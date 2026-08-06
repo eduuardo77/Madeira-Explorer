@@ -1,0 +1,394 @@
+# Tasks
+
+Ordered implementation checklist with explicit dependencies.
+
+**Document date:** 2026-08-06
+**Overall progress:** Planning complete. No code written.
+
+Task IDs are stable — reference them in commits and never renumber. Dependencies are listed
+as `⇠ T-xxx`. A task must not start until all its dependencies are done.
+
+This list is kept current as work happens and as decisions change the plan — see the
+maintenance protocol in [CONTEXT.md §9](CONTEXT.md). A decision that changes the architecture
+almost always changes tasks and dependencies here too.
+
+Legend: `[x]` done · `[ ]` not started · `[~]` in progress · `[!]` blocked
+
+---
+
+## Phase P — Planning and definition
+
+- [x] **T-001** Define product concept, audience and core loop
+- [x] **T-002** Critique the concept; identify the slow-fill / dark-map retention risk
+- [x] **T-003** Survey prior art (Wandrer, CityStrides, Fog of World, Polarsteps, AllTrails,
+      Wikiloc) and confirm technical feasibility
+- [x] **T-004** Decide the canvas model — curated places over island-wide road coverage
+      ⇠ T-002
+- [x] **T-005** Decide the reward metaphor — passport stamps over stars ⇠ T-004
+- [x] **T-006** Settle the battery strategy (batching, activity gating, geofences, burst
+      matching)
+- [x] **T-007** Settle the mobile-data strategy (bundle the island offline)
+- [x] **T-008** Settle the privacy architecture (no backend, zero networked dependencies)
+      ⇠ T-007
+- [x] **T-009** Design the "ghost app" resilience model (OS-survival, day-1 health check, two
+      notifications)
+- [x] **T-010** Design the low-signal matching strategy (tunnels, levada corridors, barometer,
+      pedometer, generosity rule) ⇠ T-006
+- [x] **T-011** Decide the distribution strategy — organic sharing of the souvenir video
+- [x] **T-012** Write project documentation (README, PROJECT_PLAN, ARCHITECTURE, TASKS,
+      DECISIONS, CONTEXT) ⇠ T-001…T-011
+
+### Still open in this phase
+
+- [x] **T-013** Decide framework (OD-1) — **resolved 2026-08-06: React Native** with
+      `@maplibre/maplibre-react-native` v11 and Expo tooling (D-023). **Phase 1 unblocked.**
+      ⇠ T-013a
+- [x] **T-013a** Research MapLibre and geolocation plugin maturity in RN vs Flutter —
+      **done 2026-08-06.** Surfaced the `setFeatureState` finding (D-004 revision, D-022),
+      which mattered more than the framework question itself.
+- [x] **T-014** Decide whether Porto Santo is in scope (OD-2) — **resolved 2026-08-06:
+      included structurally, deliberately deprioritised editorially** (D-021)
+- [x] **T-015** Confirm the hero number (OD-3) — **resolved 2026-08-06: places/stamps**
+      (D-002 Accepted)
+- [x] **T-016** Decide raw-trace retention policy (OD-6) — **resolved 2026-08-06: retain**
+      (D-010 Accepted)
+- [x] **T-016b** Confirm whether Phase 0 fieldwork is locally available — **resolved
+      2026-08-06: project lead lives in Madeira.** Sequencing unchanged; see CONTEXT.md §5a
+- [ ] **T-016a** Confirm D-022 (overlay rendering rather than feature state) — Provisional
+- [x] **T-016c** Decide on the Transistor Soft licence — **resolved 2026-08-06: not purchased.**
+      Start free on `expo-location`; buy only if T-051–T-054 fail (D-025)
+
+---
+
+## Phase 0 — Validation
+
+Cheap answers to expensive questions. Nothing here requires the app to exist.
+
+### Field GPS reality check
+
+- [ ] **T-017** Obtain a raw sensor logger — **do not build one.** Use **Sensor Logger**
+      (Kelvin Choi, iOS + Android): records GPS fix/accuracy/speed/heading/altitude, barometer
+      and pedometer in one time-aligned session, exports CSV/JSON/SQLite. Paid tier is needed
+      for combined CSV export and the barometric-altitude/pedometer channels. Tooling and
+      sample parsing code at github.com/tszheichoi/awesome-sensor-logger.
+- [ ] **T-017a** Capture ground truth alongside each run: take a **photo** at each key waypoint
+      (trailhead, tunnel portals, exit). EXIF gives timestamp + location for free, which is what
+      the recorded trace gets compared against.
+- [ ] **T-018** Walk one full levada under Laurissilva canopy with the logger ⇠ T-017
+- [ ] **T-019** Drive one tunnel-heavy VR1/VE1 route with the logger ⇠ T-017
+- [ ] **T-020** Analyse and document blackout durations, error magnitudes, whether the
+      barometer survives tunnels and canopy, whether altitude separates the VR1 from the
+      coastal ER101, and whether the pedometer keeps counting through blackouts. Write to
+      `docs/field-notes.md`. ⇠ T-018, T-019
+- [ ] **T-021** Commit the traces to `tools/fixtures/` as the permanent matching regression
+      suite ⇠ T-018, T-019
+- [ ] **T-021a** **Repeat at least one run on a mid-range Android device.** The project lead's
+      iPhone 15 has better GNSS than much of what tourists actually carry, so iPhone-only
+      fixtures are best-case. Tuning corridor widths and gap thresholds against them risks an
+      app that under-credits on cheaper hardware. Sensor Logger is cross-platform, so the same
+      procedure applies. ⇠ T-018, T-019
+
+### Tile pipeline spike
+
+- [ ] **T-022** Obtain an OSM extract of Madeira **and Porto Santo** (D-021)
+- [ ] **T-023** Build a reproducible tile generation script (Tilemaker / Protomaps) producing
+      PMTiles or MBTiles ⇠ T-022
+- [ ] **T-024** Verify stable OSM way IDs survive into the rendered tiles. **Downgraded from
+      "critical" by D-022** — useful as an internal join key, no longer architecturally
+      load-bearing. ⇠ T-023
+- [ ] **T-025** Prove overlay rendering: a MapLibre demo drawing a highlighted road segment
+      from *local* geometry on top of the basemap, and confirm it aligns with the basemap's own
+      road rendering (D-022) ⇠ T-023
+- [ ] **T-025a** Evaluate suppressing basemap road rendering entirely and drawing all roads —
+      visited and unvisited — from the local overlay, which makes alignment a non-issue by
+      construction ⇠ T-025
+- [ ] **T-026** Record tile pack size and judge it acceptable for a hotel-WiFi download
+      ⇠ T-023
+- [ ] **T-027** ~~Decision gate on T-024~~ **Removed by D-022.** The fog-of-war fallback is no
+      longer contingent on the tile pipeline preserving OSM IDs.
+
+### Content feasibility
+
+- [ ] **T-028** Assess OSM levada coverage and quality; decide whether official PR-route data
+      must be reconciled in, and confirm licensing (OD-7) ⇠ T-022
+
+**Milestone M0** — assumptions validated ⇠ T-020, T-025, T-026, T-028
+
+---
+
+## Phase 1 — The recorder
+
+**Blocked until T-013 (framework decision).**
+
+### Foundations
+
+- [ ] **T-029** Scaffold an Expo + React Native project **in TypeScript** (CONTEXT.md §6.7);
+      set up iOS and Android dev builds. Note background location requires a development build,
+      not Expo Go. ⇠ T-013
+- [ ] **T-030** Implement the SQLite schema (raw_fix, sensor_sample, geofence_event, trip)
+      with WAL mode ⇠ T-029, T-016
+- [ ] **T-030a** Define a `LocationProvider` interface so the recording backend can be swapped
+      without touching matching, storage or presentation (D-025) ⇠ T-029
+- [ ] **T-031** Integrate **`expo-location`** (free) behind `LocationProvider` (D-025)
+      ⇠ T-030a
+- [ ] **T-031a** *Contingency only:* swap in the Transistor Soft SDK if any of T-051–T-054
+      fail. Do not purchase before that evidence exists. ⇠ T-051, T-052, T-053, T-054
+- [ ] **T-032** Set iOS Data Protection class to `CompleteUntilFirstUserAuthentication` and
+      configure Android app-private storage ⇠ T-030
+- [ ] **T-032a** Backup policy (ARCHITECTURE.md §4a): **include** the SQLite database,
+      **exclude** the tile pack. iOS `isExcludedFromBackup`; Android manifest backup rules.
+      Exceeding Android's auto-backup cap can silently fail the *whole* backup, losing the
+      user's trip history. ⇠ T-032, T-057
+
+### Capture
+
+- [ ] **T-033** Implement batched location delivery — iOS deferred updates, Android
+      `setMaxWaitTime` ⇠ T-031
+- [ ] **T-034** Implement activity-recognition gating (stationary → near-zero, walking →
+      coarse, driving → higher rate) ⇠ T-031
+- [ ] **T-035** Capture barometer / relative altitude alongside GPS ⇠ T-030
+- [ ] **T-036** Capture pedometer step counts alongside GPS ⇠ T-030
+- [ ] **T-037** Immediate incremental flush on every batch — never hold a day in memory
+      ⇠ T-030, T-033
+- [ ] **T-038** Sampling policy tuned against Phase 0 field data ⇠ T-020, T-033, T-034
+
+### Geofence backbone
+
+- [ ] **T-039** Implement the dynamic geofence manager — nearest ~18 registered plus one large
+      "left this area" trigger that reshuffles the set (iOS 20-region cap) ⇠ T-031
+- [ ] **T-040** Load geofence definitions from the content pack, not from code ⇠ T-039, T-014
+- [ ] **T-041** Persist geofence enter/exit/dwell events ⇠ T-039, T-030
+
+### Permissions and survival
+
+- [ ] **T-042** Permission flow: While-Using first and **fully functional**, with explicit
+      start/end recording mode ⇠ T-031
+- [ ] **T-043** Deferred "Always" upgrade request, timed for ~day 2 ⇠ T-042
+- [ ] **T-044** Detect iOS Always → While-Using downgrade and prompt gently for recovery
+      ⇠ T-043
+- [ ] **T-045** Android foreground service with the `FOREGROUND_SERVICE_LOCATION` type
+      ⇠ T-031
+- [ ] **T-046** Android battery-optimisation exemption request ⇠ T-045
+- [ ] **T-047** iOS region monitoring + significant-location-change as the
+      termination-survival backbone (survives force-quit) ⇠ T-039
+- [ ] **T-048** Service health monitor and gap annotation ⇠ T-037
+- [ ] **T-049** Day-1 self-check (12–24h after install) verifying recording actually happened
+      ⇠ T-048
+- [ ] **T-050** Debug screen: raw fix count, last fix time, gaps, permission state, service
+      health ⇠ T-048
+
+### Verification
+
+- [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
+- [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
+- [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046
+- [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038
+- [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
+
+**Milestone M1 — "It remembers"** ⇠ T-051, T-052, T-053, T-054, T-055
+
+---
+
+## Phase 2 — Offline map rendering
+
+- [ ] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
+- [ ] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
+- [ ] **T-058** Author the dark base style — grey island, recessive but legible roads, minimal
+      labels (city names and major cultural landmarks only) ⇠ T-056
+- [ ] **T-059** Implement visited/unvisited styling via data-driven expressions and feature
+      state, keyed on OSM way ID ⇠ T-058, T-025
+- [ ] **T-060** Accessibility styling pass: unvisited as legible mid-grey (not near-black);
+      visited differentiated by brightness **and** line weight, not hue alone (D-015) ⇠ T-059
+- [ ] **T-061** Respect system font scaling for all map labels ⇠ T-058
+- [ ] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
+- [ ] **T-063** Verify cold start renders fully in airplane mode ⇠ T-057
+- [ ] **T-064** Performance test: recolour 5,000+ segments without dropping frames ⇠ T-059
+- [ ] **T-065** Outdoor sunlight legibility test ⇠ T-060
+
+**Milestone M2 — "It looks like Madeira"** ⇠ T-063, T-064, T-065
+
+---
+
+## Phase 3 — Stamps, geofences and regions
+
+### Content curation
+
+- [ ] **T-066** Curate 150–250 POIs on **Madeira only** — miradouros, levada trailheads and
+      exits, villages, beaches, landmarks. Hand-verified. Porto Santo POI curation is
+      explicitly deferred (D-021) — do not spend effort on it. ⇠ T-015
+- [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
+- [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
+      until an island-level geofence fires; unlock is permanent. **The stamp denominator must
+      count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
+- [ ] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028
+- [ ] **T-069** Extract tunnel portal pairs from OSM into `content/tunnels.geojson` ⇠ T-022
+- [ ] **T-070** Commission or produce stamp artwork ⇠ T-066
+
+### Mechanics
+
+- [ ] **T-071** Stamp award rules: dwell time **and** plausible speed gates (D-009) ⇠ T-041,
+      T-066
+- [ ] **T-072** Store a confidence value on every stamp award ⇠ T-071
+- [ ] **T-073** Per-region progress computation ⇠ T-067, T-071
+- [ ] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071
+- [ ] **T-075** Primary screen with one hero number ⇠ T-015, T-073, T-074
+
+### Verification
+
+- [ ] **T-076** Verify the geofence set reshuffles correctly while crossing the island
+      ⇠ T-039, T-066
+- [ ] **T-077** Verify a stamp fires reliably on arrival at a miradouro ⇠ T-071
+- [ ] **T-078** Verify driving past a levada trailhead does **not** award it ⇠ T-071
+- [ ] **T-079** Verify stamps still award with GPS accuracy degraded to 100m ⇠ T-071
+- [ ] **T-080** Verify geofencing battery cost is not measurable above baseline ⇠ T-076
+- [ ] **T-081** Verify the passport screen is legible with 3 stamps and with 200 ⇠ T-074
+
+**Milestone M3 — "It rewards you"** ⇠ T-077, T-078, T-079, T-080, T-081
+
+---
+
+## Phase 4 — Map matching and road highlighting
+
+### Graph and core matching
+
+- [ ] **T-082** Import the road/path graph into SQLite with an R-tree spatial index ⇠ T-022,
+      T-030
+- [ ] **T-083** Snap-to-segment matching using heading, speed and **altitude** ⇠ T-082, T-035
+- [ ] **T-084** Hysteresis to prevent flicker between vertically stacked roads (VR1 vs ER101)
+      ⇠ T-083
+- [ ] **T-085** Wide match corridor for paths — 50–75m vs 15–25m for roads ⇠ T-083
+- [ ] **T-086** Movement-bout segmentation using activity type and speed ⇠ T-034, T-083
+
+### Generous crediting (D-009)
+
+- [ ] **T-087** Tunnel portal inference — portal A then portal B credits the whole tunnel
+      ⇠ T-069, T-083
+- [ ] **T-088** Shortest-path gap bridging with plausibility checks (starting thresholds:
+      <~30 min, <~15 km). Must **not** attempt to credit a road route across the Porto Santo
+      ferry crossing (D-021). ⇠ T-082, T-083
+- [ ] **T-089** Levada corridor crediting — trailhead + exit credits the whole walk ⇠ T-068
+- [ ] **T-090** Sensor-only fallback — trailhead + step count + elevation profile ⇠ T-036,
+      T-035, T-089
+- [ ] **T-091** Store `confidence` and `credit_method` on every visited_segment ⇠ T-083
+
+### Execution and verification
+
+- [ ] **T-092** Burst matching scheduler — runs on idle or charge, never per-fix ⇠ T-086
+- [ ] **T-093** Re-runnable matching over stored raw traces ⇠ T-092, T-016
+- [ ] **T-094** Matching regression harness running against the Phase 0 fixtures ⇠ T-021,
+      T-083
+- [ ] **T-095** Verify a tunnel drive is credited with zero fixes inside it ⇠ T-087, T-094
+- [ ] **T-096** Verify a canopy-blackout levada is credited end to end ⇠ T-089, T-090, T-094
+- [ ] **T-097** Verify the VR1 and the coastal road are never confused ⇠ T-084, T-094
+- [ ] **T-098** Verify burst matching over a full day has no noticeable battery cost ⇠ T-092
+
+**Milestone M4 — "The map fills in"** ⇠ T-095, T-096, T-097, T-098
+
+---
+
+## Phase 5 — The souvenir
+
+- [ ] **T-099** Trip-end detection via airport geofence, plus Porto Santo airport and the
+      Funchal cruise terminal ⇠ T-039, T-014
+- [ ] **T-100** Fallback trip-end detection — left island bounding box, or 24h+ no data.
+      **Must treat Madeira and Porto Santo as a single region (D-021)**, otherwise a day trip
+      to Porto Santo falsely ends the trip. ⇠ T-099
+- [ ] **T-101** Finalisation pass — run any pending matching before the reveal ⇠ T-092, T-099
+- [ ] **T-102** Reveal notification at the departure-lounge moment ⇠ T-099
+- [ ] **T-103** Accommodation detection — identify the most frequent overnight location
+      ⇠ T-030
+- [ ] **T-104** Accommodation masking applied by default to all exports (D-016) ⇠ T-103
+- [ ] **T-105** On-device 9:16 vertical video renderer — animated trace draw-on, stamps
+      popping in collection order, camera flyover ⇠ T-059, T-074
+- [ ] **T-106** Watermark ⇠ T-105
+- [ ] **T-107** Still-image export ⇠ T-105
+- [ ] **T-108** Share sheet integration ⇠ T-105, T-107
+- [ ] **T-109** Verify render completes on-device in under ~30 seconds ⇠ T-105
+- [ ] **T-110** Verify the accommodation is not identifiable in a default export ⇠ T-104
+- [ ] **T-111** Verify the reveal works when the app has not been opened since install day
+      ⇠ T-102
+
+**Milestone M5 — "It hands you a souvenir"** ⇠ T-109, T-110, T-111
+
+---
+
+## Phase 6 — Simplicity, accessibility and compliance
+
+### UX reduction
+
+- [ ] **T-112** Ruthless UI reduction pass — one primary screen, one hero number ⇠ T-075
+- [ ] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
+- [ ] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
+- [ ] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
+      handing off to Apple/Google Maps). No in-app navigation. (D-018) ⇠ T-066
+- [ ] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
+
+### Privacy and compliance
+
+- [ ] **T-117** **Dependency network audit** — confirm zero SDKs transmit anything. This is
+      where these apps actually leak. ⇠ T-029
+- [ ] **T-118** iOS `PrivacyInfo.xcprivacy` manifest, including third-party SDK declarations
+      ⇠ T-117
+- [ ] **T-119** iOS purpose strings for While-Using and Always ⇠ T-042, T-043
+- [ ] **T-120** iOS Privacy Nutrition Label — Location / App Functionality / Not Linked to You
+      / Not Used for Tracking ⇠ T-117
+- [ ] **T-121** Android prominent-disclosure screen before requesting background location
+      ⇠ T-043
+- [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
+- [ ] **T-123** Google Play background-location review submission with demonstration video and
+      written justification ⇠ T-121, T-122
+- [ ] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
+- [ ] **T-125** "Delete all my data" control ⇠ T-030
+
+### Verification
+
+- [ ] **T-126** Untrained older tester completes install → first stamp with no help ⇠ T-114,
+      T-113
+- [ ] **T-127** Network monitor shows zero outbound requests over a full simulated trip
+      ⇠ T-117
+- [ ] **T-128** Both store privacy declarations verified truthful ⇠ T-120, T-122
+
+**Milestone M6 — "It is honest and easy"** ⇠ T-123, T-126, T-127, T-128
+
+---
+
+## Phase 7 — Beta and launch
+
+- [ ] **T-129** Recruit closed beta testers taking real Madeira trips ⇠ M6
+- [ ] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
+      upload ⇠ T-125
+- [ ] **T-131** Tune matching thresholds and geofence radii against real trip data ⇠ T-130,
+      T-094
+- [ ] **T-132** Collect and act on beta feedback ⇠ T-129
+- [ ] **T-133** Store listing — screenshots, copy, preview video ⇠ M6
+- [ ] **T-134** Verify ≥10 real week-long trips recorded end to end with no tracking failure
+      ⇠ T-129
+- [ ] **T-135** Verify no beta tester reports a missing levada or a false stamp ⇠ T-132
+- [ ] **T-136** Verify at least half of beta testers share their souvenir unprompted (this is
+      the distribution hypothesis under test — D-013) ⇠ T-132
+- [ ] **T-137** Submit to both stores ⇠ T-133, T-134
+- [ ] **T-138** Launch ⇠ T-137
+
+**Milestone M7 — Launched** ⇠ T-138
+
+---
+
+## Critical path
+
+The longest dependency chain, and therefore the schedule driver:
+
+```
+T-013 (framework) ✅ RESOLVED — React Native
+  → T-029 (scaffold) → T-031 (expo-location) → T-039 (geofence manager)
+  → T-071 (stamp rules) → T-075 (primary screen) → T-112 (UI reduction)
+  → T-123 (Play background-location review)  ← slow, external, budget generously
+  → T-129 (beta) → T-137 (submit) → T-138 (launch)
+```
+
+Two items sit on the critical path and are **outside our control**: the Google Play
+background-location review (T-123) and the real-world beta (T-129), which requires people to
+actually go to Madeira for a week. Start both as early as possible.
+
+**No longer a gate:** `T-024` (stable OSM way IDs in tiles) was previously the project's
+critical decision gate. **D-022 retired it** — visited segments are drawn from our own local
+geometry, so nothing depends on addressing tile features at runtime.

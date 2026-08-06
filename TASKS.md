@@ -3,7 +3,13 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Overall progress:** Planning complete. No code written.
+**Overall progress:** Planning complete. Phase 1 recorder implemented; **nothing has
+run on real hardware yet.** Phase 0 validation not started.
+
+⚠ **Everything marked done in Phase 1 below is verified by typecheck, bundle and config
+introspection only.** No fix has ever been recorded, no permission dialog has been seen, and
+no battery figure has been measured. Real-device testing is mandatory for anything touching
+recording (CONTEXT §6.6) and is what T-051–T-055 exist for.
 
 Task IDs are stable — reference them in commits and never renumber. Dependencies are listed
 as `⇠ T-xxx`. A task must not start until all its dependencies are done.
@@ -122,34 +128,55 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Foundations
 
-- [ ] **T-029** Scaffold an Expo + React Native project **in TypeScript** (CONTEXT.md §6.7);
+- [~] **T-029** Scaffold an Expo + React Native project **in TypeScript** (CONTEXT.md §6.7);
       set up iOS and Android dev builds. Note background location requires a development build,
       not Expo Go. ⇠ T-013
-- [ ] **T-030** Implement the SQLite schema (raw_fix, sensor_sample, geofence_event, trip)
+      — **Project scaffolded 2026-08-06** (Expo SDK 57, RN 0.86, TS strict, `blank-typescript`
+      template). **Dev builds not yet created** — needs an EAS account, or a local toolchain
+      (no JDK on the dev machine, and iOS needs a Mac). This is what still blocks the task.
+- [x] **T-030** Implement the SQLite schema (raw_fix, sensor_sample, geofence_event, trip)
       with WAL mode ⇠ T-029, T-016
-- [ ] **T-030a** Define a `LocationProvider` interface so the recording backend can be swapped
+      — Also `recording_event` (gap honesty) and `app_state`. Migration runner; UPDATE-blocking
+      triggers make the append-only rule (CONTEXT §6.2) a property of the database.
+- [x] **T-030a** Define a `LocationProvider` interface so the recording backend can be swapped
       without touching matching, storage or presentation (D-025) ⇠ T-029
-- [ ] **T-031** Integrate **`expo-location`** (free) behind `LocationProvider` (D-025)
-      ⇠ T-030a
+- [x] **T-031** Integrate **`expo-location`** (free) behind `LocationProvider` (D-025)
+      ⇠ T-030a — code complete, never yet run on hardware.
 - [ ] **T-031a** *Contingency only:* swap in the Transistor Soft SDK if any of T-051–T-054
       fail. Do not purchase before that evidence exists. ⇠ T-051, T-052, T-053, T-054
-- [ ] **T-032** Set iOS Data Protection class to `CompleteUntilFirstUserAuthentication` and
+- [x] **T-032** Set iOS Data Protection class to `CompleteUntilFirstUserAuthentication` and
       configure Android app-private storage ⇠ T-030
-- [ ] **T-032a** Backup policy (ARCHITECTURE.md §4a): **include** the SQLite database,
+- [~] **T-032a** Backup policy (ARCHITECTURE.md §4a): **include** the SQLite database,
       **exclude** the tile pack. iOS `isExcludedFromBackup`; Android manifest backup rules.
       Exceeding Android's auto-backup cap can silently fail the *whole* backup, losing the
       user's trip history. ⇠ T-032, T-057
+      — **Android half done**: `plugins/withAndroidBackupRules.js` writes both rule files and
+      sets the manifest attributes. **iOS half still open** — `isExcludedFromBackup` is a
+      runtime flag set when the tile pack is written, so it lands with T-057.
 
 ### Capture
 
-- [ ] **T-033** Implement batched location delivery — iOS deferred updates, Android
+- [~] **T-033** Implement batched location delivery — iOS deferred updates, Android
       `setMaxWaitTime` ⇠ T-031
+      — Configured via `deferredUpdatesInterval` / `deferredUpdatesDistance`, which is the only
+      batching knob `expo-location` exposes; it does not surface `setMaxWaitTime` by name.
+      **Whether Android actually batches rather than delivering per-fix is unverified** and is
+      a direct input to the battery target (T-054).
 - [ ] **T-034** Implement activity-recognition gating (stationary → near-zero, walking →
       coarse, driving → higher rate) ⇠ T-031
-- [ ] **T-035** Capture barometer / relative altitude alongside GPS ⇠ T-030
-- [ ] **T-036** Capture pedometer step counts alongside GPS ⇠ T-030
-- [ ] **T-037** Immediate incremental flush on every batch — never hold a day in memory
+      — Profiles and parameters exist (`samplingPolicy.ts`); **nothing switches between them
+      yet.** `expo-location` does not surface platform activity recognition, so the trigger
+      still has to be chosen — see the open question in HANDOFF.
+- [x] **T-035** Capture barometer / relative altitude alongside GPS ⇠ T-030
+      — Sampled once per location batch, so the profile is only as dense as the batches.
+      `relativeAltitude` is iOS-only; Android stores pressure and derives altitude later.
+- [~] **T-036** Capture pedometer step counts alongside GPS ⇠ T-030
+      — **iOS only.** `expo-sensors` has no historical step query on Android, and its live
+      watcher does not deliver in the background. Android currently stores null, which the
+      sensor fallback (T-090) must treat as "unknown", never as zero.
+- [x] **T-037** Immediate incremental flush on every batch — never hold a day in memory
       ⇠ T-030, T-033
+      — One transaction per batch: one disk sync per OS wake-up, not one per fix.
 - [ ] **T-038** Sampling policy tuned against Phase 0 field data ⇠ T-020, T-033, T-034
 
 ### Geofence backbone
@@ -157,7 +184,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-039** Implement the dynamic geofence manager — nearest ~18 registered plus one large
       "left this area" trigger that reshuffles the set (iOS 20-region cap) ⇠ T-031
 - [ ] **T-040** Load geofence definitions from the content pack, not from code ⇠ T-039, T-014
-- [ ] **T-041** Persist geofence enter/exit/dwell events ⇠ T-039, T-030
+- [x] **T-041** Persist geofence enter/exit/dwell events ⇠ T-039, T-030
+      — Enter/exit persisted. Note `dwell` is **not** an OS event on either platform: the
+      dwell + speed gate (D-009) is computed later over the enter/exit log, which is what keeps
+      the award thresholds retunable without re-collecting anything.
 
 ### Permissions and survival
 
@@ -171,11 +201,17 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-046** Android battery-optimisation exemption request ⇠ T-045
 - [ ] **T-047** iOS region monitoring + significant-location-change as the
       termination-survival backbone (survives force-quit) ⇠ T-039
-- [ ] **T-048** Service health monitor and gap annotation ⇠ T-037
+- [~] **T-048** Service health monitor and gap annotation ⇠ T-037
+      — `recording_event` diary plus `getRecorderHealth()` and SQL gap detection are in.
+      Still missing: the gap **threshold** is a guess (30 min) pending T-020/T-051, and gaps
+      are detected on demand rather than annotated onto the trace.
 - [ ] **T-049** Day-1 self-check (12–24h after install) verifying recording actually happened
       ⇠ T-048
-- [ ] **T-050** Debug screen: raw fix count, last fix time, gaps, permission state, service
+- [x] **T-050** Debug screen: raw fix count, last fix time, gaps, permission state, service
       health ⇠ T-048
+      — Also sensor counts, last barometer/step reading, live-ticking last-fix age, the event
+      diary, and the delete-all control. Built to D-015 (60dp targets, no colour-only status)
+      because it gets read outdoors in sunlight during field tests.
 
 ### Verification
 

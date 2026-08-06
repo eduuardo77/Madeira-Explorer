@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "Madeira Explorer",
+    "slug": "madeira-explorer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "madeiraexplorer",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.madeiraexplorer.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Madeira Explorer notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone and is never uploaded.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
+        "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
+        "NSMotionUsageDescription": "Madeira Explorer uses the step counter and air-pressure sensor to work out where you walked when GPS is blocked by tunnels or forest canopy.",
+        "UIBackgroundModes": ["location", "fetch", "processing"],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.default-data-protection": "NSFileProtectionCompleteUntilFirstUserAuthentication"
+      }
+    },
+    "android": {
+      "package": "com.madeiraexplorer.app",
+      "allowBackup": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#1B2A33",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "ACTIVITY_RECOGNITION",
+        "POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "WAKE_LOCK"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Madeira Explorer notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone.",
+          "locationAlwaysAndWhenInUsePermission": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": false
+          }
+        }
+      ],
+      "./plugins/withAndroidBackupRules",
+      "expo-dev-client"
+    ]
+  }
+}

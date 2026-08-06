@@ -1,0 +1,150 @@
+/**
+ * Database migrations.
+ *
+ * Each migration runs exactly once, in order, and is recorded in `schema_migration`.
+ * Never edit a migration that has already shipped — add a new one instead. A user
+ * who upgrades mid-trip must not lose their trace (D-010: raw traces are the only
+ * irreplaceable asset).
+ *
+ * Time is stored as epoch milliseconds in INTEGER columns throughout. Plain,
+ * sortable, and no timezone ambiguity.
+ */
+
+export type Migration = {
+  id: number;
+  name: string;
+  statements: string[];
+};
+
+export const MIGRATIONS: Migration[] = [
+  {
+    id: 1,
+    name: 'initial_recording_schema',
+    statements: [
+      // ---------------------------------------------------------------------
+      // trip — the unit everything else hangs off.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE trip (
+         id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+         started_ts           INTEGER NOT NULL,
+         ended_ts             INTEGER,
+         -- airport_geofence | left_bbox | inactivity | manual
+         end_detection_method TEXT,
+         -- Accommodation masking (D-016). Populated at trip end, not during.
+         home_mask_lat        REAL,
+         home_mask_lon        REAL,
+         home_mask_radius_m   REAL
+       );`,
+
+      // ---------------------------------------------------------------------
+      // raw_fix — immutable, append-only. THE irreplaceable asset (D-010).
+      //
+      // Everything else in the database can be wiped and regenerated from this
+      // table plus the content pack. This one cannot be recovered if lost.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE raw_fix (
+         id            INTEGER PRIMARY KEY AUTOINCREMENT,
+         trip_id       INTEGER NOT NULL REFERENCES trip(id),
+         ts            INTEGER NOT NULL,
+         lat           REAL    NOT NULL,
+         lon           REAL    NOT NULL,
+         accuracy_m    REAL,
+         speed_mps     REAL,
+         bearing_deg   REAL,
+         altitude_m    REAL,
+         -- still | walking | running | cycling | driving | unknown
+         activity_type TEXT    NOT NULL DEFAULT 'unknown',
+         -- gps | fused | significant_change | geofence
+         source        TEXT    NOT NULL
+       );`,
+      `CREATE INDEX idx_raw_fix_trip_ts ON raw_fix(trip_id, ts);`,
+
+      // ---------------------------------------------------------------------
+      // sensor_sample — barometer and pedometer. Also immutable.
+      //
+      // These are the sensors that keep working where GPS does not: in tunnels
+      // and under Laurissilva canopy (ARCHITECTURE §8.4). On this island
+      // elevation is enormously discriminating, so this table is not an
+      // optional extra — it is how the VR1 gets told apart from the ER101
+      // below it, and how a canopy-blackout levada gets credited at all.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE sensor_sample (
+         id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+         trip_id             INTEGER NOT NULL REFERENCES trip(id),
+         ts                  INTEGER NOT NULL,
+         pressure_hpa        REAL,
+         relative_altitude_m REAL,
+         step_count_delta    INTEGER
+       );`,
+      `CREATE INDEX idx_sensor_sample_trip_ts ON sensor_sample(trip_id, ts);`,
+
+      // ---------------------------------------------------------------------
+      // geofence_event — the backbone (D-005).
+      //
+      // Stamps are awarded from these, not from the location stream. Note we
+      // store the raw enter/exit/dwell events, NOT the award decision. The
+      // dwell + speed gate (D-009) is applied later over this log, so award
+      // thresholds can be retuned without re-collecting anything.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE geofence_event (
+         id         INTEGER PRIMARY KEY AUTOINCREMENT,
+         trip_id    INTEGER NOT NULL REFERENCES trip(id),
+         poi_id     TEXT    NOT NULL,
+         ts         INTEGER NOT NULL,
+         -- enter | exit | dwell
+         event_type TEXT    NOT NULL,
+         accuracy_m REAL
+       );`,
+      `CREATE INDEX idx_geofence_event_trip_ts ON geofence_event(trip_id, ts);`,
+      `CREATE INDEX idx_geofence_event_poi ON geofence_event(trip_id, poi_id, ts);`,
+
+      // ---------------------------------------------------------------------
+      // recording_event — the substrate for honest gap reporting.
+      //
+      // "If an OEM killed the service for three days, the app must not pretend
+      // otherwise" (ARCHITECTURE §10). We cannot report a gap we did not
+      // notice, so the recorder logs its own lifecycle here: starts, stops,
+      // permission changes, batches, errors. This is what T-048 and the day-1
+      // health check (T-049) read.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE recording_event (
+         id     INTEGER PRIMARY KEY AUTOINCREMENT,
+         ts     INTEGER NOT NULL,
+         -- start | stop | permission_change | batch | error | app_launch
+         kind   TEXT    NOT NULL,
+         detail TEXT
+       );`,
+      `CREATE INDEX idx_recording_event_ts ON recording_event(ts);`,
+
+      // ---------------------------------------------------------------------
+      // app_state — small key/value store for flags that are not trip data.
+      // e.g. active trip id, Porto Santo unlock flag (D-024), last health check.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE app_state (
+         key        TEXT PRIMARY KEY,
+         value      TEXT    NOT NULL,
+         updated_ts INTEGER NOT NULL
+       );`,
+
+      // ---------------------------------------------------------------------
+      // Immutability guards.
+      //
+      // CONTEXT §6.2 says raw_fix and sensor_sample are immutable and
+      // append-only. These triggers make that a property of the database
+      // rather than a convention someone can forget. UPDATE is blocked
+      // outright; DELETE is left open because the "delete all my data"
+      // control (T-125) has to be able to wipe.
+      // ---------------------------------------------------------------------
+      `CREATE TRIGGER raw_fix_is_immutable
+         BEFORE UPDATE ON raw_fix
+       BEGIN
+         SELECT RAISE(ABORT, 'raw_fix is append-only (CONTEXT 6.2)');
+       END;`,
+      `CREATE TRIGGER sensor_sample_is_immutable
+         BEFORE UPDATE ON sensor_sample
+       BEGIN
+         SELECT RAISE(ABORT, 'sensor_sample is append-only (CONTEXT 6.2)');
+       END;`,
+    ],
+  },
+];

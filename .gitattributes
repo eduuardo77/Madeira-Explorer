@@ -1,0 +1,13 @@
+# Normalise line endings. The project lead develops on Windows; CI, EAS Build
+# and any future contributor on macOS/Linux should see LF regardless.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ttf binary
+*.otf binary
+*.pmtiles binary
+*.mbtiles binary
+*.pbf binary

@@ -1,9 +1,10 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**For:** a fresh Claude Code session picking this project up cold to begin implementation.
-**Repository state:** documentation only. No code, no dependencies, no `package.json`, not a
-git repository.
+**Updated:** 2026-08-06, after the first implementation session.
+**For:** a fresh Claude Code session picking this project up cold.
+**Repository state:** git repository with three commits. Planning docs plus a Phase 1 recorder
+skeleton in `app/` — 21 source files, ~2,200 lines, **none of which has ever been run.**
 
 ---
 
@@ -18,23 +19,38 @@ git repository.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
 
 **These six documents are the source of truth, not this handoff and not any chat history.**
-If this file and those disagree, they win.
+If this file and those disagree about a *decision*, they win.
+
+The exception is **implementation status**: what is built, what is unverified, and what is
+waiting on the project lead is recorded here and in `TASKS.md`. Read both before writing code —
+this file explains the shape of what exists, `TASKS.md` tracks it task by task.
 
 ---
 
 ## Where the project stands
 
-Planning is complete. **Every blocking decision is closed.** Phase 0 can begin immediately.
+Planning is complete and every blocking decision is closed. **Phase 0 has not started.**
+Phase 1 is implemented but entirely unproven.
 
 | | |
 |---|---|
-| Framework | React Native + Expo, **TypeScript** |
-| Map | `@maplibre/maplibre-react-native` v11, offline PMTiles/MBTiles |
+| Framework | Expo SDK 57, React Native 0.86, **TypeScript strict** |
+| Map | `@maplibre/maplibre-react-native` v11, offline PMTiles/MBTiles — *not yet installed* |
 | Location | `expo-location` (free) behind a swappable `LocationProvider` |
-| Storage | SQLite, WAL, R-tree spatial index |
+| Storage | SQLite, WAL — R-tree comes with the road graph in Phase 4 |
 | Backend | **None.** Zero servers, zero accounts, zero analytics. |
-| Dependency cost | **$0** |
+| Dependency cost | **$0** for the app. Track A needs Sensor Logger's paid tier (tooling, not a dependency). |
 | Unavoidable spend | Apple $99/yr, Google Play $25 once — at launch, not now |
+
+### ⚠ The single most important thing to know
+
+**No line of this app has ever executed.** What has been verified is that it is *well-formed*:
+`tsc --noEmit` clean under strict, Metro bundles 653 modules, `expo-doctor` 20/20, and config
+introspection confirms the entitlements and manifest attributes reach the native config.
+
+None of that proves a GPS fix would land in the database. No permission dialog has been seen,
+no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
+until a development build exists — which is the first blocker below.
 
 ### The one thing still marked Provisional
 
@@ -72,10 +88,80 @@ Restated from `CONTEXT.md` §2 because misunderstanding any of them will produce
 
 ---
 
+## What is already built
+
+Three commits: planning docs, the Phase 1 recorder skeleton, then a TASKS.md status update.
+
+```
+app/
+├── app.json                          purpose strings, permissions, iOS data-protection
+│                                     entitlement, plugin list
+├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
+├── index.ts                          imports backgroundTasks for its side effects — see below
+└── src/
+    ├── storage/                      ~550 lines. COMPLETE.
+    │   ├── migrations.ts             6 tables, numbered migration runner
+    │   ├── database.ts               WAL, foreign keys, deleteAllUserData()
+    │   ├── types.ts                  row shapes, narrow string unions
+    │   └── dao/                      rawFix, sensorSample, geofenceEvent,
+    │                                 recordingEvent, trip, appState
+    ├── recording/                    ~730 lines. COMPLETE BUT INERT.
+    │   ├── LocationProvider.ts       the D-025 seam — read this first
+    │   ├── ExpoLocationProvider.ts   the only file allowed to import expo-location
+    │   ├── backgroundTasks.ts        TaskManager.defineTask, module scope
+    │   ├── recordingSink.ts          writes batches to SQLite; never throws
+    │   ├── sensors.ts                barometer + pedometer, with two honest limitations
+    │   ├── samplingPolicy.ts         profiles — ⚠ NUMBERS ARE NOT TUNED
+    │   └── recorderHealth.ts         feeds the debug screen, T-048 and T-049
+    └── ui/                           ~520 lines
+        ├── DebugScreen.tsx           the only screen that exists
+        └── theme.ts                  D-015 encoded as values, not intentions
+```
+
+**Tables beyond the documented schema:** `recording_event` (the recorder's own diary — a
+silence in `raw_fix` cannot otherwise be told apart from a dead service, and ARCHITECTURE §10
+demands honest gaps) and `app_state` (small key/value: Porto Santo unlock flag, health-check
+timestamp, last permission state).
+
+**Append-only is enforced, not assumed.** SQLite triggers abort any `UPDATE` on `raw_fix` and
+`sensor_sample`. `DELETE` is left open because T-125 has to be able to wipe.
+
+**The sink is a statically imported module, not a runtime callback.** This looks inflexible and
+is deliberate: when the OS relaunches the app headless there is no React tree to hand a callback
+to. Expo's docs are explicit that `defineTask` must run in the global scope of the bundle, which
+is why `index.ts` imports `backgroundTasks` for side effects. Do not "tidy" that import away.
+
+### What would happen if you ran it
+
+App opens → database migrates → debug screen. *Request While-Using* shows a real permission
+dialog. *Start recording* registers the background task. Batches arrive → sink writes `raw_fix`
+rows plus one `sensor_sample` → counts and last-fix age update on screen. That is the whole
+loop, and it *should* work.
+
+### The largest hole in Phase 1
+
+**Geofencing is wired but never fires.** `startGeofencing()` exists on the provider and the task
+handler is written, but nothing calls it with regions, because there are no POIs yet (T-039 the
+manager, T-066 the content). So `geofence_event` stays empty. Since geofences are the reward
+backbone (D-005), this is the biggest gap in the phase.
+
+Also missing from Phase 1: activity switching (T-034 — profiles exist, nothing selects between
+them), notifications and the day-1 health check (T-049), the Always upgrade and downgrade
+detection (T-043/T-044), and the battery-optimisation exemption (T-046).
+
+Nothing at all exists from Phases 2–7.
+
+---
+
 ## Start here
 
-Phase 0 has **two independent tracks** that can run in either order or in parallel. Neither
-requires writing app code, and neither costs money.
+**The first blocker is a development build.** Background location cannot run in Expo Go, so
+nothing in Phase 1 can be verified until one exists. That needs an Expo account (the project
+lead's to create) and `eas.json`. No JDK on the dev machine and no Mac, so EAS Build is the
+realistic path for both platforms.
+
+Phase 0 has **two independent tracks** that can run in either order or in parallel, and neither
+is blocked by the above. Neither requires writing app code.
 
 ### Track A — Field GPS validation (T-017 → T-021a)
 
@@ -160,11 +246,20 @@ thresholds on iPhone data alone.
 Note T-024 (stable OSM way IDs in tiles) was downgraded from "critical decision gate" to
 nice-to-have by D-022. Do not treat it as a blocker.
 
-### Then Phase 1 — the recorder (T-029 onward)
+### Finishing Phase 1
 
-Scaffold Expo + React Native **in TypeScript**. Background location requires a development
-build, not Expo Go. Define the `LocationProvider` interface (T-030a) *before* integrating
-`expo-location` (T-031), so the paid SDK stays a cheap swap.
+The scaffold, storage, provider interface, `expo-location` integration, data protection and
+debug screen are done (see "What is already built"). What remains, in the order I would take it:
+
+1. **A dev build** — nothing below can be verified without one.
+2. **T-039, the dynamic geofence manager.** The reward backbone, needs no hardware, and the docs
+   twice warn it is painful to retrofit. Drive it from a test fixture so it stays
+   content-agnostic (D-017). This is the recommended next piece of code.
+3. **T-042/T-114, the permission flow and onboarding.** Sits on the critical path via the slow,
+   external Google Play review (T-123).
+4. **T-034, activity gating** — needs a decision first, see below.
+5. **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and
+   they are the trigger for the Transistor purchase decision (D-025).
 
 ---
 
@@ -246,9 +341,59 @@ through carelessness with the database, but through an analytics or crash-report
 phones home by default. Target zero networked dependencies. Adding any network call requires a
 recorded decision.
 
+### Learned while implementing Phase 1
+
+**`app/AGENTS.md` tells you to read the versioned SDK 57 docs before writing code. Do it.**
+Expo moves fast enough that writing from memory produces plausible, wrong code. Checking
+`https://docs.expo.dev/versions/v57.0.0/` caught two real errors in this session.
+
+**`newArchEnabled` no longer exists in SDK 57.** The new architecture is the default and the
+flag was removed from the config schema; leaving it in fails `expo-doctor`.
+
+**The `expo-location` config plugin injects a generic `NSLocationAlwaysUsageDescription`** —
+literally "Allow $(PRODUCT_NAME) to access your location". That is exactly the weak purpose
+string Apple pushes back on (D-008, T-119). It is overridden explicitly in `app.json`; if you
+regenerate that file, put the override back.
+
+**`Pedometer.getStepCountAsync` is iOS-only** and stores only the past seven days. `expo-sensors`
+has no historical step query on Android, and its live watcher does not deliver in the
+background. Android therefore stores `null` for steps — which the sensor fallback (T-090) must
+treat as "unknown", never as zero. Fabricating a zero would be exactly the invented continuity
+ARCHITECTURE §10 forbids.
+
+**`Barometer.relativeAltitude` is iOS-only** too. Android gets `pressure` in hPa only, so
+altitude has to be derived later against a reference.
+
+**`pausesUpdatesAutomatically` is a live risk, not a settled choice.** iOS may pause location
+updates when it thinks the user has stopped and historically does not reliably resume until a
+significant location change. That is both the largest battery saving available and a plausible
+cause of silent recording death. It is currently enabled for the stationary and walking
+profiles. **Watch it specifically in the 72-hour soak (T-051).**
+
+**`expo-dev-client` drags in permissions that must not ship**: `SYSTEM_ALERT_WINDOW`,
+`READ/WRITE_EXTERNAL_STORAGE`, and `NSAllowsArbitraryLoads`. Harmless in development, but T-117
+must confirm they are absent from the production build. A reviewer seeing those on a
+"no data leaves the device" app is a bad conversation to have.
+
+**Windows dev-environment quirk:** PowerShell 5.1 mangles native-command arguments containing
+double quotes, so multi-line `git commit -m` messages get word-split. Write the message to a
+file and use `git commit -F` instead.
+
 ---
 
-## Open questions, none blocking
+## Decisions waiting on the project lead
+
+These were raised at the end of the first implementation session and are **not yet answered.**
+Ask before assuming any of them.
+
+| Question | Why it matters |
+|---|---|
+| **Bundle identifier.** Currently the placeholder `com.madeiraexplorer.app`. | Free to change now, permanent after store submission, and it is the unit a Transistor licence is sold against. Use a reverse-DNS form of a domain the lead controls if there is one. |
+| **T-034 activity gating trigger.** Infer from speed, add a dependency, or leave a fixed profile until Phase 0 data exists. | `expo-location` does not surface platform activity recognition, so the profiles currently never switch. Directly sets the battery number. Inferring from speed adds no dependency, which matters given the §6.4 zero-networked-dependency target. |
+| **How much latitude on the six planning documents.** | The standing instruction is to keep them current unprompted; the lead also said not to change the plan without approval. The line between "fix a factual error" and "change the plan" has not been drawn. |
+| **Save the UI design brief to `docs/`?** | A prompt for sketching the product screens was drafted in chat and deliberately not committed. |
+
+### Older open questions, none blocking
 
 | ID | Question | Status |
 |---|---|---|
@@ -260,6 +405,12 @@ recorded decision.
 Also unresolved, cheap to settle: whether Transistor Soft debug builds run unlicensed. Only
 matters if the free stack fails its soak tests (T-051–T-054), which is when the $399 purchase
 decision arises at all.
+
+### Known documentation inconsistency
+
+`ARCHITECTURE.md` §2, in the component diagram, still lists "Feature-state recolouring by OSM
+way ID" in the presentation layer. D-022 retired that approach and §5 of the same document
+already reflects the change. One-line fix, left alone pending the doc-latitude question above.
 
 ---
 
@@ -299,6 +450,16 @@ For context on how the design arrived where it did. Full reasoning for each is i
 
 ## Suggested opening message for the new session
 
-> This is the Madeira Explorer project. Read `CONTEXT.md`, `DECISIONS.md` and `TASKS.md` first —
-> they are the source of truth and planning is complete. I want to start Phase 0. Begin with
-> [Track A: the field GPS validation / Track B: the tile pipeline spike].
+> This is the Madeira Explorer project. Read `HANDOFF.md`, then `CONTEXT.md`, `DECISIONS.md`
+> and `TASKS.md` — those four are the source of truth, not chat history. Planning is complete
+> and a Phase 1 recorder skeleton exists in `app/`, but it has never been run. Do not change
+> the plan without asking me.
+>
+> I want to work on [pick one]:
+> - getting a development build onto my phone, so the recorder can actually be tested
+> - T-039, the dynamic geofence manager
+> - Phase 0 Track A — the field GPS runs with Sensor Logger
+> - Phase 0 Track B — the tile pipeline spike
+
+Whichever is chosen, read the "Decisions waiting on the project lead" table above first — four
+questions are outstanding and one of them (activity gating) blocks a Phase 1 task.

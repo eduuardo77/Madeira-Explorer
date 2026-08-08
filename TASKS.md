@@ -103,9 +103,18 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Tile pipeline spike
 
-- [ ] **T-022** Obtain an OSM extract of Madeira **and Porto Santo** (D-021)
-- [ ] **T-023** Build a reproducible tile generation script (Tilemaker / Protomaps) producing
-      PMTiles or MBTiles ⇠ T-022
+- [x] **T-022** Obtain an OSM extract of Madeira **and Porto Santo** (D-021)
+      — **Done 2026-08-08.** Geofabrik publishes an *Azores* extract but **no Madeira** one, so
+      the pipeline takes all of Portugal (400 MB, MD5 verified) and clips to
+      `-17.32,32.40,-16.20,33.20`. Fetched by `tiles/pipeline/build.sh`; gitignored.
+- [x] **T-023** Build a reproducible tile generation script producing PMTiles or MBTiles ⇠ T-022
+      — **Done 2026-08-08.** `tools/fetch-toolchain.sh` (checksum-verified toolchain) +
+      `tiles/pipeline/build.sh` (planetiler). Findings in `docs/tile-pipeline.md`.
+      — **Planetiler, not Tilemaker.** Tilemaker ships no Windows build at all; Docker, Java, Go
+      and WSL are all absent from the dev machine. Java is supplied as a **portable JDK** in
+      `tools/jdk/` — nothing installed system-wide, nothing on PATH, deletable.
+      — First run pulls ~1.4 GB of global reference data (water polygons, Natural Earth, lake
+      centrelines). Cached, gitignored, one-time.
 - [ ] **T-024** Verify stable OSM way IDs survive into the rendered tiles. **Downgraded from
       "critical" by D-022** — useful as an internal join key, no longer architecturally
       load-bearing. ⇠ T-023
@@ -119,8 +128,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       splitting at intersections — not the ~5,000 implied elsewhere. D-022 names this as the
       escape hatch for the alignment risk; it is not the cheap one it reads as. Measure before
       committing.
-- [ ] **T-026** Record tile pack size and judge it acceptable for a hotel-WiFi download
-      ⇠ T-023
+      — **But it need not be all-or-nothing.** T-026a found the basemap cannot distinguish a
+      levada path from any other footpath (names are stripped from `transportation`). Drawing
+      **only levada paths** from our own overlay is **~1,386 ways** — ~3% of the full cost, aimed
+      at the one feature the product is about. Evaluate this scoped version first.
+      — Cheaper still, worth eyeballing before building anything: the *named* `waterway` channel
+      runs parallel to the path within a few metres, so rendering it may read as "the levada" at
+      most zooms with no overlay at all.
+- [~] **T-026** Record tile pack size and judge it acceptable for a hotel-WiFi download ⇠ T-023
+      — **8.9 MB** for the whole archipelago, zoom 0–14, built in 3m37s (2026-08-08). Not a close
+      call — smaller than one phone photo. **This reopens T-057:** bundling the pack in the app
+      rather than downloading it on first run is now a genuine option.
+      — **Not done, because this excludes terrain.** D-026 wants shaded relief, which is a
+      separate elevation source and pipeline. 8.9 MB is the floor, not the answer. Re-measure
+      after T-058a.
+- [x] **T-026a** Verify the tile schema actually carries Madeira's defining features
+      — **Done 2026-08-08** via `tools/mvt-inspect.py` (decodes MVT directly — no browser, no
+      GPU, no style). **Levada channels survive with names intact** (`waterway`, `class=drain`).
+      **Levada paths do not** — OpenMapTiles strips names from `transportation` by design, and
+      `transportation_name` carries only a filtered label subset. So an unvisited levada path
+      renders identically to any footpath. See `docs/tile-pipeline.md` §3 and T-025a.
 - [ ] **T-027** ~~Decision gate on T-024~~ **Removed by D-022.** The fog-of-war fallback is no
       longer contingent on the tile pipeline preserving OSM IDs.
 

@@ -24,9 +24,20 @@ app/android/
 # Generated tile packs. The *pipeline* is committed; its output is not —
 # tens of MB, reproducible from the script (T-023).
 tiles/out/
+tiles/src/
 *.pmtiles
 *.mbtiles
 *.osm.pbf
+
+# Planetiler scratch: tile_weights.tsv.gz (5.7 MB global tile-load stats, used
+# for weighted average tile size) and tmp/. Downloaded artefacts, not source.
+data/
+
+# Tile-build toolchain — fetched by tools/fetch-toolchain.sh, never committed.
+# ~700 MB of third-party binaries. Portable: nothing is installed system-wide
+# and nothing is on PATH, so deleting these two folders fully removes it.
+tools/jdk/
+tools/bin/
 
 # OS noise
 .DS_Store

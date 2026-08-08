@@ -1,0 +1,152 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Madeira tile spike — T-025</title>
+<!--
+  T-025 test bed. NOT app code, and deliberately not React Native.
+
+  Why the web renderer: this page tests the *rendering* half of Phase 0.2 —
+  does the tile pack draw, does our own overlay geometry line up with the
+  basemap's roads — independently of the *tile-building* half. Two unknowns at
+  once means a wrong result tells you nothing about which half broke.
+
+  Styles transfer: maplibre-react-native v11 mirrors the MapLibre GL JS style
+  spec, which is one of the reasons React Native was chosen (D-023, point 2).
+  A style validated here is the same style the app loads.
+
+  Serve with:  bash tiles/viewer/serve.sh
+-->
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #101010; }
+  #map { position: absolute; inset: 0; }
+  #hud {
+    position: absolute; top: 10px; left: 10px; z-index: 1;
+    font: 12px/1.5 ui-monospace, Consolas, monospace;
+    background: rgba(0,0,0,.75); color: #eee;
+    padding: 8px 10px; border-radius: 6px; max-width: 340px;
+  }
+  #hud b { color: #7fd4ff; }
+  #hud button {
+    font: inherit; margin-top: 6px; padding: 4px 8px; cursor: pointer;
+    background: #222; color: #eee; border: 1px solid #555; border-radius: 4px;
+  }
+</style>
+
+<div id="map"></div>
+<div id="hud">
+  <div><b>T-025</b> overlay alignment test</div>
+  <div id="status">loading…</div>
+  <button id="toggle">toggle overlay</button>
+  <button id="basemap-roads">toggle basemap roads</button>
+</div>
+
+<script>
+const STYLE = "../style/light.json";
+
+const map = new maplibregl.Map({
+  container: "map",
+  style: STYLE,
+  center: [-16.92, 32.74],   // central Madeira
+  zoom: 10,
+  hash: true,
+  // Terrain (D-026) is not in this pack yet; this is a flat map on purpose.
+});
+
+// Exposed on purpose: this is a diagnostic page and the console is the point.
+// Note `const map` alone does NOT reach window, and `window.map` would instead
+// resolve to the <div id="map"> element, which is a confusing five minutes.
+window.mlMap = map;
+
+map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
+
+const status = document.getElementById("status");
+
+map.on("error", (e) => {
+  status.innerHTML = `<span style="color:#ff8080">error: ${e.error?.message ?? e.type}</span>`;
+  console.error(e);
+});
+
+map.on("load", async () => {
+  const layers = map.getStyle().layers.map((l) => l.id);
+  status.textContent = `style loaded — ${layers.length} layers`;
+
+  // The actual T-025 question: does geometry we hold locally land exactly on
+  // the basemap's own rendering of the same road? Both derive from the same
+  // OSM extract, so they should — the fiddly part is line width across zooms.
+  //
+  // overlay.geojson is fetched from Overpass by tiles/viewer/fetch-overlay.sh
+  // and stands in for what road_graph will hold (D-022).
+  try {
+    const res = await fetch("./overlay.geojson");
+    if (!res.ok) throw new Error(`overlay.geojson ${res.status}`);
+    const data = await res.json();
+
+    map.addSource("visited", { type: "geojson", data });
+
+    // Deliberately drawn wider and semi-transparent: if the basemap road is
+    // NOT centred inside this band, the misalignment is obvious rather than
+    // something you have to squint for.
+    map.addLayer({
+      id: "visited-halo",
+      type: "line",
+      source: "visited",
+      paint: {
+        "line-color": "#ff2d6f",
+        "line-opacity": 0.45,
+        "line-width": ["interpolate", ["linear"], ["zoom"], 10, 6, 16, 18],
+      },
+      layout: { "line-cap": "round", "line-join": "round" },
+    });
+    map.addLayer({
+      id: "visited-core",
+      type: "line",
+      source: "visited",
+      paint: {
+        "line-color": "#ff2d6f",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1, 16, 3],
+      },
+      layout: { "line-cap": "round", "line-join": "round" },
+    });
+
+    const n = data.features?.length ?? 0;
+    status.textContent = `style loaded — ${layers.length} layers · overlay: ${n} features`;
+    if (data.bbox || n) map.fitBounds(bboxOf(data), { padding: 60, maxZoom: 15 });
+  } catch (err) {
+    status.innerHTML += `<br><span style="color:#ffb060">no overlay.geojson yet — `
+      + `run tiles/viewer/fetch-overlay.sh</span>`;
+  }
+});
+
+function bboxOf(fc) {
+  let minX = 180, minY = 90, maxX = -180, maxY = -90;
+  const walk = (c) => {
+    if (typeof c[0] === "number") {
+      minX = Math.min(minX, c[0]); maxX = Math.max(maxX, c[0]);
+      minY = Math.min(minY, c[1]); maxY = Math.max(maxY, c[1]);
+    } else c.forEach(walk);
+  };
+  fc.features.forEach((f) => walk(f.geometry.coordinates));
+  return [[minX, minY], [maxX, maxY]];
+}
+
+document.getElementById("toggle").onclick = () => {
+  for (const id of ["visited-halo", "visited-core"]) {
+    if (!map.getLayer(id)) continue;
+    const v = map.getLayoutProperty(id, "visibility") === "none" ? "visible" : "none";
+    map.setLayoutProperty(id, "visibility", v);
+  }
+};
+
+// T-025a: suppressing basemap roads entirely and drawing everything ourselves
+// makes alignment a non-issue by construction. Measured cost: ~51,000 highway
+// ways for the island (T-028), not the ~5,000 assumed elsewhere.
+document.getElementById("basemap-roads").onclick = () => {
+  for (const l of map.getStyle().layers) {
+    if (!/road|transport|highway/i.test(l.id)) continue;
+    const v = map.getLayoutProperty(l.id, "visibility") === "none" ? "visible" : "none";
+    map.setLayoutProperty(l.id, "visibility", v);
+  }
+};
+</script>

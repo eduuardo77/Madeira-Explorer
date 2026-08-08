@@ -574,7 +574,8 @@ around a single landmass.
 
 ## D-022 — Draw visited segments as our own overlay, not by recolouring basemap features.
 
-**Status:** Provisional — recommended 2026-08-06, awaiting project lead confirmation
+**Status:** **Accepted** — recommended 2026-08-06, confirmed by the project lead 2026-08-08.
+T-016a closed. This was the last Provisional entry from the planning phase.
 
 **Decision:** The vector tile pack provides a **dumb dark basemap only**. Visited roads and
 levadas are rendered as a *separate overlay layer* built from geometry we already hold in the
@@ -829,3 +830,204 @@ data proving it is necessary.
 **Consequence for OD-1:** see the revised comparison in D-023. An initial claim that Flutter's
 free geofencing was "fragmented" was overstated and has been corrected there — maintained free
 options exist on both sides.
+
+---
+
+## D-026 — Two map styles: light for use, dark for the souvenir. Terrain, not buildings.
+
+**Status:** Provisional — chosen by the project lead 2026-08-08, but not yet validated against
+real tiles or in real Madeira sunlight. Confirm after T-025.
+
+**Decision:** The app ships **two MapLibre styles built from the same tile pack**:
+
+- a **light** style for everyday in-app use, and
+- a **dark** style used by the souvenir renderer (Phase 5), also offered as a user preference.
+
+Both are produced by **starting from an existing permissively-licensed basemap style and
+subtracting** — Protomaps' basemap themes, or CARTO Positron / Dark Matter over an
+OpenMapTiles-schema build — rather than authored from a blank file. Confirm the licence terms
+of whichever is chosen; both are permissive, but check.
+
+Figure-ground comes from **shaded terrain**, not building footprints.
+
+**What prompted this:** the project lead brought WalkNYC (a New York walking-coverage app built
+on Apple Maps) as a visual reference. See `docs/design-brief.md` for the full reading.
+
+**Alternatives considered:**
+
+- *Dark only* — the original assumption behind D-015 and T-058. The fog-of-war metaphor is
+  natively dark: unvisited is dim, visited lights up. It also makes a far more striking souvenir
+  video, which is load-bearing (D-013). **Rejected as the sole style** because dark screens are
+  genuinely hard to read in direct sunlight, and CONTEXT §6.5 requires outdoor legibility. The
+  users are outdoors all day; this is not a hypothetical.
+- *Light only* — best outdoors, but "roads light up" barely means anything against a light
+  ground. Visited would have to render *darker* or heavier, which reads as underlining rather
+  than revealing, and it weakens the souvenir badly.
+- *Apple Maps / `MKMapView`* — the reference app's own choice. **Rejected on four hard stops:**
+  no offline tile API is exposed to third-party apps (breaking two of the six hard constraints
+  in CONTEXT §3, and T-063 outright); every pan and zoom leaks position to a tile server,
+  reversing CONTEXT §4.7; the basemap cannot be dimmed, so there is no fog of war at all; and
+  there is no Apple Maps SDK for Android, so the app would need two maps and look like two
+  different products. This is the same reasoning that rejected the Google and Mapbox SDKs in
+  D-004.
+- *Authoring cartography from scratch.* Rejected as unnecessary work and the main reason the
+  design phase had stalled.
+- *Building massing* (WalkNYC's actual signature look). Rejected: OSM building coverage in
+  Madeira is patchy outside Funchal, buildings add tile weight against T-026, and they compete
+  visually with the only thing meant to light up. Madeira's defining feature is its relief, not
+  its built form.
+
+**The counter-argument, recorded because it is a real one.** Raised by the project lead
+2026-08-08: *Apple Maps carries familiarity — most users have seen it before, and a familiar map
+is easier to read.* This is true and should not be dismissed.
+
+The resolution is a distinction between **conventions** and **styling**. Familiarity comes from
+map conventions — water is blue, parks are green, roads are lighter than the ground they sit on,
+labels look like map labels, north is up by default — and from **interaction**, which MapLibre
+provides identically: pinch to zoom, drag to pan, two-finger rotate. Every one of those is kept.
+What is discarded is Apple's *POI density and brand look*, which is precisely the part that would
+compete with the trace. A custom style can be more familiar-feeling than Apple Maps for this
+task, because it does less.
+
+**Reasoning:** the two styles are two text files over one tile pack, and the souvenir renderer is
+already a separate path (T-105), so this is far cheaper than it sounds. It resolves a genuine
+conflict — D-015's accessibility priority pulls light, D-013's distribution strategy pulls dark —
+without either losing.
+
+**Consequences:**
+
+- **D-015's encoding is style-dependent, not absolute.** "Visited is brighter" holds in the dark
+  style. In the light style, visited must be differentiated by **weight and darkness**. The
+  underlying rule survives unchanged and is the one that matters: *never differentiate by hue
+  alone, and unvisited must stay legible.*
+- T-058 and T-060 now cover two styles. A new task (T-139) covers the souvenir dark variant.
+- A light/dark preference joins settings (T-140).
+- Shaded terrain increases tile pack size — a direct input to T-026.
+- **A quality bar, testable rather than aspirational:** the map reads at a glance in Funchal
+  midday sun; the trace is unambiguously the brightest thing on screen; label load stays low
+  enough that the island's shape carries the composition. Test outdoors, not at a desk.
+
+---
+
+## D-027 — The passport is organised by category, not by region.
+
+**Status:** Provisional — chosen by the project lead 2026-08-08.
+
+**Decision:** The passport screen's primary axis is **place category**, with five named rows:
+
+> **Viewpoints · Levadas · Villages · Beaches · Landmarks**
+
+There is deliberately **no "Other" row.** Every curated place must belong to one of the five.
+
+Region does not disappear — it moves to the **map screen**, where it does the "where should I go
+next" job. Each POI therefore carries both a `category` and a `region_id`, and both live in the
+content pack, never in `app/` (D-017).
+
+**Alternatives considered:**
+
+- *Region as the primary axis* (the original plan in T-073/T-074). Regions are better at
+  **discovery** — an empty region is a recommendation, which is half of what D-002 is for. But
+  they are worse at **collecting**, and the passport's entire job is collecting.
+- *An "Other" / miscellaneous row.* Rejected. A catch-all bin absorbs every awkward classification
+  decision, grows without limit, and means nothing by the end. Forcing five named rows is a
+  curation discipline, not a UI constraint — if a place fits nowhere, that is a signal about the
+  place.
+- *Both axes on one screen.* Rejected on the complexity budget already flagged in D-003: region %
+  *and* stamps *and* highlighted roads is three scoring systems, and one must be the hero.
+
+**Reasoning:** splitting the two jobs puts each where it works. The passport collects; the map
+suggests. Neither is asked to do the other's work.
+
+**Supporting evidence:** the reference app ships a settings section that lets the user switch off
+whole boroughs so they stop counting toward progress — a manual fix for a denominator that is too
+large and too demoralising. Its headline figure, photographed 2026-08-08, reads **`0.00%`** — a
+progress number needing two decimal places to avoid displaying as zero. That is exactly the
+failure D-002 predicted and D-024 avoids automatically.
+
+**Consequences:**
+
+- **Levadas are not points, and the levada row is different in kind.** Every other category means
+  *"you arrived somewhere."* A levada stamp means *"you walked the whole thing"* — trailhead
+  geofence plus exit geofence (D-009). It is the hardest row to earn and the most valuable, and
+  should look different. Importantly it is still **geofence-driven**, so CONTEXT §2.1 holds: the
+  reward does not depend on map matching.
+- T-066 curation must assign exactly one of the five categories to every place.
+- T-073 (region progress) survives but is consumed by the map screen, not the passport.
+- The category set is content, not code — a second island ships new categories without touching
+  `app/` (D-017).
+
+---
+
+## D-028 — Gate sampling on stationary-vs-moving. The pedometer classifies; it never gates.
+
+**Status:** Provisional — chosen 2026-08-08. Revisit once T-020 field data exists.
+
+**Decision:** Activity gating (T-034) is split into two separate problems, and only the first is
+solved now.
+
+1. **Stationary vs moving — implement now.** Derived from distance over time (starting point:
+   moved less than ~100 m in ~10 minutes → stationary profile). No new sensor, no new dependency,
+   no new permission, and **identical behaviour on both platforms.**
+2. **Walking vs driving — deferred.** A single "moving" profile until Phase 0 data shows the
+   distinction pays for itself.
+
+Where speed is ambiguous, the **pedometer may be consulted as a classifier** on iOS, where it is
+free. It must **never** be used to gate recording on or off.
+
+**What prompted this:** the project lead correctly objected that speed alone is a poor signal *in
+Madeira specifically* — steep gradients and single-lane roads compress driving speeds into
+walking range, and Funchal traffic does the same. They asked whether the pedometer could resolve
+it, noting the reference app does exactly that.
+
+**It does — and its own settings screen says so.** Photographed 2026-08-08:
+
+> *"Aggressive should catch all your walks. Uses about 20% of your battery per day. WalkNYC only
+> records your location when the pedometer detects you're walking."*
+
+Two things follow from that sentence, and they point in opposite directions from the obvious
+conclusion:
+
+- **Pedometer gating did not buy them a low battery number.** 20% per day at the setting that
+  catches everything, against ~3% at the setting that does not. They could not resolve the
+  trade-off and shipped it to the user as a three-way switch (Battery Saver / Default /
+  Aggressive). We cannot do that — CONTEXT §3 forbids that kind of option, and an 80-year-old
+  should not be adjudicating a battery/completeness trade.
+- **They are a walking-only app.** Driving is irrelevant to them, so *"record only when walking"*
+  costs them nothing. **Madeira tourism is rental-car dominated** (CONTEXT §5). Gating recording
+  on steps would make us blind to the tunnel drives, the VR1 and the ER101 — precisely the roads
+  the tunnel-inference design in ARCHITECTURE §8.1 exists to serve, and precisely the failure
+  D-009 calls an uninstall.
+
+**Alternatives considered:**
+
+- *Speed alone.* The original proposal. Correctly rejected by the project lead for the reasons
+  above.
+- *Pedometer as the recording gate* (the reference app's approach). Rejected: loses all driving
+  data, and is iOS-only for us anyway.
+- *A dedicated activity-recognition dependency.* Rejected **for now**: it costs a new dependency
+  against the zero-networked-dependency target (§6.4) and, on Android, an additional
+  `ACTIVITY_RECOGNITION` runtime permission. Spending a permission prompt on an unmeasured guess
+  is a bad trade when the app's hardest problem is already permissions (D-008). Reconsider if
+  T-020 shows the walking/driving split is worth real battery.
+
+**Reasoning:** nearly all of the available saving lives in stationary-vs-moving, not in
+walking-vs-driving. A tourist sleeps eight hours and sits in restaurants, cafés and their
+accommodation for several more — over half the day at near-zero cost, detectable with no new
+sensor and no platform asymmetry. The walking/driving distinction is both harder to detect and
+worth much less.
+
+**The Android asymmetry this avoids.** `Pedometer.getStepCountAsync` is iOS-only, `expo-sensors`
+has no historical step query on Android, and its live watcher does not deliver in the background.
+A pedometer-led design would give iOS users good battery behaviour and Android users none —
+exactly the outcome the sampling-bias warning in HANDOFF and T-021a exists to prevent.
+
+**Consequences:**
+
+- T-034 is reworded to stationary-vs-moving and is no longer blocked on an undecided trigger.
+- The ~100 m / ~10 min threshold is a **guess**, like the 30-minute gap threshold in T-048. Both
+  are tuned by T-038 against T-020 data.
+- The pedometer's importance to **T-090 (levada sensor fallback)** is unchanged and unaffected.
+  That remains iOS-only and remains documented as such.
+- **Benchmark worth keeping:** a competing iOS app spends 20%/day to reliably catch walking in a
+  dense city. Our ≤5% per 12-hour day (T-054) depends on batching, geofences and stationary
+  gating together — not on activity detection alone. If T-054 fails, this is where to look first.

@@ -20,8 +20,9 @@ everything you saw.
 
 ### Product goals
 
-1. **Show where you have been.** A dark, clean map of Madeira where travelled roads and
-   levadas are highlighted and untravelled ones recede.
+1. **Show where you have been.** A clean, quiet map of Madeira where travelled roads and
+   levadas are highlighted and untravelled ones recede. Light for everyday use, dark for the
+   souvenir (D-026).
 2. **Suggest where to go next.** Unvisited curated places and per-region progress imply the
    recommendation without needing a recommendation engine.
 3. **Reward exploration.** Collectible stamps for reaching notable places — the "passport"
@@ -63,16 +64,25 @@ everything you saw.
 - ✅ Raw trace retention confirmed: retain, with a delete-all control (D-010)
 - ✅ Framework decided: **React Native + Expo, TypeScript** (D-023)
 - ✅ Location stack decided: free `expo-location`; paid SDK is a contingency only (D-025)
+- ✅ Rendering approach confirmed: local overlay, not feature state (D-022, Accepted 2026-08-08)
+- ✅ Visual direction agreed: two styles — light for use, dark for the souvenir (D-026,
+  *Provisional*); passport by category (D-027, *Provisional*) — see
+  [docs/design-brief.md](docs/design-brief.md)
+- ✅ Sampling gate decided: stationary-vs-moving (D-028, *Provisional*)
+- 🟨 Phase 1 recorder skeleton written — **~2,400 lines, never executed on hardware**
 - ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started**
 - ⬜ Tile pipeline spike — **not started**
-- ⬜ No code written
+- ⬜ Development build — **not created.** Nothing in Phase 1 can be verified without one.
 
-**All blocking decisions are now closed. Phase 0 can begin.** Current dependency cost: **$0**
-(the only unavoidable spend is store fees — Apple $99/year, Google Play $25 one-time).
+**All blocking decisions are closed.** Current dependency cost: **$0** (the only unavoidable
+spend is store fees — Apple $99/year, Google Play $25 one-time).
 
-Nothing has been built yet. The next concrete step is **Phase 0 validation** (see
-[PROJECT_PLAN.md](PROJECT_PLAN.md)), which is deliberately cheap and answers the questions
-that would be expensive to get wrong.
+The next concrete step is **Phase 0 validation** (see [PROJECT_PLAN.md](PROJECT_PLAN.md)) — it is
+deliberately cheap, needs no app code, and answers the questions that would be expensive to get
+wrong. The tile spike in particular is the unblock for all visual design work.
+
+**The app has no name yet**, and the bundle identifier is a placeholder. See
+[docs/design-brief.md §7](docs/design-brief.md).
 
 ---
 
@@ -89,6 +99,7 @@ that would be expensive to get wrong.
 | [TASKS.md](TASKS.md) | Ordered, dependency-aware implementation checklist. |
 | [DECISIONS.md](DECISIONS.md) | Decision log — what we chose, what we rejected, and why. |
 | [CONTEXT.md](CONTEXT.md) | Everything a fresh contributor (human or AI) needs before touching anything. |
+| [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
 
 **These documents are the source of truth, not conversation history.** They are updated as
 decisions are made, not retrospectively. The maintenance protocol — which document to update
@@ -107,7 +118,7 @@ This is the intended structure once implementation begins. It is not yet created
 │   │   ├── recording/         # Location capture, batching, sensor fusion
 │   │   ├── matching/          # Map matching, gap bridging, tunnel inference
 │   │   ├── progress/          # Stamps, regions, scoring, confidence
-│   │   ├── map/               # MapLibre integration, dark style, visited-road overlay
+│   │   ├── map/               # MapLibre integration, style loading, visited-road overlay
 │   │   ├── souvenir/          # End-of-trip video and image rendering
 │   │   ├── storage/           # SQLite schema, migrations, DAOs
 │   │   ├── platform/          # iOS/Android-specific permission + lifecycle glue
@@ -115,14 +126,14 @@ This is the intended structure once implementation begins. It is not yet created
 │   ├── ios/
 │   └── android/
 ├── content/                   # ALL Madeira-specific data — never hardcoded in app/
-│   ├── pois.json              # Curated places + geofence radii + stamp metadata
+│   ├── pois.json              # Curated places + category + region + geofence radii + stamps
 │   ├── regions.geojson        # Region boundaries for per-region progress
 │   ├── levadas.geojson        # Levada corridors with entry/exit nodes
 │   ├── tunnels.geojson        # Tunnel portals for gap inference
 │   └── stamps/                # Stamp artwork
 ├── tiles/                     # Offline map pipeline
-│   ├── pipeline/              # OSM extract → vector tiles with stable OSM IDs
-│   └── style/                 # MapLibre style JSON (dark base, visited/unvisited)
+│   ├── pipeline/              # OSM extract → vector tiles (+ terrain)
+│   └── style/                 # MapLibre style JSON — light.json and dark.json (D-026)
 └── tools/                     # Field-test loggers, trace replay, matching harness
 ```
 

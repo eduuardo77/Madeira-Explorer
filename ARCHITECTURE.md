@@ -81,9 +81,11 @@ for a global app. **The bounded scope is what makes the architecture simple.**
                            │
 ┌──────────────────────────▼────────────────────────────────────────────┐
 │                        PRESENTATION LAYER                             │
-│  • MapLibre GL Native + offline PMTiles/MBTiles (dark style)          │
-│  • Feature-state recolouring by OSM way ID                            │
-│  • Passport (stamp collection) view                                   │
+│  • MapLibre GL Native + offline PMTiles/MBTiles                       │
+│  • Two styles over one tile pack: light for use, dark for the         │
+│    souvenir (D-026). Figure-ground from shaded terrain.               │
+│  • Visited-road overlay drawn from local road_graph geometry (D-022)  │
+│  • Passport (stamp collection) view — by category (D-027)             │
 │  • Souvenir renderer (9:16 video + still, on-device)                  │
 │  • Accommodation masking filter                                       │
 └───────────────────────────────────────────────────────────────────────┘
@@ -278,7 +280,8 @@ Full reasoning, including rejected alternatives, is in [DECISIONS.md](DECISIONS.
 |---|---|
 | Backend | None. Zero-server architecture. |
 | Map rendering | MapLibre GL Native |
-| Tiles | PMTiles/MBTiles vector extract of Madeira **and Porto Santo** (D-021) — a dumb dark basemap |
+| Tiles | PMTiles/MBTiles vector extract of Madeira **and Porto Santo** (D-021) — a dumb basemap carrying no visited state |
+| Map styling | **Two styles over one tile pack** — light for in-app use, dark for the souvenir (D-026). Both derived by subtracting from an existing permissively-licensed style, not authored from scratch. Figure-ground from shaded terrain, not buildings. |
 | Segment highlighting | **Overlay layer drawn from our own local `road_graph` geometry** (D-022), *not* feature state on basemap features — `setFeatureState` is not reliably available on MapLibre Native mobile |
 | Location capture | `expo-location` (free) behind a swappable `LocationProvider` interface. Transistor Soft SDK is a paid contingency if soak tests fail (D-025). |
 | Storage | SQLite + WAL + R-tree spatial index |
@@ -342,7 +345,7 @@ position — we need the trace.** That distinction is the whole strategy.
 | Technique | Effect |
 |---|---|
 | Batched delivery (deferred updates / `setMaxWaitTime`) | The chip buffers fixes and wakes the app every few minutes instead of every second. **Largest single win.** |
-| Activity-recognition gating | Stationary → near-zero. Walking → coarse. Driving → higher rate, and they are probably charging in the car anyway. |
+| **Stationary-vs-moving gating** (D-028) | Stationary → near-zero. This is where nearly all the saving lives: a tourist sleeps eight hours and sits in restaurants and their accommodation for several more. Derived from distance over time — no extra sensor, no platform asymmetry. Walking-vs-driving is deferred (T-034a); the pedometer classifies but never gates. |
 | Geofences over polling | Handled by the coprocessor; effectively free. |
 | Burst matching | Map matching runs over a buffered batch when idle or charging, never per-fix. |
 | Never render in background | The map is only drawn when the user is looking at it. |
@@ -517,6 +520,12 @@ Stated explicitly so they can be checked and, where wrong, corrected early.
 - Passive trip tracking with a beautiful end-of-trip artefact is a real product —
   Polarsteps.
 - Offline maps with trail data at scale work — AllTrails, Wikiloc.
+- Street-coverage tracking with a passive recorder ships as a solo-developer app — **WalkNYC**
+  (Joe Puccio, iOS). Reviewed 2026-08-08; see `docs/design-brief.md` §6. Useful mostly as a
+  source of **observed failure modes** rather than validation: a `0.00%` hero number (the exact
+  outcome D-002 rejected), a modal begging users not to force-quit (the problem D-005 avoids
+  architecturally), a 22-minute walk credited zero (the D-009 uninstall case), and 20%/day
+  battery at the setting that reliably catches walks. Its badge system is still unshipped.
 
 **Caveat:** each of those solved *one* of our three problems. Wandrer and CityStrides never
 touch the user's battery — they piggyback on Strava's recording and do all matching

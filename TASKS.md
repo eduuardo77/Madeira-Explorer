@@ -3,6 +3,8 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
+**Last updated:** 2026-08-08 — visual direction and passport structure settled (D-026, D-027);
+activity gating trigger settled (D-028); D-022 confirmed.
 **Overall progress:** Planning complete. Phase 1 recorder implemented; **nothing has
 run on real hardware yet.** Phase 0 validation not started.
 
@@ -60,7 +62,12 @@ Legend: `[x]` done · `[ ]` not started · `[~]` in progress · `[!]` blocked
       (D-010 Accepted)
 - [x] **T-016b** Confirm whether Phase 0 fieldwork is locally available — **resolved
       2026-08-06: project lead lives in Madeira.** Sequencing unchanged; see CONTEXT.md §5a
-- [ ] **T-016a** Confirm D-022 (overlay rendering rather than feature state) — Provisional
+- [x] **T-016a** Confirm D-022 (overlay rendering rather than feature state) — **confirmed by
+      the project lead 2026-08-08. D-022 is Accepted.**
+- [x] **T-016d** Settle the visual direction and primary-screen structure — **resolved
+      2026-08-08:** two styles, light for use and dark for the souvenir (D-026); passport by
+      category (D-027); three-control layout. Written up in `docs/design-brief.md`.
+      **All three decisions are Provisional** until validated against real tiles (T-025).
 - [x] **T-016c** Decide on the Transistor Soft licence — **resolved 2026-08-06: not purchased.**
       Start free on `expo-location`; buy only if T-051–T-054 fail (D-025)
 
@@ -162,11 +169,21 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       batching knob `expo-location` exposes; it does not surface `setMaxWaitTime` by name.
       **Whether Android actually batches rather than delivering per-fix is unverified** and is
       a direct input to the battery target (T-054).
-- [ ] **T-034** Implement activity-recognition gating (stationary → near-zero, walking →
-      coarse, driving → higher rate) ⇠ T-031
-      — Profiles and parameters exist (`samplingPolicy.ts`); **nothing switches between them
-      yet.** `expo-location` does not surface platform activity recognition, so the trigger
-      still has to be chosen — see the open question in HANDOFF.
+- [ ] **T-034** Implement **stationary-vs-moving** sampling gating (D-028) ⇠ T-031
+      — **Trigger decided 2026-08-08.** Derive from distance over time — starting point: moved
+      less than ~100 m in ~10 min → stationary profile. No new sensor, no new dependency, no new
+      permission, identical on both platforms. The ~100 m / ~10 min figures are **guesses**,
+      tuned by T-038.
+      — Walking-vs-driving is **deferred** to a single "moving" profile (see T-034a). Speed alone
+      cannot separate them in Madeira: steep gradients and Funchal traffic compress driving
+      speeds into walking range.
+      — The pedometer may be consulted as a **classifier** on iOS where speed is ambiguous. It
+      must **never** gate recording on or off — that would blind us to the tunnel drives and the
+      VR1 on a rental-car-dominated island (D-028).
+- [ ] **T-034a** *Deferred:* revisit walking-vs-driving gating once T-020 shows whether the
+      distinction pays for itself. If it does, the Android answer is a dedicated step-counter or
+      activity-recognition dependency — costing a new dependency (§6.4) **and** an
+      `ACTIVITY_RECOGNITION` runtime permission. Do not spend either on a guess. ⇠ T-020, T-034
 - [x] **T-035** Capture barometer / relative altitude alongside GPS ⇠ T-030
       — Sampled once per location batch, so the profile is only as dense as the batches.
       `relativeAltitude` is iOS-only; Android stores pressure and derives altitude later.
@@ -193,7 +210,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-042** Permission flow: While-Using first and **fully functional**, with explicit
       start/end recording mode ⇠ T-031
+      — The start/stop control is a **primary-screen action shown only to users without Always**,
+      not a settings item (`docs/design-brief.md` §3.3).
+      — **State the battery cost in the copy**, next to the control that turns tracking on:
+      "uses about N% of your battery per day." Use the **measured** figure from T-054, never an
+      invented one. ⇠ T-054 for the number, not for the work.
 - [ ] **T-043** Deferred "Always" upgrade request, timed for ~day 2 ⇠ T-042
+      — Same honest-battery-figure treatment as T-042.
 - [ ] **T-044** Detect iOS Always → While-Using downgrade and prompt gently for recovery
       ⇠ T-043
 - [ ] **T-045** Android foreground service with the `FOREGROUND_SERVICE_LOCATION` type
@@ -229,17 +252,34 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
 - [ ] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
-- [ ] **T-058** Author the dark base style — grey island, recessive but legible roads, minimal
-      labels (city names and major cultural landmarks only) ⇠ T-056
-- [ ] **T-059** Implement visited/unvisited styling via data-driven expressions and feature
-      state, keyed on OSM way ID ⇠ T-058, T-025
-- [ ] **T-060** Accessibility styling pass: unvisited as legible mid-grey (not near-black);
-      visited differentiated by brightness **and** line weight, not hue alone (D-015) ⇠ T-059
+- [ ] **T-058** Author the **light** base style — the everyday in-app map (D-026). Start from an
+      existing permissively-licensed style (Protomaps basemap theme, or CARTO Positron over an
+      OpenMapTiles-schema build) and **subtract**: strip labels, mute roads, quiet the water and
+      landcover so the trace can dominate. **Do not author from a blank file.** Verify the
+      starting style's licence. Minimal labels — city names and major cultural landmarks only.
+      ⇠ T-056
+- [ ] **T-058a** Add **shaded terrain** as the figure-ground element instead of building
+      footprints (D-026). Madeira's relief is the island's defining feature and OSM building
+      coverage is patchy outside Funchal. Record the tile-size cost against T-026. ⇠ T-058, T-023
+- [ ] **T-059** Implement visited/unvisited styling via data-driven expressions over the local
+      overlay geometry, keyed on OSM way ID. **Not feature state** — unavailable on MapLibre
+      Native mobile (D-022). ⇠ T-058, T-025
+- [ ] **T-060** Accessibility styling pass **in both styles** (D-015, D-026): unvisited stays
+      legible mid-grey, never near-black and never near-invisible. Visited differentiated by
+      **weight plus brightness/darkness**, never hue alone — brighter and heavier in the dark
+      style, darker and heavier in the light style. ⇠ T-059, T-139
 - [ ] **T-061** Respect system font scaling for all map labels ⇠ T-058
 - [ ] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
 - [ ] **T-063** Verify cold start renders fully in airplane mode ⇠ T-057
 - [ ] **T-064** Performance test: recolour 5,000+ segments without dropping frames ⇠ T-059
-- [ ] **T-065** Outdoor sunlight legibility test ⇠ T-060
+- [ ] **T-065** Outdoor sunlight legibility test — **in Funchal, at midday, held at arm's
+      length.** This is the test that decides whether D-026's light-for-use choice was right.
+      Run it against both styles. ⇠ T-060
+- [ ] **T-139** Author the **dark** style variant for the souvenir renderer (D-026) — the
+      fog-of-war look: dark ground, unvisited legible mid-grey, visited bright and heavy. Shares
+      the same tile pack as T-058. Also offered as a user preference (T-140). ⇠ T-058
+- [ ] **T-140** Light/dark preference in settings (D-026). Defaults to light for in-app use;
+      the souvenir always renders dark regardless of this setting. ⇠ T-139, T-141
 
 **Milestone M2 — "It looks like Madeira"** ⇠ T-063, T-064, T-065
 
@@ -249,9 +289,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Content curation
 
-- [ ] **T-066** Curate 150–250 POIs on **Madeira only** — miradouros, levada trailheads and
-      exits, villages, beaches, landmarks. Hand-verified. Porto Santo POI curation is
-      explicitly deferred (D-021) — do not spend effort on it. ⇠ T-015
+- [ ] **T-066** Curate 150–250 POIs on **Madeira only** — hand-verified. Porto Santo POI
+      curation is explicitly deferred (D-021) — do not spend effort on it. ⇠ T-015, T-016d
+      — **Every place must be assigned exactly one of the five categories** (D-027):
+      **Viewpoints · Levadas · Villages · Beaches · Landmarks**. There is deliberately no
+      "Other" — if a place fits nowhere, that is a signal about the place, not a missing row.
+      — Each place also carries a `region_id`, used by the map screen rather than the passport.
+      — Categories live in the content pack, never in `app/` (D-017).
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
@@ -265,9 +309,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-071** Stamp award rules: dwell time **and** plausible speed gates (D-009) ⇠ T-041,
       T-066
 - [ ] **T-072** Store a confidence value on every stamp award ⇠ T-071
+- [ ] **T-072a** Per-category progress computation (D-027) — the passport's primary axis
+      ⇠ T-066, T-071
 - [ ] **T-073** Per-region progress computation ⇠ T-067, T-071
-- [ ] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071
-- [ ] **T-075** Primary screen with one hero number ⇠ T-015, T-073, T-074
+      — **Consumed by the map screen, not the passport** (D-027). It does the "where should I go
+      next" job that D-002 needs it for. Denominator counts **unlocked regions only** (D-024).
+- [ ] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071, T-072a
+      — Organised by **category**, five named rows, no catch-all (D-027).
+      — **The levada row is different in kind:** every other category means "you arrived
+      somewhere"; a levada stamp means "you walked the whole thing" (trailhead + exit geofence,
+      D-009). Hardest to earn, most valuable, and it should look like it.
+- [ ] **T-075** Primary screen: map, plus **three controls only** ⇠ T-015, T-073, T-074
+      — Layout per `docs/design-brief.md` §3: gear top-left, stamp button bottom-right,
+      conditional start/stop for While-Using users.
+      — **The stamp button carries the hero number** (icon + `23 / 180`). One element, two jobs —
+      this is how the one-hero-number requirement is met without a fourth element on screen.
+      — Never show a coverage percentage as the headline (D-002).
 
 ### Verification
 
@@ -353,6 +410,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 ### UX reduction
 
 - [ ] **T-112** Ruthless UI reduction pass — one primary screen, one hero number ⇠ T-075
+      — Target is already set by `docs/design-brief.md` §3: map plus three controls. Watch
+      specifically for banner/promo cards accumulating over the map; the reference app loses the
+      top third of its map to two stacked dismissible banners.
 - [ ] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
 - [ ] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
 - [ ] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
@@ -374,7 +434,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
 - [ ] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
-- [ ] **T-125** "Delete all my data" control ⇠ T-030
+- [ ] **T-125** "Delete all my data" control ⇠ T-030, T-141
+      — **Last item in settings, in its own section, red, with an icon.** Findable, not
+      fat-fingerable. Requires a second confirmation step.
+      — Copy must be honest about consequences: there is no cloud, no account and no restore
+      (D-001). Deleting is permanent and takes the whole trip with it. **Do not use developer
+      idiom** such as "Danger Zone" for the section header — name it for what it does.
+- [ ] **T-141** Settings screen (`docs/design-brief.md` §5) ⇠ T-042
+      — Reached by the **gear, top-left** — not a hamburger. Three lines promises a drawer of
+      destinations; a gear reads as "settings" to someone not fluent in app idiom (D-015,
+      CONTEXT §6.5).
+      — Sections with headers and **plain-English footnotes** explaining what each does and what
+      it costs. This is what lets settings grow without becoming hostile.
+      — Contents: permission status + route to system settings (T-044, T-121); Android
+      battery-optimisation exemption (T-046); light/dark preference (T-140); tile pack status
+      (T-057); privacy policy (T-124); a hidden debug/trace-export entry (T-050, T-130); and
+      erase-all last (T-125).
 
 ### Verification
 

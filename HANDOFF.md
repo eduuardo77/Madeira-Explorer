@@ -1,24 +1,27 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-06, after the first implementation session.
+**Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
+session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added).
 **For:** a fresh Claude Code session picking this project up cold.
-**Repository state:** git repository with three commits. Planning docs plus a Phase 1 recorder
-skeleton in `app/` — 21 source files, ~2,200 lines, **none of which has ever been run.**
+**Repository state:** git repository, four commits. Planning docs plus a Phase 1 recorder
+skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.**
 
 ---
 
 ## Read this in order
 
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
-   before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints)
-   and §6 (coding conventions).
-2. **`DECISIONS.md`** — 25 numbered decisions with alternatives and reasoning. Read before
+   before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
+   §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
+2. **`DECISIONS.md`** — 28 numbered decisions with alternatives and reasoning. Read before
    proposing anything that contradicts one.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
+5. `docs/design-brief.md` — visual direction and screen structure. Read before touching anything
+   that renders. Its §1 explains why the "UI work" on this app is mostly cartography.
 
-**These six documents are the source of truth, not this handoff and not any chat history.**
+**These seven documents are the source of truth, not this handoff and not any chat history.**
 If this file and those disagree about a *decision*, they win.
 
 The exception is **implementation status**: what is built, what is unverified, and what is
@@ -52,12 +55,44 @@ None of that proves a GPS fix would land in the database. No permission dialog h
 no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
 until a development build exists — which is the first blocker below.
 
-### The one thing still marked Provisional
+### What is Provisional
 
-**D-022** — drawing visited roads as our own overlay rather than recolouring basemap features.
-It is a technically-forced change (the `setFeatureState` API is not reliably available on
-MapLibre Native mobile) and the project lead has not explicitly confirmed it. It does not block
-Phase 0. Raise it when the tile spike produces something concrete to look at.
+**D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
+
+Three new decisions from the 2026-08-08 design session are **Provisional** — agreed by the
+project lead, but not yet validated against anything real:
+
+- **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
+  terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
+  Funchal midday sun.
+- **D-027** — the passport is organised by category (five named rows), not by region. Region
+  moves to the map screen.
+- **D-028** — sampling gates on stationary-vs-moving; walking-vs-driving deferred; the pedometer
+  classifies but never gates recording.
+
+Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
+
+### What the 2026-08-08 session settled
+
+A design session, no code. Six planning docs updated plus one new file.
+
+- **The visual direction exists now**, where before there was none. Two styles over one tile
+  pack, terrain rather than buildings, a three-control primary screen, and a passport organised
+  by category. All of it in `docs/design-brief.md`.
+- **The doc-maintenance latitude question is answered** — three tiers, in CONTEXT §9. Follow it.
+  The default for anything new is **Provisional**; the burden is on confirmation, not objection.
+- **The activity-gating trigger is decided** (D-028), so T-034 is no longer blocked.
+- **D-022 was confirmed**, closing the last Provisional entry from planning.
+- **Four stale statements were corrected** under the tier-1 rule: the ARCHITECTURE §2 diagram,
+  a PROJECT_PLAN Phase 0 success criterion, PROJECT_PLAN's "newly raised" section, and README's
+  claim that no code had been written.
+- **The app still has no name.** Deliberately deferred — see below.
+
+The session's most useful artefact may be the competitor teardown in `docs/design-brief.md` §6.
+Three of this project's decisions turn out to be visible in a shipped competitor as observed
+failures: a `0.00%` hero number (what D-002 rejected), a modal begging users not to force-quit
+(what D-005 avoids architecturally), and a 22-minute walk credited zero (the D-009 uninstall
+case). Concrete evidence, worth keeping.
 
 ---
 
@@ -145,9 +180,10 @@ handler is written, but nothing calls it with regions, because there are no POIs
 manager, T-066 the content). So `geofence_event` stays empty. Since geofences are the reward
 backbone (D-005), this is the biggest gap in the phase.
 
-Also missing from Phase 1: activity switching (T-034 — profiles exist, nothing selects between
-them), notifications and the day-1 health check (T-049), the Always upgrade and downgrade
-detection (T-043/T-044), and the battery-optimisation exemption (T-046).
+Also missing from Phase 1: sampling gating (T-034 — profiles exist, nothing selects between
+them; the trigger is now decided, the code is not written), notifications and the day-1 health
+check (T-049), the Always upgrade and downgrade detection (T-043/T-044), and the
+battery-optimisation exemption (T-046).
 
 Nothing at all exists from Phases 2–7.
 
@@ -155,7 +191,12 @@ Nothing at all exists from Phases 2–7.
 
 ## Start here
 
-**The first blocker is a development build.** Background location cannot run in Expo Go, so
+**If the project lead has no preference, start Track B.** It is the single biggest unblock in
+the project right now: it is Phase 0 work that was always required, it needs no dev build and no
+app code, and it is the **prerequisite for every visual decision** — the map is a MapLibre style
+and it cannot be designed against an imaginary map. D-026 also cannot be confirmed without it.
+
+**The other blocker is a development build.** Background location cannot run in Expo Go, so
 nothing in Phase 1 can be verified until one exists. That needs an Expo account (the project
 lead's to create) and `eas.json`. No JDK on the dev machine and no Mac, so EAS Build is the
 realistic path for both platforms.
@@ -241,10 +282,17 @@ thresholds on iPhone data alone.
    over the basemap, and confirm it **aligns** with the basemap's own road rendering (T-025).
 4. Evaluate suppressing basemap roads entirely and drawing all roads from the overlay, which
    makes alignment a non-issue by construction (T-025a).
-5. Record tile pack size (T-026).
+5. Record tile pack size (T-026) — **including shaded terrain**, which D-026 adds and which is
+   not free.
 
 Note T-024 (stable OSM way IDs in tiles) was downgraded from "critical decision gate" to
 nice-to-have by D-022. Do not treat it as a blocker.
+
+**Track B is now also the design unblock.** Once tiles render, the next step is T-058: take an
+existing permissively-licensed style — a Protomaps basemap theme, or CARTO Positron over an
+OpenMapTiles-schema build — and **subtract** from it. Do not author cartography from a blank
+file; that assumption is a large part of why the design phase previously stalled. Then look at
+it outdoors, in Funchal, at midday. That is the test that confirms or kills D-026.
 
 ### Finishing Phase 1
 
@@ -257,7 +305,8 @@ debug screen are done (see "What is already built"). What remains, in the order 
    content-agnostic (D-017). This is the recommended next piece of code.
 3. **T-042/T-114, the permission flow and onboarding.** Sits on the critical path via the slow,
    external Google Play review (T-123).
-4. **T-034, activity gating** — needs a decision first, see below.
+4. **T-034, stationary-vs-moving gating.** **No longer blocked** — the trigger was decided
+   2026-08-08 (D-028): distance over time, no new sensor, no new dependency, no new permission.
 5. **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and
    they are the trigger for the Transistor purchase decision (D-025).
 
@@ -379,19 +428,48 @@ must confirm they are absent from the production build. A reviewer seeing those 
 double quotes, so multi-line `git commit -m` messages get word-split. Write the message to a
 file and use `git commit -F` instead.
 
+### Learned in the 2026-08-08 design session
+
+**Apple Maps is settled, and the answer is no.** It will come up again, because it looks good and
+the reference app uses it. Four hard stops, recorded in D-026: no offline tile API is exposed to
+third-party apps; every pan and zoom leaks position to a tile server; the basemap cannot be
+dimmed, so there is no fog of war; and there is no Apple Maps SDK for Android at all. Their
+choice is correct *for New York*, which has connectivity everywhere. Madeira's north and interior
+do not. The counter-argument that Apple Maps carries useful familiarity is real and is answered
+in D-026 — familiarity comes from map *conventions* and *gestures*, both of which MapLibre keeps.
+
+**Never gate recording on the pedometer.** It is tempting, the reference app does exactly it, and
+it is wrong here: they are a walking-only app, and Madeira tourism is rental-car dominated.
+Gating on steps would blind the app to the tunnel drives and the VR1. The pedometer classifies;
+it never gates (D-028). Note also their own settings admit **20%/day** battery at the setting
+that reliably catches walks — pedometer gating is not the battery win it appears to be.
+
+**Most "UI work" on this app is cartography.** The primary screen is a map plus three controls.
+Asking a UI design tool for "the screen" produces generic dashboard chrome because that is all it
+can do with the space. This cost the project lead real time before it was diagnosed. See
+`docs/design-brief.md` §1, and do not repeat it.
+
+**Do not author a map style from a blank file.** Start from Protomaps' basemap themes or CARTO
+Positron/Dark Matter and subtract. Verify the licence of whichever is chosen.
+
+**Do not name the app after anything official.** The reference app is currently subject to a
+cease and desist from NYC DOT for using the name of the city's own wayfinding programme. Madeira
+has equivalents — *Visit Madeira* and similar. Search INPI and EUIPO before committing. The
+shortlist in `docs/design-brief.md` §7.4 is **unchecked candidates**, not cleared names.
+
 ---
 
 ## Decisions waiting on the project lead
 
-These were raised at the end of the first implementation session and are **not yet answered.**
-Ask before assuming any of them.
+Three of the four questions raised after the first implementation session were **answered
+2026-08-08.** One remains.
 
-| Question | Why it matters |
+| Question | Status |
 |---|---|
-| **Bundle identifier.** Currently the placeholder `com.madeiraexplorer.app`. | Free to change now, permanent after store submission, and it is the unit a Transistor licence is sold against. Use a reverse-DNS form of a domain the lead controls if there is one. |
-| **T-034 activity gating trigger.** Infer from speed, add a dependency, or leave a fixed profile until Phase 0 data exists. | `expo-location` does not surface platform activity recognition, so the profiles currently never switch. Directly sets the battery number. Inferring from speed adds no dependency, which matters given the §6.4 zero-networked-dependency target. |
-| **How much latitude on the six planning documents.** | The standing instruction is to keep them current unprompted; the lead also said not to change the plan without approval. The line between "fix a factual error" and "change the plan" has not been drawn. |
-| **Save the UI design brief to `docs/`?** | A prompt for sketching the product screens was drafted in chat and deliberately not committed. |
+| **Bundle identifier.** | **Still open.** The project lead has no app name and no domain yet. `com.madeiraexplorer.app` stays as a working placeholder — permanent only *after* store publication, so it must not block the dev build. Decide before T-137. **Search INPI and EUIPO first**, and avoid anything reading as an official regional-tourism asset — see `docs/design-brief.md` §7 for the cautionary case. |
+| ~~T-034 activity gating trigger~~ | **Answered — D-028.** Stationary-vs-moving from distance over time; walking-vs-driving deferred to T-034a; pedometer classifies, never gates. |
+| ~~Doc-maintenance latitude~~ | **Answered.** Three-tier protocol now in CONTEXT.md §9. Default for anything new is **Provisional**. |
+| ~~Save the UI design brief to `docs/`?~~ | **Answered — yes.** Written as `docs/design-brief.md`. |
 
 ### Older open questions, none blocking
 
@@ -400,17 +478,22 @@ Ask before assuming any of them.
 | OD-4 | Monetisation | Deferred. Free for v1, no ads ever (would break the privacy position). |
 | OD-5 | Cruise day-trippers as a segment | Open, affects content curation only. |
 | OD-7 | Levada data source and licensing | Not yet decidable — needs the OSM coverage assessment in T-028 first. |
-| — | Confirm D-022 | Provisional, does not block Phase 0. |
+| — | ~~Confirm D-022~~ | **Accepted 2026-08-08.** T-016a closed. |
+| — | Confirm D-026 / D-027 / D-028 | Provisional. D-026 needs T-025 plus an outdoor look; D-028 needs T-020 data. Neither blocks Phase 0. |
 
 Also unresolved, cheap to settle: whether Transistor Soft debug builds run unlicensed. Only
 matters if the free stack fails its soak tests (T-051–T-054), which is when the $399 purchase
 decision arises at all.
 
-### Known documentation inconsistency
+### Known documentation inconsistencies
 
-`ARCHITECTURE.md` §2, in the component diagram, still lists "Feature-state recolouring by OSM
-way ID" in the presentation layer. D-022 retired that approach and §5 of the same document
-already reflects the change. One-line fix, left alone pending the doc-latitude question above.
+~~`ARCHITECTURE.md` §2 component diagram still lists feature-state recolouring.~~ **Fixed
+2026-08-08** under the tier-1 rule now recorded in CONTEXT.md §9.
+
+Note that `DECISIONS.md` D-004 still discusses feature state at length. That is **correct and
+deliberate** — the entry carries its own dated revision notice and is superseded by D-022 rather
+than rewritten. Superseding rather than deleting is the convention (CONTEXT §9); do not "tidy"
+those passages away.
 
 ---
 
@@ -445,21 +528,26 @@ For context on how the design arrived where it did. Full reasoning for each is i
 - **D-023** React Native
 - **D-024** Porto Santo hidden until the user goes there
 - **D-025** Free location stack; paid SDK only on evidence
+- **D-026** Two map styles — light for use, dark for the souvenir; terrain, not buildings *(Provisional)*
+- **D-027** Passport organised by category, not region *(Provisional)*
+- **D-028** Gate on stationary-vs-moving; pedometer classifies but never gates *(Provisional)*
 
 ---
 
 ## Suggested opening message for the new session
 
 > This is the Madeira Explorer project. Read `HANDOFF.md`, then `CONTEXT.md`, `DECISIONS.md`
-> and `TASKS.md` — those four are the source of truth, not chat history. Planning is complete
-> and a Phase 1 recorder skeleton exists in `app/`, but it has never been run. Do not change
-> the plan without asking me.
+> and `TASKS.md` — those are the source of truth, not chat history. If the work touches
+> anything visual, read `docs/design-brief.md` too. Planning is complete and a Phase 1 recorder
+> skeleton exists in `app/`, but it has never been run. Follow the three-tier doc-maintenance
+> protocol in CONTEXT.md §9.
 >
 > I want to work on [pick one]:
+> - Phase 0 Track B — the tile pipeline spike (**this is the unblock for all visual work**)
+> - Phase 0 Track A — the field GPS runs with Sensor Logger
 > - getting a development build onto my phone, so the recorder can actually be tested
 > - T-039, the dynamic geofence manager
-> - Phase 0 Track A — the field GPS runs with Sensor Logger
-> - Phase 0 Track B — the tile pipeline spike
+> - T-034, stationary-vs-moving gating (unblocked by D-028)
 
-Whichever is chosen, read the "Decisions waiting on the project lead" table above first — four
-questions are outstanding and one of them (activity gating) blocks a Phase 1 task.
+Only one question is still outstanding for the project lead — the **app name and bundle
+identifier** — and it blocks nothing before store submission.

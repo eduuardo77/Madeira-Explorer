@@ -51,11 +51,16 @@ matching change is tested against.
 ### 0.2 Tile pipeline spike
 
 Produce a vector tile pack of Madeira **and Porto Santo** (D-021) from an OSM extract, and
-confirm the single critical property: **stable OSM way IDs survive into the
-rendered tiles** and can be addressed at runtime for per-segment recolouring.
+confirm that a **locally-drawn overlay aligns cleanly with the basemap's own road rendering**
+(D-022). Stable OSM way IDs remain useful as an internal join key but are no longer
+architecturally load-bearing.
 
 **Deliverable:** a `.pmtiles` or `.mbtiles` file, its size on disk, and a working MapLibre
 demo that draws a highlighted road segment from local geometry over the basemap.
+
+**This is also the unblock for all visual design work.** The map is a MapLibre style, not UI, and
+it cannot be designed against an imaginary map — invented road density and fictional label load
+produce mockups that look convincing and are wrong. See `docs/design-brief.md` §1.
 
 **Revised 2026-08-06 (D-022):** this spike is no longer a kill criterion. Because visited
 segments are drawn from our own local geometry rather than by recolouring tile features,
@@ -73,7 +78,7 @@ recorded as **closed by decision**, not as completed work.
 - [ ] Real traces from at least one levada and one tunnel route exist in the repo
 - [ ] Blackout durations and error magnitudes documented in `docs/field-notes.md`
 - [ ] Tile pack builds reproducibly from a script, with size recorded
-- [ ] A road segment can be recoloured at runtime by OSM way ID
+- [ ] A locally-drawn overlay segment aligns cleanly with the basemap's road rendering (D-022)
 - [x] Framework decision made and recorded — **React Native + Expo, TypeScript** (D-023)
 
 ---
@@ -116,33 +121,43 @@ in the local database, with no user interaction after install.
 
 ## Phase 2 — Offline map rendering
 
-**Goal:** The dark Madeira map renders beautifully, offline, at 60fps.
-**Depends on:** Phase 0.2.
+**Goal:** The Madeira map renders beautifully, offline, at 60fps.
+**Depends on:** Phase 0.2. **Visual direction:** `docs/design-brief.md` (D-026).
 
 ### Scope
 
 - Bundle or first-run-download the tile pack (WiFi-gated)
-- MapLibre GL Native integration with the custom dark style
-- Base style: dark/grey island, roads legible but recessive, minimal labels — city names and
-  major cultural landmarks only
+- MapLibre GL Native integration
+- **Two styles over one tile pack** (D-026): **light** for everyday in-app use, **dark** for the
+  souvenir renderer and as a user preference
+- **Both derived by subtracting from an existing permissively-licensed style** — Protomaps
+  basemap themes, or CARTO Positron / Dark Matter over an OpenMapTiles-schema build. Not
+  authored from a blank file. Verify licences.
+- **Shaded terrain as the figure-ground element**, not building footprints — Madeira's relief is
+  the island's defining feature and OSM building coverage is patchy outside Funchal
+- Roads legible but recessive; minimal labels — city names and major cultural landmarks only
 - Visited/unvisited styling via an overlay layer drawn from local `road_graph` geometry (D-022),
   using data-driven expressions. **Not** feature state — unavailable on MapLibre Native mobile.
-- Accessibility pass: unvisited roads are mid-grey and *readable*, not near-black; visited
-  differentiated by **brightness and line weight**, not hue alone
+- Accessibility pass **in both styles**: unvisited stays readable mid-grey; visited
+  differentiated by **weight plus brightness/darkness**, never hue alone
 - Respect system font scaling for labels
-- Camera defaults: sensible island-wide framing, gentle constraints on pan/zoom bounds
+- Camera defaults: sensible island-wide framing, gentle constraints on pan/zoom bounds.
+  Madeira-only until Porto Santo unlocks (D-024).
 
 ### Success criteria
 
 - [ ] Map renders with the device in airplane mode from a cold start
 - [ ] Recolouring 5,000+ segments does not drop frames
 - [ ] Contrast between visited and unvisited passes a legibility check with an older tester
-- [ ] Style remains readable in bright outdoor sunlight
-- [ ] Tile pack size documented and acceptable for a hotel-WiFi download
+- [ ] **Both styles readable in Funchal midday sun, held at arm's length** — this is the test
+      that decides whether D-026's light-for-use choice was right
+- [ ] The visited trace is unambiguously the brightest thing on screen
+- [ ] Tile pack size documented and acceptable for a hotel-WiFi download, terrain included
 
 ### Milestone M2 — "It looks like Madeira"
 
-The island renders offline, dark and clean, with a hand-set list of segments highlighted.
+The island renders offline and clean in both styles, with a hand-set list of segments
+highlighted.
 
 ---
 
@@ -153,15 +168,21 @@ The island renders offline, dark and clean, with a hand-set list of segments hig
 
 ### Scope
 
-- Curate the POI list: **150–250 places** — miradouros, levada trailheads and exits,
-  villages, beaches, notable landmarks. Hand-verified.
-- Region boundaries for per-region progress
+- Curate the POI list: **150–250 places**, hand-verified. Every place is assigned exactly one of
+  **five categories — Viewpoints · Levadas · Villages · Beaches · Landmarks** (D-027). There is
+  deliberately no "Other": a place that fits nowhere is a signal about the place.
+- Region boundaries for per-region progress. **Regions serve the map screen** ("where should I go
+  next"); **the passport is organised by category** (D-027).
 - Dynamic geofence management: register the nearest ~18 regions (iOS hard cap is 20
   simultaneous), plus one large "you have left this area" trigger that reshuffles the set
 - Stamp award rules: **dwell time + plausible speed**. In-geofence for N minutes at walking
   pace = awarded. Driving past at 60km/h = not awarded.
-- Stamp artwork and the "passport" collection screen
-- Per-region progress display (e.g. Funchal 60%, São Vicente 15%, Porto Moniz 0%)
+- Stamp artwork and the "passport" collection screen — **five category rows.** The levada row is
+  different in kind: every other category means "you arrived somewhere", a levada stamp means
+  "you walked the whole thing" (trailhead + exit geofence, D-009). Hardest to earn, most
+  valuable, and it should look like it.
+- Per-region progress display on the **map screen** (e.g. Funchal 60%, São Vicente 15%, Porto
+  Moniz 0%). Denominator counts **unlocked regions only** (D-024).
 - Confidence value stored alongside every award
 
 ### Success criteria
@@ -386,16 +407,30 @@ low.
 
 ---
 
-## Newly raised, not yet tracked as OD entries
+## Recently closed, previously untracked
 
-**Who does the Phase 0 fieldwork, and are they on the island?** The "validate before building"
-sequencing assumes someone can walk a levada and drive the VR1 with a logger at low cost. If
-that requires travelling to Madeira, Phase 0 is expensive and the sequencing should be
-reconsidered — it may be better to build the recorder first (Phase 1) and use it to do the
-validation. This directly affects the shape of the whole plan.
+- ~~**Who does the Phase 0 fieldwork, and are they on the island?**~~ **Resolved 2026-08-06 — the
+  project lead lives in Madeira.** The "validate before building" sequencing stands unchanged and
+  field validation is a continuous capability rather than a one-off trip. See CONTEXT.md §5a.
+- ~~**Transistor Soft licence spend.**~~ **Resolved 2026-08-06 by D-025** — not purchased. Build
+  on free `expo-location` behind a swappable interface; buy only if T-051–T-054 fail. Dependency
+  cost is currently **$0**.
+- ~~**Doc-maintenance latitude.**~~ **Resolved 2026-08-08** — three-tier protocol recorded in
+  CONTEXT.md §9. Default for anything new is Provisional.
 
-**Transistor Soft licence spend.** D-006 records it as the correct technical choice and the
-highest-leverage money on the project, but it has not been approved as an actual purchase.
+### Still open
+
+**The app has no name and no domain** (as of 2026-08-08). The bundle identifier
+`com.madeiraexplorer.app` is a working placeholder — permanent only after store publication, so
+it must not block the dev build.
+
+**Deliberately deferred, not merely outstanding.** Nothing before Phase 5 depends on it, and
+naming now would mean naming a product nobody has seen. Revisit once the tile spike renders the
+real style (T-025) and a souvenir exists (T-105); **decide before the Google Play demo video
+(T-123), not before the store listing.** A five-name shortlist with reasoning is recorded in
+`docs/design-brief.md` §7.4 — **none of them checked.** Search INPI and EUIPO plus both app
+stores before committing, and avoid anything reading as an official regional-tourism asset; §7
+records why that is not a hypothetical risk.
 
 ---
 
@@ -412,3 +447,5 @@ highest-leverage money on the project, but it has not been approved as an actual
 | Users never find the app | High | The souvenir video is the entire distribution strategy. It must be genuinely good. |
 | Slow-fill demotivation over a 7-day trip | Medium | Curated canvas + per-region progress + stamps, rather than island-wide road %. |
 | A third-party SDK quietly transmits data | Medium | Explicit dependency network audit in Phase 6; target zero networked dependencies. |
+| Custom cartography does not reach an acceptable standard — the map is the most-viewed surface in the app | Medium | Start from an existing professionally-made style and subtract, rather than authoring from scratch (D-026). Judge against a testable bar, outdoors in Funchal sun (T-065), not against Apple Maps' general-purpose polish — different job, different target. |
+| The app's name collides with a government or tourism-board trademark | Low | Search INPI and EUIPO before committing; avoid names implying official endorsement. A directly comparable app is currently subject to a cease and desist for exactly this. |

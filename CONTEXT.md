@@ -219,6 +219,10 @@ Prior art confirms every individual piece ships:
   printed books. The closest business-model analogue.
 - **AllTrails / Wikiloc** — offline maps and trail data at scale. Wikiloc is big in Portugal.
   These are also the **incumbent competition** for the levada use case.
+- **WalkNYC** (Joe Puccio, iOS) — passive street-coverage tracking, built on Apple Maps, by one
+  developer. Reviewed 2026-08-08 as a visual reference; the full reading is in
+  `docs/design-brief.md` §6. Its main value is as a catalogue of **observed failure modes** that
+  our decisions already anticipate — see ARCHITECTURE §11.
 
 **The caveat that matters:** each solved *one* of our three problems. Wandrer and CityStrides
 never touch the user's battery — they piggyback on Strava's recording and do all matching
@@ -353,11 +357,21 @@ explicit battery justification.
 - Minimum tap target **60dp**, not 44.
 - Respect system font scaling everywhere.
 - Never differentiate meaning by hue alone — always brightness and/or weight as well.
-- Unvisited roads stay legible mid-grey. Never near-black. (The dark aesthetic and the 80+
-  goal are in genuine tension; accessibility wins.)
+- Unvisited roads stay legible mid-grey. Never near-black, never near-invisible.
 - Minimal does **not** mean unlabelled. Older users want confirmation of what a control does.
-  The target is one screen with a small number of large, clearly-named things.
+  The target is one screen with a small number of large, clearly-named things. This is why the
+  settings entry point is a **gear and not three lines** — a hamburger is a learned convention
+  that promises a drawer of destinations.
 - Test in bright outdoor sunlight, not just on a desk.
+
+**Revised 2026-08-08 (D-026).** The dark-aesthetic-versus-legibility tension noted here was
+resolved rather than traded: the app ships **two styles over one tile pack** — light for
+everyday use, where sunlight legibility matters, and dark for the souvenir, where the
+fog-of-war metaphor and the shareability matter. "Visited is brighter" therefore holds only in
+the dark style; in the light style visited is *darker and heavier*. The underlying rule is
+unchanged and is the one to apply: **weight always carries part of the signal, and unvisited
+must stay readable.** Full direction and the primary-screen structure are in
+`docs/design-brief.md`.
 
 ### 6.6 Testing
 
@@ -486,6 +500,21 @@ protecting against. That reasoning has to live in the repository.
 
 Whenever an important architectural or planning decision is made, **update the affected
 documents as part of the same piece of work.** Not later, not at the end of the phase.
+
+### How much latitude — agreed with the project lead 2026-08-08
+
+The standing instruction to keep these documents current pulled against the instruction not to
+change the plan without approval. The boundary is now drawn, in three tiers:
+
+| Tier | Examples | What to do |
+|---|---|---|
+| **Just do it** | Factual corrections; internal contradictions between documents; task status changes; writing down something the project lead decided in conversation | Make the change, and say plainly afterwards what changed and why |
+| **Do it, mark Provisional** | A new decision being *recommended*, including ones the project lead has agreed to in conversation but that remain unvalidated | Record it with a `D-0xx`, status **Provisional**, and flag it. Never launder a strong lean into **Accepted** |
+| **Ask first** | Reversing an Accepted decision; changing scope; reordering phases | Do not edit. Raise it |
+
+This resolves the fourth item in the old "decisions waiting on the project lead" table in
+HANDOFF.md. The default for anything new is **Provisional** — the burden is on confirmation, not
+on objection.
 
 ### Which document gets updated
 

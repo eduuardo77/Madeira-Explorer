@@ -1092,3 +1092,124 @@ not control. The name is the stable join; the relations carry the official struc
   None of that is answerable from counts. It is answerable in an afternoon by someone living on
   the island (CONTEXT §5a), and that is the honest next step.
 - Zero cost. Dependency spend remains **$0**.
+
+---
+
+## D-030 — Protomaps basemap schema, extracted from their hosted planet build.
+
+**Status:** Provisional — decided 2026-08-08 after a second, deeper research pass requested by
+the project lead. Provisional until the map has been *looked at* with terrain and a real style.
+
+**Decision:** The tile pack uses the **Protomaps basemap schema**, obtained by `pmtiles extract`
+against a **pinned, dated** Protomaps planet build (currently `20260803`). Pipeline in
+`tiles/pipeline/build.sh`.
+
+**Measured:** 12 MB for Madeira + Porto Santo, zoom 0–15, in **8.5 seconds**, with no local
+toolchain.
+
+**How this decision was reached, recorded because the process was the useful part:** the first
+pass adopted planetiler's *default* profile (OpenMapTiles) without examining it. That was chosen
+by what would run on the dev machine, which is the wrong basis for a load-bearing choice. The
+project lead stopped it and asked for research twice. Both passes changed the answer. **The
+lesson is worth more than the decision: a default is not a decision.**
+
+**Alternatives considered:**
+
+- *OpenMapTiles via planetiler* — what was built first, and it works: 8.9 MB, 3m37s. **Rejected
+  on two grounds.** Its schema is **CC-BY**, requiring a visible "© OpenMapTiles" credit that
+  would have to appear in the souvenir video (D-013) beside our own name. And it **strips names
+  from the `transportation` layer** by design, so a levada path is indistinguishable from any
+  footpath (T-026a). It is also incompatible with the styles D-026 already chose — an
+  inconsistency introduced and then caught.
+- *Shortbread* — lean, community schema, ODbL-only attribution. Rejected: it splits names into
+  separate label layers, the same pattern that hurt us in OpenMapTiles, and no ready-made style
+  ecosystem comparable to Protomaps'.
+- *A custom planetiler YAML schema* — technically the strongest "own everything" answer, needs
+  no Java, only ODbL attribution, and could make levadas a first-class layer. **Rejected for
+  now** because no existing style targets a bespoke schema, so it would mean authoring
+  cartography from a blank file — precisely the trap D-026 exists to avoid and precisely what
+  stalled the design phase. Retained as fallback route 2 in `build.sh`.
+
+**Reasoning:**
+
+1. **Attribution.** CC0 schema. Only "© OpenStreetMap" remains, which is required under ODbL
+   under *every* option including a fully custom build. The watermark problem disappears.
+2. **Levadas stay identifiable.** `roads` carries `name` at z13+, verified by decoding a real
+   tile — `Levada da Serra do Faial/Levada da Faja da Nogueira`, `kind=path`.
+3. **Measurably better suited to Madeira.** 48 `cliff` features in one z13 tile, plus
+   `bare_rock`, `scrub`, and peaks carrying `elevation`. For an island defined by relief this is
+   material, and it was not predictable from documentation.
+4. **`is_tunnel` is a first-class boolean**, useful to T-069/T-087.
+5. **It is the schema D-026's chosen styles target natively.**
+
+**The dependency risk, assessed rather than waved away:** Protomaps is essentially one maintainer
+(@bdon), a single-member LLC with no outside investors, funded by GitHub Sponsors and an
+NLnet/EU NGI grant. For most projects that is a real supplier risk. **Here it is nearly
+irrelevant, and the reason is our own architecture** — it is a *build-time* dependency, never a
+runtime one. We ship a file and the app makes no requests (D-001). If the hosted builds stop
+tomorrow, the shipped pack keeps working, and `build.sh` documents three self-build fallbacks
+using a toolchain already proven on this machine.
+
+**Why this is safely reversible — and this matters more than the choice itself.** Trace what
+depends on the tile schema: matching uses `road_graph` imported from OSM (T-082); visited-road
+rendering uses `road_graph` (D-022); stamps, geofences and regions use the content pack, built
+from OSM directly; the recorder does not touch tiles at all. **The tile pack is the background
+only.** Changing schema later means rewriting one style file, not a rewrite. What *is* sticky is
+shipping: once tiles are bundled (T-057) a change forces a re-download, and once a souvenir video
+is published its attribution is public. So this needed to be right before **shipping**, not
+before **building**.
+
+**Consequences:**
+
+- `tiles/pipeline/build.sh` is now an extract, not a build. The planetiler toolchain stays as a
+  documented fallback and is no longer required for a normal build.
+- `tiles/style/light.json` rewritten against Protomaps layer names.
+- The planet build date is **pinned** in `build.sh`; an unpinned "latest" would make builds
+  irreproducible. Bump deliberately and record it.
+- **Terrain remains the real open question.** Neither schema carries elevation, so D-026's shaded
+  relief is a separate pipeline regardless, and it is the single largest determinant of whether
+  this map looks good. 12 MB is the floor, not the answer.
+
+---
+
+## D-031 — No backend. Re-examined against the competition, and reaffirmed.
+
+**Status:** Accepted — D-001 reaffirmed 2026-08-08 after the project lead asked directly whether
+we could have a backend, having noticed that every competitor does.
+
+**The question:** the trail apps all run servers. Why not us?
+
+**Decision:** unchanged — no backend, no account, no analytics (D-001). But the reasoning is
+sharper now that the competition has been measured, so it is recorded rather than left implicit.
+
+**What a backend would actually buy:** exactly one thing of substance — **server-side map
+matching**, the Wandrer/CityStrides model. That is a real argument, because matching in
+JavaScript on-device is the sharpest technical risk in the project (D-023). Everything else on
+the list (sync, remote diagnostics, analytics) is convenience.
+
+**What it would cost:**
+
+- An ongoing hosting bill on a project with **no revenue** (D-014).
+- A **GDPR controller relationship over location data** — the most sensitive category there is —
+  where today we have essentially no obligations because nothing is transmitted.
+- A breach surface, and accounts, which break the "80-year-old, no instructions" constraint.
+- Network dependency in exactly the places Madeira has no coverage (CONTEXT §5).
+
+**And critically, it would not help the map at all.** The whole archipelago is a 12 MB file
+(D-030). There is nothing a tile server could give us that we do not already have offline.
+
+**What the competition actually shows** (`docs/competitors.md`): the market leader for Madeira
+levadas, WalkMe, declares collection of **location, contact info, user content, identifiers,
+usage data and diagnostics**. AllTrails serves its maps from Mapbox, so every pan and zoom is a
+billed request carrying a user's position. **They have backends because they are online products
+with revenue** — social discovery, subscriptions, curation. Ours is a passive recorder that hands
+over a souvenir.
+
+**So the honest framing:** "nothing leaves your phone" is not purism, it is the one position the
+incumbents structurally cannot copy without rebuilding. Giving it up to solve a matching
+performance problem we have not yet measured would be trading the differentiator for a
+convenience.
+
+**Revisit only if** T-094/T-098 show on-device matching is genuinely infeasible — and even then,
+the cheaper options in D-023 (chunking, or pushing the hot loop native) come first. Raw traces
+are retained (D-010) precisely so matching can be improved later without re-collecting anything.

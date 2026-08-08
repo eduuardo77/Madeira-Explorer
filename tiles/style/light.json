@@ -3,14 +3,14 @@
   "name": "Madeira light — spike",
   "metadata": {
     "madeira:purpose": "T-025 spike style. NOT the shipping style (T-058).",
+    "madeira:schema": "Protomaps basemap (D-030). Layers: earth, landuse, water, roads, places, pois, boundaries, transit, buildings.",
     "madeira:notes": [
-      "Deliberately minimal and hand-written rather than derived from Positron.",
-      "D-026 says the shipping style starts from an existing style and subtracts;",
-      "this one starts from nothing on purpose, because its job is diagnostic:",
-      "prove the schema carries what Madeira needs, with as few variables as",
-      "possible. Levadas are drawn LOUD here so their presence or absence is",
-      "obvious at a glance - the opposite of what the real style will do.",
-      "No terrain: D-026 wants shaded relief and this pack has none yet."
+      "Hand-written and diagnostic on purpose: its job is to show what the pack",
+      "contains with as few variables as possible. Levadas are drawn LOUD here",
+      "so their presence is obvious - the opposite of what T-058 will do.",
+      "The shipping style starts from a Protomaps theme and SUBTRACTS (D-026).",
+      "No terrain: D-026 wants shaded relief and this pack has none yet. That,",
+      "not the schema, is the biggest open question about how good this looks."
     ]
   },
   "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
@@ -19,30 +19,53 @@
       "type": "vector",
       "tiles": ["http://localhost:8080/madeira/{z}/{x}/{y}.mvt"],
       "minzoom": 0,
-      "maxzoom": 14,
-      "attribution": "<a href=\"https://www.openmaptiles.org/\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\">&copy; OpenStreetMap contributors</a>"
+      "maxzoom": 15,
+      "attribution": "<a href=\"https://www.openstreetmap.org/copyright\">&copy; OpenStreetMap contributors</a>"
     }
   },
   "layers": [
+    { "id": "bg", "type": "background", "paint": { "background-color": "#c3d4dd" } },
+
     {
-      "id": "background",
-      "type": "background",
-      "paint": { "background-color": "#eae7e1" }
-    },
-    {
-      "id": "landcover-wood",
+      "id": "earth",
       "type": "fill",
       "source": "madeira",
-      "source-layer": "landcover",
-      "filter": ["match", ["get", "class"], ["wood", "forest"], true, false],
-      "paint": { "fill-color": "#d9e0cf", "fill-opacity": 0.9 }
+      "source-layer": "earth",
+      "paint": { "fill-color": "#eae7e1" }
     },
     {
-      "id": "park",
+      "id": "landuse-green",
       "type": "fill",
       "source": "madeira",
-      "source-layer": "park",
-      "paint": { "fill-color": "#dbe4d2", "fill-opacity": 0.6 }
+      "source-layer": "landuse",
+      "filter": ["match", ["get", "kind"],
+        ["wood", "forest", "nature_reserve", "park", "scrub", "grassland", "meadow"], true, false],
+      "paint": {
+        "fill-color": ["match", ["get", "kind"],
+          ["wood", "forest"], "#d3ddc6",
+          ["scrub"], "#dde2cf",
+          "#e0e6d6"],
+        "fill-opacity": 0.85
+      }
+    },
+    {
+      "id": "landuse-rock",
+      "type": "fill",
+      "source": "madeira",
+      "source-layer": "landuse",
+      "filter": ["==", ["get", "kind"], "bare_rock"],
+      "paint": { "fill-color": "#dedad2" }
+    },
+    {
+      "id": "cliffs",
+      "type": "line",
+      "source": "madeira",
+      "source-layer": "earth",
+      "filter": ["==", ["get", "kind"], "cliff"],
+      "paint": {
+        "line-color": "#b3aca0",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.4, 15, 1.4]
+      }
     },
     {
       "id": "water",
@@ -51,14 +74,24 @@
       "source-layer": "water",
       "paint": { "fill-color": "#c3d4dd" }
     },
+    {
+      "id": "water-lines",
+      "type": "line",
+      "source": "madeira",
+      "source-layer": "water",
+      "filter": ["match", ["get", "kind"], ["stream", "river"], true, false],
+      "paint": {
+        "line-color": "#a9c4d2",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.4, 15, 1.4]
+      }
+    },
 
     {
       "id": "roads-minor",
       "type": "line",
       "source": "madeira",
-      "source-layer": "transportation",
-      "filter": ["match", ["get", "class"],
-        ["motorway", "trunk", "primary", "secondary", "tertiary"], false, true],
+      "source-layer": "roads",
+      "filter": ["match", ["get", "kind"], ["minor_road", "other"], true, false],
       "paint": {
         "line-color": "#ffffff",
         "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.4, 16, 3]
@@ -68,9 +101,8 @@
       "id": "roads-major",
       "type": "line",
       "source": "madeira",
-      "source-layer": "transportation",
-      "filter": ["match", ["get", "class"],
-        ["motorway", "trunk", "primary", "secondary", "tertiary"], true, false],
+      "source-layer": "roads",
+      "filter": ["==", ["get", "kind"], "major_road"],
       "paint": {
         "line-color": "#ffffff",
         "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.8, 16, 7]
@@ -80,48 +112,53 @@
       "id": "roads-tunnel",
       "type": "line",
       "source": "madeira",
-      "source-layer": "transportation",
-      "filter": ["==", ["get", "brunnel"], "tunnel"],
+      "source-layer": "roads",
+      "filter": ["==", ["get", "is_tunnel"], true],
       "paint": {
         "line-color": "#b9b4ab",
         "line-dasharray": [2, 2],
         "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.8, 16, 5]
       }
     },
+    {
+      "id": "paths",
+      "type": "line",
+      "source": "madeira",
+      "source-layer": "roads",
+      "filter": ["==", ["get", "kind"], "path"],
+      "paint": {
+        "line-color": "#c9bfae",
+        "line-dasharray": [3, 2],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2]
+      }
+    },
 
     {
-      "id": "DIAGNOSTIC-waterway-all",
+      "id": "DIAGNOSTIC-levada-path",
       "type": "line",
       "source": "madeira",
-      "source-layer": "waterway",
-      "paint": {
-        "line-color": "#3aa0d0",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 0.5, 16, 2]
-      }
-    },
-    {
-      "id": "DIAGNOSTIC-levada-candidates",
-      "type": "line",
-      "source": "madeira",
-      "source-layer": "waterway",
-      "filter": ["match", ["get", "class"], ["drain", "ditch", "canal"], true, false],
-      "paint": {
-        "line-color": "#ff8c00",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 16, 5]
-      }
-    },
-    {
-      "id": "DIAGNOSTIC-levada-named",
-      "type": "line",
-      "source": "madeira",
-      "source-layer": "waterway",
+      "source-layer": "roads",
       "filter": ["all",
         ["has", "name"],
-        ["in", "Levada", ["coalesce", ["get", "name"], ""]]
+        ["in", "evada", ["coalesce", ["get", "name"], ""]]
       ],
       "paint": {
         "line-color": "#e01b6a",
         "line-width": ["interpolate", ["linear"], ["zoom"], 12, 2, 16, 6]
+      }
+    },
+    {
+      "id": "DIAGNOSTIC-levada-channel",
+      "type": "line",
+      "source": "madeira",
+      "source-layer": "water",
+      "filter": ["all",
+        ["has", "name"],
+        ["in", "evada", ["coalesce", ["get", "name"], ""]]
+      ],
+      "paint": {
+        "line-color": "#ff8c00",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.5, 16, 4]
       }
     },
 
@@ -129,11 +166,9 @@
       "id": "place-labels",
       "type": "symbol",
       "source": "madeira",
-      "source-layer": "place",
-      "filter": ["match", ["get", "class"],
-        ["city", "town", "village"], true, false],
+      "source-layer": "places",
       "layout": {
-        "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
+        "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]],
         "text-font": ["Noto Sans Regular"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 8, 11, 14, 15],
         "text-max-width": 8
@@ -148,12 +183,13 @@
       "id": "peak-labels",
       "type": "symbol",
       "source": "madeira",
-      "source-layer": "mountain_peak",
+      "source-layer": "pois",
       "minzoom": 11,
+      "filter": ["==", ["get", "kind"], "peak"],
       "layout": {
         "text-field": ["concat",
-          ["coalesce", ["get", "name:latin"], ["get", "name"], ""],
-          " ", ["to-string", ["get", "ele"]], "m"],
+          ["coalesce", ["get", "name"], ""], " ",
+          ["to-string", ["coalesce", ["get", "elevation"], ""]], "m"],
         "text-font": ["Noto Sans Regular"],
         "text-size": 10
       },

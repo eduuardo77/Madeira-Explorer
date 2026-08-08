@@ -3,8 +3,19 @@
 **T-022, T-023, T-026.** Can we build an offline vector tile pack of Madeira and Porto Santo,
 reproducibly, and is it small enough to ship?
 
-**Short answer: yes, and it is much smaller than expected — 8.9 MB for the whole archipelago.**
-One real limitation surfaced, and it is about levadas.
+**Short answer: yes, and it is much smaller than expected — 12 MB for the whole archipelago.**
+
+> ### ⚠ Superseded in part, 2026-08-08 — schema changed to Protomaps (D-030)
+> This document was written against **planetiler + the OpenMapTiles schema**, which was
+> planetiler's *default* and was never actually chosen. On review it failed on two counts: a
+> **CC-BY** licence forcing "© OpenMapTiles" into the souvenir video, and **names stripped from
+> path features**, making levadas unidentifiable. It was also incompatible with the styles D-026
+> had already chosen.
+>
+> **The pipeline now extracts the Protomaps basemap schema** (CC0, names preserved, `is_tunnel`,
+> cliffs and peak elevations) in 8.5 seconds with no toolchain. §1–§3 below are retained as the
+> measurement record of the rejected route; §2's toolchain remains valid as the documented
+> fallback. Current numbers: **12 MB, zoom 0–15, 8.5s**.
 
 **Built:** 2026-08-08. Reproduce with `bash tools/fetch-toolchain.sh` then
 `bash tiles/pipeline/build.sh`.
@@ -15,7 +26,7 @@ One real limitation surfaced, and it is about levadas.
 
 | | |
 |---|---|
-| **Tile pack** | **8.9 MB**, `tiles/out/madeira.pmtiles` |
+| **Tile pack** | ~~8.9 MB~~ → **12 MB** (Protomaps, z0–15). 8.9 MB was the rejected OpenMapTiles build. |
 | Coverage | bbox `-17.32,32.40,-16.20,33.20` — Madeira, Porto Santo, Desertas (D-021) |
 | Zoom | 0–14 |
 | Schema | OpenMapTiles (planetiler's default profile), 16 vector layers |
@@ -104,11 +115,18 @@ all. Worth eyeballing before building anything.
 
 ---
 
-## 4. Attribution obligation
+## 4. Attribution obligation — resolved by D-030
 
-Planetiler's OpenMapTiles profile output requires a visible credit:
+~~Planetiler's OpenMapTiles profile output requires a visible credit:~~
 
-> **© OpenMapTiles © OpenStreetMap contributors**
+> ~~**© OpenMapTiles © OpenStreetMap contributors**~~
+
+**No longer applies.** The Protomaps schema is **CC0**; attribution to Protomaps is requested but
+not required. What remains is **© OpenStreetMap**, required under ODbL by every possible option
+including a fully custom pipeline. The paragraphs below stand as the reasoning for why this
+mattered enough to change schema.
+
+Original note, retained:
 
 This must appear in the app **and in the souvenir export** (T-105/T-106), since the video is a
 public artefact. Worth designing into the watermark rather than bolting on later — it sits next

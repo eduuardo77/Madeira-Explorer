@@ -123,6 +123,11 @@ def main():
 
         print(f"\nlayer {name!r}  features={len(features)}  extent={extent}")
 
+        # Schemas disagree about what the type attribute is called: OpenMapTiles
+        # uses `class`, Protomaps uses `kind`/`kind_detail`. Look for whichever
+        # is present rather than assuming, or the comparison silently reads as
+        # "no data" when it is really "wrong key".
+        KIND_KEYS = ("class", "kind", "kind_detail", "subclass")
         classes, geoms, matches = Counter(), Counter(), []
         for tags, gtype in features:
             geoms[GEOM.get(gtype, gtype)] += 1
@@ -130,14 +135,16 @@ def main():
             for k, v in zip(tags[0::2], tags[1::2]):
                 if k < len(keys) and v < len(values):
                     props[keys[k]] = values[v]
-            if "class" in props:
-                classes[str(props["class"])] += 1
+            kind = next((str(props[k]) for k in KIND_KEYS if k in props), None)
+            if kind:
+                classes[kind] += 1
             nm = str(props.get("name", ""))
             if grep and grep in nm.lower():
-                matches.append((nm, props.get("class"), GEOM.get(gtype, gtype)))
+                matches.append((nm, kind, GEOM.get(gtype, gtype)))
 
+        print("  attribute keys:", ", ".join(sorted(keys)) or "(none)")
         if classes:
-            print("  by class:", dict(classes.most_common()))
+            print("  by kind/class:", dict(classes.most_common()))
         print("  by geometry:", dict(geoms))
         if grep:
             print(f"  name contains {grep!r}: {len(matches)}")

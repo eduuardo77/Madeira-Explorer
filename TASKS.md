@@ -108,8 +108,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       the pipeline takes all of Portugal (400 MB, MD5 verified) and clips to
       `-17.32,32.40,-16.20,33.20`. Fetched by `tiles/pipeline/build.sh`; gitignored.
 - [x] **T-023** Build a reproducible tile generation script producing PMTiles or MBTiles ⇠ T-022
-      — **Done 2026-08-08.** `tools/fetch-toolchain.sh` (checksum-verified toolchain) +
-      `tiles/pipeline/build.sh` (planetiler). Findings in `docs/tile-pipeline.md`.
+      — **Done 2026-08-08**, then **reworked the same day (D-030).** `tiles/pipeline/build.sh`
+      now extracts the **Protomaps** schema from a *pinned* planet build — 12 MB, z0–15, 8.5s,
+      no toolchain. Findings in `docs/tile-pipeline.md`.
+      — The first version used planetiler's **default** OpenMapTiles profile, which was never
+      actually chosen. It forced a CC-BY "© OpenMapTiles" credit into the souvenir video and
+      stripped names from paths. **A default is not a decision.**
+      — The planetiler toolchain (`tools/fetch-toolchain.sh`) is retained and proven as the
+      documented self-build fallback; it is no longer needed for a normal build.
       — **Planetiler, not Tilemaker.** Tilemaker ships no Windows build at all; Docker, Java, Go
       and WSL are all absent from the dev machine. Java is supplied as a **portable JDK** in
       `tools/jdk/` — nothing installed system-wide, nothing on PATH, deletable.
@@ -136,8 +142,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       runs parallel to the path within a few metres, so rendering it may read as "the levada" at
       most zooms with no overlay at all.
 - [~] **T-026** Record tile pack size and judge it acceptable for a hotel-WiFi download ⇠ T-023
-      — **8.9 MB** for the whole archipelago, zoom 0–14, built in 3m37s (2026-08-08). Not a close
-      call — smaller than one phone photo. **This reopens T-057:** bundling the pack in the app
+      — **12 MB** for the whole archipelago, zoom 0–15, extracted in 8.5s (D-030). Not a close
+      call. (The rejected OpenMapTiles build was 8.9 MB at z0–14 — one fewer zoom level.) **This reopens T-057:** bundling the pack in the app
       rather than downloading it on first run is now a genuine option.
       — **Not done, because this excludes terrain.** D-026 wants shaded relief, which is a
       separate elevation source and pipeline. 8.9 MB is the floor, not the answer. Re-measure
@@ -145,9 +151,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-026a** Verify the tile schema actually carries Madeira's defining features
       — **Done 2026-08-08** via `tools/mvt-inspect.py` (decodes MVT directly — no browser, no
       GPU, no style). **Levada channels survive with names intact** (`waterway`, `class=drain`).
-      **Levada paths do not** — OpenMapTiles strips names from `transportation` by design, and
-      `transportation_name` carries only a filtered label subset. So an unvisited levada path
-      renders identically to any footpath. See `docs/tile-pipeline.md` §3 and T-025a.
+      **Levada paths did not** under OpenMapTiles — names stripped from `transportation` by
+      design. **Fixed by D-030:** the Protomaps `roads` layer carries `name` at z13+, verified by
+      decoding a real tile. Also gains `is_tunnel` as a boolean (useful to T-069/T-087), plus
+      cliffs and peak elevations. See `docs/tile-pipeline.md` §3 and T-025a.
 - [ ] **T-027** ~~Decision gate on T-024~~ **Removed by D-022.** The fog-of-war fallback is no
       longer contingent on the tile pipeline preserving OSM IDs.
 
@@ -161,6 +168,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Headline: OSM alone is sufficient and no external licensing arises — the 44 official PR
       routes are already in OSM. **Select levadas by name + relation, never by tag** — a levada
       is two parallel ways sharing one name, and `highway=path` captures only 23% of them.
+- [ ] **T-028b** Install WalkMe and look at it — the direct competitor (`docs/competitors.md`).
+      Its map is app-only, so cartography, trail rendering and the offline download flow could
+      not be inspected from the web. One afternoon, on the island. ⇠ nothing
 - [ ] **T-028a** Field-verify the OSM levada data. Counts prove the data exists, not that it is
       accurate. Walk one known levada and compare against OSM: corridor **connectivity** (a gap
       mid-corridor breaks trailhead-to-exit crediting), tunnel **portal-node precision**, and

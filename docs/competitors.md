@@ -18,8 +18,9 @@ this project has to a direct rival.
 | Age | iOS app ID `577067362` places the listing around **2012**. Fourteen years old. |
 | Activity | v8.8.7, **updated 4 days before survey.** Actively maintained. |
 | **App size** | **178.5 MB** |
-| Map | **Mapbox** — named in their own release notes ("fixed Mapbox glitches") **[verified]** |
-| Offline | *"Download trail maps… internet or not"* — Mapbox offline packs |
+| Map | **Apple Maps (MapKit)** — the "Maps / Legal" attribution is on screen **[verified from screenshots, 2026-08-08]** |
+| Offline | *claims* "Download trail maps… internet or not" — **but see §Offline claim below** |
+| UI | Portuguese-localised; bottom tab bar (Início · Avisos · **Caminhadas** · Info · Perfil) with the primary action as a large centre button |
 | Content | 50+ curated trails, descriptions, photos, difficulty, closure and weather alerts |
 | Trailhead directions | **Hands off to Google Maps** — the same conclusion as D-018 |
 | **Pricing** | Free + IAP: Basic **$7.99** · Plus **$14.99** · Week Pass **$8.99** · Lifetime **$49.99** |
@@ -45,8 +46,41 @@ lifetime**, sustained over fourteen years by one developer. PROJECT_PLAN's monet
 (OD-4) assumed a ~€4 paid app; the real market clears higher. This does not change the v1
 decision — free, no ads (D-014) — but it is evidence worth having when OD-4 is reopened.
 
-**5. Fourteen years and still shipping.** A solo Madeira hiking app is a viable long-term
+**5. They record walks too — "Gravar percurso."** Closer to this project than the "guide vs
+souvenir" split suggested, but it is a **manual, per-walk button press**, not passive background
+recording. The user has to decide to press it, at the trailhead, having remembered the app
+exists. That is the gap this project's ghost operation targets, and it is the whole reason for
+the permission and battery work in Phase 1.
+
+**6. Trail closures are a top-level tab** ("Avisos"). In Madeira, closure status is important
+enough to earn one of five slots. Worth remembering when T-115's landmark card is designed.
+
+**7. Fourteen years and still shipping.** A solo Madeira hiking app is a viable long-term
 concern. Encouraging, and a caution against assuming the niche is empty.
+
+---
+
+### ⚠ Correction, 2026-08-08 — the map is Apple Maps, not Mapbox
+
+An earlier version of this file recorded Mapbox, on the strength of a "fixed Mapbox glitches"
+line in their App Store release notes. **Screenshots of the running app show the Apple Maps
+attribution.** They most likely migrated and the release note is historical. Recorded because the
+error is instructive: **a secondary source lost to one screenshot.**
+
+### The offline claim — worth two minutes to test
+
+Apple exposes **no offline tile API to third-party apps**. Apple Maps added offline regions in
+iOS 17 for *Apple's own* Maps app only. So WalkMe's "offline maps" claim can only mean one of:
+
+1. the **trail data** (routes, descriptions, photos) is offline while the **basemap is not**, or
+2. they ship their own separate offline tiles and swap renderers when the network drops.
+
+**(1) is far more likely**, and if so their basemap goes blank in exactly the places Madeira has
+no coverage — the north and the interior, which is where the levadas are.
+
+**Test: put the phone in airplane mode and open a trail.** If the map goes grey, the strongest
+claim in this project's positioning is confirmed against the market leader, and it costs one
+minute to find out. Worth doing before any marketing copy is written.
 
 ---
 
@@ -57,7 +91,7 @@ concern. Encouraging, and a caution against assuming the niche is empty.
 | **AllTrails** | **Mapbox** — custom style `api.mapbox.com/styles/v1/alltrails/…`, own API token | Yes | **[verified]** — pulled from loaded resources on their Madeira page |
 | **Wikiloc** | **Leaflet + MapLibre**, heavy **IGN** (national topo) references | Yes | **[verified]** in page markup |
 | **Komoot** | OSM data, own tile style, own servers | Yes | **[secondary]** |
-| **WalkMe** | **Mapbox** | Yes | **[verified]** from release notes |
+| **WalkMe** | **Apple Maps (MapKit)** | Yes | **[verified]** from app screenshots |
 | **OsmAnd / Organic Maps** | **Own renderer, own binary format** — Organic Maps is a C++ core | No | **[secondary]** |
 
 ### The pattern that matters

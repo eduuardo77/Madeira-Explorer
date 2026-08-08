@@ -421,7 +421,10 @@ changes that arithmetic, if the project ever wants it to.
 
 ## D-015 — Accessibility beats aesthetics where they conflict.
 
-**Status:** Accepted
+**Status:** Accepted. **The encoding below is revised by D-026 (2026-08-08)** — the app ships
+two styles, so "visited is brighter" holds only in the dark one; in the light style visited is
+darker and heavier. The rule itself is unchanged and is the part that matters: *never
+differentiate by hue alone, and unvisited must stay legible.*
 
 **Decision:** Unvisited roads render as a legible mid-grey, not near-black. Visited segments
 are differentiated by **brightness and line weight**, not hue alone.
@@ -1031,3 +1034,61 @@ exactly the outcome the sampling-bias warning in HANDOFF and T-021a exists to pr
 - **Benchmark worth keeping:** a competing iOS app spends 20%/day to reliably catch walking in a
   dense city. Our ≤5% per 12-hour day (T-054) depends on batching, geofences and stationary
   gating together — not on activity detection alone. If T-054 fails, this is where to look first.
+
+---
+
+## D-029 — OSM alone is sufficient for levadas. Select by name and relation, never by tag.
+
+**Status:** Provisional — measured 2026-08-08 (T-028). **Resolves OD-7.** Provisional because
+counts prove the data *exists*, not that it is *accurate*; confirm by comparing one known levada
+against OSM in the field.
+
+**Decision:** Build levada content on **OpenStreetMap alone**. No external or official dataset is
+licensed, purchased or reconciled in.
+
+Levada geometry is selected by **name (`Levada*`) plus hiking-relation membership**, *never* by a
+single tag. For matching, use the `highway=*` ways — the user walks the path, not the channel.
+Fall back to `waterway=*` geometry where a levada has a channel mapped but no path.
+
+**What the survey found** (full writeup in `docs/osm-coverage.md`):
+
+| Count | Feature |
+|---:|---|
+| 3,981 | ways named `Levada*` |
+| 1,386 | …tagged `highway=*` — the walkable path (922 of them `highway=path`) |
+| 2,552 | …tagged `waterway=*` — the channel (2,357 of them `waterway=drain`) |
+| 108 | `highway=*` **and** `tunnel=*` — levada tunnels |
+| 44 | `route=hiking` relations carrying an official `ref=PR*` |
+
+**Alternatives considered:**
+
+- *License official PR-route data from the regional authority and reconcile it with OSM.* This
+  was the concern that kept OD-7 open and undecidable since planning. **Moot** — the official PR
+  route structure is already in OSM as 44 ref-carrying relations. No negotiation, no second
+  source, no reconciliation pipeline, no licence beyond ODbL which the project already accepts.
+- *Select levadas by `highway=path`.* This is what CONTEXT §5 assumed. **Rejected because it is
+  wrong** — it captures 922 of 3,981 named ways, 23%.
+- *Select by `waterway=canal`*, the semantically correct tag for an irrigation channel.
+  **Rejected — it captures 3%.** Madeira's levadas are overwhelmingly mapped `waterway=drain`,
+  which is semantically odd but consistent, and consistency is what a selector needs.
+
+**Reasoning:** OSM maps a levada as **two parallel ways sharing one name** — the channel and the
+footpath beside it — with different tags on each. Any tag-based selector therefore gets a
+fraction of the network, and *which* fraction depends on an arbitrary mapping convention we do
+not control. The name is the stable join; the relations carry the official structure.
+
+**Consequences:**
+
+- **T-028 is done and OD-7 is closed.** Both had been blocking Phase 3 content and Phase 4
+  matching.
+- **T-068 (levada corridors) changes shape** — name-and-relation selection, with a documented
+  fallback, rather than a tag filter.
+- **T-069 (tunnel portals) must cover walkable tunnels**, not just road tunnels. 108 of the 604
+  tunnel ways are levada tunnels, and those are precisely the zero-GPS case T-089 and T-090 exist
+  for.
+- **CONTEXT §5's claim about `highway=path` is corrected** in the same pass.
+- **The risk moved.** It is no longer "is there enough data" but "**is the data accurate enough**"
+  — corridor connectivity, portal-node precision, and whether the 44 PR relations are current.
+  None of that is answerable from counts. It is answerable in an afternoon by someone living on
+  the island (CONTEXT §5a), and that is the honest next step.
+- Zero cost. Dependency spend remains **$0**.

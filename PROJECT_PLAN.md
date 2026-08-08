@@ -3,7 +3,10 @@
 Implementation roadmap for the Madeira Explorer app.
 
 **Document date:** 2026-08-06
-**Status:** Pre-implementation. Phase 0 not started.
+**Updated:** 2026-08-08 — D-026/D-027/D-028 folded in; status corrected.
+**Status:** **Phase 0 not started.** Phase 1 is partly implemented and entirely unverified —
+a recorder skeleton exists in `app/` that has never been run. See TASKS.md for task-level
+status and HANDOFF.md for what that skeleton actually contains.
 
 ---
 
@@ -67,6 +70,15 @@ segments are drawn from our own local geometry rather than by recolouring tile f
 preserving OSM IDs in the tiles is a convenience, not a requirement. The new thing to prove is
 **visual alignment** between the overlay and the basemap's road rendering.
 
+### 0.2a Content feasibility — **done 2026-08-08**
+
+Surveyed OSM coverage for the whole archipelago via Overpass (T-028). **No extract was needed**,
+so this ran ahead of 0.2 rather than after it. Result: **OSM alone is sufficient and no external
+data licensing arises** (D-029) — the 44 official PR routes are already in OSM. It also corrected
+a factual error about levada tagging and produced hard scale numbers for the road graph.
+
+Reproduce with `python tools/osm-survey.py`. Findings in `docs/osm-coverage.md`.
+
 ### 0.3 Distribution sanity check
 
 Confirmed as out of scope for validation — the distribution strategy is organic sharing of
@@ -80,6 +92,7 @@ recorded as **closed by decision**, not as completed work.
 - [ ] Tile pack builds reproducibly from a script, with size recorded
 - [ ] A locally-drawn overlay segment aligns cleanly with the basemap's road rendering (D-022)
 - [x] Framework decision made and recorded — **React Native + Expo, TypeScript** (D-023)
+- [x] OSM levada coverage assessed and the data source settled — **OSM alone** (D-029, T-028)
 
 ---
 
@@ -344,7 +357,7 @@ Store-ready, privacy-clean, and usable without instruction.
 |---|---|---|---|
 | M0 | Assumptions validated | 0 | The terrain and the tiles will not surprise us |
 | M1 | It remembers | 1 | Durable, cheap, ghost-mode recording |
-| M2 | It looks like Madeira | 2 | Offline dark map renders beautifully |
+| M2 | It looks like Madeira | 2 | Offline map renders beautifully in both styles (D-026) |
 | M3 | It rewards you | 3 | Stamps and regional progress work |
 | M4 | The map fills in | 4 | Roads and levadas highlight correctly |
 | M5 | It hands you a souvenir | 5 | The shareable video exists |
@@ -368,12 +381,8 @@ An 8-hour Funchal visit is a very different app from a 7-day island trip. Curren
 design for the multi-day visitor and let day-trippers be a happy accident. If pursued later,
 it would argue for a much tighter Funchal-centric POI set.
 
-### OD-7 — Levada data source and licensing
-**Blocks:** Phase 3 content, Phase 4 matching. **Not yet decidable.**
-OSM covers levadas as `highway=path` with varying quality and completeness. Need to assess
-whether OSM alone is sufficient or whether official trail data (PR-numbered routes) must be
-reconciled in, and confirm the licensing position for anything non-OSM. This is a research
-task (T-028) before it is a decision.
+### ~~OD-7 — Levada data source and licensing~~ → **Resolved 2026-08-08**
+Moved to Resolved below. Recorded as **D-029**.
 
 ---
 
@@ -398,6 +407,16 @@ route.
 Recorded as D-002, now Accepted. Road coverage % and per-region progress remain as supporting
 detail, never as the headline. This is what makes the system degrade gracefully: the user's
 reward does not depend on map matching succeeding.
+
+### OD-7 — Levada data source and licensing → **OSM alone** (2026-08-08)
+Recorded as D-029, measured by T-028. The concern was that official PR-route data might have to
+be licensed and reconciled in. **Moot — the 44 official PR routes are already in OSM** as
+ref-carrying hiking relations. No second source, no licensing negotiation, no reconciliation
+pipeline; everything stays ODbL. The survey also corrected a factual error: levadas are *not*
+simply `highway=path` (that captures 23%), because OSM maps a levada as two parallel ways sharing
+one name — the channel and the footpath. Select by **name + relation, never by tag**. Full
+measurements in `docs/osm-coverage.md`. **The risk moved from coverage to accuracy**, which only
+fieldwork can settle.
 
 ### OD-6 — Raw trace retention policy → **Retain** (2026-08-06)
 Recorded as D-010, now Accepted. Raw fixes and sensor samples are immutable and kept for the

@@ -3,7 +3,10 @@
 System design for the Madeira Explorer app.
 
 **Document date:** 2026-08-06
-**Status:** Design. Nothing implemented.
+**Updated:** 2026-08-08 — §2 diagram corrected for D-022/D-026/D-027; status corrected.
+**Status:** Design. **Partly implemented and wholly unverified** — the storage layer (§4) and
+the recording subsystem (§2) exist in `app/src`, but no line of the app has ever executed on
+hardware. Everything from §8 onward is unbuilt.
 
 ---
 
@@ -542,7 +545,11 @@ simultaneously.** The components are proven; the integration is genuinely new wo
   of D-022** — the overlay is drawn from our own local geometry, so runtime addressing of tile
   features is not required. IDs remain useful as an internal join key only.
 - The tile pack is small enough for a hotel-WiFi download.
-- OSM levada coverage is complete and accurate enough to build on (see OD-7).
+- ~~OSM levada coverage is complete enough to build on.~~ **Answered 2026-08-08 (T-028, D-029) —
+  yes.** 3,981 ways named `Levada*`, 1,386 of them walkable, 108 levada tunnels, and 44 official
+  PR routes already in OSM. **Still unvalidated: whether it is *accurate* enough** — corridor
+  connectivity, tunnel portal-node precision, and whether the PR relations are current. Counts
+  cannot answer that; fieldwork can (T-028a). Measurements in `docs/osm-coverage.md`.
 - Batched location on real devices actually achieves the target battery figures.
 
 ### Product assumptions (accepted risk)

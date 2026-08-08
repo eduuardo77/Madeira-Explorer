@@ -115,6 +115,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-025a** Evaluate suppressing basemap road rendering entirely and drawing all roads —
       visited and unvisited — from the local overlay, which makes alignment a non-issue by
       construction ⇠ T-025
+      — ⚠ **Measured 2026-08-08 (T-028): this means rendering ~51,000 highway ways**, before any
+      splitting at intersections — not the ~5,000 implied elsewhere. D-022 names this as the
+      escape hatch for the alignment risk; it is not the cheap one it reads as. Measure before
+      committing.
 - [ ] **T-026** Record tile pack size and judge it acceptable for a hotel-WiFi download
       ⇠ T-023
 - [ ] **T-027** ~~Decision gate on T-024~~ **Removed by D-022.** The fog-of-war fallback is no
@@ -122,8 +126,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Content feasibility
 
-- [ ] **T-028** Assess OSM levada coverage and quality; decide whether official PR-route data
-      must be reconciled in, and confirm licensing (OD-7) ⇠ T-022
+- [x] **T-028** Assess OSM levada coverage and quality; decide whether official PR-route data
+      must be reconciled in, and confirm licensing (OD-7)
+      — **Done 2026-08-08 without needing T-022.** Surveyed via Overpass, so no extract was
+      required; the dependency was wrong. Reproduce with `python tools/osm-survey.py`; findings
+      in `docs/osm-coverage.md`; decision recorded as **D-029**. **OD-7 closed.**
+      — Headline: OSM alone is sufficient and no external licensing arises — the 44 official PR
+      routes are already in OSM. **Select levadas by name + relation, never by tag** — a levada
+      is two parallel ways sharing one name, and `highway=path` captures only 23% of them.
+- [ ] **T-028a** Field-verify the OSM levada data. Counts prove the data exists, not that it is
+      accurate. Walk one known levada and compare against OSM: corridor **connectivity** (a gap
+      mid-corridor breaks trailhead-to-exit crediting), tunnel **portal-node precision**, and
+      whether the PR relations are current. Fold into a Track A run — same afternoon, same
+      device. ⇠ T-018
 
 **Milestone M0** — assumptions validated ⇠ T-020, T-025, T-026, T-028
 
@@ -271,7 +286,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-061** Respect system font scaling for all map labels ⇠ T-058
 - [ ] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
 - [ ] **T-063** Verify cold start renders fully in airplane mode ⇠ T-057
-- [ ] **T-064** Performance test: recolour 5,000+ segments without dropping frames ⇠ T-059
+- [ ] **T-064** Performance test: recolour **the real graph**, not a sample ⇠ T-059
+      — **Target corrected 2026-08-08 (T-028).** The old "5,000+ segments" figure was an order of
+      magnitude low: Madeira has **~51,000 highway ways** before splitting at intersections. Test
+      against the actual island. If T-025a is adopted, all of them render every frame.
 - [ ] **T-065** Outdoor sunlight legibility test — **in Funchal, at midday, held at arm's
       length.** This is the test that decides whether D-026's light-for-use choice was right.
       Run it against both styles. ⇠ T-060
@@ -296,12 +314,25 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       "Other" — if a place fits nowhere, that is a signal about the place, not a missing row.
       — Each place also carries a `region_id`, used by the map screen rather than the passport.
       — Categories live in the content pack, never in `app/` (D-017).
+      — **This is selection, not research** (T-028): OSM already offers 569 `tourism=viewpoint`
+      nodes, 180 peaks and 79 settlements in the bbox — far more candidates than the 150–250
+      target. The work is hand-verification and editorial judgement, which is the one thing a
+      global competitor cannot buy (CONTEXT §5a).
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
-- [ ] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028
+- [ ] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028, T-028a
+      — **Select by name (`Levada*`) plus hiking-relation membership, never by a single tag**
+      (D-029). A levada is two parallel ways sharing one name: the channel (usually
+      `waterway=drain`, 2,357 ways) and the footpath beside it (usually `highway=path`, 922).
+      Use the `highway=*` ways for matching — the user walks the path, not the channel — and fall
+      back to `waterway=*` geometry where a channel is mapped but no path is.
+      — **Verify corridor connectivity.** A gap mid-corridor silently breaks trailhead-to-exit
+      crediting, which is the mechanic levadas depend on (D-009).
 - [ ] **T-069** Extract tunnel portal pairs from OSM into `content/tunnels.geojson` ⇠ T-022
+      — **Must cover walkable tunnels, not just road tunnels.** 108 of the 604 tunnel ways are
+      levada tunnels (T-028) — zero GPS, on foot, which is exactly the T-089/T-090 case.
 - [ ] **T-070** Commission or produce stamp artwork ⇠ T-066
 
 ### Mechanics
@@ -346,6 +377,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-082** Import the road/path graph into SQLite with an R-tree spatial index ⇠ T-022,
       T-030
+      — Scale, measured 2026-08-08 (T-028): **~51,000 highway ways** before splitting at
+      intersections.
+      — **Open question to settle here, not in an implementer's head: do footways belong in the
+      graph?** There are **16,066**, overwhelmingly Funchal pavements. Including them makes the
+      city a mass of pavement fragments, inflates any denominator they touch, and adds matching
+      ambiguity exactly where GPS is already multipathed by buildings. Excluding them is probably
+      right. Decide explicitly and record it.
 - [ ] **T-083** Snap-to-segment matching using heading, speed and **altitude** ⇠ T-082, T-035
 - [ ] **T-084** Hysteresis to prevent flicker between vertically stacked roads (VR1 vs ER101)
       ⇠ T-083

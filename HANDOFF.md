@@ -4,8 +4,9 @@
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added).
 **For:** a fresh Claude Code session picking this project up cold.
-**Repository state:** git repository, four commits. Planning docs plus a Phase 1 recorder
+**Repository state:** git repository, six commits. Planning docs plus a Phase 1 recorder
 skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.**
+Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
 
 ---
 
@@ -88,7 +89,29 @@ A design session, no code. Six planning docs updated plus one new file.
   claim that no code had been written.
 - **The app still has no name.** Deliberately deferred — see below.
 
-The session's most useful artefact may be the competitor teardown in `docs/design-brief.md` §6.
+### First Phase 0 result — T-028, the OSM survey
+
+Also 2026-08-08, after the design work. **`docs/osm-coverage.md`**, reproducible via
+`python tools/osm-survey.py` (counts only, no geometry, safe to re-run).
+
+- **OD-7 is closed** (D-029). No external levada data needs licensing — the 44 official PR
+  routes are already in OSM. Dependency cost stays $0.
+- **A factual error was corrected.** Levadas are *not* simply `highway=path` — that captures 23%.
+  OSM maps a levada as two parallel ways sharing one name: the channel (usually
+  `waterway=drain`) and the path beside it. **Select by name plus relation, never by tag.**
+- **108 levada tunnel ways**, where the docs said "several." Walkable, zero GPS — the T-089/T-090
+  case, and T-069 must now cover walkable tunnels.
+- **~51,000 highway ways.** T-064's "5,000+ segments" target was an order of magnitude low, and
+  T-025a — drawing *all* roads from the overlay — means rendering all 51,000, not 5,000.
+- **16,066 footways**, nearly all Funchal pavements. Whether they belong in the road graph is now
+  an explicit open question on T-082.
+- **T-066 is selection, not research** — 569 viewpoints and 180 peaks already in OSM.
+
+The risk on levadas moved from *coverage* to *accuracy*, which counts cannot settle. **T-028a**
+folds that check into a Track A field walk.
+
+The design session's most useful artefact may be the competitor teardown in
+`docs/design-brief.md` §6.
 Three of this project's decisions turn out to be visible in a shipped competitor as observed
 failures: a `0.00%` hero number (what D-002 rejected), a modal begging users not to force-quit
 (what D-005 avoids architecturally), and a 22-minute walk credited zero (the D-009 uninstall
@@ -125,7 +148,9 @@ Restated from `CONTEXT.md` §2 because misunderstanding any of them will produce
 
 ## What is already built
 
-Three commits: planning docs, the Phase 1 recorder skeleton, then a TASKS.md status update.
+Six commits: planning docs and the repository skeleton, the Phase 1 recorder skeleton, a
+TASKS.md status update, a HANDOFF.md rewrite, the 2026-08-08 design session, then the first
+Phase 0 result (T-028 OSM survey).
 
 ```
 app/
@@ -477,7 +502,7 @@ Three of the four questions raised after the first implementation session were *
 |---|---|---|
 | OD-4 | Monetisation | Deferred. Free for v1, no ads ever (would break the privacy position). |
 | OD-5 | Cruise day-trippers as a segment | Open, affects content curation only. |
-| OD-7 | Levada data source and licensing | Not yet decidable — needs the OSM coverage assessment in T-028 first. |
+| OD-7 | Levada data source and licensing | **Resolved 2026-08-08 — OSM alone** (D-029, T-028). The 44 official PR routes are already in OSM, so no licensing arises. See `docs/osm-coverage.md`. |
 | — | ~~Confirm D-022~~ | **Accepted 2026-08-08.** T-016a closed. |
 | — | Confirm D-026 / D-027 / D-028 | Provisional. D-026 needs T-025 plus an outdoor look; D-028 needs T-020 data. Neither blocks Phase 0. |
 

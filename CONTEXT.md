@@ -5,8 +5,11 @@ anything in this project, including the reasoning behind decisions that look arb
 the outside.
 
 **Document date:** 2026-08-06
-**Repository state:** Documentation only. No code, no dependencies, no build. Not a git
-repository yet.
+**Updated:** 2026-08-08 — design session (D-026, D-027, D-028); stale factual statements
+corrected under the tier-1 rule in §9.
+**Repository state:** Git repository, five commits. Planning documents plus a Phase 1 recorder
+skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.** Phase 0
+validation has not started.
 
 ---
 
@@ -260,16 +263,23 @@ with Madeira will make wrong assumptions without these.
   in many places. Nearest-segment matching confuses them constantly. Altitude (barometer, not
   GPS) is the discriminator.
 - **Levadas are the point of the island.** Irrigation canals with footpaths beside them, and
-  the defining tourist activity. They are `highway=path` in OSM, not roads — omit them and the
-  app misses what people actually came for. GPS under Laurissilva canopy is poor, and several
-  levadas run through their own tunnels. **But they are linear with no mid-route exits**,
-  which makes them the *easiest* thing to credit despite the worst signal.
+  the defining tourist activity. Omit them and the app misses what people actually came for.
+  GPS under Laurissilva canopy is poor, and levadas run through their own tunnels — **108 ways
+  are tagged both `highway` and `tunnel`**, so this is a routine case, not an exotic one.
+  **But they are linear with no mid-route exits**, which makes them the *easiest* thing to
+  credit despite the worst signal.
+  **⚠ Corrected 2026-08-08 (T-028, D-029):** an earlier version of this line said levadas *are*
+  `highway=path` in OSM. That is true of only **23%** of them. OSM maps a levada as **two
+  parallel ways sharing one name** — the channel (usually `waterway=drain`) and the footpath
+  beside it (usually `highway=path`). Select by **name plus hiking-relation membership, never by
+  a single tag.** Measurements in `docs/osm-coverage.md`.
 - **Elevation is enormously discriminating** on this island. It separates roads that overlap
   in plan view and unambiguously identifies a levada climb.
 - **Poor mobile coverage** in the north and interior — reinforcing offline-first.
 - **Rental-car dominated tourism**, with strong UK, German and Nordic markets.
-- **Porto Santo** is a separate island, ~40 minutes by air or a ferry ride. In-scope status is
-  an open question (OD-2).
+- **Porto Santo** is a separate island, ~40 minutes by air or a ferry ride. **In scope for v1**
+  (OD-2 resolved 2026-08-06, D-021) — included structurally, deprioritised editorially, and
+  hidden from the UI until the user actually goes there (D-024).
 - **Cruise-ship day-trippers** are a large segment in Funchal — an 8-hour visit is a very
   different product from a 7-day trip. Currently not designed for (OD-5).
 - **One airport** (plus Porto Santo's and the Funchal cruise terminal), which makes airport
@@ -300,8 +310,10 @@ When a matching assumption is in doubt, go and measure it.
 
 ## 6. Coding conventions
 
-**Status: proposed, not yet established.** No code exists. These are starting positions;
-revise them deliberately in Phase 1 and update this section when you do.
+**Status: partly established.** The Phase 1 recorder skeleton (`app/src/storage`,
+`app/src/recording`, `app/src/ui`) was written to these conventions, but none of it has run yet
+and nothing below has been tested against real code in anger. Treat them as working positions;
+revise them deliberately as Phase 1 is verified, and update this section when you do.
 
 ### 6.1 Structure
 
@@ -450,7 +462,7 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 | OD-4 | Monetisation | Nothing (deferred) | Deferred. Free for v1; no ads ever. |
 | OD-5 | Cruise day-trippers as a segment? | Content curation | Open, not blocking. Not designed for; happy accident if it works. |
 | OD-6 | Raw trace retention policy | Phase 1 schema | **Resolved 2026-08-06 — retain**, with a delete-all control (D-010 Accepted) |
-| OD-7 | Levada data source and licensing | Content, matching | Not yet decidable — needs the OSM coverage assessment in T-028 first |
+| OD-7 | Levada data source and licensing | ~~Content, matching~~ | **Resolved 2026-08-08 — OSM alone is sufficient** (D-029). The 44 official PR routes are already in OSM, so no external licensing arises. Select by name + relation, never by tag. See `docs/osm-coverage.md` |
 
 ### Recently closed
 
@@ -471,7 +483,10 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 - Does the locally-drawn overlay align cleanly with the basemap's road rendering? *(This is the
   new thing to prove in Phase 0.2.)*
 - Is the tile pack small enough for a hotel-WiFi download?
-- Is OSM levada coverage complete enough to build on?
+- ~~Is OSM levada coverage complete enough to build on?~~ **Answered 2026-08-08 (T-028, D-029) —
+  yes.** 3,981 named ways, 1,386 walkable, 108 levada tunnels, 44 official PR relations. The open
+  question is now **accuracy**, not coverage: corridor connectivity, portal-node precision, and
+  whether the PR relations are current. Only answerable in the field.
 - Do batched location APIs actually hit the battery targets on real devices?
 
 ### Accepted product risks
@@ -488,7 +503,9 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 
 ## 9. Keeping these documents true
 
-**These six documents are the source of truth for the project, not conversation history.**
+**These seven documents are the source of truth for the project, not conversation history.**
+The six at the repository root — README, PROJECT_PLAN, ARCHITECTURE, TASKS, DECISIONS,
+CONTEXT — plus `docs/design-brief.md`, added 2026-08-08.
 
 Conversation history does not survive across sessions or context compaction. A decision that
 lives only in a chat log is a decision that will be re-litigated in three weeks, or silently
@@ -526,6 +543,7 @@ on objection.
 | New/removed/reordered tasks, changed dependencies, completed work | TASKS.md |
 | Anything a fresh contributor would need to know | CONTEXT.md |
 | Status, goals, project structure | README.md |
+| Visual direction, map styling, screen structure, naming | `docs/design-brief.md` |
 
 Most decisions touch more than one. A decision that changes the architecture almost always
 changes tasks and their dependencies too.
@@ -560,9 +578,16 @@ because the repository must not depend on any particular tool's memory to stay c
 1. Read [DECISIONS.md](DECISIONS.md) — it explains *why*, and prevents re-litigating settled
    questions.
 2. Check [TASKS.md](TASKS.md) for the ordered checklist and dependencies.
-3. **The immediate next actions are T-013 (framework decision) and the Phase 0 validation
-   tasks.** Phase 0 is deliberately cheap and answers the questions that would be expensive to
-   get wrong later. Nothing in Phase 1 should start before T-013.
+3. **The immediate next action is Phase 0 validation** — the tile pipeline spike (T-022–T-026)
+   and the field GPS runs (T-017–T-021a). Phase 0 is deliberately cheap and answers the
+   questions that would be expensive to get wrong later. The tile spike in particular is the
+   unblock for all visual work, because the map is a MapLibre style and cannot be designed
+   against an imaginary map (`docs/design-brief.md` §1).
+4. **A development build is the other gate.** Background location cannot run in Expo Go, so no
+   Phase 1 claim is verifiable until one exists. See HANDOFF.md.
+
+*(T-013, the framework decision, was the blocking item here until 2026-08-06. It is closed —
+React Native, D-023.)*
 
 Two things that are worth starting early because they sit on the critical path and are
 outside our control: the **Google Play background-location review** (T-123) and **beta

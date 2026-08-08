@@ -52,7 +52,8 @@ everything you saw.
 
 ## Current status
 
-**Phase: Planning complete, pre-implementation.**
+**Phase: Planning complete. Phase 0 validation not started; a Phase 1 recorder skeleton exists
+and has never been run.**
 
 - ✅ Concept defined and critiqued
 - ✅ Core product risks identified and mitigated in design
@@ -106,9 +107,11 @@ decisions are made, not retrospectively. The maintenance protocol — which docu
 for which kind of change, and the conventions around stable IDs and superseding — is in
 [CONTEXT.md §9](CONTEXT.md).
 
-### Planned source layout
+### Source layout
 
-This is the intended structure once implementation begins. It is not yet created.
+The target structure. **Partly created:** `app/src/{recording,storage,ui}`, `app/plugins/` and
+the top-level `content/`, `tiles/` and `tools/` directories exist; `content/`, `tiles/` and
+`tools/` are still empty of real content. Everything else below is planned.
 
 ```
 /

@@ -275,7 +275,15 @@ with Madeira will make wrong assumptions without these.
   a single tag.** Measurements in `docs/osm-coverage.md`.
 - **Elevation is enormously discriminating** on this island. It separates roads that overlap
   in plan view and unambiguously identifies a levada climb.
-- **Poor mobile coverage** in the north and interior — reinforcing offline-first.
+- **Mobile coverage is better than this document originally claimed.** ⚠ **Corrected
+  2026-08-08 by the project lead, who lives here:** only *specific spots* are weak; the main
+  areas have genuinely good connection. The original "poor coverage in the north and interior"
+  framing was overstated.
+  **Offline-first is unaffected, but its justification changes.** It now rests on **battery**
+  (every tile fetch wakes the radio — §6.3) and **privacy** (tile requests leak position to a
+  third party — §4.7, and the thing WalkMe cannot copy), not primarily on coverage. Since the
+  whole archipelago is a 12 MB file (D-030), it stays a cheap win regardless. Do not cite poor
+  coverage as the main argument.
 - **Rental-car dominated tourism**, with strong UK, German and Nordic markets.
 - **Porto Santo** is a separate island, ~40 minutes by air or a ferry ride. **In scope for v1**
   (OD-2 resolved 2026-08-06, D-021) — included structurally, deprioritised editorially, and

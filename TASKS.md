@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **the permission flow and onboarding** (T-042/T-043/T-044/
+**Last updated:** 2026-08-10 — **settings and the erase control** (T-141/T-140/T-125), which
+turned up a real bug: erase-all had been silently broken since migration 2. Earlier the same
+day, **the permission flow and onboarding** (T-042/T-043/T-044/
 T-114/T-121, D-041): three screens, nothing gates, and no battery figure until one is measured.
 Earlier the same day, **accommodation masking** (T-103/T-104, D-040) closes the one
 genuine privacy hole in the design, behind a single export door. Earlier the same day,
@@ -481,8 +483,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       the same tile pack as T-058. Also offered as a user preference (T-140). ⇠ T-058
       — An untuned draft already exists (`dark.json`, generated alongside light). The task is
       now tuning its flavor and hillshade in `generate.mjs`, not starting one.
-- [ ] **T-140** Light/dark preference in settings (D-026). Defaults to light for in-app use;
+- [x] **T-140** Light/dark preference in settings (D-026). Defaults to light for in-app use;
       the souvenir always renders dark regardless of this setting. ⇠ T-139, T-141
+      — Done 2026-08-10 as part of T-141. The control exists and holds its choice; **wiring it
+      to the map's style is still open** — `MapScreen` hardcodes `light` until the dark style
+      is tuned (T-139).
 
 **Milestone M2 — "It looks like Madeira"** ⇠ T-063, T-064, T-065
 
@@ -764,13 +769,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
 - [ ] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
-- [ ] **T-125** "Delete all my data" control ⇠ T-030, T-141
+- [x] **T-125** "Delete all my data" control ⇠ T-030, T-141
       — **Last item in settings, in its own section, red, with an icon.** Findable, not
       fat-fingerable. Requires a second confirmation step.
+      — Done 2026-08-10. Last section, red, with an icon, and **two deliberate steps**: the
+      settings row opens a full screen that states the consequence, and the destructive button
+      lives there. An alert was rejected — too small to explain that there is genuinely no
+      restore, and too easy to dismiss by reflex.
+      — ⚠ **Fixed a real bug while wiring this: erase-all was broken.** `deleteAllUserData`
+      never learned about `stamp_award` (migration 2). With `foreign_keys = ON` and no cascade,
+      `DELETE FROM trip` aborts the whole transaction on a foreign-key violation — so nothing
+      was deleted at all, for exactly the users who had something to erase.
+      `deleteAllUserData.test.ts` now derives the child tables from the migrations and fails if
+      any is missing or ordered after `trip`. Verified by reintroducing the bug.
       — Copy must be honest about consequences: there is no cloud, no account and no restore
       (D-001). Deleting is permanent and takes the whole trip with it. **Do not use developer
       idiom** such as "Danger Zone" for the section header — name it for what it does.
-- [ ] **T-141** Settings screen (`docs/design-brief.md` §5) ⇠ T-042
+- [x] **T-141** Settings screen (`docs/design-brief.md` §5) ⇠ T-042
+      — Done 2026-08-10. Five sections in §5's order — Recording, Appearance, Map, About,
+      Erase — each with a header and a plain-English footnote, which is what §5 says lets the
+      screen grow without becoming hostile. The gear on the primary screen now opens it.
+      — Light/dark is two labelled buttons rather than a switch (**T-140** done with it): a
+      switch needs the user to know which state is which, and D-015 forbids meaning carried by
+      anything but words.
       — Reached by the **gear, top-left** — not a hamburger. Three lines promises a drawer of
       destinations; a gear reads as "settings" to someone not fluent in app idiom (D-015,
       CONTEXT §6.5).

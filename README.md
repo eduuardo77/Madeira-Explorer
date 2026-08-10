@@ -81,6 +81,8 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ The hero number and its breakdown (T-072a/T-073), with locked regions excluded from both
   halves of the total (D-024)
 - ✅ Day-1 health check (T-049, D-011) — the answer to recording dying silently on day 2
+- ✅ **Settings and the erase control** (T-141/T-140/T-125) — five explained sections, the
+  destructive action last behind two deliberate steps
 - ✅ **Onboarding and the permission flow** (T-042/T-043/T-044/T-114/T-121, D-041,
   *Provisional*) — plain English, nothing gates on a grant, and the battery claim is omitted
   rather than guessed until it is measured

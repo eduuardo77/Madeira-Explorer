@@ -93,9 +93,18 @@ export async function deleteAllUserData(): Promise<void> {
   const db = await getDatabase();
   await db.withTransactionAsync(async () => {
     // Order matters: children before parents, because foreign_keys is ON.
+    //
+    // ⚠ EVERY TABLE THAT REFERENCES `trip` MUST BE LISTED ABOVE IT. A missing
+    // one does not silently leave rows behind — it aborts the whole
+    // transaction on a foreign-key violation, so nothing is deleted at all.
+    // `stamp_award` was added in migration 2 and missed here, which broke
+    // erase-all outright for any user who had earned a stamp: precisely the
+    // users who have something to erase. Add new child tables here in the
+    // same commit that creates them.
     await db.execAsync('DELETE FROM raw_fix;');
     await db.execAsync('DELETE FROM sensor_sample;');
     await db.execAsync('DELETE FROM geofence_event;');
+    await db.execAsync('DELETE FROM stamp_award;');
     await db.execAsync('DELETE FROM recording_event;');
     await db.execAsync('DELETE FROM trip;');
     await db.execAsync('DELETE FROM app_state;');

@@ -34,6 +34,7 @@ import OnboardingView, {
   type OnboardingScreen,
 } from './src/onboarding/OnboardingView';
 import PassportView from './src/ui/PassportView';
+import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from './src/ui/theme';
 
@@ -106,12 +107,14 @@ type Screen =
   | 'passport'
   | 'primary'
   | 'primary-while-using'
+  | 'settings'
   | `onboarding:${OnboardingScreen}`;
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
+  { id: 'settings', label: 'Settings (T-141/T-125)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
   { id: 'onboarding:notifications', label: 'Notifications ask' },
@@ -183,6 +186,18 @@ export default function DesignWorkbench() {
             />
           ) : screen === 'passport' ? (
             <PassportView progress={progress} awards={awards} />
+          ) : screen === 'settings' ? (
+            <SettingsView
+              permission="while_using"
+              mapStyle="light"
+              mapPackBytes={19_100_000}
+              onChangeMapStyle={() => undefined}
+              onOpenSystemSettings={() => undefined}
+              onOpenPrivacyPolicy={() => undefined}
+              onOpenDebug={() => undefined}
+              onEraseRequested={() => undefined}
+              onClose={() => undefined}
+            />
           ) : (
             <View style={styles.mapStandIn}>
               {/* The map cannot render here — the native renderer has no web

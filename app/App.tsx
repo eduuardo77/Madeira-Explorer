@@ -12,6 +12,7 @@ import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
+import SettingsScreen from './src/ui/SettingsScreen';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
 
 /**
@@ -24,7 +25,9 @@ import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
  * (CONTEXT §6.4).
  */
 export default function App() {
-  const [screen, setScreen] = useState<'map' | 'passport' | 'debug'>('map');
+  const [screen, setScreen] = useState<
+    'map' | 'passport' | 'settings' | 'debug'
+  >('map');
   /** null until checked; false once onboarding is behind us. */
   const [onboarding, setOnboarding] = useState<boolean | null>(null);
   /** The Always upgrade or downgrade prompt, when one is due (T-043, T-044). */
@@ -97,9 +100,17 @@ export default function App() {
     <View style={styles.root}>
       <StatusBar style="light" />
       {screen === 'map' ? (
-        <MapScreen onOpenPassport={() => setScreen('passport')} />
+        <MapScreen
+          onOpenPassport={() => setScreen('passport')}
+          onOpenSettings={() => setScreen('settings')}
+        />
       ) : screen === 'passport' ? (
         <PassportScreen onClose={() => setScreen('map')} />
+      ) : screen === 'settings' ? (
+        <SettingsScreen
+          onClose={() => setScreen('map')}
+          onOpenDebug={() => setScreen('debug')}
+        />
       ) : (
         <DebugScreen />
       )}

@@ -234,6 +234,8 @@ app/
     │   ├── PrimaryOverlay.tsx        T-075, the three controls over the map
     │   ├── DebugScreen.tsx           T-050, the instrument panel
     │   └── theme.ts                  D-015 encoded as values
+    ├── ui/SettingsView.tsx           T-141 — five sections, erase last (design brief §5)
+    ├── ui/SettingsScreen.tsx         T-125 — the two-step erase
     ├── onboarding/                   T-042/T-114/T-121. The hardest permission (D-041).
     │   ├── permissionPolicy.ts       pure: what to ask, and when
     │   ├── permissionPolicy.test.ts  17 tests, incl. "no invented battery figure"
@@ -581,6 +583,13 @@ When a matching threshold, geofence radius or battery figure is in doubt, the ri
 ## Things that are easy to get wrong
 
 Collected because each one was reasoned about carefully and would be expensive to rediscover.
+
+**`deleteAllUserData` must list every table that references `trip`.** With `foreign_keys = ON`
+and no `ON DELETE CASCADE`, a missing child table does not leave stray rows — it aborts the
+whole transaction, so *nothing* is deleted. `stamp_award` was missed when migration 2 added it
+and erase-all was broken for every user with a stamp until 2026-08-10.
+`deleteAllUserData.test.ts` now derives the list from the migrations and fails if one is
+missing. Add new child tables to both in the same commit.
 
 **`setFeatureState` does not work reliably on MapLibre Native mobile.** It is a GL JS (web) API.
 Do not design around it. Data-driven style *expressions* are fine; only runtime per-feature

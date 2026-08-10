@@ -1,10 +1,11 @@
 /**
- * The map (T-056), with the recorded trace drawn over it (T-059).
+ * The primary screen (T-075): the map (T-056) with the recorded trace over it
+ * (T-059) and the three controls (`PrimaryOverlay`).
  *
- * This is not yet the primary screen of `docs/design-brief.md` §3 — no gear,
- * no stamp button (those are T-075, and they need content to count). It is
- * the map itself: offline basemap, shaded terrain, and the user's own trace,
- * which after D-032 is the whole visual product of v1.
+ * This is `docs/design-brief.md` §3 in full — gear top-left, stamp button
+ * bottom-right carrying the hero number, and the conditional start/stop for
+ * users without Always. The map itself is offline basemap, shaded terrain and
+ * the user's own trace, which after D-032 is the whole visual product of v1.
  *
  * Everything on this screen comes from files copied out of the app binary by
  * `mapAssets.ts`. Nothing here talks to a network, ever (D-001).
@@ -59,8 +60,10 @@ const EMPTY_PROGRESS: TripProgress = {
 
 export default function MapScreen({
   onOpenPassport,
+  onOpenSettings,
 }: {
   onOpenPassport: () => void;
+  onOpenSettings: () => void;
 }) {
   const [styleJson, setStyleJson] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -164,60 +167,58 @@ export default function MapScreen({
   return (
     <View style={styles.map}>
       <MapLibreMap
-      style={styles.map}
-      mapStyle={styleJson}
-      // The map is the product; the chrome is not (design brief §3). The
-      // renderer's own UI stays off — attribution is presented on the About
-      // screen (T-124) instead, which the licence permits for a mobile app.
-      attribution={false}
-      logo={false}
-      compass={false}
-    >
-      <Camera
-        initialViewState={{ bounds: [WEST, SOUTH, EAST, NORTH] }}
-        // Panning may not leave the archipelago: there is nothing outside it
-        // but empty ocean tiles, and "where did the island go" is not a
-        // support conversation worth having (CONTEXT §3, radical simplicity).
-        maxBounds={[WEST - 0.4, SOUTH - 0.3, EAST + 0.4, NORTH + 0.3]}
-        minZoom={7}
-        maxZoom={16}
-      />
+        style={styles.map}
+        mapStyle={styleJson}
+        // The map is the product; the chrome is not (design brief §3). The
+        // renderer's own UI stays off — attribution is presented on the About
+        // screen (T-124) instead, which the licence permits for a mobile app.
+        attribution={false}
+        logo={false}
+        compass={false}
+      >
+        <Camera
+          initialViewState={{ bounds: [WEST, SOUTH, EAST, NORTH] }}
+          // Panning may not leave the archipelago: there is nothing outside it
+          // but empty ocean tiles, and "where did the island go" is not a
+          // support conversation worth having (CONTEXT §3, radical simplicity).
+          maxBounds={[WEST - 0.4, SOUTH - 0.3, EAST + 0.4, NORTH + 0.3]}
+          minZoom={7}
+          maxZoom={16}
+        />
 
-      {/* The trace: the one saturated, heavy thing on the map (D-032,
-          design brief §2.4 — visited is darker AND heavier in the light
-          style). Two layers, one line: a pale casing under a strong core
-          keeps it legible over both terrain shadow and pale roads. */}
-      <GeoJSONSource id="trace" data={trace}>
-        <Layer
-          type="line"
-          id="trace_casing"
-          layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-          paint={{
-            'line-color': '#ffffff',
-            'line-opacity': 0.55,
-            'line-width': 7,
-          }}
-        />
-        <Layer
-          type="line"
-          id="trace_line"
-          layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-          paint={{
-            'line-color': '#c2402a',
-            'line-width': 3.5,
-          }}
-        />
-      </GeoJSONSource>
-      </MapLibreMap>
+        {/* The trace: the one saturated, heavy thing on the map (D-032,
+            design brief §2.4 — visited is darker AND heavier in the light
+            style). Two layers, one line: a pale casing under a strong core
+            keeps it legible over both terrain shadow and pale roads. */}
+        <GeoJSONSource id="trace" data={trace}>
+          <Layer
+            type="line"
+            id="trace_casing"
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            paint={{
+              'line-color': '#ffffff',
+              'line-opacity': 0.55,
+              'line-width': 7,
+            }}
+          />
+          <Layer
+            type="line"
+            id="trace_line"
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            paint={{
+              'line-color': '#c2402a',
+              'line-width': 3.5,
+            }}
+          />
+        </GeoJSONSource>
+        </MapLibreMap>
 
       <PrimaryOverlay
         progress={progress}
         showRecordingControl={needsRecordingControl}
         isRecording={isRecording}
         onOpenPassport={onOpenPassport}
-        // Settings is T-114/T-140. Until it exists the gear does nothing
-        // rather than pretending to.
-        onOpenSettings={() => undefined}
+        onOpenSettings={onOpenSettings}
         onToggleRecording={toggleRecording}
       />
     </View>

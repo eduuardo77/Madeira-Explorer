@@ -1550,7 +1550,17 @@ permitted but unused; keeping the door open costs nothing. *Play Asset Delivery 
 store-specific machinery solving a size problem we do not have.
 
 **Consequences:** app updates are the only content-update channel (already true of the POI
-pack, D-034). The backup exclusion moved with the implementation: Android excludes `map/`
-(the plugin and `mapAssets.ts` must keep that path in step). ⚠ **iOS backup exclusion is now
-the open half of T-032** — the copied packs land in the document directory, which iCloud
-backs up unless flagged; ~19 MB of a user's backup wasted on regenerable data until fixed.
+pack, D-034).
+
+**Amended the same day — the copies live in the CACHE directory.** The first implementation put
+them in the document directory, which would have required two platform-specific backup
+exclusions (an iCloud attribute on iOS, an XML rule on Android) kept in step with the code
+forever. Both platforms exclude the cache directory from backup by construction, so the 19 MB
+cannot compete with the user's trip history for backup space (ARCHITECTURE §4a) without anyone
+having to remember a rule.
+
+The trade — either OS may purge the files, and a user may clear them from settings — costs
+nothing here and is self-healing: the source is the app binary, so the next launch copies them
+again, with no network, in airplane mode, up a levada. Regenerable data in the regenerable
+place. This closes what was briefly flagged as the open iOS half of T-032; the SQLite database
+stays in the document directory, where it is correctly backed up.

@@ -412,6 +412,12 @@ must stay readable.** Full direction and the primary-screen structure are in
   suite**. Every matching change runs against them.
 - Real-device testing is mandatory for anything touching recording. Simulators do not
   reproduce OEM battery killers, force-quit relaunch behaviour, or barometer noise.
+  **This rule survived contact with reality on 2026-08-10** and is worth restating precisely,
+  because there is no Android device on the project and an emulator is doing the day-to-day
+  looking (`docs/dev-build.md`). The emulator is legitimate for *rendering, storage, UI,
+  permissions and replayed-route logic* — and worthless for battery, background survival and
+  GPS realism. Never let a green result in the emulator close a task that names a battery
+  figure or a survival claim.
 - Battery measurements are part of the acceptance criteria for Phase 1, not an afterthought.
 
 ---

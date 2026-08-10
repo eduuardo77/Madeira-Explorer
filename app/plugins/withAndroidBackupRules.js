@@ -39,11 +39,11 @@ const BACKUP_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
     <!-- The user's trip history. Small, and irreplaceable. -->
     <include domain="file" path="SQLite/" />
 
-    <!-- The map: tile packs and glyphs, copied out of the app binary by
-         app/src/map/mapAssets.ts. KEEP THIS PATH IN STEP WITH THAT FILE.
-         Tens of MB, identical for every user, re-obtainable. Including it can
-         blow the auto-backup size cap and fail the whole backup. -->
-    <exclude domain="file" path="map/" />
+    <!-- Nothing to exclude. The map's tile packs and glyphs live in the CACHE
+         directory (app/src/map/mapAssets.ts), which Android never backs up —
+         so the 19 MB that could blow the auto-backup cap, and take the user's
+         trip history down with it, is out of scope by construction rather than
+         by a rule somebody has to remember to maintain. -->
 </full-backup-content>
 `;
 
@@ -53,11 +53,9 @@ const DATA_EXTRACTION_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
         <include domain="file" path="SQLite/" />
-        <exclude domain="file" path="map/" />
     </cloud-backup>
     <device-transfer>
         <include domain="file" path="SQLite/" />
-        <exclude domain="file" path="map/" />
     </device-transfer>
 </data-extraction-rules>
 `;

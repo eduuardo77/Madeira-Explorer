@@ -26,10 +26,23 @@
  * revision starts clean, and stale revisions are deleted. Bump the revision
  * whenever any bundled map file changes.
  *
- * Backup note (ARCHITECTURE §4a): everything this module writes is
- * regenerable from the app binary, and the Android backup rules exclude the
- * whole directory by pattern — the tile pack must never crowd the user's
- * trip history out of the backup quota.
+ * WHY THE CACHE DIRECTORY AND NOT THE DOCUMENT DIRECTORY
+ * -----------------------------------------------------
+ * Because of backups (ARCHITECTURE §4a). 19 MB of regenerable tiles must never
+ * compete with the user's trip history for backup space — Android's auto-backup
+ * cap can be blown by the pack alone, and exceeding it can fail the *entire*
+ * backup, losing the one thing that cannot be recovered (D-010).
+ *
+ * The document directory would need two different platform-specific exclusions
+ * to achieve that (an iCloud "do not back up" attribute on iOS, an XML rule on
+ * Android) which must then be kept in step with this file forever. The cache
+ * directory is excluded from backup by both platforms *by construction*.
+ *
+ * The trade is that either OS may purge these files, and a user may clear them
+ * from system settings. That is harmless here and self-healing: the source is
+ * the app binary, which is always present, so the next call simply copies them
+ * again — no network, works up a levada in airplane mode. Regenerable data in
+ * the regenerable place.
  */
 
 import { Asset } from 'expo-asset';
@@ -111,7 +124,7 @@ export async function prepareMapAssets(): Promise<MapAssetUris> {
     return prepared;
   }
 
-  const mapRoot = new Directory(Paths.document, 'map');
+  const mapRoot = new Directory(Paths.cache, 'map');
   const revisionDir = new Directory(mapRoot, `v${MAP_CONTENT_REVISION}`);
 
   // A previous revision's files are dead weight the moment this one exists;

@@ -208,9 +208,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       template). **Dev builds not yet created** — needs an EAS account, or a local toolchain
       (no JDK on the dev machine, and iOS needs a Mac). This is what still blocks the task.
       — **`app/eas.json` written 2026-08-10**, with a development profile that produces an
-      installable APK. The remaining steps need an Expo account and are therefore the project
-      lead's: the exact runbook, and what to check first once it runs, is **`docs/dev-build.md`**.
-      Android alone is enough to unblock everything except the iOS-specific claims.
+      installable APK. Runbook: **`docs/dev-build.md`**.
+      — ⚠ **Corrected 2026-08-10: there is no Android device.** iPhone 15, Windows, no Mac. An
+      iPhone dev build needs the Apple Developer Program ($99/yr); a free Apple ID requires
+      Xcode, which requires a Mac. Three paths in `docs/dev-build.md`: the free emulator
+      (T-029b) now, a cheap used Android (already required by T-021a) next, the Apple
+      membership when approaching release.
+- [ ] **T-029b** Stand up the portable Android emulator so the app can be *seen*
+      — `bash tools/fetch-android-emulator.sh` (~2.5 GB into gitignored `tools/android-sdk/`),
+      then `run-emulator.sh` and `install-apk.sh` with an EAS-built APK. Deliberately no local
+      native toolchain: EAS compiles in the cloud, the emulator only runs the result.
+      — Settles T-063 (offline cold start), the migrations, the permission dialogs, and — via
+      GPX route replay — the recorder end-to-end including T-034 and T-076's reshuffle.
+      — ⚠ Settles **nothing** about battery, OEM killers, force-quit relaunch or iOS.
+      CONTEXT §6.6 is unchanged. ⇠ T-029
 - [x] **T-030** Implement the SQLite schema (raw_fix, sensor_sample, geofence_event, trip)
       with WAL mode ⇠ T-029, T-016
       — Also `recording_event` (gap honesty) and `app_state`. Migration runner; UPDATE-blocking
@@ -353,8 +364,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
       — **Resolved 2026-08-10: bundled (D-036).** 19.1 MB rides in the binary; first launch
       copies it out. The download path is not built; the decision names the revisit trigger.
-      — ⚠ The **iOS half of T-032** (exclude the copied packs from iCloud backup) is now live
-      and unhandled — see D-036 consequences.
+      — The copies live in the **cache directory**, which both platforms exclude from backup by
+      construction, so no per-platform exclusion rule is needed and none can rot (D-036
+      amendment). Purging is self-healing — the source is the binary.
 - [x] **T-058** Author the **light** base style — the everyday in-app map (D-026). Start from an
       existing permissively-licensed style (Protomaps basemap theme, or CARTO Positron over an
       OpenMapTiles-schema build) and **subtract**: strip labels, mute roads, quiet the water and

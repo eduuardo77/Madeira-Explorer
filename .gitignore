@@ -53,3 +53,7 @@ Thumbs.db
 
 # NOTE: tools/fixtures/ is deliberately NOT ignored.
 # The Phase 0 field traces are the permanent matching regression suite (T-021).
+
+# Portable Android emulator (tools/fetch-android-emulator.sh). ~2.5 GB,
+# reproducible from the script, never committed.
+tools/android-sdk/

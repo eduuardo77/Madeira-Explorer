@@ -96,8 +96,9 @@ project lead, but not yet validated against anything real:
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
 - **D-036** *(2026-08-10)* — the map is bundled in the binary, not downloaded on first run.
-  19.1 MB rides along; first launch copies it to device storage. ⚠ Opens the iOS half of
-  T-032: exclude the copies from iCloud backup.
+  19.1 MB rides along; first launch copies it into the **cache** directory, which both
+  platforms keep out of backups by construction — so regenerable tiles can never crowd out the
+  irreplaceable trip history (ARCHITECTURE §4a).
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 
@@ -311,10 +312,27 @@ Background location cannot run in Expo Go, so nothing in Phase 1 can be verified
 No JDK-based local Android build and no Mac, so EAS Build is the realistic path for both
 platforms. **Nothing below this line can be tested until this exists.**
 
-`app/eas.json` is written and committed; what remains needs an Expo account. **The runbook is
-`docs/dev-build.md`** — five commands, plus an ordered list of what to check first once it runs
-and which of those checks settles which open question. Android alone unblocks everything except
-the iOS-specific claims, and it needs no Apple Developer membership.
+`app/eas.json` is written and committed. **The runbook is `docs/dev-build.md`.**
+
+⚠ **Corrected 2026-08-10, and the correction matters.** An earlier version of that document
+assumed an Android phone. There is none: the project lead has an **iPhone 15**, a Windows PC and
+no Mac. An iPhone development build therefore requires the **Apple Developer Program at
+$99/year** — a free Apple ID can only sign through Xcode, which needs a Mac.
+
+Three paths, in the order they should happen:
+
+- **A. The emulator, free, today.** `bash tools/fetch-android-emulator.sh` puts a portable
+  Android emulator in `tools/android-sdk/` (~2.5 GB, gitignored, nothing system-wide). EAS
+  builds the APK in the cloud; the emulator runs it. **This clears the largest block of
+  unverified work** — the map rendering offline, migrations, permission dialogs, and, via GPX
+  route replay, the whole recorder including the sampling gate and geofence reshuffles.
+  It cannot touch battery, OEM killers, force-quit relaunch or anything iOS.
+- **B. A cheap used Android, ~€50–100 once.** Already required by T-021a — iPhone-only fixtures
+  are best-case and risk under-crediting exactly the hardware most tourists carry. Cheaper than
+  the Apple fee, and the only source of real battery and background-survival numbers
+  (T-051–T-055).
+- **C. The iPhone, $99/year.** Needed for release anyway (T-137), and the only way to test the
+  platform D-005 and D-033 actually depend on. Not urgent.
 
 **2. ~~T-039 — the dynamic geofence manager.~~ Done 2026-08-10 (D-033).** Content-agnostic and
 unit-tested, exactly as intended. Unproven on hardware, like everything else here.

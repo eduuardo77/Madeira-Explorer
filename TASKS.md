@@ -3,8 +3,11 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — T-039 the dynamic geofence manager (D-033), T-040 the content
-pack (D-034) and T-034 the sampling gate are built. **T-066 is unblocked**:
+**Last updated:** 2026-08-10 — the map exists: T-058 light style (generated, D-030 schema) and
+T-058a shaded terrain (D-035, 6.5 MB elevation pack — total pack 19.1 MB) are built and
+iterated on screen in the repo viewer; a draft dark style rides along for T-139. Earlier the
+same day: T-039 the dynamic geofence manager (D-033), T-040 the content pack (D-034) and T-034
+the sampling gate. **T-066 is unblocked**:
 `content/pois.json` is the file to fill in and `node tools/validate-content.mjs` checks it.
 `app/eas.json` and `docs/dev-build.md` reduce the development-build blocker to steps only the
 project lead can take. The project also has a unit-test runner for the first time
@@ -341,15 +344,27 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
 - [ ] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
-- [ ] **T-058** Author the **light** base style — the everyday in-app map (D-026). Start from an
+- [x] **T-058** Author the **light** base style — the everyday in-app map (D-026). Start from an
       existing permissively-licensed style (Protomaps basemap theme, or CARTO Positron over an
       OpenMapTiles-schema build) and **subtract**: strip labels, mute roads, quiet the water and
       landcover so the trace can dominate. **Do not author from a blank file.** Verify the
       starting style's licence. Minimal labels — city names and major cultural landmarks only.
       ⇠ T-056
-- [ ] **T-058a** Add **shaded terrain** as the figure-ground element instead of building
+      — Done 2026-08-10, as a **generator**: `tiles/style/generate.mjs` derives `light.json`
+      (and a draft `dark.json`, T-139) from `@protomaps/basemaps` (BSD-3-Clause, licence
+      verified). Every choice is either a flavor colour override or an entry in the
+      subtraction list, each with its reason. **Never hand-edit the JSON.** Method and preview
+      instructions: `docs/map-style.md`.
+      — Iterated on screen against the real pack at four test locations. ⚠ **Not the real
+      test** — that is T-065, outdoors. Glyphs are still remote (viewer-only); bundling them is
+      T-056/T-057 and gates shipping.
+- [x] **T-058a** Add **shaded terrain** as the figure-ground element instead of building
       footprints (D-026). Madeira's relief is the island's defining feature and OSM building
       coverage is patchy outside Funchal. Record the tile-size cost against T-026. ⇠ T-058, T-023
+      — Done 2026-08-10: **D-035** — raw terrarium elevation (z0–12, **6.5 MB**; total pack now
+      **19.1 MB**), shaded at render time so one pack serves both styles.
+      `python tiles/pipeline/build-terrain.py` rebuilds it. ⚠ Hillshade on
+      `maplibre-react-native` is unverified on-device (T-056).
 - [ ] **T-059** **v1: draw the recorded raw trace** as a line layer from `raw_fix` (D-032) —
       not matched segments. Simplify for rendering; keep the stored fixes untouched (D-010).
       ⇠ T-058, T-030
@@ -374,6 +389,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-139** Author the **dark** style variant for the souvenir renderer (D-026) — the
       fog-of-war look: dark ground, unvisited legible mid-grey, visited bright and heavy. Shares
       the same tile pack as T-058. Also offered as a user preference (T-140). ⇠ T-058
+      — An untuned draft already exists (`dark.json`, generated alongside light). The task is
+      now tuning its flavor and hillshade in `generate.mjs`, not starting one.
 - [ ] **T-140** Light/dark preference in settings (D-026). Defaults to light for in-app use;
       the souvenir always renders dark regardless of this setting. ⇠ T-139, T-141
 

@@ -1472,3 +1472,56 @@ cannot start until the file it produces has a defined shape.
   weeks T-066 takes. **T-117 must confirm it is inert in the release build.**
 - `app/src/content/` is a new directory, not in README's original layout. It holds the reader,
   never the content.
+
+---
+
+## D-035 — Terrain ships as raw elevation, shaded at render time. AWS Terrain Tiles, z12 ceiling.
+
+**Status:** Provisional — implemented 2026-08-10 (T-058a). Confirmed or killed by two events:
+hillshade rendering correctly in `maplibre-react-native` on a real device (T-056), and the
+outdoor look test (T-065).
+
+**Decision:** the terrain D-026 asks for is shipped as a **second PMTiles pack of raw
+elevation** (`madeira-terrain.pmtiles`, terrarium-encoded PNGs, z0–12, 6.5 MB), built by
+`tiles/pipeline/build-terrain.py` from the AWS Open Data *Terrain Tiles* set (underlying DEM
+for Madeira: NASA SRTM, public domain). Shading is computed **at render time** by MapLibre's
+`hillshade` layer, styled per-style in `tiles/style/generate.mjs`.
+
+**Why render-time shading rather than a baked hillshade image:**
+
+- **One pack serves both styles.** D-026 requires a light and a dark map from one tile pack.
+  Baked shading is one style's shadows frozen into pixels; raw elevation lets the light style
+  shade warm-on-paper and the dark style shade moonlit, from the same 6.5 MB.
+- **Restyling stays a style-file edit.** Exaggeration, light direction and shadow colour are
+  paint properties, tunable in the viewer in seconds. A baked raster puts every such change
+  through a rebuild.
+- **It keeps a door open** — the same raster-dem source can drive 3D terrain or slope shading
+  in the souvenir renderer later without new data.
+
+**Why z12 and not deeper:** the DEM under it is ~30 m/pixel, which z12 already slightly
+outresolves. z13 would quadruple the tile count to interpolate the same information. MapLibre
+overzooms the DEM past z12, so shading never disappears — ridges just stop gaining detail.
+Measured cost of going deeper anyway: z13 ≈ +4× tiles for no new information.
+
+**Alternatives rejected:**
+
+- *Prebaked hillshade raster tiles.* Rejected for the reasons above; also slightly larger at
+  comparable quality, because shading compresses worse than smooth elevation gradients.
+- *Vector contour lines.* A different aesthetic (topo map), higher visual noise — competes
+  with the trace, which is the one thing D-032 says the map must not do.
+- *EU-DEM / Copernicus as the source.* Comparable data for Madeira but carries an attribution
+  obligation; SRTM is public domain and the AWS tile set asks only a courtesy credit, which
+  ships in the style's source attribution.
+- *No terrain.* Was the status quo, and the viewer made the case against it plainly: Rabaçal —
+  400 m ravines — rendered as flat pale green. D-026 called terrain the figure-ground element;
+  the flat map confirmed it.
+
+**Costs, recorded against T-026:** basemap 12.6 MB + terrain 6.5 MB = **19.1 MB total pack**.
+Still comfortably a hotel-WiFi download; T-057's bundle-vs-download question stays open with
+this number.
+
+**One platform lesson, written down because it cost twenty minutes:** a `raster-dem` source
+covering a partial-world archive **must declare `bounds`**. Without it the renderer requests
+DEM tiles beyond the archive edge, receives empty responses, and fails neighbour
+reconciliation with a `dem dimension mismatch` error. With bounds declared the requests are
+never made. The vector source gets bounds too — there it is merely efficiency.

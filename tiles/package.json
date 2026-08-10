@@ -1,0 +1,9 @@
+{
+  "name": "madeira-tiles",
+  "private": true,
+  "description": "Build-time tooling for the tile pack and map styles. Never shipped.",
+  "type": "module",
+  "dependencies": {
+    "@protomaps/basemaps": "5.7.2"
+  }
+}

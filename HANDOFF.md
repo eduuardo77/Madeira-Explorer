@@ -3,8 +3,9 @@
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
-building the geofence manager, the content pack and the sampling gate (T-039/D-033,
-T-040/D-034, T-034) and writing `docs/dev-build.md`.
+building the geofence manager, the content pack, the sampling gate (T-039/D-033, T-040/D-034,
+T-034, `docs/dev-build.md`) and then the map itself — light style and shaded terrain
+(T-058/T-058a, D-035, `docs/map-style.md`).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
@@ -52,7 +53,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 | Map | `@maplibre/maplibre-react-native` v11, offline PMTiles/MBTiles — *not yet installed* |
 | Location | `expo-location` (free) behind a swappable `LocationProvider` |
 | Storage | SQLite, WAL. *(R-tree and road graph are v2 — D-032)* |
-| Tiles | **Built.** 12 MB, Protomaps schema, `bash tiles/pipeline/build.sh` (D-030) |
+| Tiles | **Built.** 12.6 MB basemap (D-030) + 6.5 MB terrain (D-035) = 19.1 MB. Styles generated: `tiles/style/generate.mjs` |
 | Backend | **None.** Zero servers, zero accounts, zero analytics. |
 | Dependency cost | **$0** for the app. Track A needs Sensor Logger's paid tier (tooling, not a dependency). |
 | Unavoidable spend | Apple $99/yr, Google Play $25 once — at launch, not now |
@@ -90,6 +91,9 @@ project lead, but not yet validated against anything real:
   validated by the same parser at runtime and in `tools/validate-content.mjs`. A place owns one
   or more geofences, so a levada can carry a start and an end. **T-066 is what will find its
   gaps** — the format has never met a real list.
+- **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
+  time so one pack serves both styles. Confirmed or killed by hillshade rendering on
+  `maplibre-react-native` (T-056) and the outdoor look test (T-065).
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 
@@ -327,10 +331,15 @@ The tooling was finished 2026-08-10 (T-040, D-034), so the task is now mechanica
 
 **This is on the critical path and it is not code.**
 
-**4. T-058 / T-058a — the map's appearance.** The tile pack is built (12 MB, `bash
-tiles/pipeline/build.sh`). Start from a Protomaps theme and **subtract** (D-026). Then add
-**terrain** — the single biggest determinant of whether this map looks good, and the last real
-unknown in the tile work. **This is where the perfectionism belongs** (D-032).
+**4. ~~T-058 / T-058a — the map's appearance.~~ Done 2026-08-10 (D-035).** The styles are
+*generated* — `tiles/style/generate.mjs` derives both from the official Protomaps theme
+(BSD-3-Clause) and every choice lives in the generator with its reason. Terrain is a second
+6.5 MB elevation pack (`python tiles/pipeline/build-terrain.py`), shaded at render time so one
+pack serves both styles. Iterated on screen against the real island; Rabaçal finally has its
+ravines. **What remains is where it always was: T-065, outdoors, in the sun** — plus bundling
+glyphs locally (T-056/T-057; the generated styles use hosted fonts, which must not ship, D-001)
+and verifying hillshade renders on `maplibre-react-native` (T-056). Method:
+`docs/map-style.md`.
 
 **5. T-042 / T-114 — permission flow and onboarding.** Sits on the critical path via the slow,
 external Google Play review (T-123). Start it early.

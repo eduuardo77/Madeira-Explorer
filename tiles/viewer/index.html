@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Madeira tile spike — T-025</title>
+<title>Madeira map workbench</title>
 <!--
   T-025 test bed. NOT app code, and deliberately not React Native.
 
@@ -35,14 +35,18 @@
 
 <div id="map"></div>
 <div id="hud">
-  <div><b>T-025</b> overlay alignment test</div>
+  <div><b>Madeira map workbench</b> — T-025 alignment, T-058 styling</div>
   <div id="status">loading…</div>
   <button id="toggle">toggle overlay</button>
   <button id="basemap-roads">toggle basemap roads</button>
 </div>
 
 <script>
-const STYLE = "../style/light.json";
+// ?style=light (default) | dark | spike-t025 — the T-025 diagnostic style
+// lives on as spike-t025.json; light/dark are the generated shipping styles
+// (tiles/style/generate.mjs, T-058/T-139).
+const STYLE_NAME = new URLSearchParams(location.search).get("style") || "light";
+const STYLE = `../style/${STYLE_NAME}.json`;
 
 const map = new maplibregl.Map({
   container: "map",
@@ -50,7 +54,11 @@ const map = new maplibregl.Map({
   center: [-16.92, 32.74],   // central Madeira
   zoom: 10,
   hash: true,
-  // Terrain (D-026) is not in this pack yet; this is a flat map on purpose.
+  // Compact ⓘ attribution, mirroring what the app will do. The OSM credit is
+  // the one licence obligation we carry (ODbL, D-030) and stays; the compact
+  // control is the accepted discreet form of it. The MapLibre wordmark is
+  // renderer branding, not an obligation — the app disables it (logoEnabled).
+  attributionControl: { compact: true },
 });
 
 // Exposed on purpose: this is a diagnostic page and the console is the point.
@@ -64,8 +72,17 @@ map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
 const status = document.getElementById("status");
 
 map.on("error", (e) => {
-  status.innerHTML = `<span style="color:#ff8080">error: ${e.error?.message ?? e.type}</span>`;
+  // Timestamped because the message stays on screen until something replaces
+  // it — an old error over a since-fixed style reads as a live one otherwise.
+  const at = new Date().toLocaleTimeString();
+  status.innerHTML = `<span style="color:#ff8080">error at ${at}: ${e.error?.message ?? e.type}</span>`;
   console.error(e);
+});
+
+// A style swapped in at runtime (styling workflow: `mlMap.setStyle(...)` from
+// the console) should reset the HUD like the initial load does.
+map.on("style.load", () => {
+  status.textContent = `style loaded — ${map.getStyle().layers.length} layers`;
 });
 
 map.on("load", async () => {

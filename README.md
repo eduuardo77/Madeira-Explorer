@@ -82,6 +82,9 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started** (no longer
   blocks v1 after D-032)
 - ✅ Sampling gating implemented: stationary-vs-moving, asymmetric on purpose (T-034, D-028)
+- ✅ Map styles authored as a generator over the Protomaps theme — light for use, draft dark for
+  the souvenir (T-058, D-026); **shaded terrain** built and rendering (T-058a, D-035,
+  *Provisional*). Total pack: **19.1 MB**. See [docs/map-style.md](docs/map-style.md)
 - 🟨 Development build — **not created.** `app/eas.json` is written and
   [docs/dev-build.md](docs/dev-build.md) is the runbook; the remaining steps need an Expo
   account. **Nothing in Phase 1 can be verified without one.**
@@ -89,9 +92,10 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 **All blocking decisions are closed.** Current dependency cost: **$0** (the only unavoidable
 spend is store fees — Apple $99/year, Google Play $25 one-time).
 
-The next concrete step is **Phase 0 validation** (see [PROJECT_PLAN.md](PROJECT_PLAN.md)) — it is
-deliberately cheap, needs no app code, and answers the questions that would be expensive to get
-wrong. The tile spike in particular is the unblock for all visual design work.
+The next concrete steps are the two only the project lead can take: **create the Expo account
+for the development build** ([docs/dev-build.md](docs/dev-build.md)) and **curate the places**
+([content/README.md](content/README.md)). Everything verifiable without a phone has been built
+and verified.
 
 **The app has no name yet**, and the bundle identifier is a placeholder. See
 [docs/design-brief.md §7](docs/design-brief.md).
@@ -114,6 +118,7 @@ wrong. The tile spike in particular is the unblock for all visual design work.
 | [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
 | [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone, and what to check first once it runs. |
 | [content/README.md](content/README.md) | The content pack format, and the guide for curating it (T-066). |
+| [docs/map-style.md](docs/map-style.md) | How the map styles are generated, and why they look the way they do (T-058, D-035). |
 
 **These documents are the source of truth, not conversation history.** They are updated as
 decisions are made, not retrospectively. The maintenance protocol — which document to update

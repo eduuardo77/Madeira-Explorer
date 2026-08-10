@@ -32,6 +32,10 @@ process.removeAllListeners('warning');
 const { countByCategory, parseContentPack } = await import(
   '../app/src/content/contentPack.ts'
 );
+// The app's own haversine, for the same reason as the parser: two definitions
+// of "how far apart are two points" would let a curator's duplicate check
+// disagree with what the phone actually does.
+const { distanceM } = await import('../app/src/recording/distance.ts');
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -58,20 +62,6 @@ const TARGET_MAX_PLACES = 250;
 
 /** Below this, two places are probably one place entered twice. */
 const SUSPICIOUSLY_CLOSE_M = 100;
-
-const EARTH_RADIUS_M = 6371008.8;
-
-function distanceM(a, b) {
-  const toRadians = (degrees) => (degrees * Math.PI) / 180;
-  const deltaLat = toRadians(b.lat - a.lat);
-  const deltaLon = toRadians(b.lon - a.lon);
-  const h =
-    Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(toRadians(a.lat)) *
-      Math.cos(toRadians(b.lat)) *
-      Math.sin(deltaLon / 2) ** 2;
-  return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)));
-}
 
 const errors = [];
 const warnings = [];

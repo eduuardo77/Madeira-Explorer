@@ -90,12 +90,19 @@ const MIN_BACKSTOP_INTERVAL_MS = 60 * 1000;
 /** What we remember about the current window, across headless relaunches. */
 type StoredState = {
   anchor: Anchor | null;
-  monitoredPoiIds: string[];
+  monitoredCount: number;
   unmonitoredCount: number;
   anchorCoversUnmonitored: boolean;
   updatedTs: number;
 };
 
+/**
+ * Memoised, and the memoisation earns its keep: `noteRecordedPosition` reads
+ * this on every batch of fixes for the rest of the trip, and after the first
+ * read the answer is already in this process's memory. `appStateDao.getJson`
+ * returns null on unparseable text, so a stored state from an older version
+ * degrades to "rebuild from scratch" rather than crashing the recorder.
+ */
 let cachedState: StoredState | null = null;
 let stateLoaded = false;
 
@@ -104,30 +111,28 @@ async function readState(): Promise<StoredState | null> {
     return cachedState;
   }
 
-  const raw = await appStateDao.get(appStateDao.AppStateKey.GeofenceWorkingSet);
-  cachedState = raw === null ? null : parseState(raw);
+  cachedState = await appStateDao.getJson<StoredState>(
+    appStateDao.AppStateKey.GeofenceWorkingSet
+  );
   stateLoaded = true;
   return cachedState;
-}
-
-function parseState(raw: string): StoredState | null {
-  try {
-    // Written by us, one version of us ago. Treat it as untrusted anyway: a
-    // parse failure here must degrade to "rebuild from scratch", not crash the
-    // recorder on launch.
-    return JSON.parse(raw) as StoredState;
-  } catch {
-    return null;
-  }
 }
 
 async function writeState(state: StoredState): Promise<void> {
   cachedState = state;
   stateLoaded = true;
-  await appStateDao.set(
-    appStateDao.AppStateKey.GeofenceWorkingSet,
-    JSON.stringify(state)
-  );
+  await appStateDao.setJson(appStateDao.AppStateKey.GeofenceWorkingSet, state);
+}
+
+/** Monitoring nothing. Written when the catalogue is empty, and on stop. */
+async function writeEmptyState(): Promise<void> {
+  await writeState({
+    anchor: null,
+    monitoredCount: 0,
+    unmonitoredCount: 0,
+    anchorCoversUnmonitored: true,
+    updatedTs: Date.now(),
+  });
 }
 
 /**
@@ -166,7 +171,7 @@ async function currentPosition(): Promise<Coordinate | null> {
       return { lat: cached.lat, lon: cached.lon };
     }
   } catch (error) {
-    await logError('getLastKnownPosition', error);
+    await recordingEventDao.logError('geofence last-known position', error);
   }
 
   try {
@@ -177,7 +182,7 @@ async function currentPosition(): Promise<Coordinate | null> {
     const fix = await rawFixDao.getLastFix(trip.id);
     return fix === null ? null : { lat: fix.lat, lon: fix.lon };
   } catch (error) {
-    await logError('last recorded fix', error);
+    await recordingEventDao.logError('geofence last recorded fix', error);
     return null;
   }
 }
@@ -203,13 +208,7 @@ async function rebuildAround(from: Coordinate, reason: string): Promise<void> {
 
     if (catalogue.length === 0) {
       await locationProvider.stopGeofencing();
-      await writeState({
-        anchor: null,
-        monitoredPoiIds: [],
-        unmonitoredCount: 0,
-        anchorCoversUnmonitored: true,
-        updatedTs: Date.now(),
-      });
+      await writeEmptyState();
       await recordingEventDao.log(
         'geofence',
         `no places in the catalogue; monitoring nothing (${reason})`
@@ -240,7 +239,7 @@ async function rebuildAround(from: Coordinate, reason: string): Promise<void> {
 
     await writeState({
       anchor: set.anchor,
-      monitoredPoiIds: set.monitored.map((place) => place.poiId),
+      monitoredCount: set.monitored.length,
       unmonitoredCount: set.unmonitoredCount,
       anchorCoversUnmonitored: set.anchorCoversUnmonitored,
       updatedTs: Date.now(),
@@ -273,7 +272,7 @@ async function rebuildAround(from: Coordinate, reason: string): Promise<void> {
   } catch (error) {
     // Note what is NOT here: any attempt to clear the regions. Whatever the OS
     // is monitoring from the last successful rebuild stays monitored.
-    await logError(`rebuild (${reason})`, error);
+    await recordingEventDao.logError(`geofence rebuild (${reason})`, error);
   }
 }
 
@@ -302,16 +301,10 @@ export function stopGeofences(): Promise<void> {
   return serialise(async () => {
     try {
       await locationProvider.stopGeofencing();
-      await writeState({
-        anchor: null,
-        monitoredPoiIds: [],
-        unmonitoredCount: 0,
-        anchorCoversUnmonitored: true,
-        updatedTs: Date.now(),
-      });
+      await writeEmptyState();
       await recordingEventDao.log('geofence', 'stopped');
     } catch (error) {
-      await logError('stopGeofences', error);
+      await recordingEventDao.logError('geofence stop', error);
     }
   });
 }
@@ -334,25 +327,33 @@ export function handleAnchorExit(): Promise<void> {
  * arrive anyway, checking one number against them costs nothing and repairs
  * that case before the user notices it.
  */
-export function noteRecordedPosition(at: Coordinate): Promise<void> {
-  return serialise(async () => {
-    try {
-      const state = await readState();
-      if (state === null || state.anchor === null) {
-        // Not monitoring, or the whole catalogue fits and nothing can go stale.
-        return;
-      }
-      if (Date.now() - state.updatedTs < MIN_BACKSTOP_INTERVAL_MS) {
-        return;
-      }
-      if (!shouldRebuild(state.anchor, at)) {
-        return;
-      }
-      await rebuildAround(at, 'moved away from the anchor');
-    } catch (error) {
-      await logError('noteRecordedPosition', error);
+export async function noteRecordedPosition(at: Coordinate): Promise<void> {
+  try {
+    // Decided OUTSIDE the queue, deliberately. This runs on every batch of
+    // fixes and almost always concludes there is nothing to do — one memoised
+    // read and one haversine. Inside `serialise` it would instead wait for
+    // whatever rebuild happens to be in flight, so the common case would pay
+    // for a catalogue sort and twenty region registrations it did not ask for,
+    // out of the location callback's execution budget.
+    const state = await readState();
+    if (state === null || state.anchor === null) {
+      // Not monitoring, or the whole catalogue fits and nothing can go stale.
+      return;
     }
-  });
+    if (Date.now() - state.updatedTs < MIN_BACKSTOP_INTERVAL_MS) {
+      return;
+    }
+    if (!shouldRebuild(state.anchor, at)) {
+      return;
+    }
+  } catch (error) {
+    await recordingEventDao.logError('geofence backstop', error);
+    return;
+  }
+
+  // Only a real rebuild joins the queue, where it belongs — it ends in
+  // `startGeofencing`, which replaces the whole region set.
+  await serialise(() => rebuildAround(at, 'moved away from the anchor'));
 }
 
 /** What the debug screen shows, and what T-076 is checked against in the field. */
@@ -387,7 +388,7 @@ export async function getGeofenceStatus(): Promise<GeofenceStatus> {
   return {
     active,
     catalogueRegistered: catalogueSource !== null,
-    monitoredCount: state?.monitoredPoiIds.length ?? 0,
+    monitoredCount: state?.monitoredCount ?? 0,
     unmonitoredCount: state?.unmonitoredCount ?? 0,
     anchorRadiusM: state?.anchor?.radiusM ?? null,
     anchorCoversUnmonitored: state?.anchorCoversUnmonitored ?? true,
@@ -396,12 +397,3 @@ export async function getGeofenceStatus(): Promise<GeofenceStatus> {
   };
 }
 
-async function logError(where: string, error: unknown): Promise<void> {
-  const message = error instanceof Error ? error.message : String(error);
-  try {
-    await recordingEventDao.log('error', `geofence ${where}: ${message}`);
-  } catch {
-    // The database itself is the problem. Nothing useful is left to do, and
-    // throwing out of an OS callback is worse than silence.
-  }
-}

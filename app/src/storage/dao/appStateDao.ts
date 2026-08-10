@@ -67,6 +67,37 @@ export async function set(
   );
 }
 
+/**
+ * Read a value that was stored as JSON.
+ *
+ * Returns null both when the key is absent and when the stored text will not
+ * parse. Callers that care about the difference should say so at their own call
+ * site — the two keys using this today disagree deliberately, and that policy
+ * belongs with them rather than buried in here.
+ *
+ * The cast is unchecked, as it is for any JSON round-trip. The value came from
+ * `setJson` one version of the app ago, so the risk is a schema change rather
+ * than corruption, and both callers tolerate a null.
+ */
+export async function getJson<T>(key: AppStateKeyName): Promise<T | null> {
+  const raw = await get(key);
+  if (raw === null) {
+    return null;
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function setJson(
+  key: AppStateKeyName,
+  value: unknown
+): Promise<void> {
+  await set(key, JSON.stringify(value));
+}
+
 export async function getFlag(key: AppStateKeyName): Promise<boolean> {
   return (await get(key)) === 'true';
 }

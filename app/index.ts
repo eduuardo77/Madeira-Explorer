@@ -29,7 +29,11 @@ import App from './App';
 //
 // ⚠ The `withDevFixtureFallback` wrapper is development-only scaffolding — it
 // substitutes synthetic places while `content/pois.json` is still being curated
-// (T-066), and does nothing in a release build. T-117 confirms that.
-setPoiCatalogue(withDevFixtureFallback(contentPoiCatalogue));
+// (T-066). The condition is here, at the wiring, rather than inside the wrapper,
+// so that what a release build does is legible in the line that does it.
+// T-117a confirms it. In production this is exactly `contentPoiCatalogue`.
+setPoiCatalogue(
+  __DEV__ ? withDevFixtureFallback(contentPoiCatalogue) : contentPoiCatalogue
+);
 
 registerRootComponent(App);

@@ -43,6 +43,36 @@ export function distanceM(a: Coordinate, b: Coordinate): number {
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+/**
+ * Metres per degree of latitude, near enough.
+ *
+ * A spherical-earth constant. Used only to *place* points a known distance
+ * apart — never to measure them, which is what `distanceM` is for — so the ~0.3%
+ * error against the real ellipsoid does not matter anywhere it is used.
+ */
+const METRES_PER_DEGREE_LAT = 111195;
+
+/**
+ * The coordinate `northM` metres north and `eastM` metres east of `origin`.
+ *
+ * The longitude correction is `cos(latitude)`, because meridians converge: at
+ * Madeira's latitude a degree of longitude is about 84% of a degree of
+ * latitude, and ignoring that would put every generated point noticeably east
+ * of where it was asked for.
+ */
+export function offsetByMetres(
+  origin: Coordinate,
+  northM: number,
+  eastM: number
+): Coordinate {
+  const latitudeRadians = (origin.lat * Math.PI) / 180;
+  return {
+    lat: origin.lat + northM / METRES_PER_DEGREE_LAT,
+    lon:
+      origin.lon + eastM / (METRES_PER_DEGREE_LAT * Math.cos(latitudeRadians)),
+  };
+}
+
 /** True for a coordinate we can actually measure against. */
 export function isUsableCoordinate(value: Coordinate): boolean {
   return (

@@ -36,7 +36,6 @@ export type RecorderHealth = {
   providerName: string;
   permission: PermissionLevel;
   isRecording: boolean;
-  isGeofencing: boolean;
   /** What the stationary-vs-moving gate has selected (T-034). */
   samplingProfile: SamplingProfile;
 
@@ -73,8 +72,6 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       recordingEventDao.getRecent(20),
     ]);
 
-  const isGeofencing = geofence.active;
-
   // No trip yet means nothing has ever been recorded. Report that plainly
   // rather than inventing zeroes that look like a healthy empty state.
   if (trip === null) {
@@ -82,7 +79,6 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       providerName: locationProvider.name,
       permission,
       isRecording,
-      isGeofencing,
       samplingProfile,
       tripId: null,
       tripStartedTs: null,
@@ -128,7 +124,6 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     providerName: locationProvider.name,
     permission,
     isRecording,
-    isGeofencing,
     samplingProfile,
     tripId: trip.id,
     tripStartedTs: trip.started_ts,

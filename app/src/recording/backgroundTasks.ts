@@ -21,13 +21,11 @@ import type {
   GeofenceEventType,
 } from '../storage/types';
 import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
-import { ANCHOR_REGION_ID } from './geofenceSelection';
+import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
 import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
-
-export { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME };
 
 /**
  * Convert an Expo location into our own shape.
@@ -116,12 +114,17 @@ TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
     return;
   }
 
-  // The anchor is not a place — it is the manager's own tripwire for "you have
-  // travelled far enough that the monitored set is stale" (T-039). It must
-  // never reach `geofence_event`, or it would show up later as a stamp for
-  // somewhere that does not exist.
-  if (region.identifier === ANCHOR_REGION_ID) {
-    if (eventType === Location.GeofencingEventType.Exit) {
+  // Mechanism regions are not places, and must never reach `geofence_event` —
+  // one would show up later as a stamp for somewhere that does not exist. The
+  // check is on the reserved prefix rather than on the anchor's own id, so that
+  // a second mechanism region cannot be added without this staying correct.
+  if (isMechanismRegionId(region.identifier)) {
+    // The anchor's exit is the manager's tripwire for "you have travelled far
+    // enough that the monitored set is stale" (T-039).
+    if (
+      region.identifier === ANCHOR_REGION_ID &&
+      eventType === Location.GeofencingEventType.Exit
+    ) {
       await handleAnchorExit();
     }
     return;

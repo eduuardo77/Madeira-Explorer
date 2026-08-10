@@ -22,25 +22,9 @@
 
 import * as appStateDao from '../storage/dao/appStateDao';
 import type { Coordinate } from './distance';
+import { offsetByMetres } from './distance';
 import type { GeofencePlace } from './geofenceSelection';
 import type { PoiCatalogueSource } from './geofenceManager';
-
-/** Close enough for a fixture at this latitude; the error is under 1%. */
-const METRES_PER_DEGREE_LAT = 111195;
-
-function offsetBy(
-  origin: Coordinate,
-  northM: number,
-  eastM: number
-): Coordinate {
-  const latitudeRadians = (origin.lat * Math.PI) / 180;
-  return {
-    lat: origin.lat + northM / METRES_PER_DEGREE_LAT,
-    lon:
-      origin.lon +
-      eastM / (METRES_PER_DEGREE_LAT * Math.cos(latitudeRadians)),
-  };
-}
 
 function ringPlace(
   origin: Coordinate,
@@ -51,7 +35,7 @@ function ringPlace(
   radiusM: number
 ): GeofencePlace {
   const angle = (2 * Math.PI * bearingIndex) / ofCount;
-  const at = offsetBy(
+  const at = offsetByMetres(
     origin,
     Math.cos(angle) * metres,
     Math.sin(angle) * metres
@@ -113,28 +97,15 @@ export function generateFixture(
  * test needs to reproduce.
  */
 export async function saveFixture(places: GeofencePlace[]): Promise<void> {
-  await appStateDao.set(
-    appStateDao.AppStateKey.DevPoiFixture,
-    JSON.stringify(places)
-  );
+  await appStateDao.setJson(appStateDao.AppStateKey.DevPoiFixture, places);
 }
 
 export async function loadFixture(): Promise<GeofencePlace[]> {
-  const raw = await appStateDao.get(appStateDao.AppStateKey.DevPoiFixture);
-  if (raw === null) {
-    return [];
-  }
-  return JSON.parse(raw) as GeofencePlace[];
+  const places = await appStateDao.getJson<GeofencePlace[]>(
+    appStateDao.AppStateKey.DevPoiFixture
+  );
+  return places ?? [];
 }
-
-/**
- * The fixture as a catalogue source.
- *
- * Note it throws on a corrupt fixture rather than returning an empty array —
- * the contract on `PoiCatalogueSource` is that an empty catalogue means "there
- * is genuinely nothing to monitor", and the manager acts on that by stopping.
- */
-export const devPoiCatalogue: PoiCatalogueSource = loadFixture;
 
 /**
  * Use the real content pack, but fall back to the fixture while it is empty.
@@ -143,19 +114,17 @@ export const devPoiCatalogue: PoiCatalogueSource = loadFixture;
  * finished, over weeks. Without this the geofence backbone is untestable for
  * that entire period — and it is the part most in need of field testing.
  *
- * Guarded on `__DEV__` so a release build can never do it. Shipping synthetic
- * geofences in a ring around the user would be absurd, and it is exactly the
- * kind of development affordance that survives to production if nothing stops
- * it. T-117 should confirm this is inert in the release build.
+ * ⚠ The caller decides whether to apply this at all — `index.ts` wraps the real
+ * catalogue only when `__DEV__`. Keeping the condition at the wiring site means
+ * the production behaviour can be read there, rather than inferred from a
+ * branch buried in a file named "fixture". T-117a confirms it is absent from a
+ * release build.
  */
 export function withDevFixtureFallback(
   source: PoiCatalogueSource
 ): PoiCatalogueSource {
   return async () => {
     const places = await source();
-    if (places.length > 0 || !__DEV__) {
-      return places;
-    }
-    return loadFixture();
+    return places.length > 0 ? places : loadFixture();
   };
 }

@@ -421,6 +421,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-071** Stamp award rules: dwell time **and** plausible speed gates (D-009) ⇠ T-041,
       T-066
+      — Needs a `geofence_event.poi_id` → place lookup. That is a `Map` built from
+      `ContentPack.places`; it was deliberately **not** written in advance (T-040), because a
+      helper with no caller is a guess about its own shape. Build it here, against the real
+      award rules.
 - [ ] **T-072** Store a confidence value on every stamp award ⇠ T-071
 - [ ] **T-072a** Per-category progress computation (D-027) — the passport's primary axis
       ⇠ T-066, T-071
@@ -563,6 +567,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-117** **Dependency network audit** — confirm zero SDKs transmit anything. This is
       where these apps actually leak. ⇠ T-029
+- [ ] **T-117a** **Confirm the development scaffolding is inert in a release build.** Distinct
+      from T-117, which is about network behaviour and would not look at this. Two things to
+      check: the `expo-dev-client` permissions (`SYSTEM_ALERT_WINDOW`,
+      `READ/WRITE_EXTERNAL_STORAGE`, `NSAllowsArbitraryLoads`) are absent, and the synthetic POI
+      fixture cannot run — `app/index.ts` only wraps the catalogue in
+      `withDevFixtureFallback` when `__DEV__`, and shipping a ring of invented geofences around
+      the user would be absurd. ⇠ T-029
 - [ ] **T-118** iOS `PrivacyInfo.xcprivacy` manifest, including third-party SDK declarations
       ⇠ T-117
 - [ ] **T-119** iOS purpose strings for While-Using and Always ⇠ T-042, T-043

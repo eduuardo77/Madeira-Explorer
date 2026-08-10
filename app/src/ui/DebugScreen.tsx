@@ -282,8 +282,8 @@ export default function DebugScreen() {
         />
         <Row
           label="Geofencing"
-          value={health.isGeofencing ? 'yes' : 'no'}
-          tone={health.isGeofencing ? 'good' : 'warn'}
+          value={health.geofence.active ? 'yes' : 'no'}
+          tone={health.geofence.active ? 'good' : 'warn'}
         />
         <Row
           label="Sampling profile"

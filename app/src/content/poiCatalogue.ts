@@ -17,13 +17,19 @@ import rawPack from '../../../content/pois.json';
 import type { PoiCatalogueSource } from '../recording/geofenceManager';
 import type { GeofencePlace } from '../recording/geofenceSelection';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
-import type { ContentPack, Place, PlaceGeofence } from './contentPack';
-import {
-  countByCategory,
-  indexGeofencesByPlace,
-  parseContentPack,
-  toGeofencePlaces,
-} from './contentPack';
+import type { Category, ContentPack } from './contentPack';
+import { countByCategory, parseContentPack, toGeofencePlaces } from './contentPack';
+
+/**
+ * Everything derived from the pack, computed together because the pack is
+ * immutable and none of it can go stale.
+ */
+type LoadedPack = {
+  pack: ContentPack;
+  geofencePlaces: GeofencePlace[];
+  byCategory: Record<Category, number>;
+  problemCount: number;
+};
 
 /**
  * Parsed once, on first use, and kept.
@@ -32,14 +38,9 @@ import {
  * and this is read on a headless relaunch, where every millisecond is spent
  * against a background execution budget the OS is timing.
  */
-let parsed: {
-  pack: ContentPack;
-  geofencePlaces: GeofencePlace[];
-  byGeofenceId: Map<string, { place: Place; geofence: PlaceGeofence }>;
-  problemCount: number;
-} | null = null;
+let parsed: LoadedPack | null = null;
 
-function load(): NonNullable<typeof parsed> {
+function load(): LoadedPack {
   if (parsed !== null) {
     return parsed;
   }
@@ -51,7 +52,7 @@ function load(): NonNullable<typeof parsed> {
   parsed = {
     pack: result.pack,
     geofencePlaces: toGeofencePlaces(result.pack),
-    byGeofenceId: indexGeofencesByPlace(result.pack),
+    byCategory: countByCategory(result.pack),
     problemCount: result.problems.length,
   };
 
@@ -60,39 +61,31 @@ function load(): NonNullable<typeof parsed> {
     // user one missing stamp, never a recorder that will not start (D-010).
     // `tools/validate-content.mjs` is where these are meant to be caught.
     for (const problem of result.problems.slice(0, 10)) {
-      void recordingEventDao
-        .log('error', `content pack: ${problem.where}: ${problem.problem}`)
-        .catch(() => undefined);
+      void recordingEventDao.logError(
+        'content pack',
+        `${problem.where}: ${problem.problem}`
+      );
     }
   }
 
   return parsed;
 }
 
-/** The whole parsed pack, for the passport and the map screen later. */
-export function getContentPack(): ContentPack {
-  return load().pack;
-}
-
-/** Which place a `geofence_event.poi_id` belongs to. Used by the stamp rules (T-071). */
-export function findPlaceByGeofenceId(
-  geofenceId: string
-): { place: Place; geofence: PlaceGeofence } | null {
-  return load().byGeofenceId.get(geofenceId) ?? null;
-}
-
-export function getContentPackSummary(): {
+export type ContentPackSummary = {
   placeCount: number;
   geofenceCount: number;
   problemCount: number;
-  byCategory: Record<string, number>;
-} {
+  byCategory: Record<Category, number>;
+};
+
+/** For the debug screen. Everything here was computed once, at load. */
+export function getContentPackSummary(): ContentPackSummary {
   const loaded = load();
   return {
     placeCount: loaded.pack.places.length,
     geofenceCount: loaded.geofencePlaces.length,
     problemCount: loaded.problemCount,
-    byCategory: countByCategory(loaded.pack),
+    byCategory: loaded.byCategory,
   };
 }
 

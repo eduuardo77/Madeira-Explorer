@@ -15,7 +15,6 @@ import assert from 'node:assert/strict';
 
 import {
   countByCategory,
-  indexGeofencesByPlace,
   MAX_GEOFENCE_RADIUS_M,
   MIN_GEOFENCE_RADIUS_M,
   parseContentPack,
@@ -223,27 +222,6 @@ test('a levada flattens to two independently monitored regions', () => {
     ['levada-x/start', 'levada-x/end']
   );
   assert.equal(monitored[0].radiusM, 400);
-});
-
-test('a geofence id resolves back to the place that owns it', () => {
-  const result = parseContentPack(
-    pack([
-      placeRow({
-        id: 'levada-x',
-        name: 'Levada X',
-        category: 'levada',
-        geofences: [
-          { id: 'levada-x/start', role: 'start', lat: 32.6, lon: -16.9, radiusM: 400 },
-          { id: 'levada-x/end', role: 'end', lat: 32.7, lon: -17.0, radiusM: 400 },
-        ],
-      }),
-    ])
-  );
-
-  const index = indexGeofencesByPlace(result.pack);
-  assert.equal(index.get('levada-x/end')?.place.name, 'Levada X');
-  assert.equal(index.get('levada-x/end')?.geofence.role, 'end');
-  assert.equal(index.get('nothing-like-this'), undefined);
 });
 
 test('category counts cover all five rows, including the empty ones', () => {

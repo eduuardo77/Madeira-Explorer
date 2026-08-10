@@ -11,6 +11,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { offsetByMetres } from './distance.ts';
 import {
   decideProfile,
   MAX_TRUSTED_ACCURACY_M,
@@ -20,7 +21,6 @@ import {
 } from './movementPolicy.ts';
 
 const ORIGIN = { lat: 32.65, lon: -16.9 };
-const METRES_PER_DEGREE_LAT = 111195;
 const NOW = 1_800_000_000_000;
 
 /** A fix `metres` north of the origin, `minutesAgo` before `NOW`. */
@@ -29,12 +29,12 @@ function fix(
   metres: number,
   accuracyM: number | null = 10
 ): MovementSample {
-  return {
-    ts: NOW - minutesAgo * 60_000,
-    lat: ORIGIN.lat + metres / METRES_PER_DEGREE_LAT,
-    lon: ORIGIN.lon,
-    accuracyM,
-  };
+  // These tests are about the decision, not about geometry, so they use the
+  // app's own offset helper rather than an independent one. (The geofence
+  // selection tests deliberately do the opposite — there the helper is the
+  // oracle for the distance code under test, so it must not share an
+  // implementation with it.)
+  return { ...offsetByMetres(ORIGIN, metres, 0), ts: NOW - minutesAgo * 60_000, accuracyM };
 }
 
 /** A still phone reporting every minute for `minutes`, with GPS scatter. */

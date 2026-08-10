@@ -26,6 +26,28 @@ export async function log(
   );
 }
 
+/**
+ * Record a failure, and never fail while doing it.
+ *
+ * Every module that runs inside an OS callback needs exactly this, because
+ * throwing out of one costs a batch of fixes — the one loss this app cannot
+ * recover (D-010). It lives here rather than being written out four times
+ * because the rule is one rule, and a fifth module doing background work should
+ * find a helper rather than invent a fifth spelling of it.
+ *
+ * `where` is a short label for the failing operation; it is prefixed onto the
+ * message so a diary line reads `geofence rebuild: database is locked`.
+ */
+export async function logError(where: string, error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error);
+  try {
+    await log('error', `${where}: ${message}`);
+  } catch {
+    // The database itself is the problem, so there is nowhere left to write
+    // this. Intentionally silent: propagating would defeat the entire purpose.
+  }
+}
+
 export async function getRecent(limit: number): Promise<RecordingEvent[]> {
   const db = await getDatabase();
   return db.getAllAsync<RecordingEvent>(

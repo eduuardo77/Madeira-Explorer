@@ -77,6 +77,20 @@ export type GeofencePlace = {
 export const ANCHOR_REGION_ID = '__anchor__';
 
 /**
+ * Is this region one of ours rather than a place?
+ *
+ * The rule is the prefix, not the specific id. Written as a predicate because
+ * three places need it — the content parser rejecting such ids, and the geofence
+ * task refusing to write such a crossing to `geofence_event` — and because the
+ * anchor will not be the last one. A significant-location-change tripwire is the
+ * obvious second. Checking for `__anchor__` specifically would quietly turn that
+ * one into a phantom stamp on somebody's holiday.
+ */
+export function isMechanismRegionId(id: string): boolean {
+  return id.startsWith('__');
+}
+
+/**
  * Distance the anchor is shrunk by, below the largest radius that would be
  * provably safe.
  *
@@ -167,50 +181,63 @@ export function selectWorkingSet(
   from: Coordinate,
   options: SelectionOptions
 ): WorkingSet {
-  const empty: WorkingSet = {
-    regions: [],
-    monitored: [],
-    unmonitoredCount: 0,
-    anchor: null,
-    anchorCoversUnmonitored: true,
-    invalidCount: 0,
-  };
-
   if (options.maxRegions < 1 || !isUsableCoordinate(from)) {
-    return { ...empty, unmonitoredCount: catalogue.length };
+    return {
+      regions: [],
+      monitored: [],
+      unmonitoredCount: catalogue.length,
+      anchor: null,
+      anchorCoversUnmonitored: true,
+      invalidCount: 0,
+    };
   }
 
-  const usable: GeofencePlace[] = [];
+  // Measure each place's edge distance once, here, rather than inside the sort
+  // comparator. A comparator that computes it would call `distanceM` twice per
+  // comparison — for 250 places that is roughly 4,000 haversines where 250 will
+  // do, in a function that runs inside a background callback the OS is timing.
+  const ranked: { place: GeofencePlace; edgeM: number }[] = [];
   let invalidCount = 0;
   for (const place of catalogue) {
     if (isUsableCoordinate(place) && Number.isFinite(place.radiusM) && place.radiusM > 0) {
-      usable.push(place);
+      ranked.push({ place, edgeM: edgeDistanceM(from, place) });
     } else {
       invalidCount += 1;
     }
   }
 
-  if (usable.length === 0) {
-    return { ...empty, invalidCount };
+  if (ranked.length === 0) {
+    return {
+      regions: [],
+      monitored: [],
+      unmonitoredCount: 0,
+      anchor: null,
+      anchorCoversUnmonitored: true,
+      invalidCount,
+    };
   }
 
-  // Nearest first, by edge distance. The poiId tie-break makes the result
-  // independent of catalogue order, which keeps the tests honest and stops the
-  // monitored set churning for no reason when two places are equidistant.
-  const ranked = usable.slice().sort((a, b) => {
-    const difference = edgeDistanceM(from, a) - edgeDistanceM(from, b);
-    if (difference !== 0) {
-      return difference;
+  // Nearest first. The poiId tie-break makes the result independent of
+  // catalogue order, which keeps the tests honest and stops the monitored set
+  // churning for no reason when two places are equidistant.
+  ranked.sort((a, b) => {
+    if (a.edgeM !== b.edgeM) {
+      return a.edgeM - b.edgeM;
     }
-    return a.poiId < b.poiId ? -1 : a.poiId > b.poiId ? 1 : 0;
+    return a.place.poiId < b.place.poiId
+      ? -1
+      : a.place.poiId > b.place.poiId
+        ? 1
+        : 0;
   });
 
   // Everything fits: no anchor, because there is nothing it could usefully
   // trigger a rebuild for.
   if (ranked.length <= options.maxRegions) {
+    const all = ranked.map((entry) => entry.place);
     return {
-      regions: ranked.map(toRegion),
-      monitored: ranked,
+      regions: all.map(toRegion),
+      monitored: all,
       unmonitoredCount: 0,
       anchor: null,
       anchorCoversUnmonitored: true,
@@ -219,13 +246,14 @@ export function selectWorkingSet(
   }
 
   // One slot goes to the anchor.
-  const monitored = ranked.slice(0, options.maxRegions - 1);
+  const monitored = ranked
+    .slice(0, options.maxRegions - 1)
+    .map((entry) => entry.place);
   const unmonitored = ranked.slice(options.maxRegions - 1);
 
   // The nearest place we are NOT watching sets the safe radius. `unmonitored`
   // is already sorted, so its first entry is the binding one.
-  const nearestUnmonitoredEdgeM = edgeDistanceM(from, unmonitored[0]);
-  const safeRadiusM = nearestUnmonitoredEdgeM - options.anchorMarginM;
+  const safeRadiusM = unmonitored[0].edgeM - options.anchorMarginM;
 
   const radiusM = Math.min(
     options.maxAnchorRadiusM,

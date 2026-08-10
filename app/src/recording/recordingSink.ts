@@ -90,7 +90,7 @@ export const databaseSink: RecordingSink = {
 
       await recordingEventDao.log('batch', `${inserted} fixes`);
     } catch (error) {
-      await safelyLogError('onLocations', error);
+      await recordingEventDao.logError('onLocations', error);
     }
   },
 
@@ -109,25 +109,11 @@ export const databaseSink: RecordingSink = {
         `geofence ${transition.eventType} ${transition.poiId}`
       );
     } catch (error) {
-      await safelyLogError('onGeofenceTransition', error);
+      await recordingEventDao.logError('onGeofenceTransition', error);
     }
   },
 
   async onError(message: string): Promise<void> {
-    await safelyLogError('provider', message);
+    await recordingEventDao.logError('provider', message);
   },
 };
-
-/**
- * Even the error path can fail — if the database itself is the problem, writing
- * an error row will throw too. At that point there is genuinely nothing useful
- * left to do, so we stop rather than let it propagate into the OS callback.
- */
-async function safelyLogError(where: string, error: unknown): Promise<void> {
-  const message = error instanceof Error ? error.message : String(error);
-  try {
-    await recordingEventDao.log('error', `${where}: ${message}`);
-  } catch {
-    // Intentionally empty. See above.
-  }
-}

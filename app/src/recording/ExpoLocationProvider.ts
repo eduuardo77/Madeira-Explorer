@@ -218,8 +218,8 @@ export class ExpoLocationProvider implements LocationProvider {
         latitude: region.lat,
         longitude: region.lon,
         radius: region.radiusM,
-        notifyOnEnter: region.notifyOnEnter ?? true,
-        notifyOnExit: region.notifyOnExit ?? true,
+        notifyOnEnter: region.notifyOnEnter,
+        notifyOnExit: region.notifyOnExit,
       }))
     );
   }

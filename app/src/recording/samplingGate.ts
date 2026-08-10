@@ -18,7 +18,12 @@ import * as tripDao from '../storage/dao/tripDao';
 import { locationProvider } from './ExpoLocationProvider';
 import type { SamplingProfile } from './LocationProvider';
 import type { MovementSample } from './movementPolicy';
-import { decideProfile, MOVING_PROFILE } from './movementPolicy';
+import {
+  decideProfile,
+  MOVING_PROFILE,
+  STATIONARY_WINDOW_MS,
+} from './movementPolicy';
+import { SAMPLING_PROFILES } from './samplingPolicy';
 
 /**
  * How many recent fixes to look at.
@@ -33,24 +38,36 @@ const WINDOW_FIX_LIMIT = 40;
 /**
  * The profile we believe the provider is currently using.
  *
- * Persisted rather than kept in memory because the process is killed and
- * relaunched constantly. Getting this wrong is cheap in one direction (a
- * redundant `setSamplingProfile` call) and expensive in the other (thinking we
- * are on the moving profile when the OS has us on the cheap one), so it is
- * written before it is trusted.
+ * Persisted because the process is killed and relaunched constantly, and
+ * memoised because this module is its only writer — after the first read of a
+ * process, the database cannot know anything we do not. Getting it wrong is
+ * cheap in one direction (a redundant `setSamplingProfile` call) and expensive
+ * in the other (thinking we are on the moving profile when the OS has us on the
+ * cheap one), so it is written before it is trusted.
  */
+let cachedProfile: SamplingProfile | null = null;
+
 async function readCurrentProfile(): Promise<SamplingProfile> {
-  const stored = await appStateDao.get(appStateDao.AppStateKey.SamplingProfile);
-  if (stored === 'stationary' || stored === 'walking' || stored === 'driving') {
-    return stored;
+  if (cachedProfile !== null) {
+    return cachedProfile;
   }
-  // Nothing recorded yet: assume moving. Assuming stationary would start every
-  // fresh install on the cheap profile, which is exactly wrong — a fresh
-  // install is somebody who has just landed.
-  return MOVING_PROFILE;
+
+  const stored = await appStateDao.get(appStateDao.AppStateKey.SamplingProfile);
+  // Membership is checked against the profile table rather than a list of
+  // string literals, so adding a fourth profile cannot leave this line quietly
+  // refusing to read it back and resetting every relaunch to the default.
+  cachedProfile =
+    stored !== null && stored in SAMPLING_PROFILES
+      ? (stored as SamplingProfile)
+      : // Nothing recorded yet: assume moving. Assuming stationary would start
+        // every fresh install on the cheap profile, which is exactly wrong —
+        // a fresh install is somebody who has just landed.
+        MOVING_PROFILE;
+  return cachedProfile;
 }
 
 async function writeCurrentProfile(profile: SamplingProfile): Promise<void> {
+  cachedProfile = profile;
   await appStateDao.set(appStateDao.AppStateKey.SamplingProfile, profile);
 }
 
@@ -63,27 +80,35 @@ async function writeCurrentProfile(profile: SamplingProfile): Promise<void> {
  */
 export async function applySamplingGate(now: number): Promise<void> {
   try {
-    if (!(await locationProvider.isRecording())) {
+    // Three independent questions, so three round-trips in parallel rather than
+    // in series. One of them crosses the native bridge, which is the expensive
+    // one, and this runs on every OS wake-up for a week.
+    const [recording, trip, current] = await Promise.all([
+      locationProvider.isRecording(),
+      tripDao.getActiveTrip(),
+      readCurrentProfile(),
+    ]);
+
+    if (!recording) {
       // Not recording at all. Changing the profile would restart location
       // updates behind the user's back — on While-Using that would be a
       // straightforward bug (D-008).
       return;
     }
-
-    const trip = await tripDao.getActiveTrip();
     if (trip === null) {
       return;
     }
 
-    const fixes = await rawFixDao.getRecentFixes(trip.id, WINDOW_FIX_LIMIT);
-    const samples: MovementSample[] = fixes.map((fix) => ({
-      ts: fix.ts,
-      lat: fix.lat,
-      lon: fix.lon,
-      accuracyM: fix.accuracy_m,
-    }));
+    // Only the window the policy will actually consider, and only the four
+    // columns it reads. `getRecentFixes` would return every column of the last
+    // forty rows, most of which fall outside the window on the cheap profile
+    // and are discarded in JavaScript.
+    const samples: MovementSample[] = await rawFixDao.getMovementWindow(
+      trip.id,
+      now - STATIONARY_WINDOW_MS,
+      WINDOW_FIX_LIMIT
+    );
 
-    const current = await readCurrentProfile();
     const decision = decideProfile(current, samples, now);
 
     if (!decision.changed) {
@@ -102,12 +127,7 @@ export async function applySamplingGate(now: number): Promise<void> {
       `profile ${current} -> ${decision.profile}: ${decision.reason}`
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    try {
-      await recordingEventDao.log('error', `sampling gate: ${message}`);
-    } catch {
-      // The database is the problem. Nothing useful is left to do here.
-    }
+    await recordingEventDao.logError('sampling gate', error);
   }
 }
 

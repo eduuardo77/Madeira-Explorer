@@ -74,6 +74,39 @@ export async function getLastFix(tripId: number): Promise<RawFix | null> {
   return row ?? null;
 }
 
+/**
+ * Just enough of the recent trace to decide whether the user is moving (T-034).
+ *
+ * Four columns rather than ten, and bounded by time as well as by row count, so
+ * it returns the window the movement policy actually considers instead of
+ * whatever the last N rows happen to be. This runs on every batch of fixes for
+ * the length of a holiday, which is the only reason it is worth its own query.
+ */
+export async function getMovementWindow(
+  tripId: number,
+  sinceTs: number,
+  limit: number
+): Promise<
+  { ts: number; lat: number; lon: number; accuracyM: number | null }[]
+> {
+  const db = await getDatabase();
+  return db.getAllAsync<{
+    ts: number;
+    lat: number;
+    lon: number;
+    accuracyM: number | null;
+  }>(
+    `SELECT ts, lat, lon, accuracy_m AS accuracyM
+       FROM raw_fix
+      WHERE trip_id = ? AND ts >= ?
+      ORDER BY ts DESC
+      LIMIT ?;`,
+    tripId,
+    sinceTs,
+    limit
+  );
+}
+
 export async function getRecentFixes(
   tripId: number,
   limit: number

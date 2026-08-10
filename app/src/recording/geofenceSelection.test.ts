@@ -31,6 +31,14 @@ import {
 
 const ORIGIN = { lat: 32.65, lon: -16.9 };
 
+/**
+ * ⚠ Deliberately NOT `offsetByMetres` from `distance.ts`.
+ *
+ * This helper is the independent oracle for the code under test — the two tests
+ * immediately below assert that `distanceM` and this formula agree about how
+ * far 111 km and 1000 m are. Sharing an implementation with the code being
+ * checked would make that assertion circular and it would pass no matter what.
+ */
 const METRES_PER_DEGREE_LAT = 111195;
 
 /** A place `northM` north and `eastM` east of the origin. */

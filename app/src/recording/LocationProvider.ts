@@ -51,14 +51,15 @@ export type GeofenceRegion = {
   lon: number;
   radiusM: number;
   /**
-   * Both default to true, which is what a place wants. The geofence manager's
-   * anchor region (T-039) is the exception: it is exit-only, because we are
-   * standing in the middle of it when it is registered and an enter event would
-   * carry no information. Each suppressed event is a background wake-up we do
-   * not pay for.
+   * Both are required rather than defaulted, so that the decision lives in the
+   * code that makes it instead of once per backend. A place wants both true.
+   * The geofence manager's anchor region (T-039) is the exception: it is
+   * exit-only, because we are standing in the middle of it when it is
+   * registered and an enter event would carry no information. Each suppressed
+   * event is a background wake-up we do not pay for.
    */
-  notifyOnEnter?: boolean;
-  notifyOnExit?: boolean;
+  notifyOnEnter: boolean;
+  notifyOnExit: boolean;
 };
 
 /**

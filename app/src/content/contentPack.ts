@@ -28,8 +28,9 @@
  * what makes it unit-testable (`contentPack.test.ts`).
  */
 
+import { isUsableCoordinate } from '../recording/distance.ts';
 import type { GeofencePlace } from '../recording/geofenceSelection.ts';
-import { ANCHOR_REGION_ID } from '../recording/geofenceSelection.ts';
+import { isMechanismRegionId } from '../recording/geofenceSelection.ts';
 
 /**
  * The five categories, and there is deliberately no "Other" (D-027). A place
@@ -153,16 +154,20 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
     );
     if (place !== null) {
       places.push(place);
-      seenPlaceIds.add(place.id);
-      for (const geofence of place.geofences) {
-        seenGeofenceIds.add(geofence.id);
-      }
     }
   }
 
   return { pack: { formatVersion: SUPPORTED_FORMAT_VERSION, places }, problems };
 }
 
+/**
+ * Parse one place, and register its ids on success.
+ *
+ * Registration happens here rather than in the caller's loop because the rule
+ * being enforced — "an accepted place owns its ids from now on" — belongs to
+ * the function that decides whether to accept it. Splitting the two would leave
+ * duplicate detection depending on the caller remembering to do its half.
+ */
 function parsePlace(
   raw: unknown,
   index: number,
@@ -186,7 +191,7 @@ function parsePlace(
   }
   // `__` is reserved for regions that are mechanism rather than content —
   // currently just the geofence manager's anchor (D-033).
-  if (id.startsWith('__')) {
+  if (isMechanismRegionId(id)) {
     problems.push({ where: `${where} (${id})`, problem: 'id starts with the reserved `__`' });
     return null;
   }
@@ -225,20 +230,31 @@ function parsePlace(
 
   // A place is all-or-nothing: half a levada would credit a walk the user did
   // not finish, which is exactly the generosity boundary in CONTEXT §4.4.
+  //
+  // Ids are collected into a local set first, so that a place colliding with
+  // *itself* is caught by the same check as a place colliding with an earlier
+  // one — and so that a rejected place leaves nothing registered behind it.
   const geofences: PlaceGeofence[] = [];
+  const claimedIds = new Set<string>();
   for (let i = 0; i < row.geofences.length; i += 1) {
     const geofence = parseGeofence(row.geofences[i], `${named}.geofences[${i}]`, problems);
     if (geofence === null) {
       return null;
     }
-    if (seenGeofenceIds.has(geofence.id) || geofences.some((g) => g.id === geofence.id)) {
+    if (seenGeofenceIds.has(geofence.id) || claimedIds.has(geofence.id)) {
       problems.push({
         where: `${named}.geofences[${i}]`,
         problem: `duplicate geofence id ${geofence.id}`,
       });
       return null;
     }
+    claimedIds.add(geofence.id);
     geofences.push(geofence);
+  }
+
+  seenPlaceIds.add(id);
+  for (const geofenceId of claimedIds) {
+    seenGeofenceIds.add(geofenceId);
   }
 
   return { id, name, category, regionId, geofences };
@@ -261,7 +277,7 @@ function parseGeofence(
     problems.push({ where, problem: 'missing or empty `id`' });
     return null;
   }
-  if (id.startsWith('__') || id === ANCHOR_REGION_ID) {
+  if (isMechanismRegionId(id)) {
     problems.push({ where, problem: 'id starts with the reserved `__`' });
     return null;
   }
@@ -276,17 +292,16 @@ function parseGeofence(
     return null;
   }
 
+  // The `typeof` narrowing is this module's job — the input is `unknown`. What
+  // counts as a usable coordinate afterwards is `distance.ts`'s job, and it must
+  // be the same answer the geofence selector will give, or a row could pass here
+  // and be silently dropped there.
   const lat = row.lat;
   const lon = row.lon;
   if (
     typeof lat !== 'number' ||
     typeof lon !== 'number' ||
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon) ||
-    lat < -90 ||
-    lat > 90 ||
-    lon < -180 ||
-    lon > 180
+    !isUsableCoordinate({ lat, lon })
   ) {
     problems.push({ where, problem: 'lat/lon missing or not a usable coordinate' });
     return null;
@@ -342,25 +357,6 @@ export function toGeofencePlaces(pack: ContentPack): GeofencePlace[] {
     }
   }
   return places;
-}
-
-/**
- * Which place a geofence id belongs to.
- *
- * Built once and reused: the stamp rules (T-071) will ask this of every
- * `geofence_event` row, and a linear scan over 250 places with two geofences
- * each is the kind of thing that looks free until it is done in a loop.
- */
-export function indexGeofencesByPlace(
-  pack: ContentPack
-): Map<string, { place: Place; geofence: PlaceGeofence }> {
-  const index = new Map<string, { place: Place; geofence: PlaceGeofence }>();
-  for (const place of pack.places) {
-    for (const geofence of place.geofences) {
-      index.set(geofence.id, { place, geofence });
-    }
-  }
-  return index;
 }
 
 /** Places per category, for the passport's five rows and for the validator. */

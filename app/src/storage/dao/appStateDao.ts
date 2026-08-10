@@ -16,6 +16,11 @@ export const AppStateKey = {
   PortoSantoUnlocked: 'porto_santo_unlocked',
   /** Timestamp of the day-1 health check notification, so it fires once (T-049). */
   HealthCheckSentTs: 'health_check_sent_ts',
+  /**
+   * When the app first ran — as close to "installed" as the app can honestly
+   * get, and what the day-1 check counts from (T-049, D-011).
+   */
+  InstalledTs: 'installed_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
   /**

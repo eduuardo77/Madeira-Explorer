@@ -14,7 +14,8 @@ import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as sensorSampleDao from '../storage/dao/sensorSampleDao';
-import * as stampAwardDao from '../storage/dao/stampAwardDao';
+import { getCurrentProgress } from '../progress/currentProgress';
+import type { TripProgress } from '../progress/tripProgress';
 import * as tripDao from '../storage/dao/tripDao';
 import type { RecordingEvent } from '../storage/types';
 import { locationProvider } from './ExpoLocationProvider';
@@ -55,8 +56,8 @@ export type RecorderHealth = {
   geofenceEventCount: number;
   /** The monitored window, not the events it produced (T-039). */
   geofence: GeofenceStatus;
-  /** Stamps collected on this trip (T-071) — the hero number, eventually. */
-  stampCount: number;
+  /** The hero number and its breakdown (T-072a/T-073) — `23 / 180`. */
+  progress: TripProgress;
 
   gapCount: number;
   longestGapMs: number | null;
@@ -65,15 +66,23 @@ export type RecorderHealth = {
 };
 
 export async function getRecorderHealth(): Promise<RecorderHealth> {
-  const [permission, isRecording, samplingProfile, geofence, trip, recentEvents] =
-    await Promise.all([
-      locationProvider.getPermissionLevel(),
-      locationProvider.isRecording(),
-      getCurrentSamplingProfile(),
-      getGeofenceStatus(),
-      tripDao.getActiveTrip(),
-      recordingEventDao.getRecent(20),
-    ]);
+  const [
+    permission,
+    isRecording,
+    samplingProfile,
+    geofence,
+    progress,
+    trip,
+    recentEvents,
+  ] = await Promise.all([
+    locationProvider.getPermissionLevel(),
+    locationProvider.isRecording(),
+    getCurrentSamplingProfile(),
+    getGeofenceStatus(),
+    getCurrentProgress(),
+    tripDao.getActiveTrip(),
+    recordingEventDao.getRecent(20),
+  ]);
 
   // No trip yet means nothing has ever been recorded. Report that plainly
   // rather than inventing zeroes that look like a healthy empty state.
@@ -94,7 +103,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       lastStepDelta: null,
       geofenceEventCount: 0,
       geofence,
-      stampCount: 0,
+      progress,
       gapCount: 0,
       longestGapMs: null,
       recentEvents,
@@ -107,7 +116,6 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     sensorSampleCount,
     lastSample,
     geofenceEventCount,
-    stampCount,
     gaps,
   ] = await Promise.all([
     rawFixDao.countFixes(trip.id),
@@ -115,7 +123,6 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     sensorSampleDao.countSamples(trip.id),
     sensorSampleDao.getLastSample(trip.id),
     geofenceEventDao.countEvents(trip.id),
-    stampAwardDao.countAwards(trip.id),
     rawFixDao.findGaps(trip.id, GAP_THRESHOLD_MS),
   ]);
 
@@ -142,7 +149,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     lastStepDelta: lastSample?.step_count_delta ?? null,
     geofenceEventCount,
     geofence,
-    stampCount,
+    progress,
     gapCount: gaps.length,
     recentEvents,
     longestGapMs,

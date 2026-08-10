@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **the reward mechanic exists** (T-071/T-072, D-037): geofence
+**Last updated:** 2026-08-10 — progress computation (T-072a/T-073) and the day-1 health check
+(T-049) close the last of Phase 1's recorder work and give the interface its hero number.
+Earlier the same day, **the reward mechanic** (T-071/T-072, D-037): geofence
 crossings become stamps, with levadas verifying both endpoints so a drive-by cannot earn one.
 Earlier the same day, the map exists: T-058 light style (generated, D-030 schema) and
 T-058a shaded terrain (D-035, 6.5 MB elevation pack — total pack 19.1 MB) are built and
@@ -338,8 +340,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — `recording_event` diary plus `getRecorderHealth()` and SQL gap detection are in.
       Still missing: the gap **threshold** is a guess (30 min) pending T-020/T-051, and gaps
       are detected on demand rather than annotated onto the trace.
-- [ ] **T-049** Day-1 self-check (12–24h after install) verifying recording actually happened
+- [x] **T-049** Day-1 self-check (12–24h after install) verifying recording actually happened
       ⇠ T-048
+      — Done 2026-08-10. `healthCheckPolicy.ts` decides (pure, 12 tests), `healthCheck.ts`
+      sends. Fires once per install, 14h in, on app launch — a no-op before the window.
+      — **Deliberately asymmetric.** An alarm needs positive evidence; anything ambiguous
+      stays quiet. A quiet evening in a hotel is not a fault, and While-Using is not a fault
+      (D-008). The case it exists for is *running, permitted, and no fixes* — the OEM battery
+      killer, which nothing else in the system would notice.
+      — A **healthy** check still notifies, because D-011 promises reassurance and a check
+      that only appears when something is broken teaches people to dread it.
+      — Local notifications only: no push token, no server, nothing registered (D-001). The
+      Android 13+ notification permission is **not** requested here — stacking it on the
+      location dialog is the surest way to have both refused. It belongs in T-114.
+- [x] **T-072a** Per-category progress computation (D-027) — the passport's primary axis
+      ⇠ T-066, T-071
+      — Done 2026-08-10 with T-073, in `progress/tripProgress.ts` (pure, 13 tests). All five
+      rows always exist, including empty ones: a passport whose pages appear and disappear as
+      you travel is not a passport.
+- [x] **T-073** Per-region progress computation ⇠ T-067, T-071
+      — Done 2026-08-10. Also `suggestNextRegion()` — the nudge points at the region *nearest
+      to finishing*, not the emptiest, because that is the one most likely to be acted on
+      (D-002: the uncollected places are the recommendation).
+      — ⚠ **The denominator excludes locked regions from both halves** (D-024). Getting this
+      wrong is the named trap: a tourist who never takes the ferry must never see a total they
+      cannot reach. The locked set is threaded through and empty until **T-067a** fills it.
 - [x] **T-050** Debug screen: raw fix count, last fix time, gaps, permission state, service
       health ⇠ T-048
       — Also sensor counts, last barometer/step reading, live-ticking last-fix age, the event
@@ -490,9 +515,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Done with T-071. 0–1, from how comfortably each gate was cleared, deliberately
       non-saturating so a marginal award stays distinguishable from an obvious one. Stored
       alongside dwell, mean speed and a written reason; never shown to the user.
-- [ ] **T-072a** Per-category progress computation (D-027) — the passport's primary axis
-      ⇠ T-066, T-071
-- [ ] **T-073** Per-region progress computation ⇠ T-067, T-071
+
       — **Consumed by the map screen, not the passport** (D-027). It does the "where should I go
       next" job that D-002 needs it for. Denominator counts **unlocked regions only** (D-024).
 - [ ] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071, T-072a

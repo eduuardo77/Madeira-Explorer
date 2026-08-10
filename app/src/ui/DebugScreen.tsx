@@ -27,6 +27,7 @@ import {
 import { getContentPackSummary } from '../content/poiCatalogue';
 import { runAwardPass } from '../progress/stampAwards';
 import { generateFixture, saveFixture } from '../recording/devPoiFixture';
+import { runHealthCheck } from '../recording/healthCheck';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import {
   refreshGeofences,
@@ -363,12 +364,27 @@ export default function DebugScreen() {
         <Row
           label="Collected"
           value={
-            contentPack.placeCount === 0
+            health.progress.total === 0
               ? 'no places curated yet (T-066)'
-              : `${health.stampCount} of ${contentPack.placeCount}`
+              : `${health.progress.collected} / ${health.progress.total}`
           }
-          tone={health.stampCount > 0 ? 'good' : undefined}
+          tone={health.progress.collected > 0 ? 'good' : undefined}
         />
+        {health.progress.total > 0
+          ? health.progress.byCategory.map((row) => (
+              <Row
+                key={row.category}
+                label={`  ${row.category}`}
+                value={`${row.collected} / ${row.total}`}
+              />
+            ))
+          : null}
+        {health.progress.lockedRegionCount > 0 ? (
+          <Row
+            label="Hidden regions"
+            value={`${health.progress.lockedRegionCount} (D-024)`}
+          />
+        ) : null}
       </Section>
 
       <Section title="Geofences (T-039)">

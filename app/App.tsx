@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MapScreen from './src/map/MapScreen';
+import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
@@ -19,6 +20,12 @@ export default function App() {
     // woke us to deliver a batch" when reading the diary later. Opening the app
     // is the rare event here, not the common one.
     void recordingEventDao.log('app_launch');
+
+    // The day-1 check (T-049, D-011). A no-op before the window and once per
+    // install after it, so running it on every launch is the simplest correct
+    // trigger — and the launch itself is evidence the user is still around to
+    // act on what it says.
+    void runHealthCheck();
   }, []);
 
   return (

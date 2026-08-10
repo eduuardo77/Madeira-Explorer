@@ -208,10 +208,13 @@ app/
 ├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
 ├── index.ts                          imports backgroundTasks for its side effects — see below
 └── src/
-    ├── progress/                     T-071. The reward (D-037).
+    ├── progress/                     T-071/T-072a/T-073. The reward (D-037).
     │   ├── stampRules.ts             pure: does this place become a stamp?
     │   ├── stampRules.test.ts        23 tests, incl. the named T-078 drive-by case
-    │   └── stampAwards.ts            the re-runnable pass that writes stamp_award
+    │   ├── stampAwards.ts            the re-runnable pass that writes stamp_award
+    │   ├── tripProgress.ts           pure: the hero number and its breakdown
+    │   ├── tripProgress.test.ts      13 tests, mostly on D-024's denominator trap
+    │   └── currentProgress.ts        the same, from the database
     ├── content/                      T-040. The pack's only entry point (D-034).
     │   ├── contentPack.ts            parse + validate; pure, unit-tested
     │   ├── contentPack.test.ts       16 tests
@@ -299,8 +302,14 @@ sleep and cannot wake it**: the stationary profile pauses updates, and if iOS st
 no fix arrives and the gate never runs again. That is the single most important thing to watch
 in T-051.
 
-Still missing from Phase 1: notifications and the day-1 health check (T-049), the Always
-upgrade and downgrade detection (T-043/T-044), and the battery-optimisation exemption (T-046).
+**The day-1 health check is done too** (T-049, 2026-08-10) — the third of the three things
+D-032 says must not be cut. Deliberately asymmetric: an alarm needs positive evidence, a quiet
+evening in a hotel is not a fault, and the case it exists for is *running, permitted, and no
+fixes* — the OEM battery killer nothing else would notice. A healthy check still notifies,
+because D-011 promises reassurance.
+
+Still missing from Phase 1: the Always upgrade and downgrade detection (T-043/T-044), and the
+battery-optimisation exemption (T-046).
 
 Nothing at all exists from Phases 2–7.
 

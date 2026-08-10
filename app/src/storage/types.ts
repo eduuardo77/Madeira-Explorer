@@ -52,6 +52,8 @@ export type RecordingEventKind =
    * because "why did I get this stamp?" must be answerable months later.
    */
   | 'stamp'
+  /** The day-1 check ran and said something (T-049). */
+  | 'health_check'
   | 'app_launch';
 
 export type Trip = {

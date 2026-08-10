@@ -78,6 +78,9 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ **The reward mechanic works** (T-071/T-072, D-037, *Provisional*): geofence crossings
   become stamps behind a dwell-and-speed gate, and a levada needs both its endpoints verified
   so driving between trailheads earns nothing
+- ✅ The hero number and its breakdown (T-072a/T-073), with locked regions excluded from both
+  halves of the total (D-024)
+- ✅ Day-1 health check (T-049, D-011) — the answer to recording dying silently on day 2
 - 🟨 **POI curation (T-066) — the file is ready and empty.** This is the critical path now, and
   it is the one task nobody else can do.
 - 🟨 Phase 1 recorder written — **~3,100 lines, never executed on hardware**

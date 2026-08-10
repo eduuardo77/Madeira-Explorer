@@ -620,18 +620,31 @@ For context on how the design arrived where it did. Full reasoning for each is i
 
 ## Suggested opening message for the new session
 
-> This is the Madeira Explorer project. Read `HANDOFF.md`, then `CONTEXT.md`, `DECISIONS.md`
-> and `TASKS.md` — those are the source of truth, not chat history. If the work touches
-> anything visual, read `docs/design-brief.md` too. Planning is complete and a Phase 1 recorder
-> skeleton exists in `app/`, but it has never been run. Follow the three-tier doc-maintenance
-> protocol in CONTEXT.md §9.
+> This is the Madeira Explorer project (`C:\Users\eduar\Desktop\Madeira`).
+>
+> Read `HANDOFF.md` first — it is in **EXECUTION mode**. Then `CONTEXT.md` (especially §9, the
+> doc-maintenance protocol you must follow) and **`DECISIONS.md` D-032**, which defines v1 scope
+> and deletes a lot of work you might otherwise start. `TASKS.md` tracks everything task by task.
+> Those are the source of truth, not chat history.
+>
+> **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
+> Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference. Spend
+> effort on the interface and the map's appearance, not on GPS accuracy.
+>
+> **State:** tile pack is built (12 MB, Protomaps — `bash tiles/pipeline/build.sh`). The Phase 1
+> recorder exists in `app/` (~2,400 lines) but **has never been run** — there is no development
+> build yet, which is the one real blocker. Phase 0: T-022/T-023/T-026/T-028 done; field runs
+> outstanding but no longer blocking v1.
+>
+> I am done planning and want to build. Do not open new research threads or propose new
+> decisions unless something is genuinely blocked.
 >
 > I want to work on [pick one]:
-> - Phase 0 Track B — the tile pipeline spike (**this is the unblock for all visual work**)
-> - Phase 0 Track A — the field GPS runs with Sensor Logger
-> - getting a development build onto my phone, so the recorder can actually be tested
-> - T-039, the dynamic geofence manager
-> - T-034, stationary-vs-moving gating (unblocked by D-028)
+> - **T-039, the dynamic geofence manager** — the reward backbone, needs no hardware, best next
+>   piece of code
+> - **Getting a development build onto my phone** (I will create the Expo account)
+> - **T-058/T-058a, the map style and terrain** — start from a Protomaps theme and subtract
+> - **T-066, curating the POIs** — I choose the places, you build the content pipeline
 
-Only one question is still outstanding for the project lead — the **app name and bundle
-identifier** — and it blocks nothing before store submission.
+Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
+**Provisional**, tier 3 ask first.

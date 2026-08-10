@@ -24,6 +24,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { getContentPackSummary } from '../content/poiCatalogue';
 import { generateFixture, saveFixture } from '../recording/devPoiFixture';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import {
@@ -239,6 +240,8 @@ export default function DebugScreen() {
   }
 
   const fixAgeMs = health.lastFixTs === null ? null : now - health.lastFixTs;
+  // Cheap: the pack is parsed once and cached, so this is a map lookup.
+  const contentPack = getContentPackSummary();
 
   return (
     <ScrollView
@@ -348,6 +351,22 @@ export default function DebugScreen() {
       </Section>
 
       <Section title="Geofences (T-039)">
+        <Row
+          label="Content pack"
+          value={
+            contentPack.placeCount === 0
+              ? 'empty — using dev fixture'
+              : `${contentPack.placeCount} places, ${contentPack.geofenceCount} geofences`
+          }
+          tone={contentPack.placeCount === 0 ? 'warn' : 'good'}
+        />
+        {contentPack.problemCount > 0 ? (
+          <Row
+            label="Pack problems"
+            value={`${contentPack.problemCount} rows dropped`}
+            tone="bad"
+          />
+        ) : null}
         <Row
           label="Places watched"
           value={

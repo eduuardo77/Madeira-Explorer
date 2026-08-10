@@ -3,15 +3,16 @@
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
-building the geofence manager (T-039, D-033).
+building the geofence manager and the content pack (T-039/D-033, T-040/D-034).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
 **Repository state:** git repository. Planning docs plus a Phase 1 recorder in `app/` — 27
-source files, ~3,100 lines. **None of it has ever run on a phone**; the geofence selection
-logic is the only part that has ever run at all (18 unit tests, `cd app && npm test`).
-Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
+source files, ~3,900 lines. **None of it has ever run on a phone.** The pure logic — geofence
+selection and content-pack parsing — is the only part that has ever run at all: 34 unit tests,
+`cd app && npm test`. Phase 0 has produced its first result: the OSM coverage survey
+(T-028, D-029).
 
 ---
 
@@ -20,7 +21,7 @@ Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
    before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
    §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 32 numbered decisions. **Read D-032 first** — it defines v1 scope and
+2. **`DECISIONS.md`** — 34 numbered decisions. **Read D-032 first** — it defines v1 scope and
    deletes a large amount of work you might otherwise start.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
@@ -57,9 +58,10 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 
 ### ⚠ The single most important thing to know
 
-**No line of this app has ever executed.** What has been verified is that it is *well-formed*:
-`tsc --noEmit` clean under strict, Metro bundles 653 modules, `expo-doctor` 20/20, and config
-introspection confirms the entitlements and manifest attributes reach the native config.
+**No line of this app has ever executed on a phone.** What has been verified is that it is
+*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 662 modules, `expo-doctor`
+20/20, and config introspection confirms the entitlements and manifest attributes reach the
+native config. Since 2026-08-10, the pure logic is also unit-tested — 34 tests, on Node.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
 no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
@@ -83,6 +85,10 @@ project lead, but not yet validated against anything real:
   on an exit-only anchor sized from a stated safety property, and back it up with recorded
   fixes. Unit-tested but built on three guessed constants; **T-076 is what confirms or kills
   it**, and it is a five-minute walk.
+- **D-034** *(2026-08-10)* — the content pack: one JSON file outside `app/`, compiled in,
+  validated by the same parser at runtime and in `tools/validate-content.mjs`. A place owns one
+  or more geofences, so a levada can carry a start and an end. **T-066 is what will find its
+  gaps** — the format has never met a real list.
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 
@@ -188,6 +194,10 @@ app/
 ├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
 ├── index.ts                          imports backgroundTasks for its side effects — see below
 └── src/
+    ├── content/                      T-040. The pack's only entry point (D-034).
+    │   ├── contentPack.ts            parse + validate; pure, unit-tested
+    │   ├── contentPack.test.ts       16 tests
+    │   └── poiCatalogue.ts           the one module that reads ../../../content/
     ├── storage/                      ~550 lines. COMPLETE.
     │   ├── migrations.ts             6 tables, numbered migration runner
     │   ├── database.ts               WAL, foreign keys, deleteAllUserData()
@@ -248,8 +258,11 @@ existed but nothing ever called it with regions, so `geofence_event` could only 
 - `src/recording/devPoiFixture.ts` — synthetic places generated around wherever the phone is
   standing, so all of this can be exercised before T-066 exists and without any Madeira
   knowledge entering `app/` (D-017).
-- **The content seam is one line.** `index.ts` calls `setPoiCatalogue(devPoiCatalogue)`; T-040
-  replaces that argument and nothing else.
+- **The content seam is one line**, and T-040 filled it the same day. `index.ts` calls
+  `setPoiCatalogue(withDevFixtureFallback(contentPoiCatalogue))` — the real pack, with the
+  synthetic fixture standing in while `content/pois.json` is empty, in development builds only.
+  Format, loading and validation are **D-034**; `app/src/content/` holds the reader and
+  `content/README.md` is the curator's guide.
 
 **The project now has unit tests** — 18 of them, over the selection logic, on Node's own test
 runner with no new dependencies (`cd app && npm test`). This is the only executable evidence
@@ -284,10 +297,21 @@ tested until this exists.**
 **2. ~~T-039 — the dynamic geofence manager.~~ Done 2026-08-10 (D-033).** Content-agnostic and
 unit-tested, exactly as intended. Unproven on hardware, like everything else here.
 
-**3. T-066 — curate the POIs.** ⚠ **Only the project lead can do this.** 150–250 places, each
-assigned one of the five categories (D-027). T-028 established this is *selection, not research*
-— OSM already offers 569 viewpoints and 180 peaks. Without it, geofences have nothing to fire on
-and the app has no reward. **This is on the critical path and it is not code.**
+**3. T-066 — curate the POIs.** ⚠ **Only the project lead can do this, and nothing is now
+blocking it.** 150–250 places, each assigned one of the five categories (D-027). T-028
+established this is *selection, not research* — OSM already offers 569 viewpoints and 180 peaks.
+Without it, geofences have nothing to fire on and the app has no reward.
+
+The tooling was finished 2026-08-10 (T-040, D-034), so the task is now mechanical:
+
+- **`content/pois.json`** is the file. It exists and is empty.
+- **`content/README.md`** is the guide — the format, the levada two-geofence rule, and how to
+  choose a radius. *Read the radius section*: that one number is the difference between a stamp
+  firing and a walked levada going uncredited.
+- **`node tools/validate-content.mjs`** checks the work. It uses the app's own parser, so
+  anything it rejects is exactly what the app would drop, and it reports progress toward 150.
+
+**This is on the critical path and it is not code.**
 
 **4. T-058 / T-058a — the map's appearance.** The tile pack is built (12 MB, `bash
 tiles/pipeline/build.sh`). Start from a Protomaps theme and **subtract** (D-026). Then add
@@ -662,10 +686,10 @@ recent is D-033, the geofence window — see "What is Provisional" above.)*
 > effort on the interface and the map's appearance, not on GPS accuracy.
 >
 > **State:** tile pack is built (12 MB, Protomaps — `bash tiles/pipeline/build.sh`). The Phase 1
-> recorder exists in `app/` (~3,100 lines) and **has never run on a phone** — there is no
-> development build yet, which is the one real blocker. The geofence manager (T-039) is done
-> and unit-tested (`cd app && npm test`). Phase 0: T-022/T-023/T-026/T-028 done; field runs
-> outstanding but no longer blocking v1.
+> recorder exists in `app/` (~3,900 lines) and **has never run on a phone** — there is no
+> development build yet, which is the one real blocker. The geofence backbone (T-039) and the
+> content pack (T-040) are done and unit-tested (`cd app && npm test`). Phase 0:
+> T-022/T-023/T-026/T-028 done; field runs outstanding but no longer blocking v1.
 >
 > I am done planning and want to build. Do not open new research threads or propose new
 > decisions unless something is genuinely blocked.
@@ -674,8 +698,11 @@ recent is D-033, the geofence window — see "What is Provisional" above.)*
 > - **Getting a development build onto my phone** (I will create the Expo account) — this is
 >   the one real blocker, and everything built so far is unproven until it exists
 > - **T-058/T-058a, the map style and terrain** — start from a Protomaps theme and subtract
-> - **T-066, curating the POIs** — I choose the places, you build the content pipeline
 > - **T-042/T-114, the permission flow and onboarding** — slow external Play review downstream
+> - **T-034, stationary-vs-moving sampling gating** — decided in D-028, never written
+>
+> **T-066 (curating `content/pois.json`) is mine to do** — the tooling is finished, see
+> `content/README.md`. Do not offer to do it for me.
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

@@ -73,6 +73,10 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ v1 scope cut: **no map matching in v1 — draw the raw trace** (D-032)
 - ✅ Geofence backbone built: the dynamic monitored set, with an exit-only anchor (T-039,
   D-033, *Provisional*) — unit-tested, unproven on hardware
+- ✅ Content pack format defined and loading (T-040, D-034, *Provisional*) — see
+  [content/README.md](content/README.md)
+- 🟨 **POI curation (T-066) — the file is ready and empty.** This is the critical path now, and
+  it is the one task nobody else can do.
 - 🟨 Phase 1 recorder written — **~3,100 lines, never executed on hardware**
 - ✅ Tile pipeline spike — **12 MB pack for the whole archipelago** (T-026, D-030)
 - ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started** (no longer
@@ -113,9 +117,9 @@ for which kind of change, and the conventions around stable IDs and superseding 
 
 ### Source layout
 
-The target structure. **Partly created:** `app/src/{recording,storage,ui}`, `app/plugins/` and
-the top-level `content/`, `tiles/` and `tools/` directories exist; `content/`, `tiles/` and
-`tools/` are still empty of real content. Everything else below is planned.
+The target structure. **Partly created:** `app/src/{recording,storage,ui,content}`,
+`app/plugins/`, `tiles/` and `tools/` exist and hold real work. `content/pois.json` exists and
+is **empty of places** — filling it is T-066. Everything else below is planned.
 
 ```
 /
@@ -128,11 +132,14 @@ the top-level `content/`, `tiles/` and `tools/` directories exist; `content/`, `
 │   │   ├── map/               # MapLibre integration, style loading, visited-road overlay
 │   │   ├── souvenir/          # End-of-trip video and image rendering
 │   │   ├── storage/           # SQLite schema, migrations, DAOs
+│   │   ├── content/           # Reads content/ — the pack's only entry point (D-034)
 │   │   ├── platform/          # iOS/Android-specific permission + lifecycle glue
 │   │   └── ui/                # Screens (there are very few)
+│   ├── metro.config.js        # Exists only to let the bundler see content/ (D-034)
 │   ├── ios/
 │   └── android/
 ├── content/                   # ALL Madeira-specific data — never hardcoded in app/
+│   ├── README.md              # The format, and the guide for curating it (T-066)
 │   ├── pois.json              # Curated places + category + region + geofence radii + stamps
 │   ├── regions.geojson        # Region boundaries for per-region progress
 │   ├── levadas.geojson        # Levada corridors with entry/exit nodes
@@ -142,6 +149,7 @@ the top-level `content/`, `tiles/` and `tools/` directories exist; `content/`, `
 │   ├── pipeline/              # OSM extract → vector tiles (+ terrain)
 │   └── style/                 # MapLibre style JSON — light.json and dark.json (D-026)
 └── tools/                     # Field-test loggers, trace replay, matching harness
+    └── validate-content.mjs   # Checks content/pois.json using the app's own parser
 ```
 
 ### The `content/` rule

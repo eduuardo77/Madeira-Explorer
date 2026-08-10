@@ -3,9 +3,10 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — T-039, the dynamic geofence manager, is built (D-033), and the
-project has a unit-test runner for the first time (`cd app && npm test`, Node's own, no new
-dependencies).
+**Last updated:** 2026-08-10 — T-039 the dynamic geofence manager (D-033) and T-040 the content
+pack (D-034) are built, which **unblocks T-066**: `content/pois.json` is the file to fill in and
+`node tools/validate-content.mjs` checks it. The project also has a unit-test runner for the
+first time (`cd app && npm test`, Node's own, no new dependencies).
 Previously 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
 Tile schema settled (D-030). Visual direction and passport structure settled (D-026, D-027);
 activity gating settled (D-028); D-022 confirmed.
@@ -265,11 +266,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       is the part that talks to the OS and SQLite. Rebuilds are triggered by the anchor's exit
       event and, as a backstop against a missed event, by recorded fixes.
       — ⚠ **Verified only on a laptop.** No device has run this. T-076 is the real test.
-- [ ] **T-040** Load geofence definitions from the content pack, not from code ⇠ T-039, T-014
-      — T-039 left the seam ready: replace the `setPoiCatalogue(devPoiCatalogue)` line in
-      `app/index.ts` with the content-pack source. Registration must stay at **module scope**
-      — a headless relaunch has no screen to register it from.
-      — **Validate that no id starts with `__`** (reserved for mechanism regions, D-033).
+- [x] **T-040** Load geofence definitions from the content pack, not from code ⇠ T-039, T-014
+      — Built 2026-08-10. Format and loading rules: **D-034**. `content/pois.json` is the file;
+      `content/README.md` is the guide for filling it in; `node tools/validate-content.mjs`
+      checks it using the app's own parser.
+      — A broken file stops the app; a broken row is dropped, counted and logged. Ids starting
+      with `__` are rejected (reserved for mechanism regions, D-033).
+      — ⚠ **The pack is empty.** Everything below the content curation heading in Phase 3 is now
+      the only thing standing between the app and a working reward loop.
 - [x] **T-041** Persist geofence enter/exit/dwell events ⇠ T-039, T-030
       — Enter/exit persisted. Note `dwell` is **not** an OS event on either platform: the
       dwell + speed gate (D-009) is computed later over the enter/exit log, which is what keeps
@@ -376,6 +380,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       nodes, 180 peaks and 79 settlements in the bbox — far more candidates than the 150–250
       target. The work is hand-verification and editorial judgement, which is the one thing a
       global competitor cannot buy (CONTEXT §5a).
+      — **Unblocked 2026-08-10 (T-040).** The file to fill in is `content/pois.json`; the format,
+      the levada two-geofence rule and the guidance on choosing radii are in
+      `content/README.md`; `node tools/validate-content.mjs` checks the work and reports
+      progress against the target. Nothing else is waiting on anything.
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

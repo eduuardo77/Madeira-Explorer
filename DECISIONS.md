@@ -1382,3 +1382,65 @@ Android and accepting it on iOS, not a cleverer selection rule.
   fixes when reading the diary in the field.
 - The manager is content-agnostic and driven through a `PoiCatalogueSource` seam. T-040 is
   now a one-line change in `index.ts` plus the pack itself.
+
+---
+
+## D-034 — The content pack: one JSON file, compiled in, validated twice.
+
+**Status:** Provisional — implemented 2026-08-10 (T-040). The format is settled enough to
+curate against; it has never been exercised by a real list, and T-066 is what will find its
+gaps.
+
+**Context:** D-017 says all Madeira content is data, not code, and CONTEXT §6.1 calls that rule
+absolute. T-039 left a `PoiCatalogueSource` seam and nothing to plug into it. T-066 — 150–250
+hand-verified places — is on the critical path, can only be done by the project lead, and
+cannot start until the file it produces has a defined shape.
+
+**Decision:**
+
+1. **`content/pois.json`, a single file at the repository root**, outside `app/`. Reached by
+   `app/metro.config.js` adding `content/` to Metro's `watchFolders`, and imported by exactly
+   one module, `app/src/content/poiCatalogue.ts`.
+2. **A place owns one or more geofences.** Almost every place has one. A levada has two, roles
+   `start` and `end`, because a levada stamp means "you walked the whole thing" and needs both
+   crossings (D-009). Geofence ids are globally unique and are what land in
+   `geofence_event.poi_id`.
+3. **Validated twice, with one set of rules.** `contentPack.ts` validates at runtime;
+   `tools/validate-content.mjs` imports that same parser and adds the checks only a curator can
+   act on — island bounds, levadas missing an end, places suspiciously close together, progress
+   against the 150–250 target. Node strips the types, so the tool needs no build step and the
+   two can never drift apart.
+4. **A broken file throws; a broken row does not.** Structural failure stops the app, because
+   the caller must not mistake "the file is wrong" for "there are no places". An individual bad
+   row is dropped, counted, and written to the recording diary. A curation mistake costs one
+   stamp, never a recorder that will not start (D-010).
+5. **Radius bounds 40–2000 m.** Below the floor, both platforms treat regions as approximate
+   and the stamp never fires. Above the ceiling, a stamp fires on somebody driving past, and a
+   collection where that happens is worthless (CONTEXT §4.4).
+
+**Alternatives considered:**
+
+- *Put `pois.json` inside `app/`.* Rejected: it is the exact thing D-017 forbids, and the
+  bundler configuration needed to avoid it is twelve lines.
+- *Ship the pack as a runtime asset read from the filesystem.* Rejected for v1 — it buys the
+  ability to update content without an app update, which is worth nothing to an app with no
+  backend and no network (D-001). The seam is async anyway, so this stays available later.
+- *One geofence per place, with levadas as two separate places.* Rejected: the passport would
+  show "Levada do X (start)" and "Levada do X (end)" as two stamps, and the "you walked the
+  whole thing" rule would have to be reconstructed from a naming convention.
+- *A schema validator dependency (zod, ajv).* Rejected: a hand-written parser is ~200 lines,
+  adds nothing to the bundle, and every new dependency needs a network-behaviour audit
+  (CONTEXT §6.4) for a problem this small.
+- *Validate only in the tool, and trust the file at runtime.* Rejected: the tool is a thing a
+  human remembers to run. The runtime check is the one that is always there, and it is what
+  makes a mistake cost one stamp instead of an app that will not launch.
+
+**Consequences:**
+
+- **Place ids are permanent once released.** They are the key stamps are awarded against.
+- **Content changes require an app update.** Accepted for v1; see the rejected alternative.
+- A development-only fallback (`withDevFixtureFallback`) substitutes synthetic places while the
+  pack is empty, guarded on `__DEV__`, so the geofence backbone stays field-testable during the
+  weeks T-066 takes. **T-117 must confirm it is inert in the release build.**
+- `app/src/content/` is a new directory, not in README's original layout. It holds the reader,
+  never the content.

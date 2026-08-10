@@ -128,10 +128,34 @@ export async function loadFixture(): Promise<GeofencePlace[]> {
 }
 
 /**
- * The catalogue source registered in `index.ts`.
+ * The fixture as a catalogue source.
  *
  * Note it throws on a corrupt fixture rather than returning an empty array —
  * the contract on `PoiCatalogueSource` is that an empty catalogue means "there
  * is genuinely nothing to monitor", and the manager acts on that by stopping.
  */
 export const devPoiCatalogue: PoiCatalogueSource = loadFixture;
+
+/**
+ * Use the real content pack, but fall back to the fixture while it is empty.
+ *
+ * T-066 is hand curation by one person and will be empty, then partial, then
+ * finished, over weeks. Without this the geofence backbone is untestable for
+ * that entire period — and it is the part most in need of field testing.
+ *
+ * Guarded on `__DEV__` so a release build can never do it. Shipping synthetic
+ * geofences in a ring around the user would be absurd, and it is exactly the
+ * kind of development affordance that survives to production if nothing stops
+ * it. T-117 should confirm this is inert in the release build.
+ */
+export function withDevFixtureFallback(
+  source: PoiCatalogueSource
+): PoiCatalogueSource {
+  return async () => {
+    const places = await source();
+    if (places.length > 0 || !__DEV__) {
+      return places;
+    }
+    return loadFixture();
+  };
+}

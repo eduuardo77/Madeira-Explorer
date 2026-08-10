@@ -12,7 +12,8 @@ import { registerRootComponent } from 'expo';
 // in the global scope of your JavaScript bundle".
 import './src/recording/backgroundTasks';
 
-import { devPoiCatalogue } from './src/recording/devPoiFixture';
+import { contentPoiCatalogue } from './src/content/poiCatalogue';
+import { withDevFixtureFallback } from './src/recording/devPoiFixture';
 import { setPoiCatalogue } from './src/recording/geofenceManager';
 
 import App from './App';
@@ -23,9 +24,12 @@ import App from './App';
 // that without knowing which places exist. There is no screen alive at that
 // moment to tell it.
 //
-// ⚠ T-040 REPLACES THIS LINE (and its import) with the real content pack. That
-// is the whole of the change: the geofence manager itself knows nothing about
-// Madeira, and must not learn (D-017).
-setPoiCatalogue(devPoiCatalogue);
+// This is the single seam between the app and Madeira (D-017): the geofence
+// manager knows nothing about the island, and must not learn.
+//
+// ⚠ The `withDevFixtureFallback` wrapper is development-only scaffolding — it
+// substitutes synthetic places while `content/pois.json` is still being curated
+// (T-066), and does nothing in a release build. T-117 confirms that.
+setPoiCatalogue(withDevFixtureFallback(contentPoiCatalogue));
 
 registerRootComponent(App);

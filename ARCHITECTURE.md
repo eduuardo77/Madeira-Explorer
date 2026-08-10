@@ -231,7 +231,15 @@ trip(
   home_mask_lat, home_mask_lon, home_mask_radius_m   -- accommodation masking
 )
 
--- Static, from content pack. Read-only at runtime.
+-- Static, from the content pack (D-034). Not database tables: `content/pois.json` is
+-- compiled into the bundle and parsed on first use by app/src/content/. A place owns
+-- one or more geofences — two for a levada, a `start` and an `end` (D-009) — and the
+-- geofence id is what `geofence_event.poi_id` holds.
+--
+--   place(id, name, category, regionId, geofences[])
+--   geofence(id, role, lat, lon, radiusM)
+
+-- Static, from content pack. Read-only at runtime. v2 (D-032).
 road_graph(
   osm_way_id, geometry, highway_type,
   is_tunnel, tunnel_portal_a, tunnel_portal_b,

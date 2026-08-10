@@ -1035,6 +1035,34 @@ exactly the outcome the sampling-bias warning in HANDOFF and T-021a exists to pr
   dense city. Our ≤5% per 12-hour day (T-054) depends on batching, geofences and stationary
   gating together — not on activity detection alone. If T-054 fails, this is where to look first.
 
+### Implemented 2026-08-10 (T-034) — three sub-choices this entry did not settle
+
+Recorded here rather than as a new decision, because each is a refinement of this one and this
+is where somebody would come looking. All three are reversible in one file
+(`movementPolicy.ts`) and none has been tested on hardware.
+
+1. **The rule is asymmetric.** One fix beyond 100 m flips to moving; going stationary needs a
+   full ten minutes of evidence. Being slow to notice a stop costs a few minutes of unnecessary
+   sampling. Being slow to notice a start costs the beginning of a walk, which is trace nothing
+   can recover (CONTEXT §2.4). The costs are not symmetric, so the rule is not either.
+2. **`walking` is the single "moving" profile**, not `driving`. This entry deferred
+   walking-vs-driving but did not say which survives. `walking` is the cheaper of the two, and
+   the argument for `driving`'s tighter sampling — catching a clean fix at each tunnel portal —
+   left v1 with the rest of Phase 4 (D-032). `driving` stays in `samplingPolicy.ts` for manual
+   use and for T-034a.
+3. **Fixes less accurate than 100 m are ignored** when measuring displacement. A fix with a
+   ±150 m accuracy radius cannot answer a 100 m question, and under Laurissilva canopy it will
+   report jumps the user did not make. Flipping to the expensive profile on noise is a battery
+   leak that would be almost impossible to find later. Fixes reporting *no* accuracy are
+   trusted, because refusing them would mean ignoring every fix on a platform that omits the
+   field.
+
+**And one hazard this creates.** The stationary profile sets `pausesUpdatesAutomatically`, so
+the gate can put the recorder to sleep and **cannot wake it**: if iOS stops delivering, no fix
+arrives, so the gate never runs again. Recovery depends on region monitoring and
+significant-location-change (T-047) and the day-1 health check (T-049), none of which has been
+tested. This is the specific thing T-051 must watch.
+
 ---
 
 ## D-029 — OSM alone is sufficient for levadas. Select by name and relation, never by tag.

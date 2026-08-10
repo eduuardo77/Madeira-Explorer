@@ -26,6 +26,13 @@ export const AppStateKey = {
    */
   GeofenceWorkingSet: 'geofence_working_set',
   /**
+   * The sampling profile the gate believes the provider is on (T-034). Held
+   * here rather than in memory because the process is killed and relaunched
+   * between batches, and a fresh module would otherwise re-assume its default
+   * every time.
+   */
+  SamplingProfile: 'sampling_profile',
+  /**
    * JSON: the synthetic places generated for a field test of the geofence
    * manager. Development only — deleted along with everything else by T-125,
    * and made redundant by the real content pack (T-040).

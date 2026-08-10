@@ -81,7 +81,10 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ Tile pipeline spike — **12 MB pack for the whole archipelago** (T-026, D-030)
 - ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started** (no longer
   blocks v1 after D-032)
-- ⬜ Development build — **not created.** Nothing in Phase 1 can be verified without one.
+- ✅ Sampling gating implemented: stationary-vs-moving, asymmetric on purpose (T-034, D-028)
+- 🟨 Development build — **not created.** `app/eas.json` is written and
+  [docs/dev-build.md](docs/dev-build.md) is the runbook; the remaining steps need an Expo
+  account. **Nothing in Phase 1 can be verified without one.**
 
 **All blocking decisions are closed.** Current dependency cost: **$0** (the only unavoidable
 spend is store fees — Apple $99/year, Google Play $25 one-time).
@@ -109,6 +112,8 @@ wrong. The tile spike in particular is the unblock for all visual design work.
 | [DECISIONS.md](DECISIONS.md) | Decision log — what we chose, what we rejected, and why. |
 | [CONTEXT.md](CONTEXT.md) | Everything a fresh contributor (human or AI) needs before touching anything. |
 | [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
+| [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone, and what to check first once it runs. |
+| [content/README.md](content/README.md) | The content pack format, and the guide for curating it (T-066). |
 
 **These documents are the source of truth, not conversation history.** They are updated as
 decisions are made, not retrospectively. The maintenance protocol — which document to update

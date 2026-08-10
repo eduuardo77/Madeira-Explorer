@@ -285,6 +285,14 @@ export default function DebugScreen() {
           value={health.isGeofencing ? 'yes' : 'no'}
           tone={health.isGeofencing ? 'good' : 'warn'}
         />
+        <Row
+          label="Sampling profile"
+          value={
+            health.samplingProfile === 'stationary'
+              ? 'stationary (cheap)'
+              : health.samplingProfile
+          }
+        />
       </Section>
 
       <Section title="Trip">

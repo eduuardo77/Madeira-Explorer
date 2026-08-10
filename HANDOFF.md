@@ -3,15 +3,16 @@
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
-building the geofence manager and the content pack (T-039/D-033, T-040/D-034).
+building the geofence manager, the content pack and the sampling gate (T-039/D-033,
+T-040/D-034, T-034) and writing `docs/dev-build.md`.
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
 **Repository state:** git repository. Planning docs plus a Phase 1 recorder in `app/` — 27
-source files, ~3,900 lines. **None of it has ever run on a phone.** The pure logic — geofence
-selection and content-pack parsing — is the only part that has ever run at all: 34 unit tests,
-`cd app && npm test`. Phase 0 has produced its first result: the OSM coverage survey
+source files, ~4,400 lines. **None of it has ever run on a phone.** The pure logic — geofence
+selection, content-pack parsing and the sampling gate — is the only part that has ever run at
+all: 47 unit tests, `cd app && npm test`. Phase 0 has produced its first result: the OSM coverage survey
 (T-028, D-029).
 
 ---
@@ -59,9 +60,9 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 ### ⚠ The single most important thing to know
 
 **No line of this app has ever executed on a phone.** What has been verified is that it is
-*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 662 modules, `expo-doctor`
+*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 664 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. Since 2026-08-10, the pure logic is also unit-tested — 34 tests, on Node.
+native config. Since 2026-08-10, the pure logic is also unit-tested — 47 tests, on Node.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
 no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
@@ -212,6 +213,9 @@ app/
     │   ├── recordingSink.ts          writes batches to SQLite; never throws
     │   ├── sensors.ts                barometer + pedometer, with two honest limitations
     │   ├── samplingPolicy.ts         profiles — ⚠ NUMBERS ARE NOT TUNED
+    │   ├── movementPolicy.ts         T-034, pure: stationary or moving? (D-028)
+    │   ├── movementPolicy.test.ts    13 tests
+    │   ├── samplingGate.ts           T-034, applies the decision to the provider
     │   ├── distance.ts               haversine; the only geometry in v1
     │   ├── geofenceSelection.ts      T-039, pure and unit-tested (D-033)
     │   ├── geofenceSelection.test.ts 18 tests — `cd app && npm test`
@@ -270,10 +274,16 @@ in the repository, and it will stay that way until a development build exists. I
 prove a geofence ever fires on a phone: that is T-076, and the debug screen has a
 *Start geofence field test* button that makes it a five-minute walk.
 
-Also missing from Phase 1: sampling gating (T-034 — profiles exist, nothing selects between
-them; the trigger is now decided, the code is not written), notifications and the day-1 health
-check (T-049), the Always upgrade and downgrade detection (T-043/T-044), and the
-battery-optimisation exemption (T-046).
+**Sampling gating is done too** (T-034, 2026-08-10). `movementPolicy.ts` decides
+stationary-vs-moving from distance over time (D-028), `samplingGate.ts` applies it, and the
+location task runs it once per batch. The rule is asymmetric on purpose — one fix flips to
+moving, ten minutes of evidence are needed to go stationary. ⚠ **It can put the recorder to
+sleep and cannot wake it**: the stationary profile pauses updates, and if iOS stops delivering,
+no fix arrives and the gate never runs again. That is the single most important thing to watch
+in T-051.
+
+Still missing from Phase 1: notifications and the day-1 health check (T-049), the Always
+upgrade and downgrade detection (T-043/T-044), and the battery-optimisation exemption (T-046).
 
 Nothing at all exists from Phases 2–7.
 
@@ -290,9 +300,13 @@ already deleted it.
 
 **1. A development build.** ⚠ **The only true blocker, and it needs the project lead.**
 Background location cannot run in Expo Go, so nothing in Phase 1 can be verified without one.
-Needs an Expo account (theirs to create) and `eas.json`. No JDK-based local Android build and no
-Mac, so EAS Build is the realistic path for both platforms. **Nothing below this line can be
-tested until this exists.**
+No JDK-based local Android build and no Mac, so EAS Build is the realistic path for both
+platforms. **Nothing below this line can be tested until this exists.**
+
+`app/eas.json` is written and committed; what remains needs an Expo account. **The runbook is
+`docs/dev-build.md`** — five commands, plus an ordered list of what to check first once it runs
+and which of those checks settles which open question. Android alone unblocks everything except
+the iOS-specific claims, and it needs no Apple Developer membership.
 
 **2. ~~T-039 — the dynamic geofence manager.~~ Done 2026-08-10 (D-033).** Content-agnostic and
 unit-tested, exactly as intended. Unproven on hardware, like everything else here.
@@ -436,14 +450,19 @@ it outdoors, in Funchal, at midday. That is the test that confirms or kills D-02
 
 ### Finishing Phase 1
 
-The scaffold, storage, provider interface, `expo-location` integration, data protection and
-debug screen are done (see "What is already built"). Remaining order is in "Start here" above.
-Note that after D-032 the geofence manager (T-039) matters more than anything else in Phase 1 —
-it is no longer one subsystem among many, it is the reward.
-4. **T-034, stationary-vs-moving gating.** **No longer blocked** — the trigger was decided
-   2026-08-08 (D-028): distance over time, no new sensor, no new dependency, no new permission.
-5. **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and
-   they are the trigger for the Transistor purchase decision (D-025).
+The scaffold, storage, provider interface, `expo-location` integration, data protection, the
+debug screen, the geofence backbone (T-039), the content pack (T-040) and sampling gating
+(T-034) are all done — see "What is already built".
+
+**Phase 1's remaining code is small:** the day-1 health check (T-049), the Always upgrade and
+downgrade detection (T-043/T-044), and the Android battery-optimisation exemption (T-046).
+Everything else left in the phase is **verification, and verification needs the development
+build**:
+
+- **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and
+  they are the trigger for the Transistor purchase decision (D-025). T-051 in particular is now
+  carrying two known hazards at once: `pausesUpdatesAutomatically`, and the fact that the
+  sampling gate can select the stationary profile and then never hear from the OS again.
 
 ---
 

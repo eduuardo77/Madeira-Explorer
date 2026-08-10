@@ -24,6 +24,7 @@ import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
 import { ANCHOR_REGION_ID } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
+import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 export { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME };
@@ -81,6 +82,17 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   // one distance calculation that there is nothing to do.
   const latest = samples[samples.length - 1];
   await noteRecordedPosition({ lat: latest.lat, lon: latest.lon });
+
+  // And finally the sampling gate (T-034). Last because it is the only one of
+  // the three that can change what the OS does next, and because it wants the
+  // fixes above already committed — it reads the window back out of the
+  // database rather than trusting this batch alone.
+  //
+  // `latest.ts`, not `Date.now()`: the OS may have been holding this batch for
+  // several minutes (that deferral is the point — ARCHITECTURE §7), and judging
+  // staleness against wall-clock would read a perfectly healthy batch as an
+  // outage.
+  await applySamplingGate(latest.ts);
 });
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {

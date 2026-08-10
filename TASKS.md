@@ -3,10 +3,12 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — T-039 the dynamic geofence manager (D-033) and T-040 the content
-pack (D-034) are built, which **unblocks T-066**: `content/pois.json` is the file to fill in and
-`node tools/validate-content.mjs` checks it. The project also has a unit-test runner for the
-first time (`cd app && npm test`, Node's own, no new dependencies).
+**Last updated:** 2026-08-10 — T-039 the dynamic geofence manager (D-033), T-040 the content
+pack (D-034) and T-034 the sampling gate are built. **T-066 is unblocked**:
+`content/pois.json` is the file to fill in and `node tools/validate-content.mjs` checks it.
+`app/eas.json` and `docs/dev-build.md` reduce the development-build blocker to steps only the
+project lead can take. The project also has a unit-test runner for the first time
+(`cd app && npm test`, Node's own, no new dependencies).
 Previously 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
 Tile schema settled (D-030). Visual direction and passport structure settled (D-026, D-027);
 activity gating settled (D-028); D-022 confirmed.
@@ -202,6 +204,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Project scaffolded 2026-08-06** (Expo SDK 57, RN 0.86, TS strict, `blank-typescript`
       template). **Dev builds not yet created** — needs an EAS account, or a local toolchain
       (no JDK on the dev machine, and iOS needs a Mac). This is what still blocks the task.
+      — **`app/eas.json` written 2026-08-10**, with a development profile that produces an
+      installable APK. The remaining steps need an Expo account and are therefore the project
+      lead's: the exact runbook, and what to check first once it runs, is **`docs/dev-build.md`**.
+      Android alone is enough to unblock everything except the iOS-specific claims.
 - [x] **T-030** Implement the SQLite schema (raw_fix, sensor_sample, geofence_event, trip)
       with WAL mode ⇠ T-029, T-016
       — Also `recording_event` (gap honesty) and `app_state`. Migration runner; UPDATE-blocking
@@ -230,11 +236,21 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       batching knob `expo-location` exposes; it does not surface `setMaxWaitTime` by name.
       **Whether Android actually batches rather than delivering per-fix is unverified** and is
       a direct input to the battery target (T-054).
-- [ ] **T-034** Implement **stationary-vs-moving** sampling gating (D-028) ⇠ T-031
+- [x] **T-034** Implement **stationary-vs-moving** sampling gating (D-028) ⇠ T-031
       — **Trigger decided 2026-08-08.** Derive from distance over time — starting point: moved
       less than ~100 m in ~10 min → stationary profile. No new sensor, no new dependency, no new
       permission, identical on both platforms. The ~100 m / ~10 min figures are **guesses**,
       tuned by T-038.
+      — Built 2026-08-10. `movementPolicy.ts` decides (pure, 13 tests), `samplingGate.ts`
+      applies, and the location task calls it once per batch. **The rule is asymmetric on
+      purpose:** one fix flips to moving, ten minutes of evidence are needed to go stationary —
+      being slow to notice a stop costs battery, being slow to notice a start costs trace.
+      — Fixes less accurate than 100 m are ignored, so canopy noise cannot fake movement. A
+      *stale* window keeps the current profile: silence is not stillness (ARCHITECTURE §10).
+      — ⚠ **The gate can put the recorder to sleep and cannot wake it.** The stationary profile
+      sets `pausesUpdatesAutomatically`; if iOS stops delivering, no fix arrives, so the gate
+      never runs again. Recovery is region monitoring and significant-location-change (T-047)
+      plus the day-1 check (T-049) — all untested. **This is the thing to watch in T-051.**
       — Walking-vs-driving is **deferred** to a single "moving" profile (see T-034a). Speed alone
       cannot separate them in Madeira: steep gradients and Funchal traffic compress driving
       speeds into walking range.

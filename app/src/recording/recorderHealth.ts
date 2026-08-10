@@ -19,7 +19,8 @@ import type { RecordingEvent } from '../storage/types';
 import { locationProvider } from './ExpoLocationProvider';
 import type { GeofenceStatus } from './geofenceManager';
 import { getGeofenceStatus } from './geofenceManager';
-import type { PermissionLevel } from './LocationProvider';
+import type { PermissionLevel, SamplingProfile } from './LocationProvider';
+import { getCurrentSamplingProfile } from './samplingGate';
 
 /**
  * How long a silence has to be before we call it a gap.
@@ -36,6 +37,8 @@ export type RecorderHealth = {
   permission: PermissionLevel;
   isRecording: boolean;
   isGeofencing: boolean;
+  /** What the stationary-vs-moving gate has selected (T-034). */
+  samplingProfile: SamplingProfile;
 
   tripId: number | null;
   tripStartedTs: number | null;
@@ -60,10 +63,11 @@ export type RecorderHealth = {
 };
 
 export async function getRecorderHealth(): Promise<RecorderHealth> {
-  const [permission, isRecording, geofence, trip, recentEvents] =
+  const [permission, isRecording, samplingProfile, geofence, trip, recentEvents] =
     await Promise.all([
       locationProvider.getPermissionLevel(),
       locationProvider.isRecording(),
+      getCurrentSamplingProfile(),
       getGeofenceStatus(),
       tripDao.getActiveTrip(),
       recordingEventDao.getRecent(20),
@@ -79,6 +83,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       permission,
       isRecording,
       isGeofencing,
+      samplingProfile,
       tripId: null,
       tripStartedTs: null,
       fixCount: 0,
@@ -124,6 +129,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     permission,
     isRecording,
     isGeofencing,
+    samplingProfile,
     tripId: trip.id,
     tripStartedTs: trip.started_ts,
     fixCount,

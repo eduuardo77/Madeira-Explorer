@@ -50,6 +50,30 @@ export type GeofenceRegion = {
   lat: number;
   lon: number;
   radiusM: number;
+  /**
+   * Both default to true, which is what a place wants. The geofence manager's
+   * anchor region (T-039) is the exception: it is exit-only, because we are
+   * standing in the middle of it when it is registered and an enter event would
+   * carry no information. Each suppressed event is a background wake-up we do
+   * not pay for.
+   */
+  notifyOnEnter?: boolean;
+  notifyOnExit?: boolean;
+};
+
+/**
+ * A position good enough to decide *which* places to monitor, and not good
+ * enough to record as a fix.
+ *
+ * Deliberately not a `LocationSample`: this comes from the OS's cache rather
+ * than from a reading we asked for, so passing it off as a recorded fix would
+ * be inventing data (ARCHITECTURE §10). It never reaches `raw_fix`.
+ */
+export type CoarsePosition = {
+  ts: number;
+  lat: number;
+  lon: number;
+  accuracyM: number | null;
 };
 
 export type GeofenceTransition = {
@@ -113,6 +137,18 @@ export interface LocationProvider {
   stopRecording(): Promise<void>;
   isRecording(): Promise<boolean>;
   setSamplingProfile(profile: SamplingProfile): Promise<void>;
+
+  /**
+   * The OS's cached position, if it has one no older than `maxAgeMs`.
+   *
+   * Free: it returns whatever the system already knows and never powers up the
+   * GNSS chip. That is the whole reason this is on the interface rather than
+   * the geofence manager calling for a fresh fix — rebuilding the monitored set
+   * is a housekeeping task and must not cost a GPS acquisition (CONTEXT §6.3).
+   * Returns null when the cache is empty or stale, and the caller is expected
+   * to cope rather than escalate.
+   */
+  getLastKnownPosition(maxAgeMs: number): Promise<CoarsePosition | null>;
 
   startGeofencing(regions: GeofenceRegion[]): Promise<void>;
   stopGeofencing(): Promise<void>;

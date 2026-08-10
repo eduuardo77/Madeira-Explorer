@@ -9,14 +9,15 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
-import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './backgroundTasks';
 import type {
+  CoarsePosition,
   GeofenceRegion,
   LocationProvider,
   PermissionLevel,
   SamplingProfile,
 } from './LocationProvider';
 import { getSamplingParameters } from './samplingPolicy';
+import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 function toExpoAccuracy(
   accuracy: 'coarse' | 'balanced' | 'high'
@@ -174,6 +175,23 @@ export class ExpoLocationProvider implements LocationProvider {
     );
   }
 
+  async getLastKnownPosition(
+    maxAgeMs: number
+  ): Promise<CoarsePosition | null> {
+    const position = await Location.getLastKnownPositionAsync({
+      maxAge: maxAgeMs,
+    });
+    if (position === null) {
+      return null;
+    }
+    return {
+      ts: position.timestamp,
+      lat: position.coords.latitude,
+      lon: position.coords.longitude,
+      accuracyM: position.coords.accuracy ?? null,
+    };
+  }
+
   async startGeofencing(regions: GeofenceRegion[]): Promise<void> {
     if (regions.length === 0) {
       await this.stopGeofencing();
@@ -200,8 +218,8 @@ export class ExpoLocationProvider implements LocationProvider {
         latitude: region.lat,
         longitude: region.lon,
         radius: region.radiusM,
-        notifyOnEnter: true,
-        notifyOnExit: true,
+        notifyOnEnter: region.notifyOnEnter ?? true,
+        notifyOnExit: region.notifyOnExit ?? true,
       }))
     );
   }

@@ -20,11 +20,13 @@ import type {
   FixSource,
   GeofenceEventType,
 } from '../storage/types';
+import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
+import { ANCHOR_REGION_ID } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
+import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
-export const LOCATION_TASK_NAME = 'madeira-location-updates';
-export const GEOFENCE_TASK_NAME = 'madeira-geofencing';
+export { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME };
 
 /**
  * Convert an Expo location into our own shape.
@@ -69,7 +71,16 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     return;
   }
 
-  await databaseSink.onLocations(locations.map(toLocationSample));
+  const samples = locations.map(toLocationSample);
+
+  // Storage first, always. The trace is the irreplaceable thing (D-010); the
+  // geofence window can be rebuilt from nothing at any time.
+  await databaseSink.onLocations(samples);
+
+  // Then the backstop for a missed anchor exit (T-039). It normally decides in
+  // one distance calculation that there is nothing to do.
+  const latest = samples[samples.length - 1];
+  await noteRecordedPosition({ lat: latest.lat, lon: latest.lon });
 });
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
@@ -90,6 +101,17 @@ TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
   // cannot attribute the crossing to anything, so drop rather than guess.
   if (!region?.identifier) {
     await databaseSink.onError('geofence event with no region identifier');
+    return;
+  }
+
+  // The anchor is not a place — it is the manager's own tripwire for "you have
+  // travelled far enough that the monitored set is stale" (T-039). It must
+  // never reach `geofence_event`, or it would show up later as a stamp for
+  // somewhere that does not exist.
+  if (region.identifier === ANCHOR_REGION_ID) {
+    if (eventType === Location.GeofencingEventType.Exit) {
+      await handleAnchorExit();
+    }
     return;
   }
 

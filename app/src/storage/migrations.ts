@@ -110,7 +110,7 @@ export const MIGRATIONS: Migration[] = [
       `CREATE TABLE recording_event (
          id     INTEGER PRIMARY KEY AUTOINCREMENT,
          ts     INTEGER NOT NULL,
-         -- start | stop | permission_change | batch | error | app_launch
+         -- start | stop | permission_change | batch | error | geofence | app_launch
          kind   TEXT    NOT NULL,
          detail TEXT
        );`,

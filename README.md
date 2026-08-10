@@ -52,8 +52,8 @@ everything you saw.
 
 ## Current status
 
-**Phase: Planning complete. Phase 0 validation not started; a Phase 1 recorder skeleton exists
-and has never been run.**
+**Phase: Planning complete. Phase 1 recorder written, including the geofence backbone; it has
+never run on a phone. Phase 0 half done — the tile pack is built, the field runs are not.**
 
 - ✅ Concept defined and critiqued
 - ✅ Core product risks identified and mitigated in design
@@ -70,9 +70,13 @@ and has never been run.**
   *Provisional*); passport by category (D-027, *Provisional*) — see
   [docs/design-brief.md](docs/design-brief.md)
 - ✅ Sampling gate decided: stationary-vs-moving (D-028, *Provisional*)
-- 🟨 Phase 1 recorder skeleton written — **~2,400 lines, never executed on hardware**
-- ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started**
-- ⬜ Tile pipeline spike — **not started**
+- ✅ v1 scope cut: **no map matching in v1 — draw the raw trace** (D-032)
+- ✅ Geofence backbone built: the dynamic monitored set, with an exit-only anchor (T-039,
+  D-033, *Provisional*) — unit-tested, unproven on hardware
+- 🟨 Phase 1 recorder written — **~3,100 lines, never executed on hardware**
+- ✅ Tile pipeline spike — **12 MB pack for the whole archipelago** (T-026, D-030)
+- ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started** (no longer
+  blocks v1 after D-032)
 - ⬜ Development build — **not created.** Nothing in Phase 1 can be verified without one.
 
 **All blocking decisions are closed.** Current dependency cost: **$0** (the only unavoidable

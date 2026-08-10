@@ -2,13 +2,15 @@
 
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
-session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added).
+session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
+building the geofence manager (T-039, D-033).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
-**Repository state:** git repository, ten commits. Planning docs plus a Phase 1 recorder
-skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.**
+**Repository state:** git repository. Planning docs plus a Phase 1 recorder in `app/` — 27
+source files, ~3,100 lines. **None of it has ever run on a phone**; the geofence selection
+logic is the only part that has ever run at all (18 unit tests, `cd app && npm test`).
 Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
 
 ---
@@ -77,6 +79,10 @@ project lead, but not yet validated against anything real:
   moves to the map screen.
 - **D-028** — sampling gates on stationary-vs-moving; walking-vs-driving deferred; the pedometer
   classifies but never gates recording.
+- **D-033** *(2026-08-10)* — the geofence window: rank by edge distance, spend one region slot
+  on an exit-only anchor sized from a stated safety property, and back it up with recorded
+  fixes. Unit-tested but built on three guessed constants; **T-076 is what confirms or kills
+  it**, and it is a five-minute walk.
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 
@@ -188,13 +194,19 @@ app/
     │   ├── types.ts                  row shapes, narrow string unions
     │   └── dao/                      rawFix, sensorSample, geofenceEvent,
     │                                 recordingEvent, trip, appState
-    ├── recording/                    ~730 lines. COMPLETE BUT INERT.
+    ├── recording/                    ~1,400 lines. COMPLETE BUT INERT.
     │   ├── LocationProvider.ts       the D-025 seam — read this first
     │   ├── ExpoLocationProvider.ts   the only file allowed to import expo-location
     │   ├── backgroundTasks.ts        TaskManager.defineTask, module scope
+    │   ├── taskNames.ts              the two task-name strings, alone, to break a cycle
     │   ├── recordingSink.ts          writes batches to SQLite; never throws
     │   ├── sensors.ts                barometer + pedometer, with two honest limitations
     │   ├── samplingPolicy.ts         profiles — ⚠ NUMBERS ARE NOT TUNED
+    │   ├── distance.ts               haversine; the only geometry in v1
+    │   ├── geofenceSelection.ts      T-039, pure and unit-tested (D-033)
+    │   ├── geofenceSelection.test.ts 18 tests — `cd app && npm test`
+    │   ├── geofenceManager.ts        T-039, the half that talks to the OS and SQLite
+    │   ├── devPoiFixture.ts          synthetic places for a field test; deleted at T-040
     │   └── recorderHealth.ts         feeds the debug screen, T-048 and T-049
     └── ui/                           ~520 lines
         ├── DebugScreen.tsx           the only screen that exists
@@ -221,12 +233,29 @@ dialog. *Start recording* registers the background task. Batches arrive → sink
 rows plus one `sensor_sample` → counts and last-fix age update on screen. That is the whole
 loop, and it *should* work.
 
-### The largest hole in Phase 1
+### ~~The largest hole in Phase 1~~ — closed 2026-08-10 (T-039)
 
-**Geofencing is wired but never fires.** `startGeofencing()` exists on the provider and the task
-handler is written, but nothing calls it with regions, because there are no POIs yet (T-039 the
-manager, T-066 the content). So `geofence_event` stays empty. Since geofences are the reward
-backbone (D-005), this is the biggest gap in the phase.
+**The geofence manager is built.** It was the biggest gap in the phase: `startGeofencing()`
+existed but nothing ever called it with regions, so `geofence_event` could only stay empty.
+
+- `src/recording/geofenceSelection.ts` — pure arithmetic: rank the catalogue by *edge* distance,
+  keep the nearest `cap − 1`, and size an exit-only anchor region so that **while you are inside
+  it you cannot have reached anything unmonitored**. The rule and its three guessed constants
+  are **D-033**.
+- `src/recording/geofenceManager.ts` — the impure half: the OS, SQLite, the clock. Rebuilds on
+  the anchor's exit event, and again from recorded fixes as a backstop against a missed event.
+  Never throws, and never clears the monitored set on failure.
+- `src/recording/devPoiFixture.ts` — synthetic places generated around wherever the phone is
+  standing, so all of this can be exercised before T-066 exists and without any Madeira
+  knowledge entering `app/` (D-017).
+- **The content seam is one line.** `index.ts` calls `setPoiCatalogue(devPoiCatalogue)`; T-040
+  replaces that argument and nothing else.
+
+**The project now has unit tests** — 18 of them, over the selection logic, on Node's own test
+runner with no new dependencies (`cd app && npm test`). This is the only executable evidence
+in the repository, and it will stay that way until a development build exists. It does not
+prove a geofence ever fires on a phone: that is T-076, and the debug screen has a
+*Start geofence field test* button that makes it a five-minute walk.
 
 Also missing from Phase 1: sampling gating (T-034 — profiles exist, nothing selects between
 them; the trigger is now decided, the code is not written), notifications and the day-1 health
@@ -252,10 +281,8 @@ Needs an Expo account (theirs to create) and `eas.json`. No JDK-based local Andr
 Mac, so EAS Build is the realistic path for both platforms. **Nothing below this line can be
 tested until this exists.**
 
-**2. T-039 — the dynamic geofence manager.** The reward backbone, and after D-032 it is *the*
-product rather than one subsystem among many. Needs no hardware and no field data. Drive it from
-a test fixture so it stays content-agnostic (D-017). **This is the recommended next piece of
-code.**
+**2. ~~T-039 — the dynamic geofence manager.~~ Done 2026-08-10 (D-033).** Content-agnostic and
+unit-tested, exactly as intended. Unproven on hardware, like everything else here.
 
 **3. T-066 — curate the POIs.** ⚠ **Only the project lead can do this.** 150–250 places, each
 assigned one of the five categories (D-027). T-028 established this is *selection, not research*
@@ -616,6 +643,9 @@ For context on how the design arrived where it did. Full reasoning for each is i
 - **D-027** Passport organised by category, not region *(Provisional)*
 - **D-028** Gate on stationary-vs-moving; pedometer classifies but never gates *(Provisional)*
 
+*(D-029 onwards were decided after the planning conversation and are not listed here. The most
+recent is D-033, the geofence window — see "What is Provisional" above.)*
+
 ---
 
 ## Suggested opening message for the new session
@@ -632,19 +662,20 @@ For context on how the design arrived where it did. Full reasoning for each is i
 > effort on the interface and the map's appearance, not on GPS accuracy.
 >
 > **State:** tile pack is built (12 MB, Protomaps — `bash tiles/pipeline/build.sh`). The Phase 1
-> recorder exists in `app/` (~2,400 lines) but **has never been run** — there is no development
-> build yet, which is the one real blocker. Phase 0: T-022/T-023/T-026/T-028 done; field runs
+> recorder exists in `app/` (~3,100 lines) and **has never run on a phone** — there is no
+> development build yet, which is the one real blocker. The geofence manager (T-039) is done
+> and unit-tested (`cd app && npm test`). Phase 0: T-022/T-023/T-026/T-028 done; field runs
 > outstanding but no longer blocking v1.
 >
 > I am done planning and want to build. Do not open new research threads or propose new
 > decisions unless something is genuinely blocked.
 >
 > I want to work on [pick one]:
-> - **T-039, the dynamic geofence manager** — the reward backbone, needs no hardware, best next
->   piece of code
-> - **Getting a development build onto my phone** (I will create the Expo account)
+> - **Getting a development build onto my phone** (I will create the Expo account) — this is
+>   the one real blocker, and everything built so far is unproven until it exists
 > - **T-058/T-058a, the map style and terrain** — start from a Protomaps theme and subtract
 > - **T-066, curating the POIs** — I choose the places, you build the content pipeline
+> - **T-042/T-114, the permission flow and onboarding** — slow external Play review downstream
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

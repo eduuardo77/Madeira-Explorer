@@ -1,6 +1,18 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    // Lets a module say `./distance.ts` instead of `./distance`. Needed because
+    // the pure modules are unit-tested by Node's own test runner, and Node's
+    // module resolver — unlike Metro's — will not guess a missing extension.
+    // Safe here because this project never emits JavaScript from tsc: Metro
+    // does the building, tsc only type-checks (`noEmit` is set in the base).
+    "allowImportingTsExtensions": true,
+    // `node` is here for the unit tests only — they import `node:test`, which
+    // the app itself never touches. `react` has to be listed alongside it
+    // because naming anything in this field switches off the automatic
+    // inclusion of everything else under `node_modules/@types`, and JSX would
+    // stop type-checking without it.
+    "types": ["node", "react"]
   }
 }

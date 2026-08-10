@@ -1305,3 +1305,80 @@ Nobody uninstalls because a drawn line was twenty metres off.
 and the interface (`docs/design-brief.md` — one screen, three controls, one number). Against a
 fourteen-year incumbent with five tabs and dense chrome, **"does less, beautifully" is the one
 position where being new is an advantage.**
+
+---
+
+## D-033 — The dynamic geofence window: nearest-by-edge-distance, plus an exit-only anchor.
+
+**Status:** Provisional — implemented 2026-08-10 (T-039), agreed in principle by nobody yet.
+The mechanism is sound on paper and unit-tested; **none of the three numbers in it has been
+measured against a real device**, which is what T-076 is for.
+
+**Context:** iOS monitors at most 20 regions at once, Android about 100, and the content pack
+will hold 150–250 places (T-066). D-005 and ARCHITECTURE §6.1 already said the set must be
+swapped dynamically — "roughly the nearest 18, plus one large 'you have left this area'
+region." This decision records *how*, because two of the choices below are not the obvious
+ones and would otherwise be quietly undone by a future contributor.
+
+**Decision:**
+
+1. **Rank by edge distance, not centre distance.** A place's own radius is subtracted before
+   ranking, so a 500 m trailhead outranks a 100 m viewpoint that is nearer by centre. The
+   question being answered is "which could the user enter first", not "which is nearest".
+2. **Spend one region slot on an anchor** centred on the user, exit-only, registered under the
+   reserved id `__anchor__`. Its exit is what rebuilds the window. It is never written to
+   `geofence_event` — it is not a place.
+3. **Size the anchor from a stated safety property**, not from a fixed radius:
+
+   > While the user is inside the anchor, they cannot have reached any place we are not
+   > monitoring.
+
+   which holds when `anchorRadius ≤ (edge distance to the nearest unmonitored place) − margin`.
+   When the whole catalogue fits inside the cap, there is no anchor at all.
+4. **Back the anchor up with recorded fixes.** Location batches are arriving anyway; if one
+   shows the user 75% of the way to the anchor's boundary, rebuild without waiting for the
+   exit event.
+
+**Alternatives considered:**
+
+- *A fixed-radius anchor (say 5 km).* Rejected: it is either too small in the empty interior,
+  where it fires constantly for nothing, or too large in Funchal, where places are dense and
+  it would let the user walk past several unmonitored ones. Deriving the radius from the
+  catalogue costs one line of arithmetic and is correct in both.
+- *Periodically re-selecting on a timer.* Rejected outright — CONTEXT §6.3 forbids adding a
+  periodic timer without a battery justification, and there is none here. The anchor is the
+  event-driven form of the same thing, handled by the location coprocessor at no cost to us.
+- *Ranking by centre distance.* Rejected: it systematically disadvantages exactly the places
+  we deliberately give generous radii to, which are the trailheads, which are the ones whose
+  omission D-032 names as an uninstall trigger.
+- *Re-selecting only on the anchor exit, with no backstop.* Rejected: a single missed geofence
+  event would freeze the monitored set for the rest of the trip, silently and invisibly. The
+  backstop costs one distance calculation per batch of fixes we were already being handed.
+- *Requesting a fresh GPS fix when rebuilding.* Rejected on battery grounds. The manager uses
+  the OS's cached position, falls back to our own last recorded fix, and defers if it has
+  neither.
+
+**The three unmeasured numbers**, all in `geofenceSelection.ts` and all guesses:
+
+| Constant | Value | What would set it properly |
+|---|---|---|
+| `ANCHOR_MARGIN_M` | 500 m | How late the OS actually delivers an exit event, at 80 km/h — T-076 |
+| `MIN_ANCHOR_RADIUS_M` | 300 m | The radius below which regions become unreliable in practice |
+| `REBUILD_AT_FRACTION_OF_RADIUS` | 0.75 | How often the backstop fires in normal use versus how much it repairs |
+
+**Known limitation, recorded rather than hidden:** in a cluster denser than the region cap —
+central Funchal, plausibly — the anchor is clamped to its minimum and the safety property no
+longer holds. There is then an unmonitored place within 300 m. It is unreachable without
+passing closer to something that *is* monitored, so the practical cost is believed small, but
+the manager logs the condition to the recording diary rather than pretending otherwise
+(ARCHITECTURE §10). If T-066 produces a cluster like this, the fix is a larger region cap on
+Android and accepting it on iOS, not a cleverer selection rule.
+
+**Consequences:**
+
+- **Content-pack ids must never begin with `__`** — that prefix is reserved for regions that
+  are mechanism rather than content. T-040 should validate it.
+- `recording_event` gains a `geofence` kind, so a reshuffle can be told apart from a batch of
+  fixes when reading the diary in the field.
+- The manager is content-agnostic and driven through a `PoiCatalogueSource` seam. T-040 is
+  now a one-line change in `index.ts` plus the pack itself.

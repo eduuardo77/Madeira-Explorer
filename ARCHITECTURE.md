@@ -195,7 +195,9 @@ sensor_sample(
 )
 
 geofence_event(
-  id, trip_id, poi_id, ts,
+  id, trip_id, poi_id, ts,   -- poi_id NEVER starts with `__`: that prefix is
+                             -- reserved for mechanism regions, currently just
+                             -- the geofence manager's `__anchor__` (D-033)
   event_type,             -- enter | exit | dwell
   accuracy_m
 )
@@ -312,6 +314,10 @@ These are not implementation details; they are constraints that determined the a
   be managed dynamically: register roughly the nearest 18, plus one large "you have left this
   area" region whose exit triggers a reshuffle. This is painful to retrofit, so it is
   designed in from the start.
+  **Implemented 2026-08-10 (T-039); the selection rule and its three unmeasured constants are
+  D-033.** Two invariants a future change must not break: places are ranked by *edge* distance
+  (centre distance minus their own radius), and the anchor region is registered under the
+  reserved id `__anchor__` and never written to `geofence_event`.
 - **"Always" location cannot be requested up front.** The flow is While-Using first, then
   escalate. iOS then periodically shows the user a map of everywhere the app has tracked
   them and asks whether to continue — which reads as a security warning to a non-technical

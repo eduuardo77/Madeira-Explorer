@@ -24,7 +24,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import { generateFixture, saveFixture } from '../recording/devPoiFixture';
 import { locationProvider } from '../recording/ExpoLocationProvider';
+import {
+  refreshGeofences,
+  stopGeofences,
+} from '../recording/geofenceManager';
 import {
   getRecorderHealth,
   type RecorderHealth,
@@ -56,6 +61,16 @@ function formatDuration(ms: number | null): string {
     return `${hours}h ${minutes % 60}m`;
   }
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+function formatMetres(metres: number | null): string {
+  if (metres === null) {
+    return '—';
+  }
+  if (metres < 1000) {
+    return `${Math.round(metres)} m`;
+  }
+  return `${(metres / 1000).toFixed(1)} km`;
 }
 
 type RowProps = {
@@ -170,6 +185,33 @@ export default function DebugScreen() {
     },
     [refresh]
   );
+
+  /**
+   * Build a synthetic catalogue around wherever the phone is standing and start
+   * monitoring it (T-039). This is the field test for T-076: walk ~850 m in any
+   * direction and the monitored set should rebuild itself around you.
+   *
+   * Replaced by the real content pack at T-040.
+   */
+  const startGeofenceFieldTest = useCallback(async () => {
+    const position = await locationProvider.getLastKnownPosition(
+      10 * 60 * 1000
+    );
+    if (position === null) {
+      Alert.alert(
+        'No position yet',
+        'The fixture is built around where you are standing, and the phone does not know yet. Start recording, wait for a fix, then try again.'
+      );
+      return;
+    }
+
+    const places = generateFixture(
+      { lat: position.lat, lon: position.lon },
+      locationProvider.maxSimultaneousRegions
+    );
+    await saveFixture(places);
+    await refreshGeofences('debug screen');
+  }, []);
 
   const confirmDeleteAll = useCallback(() => {
     Alert.alert(
@@ -305,6 +347,45 @@ export default function DebugScreen() {
         />
       </Section>
 
+      <Section title="Geofences (T-039)">
+        <Row
+          label="Places watched"
+          value={
+            health.geofence.monitoredCount === 0
+              ? 'none'
+              : `${health.geofence.monitoredCount} of ${
+                  health.geofence.monitoredCount +
+                  health.geofence.unmonitoredCount
+                }`
+          }
+          tone={health.geofence.monitoredCount === 0 ? 'warn' : 'good'}
+        />
+        <Row
+          label="Catalogue"
+          value={
+            health.geofence.catalogueRegistered ? 'registered' : 'MISSING'
+          }
+          tone={health.geofence.catalogueRegistered ? 'good' : 'bad'}
+        />
+        <Row
+          label="Anchor radius"
+          value={formatMetres(health.geofence.anchorRadiusM)}
+        />
+        <Row
+          label="Drift from anchor"
+          value={formatMetres(health.geofence.distanceFromAnchorM)}
+        />
+        <Row
+          label="Anchor covers the rest"
+          value={health.geofence.anchorCoversUnmonitored ? 'yes' : 'no — dense cluster'}
+          tone={health.geofence.anchorCoversUnmonitored ? 'good' : 'warn'}
+        />
+        <Row
+          label="Set rebuilt"
+          value={formatTimestamp(health.geofence.updatedTs)}
+        />
+      </Section>
+
       <Section title="Gaps">
         <Row
           label="Gaps over 30m"
@@ -345,6 +426,24 @@ export default function DebugScreen() {
           label="Stop recording"
           onPress={() => {
             void runAction(() => locationProvider.stopRecording());
+          }}
+        />
+        <Button
+          label="Start geofence field test"
+          onPress={() => {
+            void runAction(startGeofenceFieldTest);
+          }}
+        />
+        <Button
+          label="Rebuild geofence set"
+          onPress={() => {
+            void runAction(() => refreshGeofences('manual'));
+          }}
+        />
+        <Button
+          label="Stop geofencing"
+          onPress={() => {
+            void runAction(() => stopGeofences());
           }}
         />
         <Button label="Delete all my data" onPress={confirmDeleteAll} destructive />

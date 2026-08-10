@@ -17,6 +17,8 @@ import * as sensorSampleDao from '../storage/dao/sensorSampleDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { RecordingEvent } from '../storage/types';
 import { locationProvider } from './ExpoLocationProvider';
+import type { GeofenceStatus } from './geofenceManager';
+import { getGeofenceStatus } from './geofenceManager';
 import type { PermissionLevel } from './LocationProvider';
 
 /**
@@ -48,6 +50,8 @@ export type RecorderHealth = {
   lastStepDelta: number | null;
 
   geofenceEventCount: number;
+  /** The monitored window, not the events it produced (T-039). */
+  geofence: GeofenceStatus;
 
   gapCount: number;
   longestGapMs: number | null;
@@ -56,14 +60,16 @@ export type RecorderHealth = {
 };
 
 export async function getRecorderHealth(): Promise<RecorderHealth> {
-  const [permission, isRecording, isGeofencing, trip, recentEvents] =
+  const [permission, isRecording, geofence, trip, recentEvents] =
     await Promise.all([
       locationProvider.getPermissionLevel(),
       locationProvider.isRecording(),
-      locationProvider.isGeofencing(),
+      getGeofenceStatus(),
       tripDao.getActiveTrip(),
       recordingEventDao.getRecent(20),
     ]);
+
+  const isGeofencing = geofence.active;
 
   // No trip yet means nothing has ever been recorded. Report that plainly
   // rather than inventing zeroes that look like a healthy empty state.
@@ -83,6 +89,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       lastRelativeAltitudeM: null,
       lastStepDelta: null,
       geofenceEventCount: 0,
+      geofence,
       gapCount: 0,
       longestGapMs: null,
       recentEvents,
@@ -127,6 +134,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     lastRelativeAltitudeM: lastSample?.relative_altitude_m ?? null,
     lastStepDelta: lastSample?.step_count_delta ?? null,
     geofenceEventCount,
+    geofence,
     gapCount: gaps.length,
     recentEvents,
     longestGapMs,

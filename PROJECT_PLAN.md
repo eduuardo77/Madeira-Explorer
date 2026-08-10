@@ -3,10 +3,12 @@
 Implementation roadmap for the Madeira Explorer app.
 
 **Document date:** 2026-08-06
-**Updated:** 2026-08-08 — D-026/D-027/D-028 folded in; status corrected.
-**Status:** **Phase 0 not started.** Phase 1 is partly implemented and entirely unverified —
-a recorder skeleton exists in `app/` that has never been run. See TASKS.md for task-level
-status and HANDOFF.md for what that skeleton actually contains.
+**Updated:** 2026-08-10 — the geofence backbone (T-039) built and pulled forward out of Phase 3;
+D-033 recorded. Previously 2026-08-08 — D-026/D-027/D-028 folded in; status corrected.
+**Status:** **Phase 0 half done** — the tile pack is built (T-026, D-030), the field runs are
+not, and after D-032 they no longer block v1. Phase 1 is largely implemented and entirely
+unverified on hardware; the geofence selection logic is the only part covered by tests. See
+TASKS.md for task-level status and HANDOFF.md for what exists.
 
 ---
 
@@ -203,8 +205,12 @@ highlighted.
   deliberately no "Other": a place that fits nowhere is a signal about the place.
 - Region boundaries for per-region progress. **Regions serve the map screen** ("where should I go
   next"); **the passport is organised by category** (D-027).
-- Dynamic geofence management: register the nearest ~18 regions (iOS hard cap is 20
-  simultaneous), plus one large "you have left this area" trigger that reshuffles the set
+- ~~Dynamic geofence management: register the nearest ~18 regions (iOS hard cap is 20
+  simultaneous), plus one large "you have left this area" trigger that reshuffles the set~~
+  **Built ahead of this phase, in Phase 1 (T-039, 2026-08-10).** It belonged there: the OS cap
+  is painful to retrofit, and after D-032 the geofence backbone *is* the product. The selection
+  rule and its three unmeasured constants are **D-033**; the first success criterion below is
+  what confirms them.
 - Stamp award rules: **dwell time + plausible speed**. In-geofence for N minutes at walking
   pace = awarded. Driving past at 60km/h = not awarded.
 - Stamp artwork and the "passport" collection screen — **five category rows.** The levada row is

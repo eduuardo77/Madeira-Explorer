@@ -395,6 +395,19 @@ must stay readable.** Full direction and the primary-screen structure are in
 
 ### 6.6 Testing
 
+- **Unit tests run on Node's own test runner, with no test framework installed.**
+  `cd app && npm test`. Node 22+ strips TypeScript types as it loads a file, so a `.test.ts`
+  file next to the code runs directly — no Jest, no Babel, no transform config, and nothing
+  added to `package.json` except the script. Added 2026-08-10 with T-039.
+  Two consequences worth knowing before writing one:
+  - **A tested module must import with an explicit `.ts` extension** (`./distance.ts`).
+    Node's module resolver will not guess it; Metro does not mind either way. This is
+    JavaScript-ecosystem weirdness, not a concept — everything not under test stays
+    extensionless, as the rest of the codebase is.
+  - **Test what is pure.** Anything that touches SQLite, Expo or the clock is not reachable
+    this way and belongs in the device testing below. Keeping the arithmetic in its own
+    module — as `geofenceSelection.ts` is separated from `geofenceManager.ts` — is what makes
+    the valuable half testable at all.
 - The Phase 0 field traces in `tools/fixtures/` are the **permanent matching regression
   suite**. Every matching change runs against them.
 - Real-device testing is mandatory for anything touching recording. Simulators do not

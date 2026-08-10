@@ -3,7 +3,10 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
+**Last updated:** 2026-08-10 — T-039, the dynamic geofence manager, is built (D-033), and the
+project has a unit-test runner for the first time (`cd app && npm test`, Node's own, no new
+dependencies).
+Previously 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
 Tile schema settled (D-030). Visual direction and passport structure settled (D-026, D-027);
 activity gating settled (D-028); D-022 confirmed.
 
@@ -13,9 +16,10 @@ activity gating settled (D-028); D-022 confirmed.
 run on real hardware yet.** Phase 0 validation not started.
 
 ⚠ **Everything marked done in Phase 1 below is verified by typecheck, bundle and config
-introspection only.** No fix has ever been recorded, no permission dialog has been seen, and
-no battery figure has been measured. Real-device testing is mandatory for anything touching
-recording (CONTEXT §6.6) and is what T-051–T-055 exist for.
+introspection only** — plus, since 2026-08-10, unit tests over the pure geofence selection
+logic. No fix has ever been recorded, no permission dialog has been seen, and no battery
+figure has been measured. Real-device testing is mandatory for anything touching recording
+(CONTEXT §6.6) and is what T-051–T-055 exist for.
 
 Task IDs are stable — reference them in commits and never renumber. Dependencies are listed
 as `⇠ T-xxx`. A task must not start until all its dependencies are done.
@@ -254,9 +258,18 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Geofence backbone
 
-- [ ] **T-039** Implement the dynamic geofence manager — nearest ~18 registered plus one large
+- [x] **T-039** Implement the dynamic geofence manager — nearest ~18 registered plus one large
       "left this area" trigger that reshuffles the set (iOS 20-region cap) ⇠ T-031
+      — Built 2026-08-10. Selection rule and its unmeasured constants: **D-033**.
+      `geofenceSelection.ts` is pure and unit-tested (18 tests, `npm test`); `geofenceManager.ts`
+      is the part that talks to the OS and SQLite. Rebuilds are triggered by the anchor's exit
+      event and, as a backstop against a missed event, by recorded fixes.
+      — ⚠ **Verified only on a laptop.** No device has run this. T-076 is the real test.
 - [ ] **T-040** Load geofence definitions from the content pack, not from code ⇠ T-039, T-014
+      — T-039 left the seam ready: replace the `setPoiCatalogue(devPoiCatalogue)` line in
+      `app/index.ts` with the content-pack source. Registration must stay at **module scope**
+      — a headless relaunch has no screen to register it from.
+      — **Validate that no id starts with `__`** (reserved for mechanism regions, D-033).
 - [x] **T-041** Persist geofence enter/exit/dwell events ⇠ T-039, T-030
       — Enter/exit persisted. Note `dwell` is **not** an OS event on either platform: the
       dwell + speed gate (D-009) is computed later over the enter/exit log, which is what keeps
@@ -406,6 +419,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 - [ ] **T-076** Verify the geofence set reshuffles correctly while crossing the island
       ⇠ T-039, T-066
+      — **Does not need T-066 to start.** The debug screen's *Start geofence field test*
+      button generates a synthetic catalogue around wherever you are standing, sized so the
+      platform's region cap binds and the anchor lands at roughly 850 m — a five-minute walk.
+      Walk that far and the diary should show a `geofence` rebuild with a different set.
+      — This is what sets the three guessed constants in **D-033**. Note the delivery *lateness*
+      of the anchor exit at driving speed, not just that it arrived.
 - [ ] **T-077** Verify a stamp fires reliably on arrival at a miradouro ⇠ T-071
 - [ ] **T-078** Verify driving past a levada trailhead does **not** award it ⇠ T-071
 - [ ] **T-079** Verify stamps still award with GPS accuracy degraded to 100m ⇠ T-071

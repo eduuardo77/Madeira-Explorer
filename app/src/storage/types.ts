@@ -37,6 +37,15 @@ export type RecordingEventKind =
   | 'permission_change'
   | 'batch'
   | 'error'
+  /**
+   * The geofence manager rebuilding its monitored set (T-039). Its own kind
+   * rather than a `batch`, because "did the set reshuffle when I drove across
+   * the island?" is a question asked on its own in the field (T-076), and
+   * because a run of these with no `batch` between them is a distinctive
+   * symptom: the OS still trusts us with geofences but has stopped delivering
+   * location updates.
+   */
+  | 'geofence'
   | 'app_launch';
 
 export type Trip = {

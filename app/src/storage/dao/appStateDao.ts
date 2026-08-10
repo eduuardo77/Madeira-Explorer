@@ -18,6 +18,19 @@ export const AppStateKey = {
   HealthCheckSentTs: 'health_check_sent_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
+  /**
+   * JSON: which places the geofence manager is currently monitoring, and the
+   * anchor it will rebuild on (T-039). Persisted rather than held in memory
+   * because the process is routinely killed and relaunched headless between one
+   * geofence event and the next.
+   */
+  GeofenceWorkingSet: 'geofence_working_set',
+  /**
+   * JSON: the synthetic places generated for a field test of the geofence
+   * manager. Development only — deleted along with everything else by T-125,
+   * and made redundant by the real content pack (T-040).
+   */
+  DevPoiFixture: 'dev_poi_fixture',
 } as const;
 
 export type AppStateKeyName =

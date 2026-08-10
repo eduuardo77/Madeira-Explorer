@@ -12,6 +12,20 @@ import { registerRootComponent } from 'expo';
 // in the global scope of your JavaScript bundle".
 import './src/recording/backgroundTasks';
 
+import { devPoiCatalogue } from './src/recording/devPoiFixture';
+import { setPoiCatalogue } from './src/recording/geofenceManager';
+
 import App from './App';
+
+// Module scope, and for the same reason as the import above. When the OS wakes
+// us to deliver a geofence crossing, the manager may have to rebuild its
+// monitored set (T-039) before it can do anything useful — and it cannot do
+// that without knowing which places exist. There is no screen alive at that
+// moment to tell it.
+//
+// ⚠ T-040 REPLACES THIS LINE (and its import) with the real content pack. That
+// is the whole of the change: the geofence manager itself knows nothing about
+// Madeira, and must not learn (D-017).
+setPoiCatalogue(devPoiCatalogue);
 
 registerRootComponent(App);

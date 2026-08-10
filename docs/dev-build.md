@@ -39,9 +39,10 @@ including the AVD.**
 ⚠ **It will not start until CPU virtualization is enabled in the BIOS** — measured on this
 machine and switched off there. That is a one-time firmware toggle no program can make;
 **[emulator-setup.md](emulator-setup.md)** has the exact ASUS menu path and the driver step
-that follows it. Roughly five minutes, and nothing else in Path A works before it. It deliberately skips the native build toolchain
-(NDK, CMake — another ~5 GB): EAS compiles the APK in the cloud for free, and the emulator only
-has to run it.
+that follows it. Roughly five minutes, and nothing else in Path A works before it.
+
+The install deliberately skips the native build toolchain (NDK, CMake — another ~5 GB): EAS
+compiles the APK in the cloud for free, and the emulator only has to run it.
 
 Then create a free Expo account, build once, and install:
 

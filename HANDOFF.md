@@ -4,7 +4,10 @@
 **Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added).
 **For:** a fresh Claude Code session picking this project up cold.
-**Repository state:** git repository, six commits. Planning docs plus a Phase 1 recorder
+**Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
+Do not open new research threads. Do not propose new decisions unless something is actually
+blocked. Build the things in "Start here" below.
+**Repository state:** git repository, ten commits. Planning docs plus a Phase 1 recorder
 skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.**
 Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
 
@@ -15,8 +18,8 @@ Phase 0 has produced its first result: the OSM coverage survey (T-028, D-029).
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
    before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
    §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 28 numbered decisions with alternatives and reasoning. Read before
-   proposing anything that contradicts one.
+2. **`DECISIONS.md`** — 32 numbered decisions. **Read D-032 first** — it defines v1 scope and
+   deletes a large amount of work you might otherwise start.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
 5. `docs/design-brief.md` — visual direction and screen structure. Read before touching anything
@@ -33,15 +36,19 @@ this file explains the shape of what exists, `TASKS.md` tracks it task by task.
 
 ## Where the project stands
 
-Planning is complete and every blocking decision is closed. **Phase 0 has not started.**
-Phase 1 is implemented but entirely unproven.
+Planning is complete, **scope has been cut (D-032)**, and the project is moving to execution.
+Phase 0 is half done. Phase 1 is implemented but entirely unproven.
+
+**v1 = record → stamps by geofence → draw the raw trace → passport → souvenir.**
+Phase 4 map matching is **v2**. The effort saved goes into the interface and the map.
 
 | | |
 |---|---|
 | Framework | Expo SDK 57, React Native 0.86, **TypeScript strict** |
 | Map | `@maplibre/maplibre-react-native` v11, offline PMTiles/MBTiles — *not yet installed* |
 | Location | `expo-location` (free) behind a swappable `LocationProvider` |
-| Storage | SQLite, WAL — R-tree comes with the road graph in Phase 4 |
+| Storage | SQLite, WAL. *(R-tree and road graph are v2 — D-032)* |
+| Tiles | **Built.** 12 MB, Protomaps schema, `bash tiles/pipeline/build.sh` (D-030) |
 | Backend | **None.** Zero servers, zero accounts, zero analytics. |
 | Dependency cost | **$0** for the app. Track A needs Sensor Logger's paid tier (tooling, not a dependency). |
 | Unavoidable spend | Apple $99/yr, Google Play $25 once — at launch, not now |
@@ -72,6 +79,22 @@ project lead, but not yet validated against anything real:
   classifies but never gates recording.
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
+
+### The scope cut — read this before starting anything (D-032)
+
+The engineering ambition had grown far past the original brief. The project lead reset it:
+*an app that records where you walked and gives you a badge for levadas and notable places* —
+and set the priority: **a good interface matters more than GPS accuracy.**
+
+- **Phase 4 (T-082–T-098) is deferred to v2 in full.** No road graph, no R-tree, no snapping, no
+  tunnel inference, no gap bridging, no corridor crediting, no sensor fallback.
+- **v1 draws the raw GPS trace** instead. Honest, personal, and it needs no matching at all.
+- **Deferring costs nothing permanent** — D-010 retains raw traces, so matching can be added in
+  v2 and run *retroactively over every trip already recorded*.
+- **Stamps need almost no accuracy.** A generous radius plus a dwell-and-speed gate works under
+  canopy on cheap hardware. That is the whole reward, and it is the cheapest subsystem here.
+
+This was a return, not a pivot: D-002 always said stamps are the score and roads are decoration.
 
 ### What the 2026-08-08 session settled
 
@@ -216,18 +239,59 @@ Nothing at all exists from Phases 2–7.
 
 ## Start here
 
-**If the project lead has no preference, start Track B.** It is the single biggest unblock in
-the project right now: it is Phase 0 work that was always required, it needs no dev build and no
-app code, and it is the **prerequisite for every visual decision** — the map is a MapLibre style
-and it cannot be designed against an imaginary map. D-026 also cannot be confirmed without it.
+**v1 is small on purpose (D-032):** record → stamps by geofence → **draw the raw trace** →
+passport → souvenir. **Phase 4 map matching is deferred to v2.** Do not build a road graph, an
+R-tree, tunnel inference or corridor crediting. If a task feels enormous, check whether D-032
+already deleted it.
 
-**The other blocker is a development build.** Background location cannot run in Expo Go, so
-nothing in Phase 1 can be verified until one exists. That needs an Expo account (the project
-lead's to create) and `eas.json`. No JDK on the dev machine and no Mac, so EAS Build is the
-realistic path for both platforms.
+### The order to actually work in
 
-Phase 0 has **two independent tracks** that can run in either order or in parallel, and neither
-is blocked by the above. Neither requires writing app code.
+**1. A development build.** ⚠ **The only true blocker, and it needs the project lead.**
+Background location cannot run in Expo Go, so nothing in Phase 1 can be verified without one.
+Needs an Expo account (theirs to create) and `eas.json`. No JDK-based local Android build and no
+Mac, so EAS Build is the realistic path for both platforms. **Nothing below this line can be
+tested until this exists.**
+
+**2. T-039 — the dynamic geofence manager.** The reward backbone, and after D-032 it is *the*
+product rather than one subsystem among many. Needs no hardware and no field data. Drive it from
+a test fixture so it stays content-agnostic (D-017). **This is the recommended next piece of
+code.**
+
+**3. T-066 — curate the POIs.** ⚠ **Only the project lead can do this.** 150–250 places, each
+assigned one of the five categories (D-027). T-028 established this is *selection, not research*
+— OSM already offers 569 viewpoints and 180 peaks. Without it, geofences have nothing to fire on
+and the app has no reward. **This is on the critical path and it is not code.**
+
+**4. T-058 / T-058a — the map's appearance.** The tile pack is built (12 MB, `bash
+tiles/pipeline/build.sh`). Start from a Protomaps theme and **subtract** (D-026). Then add
+**terrain** — the single biggest determinant of whether this map looks good, and the last real
+unknown in the tile work. **This is where the perfectionism belongs** (D-032).
+
+**5. T-042 / T-114 — permission flow and onboarding.** Sits on the critical path via the slow,
+external Google Play review (T-123). Start it early.
+
+**6. T-051–T-055 — the soak tests.** What turns Phase 1 from plausible into proven, and the
+trigger for the D-025 purchase decision.
+
+### Where the effort should go, and where it should not
+
+| Spend it on | Do not spend it on |
+|---|---|
+| The interface — one screen, three controls, one number | GPS or trace accuracy |
+| The map's style and terrain | Map matching (deferred, D-032) |
+| Battery, and not failing silently | Perfect road highlighting |
+| Generous geofence radii at trailheads | Corridor widths, hysteresis, portal inference |
+
+Nobody uninstalls because a drawn line was twenty metres off. They uninstall because the battery
+died, because recording stopped silently, or because they walked a famous levada and got nothing
+— and that last one is a **geofence radius** problem, not a matching problem.
+
+### Phase 0 — what is left
+
+**Done:** T-022, T-023, T-026 (12 MB pack), T-028 (OSM survey, OD-7 closed).
+**Left, and no longer blocking v1:** Track A field runs (T-017–T-021). Their output tunes
+*matching* thresholds, and matching is now v2. Still worth an afternoon — fold in T-028a
+(verify levada corridor connectivity) and T-028b (WalkMe in airplane mode) on the same walk.
 
 ### Track A — Field GPS validation (T-017 → T-021a)
 
@@ -322,14 +386,9 @@ it outdoors, in Funchal, at midday. That is the test that confirms or kills D-02
 ### Finishing Phase 1
 
 The scaffold, storage, provider interface, `expo-location` integration, data protection and
-debug screen are done (see "What is already built"). What remains, in the order I would take it:
-
-1. **A dev build** — nothing below can be verified without one.
-2. **T-039, the dynamic geofence manager.** The reward backbone, needs no hardware, and the docs
-   twice warn it is painful to retrofit. Drive it from a test fixture so it stays
-   content-agnostic (D-017). This is the recommended next piece of code.
-3. **T-042/T-114, the permission flow and onboarding.** Sits on the critical path via the slow,
-   external Google Play review (T-123).
+debug screen are done (see "What is already built"). Remaining order is in "Start here" above.
+Note that after D-032 the geofence manager (T-039) matters more than anything else in Phase 1 —
+it is no longer one subsystem among many, it is the reward.
 4. **T-034, stationary-vs-moving gating.** **No longer blocked** — the trigger was decided
    2026-08-08 (D-028): distance over time, no new sensor, no new dependency, no new permission.
 5. **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and

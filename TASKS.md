@@ -3,8 +3,12 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-08 — visual direction and passport structure settled (D-026, D-027);
-activity gating trigger settled (D-028); D-022 confirmed.
+**Last updated:** 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
+Tile schema settled (D-030). Visual direction and passport structure settled (D-026, D-027);
+activity gating settled (D-028); D-022 confirmed.
+
+> **v1 = record → stamps by geofence → draw the trace → passport → souvenir.**
+> Phases 1, 2, 3, 5, 6, 7. **Phase 4 is v2.** See D-032.
 **Overall progress:** Planning complete. Phase 1 recorder implemented; **nothing has
 run on real hardware yet.** Phase 0 validation not started.
 
@@ -313,9 +317,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-058a** Add **shaded terrain** as the figure-ground element instead of building
       footprints (D-026). Madeira's relief is the island's defining feature and OSM building
       coverage is patchy outside Funchal. Record the tile-size cost against T-026. ⇠ T-058, T-023
-- [ ] **T-059** Implement visited/unvisited styling via data-driven expressions over the local
-      overlay geometry, keyed on OSM way ID. **Not feature state** — unavailable on MapLibre
-      Native mobile (D-022). ⇠ T-058, T-025
+- [ ] **T-059** **v1: draw the recorded raw trace** as a line layer from `raw_fix` (D-032) —
+      not matched segments. Simplify for rendering; keep the stored fixes untouched (D-010).
+      ⇠ T-058, T-030
+      — D-022's overlay-alignment risk **does not apply in v1**: there is no road geometry being
+      drawn over the basemap's own roads, so nothing can be misaligned. D-022 governs v2.
+      — *v2:* visited/unvisited styling via data-driven expressions over local `road_graph`
+      geometry keyed on OSM way ID. Not feature state (D-022). ⇠ T-082
 - [ ] **T-060** Accessibility styling pass **in both styles** (D-015, D-026): unvisited stays
       legible mid-grey, never near-black and never near-invisible. Visited differentiated by
       **weight plus brightness/darkness**, never hue alone — brighter and heavier in the dark
@@ -410,6 +418,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ## Phase 4 — Map matching and road highlighting
 
+> ## ⛔ DEFERRED TO v2 — D-032 (2026-08-08)
+>
+> **Do not build any of this for v1.** v1 draws the **raw GPS trace** instead of matching it to
+> road segments. This is the single largest body of work in the project, in service of something
+> D-002 already calls *decoration* — while the actual reward (stamps) comes from geofences, which
+> need almost no accuracy.
+>
+> **Deferring costs nothing permanent.** D-010 retains raw traces immutably, so matching can be
+> added in v2 and run **retroactively over every trip already recorded**. That is precisely the
+> property D-010 was written to buy.
+>
+> Everything from T-082 to T-098 below is v2. Left in place, unrenumbered, with dependencies
+> intact.
+
 ### Graph and core matching
 
 - [ ] **T-082** Import the road/path graph into SQLite with an R-tree spatial index ⇠ T-022,
@@ -450,7 +472,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-097** Verify the VR1 and the coastal road are never confused ⇠ T-084, T-094
 - [ ] **T-098** Verify burst matching over a full day has no noticeable battery cost ⇠ T-092
 
-**Milestone M4 — "The map fills in"** ⇠ T-095, T-096, T-097, T-098
+**Milestone M4 — "The map fills in"** ⇠ T-095, T-096, T-097, T-098 — **v2 milestone (D-032)**
 
 ---
 

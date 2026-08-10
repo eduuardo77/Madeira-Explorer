@@ -1213,3 +1213,95 @@ convenience.
 **Revisit only if** T-094/T-098 show on-device matching is genuinely infeasible — and even then,
 the cheaper options in D-023 (chunking, or pushing the hot loop native) come first. Raw traces
 are retained (D-010) precisely so matching can be improved later without re-collecting anything.
+
+---
+
+## D-032 — v1 ships without map matching. Draw the raw trace. Spend the effort on the UI.
+
+**Status:** Accepted — decided by the project lead 2026-08-08. **This is a scope decision and it
+supersedes the sequencing, not the architecture.**
+
+**Decision:** **Phase 4 (map matching) is deferred out of v1 entirely.** v1 draws the **raw GPS
+trace** on the map instead of matching it to road segments. The saved effort goes into the
+**interface and the map's appearance**, which is where this app can beat the incumbent.
+
+**v1 is:** record location → award stamps by geofence → **draw the trace** → passport screen →
+souvenir at trip end. That is the project lead's original one-sentence brief, and most of what
+has accreted since is optional.
+
+**What prompted this:** the project lead observed that the engineering ambition had grown far
+beyond the original goal — *"an app which records which roads you've walked, and if you walked a
+levada or been at a touristic place you earn a badge"* — and stated the priority plainly: **a
+good interface matters more than GPS accuracy.** WalkMe is weaker on interface than on content,
+and that is the opening.
+
+**This is a return, not a pivot.** D-002 already says *stamps are the score; highlighted roads
+are decoration.* CONTEXT §2.1 already says *the user's reward deliberately does not depend on
+matching.* D-002's own rejected-alternatives list already names fog-of-war trace rendering as
+"a possible v1 simplification." The architecture was designed so accuracy would not matter; the
+plan then drifted into making it matter.
+
+**Where the complexity actually was:**
+
+| Subsystem | Cost | Needed for the original brief? |
+|---|---|---|
+| Ghost operation (passive background recording) | Large | No — it is what makes it *magical*, not what makes it *work* |
+| **Street-level map matching (Phase 4)** | **Largest** | **No — the docs call it decoration** |
+| **Geofence stamps** | **Small** | **Yes — and it is the entire reward** |
+
+**Stamps need almost no accuracy.** A generous radius at a curated place plus a dwell-and-speed
+gate (D-009) works with poor GPS, under canopy, on cheap Android hardware. It is the cheapest
+subsystem in the project and it delivers the payoff. Matching is the most expensive and delivers
+decoration.
+
+**Alternatives considered:**
+
+- *Build Phase 4 for v1 as planned.* Rejected: it is the single largest body of work in the
+  project — road graph import, R-tree, snapping, hysteresis, tunnel inference, gap bridging,
+  corridor crediting, sensor fallback, regression harness — in service of something already
+  classified as decoration.
+- *Ship matching but crude.* Rejected as the worst of both: still needs the graph, the index and
+  the snapping, and a visibly wrong highlighted road is worse than an honest trace.
+- *Also cut ghost operation and ship a manual start/stop like WalkMe.* **Not adopted, but not
+  dead.** It would remove the Always permission, the Play background-location review (T-123) and
+  the OEM battery war from the critical path. It is rejected for now because passive recording is
+  the differentiator against WalkMe's manual button — but D-008 already requires While-Using to be
+  fully functional, so **v1 can ship While-Using-first and add Always later** if the Play review
+  drags. Keep that escape hatch visible.
+
+**Why the raw trace is not a downgrade:** for a *souvenir*, the actual wandering path is more
+personal and more truthful than a set of highlighted street segments. Fog of World has shipped
+exactly this for a decade. It is also honest in a way matching is not — it shows where the phone
+actually was, with no inference.
+
+**Consequences:**
+
+- **Phase 4 (T-082–T-098) moves to v2.** With it go the road graph, the R-tree, tunnel portal
+  inference, gap bridging, levada corridor crediting and the sensor fallback.
+- **T-059 changes meaning:** draw the recorded trace, not matched segments.
+- **D-022's alignment risk disappears for v1.** There is no overlay of road geometry to align
+  with the basemap, because we draw the trace instead. D-022 still governs v2.
+- **T-028a's precision worry is largely moot for v1** — reinforced by the project lead's point
+  that levadas do not require navigation-grade accuracy to walk (CONTEXT §5).
+- **D-010 still holds and is now more important.** Raw traces are retained immutably, so matching
+  can be added in v2 and **run retroactively over every trip already recorded**. Deferring costs
+  nothing permanent. This is exactly the property D-010 was written to buy.
+- Phase 0 Track A (T-017–T-021) drops off the v1 critical path — its output tunes matching
+  thresholds. Still worth doing, no longer blocking.
+
+**What must NOT be cut, because these are what actually drive uninstalls** — and none is about
+accuracy:
+
+1. **Battery.** The number one uninstall trigger for any tracking app. Nothing else matters if
+   the phone dies at 16:00.
+2. **Silent failure.** Recording dies on day 2, discovered on day 7. Keep the day-1 health check
+   (D-011) — it is cheap and exists precisely for this.
+3. **Missing something obvious.** They walked a famous levada and got nothing. Note this is a
+   *geofence* problem, not a matching problem: generous radii at trailheads solve it.
+
+Nobody uninstalls because a drawn line was twenty metres off.
+
+**Where the perfectionism should go instead:** the map's appearance (D-026 — style and terrain)
+and the interface (`docs/design-brief.md` — one screen, three controls, one number). Against a
+fourteen-year incumbent with five tabs and dense chrome, **"does less, beautifully" is the one
+position where being new is an advantage.**

@@ -10,6 +10,23 @@ status and HANDOFF.md for what that skeleton actually contains.
 
 ---
 
+## v1 scope — read this before anything else (D-032)
+
+**v1 is:** record location → award stamps by geofence → **draw the raw GPS trace** → passport
+screen → souvenir at trip end.
+
+**Phase 4 (map matching) is deferred to v2.** It is the largest body of work in the project and
+it produces what D-002 already calls *decoration*. The reward — stamps — comes from geofences,
+which need almost no accuracy. Raw traces are retained (D-010), so matching can be added later
+and run retroactively over trips already recorded.
+
+**The saved effort goes into the interface and the map's appearance.** Against a fourteen-year
+incumbent, "does less, beautifully" is the position where being new is an advantage.
+
+**Phases in v1:** 0 (partly), 1, 2, 3, 5, 6, 7. **Not in v1:** 4.
+
+---
+
 ## Guiding sequencing principle
 
 Build the **recorder** before the **visualisation**, and validate the **hard physical
@@ -213,7 +230,7 @@ A day out produces stamps, a visible bump in regional progress, and no false awa
 
 ---
 
-## Phase 4 — Map matching and road highlighting
+## Phase 4 — Map matching and road highlighting — ⛔ **DEFERRED TO v2 (D-032)**
 
 **Goal:** Travelled roads and levadas light up. Explicitly allowed to be imperfect.
 **Depends on:** Phase 1 (traces), Phase 2 (rendering), Phase 0.1 (real fixtures).

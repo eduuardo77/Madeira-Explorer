@@ -1778,3 +1778,56 @@ address. When in doubt, mask.
 **Consequences:** `recording_event` gains an `export` kind, so the one privacy-relevant action
 the app takes leaves a trace of its own. `tripDao.getMostRecentTrip` exists because export
 happens *after* trip end, when there is no active trip by definition.
+
+---
+
+## D-041 — Onboarding: three screens, no gate, and no battery figure until one is measured.
+
+**Status:** Provisional — implemented 2026-08-10 (T-042, T-043, T-044, T-114, T-121). The copy
+has never been read by anybody outside this project; that is what T-112's reduction pass and a
+real beta (T-129) are for.
+
+**Context:** CONTEXT §4.3 says the location permission alone could sink the app, and D-008
+answers it: fully functional on While-Using, Always is an upgrade and never a gate. Nothing
+specified what the user actually sees.
+
+**Decision:**
+
+1. **Three screens, then the map.** Welcome (what this does), Location (why, then the system
+   dialog), Notifications (how few there will be, then the dialog). Every decline is a **real
+   button the same size as the accept** — not grey text in a corner. Refusing is a supported
+   way to use this app, and styling it as a lesser choice would make D-008 a lie.
+2. **Nothing gates.** There is no step that requires a grant to move past. A user who denies
+   everything reaches a working app with a start/stop button.
+3. **Notifications are asked separately, with a screen in front.** Two system dialogs back to
+   back get both refused — the second is dismissed on reflex before it is read. The screen
+   between them is also the honest place to promise "two messages, ever", which is the actual
+   objection.
+4. **The Always upgrade is offered once, on day 2, and never again.** A second ask is pressure,
+   and pressure is what gets permissions revoked. Settings keeps a way to enable it later
+   (T-141). It waits for something to have been recorded, because the pitch is made in terms
+   of the map they already have.
+5. **No battery figure is stated until one is measured.** T-042 requires the measured number
+   from T-054 and forbids an invented one, so `MEASURED_BATTERY_PERCENT_PER_DAY` is `null` and
+   the sentence is **omitted entirely** rather than estimated. A guessed percentage is worse
+   than none: it is a promise the app has not earned, made to somebody deciding whether to
+   trust it with a week of their location, and it would be found wrong on their holiday. A
+   test asserts the constant is still null.
+6. **No jargon.** "Permission", "background", "geofence", "GPS" and "enable" do not appear in
+   any user-facing string. Verified by a check over the rendered DOM, not by eye.
+
+**Alternatives considered:**
+
+- *Ask for Always during onboarding.* Rejected — this is the single thing CONTEXT §4.3 warns
+  hardest against, and on Android 11+ it is not even possible inline.
+- *Ask for notifications alongside location.* Rejected; see point 3.
+- *Estimate the battery cost as "about 5%".* Rejected; see point 5. It is the plausible number
+  that would have shipped if nobody wrote the constraint into the code.
+- *A skippable single-screen onboarding.* Rejected: the location ask needs its own reason
+  stated immediately before the dialog, or the dialog is the first explanation the user gets.
+
+**Consequences:** the action buttons sit **outside** the ScrollView, which is load-bearing —
+measured at 2× text scaling, the Play disclosure copy overflows and scrolls while both buttons
+stay reachable; inside, they would be pushed off screen for exactly the users who need large
+text most (D-015). The Android prominent-disclosure screen (T-121) uses Play's required
+phrasing and is shown before the Always request on Android only.

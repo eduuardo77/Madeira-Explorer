@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **accommodation masking** (T-103/T-104, D-040) closes the one
+**Last updated:** 2026-08-10 — **the permission flow and onboarding** (T-042/T-043/T-044/
+T-114/T-121, D-041): three screens, nothing gates, and no battery figure until one is measured.
+Earlier the same day, **accommodation masking** (T-103/T-104, D-040) closes the one
 genuine privacy hole in the design, behind a single export door. Earlier the same day,
 **trip end and the reveal** (T-099–T-102, D-039) close the
 loop: the app now knows when the holiday is over and says so at the airport. Earlier the same
@@ -333,17 +335,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Permissions and survival
 
-- [ ] **T-042** Permission flow: While-Using first and **fully functional**, with explicit
+- [x] **T-042** Permission flow: While-Using first and **fully functional**, with explicit
       start/end recording mode ⇠ T-031
+      — Done 2026-08-10: **D-041**. `onboarding/permissionPolicy.ts` decides (pure, 17 tests),
+      `OnboardingView` + `OnboardingFlow` present and drive it. The start/stop control already
+      lives on the primary screen for non-Always users (T-075).
+      — **The battery sentence is omitted, not estimated.**
+      `MEASURED_BATTERY_PERCENT_PER_DAY` is null until T-054 measures one, and a test asserts
+      it. A guessed percentage is a promise the app has not earned.
       — The start/stop control is a **primary-screen action shown only to users without Always**,
       not a settings item (`docs/design-brief.md` §3.3).
       — **State the battery cost in the copy**, next to the control that turns tracking on:
       "uses about N% of your battery per day." Use the **measured** figure from T-054, never an
       invented one. ⇠ T-054 for the number, not for the work.
-- [ ] **T-043** Deferred "Always" upgrade request, timed for ~day 2 ⇠ T-042
+- [x] **T-043** Deferred "Always" upgrade request, timed for ~day 2 ⇠ T-042
       — Same honest-battery-figure treatment as T-042.
-- [ ] **T-044** Detect iOS Always → While-Using downgrade and prompt gently for recovery
+      — Done 2026-08-10. Offered at 40h — after the day-1 check at 14h, because two prompts in
+      one morning loses both — and **exactly once, ever**. A second ask is pressure, and
+      pressure is what gets permissions revoked (D-008). It also waits until something has been
+      recorded, so the pitch can be made in terms of the map they already have.
+- [x] **T-044** Detect iOS Always → While-Using downgrade and prompt gently for recovery
       ⇠ T-043
+      — Done 2026-08-10. Compares the observed permission against the last one recorded, and
+      records before acting so a downgrade is reported once. Losing location entirely is
+      deliberately *not* reported here — the day-1 check already covers it, and doubling up
+      would nag.
 - [ ] **T-045** Android foreground service with the `FOREGROUND_SERVICE_LOCATION` type
       ⇠ T-031
 - [ ] **T-046** Android battery-optimisation exemption request ⇠ T-045
@@ -712,7 +728,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       specifically for banner/promo cards accumulating over the map; the reference app loses the
       top third of its map to two stacked dismissible banners.
 - [ ] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
-- [ ] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
+- [x] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
+      — Done 2026-08-10. Three screens, every decline a real button the same size as the
+      accept. **No-jargon verified by a check over the rendered DOM**, not by eye:
+      "permission", "background", "geofence", "GPS" and "enable" appear nowhere.
+      — Measured at 2x text scaling: copy scrolls, buttons stay reachable (D-015).
+      — ⚠ The copy has never been read by anybody outside this project. T-112 and T-129.
 - [ ] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
       handing off to Apple/Google Maps). No in-app navigation. (D-018) ⇠ T-066
 - [ ] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
@@ -733,8 +754,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-119** iOS purpose strings for While-Using and Always ⇠ T-042, T-043
 - [ ] **T-120** iOS Privacy Nutrition Label — Location / App Functionality / Not Linked to You
       / Not Used for Tracking ⇠ T-117
-- [ ] **T-121** Android prominent-disclosure screen before requesting background location
+- [x] **T-121** Android prominent-disclosure screen before requesting background location
       ⇠ T-043
+      — Done 2026-08-10. Uses Play's required phrasing ("collects location data even when it
+      is closed or not in use"), states the purpose and that nothing is uploaded or shared,
+      and says plainly that declining still leaves a working app. Shown on Android only, before
+      the Always request. **T-123's reviewer reads this screen** — do not reword it casually.
 - [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122

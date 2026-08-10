@@ -30,6 +30,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CATEGORIES } from './src/content/contentPack';
 import type { StampAward } from './src/storage/types';
 import type { TripProgress } from './src/progress/tripProgress';
+import OnboardingView, {
+  type OnboardingScreen,
+} from './src/onboarding/OnboardingView';
 import PassportView from './src/ui/PassportView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from './src/ui/theme';
@@ -99,12 +102,22 @@ const SCENARIOS = [
   { label: '180 stamps — T-081 high', collected: 180 },
 ] as const;
 
-type Screen = 'passport' | 'primary' | 'primary-while-using';
+type Screen =
+  | 'passport'
+  | 'primary'
+  | 'primary-while-using'
+  | `onboarding:${OnboardingScreen}`;
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
+  { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
+  { id: 'onboarding:location', label: 'Location ask (T-042)' },
+  { id: 'onboarding:notifications', label: 'Notifications ask' },
+  { id: 'onboarding:android-disclosure', label: 'Play disclosure (T-121)' },
+  { id: 'onboarding:always-upgrade', label: 'Always upgrade (T-043)' },
+  { id: 'onboarding:downgrade', label: 'Downgrade (T-044)' },
 ];
 
 export default function DesignWorkbench() {
@@ -162,7 +175,13 @@ export default function DesignWorkbench() {
         {/* A phone-shaped frame, so density is judged at the size it will be
             read at rather than across a desktop window. */}
         <View style={styles.phone}>
-          {screen === 'passport' ? (
+          {screen.startsWith('onboarding:') ? (
+            <OnboardingView
+              screen={screen.slice('onboarding:'.length) as OnboardingScreen}
+              onContinue={() => undefined}
+              onSkip={() => undefined}
+            />
+          ) : screen === 'passport' ? (
             <PassportView progress={progress} awards={awards} />
           ) : (
             <View style={styles.mapStandIn}>

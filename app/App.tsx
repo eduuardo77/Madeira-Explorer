@@ -2,7 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MapScreen from './src/map/MapScreen';
+import OnboardingFlow, {
+  pendingPermissionPrompt,
+} from './src/onboarding/OnboardingFlow';
+import type { OnboardingScreen } from './src/onboarding/OnboardingView';
 import { checkTripEnd } from './src/progress/tripEndDetection';
+import * as appStateDao from './src/storage/dao/appStateDao';
 import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
@@ -20,6 +25,29 @@ import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
  */
 export default function App() {
   const [screen, setScreen] = useState<'map' | 'passport' | 'debug'>('map');
+  /** null until checked; false once onboarding is behind us. */
+  const [onboarding, setOnboarding] = useState<boolean | null>(null);
+  /** The Always upgrade or downgrade prompt, when one is due (T-043, T-044). */
+  const [prompt, setPrompt] = useState<OnboardingScreen | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const done = await appStateDao.getFlag(
+          appStateDao.AppStateKey.OnboardingCompleted
+        );
+        setOnboarding(!done);
+        if (done) {
+          // Only once onboarding is behind them. Two asks in one launch is
+          // how both get refused.
+          setPrompt(await pendingPermissionPrompt());
+        }
+      } catch {
+        // Never trap the user behind a failed check.
+        setOnboarding(false);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     // Recorded so that "the user opened the app" can be told apart from "the OS
@@ -38,6 +66,32 @@ export default function App() {
     // means it is finalised the next time anybody looks (T-099).
     void checkTripEnd();
   }, []);
+
+  if (onboarding === null) {
+    // One frame at most, while the flag is read.
+    return <View style={styles.root} />;
+  }
+
+  if (onboarding) {
+    return (
+      <View style={styles.root}>
+        <StatusBar style="light" />
+        <OnboardingFlow onFinished={() => setOnboarding(false)} />
+      </View>
+    );
+  }
+
+  if (prompt !== null) {
+    return (
+      <View style={styles.root}>
+        <StatusBar style="light" />
+        <OnboardingFlow
+          initialScreen={prompt}
+          onFinished={() => setPrompt(null)}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>

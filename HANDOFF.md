@@ -99,6 +99,10 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-041** *(2026-08-10)* — onboarding: three screens, every decline a real button, nothing
+  gates on a grant (D-008), and **no battery figure until T-054 measures one** — the constant
+  is null and a test keeps it that way. The Always upgrade is offered once on day 2 and never
+  again.
 - **D-040** *(2026-08-10)* — accommodation masking: one export door, no opt-out parameter, and
   a trace the app could not verify is **withheld rather than shipped unmasked**. The thresholds
   err toward hiding — the opposite of D-009's generosity, because masking too much costs a
@@ -230,6 +234,11 @@ app/
     │   ├── PrimaryOverlay.tsx        T-075, the three controls over the map
     │   ├── DebugScreen.tsx           T-050, the instrument panel
     │   └── theme.ts                  D-015 encoded as values
+    ├── onboarding/                   T-042/T-114/T-121. The hardest permission (D-041).
+    │   ├── permissionPolicy.ts       pure: what to ask, and when
+    │   ├── permissionPolicy.test.ts  17 tests, incl. "no invented battery figure"
+    │   ├── OnboardingView.tsx        the copy — no jargon, verified against the DOM
+    │   └── OnboardingFlow.tsx        drives the sequence and the later prompts
     ├── souvenir/                     T-103/T-104. The privacy hole, closed (D-040).
     │   ├── accommodation.ts          pure: where do they sleep, and what to hide
     │   ├── accommodation.test.ts     15 tests, mostly on the withhold rule

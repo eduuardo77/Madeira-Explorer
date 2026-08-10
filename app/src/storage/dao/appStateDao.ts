@@ -23,6 +23,14 @@ export const AppStateKey = {
   InstalledTs: 'installed_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
+  /** Set once the user has been through onboarding, however it went (T-114). */
+  OnboardingCompleted: 'onboarding_completed',
+  /**
+   * When the Always upgrade was offered. Its presence is what stops it being
+   * offered a second time — an upgrade is never a gate, and a second ask is
+   * pressure (D-008, T-043).
+   */
+  AlwaysOfferedTs: 'always_offered_ts',
   /**
    * JSON: which places the geofence manager is currently monitoring, and the
    * anchor it will rebuild on (T-039). Persisted rather than held in memory

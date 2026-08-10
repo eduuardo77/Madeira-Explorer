@@ -54,6 +54,8 @@ export type RecordingEventKind =
   | 'stamp'
   /** The day-1 check ran and said something (T-049). */
   | 'health_check'
+  /** The trip was detected as over, and by which signal (T-099, D-012). */
+  | 'trip_end'
   | 'app_launch';
 
 export type Trip = {

@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MapScreen from './src/map/MapScreen';
+import { checkTripEnd } from './src/progress/tripEndDetection';
 import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
@@ -31,6 +32,11 @@ export default function App() {
     // trigger — and the launch itself is evidence the user is still around to
     // act on what it says.
     void runHealthCheck();
+
+    // A trip can end while the app is closed — a fallback signal, or a
+    // departure-point crossing the OS never delivered. Checking on launch
+    // means it is finalised the next time anybody looks (T-099).
+    void checkTripEnd();
   }, []);
 
   return (

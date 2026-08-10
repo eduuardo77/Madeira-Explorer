@@ -154,6 +154,26 @@ async function main() {
 
   // --- report ---
 
+  // Departure points (T-099): monitored, never stampable. A pack with none
+  // simply never ends a trip at an airport, which is worth saying out loud
+  // rather than leaving as a silent gap.
+  for (const point of parsed.pack.departurePoints) {
+    if (
+      point.lat < BOUNDS.south ||
+      point.lat > BOUNDS.north ||
+      point.lon < BOUNDS.west ||
+      point.lon > BOUNDS.east
+    ) {
+      error(point.id, 'departure point is outside the Madeira archipelago');
+    }
+  }
+  if (parsed.pack.departurePoints.length === 0) {
+    warn(
+      'departurePoints',
+      'none defined - no trip will ever end at an airport (D-012, T-099)'
+    );
+  }
+
   const byCategory = countByCategory(parsed.pack);
   const byRegion = new Map();
   for (const place of places) {
@@ -161,7 +181,7 @@ async function main() {
   }
 
   const shownPath = path.relative(repositoryRoot, packPath).replace(/\\/g, '/');
-  console.log(`${shownPath} — ${places.length} places, ${allGeofences.length} geofences\n`);
+  console.log(`${shownPath} — ${places.length} places, ${allGeofences.length} geofences, ${parsed.pack.departurePoints.length} departure points\n`);
 
   console.log('By category (D-027 — the passport has exactly these five rows):');
   for (const [category, count] of Object.entries(byCategory)) {

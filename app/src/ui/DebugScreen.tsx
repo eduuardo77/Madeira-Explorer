@@ -26,6 +26,7 @@ import {
 } from 'react-native';
 import { getContentPackSummary } from '../content/poiCatalogue';
 import { runAwardPass } from '../progress/stampAwards';
+import { checkTripEnd } from '../progress/tripEndDetection';
 import { generateFixture, saveFixture } from '../recording/devPoiFixture';
 import { runHealthCheck } from '../recording/healthCheck';
 import { locationProvider } from '../recording/ExpoLocationProvider';

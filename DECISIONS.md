@@ -1670,3 +1670,56 @@ better shape anyway, and it is what made T-081 answerable at all.
 **What it still cannot tell anyone:** real text scaling, real touch behaviour, the map (no web
 build for the native renderer), and sunlight legibility. T-065 and real hardware are unmoved by
 any of this.
+
+---
+
+## D-039 — Trip end: the arrival crossing must not end the trip, and silence takes three days.
+
+**Status:** Provisional — implemented 2026-08-10 (T-099, T-100). Refines D-012 rather than
+replacing it; D-012's choice of signals stands unchanged.
+
+**Context:** D-012 chose the airport geofence as the trip-end trigger and named two fallbacks.
+Implementing it surfaced one trap it does not mention and one threshold worth arguing with.
+
+**Decision:**
+
+1. **An airport crossing only ends a trip if the user has been somewhere else first**, and the
+   trip is at least 20 hours old. **This is the trap.** Every user walks through the airport on
+   the way *in* — they land, collect a bag, pick up a rental car and drive off, straight through
+   the geofence that is supposed to mean "going home". Naively implemented, every holiday ends
+   about forty minutes after it begins, and the reveal — one of exactly two notifications
+   (D-011) — is spent on an empty trip on the way out of arrivals.
+
+   Of the two guards, *"has been somewhere else"* is the one that carries the rule; trip age
+   alone would still fire on a slow first day.
+
+2. **A departure needs a 45-minute dwell**, which separates flying out from dropping somebody
+   off or passing on the coast road.
+
+3. **Silence ends a trip after three days, not D-012's 24 hours.** Silence is ambiguous in a
+   way the other two signals are not: it means *"the user left"* or *"an OEM killed the
+   recorder"* (ARCHITECTURE §6.2), and those want opposite responses. Ending a live holiday
+   because the recorder died would fire the reveal over a half-recorded trip and burn the
+   notification budget on it. Three days makes that mistake much rarer and costs only a late
+   reveal when wrong — the cheaper error. D-012 said "24h+", so this is within its latitude.
+
+4. **The trip is dated to when it actually ended**, not when the app noticed: the moment they
+   reached the airport, or the last fix before the silence. Claiming otherwise would put empty
+   days on the souvenir, which ARCHITECTURE §10 forbids.
+
+**Alternatives considered:**
+
+- *Distinguish arrival from departure by dwell alone.* Rejected: arrivals can be slow (baggage,
+  car hire queues) and departures can be quick. Dwell separates flying from errands, not
+  arriving from leaving.
+- *Use the flight direction implied by the first fix after the airport.* Rejected: there is no
+  fix after a departure — the phone goes into airplane mode.
+- *Keep D-012's 24 hours for silence.* Rejected above.
+- *End the trip on the airport crossing regardless, and let the user reopen it.* Rejected: the
+  reveal cannot be un-sent, and D-011 allows exactly two notifications.
+
+**Consequences:** the content pack gains `departurePoints` (D-034 amended) — monitored like any
+other geofence so the trip can end, and deliberately excluded from the stamp rules so nobody
+collects an airport. `recording_event` gains a `trip_end` kind. Detection runs on every
+geofence crossing, which is what puts the reveal in the departure lounge rather than at the
+next app launch, and again on launch so a trip that ended unobserved is still finalised.

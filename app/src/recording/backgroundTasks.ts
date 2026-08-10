@@ -20,6 +20,7 @@ import type {
   FixSource,
   GeofenceEventType,
 } from '../storage/types';
+import { checkTripEnd } from '../progress/tripEndDetection';
 import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
 import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
@@ -139,4 +140,9 @@ TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
     eventType: transitionType,
     accuracyM: null,
   });
+
+  // Written down first, judged second. A crossing at a departure point is how
+  // the holiday ends (D-012), and catching it here is what puts the reveal in
+  // the departure lounge rather than at the next app launch.
+  await checkTripEnd();
 });

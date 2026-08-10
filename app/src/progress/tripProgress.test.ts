@@ -30,7 +30,7 @@ function place(
 }
 
 function pack(places: Place[]): ContentPack {
-  return { formatVersion: 1, places };
+  return { formatVersion: 1, places, departurePoints: [] };
 }
 
 test('the hero number counts stamps against places', () => {

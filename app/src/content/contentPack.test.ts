@@ -37,6 +37,17 @@ function pack(places: unknown[]): unknown {
   return { formatVersion: 1, places };
 }
 
+function departurePoint(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'an-airport',
+    name: 'An Airport',
+    lat: 32.69,
+    lon: -16.77,
+    radiusM: 1200,
+    ...overrides,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // structural failures throw
 // ---------------------------------------------------------------------------
@@ -244,4 +255,58 @@ test('category counts cover all five rows, including the empty ones', () => {
   assert.equal(counts.viewpoint, 2);
   assert.equal(counts.beach, 1);
   assert.equal(counts.levada, 0, 'the passport has five rows even when one is empty');
+});
+
+// ---------------------------------------------------------------------------
+// departure points (T-099) — monitored, never stampable
+// ---------------------------------------------------------------------------
+
+test('a pack with no departurePoints is valid', () => {
+  const result = parseContentPack(pack([placeRow()]));
+  assert.deepEqual(result.pack.departurePoints, []);
+});
+
+test('departure points parse and are monitored alongside places', () => {
+  const result = parseContentPack({
+    formatVersion: 1,
+    places: [placeRow({ id: 'p', geofences: [{ id: 'p', lat: 32.6, lon: -16.9, radiusM: 200 }] })],
+    departurePoints: [departurePoint()],
+  });
+
+  assert.equal(result.problems.length, 0);
+  assert.equal(result.pack.departurePoints[0].name, 'An Airport');
+  assert.deepEqual(
+    toGeofencePlaces(result.pack).map((g) => g.poiId),
+    ['p', 'an-airport']
+  );
+});
+
+test('a departure point is NOT a place, so it can never earn a stamp', () => {
+  const result = parseContentPack({
+    formatVersion: 1,
+    places: [],
+    departurePoints: [departurePoint()],
+  });
+
+  assert.equal(result.pack.places.length, 0);
+  assert.equal(result.pack.departurePoints.length, 1);
+});
+
+test('a departure point sharing a geofence id with a place is rejected', () => {
+  // One namespace: the OS hands back one string, and a collision would make
+  // an airport crossing indistinguishable from arriving somewhere.
+  const result = parseContentPack({
+    formatVersion: 1,
+    places: [placeRow({ id: 'shared', geofences: [{ id: 'shared', lat: 32.6, lon: -16.9, radiusM: 200 }] })],
+    departurePoints: [departurePoint({ id: 'shared' })],
+  });
+
+  assert.equal(result.pack.departurePoints.length, 0);
+  assert.match(result.problems[0].problem, /duplicate geofence id/);
+});
+
+test('a departurePoints value that is not an array throws', () => {
+  assert.throws(() =>
+    parseContentPack({ formatVersion: 1, places: [], departurePoints: 'lisbon' })
+  );
 });

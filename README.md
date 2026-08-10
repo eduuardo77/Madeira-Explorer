@@ -81,6 +81,8 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ The hero number and its breakdown (T-072a/T-073), with locked regions excluded from both
   halves of the total (D-024)
 - ✅ Day-1 health check (T-049, D-011) — the answer to recording dying silently on day 2
+- ✅ **Trip end and the reveal** (T-099–T-102, D-039, *Provisional*) — the app knows when the
+  holiday is over and notifies in the departure lounge, without mistaking your arrival for it
 - ✅ **The interface**: the passport (T-074) and the primary screen (T-075), with a web design
   workbench (D-038, `cd app && npx expo start --web`) standing in for the device this project
   does not have

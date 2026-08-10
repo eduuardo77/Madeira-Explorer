@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **the interface exists**: the passport (T-074) and the primary
+**Last updated:** 2026-08-10 — **trip end and the reveal** (T-099–T-102, D-039) close the
+loop: the app now knows when the holiday is over and says so at the airport. Earlier the same
+day, **the interface**: the passport (T-074) and the primary
 screen (T-075), built against a web design workbench (D-038) that measured T-081 and caught a
 control overlap no amount of reading would have found. Earlier: progress computation
 (T-072a/T-073) and the day-1 health check (T-049).
@@ -638,13 +640,35 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ## Phase 5 — The souvenir
 
-- [ ] **T-099** Trip-end detection via airport geofence, plus Porto Santo airport and the
+- [x] **T-099** Trip-end detection via airport geofence, plus Porto Santo airport and the
       Funchal cruise terminal ⇠ T-039, T-014
-- [ ] **T-100** Fallback trip-end detection — left island bounding box, or 24h+ no data.
+      — Done 2026-08-10: **D-039**. `progress/tripEnd.ts` decides (pure, 16 tests),
+      `progress/tripEndDetection.ts` runs it on every geofence crossing and on app launch.
+      — **The trap D-012 does not mention: the user crosses the airport geofence on the way
+      IN.** Naively, every holiday ends forty minutes after it starts and the reveal is spent
+      in arrivals. An airport crossing only ends a trip if the user has been somewhere else
+      first *and* the trip is 20h+ old *and* they dwelled 45 min.
+      — The content pack gains `departurePoints` — monitored so the trip can end, excluded
+      from the stamp rules so nobody collects an airport.
+- [x] **T-100** Fallback trip-end detection — left island bounding box, or 24h+ no data.
       **Must treat Madeira and Porto Santo as a single region (D-021)**, otherwise a day trip
       to Porto Santo falsely ends the trip. ⇠ T-099
-- [ ] **T-101** Finalisation pass — run any pending matching before the reveal ⇠ T-092, T-099
-- [ ] **T-102** Reveal notification at the departure-lounge moment ⇠ T-099
+      — Done 2026-08-10. The bounds cover both islands, so a ferry day trip stays inside them;
+      there is a test asserting Porto Santo reads as *inside*. Inaccurate fixes (>200 m) are
+      ignored so one wild reading cannot end a holiday.
+      — **Silence takes three days, not 24h** (D-039). Silence means "the user left" *or* "an
+      OEM killed the recorder", and ending a live trip on the second would fire the reveal over
+      a half-recorded holiday. D-012 said "24h+", so this is within its latitude.
+- [x] **T-101** Finalisation pass — run any pending matching before the reveal ⇠ T-092, T-099
+      — Done 2026-08-10, and **much smaller than this task was written expecting**: after
+      D-032 there is no matching to finalise, the trace is drawn raw. What remains is running
+      the stamp award pass once more before revealing, so the reveal can never show a total
+      that omits a stamp the user earned.
+- [x] **T-102** Reveal notification at the departure-lounge moment ⇠ T-099
+      — Done 2026-08-10. The second and last notification of the trip (D-011). Leads with the
+      number collected, because that is what they will want to see and might share (D-013).
+      — Fired from the geofence crossing rather than the next app launch, which is what puts
+      it in the departure lounge — D-012 calls that the best moment in the product.
 - [ ] **T-103** Accommodation detection — identify the most frequent overnight location
       ⇠ T-030
 - [ ] **T-104** Accommodation masking applied by default to all exports (D-016) ⇠ T-103

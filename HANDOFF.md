@@ -95,6 +95,10 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-039** *(2026-08-10)* — trip end: an airport crossing only counts if the user has been
+  somewhere else first, because **everyone crosses the airport geofence on the way in** and the
+  naive rule ends every holiday forty minutes after it starts. Silence takes three days, not
+  D-012's 24 hours, because a dead recorder and a departed user look identical.
 - **D-038** *(2026-08-10)* — a **web design workbench** (`cd app && npx expo start --web`),
   because there is no device on this project and an interface nobody can look at cannot be
   judged. It is not a product target and must never become one. It paid for itself on the

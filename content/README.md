@@ -7,7 +7,7 @@ not a rewrite.
 
 | File | What it is | Task |
 |---|---|---|
-| `pois.json` | The curated places. **The only file that currently exists.** | T-066 |
+| `pois.json` | The curated places, and the departure points that end a trip. **The only file that currently exists.** | T-066, T-099 |
 | `regions.geojson` | Region boundaries, for per-region progress on the map screen | T-067 |
 | `levadas.geojson` | Levada corridors with entry/exit nodes | T-068 — *v2* |
 | `tunnels.geojson` | Tunnel portal pairs | T-069 — *v2* |
@@ -85,6 +85,32 @@ node tools/validate-content.mjs my-draft.json
 | `geofences[].id` | **Unique across the whole file**, not just within the place. This is the only string the operating system hands back when a crossing happens; a collision awards the stamp to the wrong place, silently. |
 | `geofences[].role` | Optional, defaults to `main`. Use `start` and `end` on levadas. |
 | `geofences[].radiusM` | Between 40 and 2000. See below — this number matters more than it looks. |
+
+### Departure points — how the trip knows it is over
+
+Alongside `places`, the same file carries the geofences that **end the trip** (D-012, T-099):
+Madeira Airport, Porto Santo Airport, and the Funchal cruise terminal.
+
+```json
+{
+  "formatVersion": 1,
+  "places": [ ... ],
+  "departurePoints": [
+    { "id": "airport-madeira", "name": "Madeira Airport", "lat": 32.6900, "lon": -16.7745, "radiusM": 1500 }
+  ]
+}
+```
+
+They are **monitored like anything else but can never earn a stamp** — "you collected Madeira
+Airport" is not a reward. Their ids share the same namespace as place geofences, so a
+collision is an error, not a warning.
+
+**Give them a generous radius** — 1–2 km. The point is catching somebody who has arrived to
+fly home, and an airport is large. Over-catching costs little: arriving on day one cannot end
+the trip, because the app also requires that you have been somewhere else first.
+
+**With none defined, no trip ever ends at an airport** and the app falls back to noticing you
+left the archipelago, or three days of silence. The validator warns about this.
 
 ### There is no "Other" category
 

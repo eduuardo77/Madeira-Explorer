@@ -82,9 +82,28 @@ export type Place = {
   geofences: PlaceGeofence[];
 };
 
+/**
+ * A place whose geofence ends the trip, not a place that earns a stamp
+ * (D-012): the airports and the Funchal cruise terminal.
+ *
+ * Kept apart from `places` on purpose. They are monitored like anything else
+ * — the geofence manager needs them in its window — but they must never be
+ * judged by the stamp rules. "Congratulations, you collected Madeira Airport"
+ * is not a reward.
+ */
+export type DeparturePoint = {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  radiusM: number;
+};
+
 export type ContentPack = {
   formatVersion: number;
   places: Place[];
+  /** Optional: a pack with none simply never ends a trip by airport. */
+  departurePoints: DeparturePoint[];
 };
 
 /** A row that was dropped, and why. Surfaced in the diary and the validator. */
@@ -157,7 +176,64 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
     }
   }
 
-  return { pack: { formatVersion: SUPPORTED_FORMAT_VERSION, places }, problems };
+  const departurePoints: DeparturePoint[] = [];
+  if (root.departurePoints !== undefined) {
+    if (!Array.isArray(root.departurePoints)) {
+      throw new ContentPackError('`departurePoints` is not an array');
+    }
+    for (let index = 0; index < root.departurePoints.length; index += 1) {
+      const point = parseDeparturePoint(
+        root.departurePoints[index],
+        `departurePoints[${index}]`,
+        seenGeofenceIds,
+        problems
+      );
+      if (point !== null) {
+        departurePoints.push(point);
+        seenGeofenceIds.add(point.id);
+      }
+    }
+  }
+
+  return {
+    pack: { formatVersion: SUPPORTED_FORMAT_VERSION, places, departurePoints },
+    problems,
+  };
+}
+
+/**
+ * Departure points share the geofence id namespace with places — the OS hands
+ * back one string and the app has to know which kind of thing it was.
+ */
+function parseDeparturePoint(
+  raw: unknown,
+  where: string,
+  seenGeofenceIds: Set<string>,
+  problems: ContentProblem[]
+): DeparturePoint | null {
+  const geofence = parseGeofence(raw, where, problems);
+  if (geofence === null) {
+    return null;
+  }
+  if (seenGeofenceIds.has(geofence.id)) {
+    problems.push({ where, problem: `duplicate geofence id ${geofence.id}` });
+    return null;
+  }
+
+  const row = raw as Record<string, unknown>;
+  const name = row.name;
+  if (typeof name !== 'string' || name.length === 0) {
+    problems.push({ where, problem: 'missing or empty `name`' });
+    return null;
+  }
+
+  return {
+    id: geofence.id,
+    name,
+    lat: geofence.lat,
+    lon: geofence.lon,
+    radiusM: geofence.radiusM,
+  };
 }
 
 /**
@@ -355,6 +431,17 @@ export function toGeofencePlaces(pack: ContentPack): GeofencePlace[] {
         radiusM: geofence.radiusM,
       });
     }
+  }
+  // Departure points are monitored alongside the places. They earn nothing —
+  // the stamp rules only ever iterate `pack.places` — but the trip cannot end
+  // at an airport the OS was never watching (D-012).
+  for (const point of pack.departurePoints) {
+    places.push({
+      poiId: point.id,
+      lat: point.lat,
+      lon: point.lon,
+      radiusM: point.radiusM,
+    });
   }
   return places;
 }

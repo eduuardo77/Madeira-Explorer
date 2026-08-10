@@ -213,10 +213,14 @@ visited_segment(
 )
 
 stamp_award(
-  poi_id, awarded_ts,
+  id, trip_id,
+  place_id,               -- the content pack's PLACE, not a geofence: a levada
+                          -- owns two geofences and earns one stamp (D-034)
+  awarded_ts,
   dwell_seconds, mean_speed_mps,
-  confidence
-)
+  confidence,             -- 0..1, stored, never shown (D-009, T-072)
+  reason                  -- why, in words; makes a surprising stamp explicable
+)                         -- UNIQUE(trip_id, place_id) makes the pass idempotent
 
 region_progress(
   region_id,

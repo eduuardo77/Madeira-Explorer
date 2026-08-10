@@ -143,6 +143,34 @@ export async function getRecentFixes(
   );
 }
 
+/**
+ * Mean reported speed over a time window, and how many fixes backed it
+ * (T-071's second gate).
+ *
+ * One query per candidate visit rather than one scan of the whole trip: the
+ * award pass runs in a burst on demand, not on the recording hot path
+ * (CONTEXT §6.3), and a trip has a few hundred visits at most. Fixes with no
+ * speed are excluded by the WHERE clause rather than averaged as zero —
+ * "unknown" must never be silently read as "stationary", which would hand out
+ * stamps to people driving past.
+ */
+export async function getSpeedBetween(
+  tripId: number,
+  fromTs: number,
+  toTs: number
+): Promise<{ meanSpeedMps: number | null; fixCount: number }> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ mean: number | null; n: number }>(
+    `SELECT AVG(speed_mps) AS mean, COUNT(speed_mps) AS n
+       FROM raw_fix
+      WHERE trip_id = ? AND ts >= ? AND ts <= ? AND speed_mps IS NOT NULL;`,
+    tripId,
+    fromTs,
+    toTs
+  );
+  return { meanSpeedMps: row?.mean ?? null, fixCount: row?.n ?? 0 };
+}
+
 export type Gap = {
   /** Last fix before the gap. */
   fromTs: number;

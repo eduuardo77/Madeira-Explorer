@@ -95,6 +95,10 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-037** *(2026-08-10)* — stamp awards: dwell **and** speed gates, and levadas verify both
+  endpoints independently so driving between two trailheads cannot earn one. Missing speed
+  lowers confidence rather than vetoing. Every threshold is a guess; T-131 retunes them over
+  holidays already recorded, which is what storing the judgement inputs buys.
 - **D-036** *(2026-08-10)* — the map is bundled in the binary, not downloaded on first run.
   19.1 MB rides along; first launch copies it into the **cache** directory, which both
   platforms keep out of backups by construction — so regenerable tiles can never crowd out the
@@ -204,6 +208,10 @@ app/
 ├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
 ├── index.ts                          imports backgroundTasks for its side effects — see below
 └── src/
+    ├── progress/                     T-071. The reward (D-037).
+    │   ├── stampRules.ts             pure: does this place become a stamp?
+    │   ├── stampRules.test.ts        23 tests, incl. the named T-078 drive-by case
+    │   └── stampAwards.ts            the re-runnable pass that writes stamp_award
     ├── content/                      T-040. The pack's only entry point (D-034).
     │   ├── contentPack.ts            parse + validate; pure, unit-tested
     │   ├── contentPack.test.ts       16 tests

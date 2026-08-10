@@ -25,6 +25,7 @@ import {
   View,
 } from 'react-native';
 import { getContentPackSummary } from '../content/poiCatalogue';
+import { runAwardPass } from '../progress/stampAwards';
 import { generateFixture, saveFixture } from '../recording/devPoiFixture';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import {
@@ -358,6 +359,18 @@ export default function DebugScreen() {
         />
       </Section>
 
+      <Section title="Stamps (T-071)">
+        <Row
+          label="Collected"
+          value={
+            contentPack.placeCount === 0
+              ? 'no places curated yet (T-066)'
+              : `${health.stampCount} of ${contentPack.placeCount}`
+          }
+          tone={health.stampCount > 0 ? 'good' : undefined}
+        />
+      </Section>
+
       <Section title="Geofences (T-039)">
         <Row
           label="Content pack"
@@ -471,6 +484,14 @@ export default function DebugScreen() {
           label="Stop geofencing"
           onPress={() => {
             void runAction(() => stopGeofences());
+          }}
+        />
+        <Button
+          label="Re-run stamp award pass"
+          onPress={() => {
+            // Safe to press repeatedly: the pass is idempotent and derived
+            // (T-071). Useful after changing thresholds during development.
+            void runAction(() => runAwardPass());
           }}
         />
         <Button label="Delete all my data" onPress={confirmDeleteAll} destructive />

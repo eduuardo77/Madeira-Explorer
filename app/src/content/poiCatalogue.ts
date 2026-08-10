@@ -71,6 +71,14 @@ function load(): LoadedPack {
   return parsed;
 }
 
+/**
+ * The parsed pack. Used by the stamp award pass (T-071), which judges every
+ * place the user has crossed.
+ */
+export function getContentPack(): ContentPack {
+  return load().pack;
+}
+
 export type ContentPackSummary = {
   placeCount: number;
   geofenceCount: number;

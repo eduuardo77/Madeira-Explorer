@@ -110,7 +110,7 @@ export const MIGRATIONS: Migration[] = [
       `CREATE TABLE recording_event (
          id     INTEGER PRIMARY KEY AUTOINCREMENT,
          ts     INTEGER NOT NULL,
-         -- start | stop | permission_change | batch | error | geofence | app_launch
+         -- start | stop | permission_change | batch | error | geofence | stamp | app_launch
          kind   TEXT    NOT NULL,
          detail TEXT
        );`,
@@ -145,6 +145,45 @@ export const MIGRATIONS: Migration[] = [
        BEGIN
          SELECT RAISE(ABORT, 'sensor_sample is append-only (CONTEXT 6.2)');
        END;`,
+    ],
+  },
+  {
+    id: 2,
+    name: 'stamp_award',
+    statements: [
+      // ---------------------------------------------------------------------
+      // stamp_award — the reward, and the only table the user actually sees
+      // the effect of (T-071, D-002).
+      //
+      // DERIVED, not captured. Every row here is reproducible from
+      // `geofence_event` plus `raw_fix` plus the content pack, which is why
+      // CONTEXT §6.2 allows it to be wiped and regenerated freely — and why
+      // the award pass is written to be re-runnable at any time.
+      //
+      // The judgement inputs are stored alongside the verdict on purpose
+      // (D-009, T-072): dwell, mean speed and a confidence value mean the
+      // thresholds can be retuned later (T-131) against real holidays,
+      // without re-collecting a single fix.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE stamp_award (
+         id             INTEGER PRIMARY KEY AUTOINCREMENT,
+         trip_id        INTEGER NOT NULL REFERENCES trip(id),
+         -- The content pack's PLACE id, not a geofence id: a levada has two
+         -- geofences and earns one stamp (D-034).
+         place_id       TEXT    NOT NULL,
+         awarded_ts     INTEGER NOT NULL,
+         dwell_seconds  INTEGER,
+         mean_speed_mps REAL,
+         -- 0..1. Stored, never shown to the user.
+         confidence     REAL    NOT NULL,
+         -- Why it was awarded, in words. Diagnostic; also what makes a
+         -- surprising award explicable months later.
+         reason         TEXT,
+         -- One stamp per place per trip. The award pass re-runs freely, so
+         -- this is what makes re-running idempotent rather than duplicating.
+         UNIQUE(trip_id, place_id)
+       );`,
+      `CREATE INDEX idx_stamp_award_trip ON stamp_award(trip_id, awarded_ts);`,
     ],
   },
 ];

@@ -18,6 +18,7 @@ import {
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { runAwardPass } from '../progress/stampAwards';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -70,6 +71,12 @@ export default function MapScreen() {
       }
 
       try {
+        // Stamps are judged on demand rather than as events arrive (T-071) —
+        // opening the app is one of the two moments that trigger it, trip end
+        // being the other. Idempotent, so this costs nothing when nothing is
+        // new.
+        await runAwardPass();
+
         const trip = await tripDao.getActiveTrip();
         if (trip !== null) {
           const fixes = await rawFixDao.getTraceFixes(trip.id);

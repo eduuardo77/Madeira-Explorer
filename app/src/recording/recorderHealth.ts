@@ -14,6 +14,7 @@ import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as sensorSampleDao from '../storage/dao/sensorSampleDao';
+import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { RecordingEvent } from '../storage/types';
 import { locationProvider } from './ExpoLocationProvider';
@@ -54,6 +55,8 @@ export type RecorderHealth = {
   geofenceEventCount: number;
   /** The monitored window, not the events it produced (T-039). */
   geofence: GeofenceStatus;
+  /** Stamps collected on this trip (T-071) — the hero number, eventually. */
+  stampCount: number;
 
   gapCount: number;
   longestGapMs: number | null;
@@ -91,6 +94,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       lastStepDelta: null,
       geofenceEventCount: 0,
       geofence,
+      stampCount: 0,
       gapCount: 0,
       longestGapMs: null,
       recentEvents,
@@ -103,6 +107,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     sensorSampleCount,
     lastSample,
     geofenceEventCount,
+    stampCount,
     gaps,
   ] = await Promise.all([
     rawFixDao.countFixes(trip.id),
@@ -110,6 +115,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     sensorSampleDao.countSamples(trip.id),
     sensorSampleDao.getLastSample(trip.id),
     geofenceEventDao.countEvents(trip.id),
+    stampAwardDao.countAwards(trip.id),
     rawFixDao.findGaps(trip.id, GAP_THRESHOLD_MS),
   ]);
 
@@ -136,6 +142,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     lastStepDelta: lastSample?.step_count_delta ?? null,
     geofenceEventCount,
     geofence,
+    stampCount,
     gapCount: gaps.length,
     recentEvents,
     longestGapMs,

@@ -46,6 +46,12 @@ export type RecordingEventKind =
    * location updates.
    */
   | 'geofence'
+  /**
+   * A stamp was awarded (T-071). Its own kind because it is the one diary
+   * line that corresponds to something the user is about to be shown, and
+   * because "why did I get this stamp?" must be answerable months later.
+   */
+  | 'stamp'
   | 'app_launch';
 
 export type Trip = {
@@ -93,6 +99,21 @@ export type GeofenceEventInput = {
 };
 
 export type GeofenceEvent = GeofenceEventInput & { id: number };
+
+/**
+ * A collected stamp. Derived from `geofence_event` and regenerable (T-071).
+ */
+export type StampAwardInput = {
+  trip_id: number;
+  place_id: string;
+  awarded_ts: number;
+  dwell_seconds: number | null;
+  mean_speed_mps: number | null;
+  confidence: number;
+  reason: string | null;
+};
+
+export type StampAward = StampAwardInput & { id: number };
 
 export type RecordingEvent = {
   id: number;

@@ -33,6 +33,18 @@ export async function countEvents(tripId: number): Promise<number> {
   return row?.n ?? 0;
 }
 
+/**
+ * Every crossing of the trip, oldest first — the input to the award pass
+ * (T-071). A week of geofence crossings is a few hundred rows at most.
+ */
+export async function getAllEvents(tripId: number): Promise<GeofenceEvent[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<GeofenceEvent>(
+    'SELECT * FROM geofence_event WHERE trip_id = ? ORDER BY ts;',
+    tripId
+  );
+}
+
 export async function getRecentEvents(
   tripId: number,
   limit: number

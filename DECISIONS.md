@@ -1564,3 +1564,55 @@ nothing here and is self-healing: the source is the app binary, so the next laun
 again, with no network, in airplane mode, up a levada. Regenerable data in the regenerable
 place. This closes what was briefly flagged as the open iOS half of T-032; the SQLite database
 stays in the document directory, where it is correctly backed up.
+
+---
+
+## D-037 — Stamp awards: two gates, and levadas verify their endpoints.
+
+**Status:** Provisional — implemented 2026-08-10 (T-071). Every threshold is a reasoned guess;
+T-131 retunes them against real holidays, which costs nothing because each award stores what it
+was judged on.
+
+**Decision:** a place becomes a stamp when a recorded visit clears **both** gates —
+
+1. **dwell** ≥ 3 minutes inside the geofence (1 minute at a levada endpoint), and
+2. **mean speed** while inside ≤ 2.0 m/s, *when speed is known*.
+
+**Levadas are judged differently**, because the stamp means "you walked the whole thing" and
+not "you arrived" (D-009, design brief §4). Both the `start` and `end` geofences must
+independently clear the gates above, and the elapsed time between them must be 20 minutes to
+14 hours.
+
+**The non-obvious part, and the reason this needed a decision.** The naive levada rule — "was
+inside both endpoint geofences" — hands the stamp to somebody who **drives** between two
+trailheads, which on this island is often quicker than walking between them. Requiring each
+endpoint to pass its own dwell-and-speed gate is D-009's own sentence applied literally:
+*credit the connection, verify the endpoints*. A drive-by fails at the trailhead, before the
+connection is ever considered. The 20-minute floor is a second, cheaper guard on the same case.
+
+**Missing speed does not veto an award.** It lowers confidence instead (capped at 0.6 against
+1.0 for a clean two-gate pass). Refusing would deny stamps precisely where GPS is worst — under
+Laurissilva canopy, at the levada trailheads that matter most — which is the uninstall trigger
+D-032 names. Fixes reporting *no* speed are excluded from the mean rather than averaged as
+zero: "unknown" must never read as "stationary".
+
+**Alternatives considered:**
+
+- *Award on the geofence enter event, immediately.* Rejected: a visit is not judgeable until it
+  has lasted, and the enter event arrives in a headless process whose only job should be
+  writing it down (D-010). Hence a re-runnable pass rather than a listener.
+- *Dwell only.* Rejected: it cannot tell a genuine visit from a traffic jam inside a generous
+  trailhead radius, and D-032 wants those radii generous.
+- *Speed only.* Rejected for the reason D-028 already established — on Madeira's gradients and
+  in Funchal traffic, speed alone cannot separate walking from driving. Averaged over several
+  minutes in one small circle it answers a much easier question: did they stop?
+- *Require a levada's endpoints in walking order.* Rejected: levadas are walked in both
+  directions, and the direction carries no information about whether the walk happened.
+- *Overwrite an existing award when re-running the pass.* Rejected: the first award keeps its
+  timestamp. When a stamp was earned belongs to the user; a threshold change months later must
+  not rewrite their holiday.
+
+**Consequences:** `stamp_award` (migration 2) stores dwell, mean speed, confidence and a
+human-readable reason next to each verdict, so a surprising stamp is explicable and the
+thresholds are retunable without re-collecting anything. The pass runs when the app opens and
+will run again at trip end (T-101). `recording_event` gains a `stamp` kind.

@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — the map exists: T-058 light style (generated, D-030 schema) and
+**Last updated:** 2026-08-10 — **the reward mechanic exists** (T-071/T-072, D-037): geofence
+crossings become stamps, with levadas verifying both endpoints so a drive-by cannot earn one.
+Earlier the same day, the map exists: T-058 light style (generated, D-030 schema) and
 T-058a shaded terrain (D-035, 6.5 MB elevation pack — total pack 19.1 MB) are built and
 iterated on screen in the repo viewer; a draft dark style rides along for T-139. Earlier the
 same day: T-039 the dynamic geofence manager (D-033), T-040 the content pack (D-034) and T-034
@@ -470,13 +472,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Mechanics
 
-- [ ] **T-071** Stamp award rules: dwell time **and** plausible speed gates (D-009) ⇠ T-041,
+- [x] **T-071** Stamp award rules: dwell time **and** plausible speed gates (D-009) ⇠ T-041,
       T-066
-      — Needs a `geofence_event.poi_id` → place lookup. That is a `Map` built from
-      `ContentPack.places`; it was deliberately **not** written in advance (T-040), because a
-      helper with no caller is a guess about its own shape. Build it here, against the real
-      award rules.
-- [ ] **T-072** Store a confidence value on every stamp award ⇠ T-071
+      — Done 2026-08-10: **D-037**. `progress/stampRules.ts` is pure and judges (23 tests);
+      `progress/stampAwards.ts` runs the pass and writes `stamp_award` (migration 2).
+      — Two gates: 3 min dwell and ≤2 m/s mean speed while inside. **Levadas verify both
+      endpoints independently** — the naive "entered both ends" rule would award the stamp to
+      somebody who drove between two trailheads, which on this island is often faster than
+      walking. T-078 is covered by a test that says so in its name.
+      — Missing speed lowers confidence rather than vetoing: refusing would deny stamps under
+      canopy, which is the D-032 uninstall trigger.
+      — A **pass**, not a listener: idempotent, re-runnable, derived. Runs when the app opens
+      and at trip end (T-101). That is what lets T-131 retune thresholds over holidays already
+      recorded.
+      — ⚠ Every threshold is a guess and nothing has been judged on real data.
+- [x] **T-072** Store a confidence value on every stamp award ⇠ T-071
+      — Done with T-071. 0–1, from how comfortably each gate was cleared, deliberately
+      non-saturating so a marginal award stays distinguishable from an obvious one. Stored
+      alongside dwell, mean speed and a written reason; never shown to the user.
 - [ ] **T-072a** Per-category progress computation (D-027) — the passport's primary axis
       ⇠ T-066, T-071
 - [ ] **T-073** Per-region progress computation ⇠ T-067, T-071

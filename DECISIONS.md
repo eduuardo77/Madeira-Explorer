@@ -1616,3 +1616,57 @@ zero: "unknown" must never read as "stationary".
 human-readable reason next to each verdict, so a surprising stamp is explicable and the
 thresholds are retunable without re-collecting anything. The pass runs when the app opens and
 will run again at trip end (T-101). `recording_event` gains a `stamp` kind.
+
+---
+
+## D-038 — A web design workbench, for looking at screens. Web is not a target.
+
+**Status:** Provisional — added 2026-08-10. Revisit if it ever starts costing more than it
+returns, or if anyone mistakes it for a product surface.
+
+**Decision:** the app gains a **web build used only as a design workbench** —
+`App.web.tsx`, mounting the presentational screens against fixture data in a browser. Metro's
+platform-extension resolution (`.web.tsx`) means the shipping app is untouched: no
+`Platform.OS` conditional enters the recorder, and `backgroundTasks.web.ts` is a no-op file
+rather than a branch.
+
+**Why:** D-032 moved the remaining effort to the interface, and there is **no device on this
+project** — no Android phone, no Mac, and the emulator is blocked behind a BIOS setting the
+project lead has declined to change. An interface nobody can look at cannot be judged, and
+building screens blind and declaring them done is the failure mode this decision exists to
+avoid.
+
+**It paid for itself immediately.** Two things were measured rather than guessed, and neither
+was visible by reading the code:
+
+- The passport at three stamps scrolled to **1.1 screens** — a first-morning scroll that
+  reveals nothing — caused by five near-identical "No X yet" lines. Replaced by one invitation
+  under the hero; day one and three stamps now fit **exactly one screen**, and 180 stamps
+  browse in 2.66.
+- The primary screen's two bottom controls **overlapped by 38 px** on a 320 dp phone showing
+  `180 / 180` with the While-Using recording control visible. A real combination, and the worst
+  case for width. They now stack, which cannot collide at any width (verified at 320/360/390/430).
+
+**Alternatives considered:**
+
+- *Build the screens blind and check them later on a device.* Rejected: "later" has no date,
+  and both defects above would have shipped into a build somebody was relying on to evaluate
+  the design.
+- *Static HTML mockups.* Rejected: a second implementation that drifts from the real
+  components, and it would not have caught either defect, because both came from the actual
+  layout engine.
+- *A cloud device farm.* Still the right answer for the *map* and for anything native, and it
+  remains recommended in `docs/dev-build.md`. It is minutes-per-iteration rather than seconds,
+  which is the wrong loop for pushing pixels around.
+- *Ship a web version.* Rejected outright, and this is the risk the decision has to guard.
+  The app needs background location, OS geofences and an offline native renderer; a browser
+  has none of them. `backgroundTasks.web.ts` says so in the file itself.
+
+**Consequences:** three dev dependencies (`react-native-web`, `react-dom`,
+`@expo/metro-runtime`) that no shipped binary includes. Screens must be written
+**presentational** — props in, pixels out — with the database work in a container. That is a
+better shape anyway, and it is what made T-081 answerable at all.
+
+**What it still cannot tell anyone:** real text scaling, real touch behaviour, the map (no web
+build for the native renderer), and sunlight legibility. T-065 and real hardware are unmoved by
+any of this.

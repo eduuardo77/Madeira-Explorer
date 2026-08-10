@@ -81,6 +81,9 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ The hero number and its breakdown (T-072a/T-073), with locked regions excluded from both
   halves of the total (D-024)
 - ✅ Day-1 health check (T-049, D-011) — the answer to recording dying silently on day 2
+- ✅ **The interface**: the passport (T-074) and the primary screen (T-075), with a web design
+  workbench (D-038, `cd app && npx expo start --web`) standing in for the device this project
+  does not have
 - 🟨 **POI curation (T-066) — the file is ready and empty.** This is the critical path now, and
   it is the one task nobody else can do.
 - 🟨 Phase 1 recorder written — **~3,100 lines, never executed on hardware**

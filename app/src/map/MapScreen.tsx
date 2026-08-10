@@ -18,11 +18,15 @@ import {
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
+import type { TripProgress } from '../progress/tripProgress';
+import { locationProvider } from '../recording/ExpoLocationProvider';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
+import PrimaryOverlay from '../ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from '../ui/theme';
 import { prepareMapAssets } from './mapAssets';
 import { buildMapStyle } from './mapStyle';
@@ -45,10 +49,27 @@ const EMPTY_TRACE: TraceCollection = {
   features: [],
 };
 
-export default function MapScreen() {
+const EMPTY_PROGRESS: TripProgress = {
+  collected: 0,
+  total: 0,
+  byCategory: [],
+  byRegion: [],
+  lockedRegionCount: 0,
+};
+
+export default function MapScreen({
+  onOpenPassport,
+}: {
+  onOpenPassport: () => void;
+}) {
   const [styleJson, setStyleJson] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [trace, setTrace] = useState<TraceCollection>(EMPTY_TRACE);
+  const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
+  // D-008: the start/stop control exists only for users without Always, for
+  // whom it is a primary action rather than a setting (design brief §3.3).
+  const [needsRecordingControl, setNeedsRecordingControl] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +97,17 @@ export default function MapScreen() {
         // being the other. Idempotent, so this costs nothing when nothing is
         // new.
         await runAwardPass();
+
+        const [nextProgress, permission, recording] = await Promise.all([
+          getCurrentProgress(),
+          locationProvider.getPermissionLevel(),
+          locationProvider.isRecording(),
+        ]);
+        if (!cancelled) {
+          setProgress(nextProgress);
+          setNeedsRecordingControl(permission !== 'always');
+          setIsRecording(recording);
+        }
 
         const trip = await tripDao.getActiveTrip();
         if (trip !== null) {
@@ -114,8 +146,24 @@ export default function MapScreen() {
     );
   }
 
+  const toggleRecording = () => {
+    void (async () => {
+      try {
+        if (isRecording) {
+          await locationProvider.stopRecording();
+        } else {
+          await locationProvider.startRecording('walking');
+        }
+        setIsRecording(await locationProvider.isRecording());
+      } catch (error) {
+        await recordingEventDao.logError('recording toggle', error);
+      }
+    })();
+  };
+
   return (
-    <MapLibreMap
+    <View style={styles.map}>
+      <MapLibreMap
       style={styles.map}
       mapStyle={styleJson}
       // The map is the product; the chrome is not (design brief §3). The
@@ -160,7 +208,19 @@ export default function MapScreen() {
           }}
         />
       </GeoJSONSource>
-    </MapLibreMap>
+      </MapLibreMap>
+
+      <PrimaryOverlay
+        progress={progress}
+        showRecordingControl={needsRecordingControl}
+        isRecording={isRecording}
+        onOpenPassport={onOpenPassport}
+        // Settings is T-114/T-140. Until it exists the gear does nothing
+        // rather than pretending to.
+        onOpenSettings={() => undefined}
+        onToggleRecording={toggleRecording}
+      />
+    </View>
   );
 }
 

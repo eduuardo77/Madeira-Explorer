@@ -95,6 +95,10 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-038** *(2026-08-10)* — a **web design workbench** (`cd app && npx expo start --web`),
+  because there is no device on this project and an interface nobody can look at cannot be
+  judged. It is not a product target and must never become one. It paid for itself on the
+  first run: it measured T-081 and caught a 38 px control overlap on a 320 dp phone.
 - **D-037** *(2026-08-10)* — stamp awards: dwell **and** speed gates, and levadas verify both
   endpoints independently so driving between two trailheads cannot earn one. Missing speed
   lowers confidence rather than vetoing. Every threshold is a guess; T-131 retunes them over
@@ -208,6 +212,12 @@ app/
 ├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
 ├── index.ts                          imports backgroundTasks for its side effects — see below
 └── src/
+    ├── ui/                           the interface (D-032 says this is where effort goes)
+    │   ├── PassportView.tsx          T-074, presentational — five rows (D-027)
+    │   ├── PassportScreen.tsx        the container that loads it
+    │   ├── PrimaryOverlay.tsx        T-075, the three controls over the map
+    │   ├── DebugScreen.tsx           T-050, the instrument panel
+    │   └── theme.ts                  D-015 encoded as values
     ├── progress/                     T-071/T-072a/T-073. The reward (D-037).
     │   ├── stampRules.ts             pure: does this place become a stamp?
     │   ├── stampRules.test.ts        23 tests, incl. the named T-078 drive-by case

@@ -5,15 +5,20 @@ import MapScreen from './src/map/MapScreen';
 import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
+import PassportScreen from './src/ui/PassportScreen';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
 
 /**
- * Two screens for now: the map (T-056/T-059 — the emerging product) and the
- * Phase 1 debug screen (T-050 — the instrument panel). The floating switch is
- * scaffolding, not design; the real primary screen layout is T-075.
+ * Three screens: the primary map (T-075), the passport (T-074), and the Phase
+ * 1 debug view (T-050 — the instrument panel, not part of the product; the
+ * design brief §5 puts it behind settings eventually).
+ *
+ * Navigation is a state variable rather than a router. Two destinations and a
+ * hidden third do not need one, and every dependency has to earn its place
+ * (CONTEXT §6.4).
  */
 export default function App() {
-  const [screen, setScreen] = useState<'map' | 'debug'>('map');
+  const [screen, setScreen] = useState<'map' | 'passport' | 'debug'>('map');
 
   useEffect(() => {
     // Recorded so that "the user opened the app" can be told apart from "the OS
@@ -31,17 +36,23 @@ export default function App() {
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
-      {screen === 'map' ? <MapScreen /> : <DebugScreen />}
+      {screen === 'map' ? (
+        <MapScreen onOpenPassport={() => setScreen('passport')} />
+      ) : screen === 'passport' ? (
+        <PassportScreen onClose={() => setScreen('map')} />
+      ) : (
+        <DebugScreen />
+      )}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={
-          screen === 'map' ? 'Open the debug screen' : 'Open the map'
+          screen === 'debug' ? 'Open the map' : 'Open the debug screen'
         }
-        onPress={() => setScreen(screen === 'map' ? 'debug' : 'map')}
+        onPress={() => setScreen(screen === 'debug' ? 'map' : 'debug')}
         style={styles.switcher}
       >
         <Text style={styles.switcherText}>
-          {screen === 'map' ? 'Debug' : 'Map'}
+          {screen === 'debug' ? 'Map' : 'Debug'}
         </Text>
       </Pressable>
     </View>

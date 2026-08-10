@@ -3,8 +3,10 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — progress computation (T-072a/T-073) and the day-1 health check
-(T-049) close the last of Phase 1's recorder work and give the interface its hero number.
+**Last updated:** 2026-08-10 — **the interface exists**: the passport (T-074) and the primary
+screen (T-075), built against a web design workbench (D-038) that measured T-081 and caught a
+control overlap no amount of reading would have found. Earlier: progress computation
+(T-072a/T-073) and the day-1 health check (T-049).
 Earlier the same day, **the reward mechanic** (T-071/T-072, D-037): geofence
 crossings become stamps, with levadas verifying both endpoints so a drive-by cannot earn one.
 Earlier the same day, the map exists: T-058 light style (generated, D-030 schema) and
@@ -218,7 +220,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Xcode, which requires a Mac. Three paths in `docs/dev-build.md`: the free emulator
       (T-029b) now, a cheap used Android (already required by T-021a) next, the Apple
       membership when approaching release.
-- [~] **T-029b** Stand up the portable Android emulator so the app can be *seen*
+- [!] **T-029b** Stand up the portable Android emulator so the app can be *seen*
+      — **Parked 2026-08-10: the project lead has declined to change the BIOS setting**, which
+      is their call and ends this route. The SDK stays installed (`tools/android-sdk`, 2.1 GB,
+      gitignored) and works the moment virtualization is ever enabled; `rm -rf
+      tools/android-sdk` reclaims the space.
+      — **Superseded for interface work by D-038**, the web design workbench, which needs no
+      device at all. For the map and anything native the answer is a cloud device farm or real
+      hardware — see `docs/dev-build.md`.
       — `bash tools/fetch-android-emulator.sh` (~2.5 GB into gitignored `tools/android-sdk/`),
       then `run-emulator.sh` and `install-apk.sh` with an EAS-built APK. Deliberately no local
       native toolchain: EAS compiles in the cloud, the emulator only runs the result.
@@ -518,12 +527,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
       — **Consumed by the map screen, not the passport** (D-027). It does the "where should I go
       next" job that D-002 needs it for. Denominator counts **unlocked regions only** (D-024).
-- [ ] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071, T-072a
+- [x] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071, T-072a
+      — Done 2026-08-10. `ui/PassportView.tsx` is presentational (props in, pixels out) and
+      `ui/PassportScreen.tsx` is the container. Five category rows always, including empty
+      ones (D-027). The levada stamp is heavier and differently coloured — never hue alone
+      (D-015) — because it is the one that means "you walked the whole thing".
+      — ⚠ **Stamp artwork is a placeholder** (a disc with an initial). T-070 designs the real
+      thing; the placeholder still shows the density and rhythm T-081 asks about.
       — Organised by **category**, five named rows, no catch-all (D-027).
       — **The levada row is different in kind:** every other category means "you arrived
       somewhere"; a levada stamp means "you walked the whole thing" (trailhead + exit geofence,
       D-009). Hardest to earn, most valuable, and it should look like it.
-- [ ] **T-075** Primary screen: map, plus **three controls only** ⇠ T-015, T-073, T-074
+- [x] **T-075** Primary screen: map, plus **three controls only** ⇠ T-015, T-073, T-074
+      — Done 2026-08-10. `ui/PrimaryOverlay.tsx` over `MapScreen`: gear top-left, stamp button
+      bottom-right carrying the hero number `23 / 180`, and the conditional start/stop shown
+      only to users without Always (D-008).
+      — **A real bug the workbench caught:** side by side, the two bottom controls overlapped
+      by 38 px on a 320 dp phone at `180 / 180` with the recording control visible. They now
+      stack; verified zero overlap at 320/360/390/430, all controls 60 dp (D-015).
       — Layout per `docs/design-brief.md` §3: gear top-left, stamp button bottom-right,
       conditional start/stop for While-Using users.
       — **The stamp button carries the hero number** (icon + `23 / 180`). One element, two jobs —
@@ -544,7 +565,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-078** Verify driving past a levada trailhead does **not** award it ⇠ T-071
 - [ ] **T-079** Verify stamps still award with GPS accuracy degraded to 100m ⇠ T-071
 - [ ] **T-080** Verify geofencing battery cost is not measurable above baseline ⇠ T-076
-- [ ] **T-081** Verify the passport screen is legible with 3 stamps and with 200 ⇠ T-074
+- [x] **T-081** Verify the passport screen is legible with 3 stamps and with 200 ⇠ T-074
+      — **Measured 2026-08-10** in the web workbench (D-038), not eyeballed. Day one and 3
+      stamps each fit **exactly one screen**; 23 stamps 1.05; 180 stamps 2.66 screens, all
+      rendered. The first attempt scrolled to 1.1 screens at 3 stamps — five "No X yet" lines
+      — which is what the measurement caught and one invitation fixed.
+      — ⚠ Still unverified on hardware: real font scaling and sunlight (T-065).
 
 **Milestone M3 — "It rewards you"** ⇠ T-077, T-078, T-079, T-080, T-081
 

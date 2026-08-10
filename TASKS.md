@@ -214,10 +214,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Xcode, which requires a Mac. Three paths in `docs/dev-build.md`: the free emulator
       (T-029b) now, a cheap used Android (already required by T-021a) next, the Apple
       membership when approaching release.
-- [ ] **T-029b** Stand up the portable Android emulator so the app can be *seen*
+- [~] **T-029b** Stand up the portable Android emulator so the app can be *seen*
       — `bash tools/fetch-android-emulator.sh` (~2.5 GB into gitignored `tools/android-sdk/`),
       then `run-emulator.sh` and `install-apk.sh` with an EAS-built APK. Deliberately no local
       native toolchain: EAS compiles in the cloud, the emulator only runs the result.
+      — **SDK, system image and the `madeira` AVD installed 2026-08-10.**
+      — [!] **Blocked on a BIOS setting.** `Virtualization Enabled In Firmware: No` on this
+      machine (i5-10400F / ASUS PRIME H410M-R); the CPU supports it, the firmware disables it.
+      No program can change that. Exact steps in **`docs/emulator-setup.md`** — ~5 minutes,
+      then a one-command driver install. Google's hypervisor driver is already downloaded.
       — Settles T-063 (offline cold start), the migrations, the permission dialogs, and — via
       GPX route replay — the recorder end-to-end including T-034 and T-076's reshuffle.
       — ⚠ Settles **nothing** about battery, OEM killers, force-quit relaunch or iOS.

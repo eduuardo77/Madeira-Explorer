@@ -121,7 +121,8 @@ renders) and **curating the places** ([content/README.md](content/README.md)).
 | [DECISIONS.md](DECISIONS.md) | Decision log — what we chose, what we rejected, and why. |
 | [CONTEXT.md](CONTEXT.md) | Everything a fresh contributor (human or AI) needs before touching anything. |
 | [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
-| [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone, and what to check first once it runs. |
+| [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone or emulator, and what to check first once it runs. |
+| [docs/emulator-setup.md](docs/emulator-setup.md) | The one BIOS setting that stands between this project and seeing its own map. |
 | [content/README.md](content/README.md) | The content pack format, and the guide for curating it (T-066). |
 | [docs/map-style.md](docs/map-style.md) | How the map styles are generated, and why they look the way they do (T-058, D-035). |
 

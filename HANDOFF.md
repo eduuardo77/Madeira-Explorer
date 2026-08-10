@@ -321,9 +321,12 @@ $99/year** — a free Apple ID can only sign through Xcode, which needs a Mac.
 
 Three paths, in the order they should happen:
 
-- **A. The emulator, free, today.** `bash tools/fetch-android-emulator.sh` puts a portable
-  Android emulator in `tools/android-sdk/` (~2.5 GB, gitignored, nothing system-wide). EAS
-  builds the APK in the cloud; the emulator runs it. **This clears the largest block of
+- **A. The emulator, free, today.** Installed 2026-08-10 — SDK, Android 14 system image and
+  the `madeira` AVD, all portable inside gitignored `tools/android-sdk/`. EAS builds the APK in
+  the cloud; the emulator runs it.
+  ⚠ **Blocked on one BIOS toggle**: CPU virtualization is disabled in this machine's firmware,
+  which no program can change. `docs/emulator-setup.md` has the exact menu path (~5 minutes)
+  and the driver step after it. **This clears the largest block of
   unverified work** — the map rendering offline, migrations, permission dialogs, and, via GPX
   route replay, the whole recorder including the sampling gate and geofence reshuffles.
   It cannot touch battery, OEM killers, force-quit relaunch or anything iOS.

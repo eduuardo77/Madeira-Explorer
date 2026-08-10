@@ -33,7 +33,13 @@ bash tools/fetch-android-emulator.sh
 ```
 
 ~2.5 GB, portable, entirely inside `tools/android-sdk/` — gitignored, nothing installed
-system-wide, delete the folder to undo it. It deliberately skips the native build toolchain
+system-wide, delete the folder to undo it. **Already done on this machine (2026-08-10),
+including the AVD.**
+
+⚠ **It will not start until CPU virtualization is enabled in the BIOS** — measured on this
+machine and switched off there. That is a one-time firmware toggle no program can make;
+**[emulator-setup.md](emulator-setup.md)** has the exact ASUS menu path and the driver step
+that follows it. Roughly five minutes, and nothing else in Path A works before it. It deliberately skips the native build toolchain
 (NDK, CMake — another ~5 GB): EAS compiles the APK in the cloud for free, and the emulator only
 has to run it.
 

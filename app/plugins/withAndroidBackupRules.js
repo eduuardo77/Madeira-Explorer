@@ -39,9 +39,11 @@ const BACKUP_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
     <!-- The user's trip history. Small, and irreplaceable. -->
     <include domain="file" path="SQLite/" />
 
-    <!-- Tens of MB, identical for every user, re-obtainable. Including it can
+    <!-- The map: tile packs and glyphs, copied out of the app binary by
+         app/src/map/mapAssets.ts. KEEP THIS PATH IN STEP WITH THAT FILE.
+         Tens of MB, identical for every user, re-obtainable. Including it can
          blow the auto-backup size cap and fail the whole backup. -->
-    <exclude domain="file" path="tiles/" />
+    <exclude domain="file" path="map/" />
 </full-backup-content>
 `;
 
@@ -51,11 +53,11 @@ const DATA_EXTRACTION_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
         <include domain="file" path="SQLite/" />
-        <exclude domain="file" path="tiles/" />
+        <exclude domain="file" path="map/" />
     </cloud-backup>
     <device-transfer>
         <include domain="file" path="SQLite/" />
-        <exclude domain="file" path="tiles/" />
+        <exclude domain="file" path="map/" />
     </device-transfer>
 </data-extraction-rules>
 `;

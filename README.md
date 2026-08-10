@@ -85,6 +85,9 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ Map styles authored as a generator over the Protomaps theme — light for use, draft dark for
   the souvenir (T-058, D-026); **shaded terrain** built and rendering (T-058a, D-035,
   *Provisional*). Total pack: **19.1 MB**. See [docs/map-style.md](docs/map-style.md)
+- ✅ **The map is in the app** (T-056): MapLibre installed, packs and glyphs bundled in the
+  binary and copied out on first launch (T-057, D-036, *Provisional*), and the **recorded trace
+  draws** over terrain with honest gap breaks (T-059). Never rendered on a device.
 - 🟨 Development build — **not created.** `app/eas.json` is written and
   [docs/dev-build.md](docs/dev-build.md) is the runbook; the remaining steps need an Expo
   account. **Nothing in Phase 1 can be verified without one.**

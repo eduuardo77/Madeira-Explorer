@@ -107,6 +107,30 @@ export async function getMovementWindow(
   );
 }
 
+/**
+ * The whole trip's trace, oldest first, in just the columns drawing needs
+ * (T-059). A week of batched fixes is tens of thousands of rows at most, and
+ * this backs the one screen where the user is actively looking at the map —
+ * not a background path.
+ */
+export async function getTraceFixes(
+  tripId: number
+): Promise<{ ts: number; lat: number; lon: number; accuracy_m: number | null }[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<{
+    ts: number;
+    lat: number;
+    lon: number;
+    accuracy_m: number | null;
+  }>(
+    `SELECT ts, lat, lon, accuracy_m
+       FROM raw_fix
+      WHERE trip_id = ?
+      ORDER BY ts;`,
+    tripId
+  );
+}
+
 export async function getRecentFixes(
   tripId: number,
   limit: number

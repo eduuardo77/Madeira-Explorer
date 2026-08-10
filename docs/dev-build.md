@@ -95,7 +95,11 @@ When you do:
 
 In roughly this order, because each one is cheap and each one can invalidate the next:
 
-1. **The app opens and the database migrates.** The debug screen renders at all.
+1. **The app opens and the database migrates.** The map screen appears (the Debug button
+   top-right switches to the instrument panel). **Put the phone in airplane mode first**: the
+   island should render fully, with terrain shading and Portuguese labels, from the bundled
+   packs alone (T-063). This is also the first-ever device test of hillshade-over-PMTiles
+   (D-035, D-036).
 2. **Request While-Using.** A real permission dialog appears, and the screen says
    `while_using` afterwards.
 3. **Start recording, walk to the end of the street.** The fix count moves. This is the first

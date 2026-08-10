@@ -342,8 +342,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ## Phase 2 — Offline map rendering
 
-- [ ] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
-- [ ] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
+- [x] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
+      — Done 2026-08-10: `@maplibre/maplibre-react-native` 11.3.6 + config plugin.
+      `src/map/mapAssets.ts` copies packs and glyphs from the binary to device storage
+      (PMTiles needs byte-range reads Android's asset reader cannot do) and
+      `src/map/mapStyle.ts` fills the generated style templates with real `pmtiles://file://`
+      URIs. Camera bounds come from the style's metadata, not from coordinates in code (D-017).
+      — ⚠ **Has never rendered on a device.** Typecheck, tests and bundle only. First dev-build
+      run must verify: hillshade renders, PMTiles resolve, glyphs load offline (T-063).
+- [x] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056
+      — **Resolved 2026-08-10: bundled (D-036).** 19.1 MB rides in the binary; first launch
+      copies it out. The download path is not built; the decision names the revisit trigger.
+      — ⚠ The **iOS half of T-032** (exclude the copied packs from iCloud backup) is now live
+      and unhandled — see D-036 consequences.
 - [x] **T-058** Author the **light** base style — the everyday in-app map (D-026). Start from an
       existing permissively-licensed style (Protomaps basemap theme, or CARTO Positron over an
       OpenMapTiles-schema build) and **subtract**: strip labels, mute roads, quiet the water and
@@ -365,9 +376,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **19.1 MB**), shaded at render time so one pack serves both styles.
       `python tiles/pipeline/build-terrain.py` rebuilds it. ⚠ Hillshade on
       `maplibre-react-native` is unverified on-device (T-056).
-- [ ] **T-059** **v1: draw the recorded raw trace** as a line layer from `raw_fix` (D-032) —
+- [x] **T-059** **v1: draw the recorded raw trace** as a line layer from `raw_fix` (D-032) —
       not matched segments. Simplify for rendering; keep the stored fixes untouched (D-010).
       ⇠ T-058, T-030
+      — Done 2026-08-10. `src/map/traceGeoJson.ts` (pure, 9 tests): a silence longer than the
+      recorder's own gap threshold breaks the line rather than bridging it (ARCHITECTURE §10),
+      and fixes worse than 120 m accuracy are not drawn — the stored rows are untouched.
+      Rendered as casing + core so the trace stays legible over terrain shadow (D-015).
+      — No simplification yet: a week of batched fixes is small. T-064 measures; simplify only
+      if it says so.
       — D-022's overlay-alignment risk **does not apply in v1**: there is no road geometry being
       drawn over the basemap's own roads, so nothing can be misaligned. D-022 governs v2.
       — *v2:* visited/unvisited styling via data-driven expressions over local `road_graph`

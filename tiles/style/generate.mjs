@@ -48,7 +48,7 @@
  * every layer that used one (POIs, shields, one-way arrows) is subtracted.
  */
 
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -300,6 +300,53 @@ function buildStyle(name, flavor, hillshadePaint, purpose) {
   };
 }
 
+/**
+ * The same style, re-plumbed for the app (T-056).
+ *
+ * Identical layers and colours; only the wiring differs, because the app
+ * reads everything from files on the device (D-001):
+ *
+ *   - Sources become `url: "{{TILES_PMTILES}}"` / `"{{TERRAIN_PMTILES}}"`
+ *     placeholders. At runtime `app/src/map/mapAssets.ts` substitutes
+ *     `pmtiles://file://<path>` once the packs are copied to device storage
+ *     — MapLibre Native requires the inner URL fully specified, and Android
+ *     cannot byte-range-read bundled assets, hence the copy.
+ *   - Tile metadata (bounds, zoom range) is NOT restated inline: with a
+ *     `url` source the renderer reads it from the PMTiles header itself,
+ *     which also keeps it honest against the archive. `encoding`/`tileSize`
+ *     stay inline — they describe interpretation, not extent, and are not in
+ *     the header.
+ *   - Glyphs become a `{{GLYPHS}}` placeholder for the on-device fonts
+ *     directory (populated by fetch-glyphs.mjs, copied by mapAssets.ts).
+ */
+function toAppStyle(style) {
+  return {
+    ...style,
+    metadata: {
+      ...style.metadata,
+      // The camera's home view. Lives here rather than in app code because
+      // island coordinates in `app/` would violate the content rule (D-017)
+      // — the app reads this from the style it was shipped with.
+      'madeira:bounds': style.sources.madeira.bounds,
+    },
+    glyphs: '{{GLYPHS}}/{fontstack}/{range}.pbf',
+    sources: {
+      madeira: {
+        type: 'vector',
+        url: '{{TILES_PMTILES}}',
+        attribution: style.sources.madeira.attribution,
+      },
+      terrain: {
+        type: 'raster-dem',
+        url: '{{TERRAIN_PMTILES}}',
+        encoding: 'terrarium',
+        tileSize: 256,
+        attribution: style.sources.terrain.attribution,
+      },
+    },
+  };
+}
+
 const light = buildStyle(
   'Madeira light',
   MADEIRA_LIGHT,
@@ -316,6 +363,17 @@ const dark = buildStyle(
 writeFileSync(path.join(here, 'light.json'), JSON.stringify(light, null, 1));
 writeFileSync(path.join(here, 'dark.json'), JSON.stringify(dark, null, 1));
 
-console.log(`light.json: ${light.layers.length} layers`);
-console.log(`dark.json:  ${dark.layers.length} layers`);
+const appDir = path.resolve(here, '..', '..', 'app', 'assets', 'map');
+mkdirSync(appDir, { recursive: true });
+writeFileSync(
+  path.join(appDir, 'light.json'),
+  JSON.stringify(toAppStyle(light), null, 1)
+);
+writeFileSync(
+  path.join(appDir, 'dark.json'),
+  JSON.stringify(toAppStyle(dark), null, 1)
+);
+
+console.log(`light.json: ${light.layers.length} layers (+ app template)`);
+console.log(`dark.json:  ${dark.layers.length} layers (+ app template)`);
 console.log('Preview: bash tiles/viewer/serve.sh → http://localhost:8081/viewer/');

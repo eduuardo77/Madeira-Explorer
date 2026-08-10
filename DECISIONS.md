@@ -1525,3 +1525,32 @@ covering a partial-world archive **must declare `bounds`**. Without it the rende
 DEM tiles beyond the archive edge, receives empty responses, and fails neighbour
 reconciliation with a `dem dimension mismatch` error. With bounds declared the requests are
 never made. The vector source gets bounds too — there it is merely efficiency.
+
+---
+
+## D-036 — The map ships inside the app binary, not as a first-run download.
+
+**Status:** Provisional — implemented 2026-08-10 with T-056. Revisit only if the shipped pack
+grows past ~40 MB or store policies push back on binary size.
+
+**Decision:** the tile packs, glyphs and style templates are bundled as app assets and copied
+to device storage on first launch (`app/src/map/mapAssets.ts`, version-keyed so app updates
+can replace them). T-057's alternative — a WiFi-gated first-run download — is not built.
+
+**Reasoning:** the download path only earns its complexity when the payload is too big to
+ship. At 19.1 MB (D-030 + D-035) it is not: the marginal install size is modest against the
+app itself, and bundling deletes an entire failure class — first-run on hotel WiFi that
+drops, a user opening the app for the first time already up a levada with no signal, a
+half-downloaded pack. The app works completely from the moment it is installed, which is what
+"install it when you land and forget it" requires. D-030 anticipated exactly this when the
+pack came in small.
+
+**Rejected:** *WiFi-gated first-run download* — the one permitted network call (D-001) stays
+permitted but unused; keeping the door open costs nothing. *Play Asset Delivery / iOS ODR* —
+store-specific machinery solving a size problem we do not have.
+
+**Consequences:** app updates are the only content-update channel (already true of the POI
+pack, D-034). The backup exclusion moved with the implementation: Android excludes `map/`
+(the plugin and `mapAssets.ts` must keep that path in step). ⚠ **iOS backup exclusion is now
+the open half of T-032** — the copied packs land in the document directory, which iCloud
+backs up unless flagged; ~19 MB of a user's backup wasted on regenerable data until fixed.

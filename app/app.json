@@ -15,7 +15,11 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
         "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
         "NSMotionUsageDescription": "Madeira Explorer uses the step counter and air-pressure sensor to work out where you walked when GPS is blocked by tunnels or forest canopy.",
-        "UIBackgroundModes": ["location", "fetch", "processing"],
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "processing"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
@@ -64,7 +68,9 @@
         }
       ],
       "./plugins/withAndroidBackupRules",
-      "expo-dev-client"
+      "expo-dev-client",
+      "@maplibre/maplibre-react-native",
+      "expo-asset"
     ]
   }
 }

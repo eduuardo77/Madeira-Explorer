@@ -5,7 +5,8 @@
 session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
 building the geofence manager, the content pack, the sampling gate (T-039/D-033, T-040/D-034,
 T-034, `docs/dev-build.md`) and then the map itself — light style and shaded terrain
-(T-058/T-058a, D-035, `docs/map-style.md`).
+(T-058/T-058a, D-035, `docs/map-style.md`) and its integration into the app — MapLibre, bundled
+packs, the trace layer (T-056/T-057/T-059, D-036).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
@@ -50,7 +51,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 | | |
 |---|---|
 | Framework | Expo SDK 57, React Native 0.86, **TypeScript strict** |
-| Map | `@maplibre/maplibre-react-native` v11, offline PMTiles/MBTiles — *not yet installed* |
+| Map | `@maplibre/maplibre-react-native` 11.3.6, **installed and wired** (T-056): offline PMTiles + bundled glyphs, trace drawn from `raw_fix` (T-059). Never rendered on a device. |
 | Location | `expo-location` (free) behind a swappable `LocationProvider` |
 | Storage | SQLite, WAL. *(R-tree and road graph are v2 — D-032)* |
 | Tiles | **Built.** 12.6 MB basemap (D-030) + 6.5 MB terrain (D-035) = 19.1 MB. Styles generated: `tiles/style/generate.mjs` |
@@ -94,6 +95,9 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-036** *(2026-08-10)* — the map is bundled in the binary, not downloaded on first run.
+  19.1 MB rides along; first launch copies it to device storage. ⚠ Opens the iOS half of
+  T-032: exclude the copies from iCloud backup.
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 

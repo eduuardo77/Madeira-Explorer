@@ -21,4 +21,10 @@ const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [path.resolve(repositoryRoot, 'content')];
 
+// The map ships as files, not code (T-056): two PMTiles packs and the glyph
+// PBFs under assets/map/. Metro only treats listed extensions as assets —
+// without these lines the `require('../assets/map/madeira.pmtiles')` in
+// mapAssets.ts would be a resolution error.
+config.resolver.assetExts.push('pmtiles', 'pbf');
+
 module.exports = config;

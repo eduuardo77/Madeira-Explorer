@@ -70,14 +70,15 @@ Places worth judging, chosen because they stress different things:
 
 ## What still gates shipping this
 
-- **Glyphs are remote in the generated styles** (Protomaps' hosted fonts). Fine in the viewer,
-  forbidden in the app (D-001). T-056/T-057 bundle the Noto PBF ranges locally and repoint the
-  `glyphs` URL. No sprite is needed — every layer that used one is subtracted.
-- **The source URLs are viewer URLs** (`localhost:8080`). The app's copies point at its bundled
-  packs — that substitution happens where the style is loaded (T-056), not here.
-- **Hillshade on `maplibre-react-native` must be verified on-device** (T-056). The layer type
-  exists in the native renderer; that it renders our terrarium pack correctly is an assumption
-  until seen.
+- ~~Glyphs~~ **Handled 2026-08-10:** `fetch-glyphs.mjs` bundles the six Noto PBF ranges into
+  `app/assets/map/fonts/`, and the app serves them from device storage. Only the *viewer*
+  styles still use hosted fonts, which is fine — the viewer is a dev tool.
+- ~~Source URLs~~ **Handled 2026-08-10:** the generator also emits app templates
+  (`app/assets/map/{light,dark}.json`) with placeholders; `app/src/map/mapStyle.ts`
+  substitutes real `pmtiles://file://` URIs at runtime.
+- **Hillshade on `maplibre-react-native` must be verified on-device** — still the case; the
+  layer type exists in the native renderer, but that it renders our terrarium pack correctly
+  is an assumption until the first dev build runs.
 - **T-065.** Sunlight, arm's length, Funchal. The only judge whose verdict counts (D-026 is
   Provisional until then).
 

@@ -111,7 +111,7 @@ export const MIGRATIONS: Migration[] = [
          id     INTEGER PRIMARY KEY AUTOINCREMENT,
          ts     INTEGER NOT NULL,
          -- start | stop | permission_change | batch | error | geofence | stamp |
-         -- health_check | trip_end | app_launch
+         -- health_check | trip_end | export | app_launch
          kind   TEXT    NOT NULL,
          detail TEXT
        );`,

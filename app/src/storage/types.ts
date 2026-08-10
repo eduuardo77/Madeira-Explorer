@@ -56,6 +56,11 @@ export type RecordingEventKind =
   | 'health_check'
   /** The trip was detected as over, and by which signal (T-099, D-012). */
   | 'trip_end'
+  /**
+   * A trace left the app, and how much of it was masked (T-104, D-016). The
+   * one diary line that records a privacy-relevant action.
+   */
+  | 'export'
   | 'app_launch';
 
 export type Trip = {

@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **trip end and the reveal** (T-099–T-102, D-039) close the
+**Last updated:** 2026-08-10 — **accommodation masking** (T-103/T-104, D-040) closes the one
+genuine privacy hole in the design, behind a single export door. Earlier the same day,
+**trip end and the reveal** (T-099–T-102, D-039) close the
 loop: the app now knows when the holiday is over and says so at the airport. Earlier the same
 day, **the interface**: the passport (T-074) and the primary
 screen (T-075), built against a web design workbench (D-038) that measured T-081 and caught a
@@ -669,9 +671,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       number collected, because that is what they will want to see and might share (D-013).
       — Fired from the geofence crossing rather than the next app launch, which is what puts
       it in the departure lounge — D-012 calls that the best moment in the product.
-- [ ] **T-103** Accommodation detection — identify the most frequent overnight location
+- [x] **T-103** Accommodation detection — identify the most frequent overnight location
       ⇠ T-030
-- [ ] **T-104** Accommodation masking applied by default to all exports (D-016) ⇠ T-103
+      — Done 2026-08-10: **D-040**. `souvenir/accommodation.ts`, pure, 15 tests. Clusters
+      overnight fixes (01:00–05:00 local) within 150 m; needs 3 before it believes anything, so
+      one stray night or one wild fix cannot become "home". Reports nights as well as fixes,
+      because one restless night at 02:00 and 03:00 is not a pattern.
+- [x] **T-104** Accommodation masking applied by default to all exports (D-016) ⇠ T-103
+      — Done 2026-08-10. **`souvenir/exportTrace.ts` is the only door a trace leaves by** —
+      the renderer (T-105) and every future export read from it, never from `rawFixDao`. That
+      is the enforcement: masking is not a step somebody remembers, it is the only way out.
+      There is deliberately **no opt-out parameter**.
+      — **An unverifiable trace is withheld, not exported.** If overnight fixes exist but no
+      accommodation resolves, the export returns nothing and says why. A null accommodation
+      must never read as "nothing to hide" — that inversion is how this fails silently, in the
+      direction that publishes an address.
+      — Mask radius 300 m against a 150 m cluster radius: the goal is making the building
+      unidentifiable, not merely covering GPS error.
+      — ⚠ **T-110 still has to confirm it on a real export.**
 - [ ] **T-105** On-device 9:16 vertical video renderer — animated trace draw-on, stamps
       popping in collection order, camera flyover ⇠ T-059, T-074
 - [ ] **T-106** Watermark ⇠ T-105

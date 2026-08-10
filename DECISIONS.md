@@ -1723,3 +1723,58 @@ other geofence so the trip can end, and deliberately excluded from the stamp rul
 collects an airport. `recording_event` gains a `trip_end` kind. Detection runs on every
 geofence crossing, which is what puts the reveal in the departure lounge rather than at the
 next app launch, and again on launch so a trip that ended unobserved is still finalised.
+
+---
+
+## D-040 — Masking is enforced by a single export door, and an unverifiable trace is withheld.
+
+**Status:** Provisional — implemented 2026-08-10 (T-103, T-104). Confirmed by T-110, which
+must inspect a real default export and fail to find the accommodation.
+
+**Context:** D-016 requires the user's accommodation masked in exports, on by default, because
+the souvenir is an export of location history and a trace that returns to one building every
+night publishes where somebody is staying — and when it is empty — to a public feed. It is the
+one genuine privacy hole in the design, and it sits inside the most-promoted feature (D-013).
+
+**Decision:**
+
+1. **One door.** `souvenir/exportTrace.ts` is the only function that yields a shareable trace.
+   The renderer (T-105), the still, and anything later read from it and never from `rawFixDao`.
+   Masking is therefore not a step somebody remembers — it is the only way out.
+2. **No opt-out parameter.** There is deliberately no `mask: false` argument. If a "show my
+   real trace" setting is ever added it belongs at the call site with its own confirmation,
+   not as a flag threaded through a function where it could default wrong.
+3. **An unverifiable trace is withheld, not exported.** If overnight fixes exist but no
+   accommodation could be identified, the export returns *nothing* and says why. **A null
+   accommodation must never be read as "nothing to hide."** That inversion is the single most
+   likely way this feature fails silently, and it would fail in the direction that publishes an
+   address.
+4. **The mask radius (300 m) is much larger than the cluster radius (150 m).** The goal is not
+   hiding the building but making it unidentifiable — 300 m in Funchal covers hundreds of
+   dwellings. A radius that merely covered GPS error would still point at one front door.
+5. **Overnight is 01:00–05:00 local.** It excludes late dinners and early starts, both of which
+   happen away from the accommodation, and needs no map, address lookup or network to evaluate.
+
+**The asymmetry that sets every threshold here** is the opposite of D-009's. For stamps, err
+generous — a missed levada is an uninstall. For masking, err toward hiding: masking too much
+costs a little trace near the hotel that nobody notices, masking too little publishes an
+address. When in doubt, mask.
+
+**Alternatives considered:**
+
+- *Trim the first and last stretch of each day*, which D-016 offers as an alternative. Rejected
+  as the primary mechanism: it removes real trip content on days that start and end away from
+  the hotel, and it fails entirely for somebody who returns mid-afternoon. Still available as a
+  supplement if T-110 finds the radius insufficient.
+- *Ask the user to confirm their accommodation.* Rejected: it is a prompt about a privacy risk
+  most users have not thought about, at onboarding, in an app whose promise is that it needs no
+  attention (CONTEXT §3). Detecting it is cheap and silent.
+- *Reverse-geocode to snap to a building and hide that.* Rejected: needs network and an address
+  database, both forbidden (D-001), and hiding exactly one building is weaker than hiding a
+  neighbourhood anyway.
+- *Export unmasked when detection fails, and warn.* Rejected — see point 3. A warning at the
+  moment of sharing is read by nobody.
+
+**Consequences:** `recording_event` gains an `export` kind, so the one privacy-relevant action
+the app takes leaves a trace of its own. `tripDao.getMostRecentTrip` exists because export
+happens *after* trip end, when there is no active trip by definition.

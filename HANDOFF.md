@@ -11,11 +11,12 @@ packs, the trace layer (T-056/T-057/T-059, D-036).
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
-**Repository state:** git repository. Planning docs plus a Phase 1 recorder in `app/` — 27
-source files, ~4,400 lines. **None of it has ever run on a phone.** The pure logic — geofence
-selection, content-pack parsing and the sampling gate — is the only part that has ever run at
-all: 47 unit tests, `cd app && npm test`. Phase 0 has produced its first result: the OSM coverage survey
-(T-028, D-029).
+**Repository state:** git repository. **v1 is feature-complete in code** — 46 source files,
+~10,000 lines in `app/`. **None of it has ever run on a phone.** The pure logic — geofence
+selection, stamp rules, progress, trip end, accommodation masking, content parsing, the
+sampling gate — is the only part that has ever run at all: **134 unit tests**,
+`cd app && npm test`. The interface can be *looked* at, in a browser (D-038). Phase 0 has
+produced its first result: the OSM coverage survey (T-028, D-029).
 
 ---
 
@@ -24,7 +25,7 @@ all: 47 unit tests, `cd app && npm test`. Phase 0 has produced its first result:
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
    before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
    §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 34 numbered decisions. **Read D-032 first** — it defines v1 scope and
+2. **`DECISIONS.md`** — 40 numbered decisions. **Read D-032 first** — it defines v1 scope and
    deletes a large amount of work you might otherwise start.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
@@ -42,8 +43,10 @@ this file explains the shape of what exists, `TASKS.md` tracks it task by task.
 
 ## Where the project stands
 
-Planning is complete, **scope has been cut (D-032)**, and the project is moving to execution.
-Phase 0 is half done. Phase 1 is implemented but entirely unproven.
+Planning is complete, **scope has been cut (D-032)**, and **the v1 chain is written end to
+end**: record → stamps by geofence → hero number → trace on a map → passport → trip end →
+reveal, with the accommodation masked out of anything shareable. Phase 0 is half done. All of
+it is unproven on hardware.
 
 **v1 = record → stamps by geofence → draw the raw trace → passport → souvenir.**
 Phase 4 map matching is **v2**. The effort saved goes into the interface and the map.
@@ -62,9 +65,10 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 ### ⚠ The single most important thing to know
 
 **No line of this app has ever executed on a phone.** What has been verified is that it is
-*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 664 modules, `expo-doctor`
+*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 843 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. Since 2026-08-10, the pure logic is also unit-tested — 47 tests, on Node.
+native config. The pure logic is unit-tested — **134 tests**, on Node — and the two screens
+have been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
 no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
@@ -95,6 +99,10 @@ project lead, but not yet validated against anything real:
 - **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
   time so one pack serves both styles. Confirmed or killed by hillshade rendering on
   `maplibre-react-native` (T-056) and the outdoor look test (T-065).
+- **D-040** *(2026-08-10)* — accommodation masking: one export door, no opt-out parameter, and
+  a trace the app could not verify is **withheld rather than shipped unmasked**. The thresholds
+  err toward hiding — the opposite of D-009's generosity, because masking too much costs a
+  little trace and masking too little publishes an address.
 - **D-039** *(2026-08-10)* — trip end: an airport crossing only counts if the user has been
   somewhere else first, because **everyone crosses the airport geofence on the way in** and the
   naive rule ends every holiday forty minutes after it starts. Silence takes three days, not
@@ -222,6 +230,10 @@ app/
     │   ├── PrimaryOverlay.tsx        T-075, the three controls over the map
     │   ├── DebugScreen.tsx           T-050, the instrument panel
     │   └── theme.ts                  D-015 encoded as values
+    ├── souvenir/                     T-103/T-104. The privacy hole, closed (D-040).
+    │   ├── accommodation.ts          pure: where do they sleep, and what to hide
+    │   ├── accommodation.test.ts     15 tests, mostly on the withhold rule
+    │   └── exportTrace.ts            THE ONLY DOOR A TRACE LEAVES BY
     ├── progress/                     T-071/T-072a/T-073. The reward (D-037).
     │   ├── stampRules.ts             pure: does this place become a stamp?
     │   ├── stampRules.test.ts        23 tests, incl. the named T-078 drive-by case

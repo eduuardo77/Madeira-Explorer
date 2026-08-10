@@ -48,6 +48,21 @@ export async function getOrCreateActiveTrip(): Promise<Trip> {
   };
 }
 
+/**
+ * The latest trip, ended or not.
+ *
+ * The souvenir is exported *after* trip end (D-012), when there is no active
+ * trip by definition — so `getActiveTrip` alone would find nothing at exactly
+ * the moment the product matters most.
+ */
+export async function getMostRecentTrip(): Promise<Trip | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<Trip>(
+    'SELECT * FROM trip ORDER BY started_ts DESC LIMIT 1;'
+  );
+  return row ?? null;
+}
+
 export async function endTrip(
   tripId: number,
   method: EndDetectionMethod

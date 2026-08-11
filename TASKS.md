@@ -222,11 +222,27 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Xcode, which requires a Mac. Three paths in `docs/dev-build.md`: the free emulator
       (T-029b) now, a cheap used Android (already required by T-021a) next, the Apple
       membership when approaching release.
-- [!] **T-029b** Stand up the portable Android emulator so the app can be *seen*
-      — **Parked 2026-08-10: the project lead has declined to change the BIOS setting**, which
-      is their call and ends this route. The SDK stays installed (`tools/android-sdk`, 2.1 GB,
-      gitignored) and works the moment virtualization is ever enabled; `rm -rf
-      tools/android-sdk` reclaims the space.
+- [x] **T-029b** Stand up the portable Android emulator so the app can be *seen*
+      — **UNPARKED AND DONE 2026-08-11.** The project lead enabled CPU virtualization in
+      firmware, and the route the SDK had been waiting on since 2026-08-10 opened immediately:
+      `emulator-check accel` → `0`, *"WHPX is installed and usable"*, and the `madeira` AVD boots
+      to **Android 14 on `emulator-5554` in about 55 seconds**.
+      — ⚠ **Read the reporting quirk before you believe a check.** `VirtualizationFirmwareEnabled`
+      still reports **False** after the BIOS change, because Windows cannot see the raw firmware
+      flag once a hypervisor is running. The signal that actually moved is `HyperVisorPresent`,
+      False → True, and the authority is `emulator-check accel` — ask the emulator, not Windows.
+      — **What it is worth, and what it is not** (CONTEXT §6.6, unchanged): legitimate for
+      rendering, storage, UI, permissions and replayed routes; **worthless for battery,
+      background survival and GPS realism.** A green result here must never close a task that
+      names a battery figure or a survival claim. T-021a's used Android is still required.
+      — Tooling added the same day, because an emulator with no location fixes draws an empty
+      island: **`tools/replay-route.sh`** feeds a route in (two routes in `tools/routes/`, one a
+      continuous seafront walk, one a drive with a **deliberate 3.5 km blackout** standing in for
+      a VR1 tunnel — which is what checks that the trace *breaks* rather than bridging it), and
+      **`tools/screenshot.sh`** grabs the screen.
+      — ⚠ Two traps found immediately and written into the scripts: `adb emu geo fix` takes
+      **longitude first**, and `adb shell screencap > file` corrupts the PNG on Windows because
+      the shell transport rewrites newlines — `adb exec-out` is the fix.
       — **Superseded for interface work by D-038**, the web design workbench, which needs no
       device at all. For the map and anything native the answer is a cloud device farm or real
       hardware — see `docs/dev-build.md`.

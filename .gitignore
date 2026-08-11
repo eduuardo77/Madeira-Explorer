@@ -57,3 +57,7 @@ Thumbs.db
 # Portable Android emulator (tools/fetch-android-emulator.sh). ~2.5 GB,
 # reproducible from the script, never committed.
 tools/android-sdk/
+
+# Emulator screenshots (tools/screenshot.sh). Throwaway and ~1.3 MB each; the
+# deliberate artefacts in tools/out/ are committed individually instead.
+tools/out/shots/

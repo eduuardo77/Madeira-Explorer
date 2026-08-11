@@ -1,0 +1,50 @@
+# A drive with a signal blackout — the tunnel case
+#
+# `lat lon`, one point per line. Fed to the emulator by
+# `bash tools/replay-route.sh` — which swaps them into the lon-lat order
+# `adb emu geo fix` wants.
+#
+# ⚠ APPROXIMATE, AND FOR TESTING ONLY. These are hand-plotted to be plausible
+# rather than surveyed: the job is to give the recorder a moving position and
+# the map a line to draw. **Nothing here is content.** The curated places live
+# in `content/pois.json` and are the project lead's (T-066), and no threshold
+# may be tuned against a route that was invented.
+#
+# There is a DELIBERATE GAP in the middle: the points jump ~3.5 km with
+# nothing in between, which is what a tunnel looks like to the recorder.
+# ARCHITECTURE §10 and D-032 require the trace to BREAK here rather than
+# draw a straight line across it. `traceGeoJson` should produce two
+# segments, not one — that is the thing this route exists to check.
+32.648000 -16.935000
+32.649000 -16.938125
+32.650000 -16.941250
+32.651000 -16.944375
+32.652000 -16.947500
+32.653000 -16.950625
+32.654000 -16.953750
+32.655000 -16.956875
+32.656000 -16.960000
+32.656750 -16.962750
+32.657500 -16.965500
+32.658250 -16.968250
+32.659000 -16.971000
+32.659750 -16.973750
+32.660500 -16.976500
+32.661250 -16.979250
+32.670000 -17.015000
+32.670750 -17.017875
+32.671500 -17.020750
+32.672250 -17.023625
+32.673000 -17.026500
+32.673750 -17.029375
+32.674500 -17.032250
+32.675250 -17.035125
+32.676000 -17.038000
+32.676625 -17.040250
+32.677250 -17.042500
+32.677875 -17.044750
+32.678500 -17.047000
+32.679125 -17.049250
+32.679750 -17.051500
+32.680375 -17.053750
+32.681000 -17.056000

@@ -16,8 +16,12 @@ genuinely blocked.
 
 ## The two things that are not yours to do
 
-1. **Getting a device.** No Android phone, no Mac, and the emulator is parked behind a BIOS
-   change the project lead has declined. See `docs/dev-build.md`. Do not re-litigate it.
+1. **Getting a *physical* device.** No Android phone and no Mac. **The emulator now works** —
+   the project lead enabled CPU virtualization in firmware on 2026-08-11, and
+   `emulator-check accel` returns `0` with WHPX usable. `bash tools/run-emulator.sh` boots an
+   Android 14 AVD. It is legitimate for rendering, storage, UI, permissions and replayed routes,
+   and **worthless for battery, background survival and GPS realism** (CONTEXT §6.6) — those
+   still need real hardware. See `docs/dev-build.md`.
 2. **Curating `content/pois.json`.** Selection and editorial judgement, deliberately theirs
    (T-066). Do not offer to do it.
 
@@ -43,11 +47,25 @@ cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolv
 node tools/validate-content.mjs                                    # the content pack
 ```
 
-Seeing things, since there is no device:
+Seeing things:
+
+```bash
+bash tools/run-emulator.sh                       # Android 14 AVD (T-029b)
+cd app && npm run android                        # build + install the dev client
+bash tools/replay-route.sh tools/routes/funchal-seafront.txt   # give it a trace to draw
+bash tools/screenshot.sh <name>                  # → tools/out/shots/<name>.png
+```
+
+⚠ **The emulator is legitimate for rendering, storage, UI, permissions and replayed routes, and
+worthless for battery, background survival and GPS realism** (CONTEXT §6.6). A green result here
+never closes a task naming a battery figure or a survival claim.
+
+Without a device at all:
 
 ```bash
 cd app && npx expo start --web   # the screens (D-038) — a workbench, never a target
 bash tiles/viewer/serve.sh        # the map styles over the real tile pack
+node tools/preview-stamps.mjs     # the stamp artwork (D-046)
 ```
 
 ## Commit messages

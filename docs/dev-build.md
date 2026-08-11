@@ -36,7 +36,14 @@ bash tools/fetch-android-emulator.sh
 system-wide, delete the folder to undo it. **Already done on this machine (2026-08-10),
 including the AVD.**
 
-⚠ **It will not start until CPU virtualization is enabled in the BIOS** — measured on this
+✅ **Working since 2026-08-11**, when the project lead enabled CPU virtualization in firmware.
+`emulator-check accel` returns `0` and reports WHPX usable; the `madeira` AVD boots to Android 14
+in about 55 seconds. ⚠ Note the reporting quirk: Windows still says
+`VirtualizationFirmwareEnabled: False` once a hypervisor is running, so **ask
+`emulator-check accel`, not Windows**.
+
+*Historical note, kept because it cost a week:* it would not start until CPU virtualization was
+enabled in the BIOS — measured on this
 machine and switched off there. That is a one-time firmware toggle no program can make;
 **[emulator-setup.md](emulator-setup.md)** has the exact ASUS menu path and the driver step
 that follows it. Roughly five minutes, and nothing else in Path A works before it.

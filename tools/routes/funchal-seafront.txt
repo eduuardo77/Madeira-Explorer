@@ -1,0 +1,56 @@
+# A seafront walk, Funchal — the ordinary case
+#
+# `lat lon`, one point per line. Fed to the emulator by
+# `bash tools/replay-route.sh` — which swaps them into the lon-lat order
+# `adb emu geo fix` wants.
+#
+# ⚠ APPROXIMATE, AND FOR TESTING ONLY. These are hand-plotted to be plausible
+# rather than surveyed: the job is to give the recorder a moving position and
+# the map a line to draw. **Nothing here is content.** The curated places live
+# in `content/pois.json` and are the project lead's (T-066), and no threshold
+# may be tuned against a route that was invented.
+#
+# Walking pace, continuous signal, no gaps. This is the route that should
+# produce an unbroken trace: if `traceGeoJson` breaks this into segments,
+# something is wrong with the gap threshold rather than with the data.
+32.645500 -16.921000
+32.645430 -16.920200
+32.645360 -16.919400
+32.645290 -16.918600
+32.645220 -16.917800
+32.645150 -16.917000
+32.645080 -16.916200
+32.645010 -16.915400
+32.644940 -16.914600
+32.644870 -16.913800
+32.644800 -16.913000
+32.644720 -16.912450
+32.644640 -16.911900
+32.644560 -16.911350
+32.644480 -16.910800
+32.644400 -16.910250
+32.644320 -16.909700
+32.644240 -16.909150
+32.644160 -16.908600
+32.644080 -16.908050
+32.644000 -16.907500
+32.643960 -16.906950
+32.643920 -16.906400
+32.643880 -16.905850
+32.643840 -16.905300
+32.643800 -16.904750
+32.643760 -16.904200
+32.643720 -16.903650
+32.643680 -16.903100
+32.643640 -16.902550
+32.643600 -16.902000
+32.643690 -16.901550
+32.643780 -16.901100
+32.643870 -16.900650
+32.643960 -16.900200
+32.644050 -16.899750
+32.644140 -16.899300
+32.644230 -16.898850
+32.644320 -16.898400
+32.644410 -16.897950
+32.644500 -16.897500

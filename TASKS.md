@@ -9,7 +9,8 @@ audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for
 half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
 the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures;
 **T-118** the Apple privacy manifest; **T-116**/**T-116a** the notification budget and the
-island's name out of `app/`; **T-120**/**T-122** the store privacy answers; **T-113** closed by measuring every screen.
+island's name out of `app/`; **T-120**/**T-122** the store privacy answers; **T-113** closed by measuring every screen;
+**T-139** the dark style tuned by contrast, and **T-140** wired to the map.
 Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
@@ -24,7 +25,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 256 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 270 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -490,16 +491,37 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-065** Outdoor sunlight legibility test — **in Funchal, at midday, held at arm's
       length.** This is the test that decides whether D-026's light-for-use choice was right.
       Run it against both styles. ⇠ T-060
-- [ ] **T-139** Author the **dark** style variant for the souvenir renderer (D-026) — the
+- [x] **T-139** Author the **dark** style variant for the souvenir renderer (D-026) — the
       fog-of-war look: dark ground, unvisited legible mid-grey, visited bright and heavy. Shares
       the same tile pack as T-058. Also offered as a user preference (T-140). ⇠ T-058
-      — An untuned draft already exists (`dark.json`, generated alongside light). The task is
-      now tuning its flavor and hillshade in `generate.mjs`, not starting one.
+      — Done 2026-08-11. The three-line draft is now a full flavor, **tuned by measuring**
+      against `ui/contrast.ts` rather than by eye, because D-015 is the binding constraint on a
+      dark style and nobody on this project can see. `map/darkStyle.test.ts` (9 tests) holds the
+      properties against the **app's shipped copy** of the style, so a regenerated style that
+      loses an override fails the build.
+      — Sea `#070B10`, land `#232D37`, roads `#6E7B85`–`#9AA7B2` at **3.2:1 to 5:1** against the
+      ground — D-015 forbids near-black roads and that floor is what made the palette hard.
+      Nothing in the basemap exceeds 6:1, leaving the top of the range for the trace.
+      — **Sea and land are only 1.53:1 apart, deliberately.** An earlier attempt demanded 2:1
+      and there was *no* palette that also kept roads legible — the constraint was mine, not the
+      design's. D-026 puts figure-ground in the **shaded terrain**, so the dark hillshade is
+      exaggerated more than the light one (0.45 vs 0.35): a dark ground swallows relief.
+      — ⚠ **Three defects found by the test, not by looking:** `pier` at **1.07:1** — and a pier
+      is *walkable*, so the road floor applies to it; the runway at 1.43:1, which made the
+      airport unfindable when it is where the trip ends (D-012); and the island-name label at
+      6.62:1, under the label floor, on the largest labels on the map.
+      — ⚠ **Never seen.** Contrast is a floor, not a verdict. **T-065 outdoors is the verdict**
+      and D-026 stays Provisional until then.
+      — Preview: `bash tiles/viewer/serve.sh` → `http://localhost:8081/viewer/?style=dark`
 - [x] **T-140** Light/dark preference in settings (D-026). Defaults to light for in-app use;
       the souvenir always renders dark regardless of this setting. ⇠ T-139, T-141
-      — Done 2026-08-10 as part of T-141. The control exists and holds its choice; **wiring it
-      to the map's style is still open** — `MapScreen` hardcodes `light` until the dark style
-      is tuned (T-139).
+      — Done 2026-08-10 as part of T-141. **Wiring completed 2026-08-11** now T-139 has tuned
+      the dark style: the choice persists in `app_state` (`map_style`) and `MapScreen` reads it
+      instead of hardcoding `light`. `map/mapStylePreference.ts` parses it — the value is a text
+      column read on the path that draws the map, so anything unrecognised falls back to light
+      rather than producing a style name that cannot resolve (4 tests).
+      — Light stays the default deliberately: the everyday map is read outdoors in sunlight and
+      is the style tuned for it. **The souvenir renders dark regardless of this setting.**
 
 **Milestone M2 — "It looks like Madeira"** ⇠ T-063, T-064, T-065
 

@@ -25,12 +25,14 @@ import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as rawFixDao from '../storage/dao/rawFixDao';
+import * as appStateDao from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PrimaryOverlay from '../ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from '../ui/theme';
 import { prepareMapAssets } from './mapAssets';
 import { buildMapStyle } from './mapStyle';
+import { parseMapStyle } from './mapStylePreference';
 import type { TraceCollection } from './traceGeoJson';
 import { buildTrace } from './traceGeoJson';
 
@@ -79,9 +81,14 @@ export default function MapScreen({
 
     (async () => {
       try {
-        const uris = await prepareMapAssets();
+        // The user's choice, not a hardcoded style (T-139/T-140, D-026). Read
+        // before the assets so a slow copy does not decide the appearance.
+        const [preference, uris] = await Promise.all([
+          appStateDao.get(appStateDao.AppStateKey.MapStyle),
+          prepareMapAssets(),
+        ]);
         if (!cancelled) {
-          setStyleJson(buildMapStyle('light', uris));
+          setStyleJson(buildMapStyle(parseMapStyle(preference), uris));
         }
       } catch (error) {
         // A map that cannot load its files is a bug to fix, not a condition

@@ -3,10 +3,20 @@
 How the app's cartography is made, and why it looks the way it does.
 (T-058 light, T-058a terrain, T-139 dark. Decisions: D-026, D-030, D-015.)
 
-**Status 2026-08-10:** light style generated and iterated on-screen against the real pack;
-terrain **built and rendering** (232 tiles, 6.5 MB — total pack 19.1 MB); dark style is an
-untuned draft. **None of it has passed the real test — T-065, outdoors, in Funchal, at
-midday.**
+**Status 2026-08-11:** light style generated and iterated on-screen against the real pack;
+terrain **built and rendering** (232 tiles, 6.5 MB — total pack 19.1 MB); **dark style tuned
+(T-139)** — by contrast measurement rather than by eye, and held by
+`app/src/map/darkStyle.test.ts`. The light/dark preference is wired to the map (T-140).
+**None of it has passed the real test — T-065, outdoors, in Funchal, at midday.**
+
+**The dark style's numbers, because they are the interesting part.** Sea `#070B10`, land
+`#232D37`, roads `#6E7B85`–`#9AA7B2`. Roads sit at **3.2:1 to 5:1** against the ground because
+D-015 forbids near-black roads outright — that floor is what makes a dark style hard, since
+everything else wants to be dark. Nothing in the basemap exceeds **6:1**, which leaves the top
+of the range for the user's trace (design brief §2.3). Sea and land are only **1.53:1** apart
+and that is deliberate: two large adjacent fills read apart at far less than text contrast, and
+**D-026 puts figure-ground in the shaded terrain** — which is why the dark hillshade is
+exaggerated 0.45 against the light style's 0.35. A dark ground swallows relief.
 
 ---
 

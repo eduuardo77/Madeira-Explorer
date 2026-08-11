@@ -30,6 +30,8 @@ import {
 } from '../recording/batteryOptimisation';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import type { PermissionLevel } from '../recording/LocationProvider';
+import { parseMapStyle } from '../map/mapStylePreference';
+import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
@@ -53,6 +55,25 @@ export default function SettingsScreen({
     void locationProvider
       .getPermissionLevel()
       .then(setPermission)
+      .catch(() => undefined);
+
+    void appStateDao
+      .get(appStateDao.AppStateKey.MapStyle)
+      .then((raw) => setMapStyle(parseMapStyle(raw)))
+      .catch(() => undefined);
+  }, []);
+
+  /**
+   * Remember the choice (T-140).
+   *
+   * The map reads this on its next mount rather than being pushed to — the
+   * user returns to the map by closing settings, so there is nothing to
+   * synchronise and no state to hold in two places.
+   */
+  const changeMapStyle = useCallback((next: 'light' | 'dark') => {
+    setMapStyle(next);
+    void appStateDao
+      .set(appStateDao.AppStateKey.MapStyle, next)
       .catch(() => undefined);
   }, []);
 
@@ -136,7 +157,7 @@ export default function SettingsScreen({
       permission={permission}
       mapStyle={mapStyle}
       mapPackBytes={null}
-      onChangeMapStyle={setMapStyle}
+      onChangeMapStyle={changeMapStyle}
       onOpenSystemSettings={() => {
         void Linking.openSettings().catch(() => undefined);
       }}

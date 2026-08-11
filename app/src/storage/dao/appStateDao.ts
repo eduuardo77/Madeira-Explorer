@@ -31,6 +31,15 @@ export const AppStateKey = {
   InstalledTs: 'installed_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
+  /**
+   * Which map style the user prefers, `light` or `dark` (T-140, D-026).
+   *
+   * Light is the default because the everyday map is read outdoors in sunlight
+   * and the light style is the one tuned for that. The souvenir always renders
+   * dark regardless of this setting — the fog-of-war metaphor is the point
+   * there, and it is not the user's choice to make.
+   */
+  MapStyle: 'map_style',
   /** Set once the user has been through onboarding, however it went (T-114). */
   OnboardingCompleted: 'onboarding_completed',
   /**

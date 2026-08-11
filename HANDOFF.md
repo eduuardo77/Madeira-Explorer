@@ -18,7 +18,7 @@ user's accommodation masked out of anything shareable. 58 source files and 14 te
 `app/`, ~14,900 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**256 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**270 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -68,7 +68,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 | ~~**T-070** stamp artwork~~ | **Done 2026-08-11 (D-046).** Generated per place from the category and a hash of the id — eight silhouettes, six colourways, two-tone emblems. The **emblem** carries the category, not the shape or the colour (D-015). `node tools/preview-stamps.mjs` draws them all to a page, which is the only way to judge them here. |
 | ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
 | ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
-| **T-139** tune the dark style | It generates already; the settings toggle is not wired to the map until it is tuned. |
+| ~~**T-139** tune the dark style~~ | **Done 2026-08-11.** Tuned by contrast measurement, not by eye — `map/darkStyle.test.ts` holds D-015 against the shipped style. **T-140's toggle is now wired to the map** and persists. ⚠ Never seen; T-065 outdoors is the verdict. |
 
 **2. Verification that needs a device.** Everything in T-051–T-055, T-063, T-076, T-077–T-080,
 T-110. **No threshold anywhere in this app has met real data** — every number in D-033, D-037,
@@ -97,7 +97,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **256 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **270 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -264,10 +264,10 @@ the film as a storyboard and `souvenirPlan.ts` feeds it from the database. What 
 native video encoding and therefore a device. It also needs *eyes*: the composition's timings
 are guesses by somebody who has never seen the result.
 
-**3. The small remainder.** T-139, tuning the dark style so T-140's toggle can be connected to
-the map — **and it needs somebody to look at it**, which is the one thing this project cannot
-do for itself. *(T-124 the privacy policy, T-046 the battery exemption and T-070 the stamp
-artwork were all here and are now done — D-044, D-045, D-046.)*
+**3. The small remainder is empty.** Every v1 item that does not need a device is done —
+T-046, T-070, T-105a, T-113, T-116/T-116a, T-117, T-118, T-120, T-122, T-124, T-139, T-140.
+**What is left of v1 is a device, the content, and the Play submission**, and none of the three
+is code.
 
 **4. When a device exists, in this order**, because each is cheap and each can invalidate the
 next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence
@@ -524,7 +524,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 256 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 270 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
@@ -539,7 +539,8 @@ decision arises at all.
 > - **T-105b, the souvenir encoder** — the biggest remaining piece and the whole distribution
 >   strategy (D-013). The composition is already written (T-105a, D-042); this is the encoding,
 >   and it needs a device.
-> - **T-139, tune the dark style** so the light/dark toggle can be wired to the map
+> - **T-105b, the souvenir encoder** — needs a device
+> - **the content**, or **a device**, which are the only things left that move v1
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

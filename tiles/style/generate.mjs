@@ -189,16 +189,150 @@ const MADEIRA_LIGHT = {
 };
 
 /**
- * The dark flavor (T-139): the souvenir's fog-of-war ground. ⚠ A DRAFT —
- * generated now because it costs three lines, tuned when T-139 starts in
- * earnest. The fog-of-war rules (unvisited legible mid-grey, visited bright
- * and heavy) apply to the overlay, which does not exist yet.
+ * The dark flavor (T-139): the souvenir's fog-of-war ground.
+ *
+ * TUNED 2026-08-11, AND TUNED BY MEASURING
+ * ----------------------------------------
+ * The previous version was a three-line draft. Every value below was chosen
+ * against `app/src/ui/contrast.ts`, because D-015's rules are the binding
+ * constraint on a dark style and "looks about right" is not available to
+ * somebody who cannot see it. Three properties were solved for, and
+ * `app/src/map/darkStyle.test.ts` holds them:
+ *
+ *   1. **Unvisited roads stay legible.** D-015 forbids near-black roads
+ *      outright. The road greys sit at **3.2:1 to 5:1** against the ground —
+ *      genuinely readable, not merely present. This is the constraint that
+ *      makes a dark style hard: everything wants to be dark and the roads
+ *      cannot be.
+ *   2. **The island's shape carries the composition** (`docs/map-style.md`).
+ *      Sea and land are only **1.53:1** apart, and that is deliberate: two
+ *      large adjacent fills read apart at far less than text contrast, and
+ *      **D-026 puts figure-ground in the shaded terrain, not in the fills.**
+ *      An earlier attempt demanded 2:1 here and there was *no* palette that
+ *      also kept the roads legible — the constraint was mine, not the design's.
+ *   3. **Labels are unambiguous** — better than 11:1 on both sea and land.
+ *
+ * WHAT IS LEFT FOR THE TRACE
+ * --------------------------
+ * The whole point of the dark style is that the user's own trace is the
+ * brightest thing on it (design brief §2.3). Nothing here goes above about
+ * 5:1, which leaves the top of the range free. The trace's own colour and
+ * weight are set by the map layer (T-059), not by this flavor.
+ *
+ * ⚠ **Never seen.** No device, and no human eye until the project lead opens
+ * the viewer. Contrast is a floor, not a verdict — T-065 outdoors is the
+ * verdict, and D-026 stays Provisional until then.
  */
 const MADEIRA_DARK = {
   ...DARK,
-  background: '#14181c',
-  water: '#14181c',
-  earth: '#23282d',
+
+  // The Atlantic at night. Near-black, and blue rather than grey so the sea
+  // still reads as water rather than as absence.
+  background: '#070B10',
+  water: '#070B10',
+
+  // Unexplored land. The fog-of-war ground, and the value everything else was
+  // measured against.
+  earth: '#232D37',
+
+  // Madeira is largely forest. Green-shifted just enough to be believable,
+  // close enough to `earth` that the island does not read as striped.
+  park_a: '#26332C',
+  park_b: '#2A3830',
+  wood_a: '#24312B',
+  wood_b: '#28362F',
+  scrub_a: '#28332C',
+  scrub_b: '#2C3830',
+  glacier: '#232D37', // none in Madeira; keyed to earth in case of mistags
+
+  // Beaches are one of the five stamp categories, so they earn a warm note.
+  sand: '#35382E',
+  beach: '#3A3D31',
+
+  pedestrian: '#2A343E',
+  // ⚠ A pier is WALKABLE, so D-015's legibility floor applies to it exactly as
+  // it does to a road — caught by `darkStyle.test.ts`, which found it at
+  // 1.07:1, effectively invisible. Funchal and Câmara de Lobos both have one.
+  pier: '#76838E',
+  aerodrome: '#262E36', // kept: the airport is the trip-end landmark (D-012)
+  // Brighter than the draft so the airport is *identifiable* — it is where the
+  // trip ends (D-012) and the reveal fires. Not held to the road floor: a
+  // runway is a landmark, not somewhere the user walked.
+  runway: '#5F6B76',
+  military: '#242D34',
+  zoo: '#242D34',
+  hospital: '#232D37',
+  industrial: '#232D37',
+  school: '#232D37',
+
+  // Low-zoom landcover, same family. At z<6 this is most of what is drawn.
+  landcover: {
+    grassland: 'rgba(38, 51, 44, 1)',
+    barren: 'rgba(48, 52, 44, 1)',
+    urban_area: 'rgba(41, 50, 60, 1)',
+    farmland: 'rgba(40, 54, 46, 1)',
+    glacier: 'rgba(35, 45, 55, 1)',
+    scrub: 'rgba(40, 51, 44, 1)',
+    forest: 'rgba(36, 49, 43, 1)',
+  },
+
+  // ⚠ THE LOAD-BEARING BLOCK. Roads brighten as they get more major, exactly
+  // as in the light style — but here the floor matters: D-015 says unvisited
+  // roads stay legible mid-grey and never near-black, so the dimmest road on
+  // the map still clears 3:1 against the ground. Casings go *darker* than the
+  // ground, which is what makes a road read as a drawn line rather than a
+  // smear.
+  other: '#6E7B85',
+  minor_service: '#6E7B85',
+  minor_a: '#76838E',
+  minor_b: '#7F8C97',
+  link: '#8794A0',
+  major: '#8F9CA7',
+  highway: '#9AA7B2',
+  minor_service_casing: '#10161C',
+  minor_casing: '#10161C',
+  link_casing: '#0C1116',
+  major_casing_early: '#0C1116',
+  major_casing_late: '#0C1116',
+  highway_casing_early: '#080D12',
+  highway_casing_late: '#080D12',
+
+  // Tunnels: deliberately dimmer than the surface roads and NOT held to the
+  // legibility floor. GPS dies inside them and the trace gaps honestly there
+  // (D-032); a faint road continuing under the mountain reads as "the road
+  // goes through", which is a hint rather than information the user acts on.
+  tunnel_other: '#47535D',
+  tunnel_minor: '#47535D',
+  tunnel_link: '#4C5862',
+  tunnel_major: '#4C5862',
+  tunnel_highway: '#515D67',
+  tunnel_other_casing: '#141A20',
+  tunnel_minor_casing: '#141A20',
+  tunnel_link_casing: '#141A20',
+  tunnel_major_casing: '#141A20',
+  tunnel_highway_casing: '#141A20',
+
+  bridges_other: '#6E7B85',
+  bridges_minor: '#7F8C97',
+  bridges_link: '#8794A0',
+  bridges_major: '#8F9CA7',
+  bridges_highway: '#9AA7B2',
+  bridges_other_casing: '#10161C',
+  bridges_minor_casing: '#10161C',
+  bridges_link_casing: '#0C1116',
+  bridges_major_casing: '#0C1116',
+  bridges_highway_casing: '#080D12',
+
+  railway: '#3A444D', // no rail on the island; harmless if mistagged
+
+  // Labels: light on dark, haloed in the sea colour so they hold over both
+  // the water and the land without a box.
+  city_label: '#E8EEF2',
+  city_label_halo: '#070B10',
+  // Also carries the island names. Brightened from #A8B4BE, which measured
+  // 6.62:1 on land — under the label floor, on the largest labels on the map.
+  subplace_label: '#BCC7D0',
+  subplace_label_halo: '#070B10',
 };
 
 /**
@@ -234,11 +368,21 @@ const HILLSHADE_LIGHT = {
   'hillshade-accent-color': '#8b8071',
 };
 
-/** Dark style draft: deeper shadows, moonlit highlights (T-139). */
+/**
+ * Dark style: moonlit ridges (T-139).
+ *
+ * ⚠ **Exaggerated more than the light style, and that is the figure-ground
+ * mechanism, not a flourish.** D-026 puts figure-ground in the shaded terrain
+ * rather than in buildings — and on a dark ground the relief is what separates
+ * the island from the sea, because the fills themselves are only 1.53:1 apart.
+ * The light style can afford 0.35 because paper shows shading readily; a dark
+ * ground swallows it.
+ */
 const HILLSHADE_DARK = {
-  'hillshade-shadow-color': '#0b0e11',
-  'hillshade-highlight-color': '#3d4650',
-  'hillshade-accent-color': '#0b0e11',
+  'hillshade-exaggeration': 0.45,
+  'hillshade-shadow-color': '#01040A',
+  'hillshade-highlight-color': '#55677A',
+  'hillshade-accent-color': '#01040A',
 };
 
 function buildStyle(name, flavor, hillshadePaint, purpose) {
@@ -357,7 +501,7 @@ const dark = buildStyle(
   'Madeira dark',
   MADEIRA_DARK,
   HILLSHADE_DARK,
-  'T-139 draft — the souvenir ground. NOT yet tuned.'
+  'T-139 — the souvenir ground (D-026). Tuned by contrast; never seen outdoors (T-065).'
 );
 
 writeFileSync(path.join(here, 'light.json'), JSON.stringify(light, null, 1));

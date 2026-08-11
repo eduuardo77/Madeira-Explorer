@@ -20,12 +20,12 @@
  * judged.
  */
 
-import * as Notifications from 'expo-notifications';
 import { getContentPack } from '../content/poiCatalogue';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
+import { sendTripNotification } from '../notify/sendTripNotification';
 import { getCurrentProgress } from './currentProgress';
 import { runAwardPass } from './stampAwards';
 import type { GeofenceCrossing } from './stampRules';
@@ -169,8 +169,6 @@ async function sendReveal(): Promise<void> {
           progress.collected === 1 ? 'place' : 'places'
         }. Open the app to see the map of everywhere you went.`;
 
-  await Notifications.scheduleNotificationAsync({
-    content: { title: 'Your Madeira map is ready', body },
-    trigger: null,
-  });
+  // Through the one door, which owns the D-011 cap (T-116).
+  await sendTripNotification('reveal', 'Your Madeira map is ready', body);
 }

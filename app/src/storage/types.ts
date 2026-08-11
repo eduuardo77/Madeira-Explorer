@@ -61,6 +61,13 @@ export type RecordingEventKind =
    * one diary line that records a privacy-relevant action.
    */
   | 'export'
+  /**
+   * A notification was posted, or refused by the budget (T-116, D-011). Its
+   * own kind because the cap of two per trip is a promise made to the user in
+   * the privacy policy (D-044), and the diary is the only place a claim about
+   * *how many were actually sent* can be checked after the fact.
+   */
+  | 'notification'
   | 'app_launch';
 
 export type Trip = {

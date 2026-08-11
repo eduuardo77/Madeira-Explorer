@@ -7,6 +7,7 @@
  */
 
 import { getDatabase } from '../database';
+import * as appStateDao from './appStateDao';
 import type { EndDetectionMethod, Trip } from '../types';
 
 export async function getActiveTrip(): Promise<Trip | null> {
@@ -36,6 +37,12 @@ export async function getOrCreateActiveTrip(): Promise<Trip> {
     'INSERT INTO trip (started_ts) VALUES (?);',
     startedTs
   );
+
+  // A new trip gets a full notification budget (T-116, D-011). Per trip and
+  // not per install, because Madeira has an unusual number of repeat visitors
+  // (CONTEXT §4.10) and counting per install would silently mute the app on
+  // their second holiday — the one they are most likely to care about.
+  await appStateDao.set(appStateDao.AppStateKey.NotificationsSent, '');
 
   return {
     id: result.lastInsertRowId,

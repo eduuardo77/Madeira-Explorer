@@ -11,7 +11,7 @@ the stamp artwork (T-070, D-046). Contrast is now enforced by test (T-113). Prev
 feature-complete in code) and 2026-08-08 (design session, D-026/D-027/D-028).
 **Repository state:** Git repository, ~20 commits. Planning documents plus the **whole v1
 chain** in `app/` — 58 source files and 14 test files, ~14,900 lines. **None of it has ever run
-on a phone**; 232 unit tests and a browser workbench (D-038) are the only verification that
+on a phone**; 243 unit tests and a browser workbench (D-038) are the only verification that
 exists. Phase 0 is half done: the tile pack is built, the field runs are not.
 
 **Read `HANDOFF.md` for what to do next.** This document is the *why*; that one is the state.

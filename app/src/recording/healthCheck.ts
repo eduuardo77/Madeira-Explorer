@@ -19,6 +19,7 @@
  */
 
 import * as Notifications from 'expo-notifications';
+import { sendTripNotification } from '../notify/sendTripNotification';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -90,24 +91,20 @@ export async function runHealthCheck(
       return decision;
     }
 
-    // Mark it sent BEFORE posting. If the process dies between the two the
-    // user misses one reassurance; the other order risks a notification loop
-    // on a device that keeps being killed mid-send, which would burn the
-    // entire D-011 budget in an afternoon.
+    // The timestamp is still recorded — `decideHealthCheck` reads it, and it
+    // answers "when", which the budget does not.
     await appStateDao.set(
       appStateDao.AppStateKey.HealthCheckSentTs,
       String(now)
     );
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: decision.title,
-        body: decision.body ?? '',
-      },
-      // Immediately. The delay that matters was already waited out — this
-      // function is only reached once the window has passed.
-      trigger: null,
-    });
+    // Posting goes through the one door, which owns the D-011 cap and the
+    // mark-before-post ordering (T-116).
+    await sendTripNotification(
+      'health_check',
+      decision.title,
+      decision.body ?? ''
+    );
 
     await recordingEventDao.log('health_check', decision.reason);
     return decision;

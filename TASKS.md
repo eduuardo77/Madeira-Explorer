@@ -7,7 +7,8 @@ Ordered implementation checklist with explicit dependencies.
 D-042) and **T-105b** (the encoder, which needs a device); **T-117** the dependency network
 audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device
 half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
-the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures.
+the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures;
+**T-118** the Apple privacy manifest; **T-116** the notification budget.
 Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
@@ -22,7 +23,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 232 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 243 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -809,7 +810,35 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ The copy has never been read by anybody outside this project. T-112 and T-129.
 - [ ] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
       handing off to Apple/Google Maps). No in-app navigation. (D-018) ⇠ T-066
-- [ ] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
+- [x] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
+      — Done 2026-08-11. `notify/notificationPolicy.ts` (pure, 11 tests) +
+      `notify/sendTripNotification.ts`, **the only place this app posts a notification**. Same
+      shape as `exportTrace` being the only door a trace leaves by (D-040).
+      — **Nothing was broken.** Both call sites already guarded themselves; what was missing was
+      anything that would notice a *third*. The cap lived in a decision document, which is not
+      somewhere code can be stopped from violating — and the privacy policy now promises it to
+      the user in words (D-044), so it needed enforcing rather than remembering.
+      — **The test that will actually catch something reads the source** of every module in
+      `app/` and fails if anything but the door calls `scheduleNotificationAsync`. Same technique
+      as `deleteAllUserData.test.ts` deriving its table list from the migrations. **Verified by
+      deliberately breaking it** — a stray call in `MapScreen.tsx` was caught and named.
+      — Budget is **per trip, not per install**: a repeat visitor (CONTEXT §4.10) must get their
+      day-1 check again. Cleared in `getOrCreateActiveTrip`.
+      — Marked spent **before** posting: losing one message beats a send loop on a device that
+      keeps being killed, which would burn the budget in an afternoon and teach the user to
+      turn notifications off — losing the reveal, which D-012 calls the best moment in the app.
+      — ⚠ **Found and not fixed:** `tripEndDetection.ts` hardcodes the reveal title *"Your
+      Madeira map is ready"*. D-017 forbids Madeira knowledge in `app/` and CONTEXT §6.1 calls
+      it absolute. It is user-facing copy at the moment D-012 calls the best in the product, so
+      changing it is the project lead's call, not a silent edit. **New: T-116a.**
+- [ ] **T-116a** Move the island's name out of the reveal notification (D-017) ⇠ T-102
+      — `progress/tripEndDetection.ts` sends *"Your Madeira map is ready"*. Every other
+      island-specific string already comes from `content/` or the shipped style's metadata; this
+      one is a literal in `app/`, so shipping for anywhere else means editing code rather than
+      swapping a directory.
+      — **Not a mechanical fix.** It is the copy on the notification D-012 calls the best moment
+      in the product, and D-013 says it must get somebody in a departure lounge to open the app.
+      "Your map is ready" may be as good or better — but that is a copy decision. Ask.
 
 ### Privacy and compliance
 

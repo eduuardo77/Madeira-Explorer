@@ -17,6 +17,14 @@ export const AppStateKey = {
   /** Timestamp of the day-1 health check notification, so it fires once (T-049). */
   HealthCheckSentTs: 'health_check_sent_ts',
   /**
+   * Which notifications have been sent for the current trip, comma-separated
+   * (T-116). D-011 caps the app at two per trip and the privacy policy
+   * promises it to the user in words (D-044); this is what enforces it rather
+   * than everybody remembering. Cleared when a trip starts, because the budget
+   * is per trip — a repeat visitor must get their day-1 check again.
+   */
+  NotificationsSent: 'notifications_sent',
+  /**
    * When the app first ran — as close to "installed" as the app can honestly
    * get, and what the day-1 check counts from (T-049, D-011).
    */

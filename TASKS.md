@@ -9,7 +9,7 @@ audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for
 half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
 the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures;
 **T-118** the Apple privacy manifest; **T-116**/**T-116a** the notification budget and the
-island's name out of `app/`; **T-120**/**T-122** the store privacy answers.
+island's name out of `app/`; **T-120**/**T-122** the store privacy answers; **T-113** closed by measuring every screen.
 Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
@@ -24,7 +24,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 250 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 256 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -786,7 +786,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Target is already set by `docs/design-brief.md` §3: map plus three controls. Watch
       specifically for banner/promo cards accumulating over the map; the reference app loses the
       top third of its map to two stacked dismissible banners.
-- [~] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
+- [x] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
       — **Contrast done 2026-08-11, and made mechanical.** `ui/contrast.ts` (WCAG 2.1
       luminance and ratio, pure) + `contrast.test.ts` (13 tests) check **every** text pair in
       `theme.ts` and **all thirty stamp colourways**. Body text is held at **5:1, above WCAG's
@@ -800,9 +800,25 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       and would have forced ten approved colours lighter. What delineates a sticker is the bright
       paper panel, not the border, and the stamps sit on `surface` rather than `background`. The
       reasoning is written into the test rather than left in a commit message.
-      — **Still open:** the tap-target and type sweep across every screen. 60 dp is verified on
-      settings and the privacy policy (measured in the workbench, including at 2× text scaling);
-      the rest has not been swept. ⇠ T-112
+      — **Tap targets and type done 2026-08-11, by measuring.** Every screen the workbench
+      mounts was walked in the DOM and every control's height read: **10 screens, 26 controls,
+      none under 60 dp**, at normal size and again at **2× text scaling**. On the longest
+      onboarding copy at 2× — where the body text grows from 102 px to 309 px — both buttons
+      stay 60 dp, stay outside the scrolling copy and stay reachable, which is D-041's property
+      under the stress it was written for.
+      — ⚠ **The 2× simulation was itself verified before its results were believed.** RN Web
+      writes inline styles, so a re-render could have silently undone the doubling and every
+      "no problems" would have been a measurement of the unscaled screen. Confirmed by A/B on
+      one screen: body copy 17 px → 34 px, its height 102 → 309.
+      — `ui/accessibility.test.ts` holds the mechanically checkable half: font scaling is never
+      switched off, type sizes always come from the theme, and any file rendering a control
+      references `MIN_TAP_TARGET`. **Both source rules verified by deliberately breaking a
+      screen.** They do not prove accessibility — they close three ways of losing it.
+      — ⚠ **Two surfaces are unmeasured** because the workbench cannot mount them: the passport's
+      back button (`PassportScreen`, needs the database) and the whole debug screen. Both use
+      `MIN_TAP_TARGET` in their styles, which is an argument, not a measurement.
+      — ⚠ **Nothing has been touched by a finger.** Real tap targets, the text size an
+      80-year-old actually has set, and sunlight (T-065) are all still untested.
 - [x] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
       — Done 2026-08-10. Three screens, every decline a real button the same size as the
       accept. **No-jargon verified by a check over the rendered DOM**, not by eye:

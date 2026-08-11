@@ -24,7 +24,7 @@ genuinely blocked.
 ## Honesty rules, each of which cost something here
 
 - **Nothing in this app has ever run on a phone.** Say so when reporting anything as working.
-  250 unit tests and a browser workbench are the only verification that exists.
+  256 unit tests and a browser workbench are the only verification that exists.
 - **Never state a measured-sounding number that was not measured.** The battery figure is
   `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
   silence — it is a promise the app has not earned.
@@ -37,7 +37,7 @@ genuinely blocked.
 ## Verifying work
 
 ```bash
-cd app && npm test          # 250 tests, Node's own runner, no framework
+cd app && npm test          # 256 tests, Node's own runner, no framework
 cd app && npx tsc --noEmit  # strict
 cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolves everything
 node tools/validate-content.mjs                                    # the content pack

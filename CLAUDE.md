@@ -50,6 +50,38 @@ cd app && npx expo start --web   # the screens (D-038) — a workbench, never a 
 bash tiles/viewer/serve.sh        # the map styles over the real tile pack
 ```
 
+## Commit messages
+
+Commit freely — the project lead has said so. Push to `origin main`.
+
+**Subject:** the task IDs, then what it does in plain words. Decision in brackets when the
+commit records one. Task IDs are stable and are referenced in commits by design (TASKS.md), so
+`git log --grep=T-071` finds the work later.
+
+```
+T-071/T-072: geofence crossings become stamps (D-037)
+T-141/T-140/T-125: settings, and a broken erase-all
+Docs: cut HANDOFF from 826 to 504 lines
+```
+
+**Body: explain the reasoning, not the diff.** `git diff` shows what changed; the message is
+the only place the *why* survives. In practice that means the non-obvious constraint the code
+satisfies, the alternative rejected and why, and — importantly — **anything found or broken
+along the way**, including mistakes made en route. Several commits here carry more value in
+that last part than in the feature.
+
+Be honest in the subject when a commit is partly a bug: *"settings, and a broken erase-all"*.
+
+End every commit with:
+
+```
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+```
+
+⚠ **Write the message to a file and use `git commit -F <file>`.** PowerShell 5.1 mangles
+native-command arguments containing double quotes, so a multi-line `-m` gets word-split. The
+scratchpad directory is the place for that file.
+
 ## Conventions that are not obvious
 
 - **Pure logic in its own module, impure wrapper beside it** — `stampRules`/`stampAwards`,

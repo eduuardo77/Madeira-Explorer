@@ -52,8 +52,9 @@ everything you saw.
 
 ## Current status
 
-**Phase: Planning complete. Phase 1 recorder written, including the geofence backbone; it has
-never run on a phone. Phase 0 half done — the tile pack is built, the field runs are not.**
+**Phase: v1 is feature-complete in code and has never run on a phone.** What remains is the
+souvenir renderer (T-105), a short tail of small items, verification that needs a device, and
+the curated content. Phase 0 half done — the tile pack is built, the field runs are not.
 
 - ✅ Concept defined and critiqued
 - ✅ Core product risks identified and mitigated in design
@@ -95,7 +96,8 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
   does not have
 - 🟨 **POI curation (T-066) — the file is ready and empty.** This is the critical path now, and
   it is the one task nobody else can do.
-- 🟨 Phase 1 recorder written — **~3,100 lines, never executed on hardware**
+- 🟨 **The whole v1 chain is written — ~11,500 lines, never executed on hardware.** 155 unit
+  tests and a browser workbench are the only verification that exists.
 - ✅ Tile pipeline spike — **12 MB pack for the whole archipelago** (T-026, D-030)
 - ⬜ Field validation of GPS behaviour on levadas and tunnels — **not started** (no longer
   blocks v1 after D-032)
@@ -106,19 +108,20 @@ never run on a phone. Phase 0 half done — the tile pack is built, the field ru
 - ✅ **The map is in the app** (T-056): MapLibre installed, packs and glyphs bundled in the
   binary and copied out on first launch (T-057, D-036, *Provisional*), and the **recorded trace
   draws** over terrain with honest gap breaks (T-059). Never rendered on a device.
-- 🟨 Development build — **not created.** `app/eas.json` is written and
-  [docs/dev-build.md](docs/dev-build.md) is the runbook. There is **no Android device and no
-  Mac**, so the free path is a portable emulator (`tools/fetch-android-emulator.sh`) running an
-  EAS-built APK; real battery and background-survival numbers still need real hardware.
-  **Nothing in Phase 1 is verified without it.**
+- 🟨 Development build — **not created, and this is the blocker.** `app/eas.json` is written
+  and [docs/dev-build.md](docs/dev-build.md) is the runbook. There is **no Android device and
+  no Mac**; the iPhone route needs the Apple Developer Program ($99/yr), and the free emulator
+  is parked because it requires a BIOS change the project lead has declined. The live options
+  are a **cloud device farm** with an EAS-built APK, or a **used mid-range Android (~€50–100)**
+  — which T-021a requires anyway and is the only source of real battery numbers.
 
 **All blocking decisions are closed.** Current dependency cost: **$0** (the only unavoidable
 spend is store fees — Apple $99/year, Google Play $25 one-time).
 
 Everything buildable without a device has been built. The next concrete steps are
-**standing up the emulator and getting an APK into it**
-([docs/dev-build.md](docs/dev-build.md) — free, and it settles whether the map actually
-renders) and **curating the places** ([content/README.md](content/README.md)).
+**getting an APK onto real hardware** ([docs/dev-build.md](docs/dev-build.md) — it settles
+whether the map renders at all, and every threshold in the app) and **curating the places**
+([content/README.md](content/README.md)). Both are the project lead's.
 
 **The app has no name yet**, and the bundle identifier is a placeholder. See
 [docs/design-brief.md §7](docs/design-brief.md).

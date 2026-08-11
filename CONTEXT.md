@@ -5,11 +5,14 @@ anything in this project, including the reasoning behind decisions that look arb
 the outside.
 
 **Document date:** 2026-08-06
-**Updated:** 2026-08-08 — design session (D-026, D-027, D-028); stale factual statements
-corrected under the tier-1 rule in §9.
-**Repository state:** Git repository, five commits. Planning documents plus a Phase 1 recorder
-skeleton in `app/` — 21 source files, ~2,400 lines, **none of which has ever been run.** Phase 0
-validation has not started.
+**Updated:** 2026-08-10 — v1 is feature-complete in code. Previously 2026-08-08 (design
+session, D-026/D-027/D-028).
+**Repository state:** Git repository, ~20 commits. Planning documents plus the **whole v1
+chain** in `app/` — 51 source files and 11 test files, ~11,500 lines. **None of it has ever run
+on a phone**; 155 unit tests and a browser workbench (D-038) are the only verification that
+exists. Phase 0 is half done: the tile pack is built, the field runs are not.
+
+**Read `HANDOFF.md` for what to do next.** This document is the *why*; that one is the state.
 
 ---
 

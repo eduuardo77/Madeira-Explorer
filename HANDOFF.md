@@ -1,22 +1,21 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-06 after the first implementation session; 2026-08-08 after the design
-session (D-026, D-027, D-028; D-022 confirmed; `docs/design-brief.md` added); 2026-08-10 after
-building the geofence manager, the content pack, the sampling gate (T-039/D-033, T-040/D-034,
-T-034, `docs/dev-build.md`) and then the map itself — light style and shaded terrain
-(T-058/T-058a, D-035, `docs/map-style.md`) and its integration into the app — MapLibre, bundled
-packs, the trace layer (T-056/T-057/T-059, D-036).
+**Updated:** 2026-08-10 — **v1 is now feature-complete in code.** Earlier updates: 2026-08-06
+(first implementation session), 2026-08-08 (design session, D-026/D-027/D-028).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
-**Repository state:** git repository. **v1 is feature-complete in code** — 46 source files,
-~10,000 lines in `app/`. **None of it has ever run on a phone.** The pure logic — geofence
-selection, stamp rules, progress, trip end, accommodation masking, content parsing, the
-sampling gate — is the only part that has ever run at all: **134 unit tests**,
-`cd app && npm test`. The interface can be *looked* at, in a browser (D-038). Phase 0 has
-produced its first result: the OSM coverage survey (T-028, D-029).
+
+**Repository state:** git repository, ~20 commits. **The whole v1 chain is written**: record →
+stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
+user's accommodation masked out of anything shareable. 51 source files and 11 test files in
+`app/`, ~11,500 lines.
+
+**None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
+**155 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+Neither substitutes for hardware.
 
 ---
 
@@ -44,9 +43,27 @@ this file explains the shape of what exists, `TASKS.md` tracks it task by task.
 ## Where the project stands
 
 Planning is complete, **scope has been cut (D-032)**, and **the v1 chain is written end to
-end**: record → stamps by geofence → hero number → trace on a map → passport → trip end →
-reveal, with the accommodation masked out of anything shareable. Phase 0 is half done. All of
-it is unproven on hardware.
+end**. Phase 0 is half done. All of it is unproven on hardware.
+
+### What is left of v1, in three buckets
+
+**1. Code nobody has written yet** — and it is a short list:
+
+| | |
+|---|---|
+| **T-105** the souvenir renderer | 9:16 video. D-013 calls it the entire distribution strategy. The biggest remaining piece, and the one that needs native video encoding nobody can verify without a device. Its *composition* logic (what appears when, in what order) is testable. |
+| **T-070** stamp artwork | The passport draws a placeholder disc today, deliberately. |
+| **T-124** privacy policy | Short, because there is genuinely nothing to disclose. The settings row exists and does nothing until it is written. |
+| **T-046** Android battery exemption | Small. |
+| **T-139** tune the dark style | It generates already; the settings toggle is not wired to the map until it is tuned. |
+
+**2. Verification that needs a device.** Everything in T-051–T-055, T-063, T-076, T-077–T-080,
+T-110. **No threshold anywhere in this app has met real data** — every number in D-033, D-037,
+D-039 and D-041 is a reasoned guess.
+
+**3. Content, which only the project lead can produce.** `content/pois.json` is valid and
+**empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
+at an airport. See `content/README.md`.
 
 **v1 = record → stamps by geofence → draw the raw trace → passport → souvenir.**
 Phase 4 map matching is **v2**. The effort saved goes into the interface and the map.
@@ -65,10 +82,10 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 ### ⚠ The single most important thing to know
 
 **No line of this app has ever executed on a phone.** What has been verified is that it is
-*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 843 modules, `expo-doctor`
+*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **134 tests**, on Node — and the two screens
-have been measured in a browser (D-038). Neither substitutes for hardware.
+native config. The pure logic is unit-tested — **155 tests**, on Node — and every screen has
+been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
 no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
@@ -78,8 +95,10 @@ until a development build exists — which is the first blocker below.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-Three new decisions from the 2026-08-08 design session are **Provisional** — agreed by the
-project lead, but not yet validated against anything real:
+**Nine decisions are Provisional.** Three came from the 2026-08-08 design session; the rest
+were made while building on 2026-08-10 and have never met real data or a real device. The
+default for anything new is Provisional and the burden is on confirmation, not objection
+(CONTEXT §9):
 
 - **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
   terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
@@ -217,71 +236,37 @@ Restated from `CONTEXT.md` §2 because misunderstanding any of them will produce
 
 ## What is already built
 
-Six commits: planning docs and the repository skeleton, the Phase 1 recorder skeleton, a
-TASKS.md status update, a HANDOFF.md rewrite, the 2026-08-08 design session, then the first
-Phase 0 result (T-028 OSM survey).
+Everything below exists and is committed. **Nothing below has run on a phone.**
 
 ```
 app/
-├── app.json                          purpose strings, permissions, iOS data-protection
-│                                     entitlement, plugin list
-├── plugins/withAndroidBackupRules.js writes the §4a backup rules + manifest attributes
-├── index.ts                          imports backgroundTasks for its side effects — see below
+├── app.json, eas.json, metro.config.js   config; metro.config.js exists only
+│                                         so the bundler can see content/
+├── plugins/withAndroidBackupRules.js     backup rules + manifest attributes
+├── index.ts                              module-scope side effects — read it
+├── App.tsx / App.web.tsx                 the app / the design workbench (D-038)
 └── src/
-    ├── ui/                           the interface (D-032 says this is where effort goes)
-    │   ├── PassportView.tsx          T-074, presentational — five rows (D-027)
-    │   ├── PassportScreen.tsx        the container that loads it
-    │   ├── PrimaryOverlay.tsx        T-075, the three controls over the map
-    │   ├── DebugScreen.tsx           T-050, the instrument panel
-    │   └── theme.ts                  D-015 encoded as values
-    ├── ui/SettingsView.tsx           T-141 — five sections, erase last (design brief §5)
-    ├── ui/SettingsScreen.tsx         T-125 — the two-step erase
-    ├── onboarding/                   T-042/T-114/T-121. The hardest permission (D-041).
-    │   ├── permissionPolicy.ts       pure: what to ask, and when
-    │   ├── permissionPolicy.test.ts  17 tests, incl. "no invented battery figure"
-    │   ├── OnboardingView.tsx        the copy — no jargon, verified against the DOM
-    │   └── OnboardingFlow.tsx        drives the sequence and the later prompts
-    ├── souvenir/                     T-103/T-104. The privacy hole, closed (D-040).
-    │   ├── accommodation.ts          pure: where do they sleep, and what to hide
-    │   ├── accommodation.test.ts     15 tests, mostly on the withhold rule
-    │   └── exportTrace.ts            THE ONLY DOOR A TRACE LEAVES BY
-    ├── progress/                     T-071/T-072a/T-073. The reward (D-037).
-    │   ├── stampRules.ts             pure: does this place become a stamp?
-    │   ├── stampRules.test.ts        23 tests, incl. the named T-078 drive-by case
-    │   ├── stampAwards.ts            the re-runnable pass that writes stamp_award
-    │   ├── tripProgress.ts           pure: the hero number and its breakdown
-    │   ├── tripProgress.test.ts      13 tests, mostly on D-024's denominator trap
-    │   └── currentProgress.ts        the same, from the database
-    ├── content/                      T-040. The pack's only entry point (D-034).
-    │   ├── contentPack.ts            parse + validate; pure, unit-tested
-    │   ├── contentPack.test.ts       16 tests
-    │   └── poiCatalogue.ts           the one module that reads ../../../content/
-    ├── storage/                      ~550 lines. COMPLETE.
-    │   ├── migrations.ts             6 tables, numbered migration runner
-    │   ├── database.ts               WAL, foreign keys, deleteAllUserData()
-    │   ├── types.ts                  row shapes, narrow string unions
-    │   └── dao/                      rawFix, sensorSample, geofenceEvent,
-    │                                 recordingEvent, trip, appState
-    ├── recording/                    ~1,400 lines. COMPLETE BUT INERT.
-    │   ├── LocationProvider.ts       the D-025 seam — read this first
-    │   ├── ExpoLocationProvider.ts   the only file allowed to import expo-location
-    │   ├── backgroundTasks.ts        TaskManager.defineTask, module scope
-    │   ├── taskNames.ts              the two task-name strings, alone, to break a cycle
-    │   ├── recordingSink.ts          writes batches to SQLite; never throws
-    │   ├── sensors.ts                barometer + pedometer, with two honest limitations
-    │   ├── samplingPolicy.ts         profiles — ⚠ NUMBERS ARE NOT TUNED
-    │   ├── movementPolicy.ts         T-034, pure: stationary or moving? (D-028)
-    │   ├── movementPolicy.test.ts    13 tests
-    │   ├── samplingGate.ts           T-034, applies the decision to the provider
-    │   ├── distance.ts               haversine; the only geometry in v1
-    │   ├── geofenceSelection.ts      T-039, pure and unit-tested (D-033)
-    │   ├── geofenceSelection.test.ts 18 tests — `cd app && npm test`
-    │   ├── geofenceManager.ts        T-039, the half that talks to the OS and SQLite
-    │   ├── devPoiFixture.ts          synthetic places for a field test; deleted at T-040
-    │   └── recorderHealth.ts         feeds the debug screen, T-048 and T-049
-    └── ui/                           ~520 lines
-        ├── DebugScreen.tsx           the only screen that exists
-        └── theme.ts                  D-015 encoded as values, not intentions
+    ├── recording/     ~2,000 lines. COMPLETE, NEVER RUN ON A PHONE.
+    │   LocationProvider.ts (the D-025 seam — read first), ExpoLocationProvider,
+    │   backgroundTasks (+ .web no-op), taskNames, recordingSink, sensors,
+    │   samplingPolicy, distance, geofenceSelection(+test), geofenceManager,
+    │   devPoiFixture, movementPolicy(+test), samplingGate, healthCheckPolicy
+    │   (+test), healthCheck, recorderHealth
+    ├── content/       T-040, the pack's only entry point (D-034)
+    │   contentPack(+test), poiCatalogue
+    ├── progress/      the reward (D-037) and the numbers
+    │   stampRules(+test), stampAwards, tripProgress(+test), currentProgress,
+    │   tripEnd(+test), tripEndDetection
+    ├── souvenir/      T-103/T-104, the privacy hole closed (D-040)
+    │   accommodation(+test), exportTrace  ← THE ONLY DOOR A TRACE LEAVES BY
+    ├── onboarding/    T-042/T-114/T-121, the hardest permission (D-041)
+    │   permissionPolicy(+test), OnboardingView, OnboardingFlow
+    ├── map/           T-056/T-059
+    │   mapAssets, mapStyle, traceGeoJson(+test), MapScreen
+    ├── storage/       migrations (2), database, types, dao/*,
+    │   deleteAllUserData.test.ts ← guards a bug that already happened once
+    └── ui/            theme (D-015 as values), DebugScreen, PassportView,
+        PassportScreen, PrimaryOverlay, SettingsView, SettingsScreen
 ```
 
 **Tables beyond the documented schema:** `recording_event` (the recorder's own diary — a
@@ -361,70 +346,55 @@ already deleted it.
 
 ### The order to actually work in
 
-**1. A development build.** ⚠ **The only true blocker, and it needs the project lead.**
-Background location cannot run in Expo Go, so nothing in Phase 1 can be verified without one.
-No JDK-based local Android build and no Mac, so EAS Build is the realistic path for both
-platforms. **Nothing below this line can be tested until this exists.**
+Two of these are the project lead's and cannot be done for them. The rest is a short list.
 
-`app/eas.json` is written and committed. **The runbook is `docs/dev-build.md`.**
+**1. ⚠ THE TWO THINGS ONLY THE PROJECT LEAD CAN DO.** Everything else is downstream of these,
+and neither is code.
 
-⚠ **Corrected 2026-08-10, and the correction matters.** An earlier version of that document
-assumed an Android phone. There is none: the project lead has an **iPhone 15**, a Windows PC and
-no Mac. An iPhone development build therefore requires the **Apple Developer Program at
-$99/year** — a free Apple ID can only sign through Xcode, which needs a Mac.
+- **A device.** Nothing in this app has ever run. `docs/dev-build.md` has three paths and their
+  real costs. Summary: there is **no Android phone and no Mac**; the iPhone route needs the
+  Apple Developer Program at $99/year; the free emulator is **parked because it needs a BIOS
+  change the project lead has declined to make** (their call — do not re-litigate it, and see
+  `docs/emulator-setup.md` if they ever change their mind). The two live options are a **cloud
+  device farm** (upload an EAS APK, drive a real Android from a browser — cheapest way to see
+  the map render) or a **used mid-range Android, ~€50–100**, which T-021a already requires
+  regardless and is the only source of real battery and background-survival numbers.
+- **The content.** `content/pois.json` is valid and empty. `content/README.md` is the guide;
+  `node tools/validate-content.mjs` checks the work and reports progress toward 150. Without it
+  the stamp system has nothing to award and the trip cannot end at an airport. **Do not offer
+  to curate it** — T-028 established it is selection and editorial judgement, which is the one
+  thing a competitor cannot buy.
 
-Three paths, in the order they should happen:
+**2. T-105 — the souvenir renderer.** The largest remaining piece of code and the one D-013
+calls the entire distribution strategy: a 9:16 video good enough that people post it. Needs
+native video encoding, which cannot be verified without a device — but the **composition**
+(what appears when, in what order, for how long) is pure logic and testable today. Splitting it
+that way is the established pattern here: see `stampRules` / `stampAwards`.
 
-- **A. The emulator, free, today.** Installed 2026-08-10 — SDK, Android 14 system image and
-  the `madeira` AVD, all portable inside gitignored `tools/android-sdk/`. EAS builds the APK in
-  the cloud; the emulator runs it.
-  ⚠ **Blocked on one BIOS toggle**: CPU virtualization is disabled in this machine's firmware,
-  which no program can change. `docs/emulator-setup.md` has the exact menu path (~5 minutes)
-  and the driver step after it. **This clears the largest block of
-  unverified work** — the map rendering offline, migrations, permission dialogs, and, via GPX
-  route replay, the whole recorder including the sampling gate and geofence reshuffles.
-  It cannot touch battery, OEM killers, force-quit relaunch or anything iOS.
-- **B. A cheap used Android, ~€50–100 once.** Already required by T-021a — iPhone-only fixtures
-  are best-case and risk under-crediting exactly the hardware most tourists carry. Cheaper than
-  the Apple fee, and the only source of real battery and background-survival numbers
-  (T-051–T-055).
-- **C. The iPhone, $99/year.** Needed for release anyway (T-137), and the only way to test the
-  platform D-005 and D-033 actually depend on. Not urgent.
+**3. The small remainder.** T-070 stamp artwork (the passport draws a placeholder disc on
+purpose), T-124 the privacy policy (the settings row is wired and inert until it exists), T-046
+the Android battery-optimisation exemption, T-139 tuning the dark style so T-140's toggle can
+be connected to the map.
 
-**2. ~~T-039 — the dynamic geofence manager.~~ Done 2026-08-10 (D-033).** Content-agnostic and
-unit-tested, exactly as intended. Unproven on hardware, like everything else here.
+**4. When a device exists, in this order**, because each is cheap and each can invalidate the
+next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence
+field test (T-076, ~850 m on foot) → an overnight soak (T-051) → battery over 12 hours (T-054).
+`docs/dev-build.md` has the full list and says which check settles which open question.
 
-**3. T-066 — curate the POIs.** ⚠ **Only the project lead can do this, and nothing is now
-blocking it.** 150–250 places, each assigned one of the five categories (D-027). T-028
-established this is *selection, not research* — OSM already offers 569 viewpoints and 180 peaks.
-Without it, geofences have nothing to fire on and the app has no reward.
+### How to see things without a device
 
-The tooling was finished 2026-08-10 (T-040, D-034), so the task is now mechanical:
+Two workbenches exist, and both were load-bearing rather than nice-to-have:
 
-- **`content/pois.json`** is the file. It exists and is empty.
-- **`content/README.md`** is the guide — the format, the levada two-geofence rule, and how to
-  choose a radius. *Read the radius section*: that one number is the difference between a stamp
-  firing and a walked levada going uncredited.
-- **`node tools/validate-content.mjs`** checks the work. It uses the app's own parser, so
-  anything it rejects is exactly what the app would drop, and it reports progress toward 150.
+```bash
+cd app && npx expo start --web     # the screens (D-038)
+bash tiles/viewer/serve.sh          # the map styles, over the real tile pack
+```
 
-**This is on the critical path and it is not code.**
-
-**4. ~~T-058 / T-058a — the map's appearance.~~ Done 2026-08-10 (D-035).** The styles are
-*generated* — `tiles/style/generate.mjs` derives both from the official Protomaps theme
-(BSD-3-Clause) and every choice lives in the generator with its reason. Terrain is a second
-6.5 MB elevation pack (`python tiles/pipeline/build-terrain.py`), shaded at render time so one
-pack serves both styles. Iterated on screen against the real island; Rabaçal finally has its
-ravines. **What remains is where it always was: T-065, outdoors, in the sun** — plus bundling
-glyphs locally (T-056/T-057; the generated styles use hosted fonts, which must not ship, D-001)
-and verifying hillshade renders on `maplibre-react-native` (T-056). Method:
-`docs/map-style.md`.
-
-**5. T-042 / T-114 — permission flow and onboarding.** Sits on the critical path via the slow,
-external Google Play review (T-123). Start it early.
-
-**6. T-051–T-055 — the soak tests.** What turns Phase 1 from plausible into proven, and the
-trigger for the D-025 purchase decision.
+The web workbench (`App.web.tsx`) mounts every screen against fixture data. **It is not a
+product target and must never become one** — the app needs background location, OS geofences
+and a native renderer, none of which a browser has. It has already caught two defects invisible
+in code review: a passport that scrolled on day one, and two primary-screen controls that
+overlapped by 38 px on a 320 dp phone.
 
 ### Where the effort should go, and where it should not
 
@@ -515,7 +485,7 @@ risks shipping an app that quietly **under-credits users on mid-range Android ha
 precisely the failure mode identified as an uninstall trigger (D-009). Do not finalise Phase 4
 thresholds on iPhone data alone.
 
-### Track B — Tile pipeline spike (T-022 → T-026)
+### Track B — Tile pipeline spike (T-022 → T-026) — ✅ DONE 2026-08-08/10
 
 1. OSM extract of **Madeira and Porto Santo** (T-022).
 2. Reproducible tile build script — Tilemaker or Protomaps — producing PMTiles or MBTiles
@@ -536,21 +506,23 @@ OpenMapTiles-schema build — and **subtract** from it. Do not author cartograph
 file; that assumption is a large part of why the design phase previously stalled. Then look at
 it outdoors, in Funchal, at midday. That is the test that confirms or kills D-026.
 
-### Finishing Phase 1
+### Phase 1 is finished, and unproven
 
-The scaffold, storage, provider interface, `expo-location` integration, data protection, the
-debug screen, the geofence backbone (T-039), the content pack (T-040) and sampling gating
-(T-034) are all done — see "What is already built".
+Every line of the recorder is written: scaffold, storage, the provider seam, `expo-location`,
+data protection, the debug screen, the geofence backbone (T-039), the content pack (T-040),
+sampling gating (T-034), the day-1 health check (T-049), the permission flow (T-042/T-043/T-044)
+and settings (T-141). Only T-046, the Android battery-optimisation exemption, remains.
 
-**Phase 1's remaining code is small:** the day-1 health check (T-049), the Always upgrade and
-downgrade detection (T-043/T-044), and the Android battery-optimisation exemption (T-046).
-Everything else left in the phase is **verification, and verification needs the development
-build**:
+**What is left in the phase is verification, and verification needs a device.** T-051–T-055 are
+what turn Phase 1 from plausible into proven, and they are the trigger for the Transistor
+purchase decision (D-025). T-051 now carries **two** known hazards at once:
 
-- **T-051–T-055, the soak tests.** These are what turn Phase 1 from plausible into proven, and
-  they are the trigger for the Transistor purchase decision (D-025). T-051 in particular is now
-  carrying two known hazards at once: `pausesUpdatesAutomatically`, and the fact that the
-  sampling gate can select the stationary profile and then never hear from the OS again.
+1. `pausesUpdatesAutomatically` — iOS may stop location updates and not resume.
+2. The sampling gate can select the stationary profile and then never hear from the OS again —
+   it can put the recorder to sleep and cannot wake it (D-028's implementation note).
+
+Both fail the same way: silently, on somebody's holiday. The day-1 health check (T-049) exists
+to catch exactly this, and it too has never run.
 
 ---
 
@@ -792,31 +764,29 @@ recent is D-033, the geofence window — see "What is Provisional" above.)*
 >
 > Read `HANDOFF.md` first — it is in **EXECUTION mode**. Then `CONTEXT.md` (especially §9, the
 > doc-maintenance protocol you must follow) and **`DECISIONS.md` D-032**, which defines v1 scope
-> and deletes a lot of work you might otherwise start. `TASKS.md` tracks everything task by task.
-> Those are the source of truth, not chat history.
+> and deletes a lot of work you might otherwise start. `TASKS.md` tracks everything task by
+> task. Those are the source of truth, not chat history.
 >
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
-> Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference. Spend
-> effort on the interface and the map's appearance, not on GPS accuracy.
+> Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** tile pack is built (12 MB, Protomaps — `bash tiles/pipeline/build.sh`). The Phase 1
-> recorder exists in `app/` (~3,900 lines) and **has never run on a phone** — there is no
-> development build yet, which is the one real blocker. The geofence backbone (T-039) and the
-> content pack (T-040) are done and unit-tested (`cd app && npm test`). Phase 0:
-> T-022/T-023/T-026/T-028 done; field runs outstanding but no longer blocking v1.
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 155 unit
+> tests and a browser workbench are all the verification that exists. The tile pack is built
+> (19.1 MB with terrain). `content/pois.json` is valid and empty.
+>
+> **Two things are mine, not yours:** getting a device (see `docs/dev-build.md` — I have an
+> iPhone, a Windows PC, no Android and no Mac, and I am not changing my BIOS), and curating
+> `content/pois.json`. Do not offer to do either for me.
 >
 > I am done planning and want to build. Do not open new research threads or propose new
 > decisions unless something is genuinely blocked.
 >
 > I want to work on [pick one]:
-> - **Getting a development build onto my phone** (I will create the Expo account) — this is
->   the one real blocker, and everything built so far is unproven until it exists
-> - **T-058/T-058a, the map style and terrain** — start from a Protomaps theme and subtract
-> - **T-042/T-114, the permission flow and onboarding** — slow external Play review downstream
-> - **T-034, stationary-vs-moving sampling gating** — decided in D-028, never written
->
-> **T-066 (curating `content/pois.json`) is mine to do** — the tooling is finished, see
-> `content/README.md`. Do not offer to do it for me.
+> - **T-105, the souvenir renderer** — the biggest remaining piece and the whole distribution
+>   strategy (D-013). Split it: the composition logic is testable now, the encoding is not.
+> - **T-070, stamp artwork** — the passport draws a placeholder disc today
+> - **T-124, the privacy policy** — short, because there is nothing to disclose
+> - **T-139, tune the dark style** so the light/dark toggle can be wired to the map
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

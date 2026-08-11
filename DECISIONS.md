@@ -2015,3 +2015,60 @@ existed and done nothing since T-141.
 **Consequences:** T-118, T-120 and T-122 can now be filled in from a document that says what
 is true. **T-123 stays blocked on `CONTACT_EMAIL` and on a hosting URL**, which needs the
 domain question settled — the same open item as the bundle identifier.
+
+---
+
+## D-045 — The battery exemption opens a settings screen; it does not ask for the restricted permission.
+
+**Status:** Provisional — implemented 2026-08-11 (T-046). **Deliberately reversible**, and
+T-053 is what decides.
+
+**Context:** CONTEXT §7 and HANDOFF both state it plainly — **Android OEMs kill background work
+regardless of the official APIs.** Xiaomi, Huawei, Samsung, Oppo and OnePlus ship battery
+managers that stop a foreground service anyway. The battery-optimisation exemption is the one
+official lever against that, and without it a recorder correct in every other respect still
+dies on somebody's holiday.
+
+**Decision:** the settings row sends
+`android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS` — the system list of apps and their
+battery setting — rather than requesting `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` and showing the
+one-tap dialog.
+
+**Why the worse user experience wins here:** the direct dialog needs a permission Google Play
+treats as restricted and reviews against a list of qualifying uses. This app is *already* going
+through Play's manual background-location review (T-123), which is slow and sits on the
+critical path. Adding a second restricted permission to that submission is a risk taken in
+exchange for saving two taps, and the taps are recoverable where a rejected submission is
+weeks.
+
+**The honest cost, and it is real:** the user has to find this app in a list, and D-015's reader
+is 80 years old. The footnote therefore names the app so it can be recognised in that list, and
+uses the phone's own word ("battery") so the screen is identifiable when they arrive.
+
+**What the app cannot do, and how it copes:** it **cannot read whether it is currently exempt**
+— `PowerManager.isIgnoringBatteryOptimizations()` has no Expo API and reading it would mean a
+native module for one boolean. So the row offers the action and **never claims a state**.
+Showing "Off" when the app cannot tell would be an invented fact, which is the thing D-041
+exists to prevent. What catches the failure instead is the **day-1 health check** (T-049): it
+does not know *why* recording stopped, but it knows that it did, and telling the user is what
+protects the trip.
+
+**Alternatives considered:**
+
+- *Request the restricted permission and show the one-tap dialog.* **Not rejected on merit —
+  held in reserve.** It is the better experience. Adopt it if T-053 shows OEMs killing the
+  recorder despite the foreground service, at which point the reliability argument outweighs
+  the review risk and there is evidence to put in the submission.
+- *Write a small native module to read the exemption state.* Rejected for now: disproportionate
+  native surface for one boolean, on a project with no device to test native code on.
+- *Do nothing and rely on the foreground service.* Rejected — it is exactly what
+  dontkillmyapp.com exists to document as insufficient.
+- *Add `expo-intent-launcher` for the intent constants.* Rejected: a new dependency needs a
+  network-behaviour check (CONTEXT §6.4, T-117), and `Linking.sendIntent` is already in React
+  Native.
+
+**Consequences:** the row is Android-only and absent on iOS, which has no equivalent. No unit
+test, deliberately — there is nothing pure to test, and a test asserting that a string constant
+equals itself would be worse than none. **T-053 is the verification and it needs an
+aggressive-OEM Android device.**
+

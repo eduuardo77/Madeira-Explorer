@@ -1,8 +1,9 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-11 — the souvenir **composition** is written (T-105a, D-042); what is left
-of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1 feature-complete
+**Updated:** 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
+audit (T-117, D-043), the privacy policy (T-124, D-044) and the battery exemption (T-046,
+D-045). What is left of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1 feature-complete
 in code**), 2026-08-08 (design session, D-026/D-027/D-028), 2026-08-06 (first implementation
 session).
 **For:** a fresh Claude Code session picking this project up cold.
@@ -64,7 +65,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 | **T-105b** the souvenir encoder | 9:16 video. D-013 calls it the entire distribution strategy. **T-105a, the composition, is now written** (D-042): the storyboard — three scenes, camera path, strokes, and the moment each stamp lands — is pure and has 23 tests. What is left is turning that into an MP4, which needs native video encoding nobody can verify without a device. **Nobody has watched anything**; every duration in the composition is a guess. |
 | **T-070** stamp artwork | The passport draws a placeholder disc today, deliberately. |
 | ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
-| **T-046** Android battery exemption | Small. |
+| ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
 | **T-139** tune the dark style | It generates already; the settings toggle is not wired to the map until it is tuned. |
 
 **2. Verification that needs a device.** Everything in T-051–T-055, T-063, T-076, T-077–T-080,
@@ -105,7 +106,7 @@ until a development build exists — which is the first blocker below.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Seventeen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
+**Eighteen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
 is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
 entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
 from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
@@ -124,6 +125,10 @@ something specific still outstanding:
 - **D-044** *(2026-08-11)* — the privacy policy is shown offline in the app rather than linked,
   and `docs/privacy-policy.md` is generated from the same source so the two cannot drift.
   **Not lawyer-reviewed**, and `CONTACT_EMAIL` is null — both block T-123.
+- **D-045** *(2026-08-11)* — the battery exemption opens the system settings screen instead of
+  requesting the restricted permission, to keep a second reviewed permission off T-123's
+  submission. **Held in reserve, not rejected:** adopt the one-tap dialog if T-053 shows OEMs
+  killing the recorder anyway.
 
 - **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
   terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
@@ -255,9 +260,9 @@ native video encoding and therefore a device. It also needs *eyes*: the composit
 are guesses by somebody who has never seen the result.
 
 **3. The small remainder.** T-070 stamp artwork (the passport draws a placeholder disc on
-purpose), T-046 the Android battery-optimisation exemption, T-139 tuning the dark style so
-T-140's toggle can be connected to the map. *(T-124, the privacy policy, was here and is now
-written — D-044.)*
+purpose) and T-139 tuning the dark style so T-140's toggle can be connected to the map.
+*(T-124 the privacy policy and T-046 the battery exemption were here and are now done — D-044,
+D-045.)*
 
 **4. When a device exists, in this order**, because each is cheap and each can invalidate the
 next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence

@@ -24,6 +24,10 @@ import {
   Text,
   View,
 } from 'react-native';
+import {
+  isBatteryExemptionAvailable,
+  openBatteryOptimisationSettings,
+} from '../recording/batteryOptimisation';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { deleteAllUserData } from '../storage/database';
@@ -136,6 +140,15 @@ export default function SettingsScreen({
       onOpenSystemSettings={() => {
         void Linking.openSettings().catch(() => undefined);
       }}
+      // Android only (T-046). Null on iOS removes the whole section rather
+      // than showing a control that cannot do anything there.
+      onOpenBatterySettings={
+        isBatteryExemptionAvailable()
+          ? () => {
+              void openBatteryOptimisationSettings();
+            }
+          : null
+      }
       // Shown in the app rather than opened in a browser: this app makes no
       // network requests (D-001), and the reader may well have no signal.
       onOpenPrivacyPolicy={() => setShowingPolicy(true)}

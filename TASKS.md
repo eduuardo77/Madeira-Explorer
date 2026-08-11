@@ -353,7 +353,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       would nag.
 - [ ] **T-045** Android foreground service with the `FOREGROUND_SERVICE_LOCATION` type
       ⇠ T-031
-- [ ] **T-046** Android battery-optimisation exemption request ⇠ T-045
+- [x] **T-046** Android battery-optimisation exemption request ⇠ T-045
+      — Done 2026-08-11. **D-045.** `recording/batteryOptimisation.ts`, and a settings section
+      headed "If recording keeps stopping". Android only; absent on iOS.
+      — **Opens the system battery-settings screen rather than requesting the restricted
+      permission.** The one-tap dialog needs `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which Play
+      reviews — and T-123's background-location review is already slow and on the critical path.
+      Two taps is a cheaper price than a rejected submission. **Held in reserve** if T-053 shows
+      OEMs killing the recorder anyway.
+      — ⚠ **The app cannot read whether it is exempt** (no Expo API for
+      `isIgnoringBatteryOptimizations`), so the row offers the action and **claims no state** —
+      an invented "Off" is exactly what D-041 forbids. T-049's health check catches the symptom
+      instead.
+      — No unit test, deliberately: nothing here is pure. Verified in the workbench (section
+      present, in order, 60 dp, no jargon). **T-053 is the real test and it needs a device.**
 - [ ] **T-047** iOS region monitoring + significant-location-change as the
       termination-survival backbone (survives force-quit) ⇠ T-039
 - [~] **T-048** Service health monitor and gap annotation ⇠ T-037
@@ -398,6 +411,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046
 - [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038
 - [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
+      — **Overlaps T-117b** (added 2026-08-11), which watches the *whole app* including FCM
+      (D-043). Run them as one capture; this task is the recording-specific reading of it.
 
 **Milestone M1 — "It remembers"** ⇠ T-051, T-052, T-053, T-054, T-055
 

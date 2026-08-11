@@ -198,6 +198,9 @@ export default function DesignWorkbench() {
               mapPackBytes={19_100_000}
               onChangeMapStyle={() => undefined}
               onOpenSystemSettings={() => undefined}
+              // Forced on so the row can be looked at (D-038). On the web
+              // workbench Platform.OS is 'web', so it would never show.
+              onOpenBatterySettings={() => undefined}
               onOpenPrivacyPolicy={() => setScreen('privacy')}
               onOpenDebug={() => undefined}
               onEraseRequested={() => undefined}

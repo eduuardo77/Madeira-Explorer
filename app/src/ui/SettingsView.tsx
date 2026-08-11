@@ -38,6 +38,13 @@ export type SettingsViewProps = {
   mapPackBytes: number | null;
   onChangeMapStyle: (style: 'light' | 'dark') => void;
   onOpenSystemSettings: () => void;
+  /**
+   * Android only, and absent on iOS (T-046). Deliberately paired with no
+   * state: the app cannot read whether it is currently exempt, and showing a
+   * value it cannot know would be an invented fact — see
+   * `recording/batteryOptimisation.ts`.
+   */
+  onOpenBatterySettings: (() => void) | null;
   onOpenPrivacyPolicy: () => void;
   onOpenDebug: () => void;
   /** Opens the confirmation. Must never erase on its own (T-125). */
@@ -125,6 +132,7 @@ export default function SettingsView({
   mapPackBytes,
   onChangeMapStyle,
   onOpenSystemSettings,
+  onOpenBatterySettings,
   onOpenPrivacyPolicy,
   onOpenDebug,
   onEraseRequested,
@@ -146,6 +154,22 @@ export default function SettingsView({
           <Row label="Recording your trip" value={describePermission(permission)} />
           <Action label="Open phone settings" onPress={onOpenSystemSettings} />
         </Section>
+
+        {/* Android only. The label says what it achieves, not what Android
+            calls it — "battery optimisation" is the phone's word for it, and
+            the footnote uses that word so the screen it opens is recognisable
+            when the user gets there. */}
+        {onOpenBatterySettings !== null ? (
+          <Section
+            title="If recording keeps stopping"
+            footnote="Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let this app keep running. Look for Madeira Explorer in the list."
+          >
+            <Action
+              label="Let this app keep running"
+              onPress={onOpenBatterySettings}
+            />
+          </Section>
+        ) : null}
 
         <Section
           title="Appearance"

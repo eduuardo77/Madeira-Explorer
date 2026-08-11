@@ -3,43 +3,24 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **settings and the erase control** (T-141/T-140/T-125), which
-turned up a real bug: erase-all had been silently broken since migration 2. Earlier the same
-day, **the permission flow and onboarding** (T-042/T-043/T-044/
-T-114/T-121, D-041): three screens, nothing gates, and no battery figure until one is measured.
-Earlier the same day, **accommodation masking** (T-103/T-104, D-040) closes the one
-genuine privacy hole in the design, behind a single export door. Earlier the same day,
-**trip end and the reveal** (T-099–T-102, D-039) close the
-loop: the app now knows when the holiday is over and says so at the airport. Earlier the same
-day, **the interface**: the passport (T-074) and the primary
-screen (T-075), built against a web design workbench (D-038) that measured T-081 and caught a
-control overlap no amount of reading would have found. Earlier: progress computation
-(T-072a/T-073) and the day-1 health check (T-049).
-Earlier the same day, **the reward mechanic** (T-071/T-072, D-037): geofence
-crossings become stamps, with levadas verifying both endpoints so a drive-by cannot earn one.
-Earlier the same day, the map exists: T-058 light style (generated, D-030 schema) and
-T-058a shaded terrain (D-035, 6.5 MB elevation pack — total pack 19.1 MB) are built and
-iterated on screen in the repo viewer; a draft dark style rides along for T-139. Earlier the
-same day: T-039 the dynamic geofence manager (D-033), T-040 the content pack (D-034) and T-034
-the sampling gate. **T-066 is unblocked**:
-`content/pois.json` is the file to fill in and `node tools/validate-content.mjs` checks it.
-`app/eas.json` and `docs/dev-build.md` reduce the development-build blocker to steps only the
-project lead can take. The project also has a unit-test runner for the first time
-(`cd app && npm test`, Node's own, no new dependencies).
-Previously 2026-08-08 — **v1 scope cut (D-032): Phase 4 map matching deferred to v2.**
-Tile schema settled (D-030). Visual direction and passport structure settled (D-026, D-027);
-activity gating settled (D-028); D-022 confirmed.
+**Last updated:** 2026-08-10 — **v1 is feature-complete in code.** That day closed T-034,
+T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
+(D-039/D-040), T-114/T-121 and T-125/T-140/T-141, and added a web design workbench (D-038).
+It also found that **erase-all had been silently broken since migration 2**.
+Previously 2026-08-08 — v1 scope cut (D-032); tile schema (D-030); visual direction and
+passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 
 > **v1 = record → stamps by geofence → draw the trace → passport → souvenir.**
 > Phases 1, 2, 3, 5, 6, 7. **Phase 4 is v2.** See D-032.
-**Overall progress:** Planning complete. Phase 1 recorder implemented; **nothing has
-run on real hardware yet.** Phase 0 validation not started.
+**Overall progress:** the whole v1 chain is written and **nothing has run on real hardware.**
+What remains: T-105 (the souvenir renderer), a short tail of small items, verification that
+needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done in Phase 1 below is verified by typecheck, bundle and config
-introspection only** — plus, since 2026-08-10, unit tests over the pure geofence selection
-logic. No fix has ever been recorded, no permission dialog has been seen, and no battery
-figure has been measured. Real-device testing is mandatory for anything touching recording
-(CONTEXT §6.6) and is what T-051–T-055 exist for.
+⚠ **Everything marked done below is verified by typecheck, bundle, 155 unit tests over the
+pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
+recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
+Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
+T-051–T-055 exist for.
 
 Task IDs are stable — reference them in commits and never renumber. Dependencies are listed
 as `⇠ T-xxx`. A task must not start until all its dependencies are done.
@@ -106,6 +87,10 @@ Legend: `[x]` done · `[ ]` not started · `[~]` in progress · `[!]` blocked
 Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Field GPS reality check
+
+> **Track A procedure — logger, both runs, ground truth, the sampling-bias warning — is in
+> [`docs/field-testing.md`](docs/field-testing.md).** The tasks below track it; that document
+> says how to actually do it.
 
 - [ ] **T-017** Obtain a raw sensor logger — **do not build one.** Use **Sensor Logger**
       (Kelvin Choi, iOS + Android): records GPS fix/accuracy/speed/heading/altitude, barometer

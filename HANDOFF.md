@@ -31,6 +31,10 @@ Neither substitutes for hardware.
 5. `docs/design-brief.md` — visual direction and screen structure. Read before touching anything
    that renders. Its §1 explains why the "UI work" on this app is mostly cartography.
 
+**Reference, read when relevant:** `docs/dev-build.md` (getting it onto hardware),
+`docs/map-style.md` (how the cartography is generated), `docs/field-testing.md` (Track A),
+`content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`.
+
 **These seven documents are the source of truth, not this handoff and not any chat history.**
 If this file and those disagree about a *decision*, they win.
 
@@ -145,95 +149,6 @@ default for anything new is Provisional and the burden is on confirmation, not o
 
 Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
 
-### The scope cut — read this before starting anything (D-032)
-
-The engineering ambition had grown far past the original brief. The project lead reset it:
-*an app that records where you walked and gives you a badge for levadas and notable places* —
-and set the priority: **a good interface matters more than GPS accuracy.**
-
-- **Phase 4 (T-082–T-098) is deferred to v2 in full.** No road graph, no R-tree, no snapping, no
-  tunnel inference, no gap bridging, no corridor crediting, no sensor fallback.
-- **v1 draws the raw GPS trace** instead. Honest, personal, and it needs no matching at all.
-- **Deferring costs nothing permanent** — D-010 retains raw traces, so matching can be added in
-  v2 and run *retroactively over every trip already recorded*.
-- **Stamps need almost no accuracy.** A generous radius plus a dwell-and-speed gate works under
-  canopy on cheap hardware. That is the whole reward, and it is the cheapest subsystem here.
-
-This was a return, not a pivot: D-002 always said stamps are the score and roads are decoration.
-
-### What the 2026-08-08 session settled
-
-A design session, no code. Six planning docs updated plus one new file.
-
-- **The visual direction exists now**, where before there was none. Two styles over one tile
-  pack, terrain rather than buildings, a three-control primary screen, and a passport organised
-  by category. All of it in `docs/design-brief.md`.
-- **The doc-maintenance latitude question is answered** — three tiers, in CONTEXT §9. Follow it.
-  The default for anything new is **Provisional**; the burden is on confirmation, not objection.
-- **The activity-gating trigger is decided** (D-028), so T-034 is no longer blocked.
-- **D-022 was confirmed**, closing the last Provisional entry from planning.
-- **Four stale statements were corrected** under the tier-1 rule: the ARCHITECTURE §2 diagram,
-  a PROJECT_PLAN Phase 0 success criterion, PROJECT_PLAN's "newly raised" section, and README's
-  claim that no code had been written.
-- **The app still has no name.** Deliberately deferred — see below.
-
-### First Phase 0 result — T-028, the OSM survey
-
-Also 2026-08-08, after the design work. **`docs/osm-coverage.md`**, reproducible via
-`python tools/osm-survey.py` (counts only, no geometry, safe to re-run).
-
-- **OD-7 is closed** (D-029). No external levada data needs licensing — the 44 official PR
-  routes are already in OSM. Dependency cost stays $0.
-- **A factual error was corrected.** Levadas are *not* simply `highway=path` — that captures 23%.
-  OSM maps a levada as two parallel ways sharing one name: the channel (usually
-  `waterway=drain`) and the path beside it. **Select by name plus relation, never by tag.**
-- **108 levada tunnel ways**, where the docs said "several." Walkable, zero GPS — the T-089/T-090
-  case, and T-069 must now cover walkable tunnels.
-- **~51,000 highway ways.** T-064's "5,000+ segments" target was an order of magnitude low, and
-  T-025a — drawing *all* roads from the overlay — means rendering all 51,000, not 5,000.
-- **16,066 footways**, nearly all Funchal pavements. Whether they belong in the road graph is now
-  an explicit open question on T-082.
-- **T-066 is selection, not research** — 569 viewpoints and 180 peaks already in OSM.
-
-The risk on levadas moved from *coverage* to *accuracy*, which counts cannot settle. **T-028a**
-folds that check into a Track A field walk.
-
-The design session's most useful artefact may be the competitor teardown in
-`docs/design-brief.md` §6.
-Three of this project's decisions turn out to be visible in a shipped competitor as observed
-failures: a `0.00%` hero number (what D-002 rejected), a modal begging users not to force-quit
-(what D-005 avoids architecturally), and a 22-minute walk credited zero (the D-009 uninstall
-case). Concrete evidence, worth keeping.
-
----
-
-## What the app is, in four sentences
-
-A tourist installs it on arrival in Madeira, grants location permission, and forgets it exists.
-It passively records where they go, lighting up roads and levada trails they travel and
-awarding collectible "passport stamps" for reaching curated notable places. When they reach the
-airport to fly home, their phone buzzes and hands them a map of their whole trip plus a vertical
-video good enough to post. That video is the entire marketing strategy.
-
----
-
-## The five things that explain most of the design
-
-Restated from `CONTEXT.md` §2 because misunderstanding any of them will produce wrong work.
-
-1. **Stamps are the score; highlighted roads are decoration.** Map matching is the fragile part,
-   so the user's reward deliberately does not depend on it. Never let road coverage % become the
-   headline metric.
-2. **Geofences are the backbone.** Cheapest on battery, survive app termination and force-quit
-   on iOS, tolerate poor GPS. Everything important rides on them.
-3. **The souvenir video is the only distribution channel.** Not a polish item — load-bearing.
-4. **Raw traces are the only irreplaceable asset.** Everything derived is regenerable. Build the
-   recorder first.
-5. **The bounded scope is what makes it all simple.** Madeira is ~740 km², so the whole island
-   ships offline. No tile server, no network, no data cost, no position leaking to third parties.
-
----
-
 ## What is already built
 
 Everything below exists and is committed. **Nothing below has run on a phone.**
@@ -281,61 +196,6 @@ timestamp, last permission state).
 is deliberate: when the OS relaunches the app headless there is no React tree to hand a callback
 to. Expo's docs are explicit that `defineTask` must run in the global scope of the bundle, which
 is why `index.ts` imports `backgroundTasks` for side effects. Do not "tidy" that import away.
-
-### What would happen if you ran it
-
-App opens → database migrates → debug screen. *Request While-Using* shows a real permission
-dialog. *Start recording* registers the background task. Batches arrive → sink writes `raw_fix`
-rows plus one `sensor_sample` → counts and last-fix age update on screen. That is the whole
-loop, and it *should* work.
-
-### ~~The largest hole in Phase 1~~ — closed 2026-08-10 (T-039)
-
-**The geofence manager is built.** It was the biggest gap in the phase: `startGeofencing()`
-existed but nothing ever called it with regions, so `geofence_event` could only stay empty.
-
-- `src/recording/geofenceSelection.ts` — pure arithmetic: rank the catalogue by *edge* distance,
-  keep the nearest `cap − 1`, and size an exit-only anchor region so that **while you are inside
-  it you cannot have reached anything unmonitored**. The rule and its three guessed constants
-  are **D-033**.
-- `src/recording/geofenceManager.ts` — the impure half: the OS, SQLite, the clock. Rebuilds on
-  the anchor's exit event, and again from recorded fixes as a backstop against a missed event.
-  Never throws, and never clears the monitored set on failure.
-- `src/recording/devPoiFixture.ts` — synthetic places generated around wherever the phone is
-  standing, so all of this can be exercised before T-066 exists and without any Madeira
-  knowledge entering `app/` (D-017).
-- **The content seam is one line**, and T-040 filled it the same day. `index.ts` calls
-  `setPoiCatalogue(withDevFixtureFallback(contentPoiCatalogue))` — the real pack, with the
-  synthetic fixture standing in while `content/pois.json` is empty, in development builds only.
-  Format, loading and validation are **D-034**; `app/src/content/` holds the reader and
-  `content/README.md` is the curator's guide.
-
-**The project now has unit tests** — 18 of them, over the selection logic, on Node's own test
-runner with no new dependencies (`cd app && npm test`). This is the only executable evidence
-in the repository, and it will stay that way until a development build exists. It does not
-prove a geofence ever fires on a phone: that is T-076, and the debug screen has a
-*Start geofence field test* button that makes it a five-minute walk.
-
-**Sampling gating is done too** (T-034, 2026-08-10). `movementPolicy.ts` decides
-stationary-vs-moving from distance over time (D-028), `samplingGate.ts` applies it, and the
-location task runs it once per batch. The rule is asymmetric on purpose — one fix flips to
-moving, ten minutes of evidence are needed to go stationary. ⚠ **It can put the recorder to
-sleep and cannot wake it**: the stationary profile pauses updates, and if iOS stops delivering,
-no fix arrives and the gate never runs again. That is the single most important thing to watch
-in T-051.
-
-**The day-1 health check is done too** (T-049, 2026-08-10) — the third of the three things
-D-032 says must not be cut. Deliberately asymmetric: an alarm needs positive evidence, a quiet
-evening in a hotel is not a fault, and the case it exists for is *running, permitted, and no
-fixes* — the OEM battery killer nothing else would notice. A healthy check still notifies,
-because D-011 promises reassurance.
-
-Still missing from Phase 1: the Always upgrade and downgrade detection (T-043/T-044), and the
-battery-optimisation exemption (T-046).
-
-Nothing at all exists from Phases 2–7.
-
----
 
 ## Start here
 
@@ -411,100 +271,13 @@ died, because recording stopped silently, or because they walked a famous levada
 
 ### Phase 0 — what is left
 
-**Done:** T-022, T-023, T-026 (12 MB pack), T-028 (OSM survey, OD-7 closed).
-**Left, and no longer blocking v1:** Track A field runs (T-017–T-021). Their output tunes
-*matching* thresholds, and matching is now v2. Still worth an afternoon — fold in T-028a
-(verify levada corridor connectivity) and T-028b (WalkMe in airplane mode) on the same walk.
+**Done:** the tile pipeline (T-022, T-023, T-026 — 19.1 MB with terrain) and the OSM coverage
+survey (T-028, closing OD-7).
 
-### Track A — Field GPS validation (T-017 → T-021a)
-
-The project lead **lives in Madeira**, so this is an afternoon, not an expedition. **No code is
-required** — use an off-the-shelf logger.
-
-#### Tooling: Sensor Logger
-
-**Sensor Logger** by Kelvin Choi (iOS + Android) —
-`https://apps.apple.com/us/app/sensor-logger/id1531582925`
-
-Chosen because it captures GPS, barometer and pedometer **in one time-aligned session**,
-exports CSV/JSON/SQLite, has companion parsing tooling at
-`github.com/tszheichoi/awesome-sensor-logger`, and is cross-platform so the same procedure
-works for the Android comparison run (T-021a).
-
-The **paid tier is required** — it unlocks combined CSV export plus the barometric-altitude and
-pedometer channels, which are the whole point of the exercise.
-
-#### Setup
-
-1. Install Sensor Logger; buy the paid tier.
-2. Enable **Location**, **Barometer** and **Pedometer**.
-3. Set location to the **highest sample rate available.** These runs characterise the terrain —
-   they are deliberately not a simulation of how the finished app samples. Maximum fidelity.
-4. Bring a power bank. High-rate logging for a three-hour walk drains the battery, and that is
-   expected.
-
-#### Run 1 — the levada (T-018)
-
-- Pick one with genuine Laurissilva canopy, ideally including a tunnel section.
-- Start recording at the trailhead, stop at the exit.
-- **Carry the phone as a tourist would** — pocket or daypack, *not* held up to the sky.
-  Hand-held data looks better than reality and would produce falsely optimistic thresholds.
-
-#### Run 2 — the tunnel drive (T-019)
-
-- Any substantial VR1/VE1 stretch.
-- Prioritise a section where the expressway runs **above or below the old ER101 coastal road**
-  — that is the case where altitude has to do the work of telling them apart.
-
-#### Ground truth (T-017a)
-
-**Take a photo at every key waypoint** — trailhead, each tunnel portal, the exit. EXIF supplies
-timestamp and location for free. Without ground truth a trace is an ungradeable squiggle; the
-entire exercise is comparing what the sensors *recorded* against what actually *happened*.
-
-#### Afterwards
-
-- Document blackout durations and error magnitudes in `docs/field-notes.md` (T-020).
-- Commit exports and photos to `tools/fixtures/` — **these become the permanent matching
-  regression suite** (T-021). Every future matching change is tested against them.
-- **Repeat at least one run on a mid-range Android** before finalising any Phase 4 threshold
-  (T-021a) — see the warning below.
-
-#### Questions these runs must answer
-
-- Does the barometer stay usable inside tunnels and under canopy?
-- Does altitude reliably separate the VR1 from the coastal ER101 below it?
-- Does the pedometer keep counting through GPS blackouts?
-- How long are the blackouts, in seconds and metres, and how large is the error on recovery?
-
-#### ⚠ Sampling bias warning
-
-The project lead's **iPhone 15 has better GNSS than much of what tourists actually carry.**
-iPhone-only fixtures are best-case. Tuning corridor widths and gap thresholds against them
-risks shipping an app that quietly **under-credits users on mid-range Android hardware** —
-precisely the failure mode identified as an uninstall trigger (D-009). Do not finalise Phase 4
-thresholds on iPhone data alone.
-
-### Track B — Tile pipeline spike (T-022 → T-026) — ✅ DONE 2026-08-08/10
-
-1. OSM extract of **Madeira and Porto Santo** (T-022).
-2. Reproducible tile build script — Tilemaker or Protomaps — producing PMTiles or MBTiles
-   (T-023).
-3. Prove overlay rendering: a MapLibre demo drawing a highlighted road from *local* geometry
-   over the basemap, and confirm it **aligns** with the basemap's own road rendering (T-025).
-4. Evaluate suppressing basemap roads entirely and drawing all roads from the overlay, which
-   makes alignment a non-issue by construction (T-025a).
-5. Record tile pack size (T-026) — **including shaded terrain**, which D-026 adds and which is
-   not free.
-
-Note T-024 (stable OSM way IDs in tiles) was downgraded from "critical decision gate" to
-nice-to-have by D-022. Do not treat it as a blocker.
-
-**Track B is now also the design unblock.** Once tiles render, the next step is T-058: take an
-existing permissively-licensed style — a Protomaps basemap theme, or CARTO Positron over an
-OpenMapTiles-schema build — and **subtract** from it. Do not author cartography from a blank
-file; that assumption is a large part of why the design phase previously stalled. Then look at
-it outdoors, in Funchal, at midday. That is the test that confirms or kills D-026.
+**Left, and no longer blocking v1:** the Track A field runs (T-017–T-021). Their output tunes
+*matching* thresholds and matching is now v2 (D-032), so they are worth an afternoon rather
+than a delay. Full procedure — logger, the two runs, ground truth, the sampling-bias warning —
+is **`docs/field-testing.md`**.
 
 ### Phase 1 is finished, and unproven
 
@@ -649,36 +422,27 @@ must confirm they are absent from the production build. A reviewer seeing those 
 double quotes, so multi-line `git commit -m` messages get word-split. Write the message to a
 file and use `git commit -F` instead.
 
-### Learned in the 2026-08-08 design session
+### Landmines from the design session
 
-**Apple Maps is settled, and the answer is no.** It will come up again, because it looks good and
-the reference app uses it. Four hard stops, recorded in D-026: no offline tile API is exposed to
-third-party apps; every pan and zoom leaks position to a tile server; the basemap cannot be
-dimmed, so there is no fog of war; and there is no Apple Maps SDK for Android at all. Their
-choice is correct *for New York*, which has connectivity everywhere. Madeira's north and interior
-do not. The counter-argument that Apple Maps carries useful familiarity is real and is answered
-in D-026 — familiarity comes from map *conventions* and *gestures*, both of which MapLibre keeps.
+**Apple Maps is settled, and the answer is no.** It will come up again. Four hard stops in
+D-026: no offline tile API for third parties, every pan leaks position to a tile server, the
+basemap cannot be dimmed so there is no fog of war, and there is no Apple Maps SDK for Android.
+Familiarity comes from map *conventions* and *gestures*, both of which MapLibre keeps.
 
-**Never gate recording on the pedometer.** It is tempting, the reference app does exactly it, and
-it is wrong here: they are a walking-only app, and Madeira tourism is rental-car dominated.
-Gating on steps would blind the app to the tunnel drives and the VR1. The pedometer classifies;
-it never gates (D-028). Note also their own settings admit **20%/day** battery at the setting
-that reliably catches walks — pedometer gating is not the battery win it appears to be.
+**Never gate recording on the pedometer.** Tempting, and the reference app does it, but they are
+a walking-only app and Madeira tourism is rental-car dominated — gating on steps would blind us
+to every tunnel drive and the VR1. The pedometer classifies; it never gates (D-028). Their own
+settings admit 20%/day at the setting that reliably catches walks, so it is not even the battery
+win it appears to be.
 
-**Most "UI work" on this app is cartography.** The primary screen is a map plus three controls.
-Asking a UI design tool for "the screen" produces generic dashboard chrome because that is all it
-can do with the space. This cost the project lead real time before it was diagnosed. See
-`docs/design-brief.md` §1, and do not repeat it.
+**Most "UI work" on this app is cartography.** Asking a UI design tool for "the screen" produces
+generic dashboard chrome, because a map plus three controls is all the space there is. This cost
+the project lead real time before it was diagnosed (`docs/design-brief.md` §1).
 
-**Do not author a map style from a blank file.** Start from Protomaps' basemap themes or CARTO
-Positron/Dark Matter and subtract. Verify the licence of whichever is chosen.
-
-**Do not name the app after anything official.** The reference app is currently subject to a
-cease and desist from NYC DOT for using the name of the city's own wayfinding programme. Madeira
-has equivalents — *Visit Madeira* and similar. Search INPI and EUIPO before committing. The
-shortlist in `docs/design-brief.md` §7.4 is **unchecked candidates**, not cleared names.
-
----
+**Do not name the app after anything official.** The reference app is under a cease and desist
+from NYC DOT for using the name of the city's own wayfinding programme. Madeira has equivalents
+— *Visit Madeira* and similar. Search INPI and EUIPO first. The shortlist in
+`docs/design-brief.md` §7.4 is **unchecked candidates**, not cleared names.
 
 ## Decisions waiting on the project lead
 
@@ -705,58 +469,6 @@ Three of the four questions raised after the first implementation session were *
 Also unresolved, cheap to settle: whether Transistor Soft debug builds run unlicensed. Only
 matters if the free stack fails its soak tests (T-051–T-054), which is when the $399 purchase
 decision arises at all.
-
-### Known documentation inconsistencies
-
-~~`ARCHITECTURE.md` §2 component diagram still lists feature-state recolouring.~~ **Fixed
-2026-08-08** under the tier-1 rule now recorded in CONTEXT.md §9.
-
-Note that `DECISIONS.md` D-004 still discusses feature state at length. That is **correct and
-deliberate** — the entry carries its own dated revision notice and is superseded by D-022 rather
-than rewritten. Superseding rather than deleting is the convention (CONTEXT §9); do not "tidy"
-those passages away.
-
----
-
-## Decision trail from the planning conversation
-
-For context on how the design arrived where it did. Full reasoning for each is in
-`DECISIONS.md`.
-
-- **D-001** No backend, fully on-device — every constraint pointed the same way
-- **D-002** Curated canvas; stamps are the score, not island-wide road coverage
-- **D-003** Passport stamps, not stars
-- **D-004** MapLibre GL Native + offline vector tiles *(feature-state half revised — see D-022)*
-- **D-005** Geofences as the system backbone
-- **D-006** Transistor Soft assessed *(superseded in part by D-025 — now a contingency)*
-- **D-007** Cross-platform, not fully native
-- **D-008** Fully usable with While-Using permission; Always is an upgrade, never a gate
-- **D-009** Bias matching toward false positives — *be generous filling gaps between things you
-  are certain about; be strict about what you are certain about*
-- **D-010** Retain raw traces; matching is a replaceable layer
-- **D-011** Exactly two notifications per trip
-- **D-012** Airport geofence as the trip-end trigger
-- **D-013** The souvenir video is the distribution strategy
-- **D-014** Printed poster monetisation deferred
-- **D-015** Accessibility beats aesthetics
-- **D-016** Mask accommodation in exports by default
-- **D-017** All Madeira content is data, not code
-- **D-018** Never build navigation — hand off to Apple/Google Maps
-- **D-019** Build the recorder before the visualisation
-- **D-020** Validate physical assumptions before committing to street-level matching
-- **D-021** Porto Santo included structurally
-- **D-022** Overlay rendering, not feature state *(Provisional)*
-- **D-023** React Native
-- **D-024** Porto Santo hidden until the user goes there
-- **D-025** Free location stack; paid SDK only on evidence
-- **D-026** Two map styles — light for use, dark for the souvenir; terrain, not buildings *(Provisional)*
-- **D-027** Passport organised by category, not region *(Provisional)*
-- **D-028** Gate on stationary-vs-moving; pedometer classifies but never gates *(Provisional)*
-
-*(D-029 onwards were decided after the planning conversation and are not listed here. The most
-recent is D-033, the geofence window — see "What is Provisional" above.)*
-
----
 
 ## Suggested opening message for the new session
 

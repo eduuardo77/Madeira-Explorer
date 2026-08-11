@@ -143,6 +143,7 @@ whether the map renders at all, and every threshold in the app) and **curating t
 | [CONTEXT.md](CONTEXT.md) | Everything a fresh contributor (human or AI) needs before touching anything. |
 | [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
 | [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone or emulator, and what to check first once it runs. |
+| [docs/field-testing.md](docs/field-testing.md) | Track A: the GPS field runs, the logger, and the sampling-bias warning. |
 | [docs/emulator-setup.md](docs/emulator-setup.md) | The one BIOS setting that stands between this project and seeing its own map. |
 | [content/README.md](content/README.md) | The content pack format, and the guide for curating it (T-066). |
 | [docs/map-style.md](docs/map-style.md) | How the map styles are generated, and why they look the way they do (T-058, D-035). |

@@ -38,7 +38,8 @@ and invariants only — if it disagrees with a decision, the decision wins.
 
 **Reference, read when relevant:** `docs/dev-build.md` (getting it onto hardware),
 `docs/map-style.md` (how the cartography is generated), `docs/field-testing.md` (Track A),
-`content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`.
+`content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`,
+`docs/dependency-audit.md` (T-117 — what ships and what it can reach).
 
 **These seven documents are the source of truth, not this handoff and not any chat history.**
 If this file and those disagree about a *decision*, they win.
@@ -394,7 +395,16 @@ entire backup — taking the user's trip history with it.
 **Audit every dependency's network behaviour.** This is where these apps actually leak — not
 through carelessness with the database, but through an analytics or crash-reporting SDK that
 phones home by default. Target zero networked dependencies. Adding any network call requires a
-recorded decision.
+recorded decision. **T-117 ran this on 2026-08-11 — `docs/dependency-audit.md`.** No analytics,
+no crash reporting, no telemetry, and no network call in the app's own code.
+
+**`expo-notifications` puts Firebase Cloud Messaging in the Android build** (D-043). Found by
+T-117 and the one thing in the audit likely to surface in the Play review. The app uses local
+notifications only and ships no Firebase configuration, so it has nothing to register against —
+but that is a *static* argument about a *runtime* behaviour, and **T-117b still owes the packet
+capture**. Do not repeat the claim as if it were measured. Removing the dependency was
+considered and rejected: it would take the day-1 health check with it, and a recorder that dies
+silently is the failure CONTEXT §4.5 calls worse than never installing the app.
 
 ### Learned while implementing Phase 1
 

@@ -4,7 +4,9 @@ Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
 **Last updated:** 2026-08-11 — T-105 split into **T-105a** (the souvenir *composition*, done,
-D-042) and **T-105b** (the encoder, which needs a device). Previously 2026-08-10 — **v1 is
+D-042) and **T-105b** (the encoder, which needs a device); **T-117** the dependency network
+audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device
+half. Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
 (D-039/D-040), T-114/T-121 and T-125/T-140/T-141, and added a web design workbench (D-038).
@@ -757,8 +759,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Privacy and compliance
 
-- [ ] **T-117** **Dependency network audit** — confirm zero SDKs transmit anything. This is
+- [x] **T-117** **Dependency network audit** — confirm zero SDKs transmit anything. This is
       where these apps actually leak. ⇠ T-029
+      — Done 2026-08-11, **statically**. `docs/dependency-audit.md` is the artefact and the
+      thing to hand a reviewer. No analytics, no crash reporting, no telemetry: seventeen vendor
+      strings, zero hits in the emitted bundle, **with the probe verified against strings known
+      to be present** — an unverified zero looks exactly like a pass. `expo-updates` is not
+      installed, so there is no OTA check on launch. iOS podspecs depend on `ExpoModulesCore`
+      and nothing else. `app/src` contains no `fetch`, no `XMLHttpRequest`, no HTTP client.
+      — ⚠ **Found: `expo-notifications` puts `firebase-messaging` in the APK.** The app uses
+      local notifications only and no Firebase configuration ships, so it cannot register — but
+      that is a static argument about runtime behaviour. **D-043**, and **T-117b** owes the
+      confirmation.
+      — Two Expo URLs (`exp.host` push, `eascdn.net` assets) are dead strings in the bundle.
+      Written down so the answer exists before a reviewer greps for them.
+      — ⚠ **Static only. Nothing was observed on a device, because there is no device.**
+- [ ] **T-117b** **Confirm zero outbound connections on a real device** — packet capture during
+      the T-051 soak, where it costs nothing extra to watch. Specifically: no FCM registration
+      (D-043), no `exp.host`, no asset CDN, no tile requests. ⇠ T-117, T-051
 - [ ] **T-117a** **Confirm the development scaffolding is inert in a release build.** Distinct
       from T-117, which is about network behaviour and would not look at this. Two things to
       check: the `expo-dev-client` permissions (`SYSTEM_ALERT_WINDOW`,

@@ -214,6 +214,13 @@ without anyone deciding it should.
 **Target: zero networked dependencies.** Any crash reporting must be local and uploaded only
 on an explicit user tap.
 
+**Audited 2026-08-11 (T-117) — `docs/dependency-audit.md`.** No analytics, no crash reporting,
+no telemetry, and no network call in the app's own code. The target is met with one asterisk:
+`expo-notifications` puts **Firebase Cloud Messaging** in the Android build (D-043). It ships no
+configuration and is never asked for a push token, so it has nothing to register against — but
+that is a static argument and **T-117b owes the on-device confirmation.** Read the audit before
+filling in the Data Safety form or the nutrition label.
+
 ### 4.9 Feasibility is settled; the components are proven
 
 Prior art confirms every individual piece ships:

@@ -1908,3 +1908,51 @@ function. Two callers deciding that independently would be two chances to bridge
 risk: `MIN_CUE_GAP_MS` (350 ms) is a legibility figure and legibility is measured by watching;
 `CAMERA_WINDOW_FRACTION` decides whether the pan reads as deliberate or as drift; and the whole
 duration budget is guesswork until a real trip has been composed and watched to the end.
+
+---
+
+## D-043 — Firebase Cloud Messaging ships in the Android build, and stays.
+
+**Status:** Provisional — decided while auditing dependencies 2026-08-11 (T-117). The
+behavioural half is unverified: **T-117b must confirm it with a packet capture on a device.**
+
+**Context:** the dependency audit (`docs/dependency-audit.md`) found that `expo-notifications`
+declares `com.google.firebase:firebase-messaging` on Android and registers a
+`com.google.firebase.MESSAGING_EVENT` service. Both land in the APK. On an app whose entire
+position is "no data leaves the device" (D-001), a Google push SDK in the binary is not a
+detail — CONTEXT §4.8 says this is precisely how "no data leaves the device" quietly becomes
+false without anyone deciding it should.
+
+**Decision:** keep `expo-notifications`, and **write the situation down rather than discover it
+during the Play review.**
+
+1. **The app uses local scheduled notifications only** — two per trip, ever (D-011). No push
+   token is requested anywhere in `app/src`; the audit verified this against the source.
+2. **No Firebase configuration ships.** There is no `google-services.json` and no
+   `android.googleServicesFile` in `app.json`, so the google-services Gradle plugin never runs
+   and no sender configuration is compiled in. Without a default `FirebaseApp` there is nothing
+   for FCM to register against.
+3. **That argument is static and is not enough.** T-117b watches the network on a real device,
+   during the T-051 soak, where it costs nothing extra.
+4. **The privacy policy (T-124), the Data Safety form (T-122) and the nutrition label (T-120)
+   are written knowing this**, not around it.
+
+**Alternatives considered:**
+
+- *Drop notifications entirely and remove the dependency.* Rejected, and it was the tempting
+  option. CONTEXT §4.5 is explicit: the enemy of a ghost app is the OS, not the user. A
+  recorder that dies on day 2 and is discovered on day 7 is **worse than never having installed
+  the app**, and the day-1 health check (T-049) is the only thing standing between the user and
+  that outcome. Removing an SDK that does nothing, at the cost of the mechanism that catches
+  silent failure, trades a real protection for an appearance.
+- *Replace `expo-notifications` with a local-only notification library.* Not rejected on
+  merit — **left open**. It would remove the finding outright. It is not done now because it is
+  a dependency swap on a working, permission-tested flow (T-042/T-114) with no device to
+  re-verify it on, which is the wrong order. Revisit if the Play review (T-123) makes an issue
+  of Firebase, or when a device exists.
+- *Say nothing and hope it does not come up.* Rejected. It is one grep away, on a claim that
+  invites grepping.
+
+**Consequences:** `docs/dependency-audit.md` exists and is the artefact to hand a reviewer.
+T-117b is added, and is a Phase 1 device task rather than a compliance one, because the cheapest
+moment to run it is while the 72-hour soak is already running.

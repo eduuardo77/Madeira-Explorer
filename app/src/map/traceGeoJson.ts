@@ -55,13 +55,27 @@ export type TraceCollection = {
 };
 
 /**
- * Build the trace. `fixes` in any order; `gapThresholdMs` decides where the
- * line honestly breaks.
+ * One unbroken stroke: fixes in time order, with no silence inside it longer
+ * than the caller's threshold. Always at least two fixes — one point is not a
+ * line.
  */
-export function buildTrace(
+export type TraceSegment = {
+  fixes: TraceFix[];
+};
+
+/**
+ * Split a trace into the strokes it can honestly be drawn as.
+ *
+ * This is where both rules in the file header live, and it is separate from
+ * `buildTrace` because the souvenir composition (T-105a) needs the same
+ * segmentation *with timestamps attached* — GeoJSON drops them. Two callers
+ * deciding independently where a line breaks is two chances to invent a route
+ * across a blackout, so they share one function.
+ */
+export function splitIntoSegments(
   fixes: TraceFix[],
   gapThresholdMs: number
-): TraceCollection {
+): TraceSegment[] {
   const drawable = fixes
     .filter(
       (fix) =>
@@ -71,19 +85,15 @@ export function buildTrace(
     )
     .sort((a, b) => a.ts - b.ts);
 
-  const features: TraceFeature[] = [];
-  let current: [number, number][] = [];
+  const segments: TraceSegment[] = [];
+  let current: TraceFix[] = [];
   let previousTs: number | null = null;
 
   const flush = () => {
-    // One point is not a line. The point is not lost — it is still in the
-    // database — it just cannot be drawn as a stroke.
+    // The dropped point is not lost — it is still in the database — it just
+    // cannot be drawn as a stroke.
     if (current.length >= 2) {
-      features.push({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates: current },
-      });
+      segments.push({ fixes: current });
     }
     current = [];
   };
@@ -92,10 +102,33 @@ export function buildTrace(
     if (previousTs !== null && fix.ts - previousTs > gapThresholdMs) {
       flush();
     }
-    current.push([fix.lon, fix.lat]);
+    current.push(fix);
     previousTs = fix.ts;
   }
   flush();
 
-  return { type: 'FeatureCollection', features };
+  return segments;
+}
+
+/**
+ * Build the trace. `fixes` in any order; `gapThresholdMs` decides where the
+ * line honestly breaks.
+ */
+export function buildTrace(
+  fixes: TraceFix[],
+  gapThresholdMs: number
+): TraceCollection {
+  return {
+    type: 'FeatureCollection',
+    features: splitIntoSegments(fixes, gapThresholdMs).map((segment) => ({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: segment.fixes.map(
+          (fix): [number, number] => [fix.lon, fix.lat]
+        ),
+      },
+    })),
+  };
 }

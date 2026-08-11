@@ -1,8 +1,10 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-10 — **v1 is now feature-complete in code.** Earlier updates: 2026-08-06
-(first implementation session), 2026-08-08 (design session, D-026/D-027/D-028).
+**Updated:** 2026-08-11 — the souvenir **composition** is written (T-105a, D-042); what is left
+of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1 feature-complete
+in code**), 2026-08-08 (design session, D-026/D-027/D-028), 2026-08-06 (first implementation
+session).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
@@ -10,11 +12,11 @@ blocked. Build the things in "Start here" below.
 
 **Repository state:** git repository, ~20 commits. **The whole v1 chain is written**: record →
 stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
-user's accommodation masked out of anything shareable. 51 source files and 11 test files in
-`app/`, ~11,500 lines.
+user's accommodation masked out of anything shareable. 53 source files and 12 test files in
+`app/`, ~12,600 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**155 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**178 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -58,7 +60,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 
 | | |
 |---|---|
-| **T-105** the souvenir renderer | 9:16 video. D-013 calls it the entire distribution strategy. The biggest remaining piece, and the one that needs native video encoding nobody can verify without a device. Its *composition* logic (what appears when, in what order) is testable. |
+| **T-105b** the souvenir encoder | 9:16 video. D-013 calls it the entire distribution strategy. **T-105a, the composition, is now written** (D-042): the storyboard — three scenes, camera path, strokes, and the moment each stamp lands — is pure and has 23 tests. What is left is turning that into an MP4, which needs native video encoding nobody can verify without a device. **Nobody has watched anything**; every duration in the composition is a guess. |
 | **T-070** stamp artwork | The passport draws a placeholder disc today, deliberately. |
 | **T-124** privacy policy | Short, because there is genuinely nothing to disclose. The settings row exists and does nothing until it is written. |
 | **T-046** Android battery exemption | Small. |
@@ -91,7 +93,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **155 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **178 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -102,10 +104,15 @@ until a development build exists — which is the first blocker below.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Nine decisions are Provisional.** Three came from the 2026-08-08 design session; the rest
-were made while building on 2026-08-10 and have never met real data or a real device. The
-default for anything new is Provisional and the burden is on confirmation, not objection
-(CONTEXT §9):
+**Ten decisions are Provisional.** Three came from the 2026-08-08 design session; the rest
+were made while building on 2026-08-10 and 2026-08-11 and have never met real data or a real
+device. The default for anything new is Provisional and the burden is on confirmation, not
+objection (CONTEXT §9):
+
+- **D-042** *(2026-08-11)* — the souvenir is planned as a storyboard before it is rendered,
+  paced by recorded movement rather than by elapsed time, never drops a stamp, and produces
+  **no film at all** from a trace masking could not verify. Unit-tested and **never watched** —
+  every duration in it is a guess. T-105b and a pair of eyes are what confirm or kill it.
 
 - **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
   terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
@@ -175,8 +182,9 @@ app/
     ├── progress/      the reward (D-037) and the numbers
     │   stampRules(+test), stampAwards, tripProgress(+test), currentProgress,
     │   tripEnd(+test), tripEndDetection
-    ├── souvenir/      T-103/T-104, the privacy hole closed (D-040)
+    ├── souvenir/      T-103/T-104, the privacy hole closed (D-040); T-105a (D-042)
     │   accommodation(+test), exportTrace  ← THE ONLY DOOR A TRACE LEAVES BY
+    │   composition(+test), souvenirPlan   ← the film, planned but never rendered
     ├── onboarding/    T-042/T-114/T-121, the hardest permission (D-041)
     │   permissionPolicy(+test), OnboardingView, OnboardingFlow
     ├── map/           T-056/T-059
@@ -228,11 +236,12 @@ and neither is code.
   to curate it** — T-028 established it is selection and editorial judgement, which is the one
   thing a competitor cannot buy.
 
-**2. T-105 — the souvenir renderer.** The largest remaining piece of code and the one D-013
-calls the entire distribution strategy: a 9:16 video good enough that people post it. Needs
-native video encoding, which cannot be verified without a device — but the **composition**
-(what appears when, in what order, for how long) is pure logic and testable today. Splitting it
-that way is the established pattern here: see `stampRules` / `stampAwards`.
+**2. T-105b — the souvenir encoder.** The largest remaining piece of code and the one D-013
+calls the entire distribution strategy: a 9:16 video good enough that people post it.
+**T-105a split the testable half off and it is done** (D-042) — `souvenir/composition.ts` plans
+the film as a storyboard and `souvenirPlan.ts` feeds it from the database. What remains needs
+native video encoding and therefore a device. It also needs *eyes*: the composition's timings
+are guesses by somebody who has never seen the result.
 
 **3. The small remainder.** T-070 stamp artwork (the passport draws a placeholder disc on
 purpose), T-124 the privacy policy (the settings row is wired and inert until it exists), T-046
@@ -485,7 +494,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 155 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 178 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
@@ -497,8 +506,9 @@ decision arises at all.
 > decisions unless something is genuinely blocked.
 >
 > I want to work on [pick one]:
-> - **T-105, the souvenir renderer** — the biggest remaining piece and the whole distribution
->   strategy (D-013). Split it: the composition logic is testable now, the encoding is not.
+> - **T-105b, the souvenir encoder** — the biggest remaining piece and the whole distribution
+>   strategy (D-013). The composition is already written (T-105a, D-042); this is the encoding,
+>   and it needs a device.
 > - **T-070, stamp artwork** — the passport draws a placeholder disc today
 > - **T-124, the privacy policy** — short, because there is nothing to disclose
 > - **T-139, tune the dark style** so the light/dark toggle can be wired to the map

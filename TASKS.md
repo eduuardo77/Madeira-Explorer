@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-10 — **v1 is feature-complete in code.** That day closed T-034,
+**Last updated:** 2026-08-11 — T-105 split into **T-105a** (the souvenir *composition*, done,
+D-042) and **T-105b** (the encoder, which needs a device). Previously 2026-08-10 — **v1 is
+feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
 (D-039/D-040), T-114/T-121 and T-125/T-140/T-141, and added a web design workbench (D-038).
 It also found that **erase-all had been silently broken since migration 2**.
@@ -13,10 +15,10 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 > **v1 = record → stamps by geofence → draw the trace → passport → souvenir.**
 > Phases 1, 2, 3, 5, 6, 7. **Phase 4 is v2.** See D-032.
 **Overall progress:** the whole v1 chain is written and **nothing has run on real hardware.**
-What remains: T-105 (the souvenir renderer), a short tail of small items, verification that
-needs a device, and the curated content. See `HANDOFF.md`.
+What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
+small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 155 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 178 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -445,6 +447,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Rendered as casing + core so the trace stays legible over terrain shadow (D-015).
       — No simplification yet: a week of batched fixes is small. T-064 measures; simplify only
       if it says so.
+      — **Amended 2026-08-11 (T-105a):** the segmentation is now `splitIntoSegments`, exported,
+      and `buildTrace` is built on it. The souvenir needs the same strokes with timestamps
+      attached, and two callers deciding independently where a line breaks would be two chances
+      to bridge a blackout.
       — D-022's overlay-alignment risk **does not apply in v1**: there is no road geometry being
       drawn over the basemap's own roads, so nothing can be misaligned. D-022 governs v2.
       — *v2:* visited/unvisited styling via data-driven expressions over local `road_graph`
@@ -697,10 +703,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **T-110 still has to confirm it on a real export.**
 - [ ] **T-105** On-device 9:16 vertical video renderer — animated trace draw-on, stamps
       popping in collection order, camera flyover ⇠ T-059, T-074
-- [ ] **T-106** Watermark ⇠ T-105
-- [ ] **T-107** Still-image export ⇠ T-105
-- [ ] **T-108** Share sheet integration ⇠ T-105, T-107
-- [ ] **T-109** Verify render completes on-device in under ~30 seconds ⇠ T-105
+      — **Split 2026-08-11 into T-105a and T-105b (D-042).** The composition is arithmetic and
+      testable today; the encoder is not verifiable without a device. Same split as
+      `stampRules`/`stampAwards`. T-105 stays open as the parent until T-105b closes.
+- [x] **T-105a** The **composition** — what appears when, in what order, and where the camera
+      is pointing ⇠ T-059, T-104
+      — Done 2026-08-11. **D-042.** `souvenir/composition.ts` is pure and turns a trip into a
+      storyboard: absolute times from the start of the video, three scenes, a camera path, the
+      strokes, and the moment each stamp lands. 23 tests. `souvenir/souvenirPlan.ts` is the
+      impure half that reads the trip.
+      — **Paced by movement, not by hours.** One recorded fix per step, so the film is not a
+      third stationary dot, and a blackout is a visible beat rather than a bridged line.
+      — **No stamp is ever dropped**, however crowded. **An unsafe trace produces no film at
+      all** — the input demands `safeToShare` from `getExportableTrace` (D-040) and the return
+      type is a union, so a caller cannot reach the scenes of a refusal.
+      — ⚠ **Nobody has watched anything.** Every duration is a guess; `MIN_CUE_GAP_MS` is a
+      legibility figure and legibility is measured by watching. T-105b is what confirms them.
+- [ ] **T-105b** Encode the storyboard to an MP4 on the device ⇠ T-105a
+      — Needs native video encoding, which is the part that cannot be verified without a
+      device. It consumes `Composition` and needs no judgement of its own.
+      — Also where the *look* is decided: whether the finale shows a denominator (D-042 carries
+      both numbers deliberately), and whether the guessed durations survive being watched.
+- [ ] **T-106** Watermark ⇠ T-105b
+- [ ] **T-107** Still-image export ⇠ T-105b
+- [ ] **T-108** Share sheet integration ⇠ T-105b, T-107
+- [ ] **T-109** Verify render completes on-device in under ~30 seconds ⇠ T-105b
 - [ ] **T-110** Verify the accommodation is not identifiable in a default export ⇠ T-104
 - [ ] **T-111** Verify the reveal works when the app has not been opened since install day
       ⇠ T-102

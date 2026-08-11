@@ -24,7 +24,7 @@ genuinely blocked.
 ## Honesty rules, each of which cost something here
 
 - **Nothing in this app has ever run on a phone.** Say so when reporting anything as working.
-  155 unit tests and a browser workbench are the only verification that exists.
+  178 unit tests and a browser workbench are the only verification that exists.
 - **Never state a measured-sounding number that was not measured.** The battery figure is
   `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
   silence — it is a promise the app has not earned.
@@ -37,7 +37,7 @@ genuinely blocked.
 ## Verifying work
 
 ```bash
-cd app && npm test          # 155 tests, Node's own runner, no framework
+cd app && npm test          # 178 tests, Node's own runner, no framework
 cd app && npx tsc --noEmit  # strict
 cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolves everything
 node tools/validate-content.mjs                                    # the content pack
@@ -85,8 +85,9 @@ scratchpad directory is the place for that file.
 ## Conventions that are not obvious
 
 - **Pure logic in its own module, impure wrapper beside it** — `stampRules`/`stampAwards`,
-  `geofenceSelection`/`geofenceManager`, `movementPolicy`/`samplingGate`. Only the pure half is
-  testable without a device, which is why the split exists.
+  `geofenceSelection`/`geofenceManager`, `movementPolicy`/`samplingGate`,
+  `composition`/`souvenirPlan`. Only the pure half is testable without a device, which is why
+  the split exists.
 - **A module under unit test imports with an explicit `.ts` extension.** Node's resolver will
   not guess it; Metro does not mind. Everything else stays extensionless.
 - **No Madeira knowledge in `app/`** (D-017, called absolute). Coordinates, names and bounds

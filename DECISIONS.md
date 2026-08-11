@@ -1831,3 +1831,80 @@ measured at 2× text scaling, the Play disclosure copy overflows and scrolls whi
 stay reachable; inside, they would be pushed off screen for exactly the users who need large
 text most (D-015). The Android prominent-disclosure screen (T-121) uses Play's required
 phrasing and is shown before the Always request on Android only.
+
+---
+
+## D-042 — The souvenir is planned as a storyboard, paced by movement, and never partial.
+
+**Status:** Provisional — implemented 2026-08-11 (T-105a). **Nothing in it has been watched.**
+Every duration below is a reasoned guess by somebody who has not seen the film, and the first
+person who does will have better numbers. The arithmetic is unit-tested (23 tests); the
+aesthetics are not tested at all, because they cannot be.
+
+**Context:** D-013 makes the 9:16 video the entire distribution strategy, which makes T-105 the
+largest remaining piece of v1 — and the half that encodes frames cannot be verified without a
+device this project does not have. The same problem was already solved twice here
+(`stampRules`/`stampAwards`, `geofenceSelection`/`geofenceManager`), so it is solved the same
+way a third time.
+
+**Decision:**
+
+1. **The film is planned before it is rendered.** `souvenir/composition.ts` turns a trip into a
+   **storyboard**: absolute millisecond times from the start of the video, a camera path, the
+   strokes to draw, and the moment each stamp lands. It is pure — no clock, no randomness, no
+   database — so it is testable on Node today, and so the same trip always composes to the same
+   film. A renderer consuming it needs no judgement of its own. T-105b is the encoder.
+
+2. **Time is spent on movement, not on hours.** The draw-on advances one *recorded fix* at a
+   time, not one minute at a time. Elapsed-time pacing would spend a third of the video sitting
+   outside a restaurant, because the recorder samples a stationary phone rarely but for a long
+   while (D-028). This has a free second consequence: the pen-lift across a blackout consumes
+   exactly one step, so **a recording gap is a visible beat in the film** rather than a line
+   drawn across a road nobody proved was taken (ARCHITECTURE §10).
+
+3. **No stamp is ever dropped.** Stamps are the reward (D-002). Funchal will hand somebody six
+   inside an hour, so cue spacing shrinks and the draw lengthens to accommodate them; if they
+   still will not fit, they spread evenly across the scene. Compressed is acceptable; missing
+   is not. A stamp is cued at the fix that was current when it was earned, so the badge lands
+   as the line reaches the place.
+
+4. **An unsafe trace produces no film at all.** The input type demands the `safeToShare` flag
+   from `getExportableTrace` (D-040) rather than a bare fix list, and the composition returns a
+   refusal with a reason instead of scenes. `Composition` is a discriminated union, so a caller
+   *cannot* reach the scenes of a film that declined to exist. This is the same stance as
+   D-040: withhold rather than ship something unverified.
+
+5. **Bounded length, three scenes.** Establish (1.2 s), draw (6–14 s, bought by distance
+   travelled), finale (3 s) — so between roughly 10 and 18 seconds whatever the trip was. An
+   afternoon must still be a film and a fortnight must still be watchable in a feed.
+
+6. **It names no place and no island.** Every string comes from the content pack via the
+   caller (D-017). If the video should open on a title card reading a destination name, that
+   name becomes a field in `content/pois.json`, not a literal in `app/`. That is why there is
+   no title card today.
+
+**Alternatives considered:**
+
+- *Render directly from the trip, with the timing decided inside the encoder.* Rejected: it is
+  the whole of T-105 blocked behind hardware, and none of the interesting judgement would be
+  testable. The split is what lets the biggest remaining piece of v1 move at all.
+- *Pace the draw-on by elapsed time.* Rejected; see point 2. It is the obvious implementation
+  and it produces a film that is mostly a stationary dot.
+- *Cap the number of stamps shown, or show the "best" ones.* Rejected: there is no defensible
+  ranking of a person's own holiday, and the collection is the reward. Compress instead.
+- *Draw one continuous line across recording gaps.* Rejected — ARCHITECTURE §10 forbids
+  fabricated continuity, and the souvenir is the worst place to start inventing it because it
+  is the artefact that gets published.
+- *Show a partial film when masking could not be verified.* Rejected; see point 4.
+- *Fix the video at a single duration.* Rejected: a one-day trip and a two-week road trip
+  produce very different amounts of line, and a fixed length either rushes one or pads the
+  other.
+
+**Consequences:** `map/traceGeoJson.ts` grew a `splitIntoSegments` export and `buildTrace` is
+now built on it, so the map screen and the souvenir decide where a line breaks with **one**
+function. Two callers deciding that independently would be two chances to bridge a blackout.
+
+**What confirms or kills this:** T-105b, and somebody watching the result. Specifically at
+risk: `MIN_CUE_GAP_MS` (350 ms) is a legibility figure and legibility is measured by watching;
+`CAMERA_WINDOW_FRACTION` decides whether the pan reads as deliberate or as drift; and the whole
+duration budget is guesswork until a real trip has been composed and watched to the end.

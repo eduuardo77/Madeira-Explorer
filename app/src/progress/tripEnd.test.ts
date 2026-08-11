@@ -19,6 +19,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import type { Visit } from './stampRules.ts';
 import {
@@ -28,6 +31,7 @@ import {
   MIN_DEPARTURE_DWELL_SECONDS,
   MIN_TRIP_AGE_FOR_DEPARTURE_MS,
   type TripEndInput,
+  revealTitle,
 } from './tripEnd.ts';
 
 const START = 1_800_000_000_000;
@@ -257,4 +261,37 @@ test('the trip-age gate uses the constant it advertises', () => {
 
   assert.equal(justUnder.ended, false);
   assert.equal(justOver.ended, true);
+});
+
+// ---------------------------------------------------------------------------
+// The reveal's title (T-102, T-116a)
+// ---------------------------------------------------------------------------
+
+test('the reveal names the place, from the content pack', () => {
+  assert.equal(revealTitle('Madeira'), 'Your Madeira map is ready');
+  assert.equal(revealTitle('Porto Santo'), 'Your Porto Santo map is ready');
+});
+
+test('a pack that does not name itself still gets a sentence', () => {
+  // ⚠ The fallback matters more than it looks. This is the copy on the moment
+  // D-012 calls the best in the product, and D-013 gives it one job — get
+  // somebody in a departure lounge to open the app. A missing content field
+  // must cost warmth, never the notification.
+  assert.equal(revealTitle(null), 'Your map is ready');
+  assert.equal(revealTitle(''), 'Your map is ready');
+  assert.equal(revealTitle('   '), 'Your map is ready');
+});
+
+test('no island is named anywhere in `app/` for this notification', () => {
+  // ⚠ THE POINT OF T-116a. D-017 is called absolute in CONTEXT §6.1, and the
+  // title used to be the one string in `app/` that broke it. This is what
+  // stops it coming back the next time somebody wants warmer copy.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(path.join(here, 'tripEndDetection.ts'), 'utf8');
+
+  assert.ok(
+    !/Madeira/.test(source),
+    'tripEndDetection.ts names the island — it belongs in content/, not app/'
+  );
+  assert.match(source, /revealTitle/);
 });

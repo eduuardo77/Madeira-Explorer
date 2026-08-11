@@ -101,6 +101,21 @@ export type DeparturePoint = {
 
 export type ContentPack = {
   formatVersion: number;
+  /**
+   * What to call the place this pack covers, as the user would say it —
+   * "Madeira". Null when the pack does not name itself.
+   *
+   * ⚠ **This field is why D-017 can stay absolute.** The reveal notification
+   * wants to say "Your Madeira map is ready", which is warmer than "Your map
+   * is ready" and is the copy on the moment D-012 calls the best in the
+   * product. Hardcoding it in `app/` would have meant shipping for anywhere
+   * else required editing code rather than swapping a `content/` directory —
+   * so the name lives here instead, and the app reads it (T-116a).
+   *
+   * D-042 reserved exactly this for the souvenir's title card and declined to
+   * add a literal for it; the same field now serves both.
+   */
+  destination: string | null;
   places: Place[];
   /** Optional: a pack with none simply never ends a trip by airport. */
   departurePoints: DeparturePoint[];
@@ -196,9 +211,39 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
   }
 
   return {
-    pack: { formatVersion: SUPPORTED_FORMAT_VERSION, places, departurePoints },
+    pack: {
+      formatVersion: SUPPORTED_FORMAT_VERSION,
+      destination: parseDestination(root.destination, problems),
+      places,
+      departurePoints,
+    },
     problems,
   };
+}
+
+/**
+ * The pack's own name for the place it covers.
+ *
+ * Absent is fine and is not a problem worth reporting — a pack that does not
+ * name itself simply gets the generic copy. A *present but wrong* value is
+ * reported, because it means somebody tried and the app is about to silently
+ * ignore them.
+ */
+function parseDestination(
+  raw: unknown,
+  problems: ContentProblem[]
+): string | null {
+  if (raw === undefined || raw === null) {
+    return null;
+  }
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    problems.push({
+      where: 'destination',
+      problem: 'must be a non-empty string if present',
+    });
+    return null;
+  }
+  return raw.trim();
 }
 
 /**

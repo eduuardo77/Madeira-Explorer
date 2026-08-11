@@ -218,3 +218,25 @@ export function detectTripEnd(input: TripEndInput): TripEndDecision {
   }
   return CONTINUES('still travelling');
 }
+
+/**
+ * The title on the reveal notification (T-102, T-116a).
+ *
+ * ⚠ **The island's name is an argument, not a literal.** It used to be
+ * hardcoded as "Your Madeira map is ready", which read well and quietly broke
+ * D-017 — the rule CONTEXT §6.1 calls absolute, that no Madeira knowledge
+ * lives in `app/`. Every other island-specific string already comes from
+ * `content/` or the shipped style's metadata; this one did not, so shipping
+ * for anywhere else meant editing code rather than swapping a directory.
+ *
+ * The warmth is kept rather than traded away: the name now comes from the
+ * content pack's `destination` field, and only the fallback is generic. This
+ * is the copy on the moment D-012 calls the best in the product, and D-013
+ * gives it one job — get somebody in a departure lounge to open the app.
+ */
+export function revealTitle(destination: string | null): string {
+  if (destination === null || destination.trim() === '') {
+    return 'Your map is ready';
+  }
+  return `Your ${destination.trim()} map is ready`;
+}

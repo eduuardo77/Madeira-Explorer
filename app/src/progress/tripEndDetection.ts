@@ -31,7 +31,7 @@ import { runAwardPass } from './stampAwards';
 import type { GeofenceCrossing } from './stampRules';
 import { reconstructVisits } from './stampRules';
 import type { Bounds, TripEndDecision } from './tripEnd';
-import { detectTripEnd, isOutsideBounds } from './tripEnd';
+import { revealTitle, detectTripEnd, isOutsideBounds } from './tripEnd';
 
 /**
  * The archipelago's bounds, read from the shipped map style rather than
@@ -169,6 +169,11 @@ async function sendReveal(): Promise<void> {
           progress.collected === 1 ? 'place' : 'places'
         }. Open the app to see the map of everywhere you went.`;
 
-  // Through the one door, which owns the D-011 cap (T-116).
-  await sendTripNotification('reveal', 'Your Madeira map is ready', body);
+  // Through the one door, which owns the D-011 cap (T-116). The island's name
+  // comes from the content pack, never from a literal here (D-017, T-116a).
+  await sendTripNotification(
+    'reveal',
+    revealTitle(getContentPack().destination),
+    body
+  );
 }

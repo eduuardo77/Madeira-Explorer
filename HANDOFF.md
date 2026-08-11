@@ -18,7 +18,7 @@ user's accommodation masked out of anything shareable. 58 source files and 14 te
 `app/`, ~14,900 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**243 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**250 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -41,7 +41,8 @@ and invariants only — if it disagrees with a decision, the decision wins.
 **Reference, read when relevant:** `docs/dev-build.md` (getting it onto hardware),
 `docs/map-style.md` (how the cartography is generated), `docs/field-testing.md` (Track A),
 `content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`,
-`docs/dependency-audit.md` (T-117 — what ships and what it can reach).
+`docs/dependency-audit.md` (T-117 — what ships and what it can reach),
+`docs/store-privacy-answers.md` (T-120/T-122 — the exact answers for both store forms).
 
 **These seven documents are the source of truth, not this handoff and not any chat history.**
 If this file and those disagree about a *decision*, they win.
@@ -96,7 +97,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **243 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **250 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -523,7 +524,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 243 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 250 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >

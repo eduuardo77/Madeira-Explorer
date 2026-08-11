@@ -8,7 +8,8 @@ D-042) and **T-105b** (the encoder, which needs a device); **T-117** the depende
 audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device
 half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
 the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures;
-**T-118** the Apple privacy manifest; **T-116** the notification budget.
+**T-118** the Apple privacy manifest; **T-116**/**T-116a** the notification budget and the
+island's name out of `app/`; **T-120**/**T-122** the store privacy answers.
 Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
@@ -23,7 +24,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 243 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 250 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -831,14 +832,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Madeira map is ready"*. D-017 forbids Madeira knowledge in `app/` and CONTEXT §6.1 calls
       it absolute. It is user-facing copy at the moment D-012 calls the best in the product, so
       changing it is the project lead's call, not a silent edit. **New: T-116a.**
-- [ ] **T-116a** Move the island's name out of the reveal notification (D-017) ⇠ T-102
-      — `progress/tripEndDetection.ts` sends *"Your Madeira map is ready"*. Every other
-      island-specific string already comes from `content/` or the shipped style's metadata; this
-      one is a literal in `app/`, so shipping for anywhere else means editing code rather than
-      swapping a directory.
-      — **Not a mechanical fix.** It is the copy on the notification D-012 calls the best moment
-      in the product, and D-013 says it must get somebody in a departure lounge to open the app.
-      "Your map is ready" may be as good or better — but that is a copy decision. Ask.
+- [x] **T-116a** Move the island's name out of the reveal notification (D-017) ⇠ T-102
+      — Done 2026-08-11, on the project lead's instruction to take the recommendation.
+      **The warmth was kept rather than traded away.** The content pack gained an optional
+      `destination` field, and `revealTitle(destination)` builds the sentence — so the reveal
+      still says *"Your Madeira map is ready"*, and the island's name now lives in `content/`
+      where D-017 requires it. Falling back to *"Your map is ready"* only when a pack does not
+      name itself.
+      — **This is the field D-042 already reserved** and declined to invent a literal for: the
+      souvenir's title card can now name the destination too, from the same place.
+      — A test reads `tripEndDetection.ts` and fails if the word appears in `app/` again, which
+      is what stops it returning the next time somebody wants warmer copy.
+      — `tools/validate-content.mjs` warns when the field is missing and errors when it is
+      present but malformed. **Both verified by breaking the file**, not by reading the code.
 
 ### Privacy and compliance
 
@@ -885,15 +891,32 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       but is fed `null` until **T-057**. `3B52.1` and `0A2A.1` are deliberately *not* declared —
       they would be false. Both calls are recorded in the audit.
 - [ ] **T-119** iOS purpose strings for While-Using and Always ⇠ T-042, T-043
-- [ ] **T-120** iOS Privacy Nutrition Label — Location / App Functionality / Not Linked to You
-      / Not Used for Tracking ⇠ T-117
+- [x] **T-120** iOS Privacy Nutrition Label ⇠ T-117
+      — Done 2026-08-11. Answers in `docs/store-privacy-answers.md`, alongside T-122's.
+      — ⚠ **This task's own wording was wrong and is corrected.** It read *"Location / App
+      Functionality / Not Linked to You / Not Used for Tracking"* — which is the answer for an
+      app that **does** collect location. Apple's own definition exempts data processed only on
+      the device, so the correct answer is **Data Not Collected**. The old wording would have
+      put "Location" on the store listing of the one app whose entire differentiator is that
+      location never leaves the phone (CONTEXT §4.7).
+      — Must stay consistent with the privacy manifest (T-118), which already says the same
+      thing in Apple's vocabulary.
 - [x] **T-121** Android prominent-disclosure screen before requesting background location
       ⇠ T-043
       — Done 2026-08-10. Uses Play's required phrasing ("collects location data even when it
       is closed or not in use"), states the purpose and that nothing is uploaded or shared,
       and says plainly that declining still leaves a working app. Shown on Android only, before
       the Always request. **T-123's reviewer reads this screen** — do not reword it casually.
-- [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
+- [x] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
+      — Done 2026-08-11. Answers in `docs/store-privacy-answers.md`. Google's definition
+      matches Apple's: data processed only on the device is not collected.
+      — Answer **yes** to the deletion question: there is nothing held anywhere to request
+      deletion of, and Settings erases everything on the device immediately (T-125).
+      — ⚠ **Play also requires a privacy-policy URL, and there is no domain to host one on.**
+      That and the null `CONTACT_EMAIL` (D-044) block T-123.
+      — ⚠ **A background-location app declaring "no data collected" is the combination a
+      reviewer stops on.** It is true, and the evidence to hand over is listed in the doc. The
+      permission is justified separately in T-123.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
 - [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117

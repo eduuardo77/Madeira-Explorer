@@ -174,6 +174,17 @@ async function main() {
     );
   }
 
+  // The pack's own name for where it covers (T-116a). Absent is legal and the
+  // app falls back to generic copy, but it is almost certainly an oversight —
+  // the reveal notification is the best moment in the product (D-012) and
+  // "Your map is ready" is a colder sentence than it needs to be.
+  if (parsed.pack.destination === null) {
+    warn(
+      'destination',
+      'not set - the reveal will say "Your map is ready" rather than naming the place'
+    );
+  }
+
   const byCategory = countByCategory(parsed.pack);
   const byRegion = new Map();
   for (const place of places) {

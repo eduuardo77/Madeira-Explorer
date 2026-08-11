@@ -310,3 +310,57 @@ test('a departurePoints value that is not an array throws', () => {
     parseContentPack({ formatVersion: 1, places: [], departurePoints: 'lisbon' })
   );
 });
+
+// ---------------------------------------------------------------------------
+// The pack names the place it covers (T-116a, D-017)
+// ---------------------------------------------------------------------------
+
+test('the pack can name the place it covers', () => {
+  // ⚠ This field is why D-017 can stay absolute. The reveal notification wants
+  // to say "Your Madeira map is ready", and hardcoding that in `app/` meant
+  // shipping for anywhere else required editing code rather than swapping a
+  // `content/` directory.
+  const { pack } = parseContentPack({
+    formatVersion: 1,
+    destination: 'Madeira',
+    places: [],
+  });
+
+  assert.equal(pack.destination, 'Madeira');
+});
+
+test('a pack that does not name itself is still valid', () => {
+  // Absent is legal — the app falls back to generic copy rather than refusing
+  // to start over a cosmetic field.
+  assert.equal(parseContentPack({ formatVersion: 1, places: [] }).pack.destination, null);
+  assert.equal(
+    parseContentPack({ formatVersion: 1, destination: null, places: [] }).pack.destination,
+    null
+  );
+});
+
+test('a destination that is present but wrong is reported, not silently dropped', () => {
+  // Absent means nobody tried. Present-and-wrong means somebody did, and the
+  // app is about to ignore them — which is worth a line in the validator.
+  for (const bad of [123, '', '   ', {}, []]) {
+    const result = parseContentPack({
+      formatVersion: 1,
+      destination: bad,
+      places: [],
+    });
+    assert.equal(result.pack.destination, null, `${JSON.stringify(bad)} leaked through`);
+    assert.ok(
+      result.problems.some((problem) => problem.where === 'destination'),
+      `${JSON.stringify(bad)} was dropped without a word`
+    );
+  }
+});
+
+test('a destination is trimmed, so stray whitespace never reaches the copy', () => {
+  const { pack } = parseContentPack({
+    formatVersion: 1,
+    destination: '  Madeira  ',
+    places: [],
+  });
+  assert.equal(pack.destination, 'Madeira');
+});

@@ -28,6 +28,7 @@ import { locationProvider } from '../recording/ExpoLocationProvider';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
+import PrivacyPolicyView from './PrivacyPolicyView';
 import SettingsView from './SettingsView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
@@ -42,6 +43,7 @@ export default function SettingsScreen({
   const [mapStyle, setMapStyle] = useState<'light' | 'dark'>('light');
   const [confirmingErase, setConfirmingErase] = useState(false);
   const [erased, setErased] = useState(false);
+  const [showingPolicy, setShowingPolicy] = useState(false);
 
   useEffect(() => {
     void locationProvider
@@ -82,6 +84,10 @@ export default function SettingsScreen({
         </Pressable>
       </View>
     );
+  }
+
+  if (showingPolicy) {
+    return <PrivacyPolicyView onClose={() => setShowingPolicy(false)} />;
   }
 
   if (confirmingErase) {
@@ -130,9 +136,9 @@ export default function SettingsScreen({
       onOpenSystemSettings={() => {
         void Linking.openSettings().catch(() => undefined);
       }}
-      // T-124 writes the policy. Until it exists the row does nothing rather
-      // than opening an empty screen.
-      onOpenPrivacyPolicy={() => undefined}
+      // Shown in the app rather than opened in a browser: this app makes no
+      // network requests (D-001), and the reader may well have no signal.
+      onOpenPrivacyPolicy={() => setShowingPolicy(true)}
       onOpenDebug={onOpenDebug}
       onEraseRequested={() => setConfirmingErase(true)}
       onClose={onClose}

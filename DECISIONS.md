@@ -1956,3 +1956,62 @@ during the Play review.**
 **Consequences:** `docs/dependency-audit.md` exists and is the artefact to hand a reviewer.
 T-117b is added, and is a Phase 1 device task rather than a compliance one, because the cheapest
 moment to run it is while the 72-hour soak is already running.
+
+---
+
+## D-044 — The privacy policy is shown offline in the app, and the web copy is generated from it.
+
+**Status:** Provisional — written 2026-08-11 (T-124). **Not lawyer-reviewed**, and it must be
+before either store submission.
+
+**Context:** both stores require a privacy-policy URL in the listing before they will accept a
+background-location app (T-123). The app itself needs one too, and the settings row for it has
+existed and done nothing since T-141.
+
+**Decision:**
+
+1. **The policy is a screen in the app, not a link to a browser.** Two reasons, and the first
+   is the stronger: this app makes **no network requests at all** (D-001), so a linked policy
+   would become the only thing in the product that does. The second is the reader — a tourist
+   wondering what the app is doing with their location is frequently a tourist with no signal,
+   and that is exactly the moment the document has to be available.
+2. **The text lives in `app/src/legal/privacyPolicy.ts` and `docs/privacy-policy.md` is
+   generated from it** by `tools/generate-privacy-policy.mjs`. Two hand-maintained copies of a
+   legal document is a promise to let them drift, and a policy that says one thing in the app
+   and another on the web is worse than either. Same rule as the map styles: never edit the
+   generated file.
+3. **It states the two exceptions to "nothing leaves your phone", because both are true.**
+   (a) The trip is in the phone's own encrypted backup — ARCHITECTURE §4a puts it there
+   deliberately, as the answer to "my phone died on day 5". (b) Sharing the souvenir publishes
+   where the user went, with their accommodation removed first and no way to switch that off
+   (D-040). A policy written from the marketing line rather than from the code omits both, and
+   the gap between "very nearly true" and "true" is where a policy earns its keep.
+4. **`CONTACT_EMAIL` is null and the contact section is omitted entirely** rather than shipped
+   with a placeholder address — the same stance D-041 takes on the unmeasured battery figure,
+   and a test enforces it. It is **not** defaulted to the project lead's personal address:
+   publishing somebody's email in a store listing is their decision. **This blocks T-123.**
+5. **Libraries are not enumerated.** D-043's Firebase finding is not mentioned, because FCM is
+   never given anything to send and there is no server to send it to — there is no data
+   practice to disclose, and asking a lay reader to reason about a push library they were never
+   subject to makes the document less trusted, not more. The technical account is
+   `docs/dependency-audit.md`, which is what a reviewer gets. **If that stops being true, this
+   reverses.**
+6. **The vocabulary is tested, not eyeballed** — the T-114 technique. "Geofence", "SDK", "API",
+   "analytics", "third-party", "GPS", "anonymised" and eleven others appear nowhere, and no
+   sentence runs past 45 words. D-015's reader is 80 years old and a policy they will not read
+   is decoration.
+
+**Alternatives considered:**
+
+- *Link out to a hosted page.* Rejected; see point 1. It is what almost every app does and it
+  is wrong for this one specifically.
+- *Keep the markdown canonical and have the app import it.* Rejected: React Native cannot
+  import markdown without a transformer, and adding a bundler plugin to ship a legal document
+  is a poor trade.
+- *Use the project lead's personal email as the contact.* Rejected; see point 4.
+- *Mention Firebase in the policy for maximum candour.* Rejected; see point 5. Recorded because
+  it is a genuine judgement call and the opposite choice is defensible.
+
+**Consequences:** T-118, T-120 and T-122 can now be filled in from a document that says what
+is true. **T-123 stays blocked on `CONTACT_EMAIL` and on a hosting URL**, which needs the
+domain question settled — the same open item as the bundle identifier.

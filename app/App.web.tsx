@@ -34,6 +34,7 @@ import OnboardingView, {
   type OnboardingScreen,
 } from './src/onboarding/OnboardingView';
 import PassportView from './src/ui/PassportView';
+import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from './src/ui/theme';
@@ -108,6 +109,7 @@ type Screen =
   | 'primary'
   | 'primary-while-using'
   | 'settings'
+  | 'privacy'
   | `onboarding:${OnboardingScreen}`;
 
 const SCREENS: { id: Screen; label: string }[] = [
@@ -115,6 +117,7 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
   { id: 'settings', label: 'Settings (T-141/T-125)' },
+  { id: 'privacy', label: 'Privacy policy (T-124)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
   { id: 'onboarding:notifications', label: 'Notifications ask' },
@@ -186,6 +189,8 @@ export default function DesignWorkbench() {
             />
           ) : screen === 'passport' ? (
             <PassportView progress={progress} awards={awards} />
+          ) : screen === 'privacy' ? (
+            <PrivacyPolicyView onClose={() => setScreen('settings')} />
           ) : screen === 'settings' ? (
             <SettingsView
               permission="while_using"
@@ -193,7 +198,7 @@ export default function DesignWorkbench() {
               mapPackBytes={19_100_000}
               onChangeMapStyle={() => undefined}
               onOpenSystemSettings={() => undefined}
-              onOpenPrivacyPolicy={() => undefined}
+              onOpenPrivacyPolicy={() => setScreen('privacy')}
               onOpenDebug={() => undefined}
               onEraseRequested={() => undefined}
               onClose={() => undefined}

@@ -20,7 +20,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 178 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 187 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -798,7 +798,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
-- [ ] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
+- [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
+      — Done 2026-08-11. **D-044.** `app/src/legal/privacyPolicy.ts` is the source;
+      `docs/privacy-policy.md` is **generated** from it by
+      `tools/generate-privacy-policy.mjs`, so the in-app copy and the store-listing copy cannot
+      drift. 8 sections, ~740 words, 10 tests.
+      — **Shown in the app, not linked to a browser.** The app makes no network requests at all
+      (D-001), so a linked policy would be the only thing in it that does — and the reader most
+      likely to want it is a tourist with no signal.
+      — **It states the two exceptions to "nothing leaves your phone", because both are true:**
+      the phone's own encrypted backup (ARCHITECTURE §4a puts the database there on purpose),
+      and anything the user shares. A policy written from the marketing line omits both.
+      — ⚠ **`CONTACT_EMAIL` is null and the contact section is omitted rather than faked**
+      (the D-041 stance, test-enforced). **This blocks T-123**, as does the hosting URL, which
+      needs the domain question settled.
+      — ⚠ **Not lawyer-reviewed.** Verified for readability instead: no jargon, no sentence over
+      45 words, and measured in the workbench — 8 sections render, the Done button stays outside
+      the scrolling text at 60 dp **and still does at 2× text scaling** (the D-041 property).
+      — ⚠ Nobody outside this project has read it. T-129.
 - [x] **T-125** "Delete all my data" control ⇠ T-030, T-141
       — **Last item in settings, in its own section, red, with an icon.** Findable, not
       fat-fingerable. Requires a second confirmation step.

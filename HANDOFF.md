@@ -12,11 +12,11 @@ blocked. Build the things in "Start here" below.
 
 **Repository state:** git repository, ~20 commits. **The whole v1 chain is written**: record →
 stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
-user's accommodation masked out of anything shareable. 53 source files and 12 test files in
-`app/`, ~12,600 lines.
+user's accommodation masked out of anything shareable. 55 source files and 13 test files in
+`app/`, ~13,100 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**178 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**187 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -63,7 +63,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 |---|---|
 | **T-105b** the souvenir encoder | 9:16 video. D-013 calls it the entire distribution strategy. **T-105a, the composition, is now written** (D-042): the storyboard — three scenes, camera path, strokes, and the moment each stamp lands — is pure and has 23 tests. What is left is turning that into an MP4, which needs native video encoding nobody can verify without a device. **Nobody has watched anything**; every duration in the composition is a guess. |
 | **T-070** stamp artwork | The passport draws a placeholder disc today, deliberately. |
-| **T-124** privacy policy | Short, because there is genuinely nothing to disclose. The settings row exists and does nothing until it is written. |
+| ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
 | **T-046** Android battery exemption | Small. |
 | **T-139** tune the dark style | It generates already; the settings toggle is not wired to the map until it is tuned. |
 
@@ -94,7 +94,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **178 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **187 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -105,15 +105,25 @@ until a development build exists — which is the first blocker below.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Ten decisions are Provisional.** Three came from the 2026-08-08 design session; the rest
-were made while building on 2026-08-10 and 2026-08-11 and have never met real data or a real
-device. The default for anything new is Provisional and the burden is on confirmation, not
-objection (CONTEXT §9):
+**Seventeen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
+is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
+entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
+from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
+2026-08-11 and have never met real data or a real device. The default for anything new is
+Provisional and the burden is on confirmation, not objection (CONTEXT §9). The ones with
+something specific still outstanding:
 
 - **D-042** *(2026-08-11)* — the souvenir is planned as a storyboard before it is rendered,
   paced by recorded movement rather than by elapsed time, never drops a stamp, and produces
   **no film at all** from a trace masking could not verify. Unit-tested and **never watched** —
   every duration in it is a guess. T-105b and a pair of eyes are what confirm or kill it.
+- **D-043** *(2026-08-11)* — `expo-notifications` puts Firebase Cloud Messaging in the Android
+  build, and it stays, because removing it takes the day-1 health check with it. No Firebase
+  configuration ships, so it has nothing to register against — **a static argument about a
+  runtime behaviour. T-117b owes the packet capture.**
+- **D-044** *(2026-08-11)* — the privacy policy is shown offline in the app rather than linked,
+  and `docs/privacy-policy.md` is generated from the same source so the two cannot drift.
+  **Not lawyer-reviewed**, and `CONTACT_EMAIL` is null — both block T-123.
 
 - **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
   terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
@@ -245,9 +255,9 @@ native video encoding and therefore a device. It also needs *eyes*: the composit
 are guesses by somebody who has never seen the result.
 
 **3. The small remainder.** T-070 stamp artwork (the passport draws a placeholder disc on
-purpose), T-124 the privacy policy (the settings row is wired and inert until it exists), T-046
-the Android battery-optimisation exemption, T-139 tuning the dark style so T-140's toggle can
-be connected to the map.
+purpose), T-046 the Android battery-optimisation exemption, T-139 tuning the dark style so
+T-140's toggle can be connected to the map. *(T-124, the privacy policy, was here and is now
+written — D-044.)*
 
 **4. When a device exists, in this order**, because each is cheap and each can invalidate the
 next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence
@@ -504,7 +514,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 178 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 187 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
@@ -520,7 +530,6 @@ decision arises at all.
 >   strategy (D-013). The composition is already written (T-105a, D-042); this is the encoding,
 >   and it needs a device.
 > - **T-070, stamp artwork** — the passport draws a placeholder disc today
-> - **T-124, the privacy policy** — short, because there is nothing to disclose
 > - **T-139, tune the dark style** so the light/dark toggle can be wired to the map
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as

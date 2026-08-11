@@ -5,11 +5,12 @@ anything in this project, including the reasoning behind decisions that look arb
 the outside.
 
 **Document date:** 2026-08-06
-**Updated:** 2026-08-11 — the souvenir composition (T-105a, D-042). Previously 2026-08-10 (v1
+**Updated:** 2026-08-11 — the souvenir composition (T-105a, D-042), the dependency audit
+(T-117, D-043) and the privacy policy (T-124, D-044). Previously 2026-08-10 (v1
 feature-complete in code) and 2026-08-08 (design session, D-026/D-027/D-028).
 **Repository state:** Git repository, ~20 commits. Planning documents plus the **whole v1
-chain** in `app/` — 53 source files and 12 test files, ~12,600 lines. **None of it has ever run
-on a phone**; 178 unit tests and a browser workbench (D-038) are the only verification that
+chain** in `app/` — 55 source files and 13 test files, ~13,100 lines. **None of it has ever run
+on a phone**; 187 unit tests and a browser workbench (D-038) are the only verification that
 exists. Phase 0 is half done: the tile pack is built, the field runs are not.
 
 **Read `HANDOFF.md` for what to do next.** This document is the *why*; that one is the state.

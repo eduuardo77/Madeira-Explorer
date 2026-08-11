@@ -838,8 +838,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       fixture cannot run — `app/index.ts` only wraps the catalogue in
       `withDevFixtureFallback` when `__DEV__`, and shipping a ring of invented geofences around
       the user would be absurd. ⇠ T-029
-- [ ] **T-118** iOS `PrivacyInfo.xcprivacy` manifest, including third-party SDK declarations
+- [x] **T-118** iOS `PrivacyInfo.xcprivacy` manifest, including third-party SDK declarations
       ⇠ T-117
+      — Done 2026-08-11. In `ios.privacyManifests` in `app.json` — Expo's config key, so there
+      is no hand-maintained plist to drift. Verified to reach the native config by
+      `expo config --type introspect`; `expo-doctor` still 20/20. Reasoning and the full table
+      are in `docs/dependency-audit.md`.
+      — **Nothing tracked, nothing collected, stated explicitly rather than by omission.** The
+      trip's presence in the user's *own* iCloud backup is not collection — we cannot reach it.
+      This must stay consistent with T-120 and the privacy policy (D-044).
+      — **The required-reason APIs were read off what the dependencies declare**, not guessed:
+      six shipped packages carry their own manifest, and the union is FileTimestamp,
+      UserDefaults, DiskSpace, SystemBootTime. Declared at app level because Expo's docs warn
+      Apple does not reliably parse manifests inside static CocoaPods, **and** because
+      `expo-sqlite`, `expo-asset`, MapLibre and `react-native-svg` ship none at all.
+      — ⚠ `E174.1` (display disk space) is declared for a settings row whose display code ships
+      but is fed `null` until **T-057**. `3B52.1` and `0A2A.1` are deliberately *not* declared —
+      they would be false. Both calls are recorded in the audit.
 - [ ] **T-119** iOS purpose strings for While-Using and Always ⇠ T-042, T-043
 - [ ] **T-120** iOS Privacy Nutrition Label — Location / App Functionality / Not Linked to You
       / Not Used for Tracking ⇠ T-117

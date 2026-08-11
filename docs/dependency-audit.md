@@ -124,12 +124,56 @@ Every asset in this app is bundled, so the path is never taken. Same category as
 
 ---
 
+## The Apple privacy manifest (T-118)
+
+Written 2026-08-11, into `ios.privacyManifests` in `app.json` — Expo's config key for it, so
+there is no hand-maintained `PrivacyInfo.xcprivacy` to drift. Confirmed to reach the native
+config by `npx expo config --type introspect`, and `expo-doctor` stays 20/20.
+
+**Nothing is tracked and nothing is collected**, and the manifest says so explicitly rather
+than by omission: `NSPrivacyTracking: false`, `NSPrivacyTrackingDomains: []`,
+`NSPrivacyCollectedDataTypes: []`. Apple's definition of *collect* is transmitting data off the
+device where the developer can reach it. This app has no server (D-001), so the array is empty
+— and the trip's presence in the user's **own** iCloud backup is not collection, because we
+cannot reach it. That reasoning has to match the nutrition label (T-120) and the privacy policy
+(D-044), and it does.
+
+**The required-reason APIs were taken from what the dependencies declare**, not guessed. Six
+shipped packages carry their own `PrivacyInfo.xcprivacy`; the union of what they declare is
+FileTimestamp, UserDefaults, DiskSpace and SystemBootTime. Declaring them at app level matters
+for two reasons: Expo's own docs warn that **Apple does not reliably parse manifests inside
+statically-linked CocoaPods**, and several shipped modules — `expo-sqlite`, `expo-asset`,
+`@maplibre/maplibre-react-native`, `react-native-svg` — carry **no manifest at all**.
+
+| Category | Reason declared | Why it is true here |
+|---|---|---|
+| FileTimestamp | `C617.1` | The database, the diary and the tile cache all live in the app container. |
+| UserDefaults | `CA92.1` | Read and written by the app itself only — several Expo modules use it. |
+| DiskSpace | `85F4.1` | A 19.1 MB tile pack is copied into cache on first launch (D-036), and erase-all reclaims space. |
+| DiskSpace | `E174.1` | Settings displays the pack size to the user. ⚠ The display code ships but is fed `null` until **T-057** wires it. Declared now because the code is in the binary and the alternative is a submission bounce over a one-line change. |
+| SystemBootTime | `35F9.1` | React Native core measures elapsed time between events. |
+
+**Deliberately not declared**, because they would be false:
+
+- **`3B52.1`** (timestamps of files the user granted access to) — there is no document picker in
+  this app and never will be; nothing outside the app container is ever read.
+- **`0A2A.1`** (a third-party SDK wrapping file-timestamp APIs) — that reason exists for an
+  SDK's own manifest to declare about itself. `expo-file-system` declares it, correctly, in its
+  own file.
+
+If a submission ever bounces naming one of those, the fix is one line — but a false declaration
+to Apple is not the kind of thing to add speculatively.
+
+---
+
 ## What this changes
 
 - **The privacy policy (T-124) can now be written**, and it can say what is actually true
   rather than what was hoped.
 - **The Data Safety form (T-122) and the nutrition label (T-120)** should describe *no data
-  collected and none shared*, and whoever fills them in should have read finding 1 first.
+  collected and none shared*, and whoever fills them in should have read finding 1 first. The
+  privacy manifest above already states it in Apple's own vocabulary; the nutrition label must
+  agree with it or the submission contradicts itself.
 - **The standing rule stands:** no new dependency lands without this check (CONTEXT §6.4). Any
   addition that brings a networked SDK needs a recorded decision, not a judgement call. It was
   applied to `react-native-svg` on the day it was added, which is the point of writing the rule

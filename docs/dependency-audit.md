@@ -44,6 +44,7 @@ pass. Every "0 hits" below was taken with the same command that returns non-zero
 | `expo-sqlite` | vendored SQLite / libsql | No |
 | `expo-sensors`, `expo-task-manager`, `expo-system-ui`, `expo-status-bar` | none beyond AndroidX | No |
 | `@maplibre/maplibre-react-native` | MapLibre Native (vendored xcframework on iOS) | Only for remote tile/glyph/sprite URLs. **Ours are all `file://`** (D-036, and the glyph bundling in T-056). |
+| `react-native-svg` *(added 2026-08-11, T-070)* | Fresco, and **`imagepipeline-okhttp3`** | Yes, if asked — Fresco's HTTP backend exists so `<Image>` inside an SVG can load a remote `href`. **The stamp artwork draws only paths, polygons, rects and text**; there is no `SvgUri`, no `<Image>` and no remote href anywhere in `app/`. iOS: `React-Core` only. No telemetry strings in its source. |
 
 **iOS is clean by inspection:** every shipped module's podspec depends on `ExpoModulesCore` and
 nothing else. MapLibre is a vendored binary framework. There are no third-party pods.
@@ -130,4 +131,7 @@ Every asset in this app is bundled, so the path is never taken. Same category as
 - **The Data Safety form (T-122) and the nutrition label (T-120)** should describe *no data
   collected and none shared*, and whoever fills them in should have read finding 1 first.
 - **The standing rule stands:** no new dependency lands without this check (CONTEXT §6.4). Any
-  addition that brings a networked SDK needs a recorded decision, not a judgement call.
+  addition that brings a networked SDK needs a recorded decision, not a judgement call. It was
+  applied to `react-native-svg` on the day it was added, which is the point of writing the rule
+  down — and it found Fresco's OkHttp image pipeline, which nobody would have guessed was in a
+  vector-drawing library.

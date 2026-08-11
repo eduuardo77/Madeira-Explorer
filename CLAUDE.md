@@ -24,7 +24,7 @@ genuinely blocked.
 ## Honesty rules, each of which cost something here
 
 - **Nothing in this app has ever run on a phone.** Say so when reporting anything as working.
-  187 unit tests and a browser workbench are the only verification that exists.
+  219 unit tests and a browser workbench are the only verification that exists.
 - **Never state a measured-sounding number that was not measured.** The battery figure is
   `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
   silence — it is a promise the app has not earned.
@@ -37,7 +37,7 @@ genuinely blocked.
 ## Verifying work
 
 ```bash
-cd app && npm test          # 187 tests, Node's own runner, no framework
+cd app && npm test          # 219 tests, Node's own runner, no framework
 cd app && npx tsc --noEmit  # strict
 cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolves everything
 node tools/validate-content.mjs                                    # the content pack
@@ -92,6 +92,11 @@ scratchpad directory is the place for that file.
   not guess it; Metro does not mind. Everything else stays extensionless.
 - **No Madeira knowledge in `app/`** (D-017, called absolute). Coordinates, names and bounds
   come from `content/` or the shipped style's metadata.
+- **Artwork and cartography are judged by eye, and this project has none.** `stampArt.ts` /
+  `preview-stamps.mjs` is the pattern: put the design in a pure module and give it a **second
+  renderer** that draws it to a standalone page, so the thing being looked at is the thing that
+  ships. Measure the output too — three real defects in the stamps were found by reading the
+  generated geometry, none by looking.
 - **Keep the docs current in the same piece of work**, per CONTEXT §9: tier 1 just do it, tier 2
   record as **Provisional**, tier 3 ask first. Stale docs are the recurring failure here — the
   handoff twice described a codebase that no longer existed.

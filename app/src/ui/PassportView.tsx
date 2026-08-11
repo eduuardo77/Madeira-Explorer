@@ -28,9 +28,24 @@
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '../content/contentPack';
+import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
+import StampArt from './StampArt';
 import { colors, fontSize, spacing } from './theme';
+
+/**
+ * How big a sticker is drawn, in dp.
+ *
+ * Sized from T-081's measurement rather than picked: the placeholder disc was
+ * 44 and the row density it produced is what the passport was judged at. A
+ * sticker carries a name as well as a silhouette, so it needs more room — but
+ * not so much that a 40-stamp category becomes a scroll.
+ */
+const STAMP_SIZE = 62;
+
+/** The drawing, shrunk so its tilted corners stay inside the cell. */
+const STAMP_DRAW_SIZE = Math.floor(STAMP_SIZE * TILT_FIT);
 
 /**
  * What each row is called, in the user's words.
@@ -48,42 +63,37 @@ const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 
+/** A stamp the user has earned, with what it takes to draw it (T-070). */
+export type PassportStamp = {
+  placeId: string;
+  name: string;
+  category: Category;
+};
+
 export type PassportViewProps = {
   progress: TripProgress;
   /** Awarded stamps, any order. Used for counts per row and for the dates. */
   awards: StampAward[];
+  /**
+   * The collected places, with their names, so the real artwork can be drawn
+   * (T-070). Falls back to nothing when the caller has not resolved them —
+   * the row counts still come from `progress`, so a passport with no names is
+   * a passport with no stickers rather than a broken screen.
+   */
+  stamps?: PassportStamp[];
 };
-
-/**
- * One collected stamp.
- *
- * ⚠ **Placeholder artwork.** T-070 designs the real thing. This is a filled
- * disc with an initial, which is honest about being unfinished while still
- * showing the density and rhythm a real stamp row will have — which is the
- * question T-081 asks and the one artwork cannot answer for it.
- */
-function Stamp({ label, strong }: { label: string; strong: boolean }) {
-  return (
-    <View style={[styles.stamp, strong && styles.stampStrong]}>
-      <Text style={[styles.stampText, strong && styles.stampTextStrong]}>
-        {label}
-      </Text>
-    </View>
-  );
-}
 
 function CategoryRow({
   category,
   collected,
   total,
-  stampCount,
+  stamps,
 }: {
   category: Category;
   collected: number;
   total: number;
-  stampCount: number;
+  stamps: PassportStamp[];
 }) {
-  const isLevada = category === 'levada';
 
   return (
     <View style={styles.row}>
@@ -100,14 +110,18 @@ function CategoryRow({
           lines was measured at 1.1 screens on day one — a scroll that reveals
           nothing — and reads as five small failures rather than one
           invitation. The invitation is given once, under the hero. */}
-      {collected > 0 ? (
+      {collected > 0 && stamps.length > 0 ? (
         <View style={styles.stamps}>
-          {Array.from({ length: stampCount }, (_, index) => (
-            <Stamp
-              key={index}
-              label={CATEGORY_LABELS[category].charAt(0)}
-              strong={isLevada}
-            />
+          {stamps.map((stamp) => (
+            <View key={stamp.placeId} style={styles.stampCell}>
+              <StampArt
+                placeId={stamp.placeId}
+                design={designFor(stamp.placeId, stamp.category)}
+                name={stamp.name}
+                collected
+                size={STAMP_DRAW_SIZE}
+              />
+            </View>
           ))}
         </View>
       ) : null}
@@ -115,7 +129,11 @@ function CategoryRow({
   );
 }
 
-export default function PassportView({ progress, awards }: PassportViewProps) {
+export default function PassportView({
+  progress,
+  awards,
+  stamps,
+}: PassportViewProps) {
   const hasContent = progress.total > 0;
 
   return (
@@ -158,7 +176,9 @@ export default function PassportView({ progress, awards }: PassportViewProps) {
           category={row.category}
           collected={row.collected}
           total={row.total}
-          stampCount={row.collected}
+          stamps={(stamps ?? []).filter(
+            (stamp) => stamp.category === row.category
+          )}
         />
       ))}
 
@@ -173,7 +193,6 @@ export default function PassportView({ progress, awards }: PassportViewProps) {
   );
 }
 
-const STAMP_SIZE = 44;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
@@ -245,29 +264,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  stamp: {
+  stampCell: {
     width: STAMP_SIZE,
     height: STAMP_SIZE,
-    borderRadius: STAMP_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.action,
-    backgroundColor: colors.surfaceRaised,
-  },
-  // The levada marker: heavier and filled, never hue alone (D-015).
-  stampStrong: {
-    borderColor: colors.good,
-    borderWidth: 3,
-    backgroundColor: colors.background,
-  },
-  stampText: {
-    color: colors.text,
-    fontSize: fontSize.body,
-    fontWeight: '700',
-  },
-  stampTextStrong: {
-    color: colors.good,
   },
   footnote: {
     color: colors.textMuted,

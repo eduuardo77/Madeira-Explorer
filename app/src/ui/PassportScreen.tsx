@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { getContentPack } from '../content/poiCatalogue';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
@@ -15,12 +16,13 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
-import PassportView from './PassportView';
+import PassportView, { type PassportStamp } from './PassportView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 export default function PassportScreen({ onClose }: { onClose: () => void }) {
   const [progress, setProgress] = useState<TripProgress | null>(null);
   const [awards, setAwards] = useState<StampAward[]>([]);
+  const [stamps, setStamps] = useState<PassportStamp[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +43,7 @@ export default function PassportScreen({ onClose }: { onClose: () => void }) {
         if (!cancelled) {
           setProgress(nextProgress);
           setAwards(nextAwards);
+          setStamps(resolveStamps(nextAwards));
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -59,7 +62,7 @@ export default function PassportScreen({ onClose }: { onClose: () => void }) {
           <ActivityIndicator size="large" color={colors.action} />
         </View>
       ) : (
-        <PassportView progress={progress} awards={awards} />
+        <PassportView progress={progress} awards={awards} stamps={stamps} />
       )}
 
       <Pressable
@@ -72,6 +75,35 @@ export default function PassportScreen({ onClose }: { onClose: () => void }) {
       </Pressable>
     </View>
   );
+}
+
+/**
+ * Join awards to the places they were earned at, so the artwork has a name and
+ * a category to draw from (T-070).
+ *
+ * An award whose place has left the pack is skipped rather than drawn nameless
+ * — it can only happen when curation changes under an older trip, and a blank
+ * sticker is worse than one fewer. The row *count* still comes from
+ * `progress`, which is derived from the same pack, so the two agree.
+ */
+function resolveStamps(awards: StampAward[]): PassportStamp[] {
+  const places = new Map(
+    getContentPack().places.map((place) => [place.id, place])
+  );
+
+  const stamps: PassportStamp[] = [];
+  for (const award of awards) {
+    const place = places.get(award.place_id);
+    if (place === undefined) {
+      continue;
+    }
+    stamps.push({
+      placeId: place.id,
+      name: place.name,
+      category: place.category,
+    });
+  }
+  return stamps;
 }
 
 const styles = StyleSheet.create({

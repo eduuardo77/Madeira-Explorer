@@ -2,10 +2,11 @@
 
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
-audit (T-117, D-043), the privacy policy (T-124, D-044) and the battery exemption (T-046,
-D-045). What is left of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1 feature-complete
-in code**), 2026-08-08 (design session, D-026/D-027/D-028), 2026-08-06 (first implementation
-session).
+audit (T-117, D-043), the privacy policy (T-124, D-044), the battery exemption (T-046, D-045)
+and the stamp artwork (T-070, D-046). **The small-remainder list is down to T-139**, and what
+is left of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1
+feature-complete in code**), 2026-08-08 (design session, D-026/D-027/D-028), 2026-08-06 (first
+implementation session).
 **For:** a fresh Claude Code session picking this project up cold.
 **Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
 Do not open new research threads. Do not propose new decisions unless something is actually
@@ -13,11 +14,11 @@ blocked. Build the things in "Start here" below.
 
 **Repository state:** git repository, ~20 commits. **The whole v1 chain is written**: record →
 stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
-user's accommodation masked out of anything shareable. 55 source files and 13 test files in
-`app/`, ~13,100 lines.
+user's accommodation masked out of anything shareable. 58 source files and 14 test files in
+`app/`, ~14,900 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**187 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**219 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -63,7 +64,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 | | |
 |---|---|
 | **T-105b** the souvenir encoder | 9:16 video. D-013 calls it the entire distribution strategy. **T-105a, the composition, is now written** (D-042): the storyboard — three scenes, camera path, strokes, and the moment each stamp lands — is pure and has 23 tests. What is left is turning that into an MP4, which needs native video encoding nobody can verify without a device. **Nobody has watched anything**; every duration in the composition is a guess. |
-| **T-070** stamp artwork | The passport draws a placeholder disc today, deliberately. |
+| ~~**T-070** stamp artwork~~ | **Done 2026-08-11 (D-046).** Generated per place from the category and a hash of the id — eight silhouettes, six colourways, two-tone emblems. The **emblem** carries the category, not the shape or the colour (D-015). `node tools/preview-stamps.mjs` draws them all to a page, which is the only way to judge them here. |
 | ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
 | ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
 | **T-139** tune the dark style | It generates already; the settings toggle is not wired to the map until it is tuned. |
@@ -95,7 +96,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **187 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **219 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -106,7 +107,7 @@ until a development build exists — which is the first blocker below.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Eighteen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
+**Nineteen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
 is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
 entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
 from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
@@ -129,6 +130,9 @@ something specific still outstanding:
   requesting the restricted permission, to keep a second reviewed permission off T-123's
   submission. **Held in reserve, not rejected:** adopt the one-tap dialog if T-053 shows OEMs
   killing the recorder anyway.
+- **D-046** *(2026-08-11)* — stamp artwork is generated per place from its category and a hash
+  of its id; the **emblem** carries the category, shape and colour are decoration. Seen twice
+  in a browser by one person, never on a device, never outdoors (T-065).
 
 - **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
   terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
@@ -259,10 +263,10 @@ the film as a storyboard and `souvenirPlan.ts` feeds it from the database. What 
 native video encoding and therefore a device. It also needs *eyes*: the composition's timings
 are guesses by somebody who has never seen the result.
 
-**3. The small remainder.** T-070 stamp artwork (the passport draws a placeholder disc on
-purpose) and T-139 tuning the dark style so T-140's toggle can be connected to the map.
-*(T-124 the privacy policy and T-046 the battery exemption were here and are now done — D-044,
-D-045.)*
+**3. The small remainder.** T-139, tuning the dark style so T-140's toggle can be connected to
+the map — **and it needs somebody to look at it**, which is the one thing this project cannot
+do for itself. *(T-124 the privacy policy, T-046 the battery exemption and T-070 the stamp
+artwork were all here and are now done — D-044, D-045, D-046.)*
 
 **4. When a device exists, in this order**, because each is cheap and each can invalidate the
 next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence
@@ -519,7 +523,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 187 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 219 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
@@ -534,7 +538,6 @@ decision arises at all.
 > - **T-105b, the souvenir encoder** — the biggest remaining piece and the whole distribution
 >   strategy (D-013). The composition is already written (T-105a, D-042); this is the encoding,
 >   and it needs a device.
-> - **T-070, stamp artwork** — the passport draws a placeholder disc today
 > - **T-139, tune the dark style** so the light/dark toggle can be wired to the map
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as

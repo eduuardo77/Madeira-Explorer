@@ -2072,3 +2072,64 @@ test, deliberately — there is nothing pure to test, and a test asserting that 
 equals itself would be worse than none. **T-053 is the verification and it needs an
 aggressive-OEM Android device.**
 
+---
+
+## D-046 — Stamp artwork is generated per place. The emblem carries the category; shape and colour do not.
+
+**Status:** Provisional — implemented 2026-08-11 (T-070), and **revised once the same day**
+after the project lead looked at the first version and called it too minimalistic. It has now
+been seen exactly twice, on a browser, by one person. No device has drawn it.
+
+**Context:** the passport drew a placeholder disc with an initial. T-070 is the real artwork,
+and it sits on a constraint nobody can remove: the passport holds **150–250 places** (D-002)
+and `content/pois.json` is curated by the project lead (T-066), so artwork cannot be
+commissioned per place — and a place added next month must arrive with artwork already, or
+curation acquires a second job.
+
+**Decision:** the artwork is **generated from what the pack already knows** — the place's
+category and its id — in the vocabulary of vintage die-cut luggage labels, chosen by the
+project lead from a reference sheet.
+
+1. **The emblem carries the category. Shape and colour are decoration.** D-015 forbids
+   differentiating meaning by hue alone, so the reader needs a non-colour signal. The first
+   version made the *silhouette* carry it, one shape per category. The project lead asked for
+   varied shapes, and the reference sheet settles it: Greece, Spain and London are all
+   rectangles and nobody confuses them, because the icon does the work. **Eight silhouettes**
+   are now spread across places by hash and a test forbids two categories sharing an emblem.
+2. **Variation is derived from a hash of the place id, and from nothing else.** No clock, no
+   random, no list index that shifts as the pack grows. A stamp that changes appearance between
+   two launches is not a souvenir; it is a bug the user cannot describe. The hash is written out
+   rather than imported precisely so it can never change.
+3. **The layout is searched, not tabulated.** Eight shapes × one or two lines of name × five
+   emblems is too many combinations to hand-tune, and three shapes taper. So `bestBandY` and
+   `bestEmblem` **measure** each silhouette: the band goes as low as it can while staying wide
+   enough and leaving the emblem room, and the emblem is fitted to what is actually left. The
+   project lead's requirement that **the place name fits** is therefore a property of the
+   system rather than of the sample data.
+4. **Long names wrap to two lines rather than being truncated.** "MIRADOURO GRA…" technically
+   fits and tells the reader nothing.
+5. **Detail is part of the specification, not polish.** Two cut borders, a sunburst, perforation
+   dots, a keyline, two-tone emblems, six colourways per category. A test pins the layer count
+   so a later simplification is a decision rather than a drift.
+
+**Alternatives considered:**
+
+- *Commission artwork per place.* Rejected: 150–250 illustrations, and it makes every future
+  content addition wait on an illustrator.
+- *One shape per category, carrying the meaning.* **Implemented, then rejected** on the project
+  lead's instruction. The accessibility requirement moved to the emblem rather than being lost.
+- *Draw with plain React Native views.* Rejected: no torn edges, no silhouettes. `react-native-svg`
+  was added instead — audited the same day per CONTEXT §6.4, and that audit found Fresco's OkHttp
+  image pipeline inside it, which nobody would have guessed was in a vector library
+  (`docs/dependency-audit.md`).
+- *Truncate long names with an ellipsis.* Rejected; see point 4.
+
+**Consequences:** `react-native-svg` is a new native dependency, so the next dev build is not
+the same binary as the last. `tools/preview-stamps.mjs` renders the same designs to a
+standalone page from the same module, which is the only way this could be judged at all on a
+project with no device — and the same one-source rule the map styles and the privacy policy
+follow.
+
+**What confirms or kills this:** somebody looking at it, and then T-065 outdoors. Everything
+here is a screen judgement, and the sticker colours have never been seen in Funchal sun.
+

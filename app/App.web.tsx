@@ -33,7 +33,7 @@ import type { TripProgress } from './src/progress/tripProgress';
 import OnboardingView, {
   type OnboardingScreen,
 } from './src/onboarding/OnboardingView';
-import PassportView from './src/ui/PassportView';
+import PassportView, { type PassportStamp } from './src/ui/PassportView';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
@@ -94,6 +94,32 @@ function makeAwards(count: number): StampAward[] {
 }
 
 /**
+ * Collected places for the artwork (T-070). Synthetic names, in the same
+ * spread of lengths a real pack will have — including ones long enough to be
+ * truncated on the band, which is where the layout breaks if it is going to.
+ */
+function makeStamps(count: number, byCategory: TripProgress['byCategory']): PassportStamp[] {
+  const names = [
+    'High Rock', 'Miradouro Grande', 'Water Walk', 'Long Canal Trail',
+    'Machico', 'Ribeira Brava', 'Black Sands', 'Calheta Bay',
+    'Old Fort', 'Cable Car Station', 'Sé', 'Cabo',
+  ];
+  const stamps: PassportStamp[] = [];
+  let index = 0;
+  for (const row of byCategory) {
+    for (let i = 0; i < row.collected && index < count; i += 1) {
+      stamps.push({
+        placeId: `place-${index}`,
+        name: names[index % names.length],
+        category: row.category,
+      });
+      index += 1;
+    }
+  }
+  return stamps;
+}
+
+/**
  * The two densities T-081 requires the passport to survive: a first morning,
  * and a completed collection.
  */
@@ -133,6 +159,7 @@ export default function DesignWorkbench() {
   const collected = SCENARIOS[scenario].collected;
   const progress = makeProgress(collected);
   const awards = makeAwards(collected);
+  const stamps = makeStamps(collected, progress.byCategory);
 
   return (
     <View style={styles.root}>
@@ -188,7 +215,7 @@ export default function DesignWorkbench() {
               onSkip={() => undefined}
             />
           ) : screen === 'passport' ? (
-            <PassportView progress={progress} awards={awards} />
+            <PassportView progress={progress} awards={awards} stamps={stamps} />
           ) : screen === 'privacy' ? (
             <PrivacyPolicyView onClose={() => setScreen('settings')} />
           ) : screen === 'settings' ? (

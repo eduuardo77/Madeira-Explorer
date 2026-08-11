@@ -6,7 +6,8 @@ Ordered implementation checklist with explicit dependencies.
 **Last updated:** 2026-08-11 — T-105 split into **T-105a** (the souvenir *composition*, done,
 D-042) and **T-105b** (the encoder, which needs a device); **T-117** the dependency network
 audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device
-half. Previously 2026-08-10 — **v1 is
+half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
+the stamp artwork (D-046). Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
 (D-039/D-040), T-114/T-121 and T-125/T-140/T-141, and added a web design workbench (D-038).
@@ -20,7 +21,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 187 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 219 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -535,7 +536,28 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-069** Extract tunnel portal pairs from OSM into `content/tunnels.geojson` ⇠ T-022
       — **Must cover walkable tunnels, not just road tunnels.** 108 of the 604 tunnel ways are
       levada tunnels (T-028) — zero GPS, on foot, which is exactly the T-089/T-090 case.
-- [ ] **T-070** Commission or produce stamp artwork ⇠ T-066
+- [x] **T-070** Commission or produce stamp artwork ⇠ T-066
+      — Done 2026-08-11. **D-046.** `passport/stampArt.ts` (pure, 32 tests) + `ui/StampArt.tsx`.
+      **Generated per place**, not commissioned: 150–250 places (D-002) cannot each have an
+      illustration, and a place added next month must arrive with artwork already or curation
+      acquires a second job. Vintage die-cut luggage labels, from the project lead's reference.
+      — **The emblem carries the category; shape and colour do not.** First version made the
+      silhouette carry it; the project lead asked for varied shapes, so the accessibility
+      requirement (D-015: never hue alone) moved to the emblem. **Eight** silhouettes, six
+      colourways per category, spread by a hash of the place id — never a clock or an index, so
+      a stamp cannot change appearance between launches.
+      — **Layout is searched, not tabulated** (`bestBandY`, `bestEmblem`): the band goes as low
+      as the shape allows while leaving the emblem room, and the emblem is fitted to what is
+      left. That is what makes **the place name fit** a property of the system rather than of
+      the examples. Long names wrap to two lines rather than being cut with an ellipsis.
+      — ⚠ **Three defects found by measuring the output, not by looking:** the sunburst painted
+      straight over both borders and outside the sticker; the emblem escaped upward on a shield
+      because the band took the whole panel top; and the emblem overhung a diamond's sloped
+      sides while passing a containment test that only checked its middle. Each has a test now.
+      — ⚠ **Seen twice, in a browser, by one person. No device has drawn it**, and the colours
+      have never been outdoors (T-065).
+      — Adds `react-native-svg`. Audited the same day per CONTEXT §6.4 — see
+      `docs/dependency-audit.md`; it drags in Fresco's OkHttp image pipeline, unused here.
 
 ### Mechanics
 

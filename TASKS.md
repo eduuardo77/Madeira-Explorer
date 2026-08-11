@@ -498,8 +498,43 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **weight plus brightness/darkness**, never hue alone — brighter and heavier in the dark
       style, darker and heavier in the light style. ⇠ T-059, T-139
 - [ ] **T-061** Respect system font scaling for all map labels ⇠ T-058
-- [ ] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
-- [ ] **T-063** Verify cold start renders fully in airplane mode ⇠ T-057
+- [x] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
+      — Done 2026-08-11, **and it was a real defect the first device screenshot found.** The
+      camera fitted `madeira:bounds` — the whole tile pack, 1.12° of longitude including Porto
+      Santo and the Desertas — so on a tall phone the width constrained the fit and the island
+      sat small in a screen of empty ocean.
+      — The style now carries **two** rectangles: `madeira:bounds` (the pack, and the camera's
+      pan limit) and **`madeira:home`** (the main island, the opening shot). Both in the style's
+      metadata, never as literals in `app/` (D-017).
+      — Framing was not the only reason. **D-024 hides Porto Santo until the user goes there**,
+      so opening on the archipelago would have put on screen the exact thing that decision
+      exists to withhold.
+      — ⚠ **Found while editing: the file already had `maxBounds` and zoom limits I had not
+      seen**, and my change duplicated them. Merged rather than overwritten — the existing
+      0.4°/0.3° slack outside the pack is deliberate, so the coastline is never flush to the
+      viewport edge. `minZoom` 7, `maxZoom` 16 (the basemap stops at z15, terrain at z12).
+- [~] **T-063** Verify cold start renders fully in airplane mode ⇠ T-057
+      — **Partly done 2026-08-11: the map renders on a device.** Offline PMTiles + bundled
+      glyphs, hillshaded terrain, Portuguese labels, on the emulator's GPU.
+      — ⚠ **Airplane mode itself is NOT tested, which is the actual point of this task.** The
+      render happened with Metro attached over the network, so it proves the *tile pack* draws,
+      not that a cold start works offline. Still open.
+      — ⚠ MapLibre logs four `Failed to load glyph range` errors. See **T-063a**.
+- [ ] **T-063a** Decide what to do about the four unbundled glyph ranges ⇠ T-063
+      — Found 2026-08-11 by the first device render. `fetch-glyphs.mjs` bundles ranges **0–511
+      only**, and its own header records that as an accepted risk: a label needing an unbundled
+      range simply would not render. The device has now proved it happens — ranges 1024-1279,
+      1536-1791, 11520-11775 and 65024-65279 are requested and missing.
+      — **Root cause:** Protomaps' `text-field` uses `get_multiline_name`, which coalesces
+      `pgf:name`/`name`/`name2`/`name3` and tests `is-supported-script`. That makes the renderer
+      ask for Cyrillic, Arabic, Georgian and variation-selector ranges the island never uses.
+      — **No visible label is broken** — every label on screen rendered — so this is log noise
+      *so far*. But D-001 forbids network, so they can never be fetched at runtime.
+      — **Two options, and bundling is probably the wrong one:** four ranges × three font stacks
+      is ~12 more PBFs of scripts Madeira does not use, against a 19.1 MB pack budget.
+      Simplifying `text-field` to plain `name` would stop the requests instead. **Decide before
+      shipping; do not bundle megabytes by reflex.**
+      — Re-check with: `adb logcat -d | grep "glyph range"`.
 - [ ] **T-064** Performance test: recolour **the real graph**, not a sample ⇠ T-059
       — **Target corrected 2026-08-08 (T-028).** The old "5,000+ segments" figure was an order of
       magnitude low: Madeira has **~51,000 highway ways** before splitting at intersections. Test

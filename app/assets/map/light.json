@@ -31,6 +31,12 @@
    32.4,
    -16.2,
    33.2
+  ],
+  "madeira:home": [
+   -17.28,
+   32.61,
+   -16.65,
+   32.9
   ]
  },
  "glyphs": "{{GLYPHS}}/{fontstack}/{range}.pbf",

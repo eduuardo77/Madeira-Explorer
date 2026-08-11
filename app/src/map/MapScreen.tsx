@@ -43,9 +43,30 @@ import lightTemplate from '../../assets/map/light.json';
  * than from coordinates in code (D-017 — the app knows nothing about where
  * its content is until the content tells it).
  */
-const [WEST, SOUTH, EAST, NORTH] = lightTemplate.metadata[
-  'madeira:bounds'
-] as [number, number, number, number];
+/**
+ * Where the camera may go, and where it starts (T-062).
+ *
+ * ⚠ These are two different rectangles and conflating them was the first defect
+ * a real device found. `madeira:bounds` is the whole tile pack — the entire
+ * archipelago, 1.12° of longitude — and fitting it on a tall phone put the
+ * island small and adrift in a screen of ocean. `madeira:home` is the main
+ * island, which is where the user is standing.
+ *
+ * Both come from the shipped style's metadata, never from a literal here
+ * (D-017, called absolute in CONTEXT §6.1).
+ */
+const PACK_BOUNDS = lightTemplate.metadata['madeira:bounds'] as [
+  number,
+  number,
+  number,
+  number,
+];
+const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as [
+  number,
+  number,
+  number,
+  number,
+];
 
 const EMPTY_TRACE: TraceCollection = {
   type: 'FeatureCollection',
@@ -184,11 +205,20 @@ export default function MapScreen({
         compass={false}
       >
         <Camera
-          initialViewState={{ bounds: [WEST, SOUTH, EAST, NORTH] }}
+          initialViewState={{
+            bounds: [HOME_BOUNDS[0], HOME_BOUNDS[1], HOME_BOUNDS[2], HOME_BOUNDS[3]],
+          }}
           // Panning may not leave the archipelago: there is nothing outside it
           // but empty ocean tiles, and "where did the island go" is not a
           // support conversation worth having (CONTEXT §3, radical simplicity).
-          maxBounds={[WEST - 0.4, SOUTH - 0.3, EAST + 0.4, NORTH + 0.3]}
+          // Slack outside the pack on purpose, so the coastline is never jammed
+          // flush against the viewport edge.
+          maxBounds={[
+            PACK_BOUNDS[0] - 0.4,
+            PACK_BOUNDS[1] - 0.3,
+            PACK_BOUNDS[2] + 0.4,
+            PACK_BOUNDS[3] + 0.3,
+          ]}
           minZoom={7}
           maxZoom={16}
         />

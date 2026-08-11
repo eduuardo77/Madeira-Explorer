@@ -463,15 +463,37 @@ function buildStyle(name, flavor, hillshadePaint, purpose) {
  *   - Glyphs become a `{{GLYPHS}}` placeholder for the on-device fonts
  *     directory (populated by fetch-glyphs.mjs, copied by mapAssets.ts).
  */
+/**
+ * The camera's opening shot (T-062).
+ *
+ * ⚠ **Not the same as the pack's bounds, and that difference is the whole
+ * point.** The pack covers the whole archipelago — Madeira, Porto Santo and the
+ * Desertas — which spans 1.12° of longitude. Fitting *that* on a tall phone is
+ * what the first device screenshot showed: the island small and adrift in a
+ * screen of empty ocean, because the width constrains the fit and the height
+ * fills with sea.
+ *
+ * So the opening view is the **main island only**. Two reasons beyond framing:
+ * the user is on Madeira, not looking at an archipelago from orbit; and D-024
+ * hides Porto Santo until they actually go there, so putting it on screen at
+ * launch would leak the thing that decision exists to withhold.
+ *
+ * The full pack bounds stay in `madeira:bounds` and become the camera's pan
+ * limit — the user can reach everything the pack holds, they just do not start
+ * there.
+ */
+const HOME_BOUNDS = [-17.28, 32.61, -16.65, 32.9];
+
 function toAppStyle(style) {
   return {
     ...style,
     metadata: {
       ...style.metadata,
-      // The camera's home view. Lives here rather than in app code because
-      // island coordinates in `app/` would violate the content rule (D-017)
-      // — the app reads this from the style it was shipped with.
+      // The camera's limits and its opening shot. Both live here rather than in
+      // app code because island coordinates in `app/` would violate the content
+      // rule (D-017) — the app reads them from the style it was shipped with.
       'madeira:bounds': style.sources.madeira.bounds,
+      'madeira:home': HOME_BOUNDS,
     },
     glyphs: '{{GLYPHS}}/{fontstack}/{range}.pbf',
     sources: {

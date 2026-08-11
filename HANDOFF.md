@@ -31,6 +31,9 @@ Neither substitutes for hardware.
 5. `docs/design-brief.md` — visual direction and screen structure. Read before touching anything
    that renders. Its §1 explains why the "UI work" on this app is mostly cartography.
 
+`CLAUDE.md` at the repository root is loaded automatically and points here. It holds routing
+and invariants only — if it disagrees with a decision, the decision wins.
+
 **Reference, read when relevant:** `docs/dev-build.md` (getting it onto hardware),
 `docs/map-style.md` (how the cartography is generated), `docs/field-testing.md` (Track A),
 `content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`.

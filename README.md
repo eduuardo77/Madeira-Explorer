@@ -140,6 +140,7 @@ whether the map renders at all, and every threshold in the app) and **curating t
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design, components, data flow, technical decisions, assumptions. |
 | [TASKS.md](TASKS.md) | Ordered, dependency-aware implementation checklist. |
 | [DECISIONS.md](DECISIONS.md) | Decision log — what we chose, what we rejected, and why. |
+| `CLAUDE.md` | Auto-loaded by Claude Code each session: routing and invariants only. Points at the documents below rather than repeating them. |
 | [CONTEXT.md](CONTEXT.md) | Everything a fresh contributor (human or AI) needs before touching anything. |
 | [docs/design-brief.md](docs/design-brief.md) | Visual direction, screen structure, and why most of the "UI work" here is cartography. |
 | [docs/dev-build.md](docs/dev-build.md) | How to get a development build onto a phone or emulator, and what to check first once it runs. |

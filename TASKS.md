@@ -7,7 +7,8 @@ Ordered implementation checklist with explicit dependencies.
 D-042) and **T-105b** (the encoder, which needs a device); **T-117** the dependency network
 audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device
 half; **T-124** the privacy policy (D-044); **T-046** the battery exemption (D-045); **T-070**
-the stamp artwork (D-046). Previously 2026-08-10 — **v1 is
+the stamp artwork (D-046); **T-113**'s contrast half, which found three shipped failures.
+Previously 2026-08-10 — **v1 is
 feature-complete in code.** That day closed T-034,
 T-039/T-040 (D-033/D-034), T-049, T-056–T-059 (D-035/D-036), T-071–T-075, T-081, T-099–T-104
 (D-039/D-040), T-114/T-121 and T-125/T-140/T-141, and added a web design workbench (D-038).
@@ -21,7 +22,7 @@ passport structure (D-026, D-027); activity gating (D-028); D-022 confirmed.
 What remains: T-105b (the souvenir *encoder* — its composition is now written), a short tail of
 small items, verification that needs a device, and the curated content. See `HANDOFF.md`.
 
-⚠ **Everything marked done below is verified by typecheck, bundle, 219 unit tests over the
+⚠ **Everything marked done below is verified by typecheck, bundle, 232 unit tests over the
 pure logic, and — for the screens — measurement in a browser (D-038).** No fix has ever been
 recorded, no permission dialog seen, no battery figure measured, and no map rendered on a GPU.
 Real-device testing is mandatory for anything touching recording (CONTEXT §6.6) and is what
@@ -783,7 +784,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Target is already set by `docs/design-brief.md` §3: map plus three controls. Watch
       specifically for banner/promo cards accumulating over the map; the reference app loses the
       top third of its map to two stacked dismissible banners.
-- [ ] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
+- [~] **T-113** Tap targets 60dp minimum, high contrast, large type throughout ⇠ T-112
+      — **Contrast done 2026-08-11, and made mechanical.** `ui/contrast.ts` (WCAG 2.1
+      luminance and ratio, pure) + `contrast.test.ts` (13 tests) check **every** text pair in
+      `theme.ts` and **all thirty stamp colourways**. Body text is held at **5:1, above WCAG's
+      4.5**, because CONTEXT §6.5 requires reading in Funchal sun at arm's length, not indoors.
+      — ⚠ **It found three real failures that had already been written, reviewed and shipped:**
+      a teal stamp name on dark slate at **3.03:1**, cream on bright red at **3.90:1**, and
+      `colors.border` at **1.85:1** — the last one draws the outline of every settings row,
+      which is what tells the user where the 60 dp tap target is. All three are fixed.
+      — ⚠ **And one assertion of mine was simply wrong**, in the direction that would have done
+      damage: it measured each sticker's *outer border* against the page, failed ten colourways,
+      and would have forced ten approved colours lighter. What delineates a sticker is the bright
+      paper panel, not the border, and the stamps sit on `surface` rather than `background`. The
+      reasoning is written into the test rather than left in a commit message.
+      — **Still open:** the tap-target and type sweep across every screen. 60 dp is verified on
+      settings and the privacy policy (measured in the workbench, including at 2× text scaling);
+      the rest has not been swept. ⇠ T-112
 - [x] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
       — Done 2026-08-10. Three screens, every decline a real button the same size as the
       accept. **No-jargon verified by a check over the rendered DOM**, not by eye:

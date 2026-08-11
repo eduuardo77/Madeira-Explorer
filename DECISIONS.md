@@ -2133,3 +2133,10 @@ follow.
 **What confirms or kills this:** somebody looking at it, and then T-065 outdoors. Everything
 here is a screen judgement, and the sticker colours have never been seen in Funchal sun.
 
+**Amended 2026-08-11 (T-113).** The thirty colourways were written by something that cannot
+see, and were then measured. Three pairs failed: a teal name on dark slate at **3.03:1**, cream
+on bright red at **3.90:1**, and — outside this decision but found by the same pass —
+`colors.border` at **1.85:1**. All are corrected, and `ui/contrast.test.ts` now checks every
+colourway on every build, so the next palette added cannot ship unreadable. The colours here
+are still unseen outdoors; contrast is a floor, not a verdict.
+

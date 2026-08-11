@@ -276,12 +276,17 @@ const COLOURWAYS: Record<Category, Colourway[]> = {
     { border: '#F5C518', inner: '#0F7BA8', paper: '#A8E0E3', ink: '#0B3C5D', accent: '#FF8C42', band: '#0B3C5D', bandInk: '#A8E0E3' },
     { border: '#00B4D8', inner: '#FFB703', paper: '#CAF0F8', ink: '#03045E', accent: '#FB8500', band: '#03045E', bandInk: '#FFB703' },
     { border: '#EF476F', inner: '#FFD166', paper: '#E4FBFF', ink: '#073B4C', accent: '#06D6A0', band: '#073B4C', bandInk: '#FFD166' },
-    { border: '#F4A261', inner: '#2A9D8F', paper: '#FFF0DB', ink: '#264653', accent: '#E76F51', band: '#264653', bandInk: '#2A9D8F' },
+    // ⚠ `bandInk` was `#2A9D8F` (the teal) and measured 3.03:1 on this band —
+    // below the body-text floor, and this app is read in sunlight (D-015).
+    { border: '#F4A261', inner: '#2A9D8F', paper: '#FFF0DB', ink: '#264653', accent: '#E76F51', band: '#264653', bandInk: '#FFF0DB' },
   ],
   landmark: [
     { border: '#3B2E5A', inner: '#E8B84B', paper: '#FFF0C4', ink: '#241B38', accent: '#C1666B', band: '#241B38', bandInk: '#E8B84B' },
     { border: '#B23A48', inner: '#F0D9B5', paper: '#FBEFDD', ink: '#2E1A1F', accent: '#D5A021', band: '#2E1A1F', bandInk: '#F0D9B5' },
-    { border: '#1D3557', inner: '#E63946', paper: '#F1FAEE', ink: '#1D3557', accent: '#457B9D', band: '#E63946', bandInk: '#F1FAEE' },
+    // ⚠ The band was `#E63946` and measured 3.90:1 against the cream. Deepened
+    // rather than abandoned — the red is what makes this colourway, and at
+    // `#9E1B26` it reads the same and measures 7.45:1.
+    { border: '#1D3557', inner: '#E63946', paper: '#F1FAEE', ink: '#1D3557', accent: '#457B9D', band: '#9E1B26', bandInk: '#F1FAEE' },
     { border: '#264653', inner: '#E9C46A', paper: '#FDF3D8', ink: '#1B2B31', accent: '#E76F51', band: '#1B2B31', bandInk: '#E9C46A' },
     { border: '#7B2CBF', inner: '#FFD60A', paper: '#F6EDFF', ink: '#240046', accent: '#C77DFF', band: '#240046', bandInk: '#FFD60A' },
     { border: '#A4161A', inner: '#F5CB5C', paper: '#FFF3DC', ink: '#1F1300', accent: '#BA6E1F', band: '#1F1300', bandInk: '#F5CB5C' },

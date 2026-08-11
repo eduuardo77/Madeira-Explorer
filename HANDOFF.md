@@ -18,7 +18,7 @@ user's accommodation masked out of anything shareable. 58 source files and 14 te
 `app/`, ~14,900 lines.
 
 **None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**219 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
+**232 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
 Neither substitutes for hardware.
 
 ---
@@ -96,7 +96,7 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 **No line of this app has ever executed on a phone.** What has been verified is that it is
 *well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
 20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **219 tests**, on Node — and every screen has
+native config. The pure logic is unit-tested — **232 tests**, on Node — and every screen has
 been measured in a browser (D-038). Neither substitutes for hardware.
 
 None of that proves a GPS fix would land in the database. No permission dialog has been seen,
@@ -523,7 +523,7 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 219 unit
+> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 232 unit
 > tests and a browser workbench are all the verification that exists. The tile pack is built
 > (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >

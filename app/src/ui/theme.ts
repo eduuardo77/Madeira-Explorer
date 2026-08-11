@@ -30,7 +30,16 @@ export const colors = {
    */
   textMuted: '#A7B8C4',
 
-  border: '#314856',
+  /**
+   * Outlines and separators.
+   *
+   * ⚠ Was `#314856`, which measured **1.85:1** against `background` — below
+   * even WCAG's 3:1 floor for a meaningful UI boundary, and this colour draws
+   * the outline of the settings rows, which *are* the tap targets. D-015 says
+   * accessibility beats aesthetics, so it was lightened until it passed
+   * against both surfaces it is drawn on (T-113).
+   */
+  border: '#54788D',
 
   /** Status colours. Always paired with a text label, never used alone. */
   good: '#7FD1A3',

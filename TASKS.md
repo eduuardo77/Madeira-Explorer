@@ -762,6 +762,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       the levada two-geofence rule and the guidance on choosing radii are in
       `content/README.md`; `node tools/validate-content.mjs` checks the work and reports
       progress against the target. Nothing else is waiting on anything.
+      — **Made cheaper 2026-08-12: `node tools/poi-candidates.mjs`.** The task always said this
+      was *selection, not research* — but there was nothing to select *from*, so it was a blank
+      file and a coordinate lookup per place. The tool reads the tile pack already in the repo
+      (no download, no new dependency) and writes **~390 candidates** to
+      `content/pois.candidates.json`: name, coordinates, suggested category, suggested radius,
+      region. Ordered by OSM's `min_zoom` prominence so the ones most likely to matter are first.
+      **The work is now deleting, which is a thing a person can finish.**
+      — ⚠ **It does not curate and must not** — everything in it is a name, a coordinate and a
+      lookup table. It leaves levadas alone (they need a start *and* an end, D-009 — the 33 named
+      trailheads are listed separately) and departure points alone (worth getting right by hand).
+      — Two mistakes it made on the way, both caught by measuring the output: ranking across
+      categories on one scale produced **397 villages, three landmarks and no viewpoints**, and
+      deduping on rounded coordinates left pairs "0 m apart" that the validator flagged. Ranking
+      is now per-category and dedupe is by name plus 150 m.
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

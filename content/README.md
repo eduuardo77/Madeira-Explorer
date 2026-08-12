@@ -25,6 +25,32 @@ viewpoints, 180 peaks and 79 settlements already mapped inside the bounding box 
 candidates than the target. The work is hand-verification and editorial judgement, which is
 the one thing a global competitor cannot buy.
 
+### Start from the candidate list, not from a blank file
+
+```bash
+node tools/poi-candidates.mjs          # → content/pois.candidates.json
+```
+
+Reads the tile pack that is already in the repository and writes **~390 candidates** — every
+named viewpoint, peak, cape, beach, church, museum, garden and settlement on the main island,
+with coordinates, a suggested category, a suggested radius and a region. Ordered by OSM's own
+prominence signal, so the ones most likely to matter are at the top. `--max 800` shows more.
+
+**It does not curate and cannot.** Everything in it is mechanical — a name, a coordinate and a
+lookup table. The judgement is entirely yours, and the work is mostly **deleting**: 390 down to
+150–250, throwing out the ones nobody would cross a road for, fixing names OSM spells
+differently from how people say them, and widening the radius on anything under canopy.
+
+Two things it deliberately leaves alone:
+
+- **Levadas.** They need a `start` and an `end` geofence and the award requires both (D-009);
+  pairing a trailhead with the right exit is exactly the local knowledge the tool has none of.
+  The 33 named trailheads it found are listed under `_trailheads` as a starting point.
+- **Departure points.** Airports and the cruise terminal end the trip (D-012) and are worth
+  getting right by hand.
+
+Delete the `_osmKind` and `_prominence` hints as you go, then save the result as `pois.json`.
+
 ### Check your work as you go
 
 ```bash

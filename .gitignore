@@ -63,3 +63,7 @@ tools/android-sdk/
 tools/out/shots/
 # uiautomator hierarchy dumps (throwaway diagnostics)
 tools/out/ui*.xml
+
+# The POI triage list is generated (tools/poi-candidates.mjs) and is not content.
+# `content/pois.json` — the curated result — IS committed.
+content/pois.candidates.json

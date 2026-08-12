@@ -18,6 +18,18 @@
 # the native build toolchain (NDK, CMake, build-tools) — that would be another
 # ~5 GB to compile locally something EAS compiles for free.
 #
+# ⚠ CORRECTION 2026-08-12: that last paragraph describes this script, not this
+# machine. `npm run android` is `expo run:android`, which builds locally, and
+# Gradle has since pulled the toolchain in anyway — **NDK 2.2 GB, build-tools
+# 0.27 GB, CMake 0.04 GB**, all under tools/android-sdk/. Measured, not
+# estimated. The repository is now ~12 GB on disk, of which tools/ is 8.4 GB
+# (system image 4.2, NDK 2.2, emulator 1.0) and tiles/src is 1.74 GB of raw OSM
+# and Natural Earth downloads that only the tile pipeline needs.
+#
+# Nothing here is in git and nothing is needed to *run* the app. If the disk
+# matters more than the build time, tools/android-sdk/ndk and tiles/src are the
+# two big deletions, and both are re-fetchable.
+#
 # The emulator can settle every question that does not involve real radios:
 #
 #   ✓ Does the map render offline from the bundled packs (T-063)

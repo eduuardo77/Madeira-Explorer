@@ -2384,8 +2384,13 @@ it would have measured v1 *including* work v1 does not use.
   previous sample, so the window must start where the last one ended and fall back to trip start
   so the first sample is not a silent zero. Re-enabling in v2 is one line.
 
-**Consequences:** the debug screen says `Sensors — off in v1 (D-050)` rather than reporting zeroes
-and "no barometer", which read as a broken sensor. **T-054's figure will now describe v1 as it
+**Verified on the emulator 2026-08-12.** A replayed route took `raw_fix` from 27 to 33 while
+`sensor_sample` stayed at 26 — the two counts had been 1:1 before, which is what a per-batch
+capture looks like. No new errors, and the recorder is unaffected.
+
+**Consequences:** the debug screen says `Sensors — 26 samples from an earlier build` (or `off in
+v1 (D-050)` on a clean install) rather than reporting zeroes and "no barometer", which read as a
+broken sensor. **T-054's figure will now describe v1 as it
 ships.** The unvalidated assumptions in CONTEXT §8 about barometers in tunnels and pedometers
 through blackouts are untouched — they were always v2 questions and remain unanswered.
 

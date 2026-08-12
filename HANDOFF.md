@@ -2,8 +2,10 @@
 
 **Written:** 2026-08-06, at the end of the planning conversation.
 **Updated:** 2026-08-12 — **T-052a closed: the recorder records, and it was never broken**
-(D-047). The blocker was the emulator's inability to serve a `balanced`-accuracy request. Raised
-**T-052b** (notice a recorder receiving nothing) and **T-052c** (a `checkTripEnd` throw).
+(D-047). The blocker was the emulator's inability to serve a `balanced`-accuracy request. Then
+**T-052b** (the app can now tell "recording" from "recording nothing") and **T-052c**, which
+turned out to be a **concurrency** bug that was quietly creating two trips (D-048). The passport
+button also moved and stopped looking like a map control (T-075).
 Earlier 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
 audit (T-117, D-043), the privacy policy (T-124, D-044), the battery exemption (T-046, D-045)
 and the stamp artwork (T-070, D-046). **The small-remainder list is down to T-139**, and what
@@ -90,11 +92,18 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 and the trace draws.** What blocked it was the emulator's inability to serve a `balanced`-accuracy
 request, not the code.
 
-The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110, and **T-052c** (a `checkTripEnd` throw on
-a released database handle, possibly dev-client-only). **T-052b's detection half is done** — the
-debug screen now says *"recording, but nothing for 2h 2m"* instead of leaving two rows to be
-correlated — but **whether it should ever notify is an open question for the project lead**, not
-something to add: D-011 permits two notifications in seven days and its threshold is provisional.
+The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110.
+
+**T-052b's detection half is done** — the debug screen now says *"recording, but nothing for
+2h 2m"* instead of leaving two rows to be correlated — but **whether it should ever notify is an
+open question for the project lead**, not something to add: D-011 permits two notifications in
+seven days and its threshold is provisional.
+
+**T-052c is closed, and it was not what it looked like (D-048).** The reported `checkTripEnd`
+throw was guessed to be a Fast Refresh artefact; a reload does not reproduce it and a **cold
+start** does. Chasing it found a worse bug: `getOrCreateActiveTrip` is a read-then-insert that
+created **a second trip** when the OS delivered a location batch and a geofence crossing at once —
+which is the normal case, not an unusual one. The sink is now serialised.
 
 **No threshold anywhere in this app has met real data** — every number in D-033, D-037, D-039,
 D-041 and now `SILENCE_TOLERANCE` is a reasoned guess.
@@ -147,7 +156,7 @@ priority the request asked for*, and the question was never posed.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Twenty decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
+**Twenty-one decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
 is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
 entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
 from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
@@ -155,6 +164,11 @@ from the 2026-08-08 design session; most of the rest were made while building on
 Provisional and the burden is on confirmation, not objection (CONTEXT §9). The ones with
 something specific still outstanding:
 
+- **D-048** *(2026-08-12)* — the recording sink is **serialised**. The OS delivers work
+  concurrently and two of our writes assumed it did not: `getOrCreateActiveTrip` is a
+  read-then-insert that produced **a second trip** under overlap, and everything downstream
+  assumes a trip is singular. Found while chasing a much smaller `expo-sqlite` error. ⚠ **Do not
+  add a caller of `getOrCreateActiveTrip` outside the sink** without reading it.
 - **D-047** *(2026-08-12)* — the emulator cannot serve a `balanced`-accuracy location request, so
   `walking` and `stationary` record nothing here and `driving` records perfectly. **The finding is
   measured and reversible; the consequence on real hardware is not.** Whether `balanced` produces

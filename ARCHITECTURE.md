@@ -179,6 +179,16 @@ Share sheet
 
 ## 4. Data model
 
+⚠ **Writes into this schema are serialised at the recording sink** (D-048, added 2026-08-12).
+The OS delivers work concurrently — a single wake-up commonly brings a location batch *and* a
+geofence crossing, and a cold start once delivered 99 crossings inside 100 ms — and two of the
+writes below were not safe under that. `getOrCreateActiveTrip` is a read-then-insert that
+produced **a second trip** when callers overlapped, and every reader here assumes a trip is
+singular. `expo-sqlite` separately raced its own prepared statements under concurrent calls.
+`recordingSink` now queues everything through `storage/serialQueue.ts`. **Do not add a second
+caller of `getOrCreateActiveTrip` outside the sink without reading D-048** — the queue is what
+makes the read-then-insert safe, and it only covers the sink.
+
 Indicative schema. Not final; refine during Phase 1.
 
 ```sql

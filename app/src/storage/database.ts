@@ -12,24 +12,33 @@
 
 import * as SQLite from 'expo-sqlite';
 import { MIGRATIONS } from './migrations';
+import { onceOrRetry } from './onceOrRetry';
 
 const DATABASE_NAME = 'madeira.db';
 
 /**
- * Cached *promise*, not a cached database.
+ * One open-and-migrate, shared by everyone — and retried if it fails.
  *
- * The background location task and the UI can both ask for the database at the
- * same time. Caching the promise means the second caller waits for the first
- * open-and-migrate to finish, instead of starting a second one.
+ * The sharing is why this exists at all: the background location task and the
+ * UI can both ask for the database at the same moment, and two concurrent opens
+ * would run the migrations twice.
+ *
+ * ⚠ **The retry is the part that was missing** (T-052c). This was a plain
+ * cached promise, and a promise caches its rejection exactly as well as its
+ * value: one failed open and every caller for the rest of the process got the
+ * same stale failure, with nothing ever tried again. On iOS that is a real
+ * sequence rather than a hypothetical — data protection is
+ * `CompleteUntilFirstUserAuthentication` (CONTEXT §7), so after a reboot the
+ * file cannot be read until the first unlock, and the OS wakes the recorder in
+ * precisely that window. A phone rebooting in a pocket would have come back
+ * with a recorder that had permanently given up.
+ *
+ * The retry logic is in `onceOrRetry.ts` because it is pure and this file is
+ * not testable without a device (CONTEXT §6.6).
  */
-let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
-
-export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (databasePromise === null) {
-    databasePromise = openAndMigrate();
-  }
-  return databasePromise;
-}
+export const getDatabase = onceOrRetry<SQLite.SQLiteDatabase>(() =>
+  openAndMigrate()
+);
 
 async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);

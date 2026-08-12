@@ -2215,3 +2215,63 @@ no SIM and wifi off is not an exotic state.
 this and it is what settles it again on real hardware. `samplingPolicy.ts` is **untouched**.
 CONTEXT §6.6's list of what an emulator cannot answer gains a fourth entry, and it is the one
 that would have cost the most time to rediscover.
+
+---
+
+## D-048 — The recording sink is serialised. The OS delivers concurrently and our writes assumed it did not.
+
+**Status:** Provisional — implemented and measured 2026-08-12 (T-052c). The fix is verified by
+before/after on the same input; what is *not* established is whether serialising is the right
+long-term shape or a workaround for an `expo-sqlite` defect that will be fixed upstream.
+
+**Decision:** every entry point on `databaseSink` — `onLocations`, `onGeofenceTransition`,
+`onError` — runs through one `createSerialQueue()`. Work arrives concurrently and is executed one
+at a time, in arrival order.
+
+**What prompted it:** a cold start with the dev fixture delivered **99 geofence transitions inside
+100 ms**, and `recording_event` caught an error. Chasing it found two bugs, one of which is far
+worse than the thing being chased.
+
+**Bug 1 — two trips instead of one, and it is silent.** `getOrCreateActiveTrip` reads, finds no
+active trip, and inserts one, with an `await` between the read and the insert. Concurrent callers
+all read "none" before any of them inserts, so each creates a trip. **Every downstream assumption
+in this app is that a trip is singular** — the trace (T-059), the progress count (T-073), the
+passport, trip-end detection (T-099). Both callers are the sink, and the OS delivering a location
+batch and a geofence crossing in the same wake-up is the *normal* case. This was never observed in
+the wild only because a trip usually already exists; the window is the first burst after install,
+which is precisely the moment the app is least able to explain itself.
+
+**Bug 2 — a statement used after release.** Under many overlapping calls on one connection,
+`expo-sqlite` intermittently rejected with *"Cannot use shared object that was already released"*,
+surfacing as a cast failure on a `NativeStatement`. Our data access does nothing exotic — plain
+`runAsync(sql, ...params)`, no reused or shared statements — so this is the library's own
+prepare/finalize racing itself. Seen twice: from `onGeofenceTransition` and, a day earlier, from
+`checkTripEnd`. **A lost crossing is a lost stamp, and stamps are the entire reward (D-002).**
+
+**Measured, same input both times.** Before: 99 jobs → an error row. After: 99 jobs → 99
+`geofence_event` rows, 99 diary entries, zero errors.
+
+**Alternatives considered:**
+
+- *Fix `getOrCreateActiveTrip` alone* — a unique index, or `INSERT … WHERE NOT EXISTS`. Rejected as
+  insufficient: it addresses bug 1 and leaves bug 2 entirely. It is still worth doing as
+  belt-and-braces and is **not** done here, because the sink is now the only caller and adding a
+  constraint to a shipped schema needs a migration for a race that can no longer happen. Revisit if
+  a second caller ever appears — **that is the trigger.**
+- *Serialise every database call.* Rejected, and it would have deadlocked: `insertFixes` and the
+  migration runner both work inside `withTransactionAsync`, so a queued call nested inside a
+  transaction would wait for itself. It would also queue the UI's reads behind the recorder's
+  writes for no benefit.
+- *Wait for an `expo-sqlite` fix.* Rejected: it does not touch bug 1 at all, and D-025's whole
+  point is that a platform library's behaviour is not something this project gets to depend on.
+- *A bounded queue, dropping work under load.* Rejected outright. D-010 makes raw data the one
+  thing that may never be dropped, and the burst is small — a handful of small writes.
+
+**Consequences:** `storage/serialQueue.ts` is pure and tested (9 tests), and the queue is private
+to `recordingSink.ts` — the one boundary the OS delivers to, and nothing inside it re-enters. A
+failing task no longer blocks what is queued behind it, which matters over a week of recording:
+one bad write must not stop the recorder for the rest of the trip.
+
+**What would change this:** if `expo-sqlite` fixes its statement race, bug 2's justification goes
+away — but bug 1's does not, and bug 1 is the one that quietly corrupts a trip. The queue should
+stay regardless.

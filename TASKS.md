@@ -521,13 +521,32 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Also unaddressed: the recorder does not log the transition into silence to
       `recording_event`, which would need persisted state to avoid a diary full of duplicates.
       Worth doing when the threshold is real.
-- [ ] **T-052c** `checkTripEnd` throws on a released database handle
-      — Found in passing 2026-08-12 while reading `recording_event`:
-      `trip end: Call to function 'NativeDatabase.prepareAsync' has been rejected. → Caused by:
-      Cannot use shared object that was already released`. Logged as an `error` row, so the diary
-      caught it exactly as designed. Seen after a Fast Refresh reload, so it may be a
-      dev-client-only lifecycle artefact — **confirm that before treating it as a product bug**,
-      because a trip that cannot end is a reveal that never arrives (D-012).
+- [x] **T-052c** ✅ **RESOLVED 2026-08-12 — and it was not what it looked like (D-048).**
+      — The reported symptom was `checkTripEnd` throwing *"Cannot use shared object that was
+      already released"*, guessed to be a Fast Refresh artefact. **A reload does not reproduce it.**
+      A **cold start** does, reliably: the dev fixture delivers **99 geofence transitions inside
+      100 ms** and the sink processes them all at once.
+      — **The chase found a worse bug than the one being chased.**
+        · **Two trips instead of one.** `getOrCreateActiveTrip` reads, finds nothing, and inserts —
+          with an `await` between. Concurrent callers all read "none" first, so each creates a
+          trip. Everything downstream assumes a trip is singular: the trace (T-059), progress
+          (T-073), the passport, trip-end (T-099). Both callers are the sink, and the OS delivering
+          a location batch *and* a crossing in one wake-up is the **normal** case.
+        · **The reported error**, which is `expo-sqlite`'s own prepare/finalize racing itself under
+          concurrent statements. Our DAOs do nothing exotic — plain `runAsync(sql, ...params)`.
+      — **Fix:** `storage/serialQueue.ts` (pure, 9 tests), applied at `recordingSink` — the one
+      boundary the OS delivers to. Not at the database: `insertFixes` and the migration runner work
+      inside `withTransactionAsync`, so a global lock would deadlock against itself.
+      — **Measured, same input both ways.** Before: 99 jobs → an error row. After: 99 jobs → 99
+      `geofence_event` rows, 99 diary entries, **zero errors**.
+      — Also fixed alongside: `getDatabase` cached a *rejected* open forever, so one transient
+      failure disabled the database for the life of the process. On iOS that is a real sequence —
+      data protection is `CompleteUntilFirstUserAuthentication` (CONTEXT §7), so after a reboot the
+      file is unreadable until first unlock and the OS wakes the recorder in exactly that window.
+      `storage/onceOrRetry.ts` (pure, 8 tests) shares one in-flight open and retries a failed one.
+      — ⚠ **Left undone deliberately:** a unique constraint on the active trip. The sink is now the
+      only caller so the race cannot happen, and adding a constraint to a shipped schema needs a
+      migration. **A second caller of `getOrCreateActiveTrip` is the trigger to revisit** (D-048).
 - [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046

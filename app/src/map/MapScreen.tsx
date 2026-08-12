@@ -37,8 +37,9 @@ import * as tripDao from '../storage/dao/tripDao';
 import PrimaryOverlay from '../ui/PrimaryOverlay';
 import { colors, fontSize, spacing } from '../ui/theme';
 import { prepareMapAssets } from './mapAssets';
-import { buildMapStyle } from './mapStyle';
+import { buildMapStyle, type MapStyleName } from './mapStyle';
 import { parseMapStyle } from './mapStylePreference';
+import { TRACE_PAINT } from './traceStyle';
 import type { TraceCollection } from './traceGeoJson';
 import { buildTrace } from './traceGeoJson';
 
@@ -95,6 +96,9 @@ export default function MapScreen({
   onOpenSettings: () => void;
 }) {
   const [styleJson, setStyleJson] = useState<string | null>(null);
+  // Kept alongside the style so the trace can be painted for the ground it
+  // actually sits on (T-060) — the two styles need opposite treatments.
+  const [styleName, setStyleName] = useState<MapStyleName>('light');
   const [failure, setFailure] = useState<string | null>(null);
   const [trace, setTrace] = useState<TraceCollection>(EMPTY_TRACE);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
@@ -115,16 +119,12 @@ export default function MapScreen({
           prepareMapAssets(),
         ]);
         if (!cancelled) {
+          const chosen = parseMapStyle(preference);
+          setStyleName(chosen);
           // The phone's text-size setting. Read here rather than inside
           // `buildMapStyle` so that module stays pure and testable without
           // React Native (CONTEXT §6.6) — T-061.
-          setStyleJson(
-            buildMapStyle(
-              parseMapStyle(preference),
-              uris,
-              PixelRatio.getFontScale()
-            )
-          );
+          setStyleJson(buildMapStyle(chosen, uris, PixelRatio.getFontScale()));
         }
       } catch (error) {
         // A map that cannot load its files is a bug to fix, not a condition
@@ -192,6 +192,8 @@ export default function MapScreen({
     );
   }
 
+  const tracePaint = TRACE_PAINT[styleName];
+
   const toggleRecording = () => {
     void (async () => {
       try {
@@ -239,18 +241,22 @@ export default function MapScreen({
         />
 
         {/* The trace: the one saturated, heavy thing on the map (D-032,
-            design brief §2.4 — visited is darker AND heavier in the light
-            style). Two layers, one line: a pale casing under a strong core
-            keeps it legible over both terrain shadow and pale roads. */}
+            design brief §2.4). Two layers, one line — a casing under a strong
+            core keeps it legible over both terrain shadow and pale roads.
+            ⚠ The paint comes from `traceStyle.ts` and differs per style,
+            because the requirements are opposite: dark-and-heavy on the light
+            ground, bright-and-glowing on the dark one (D-026). A single colour
+            scored 2.70:1 on the dark ground with a casing brighter than the
+            line itself. */}
         <GeoJSONSource id="trace" data={trace}>
           <Layer
             type="line"
             id="trace_casing"
             layout={{ 'line-cap': 'round', 'line-join': 'round' }}
             paint={{
-              'line-color': '#ffffff',
-              'line-opacity': 0.55,
-              'line-width': 7,
+              'line-color': tracePaint.casingColor,
+              'line-opacity': tracePaint.casingOpacity,
+              'line-width': tracePaint.casingWidth,
             }}
           />
           <Layer
@@ -258,8 +264,8 @@ export default function MapScreen({
             id="trace_line"
             layout={{ 'line-cap': 'round', 'line-join': 'round' }}
             paint={{
-              'line-color': '#c2402a',
-              'line-width': 3.5,
+              'line-color': tracePaint.coreColor,
+              'line-width': tracePaint.coreWidth,
             }}
           />
         </GeoJSONSource>

@@ -615,10 +615,30 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       drawn over the basemap's own roads, so nothing can be misaligned. D-022 governs v2.
       — *v2:* visited/unvisited styling via data-driven expressions over local `road_graph`
       geometry keyed on OSM way ID. Not feature state (D-022). ⇠ T-082
-- [ ] **T-060** Accessibility styling pass **in both styles** (D-015, D-026): unvisited stays
-      legible mid-grey, never near-black and never near-invisible. Visited differentiated by
-      **weight plus brightness/darkness**, never hue alone — brighter and heavier in the dark
-      style, darker and heavier in the light style. ⇠ T-059, T-139
+- [x] **T-060** Accessibility styling pass **in both styles** (D-015, D-026) ⇠ T-059, T-139
+      — Done 2026-08-12. In v1 there are no visited/unvisited *roads* (D-032 cut matching), so
+      this is about the **trace** against each ground, plus the basemap staying legible under it.
+      `map/lightStyle.test.ts` (12 tests) is the half that did not exist.
+      — ⚠ **The light style had no contrast tests and the dark style had ten** — and the light
+      one matters more, because D-026 chose it as the everyday map precisely on sunlight
+      legibility. The souvenir look was held to a standard the working map was not.
+      — **Two real defects, both found by measuring rather than looking:**
+        · **The trace was one hardcoded colour for both styles.** On the dark ground `#c2402a`
+          measured **2.70:1** — under the floor, on the single most important mark in the product
+          — and its white casing measured **13.98:1**, so the halo was five times brighter than
+          the line it outlined. The eye follows the brightest thing, and that was the outline.
+          D-026 had predicted exactly this: *"visited is brighter"* holds **only** in the dark
+          style. One colour cannot serve both grounds because the requirements are opposite.
+        · **Over water the light trace measured 2.97:1**, under 3:1. Not hypothetical — a coastal
+          road puts the trace on the sea and the Porto Santo ferry (D-021, in scope) puts a whole
+          crossing there.
+      — **Fix:** `map/traceStyle.ts` — one palette per style. Light: `#b83a26`, 4.80:1 on land and
+      **3.28:1 over water**. Dark: `#ff6b4a` at 4.96:1, with a casing *darker* than the ground
+      rather than lighter, which is the opposite construction for the opposite reason.
+      — The load-bearing assertion is **"the trace is the most contrasty thing on the map"** —
+      measured against every flat line colour in the basemap, so muting cannot drift as
+      `generate.mjs` evolves. Verified in both styles on the emulator.
+      — ⚠ **Contrast is a floor, not a verdict. T-065 outdoors is the only judge that counts.**
 - [x] **T-061** Respect system font scaling for all map labels ⇠ T-058
       — Done 2026-08-12. `map/mapTextScale.ts` (pure, 12 tests) scales every symbol layer's
       `text-size`; `MapScreen` supplies `PixelRatio.getFontScale()`. This was the one screen

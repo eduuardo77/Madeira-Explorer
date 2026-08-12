@@ -22,6 +22,7 @@ import { locationProvider } from './ExpoLocationProvider';
 import type { GeofenceStatus } from './geofenceManager';
 import { getGeofenceStatus } from './geofenceManager';
 import type { PermissionLevel, SamplingProfile } from './LocationProvider';
+import { assessSilence, type SilenceVerdict } from './recorderSilence';
 import { getCurrentSamplingProfile } from './samplingGate';
 
 /**
@@ -62,6 +63,16 @@ export type RecorderHealth = {
   gapCount: number;
   longestGapMs: number | null;
 
+  /**
+   * Whether the recorder is running and receiving nothing (T-052b).
+   *
+   * ⚠ **Read this before believing `isRecording`.** They are different claims:
+   * `isRecording` says the task is registered, and this says whether anything
+   * is coming back. For a day in August 2026 the first was true and the second
+   * was not, and the screen showed only the first (D-047).
+   */
+  silence: SilenceVerdict;
+
   recentEvents: RecordingEvent[];
 };
 
@@ -74,6 +85,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     progress,
     trip,
     recentEvents,
+    lastStart,
   ] = await Promise.all([
     locationProvider.getPermissionLevel(),
     locationProvider.isRecording(),
@@ -82,7 +94,12 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     getCurrentProgress(),
     tripDao.getActiveTrip(),
     recordingEventDao.getRecent(20),
+    // When recording last began. The diary is the only record of it — the
+    // provider can say *whether* it is recording but not since when.
+    recordingEventDao.getLastOfKind('start'),
   ]);
+
+  const now = Date.now();
 
   // No trip yet means nothing has ever been recorded. Report that plainly
   // rather than inventing zeroes that look like a healthy empty state.
@@ -106,6 +123,17 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       progress,
       gapCount: 0,
       longestGapMs: null,
+      // No trip means no fix has ever arrived — which, if recording has been
+      // on for a while, is precisely the failure this reports. It is the state
+      // the app sat in for a day, so it must not be skipped as "nothing yet".
+      silence: assessSilence({
+        isRecording,
+        permission,
+        profile: samplingProfile,
+        recordingSinceTs: lastStart?.ts ?? null,
+        lastFixTs: null,
+        now,
+      }),
       recentEvents,
     };
   }
@@ -153,5 +181,13 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
     gapCount: gaps.length,
     recentEvents,
     longestGapMs,
+    silence: assessSilence({
+      isRecording,
+      permission,
+      profile: samplingProfile,
+      recordingSinceTs: lastStart?.ts ?? null,
+      lastFixTs: lastFix?.ts ?? null,
+      now,
+    }),
   };
 }

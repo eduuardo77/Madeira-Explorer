@@ -90,11 +90,14 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 and the trace draws.** What blocked it was the emulator's inability to serve a `balanced`-accuracy
 request, not the code.
 
-The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110, plus the two items T-052a raised on its
-way out — **T-052b** (notice a recorder that is running and receiving nothing — the silent-failure
-class, and the more valuable of the two) and **T-052c** (a `checkTripEnd` throw on a released
-database handle, possibly dev-client-only). **No threshold anywhere in this app has met real
-data** — every number in D-033, D-037, D-039 and D-041 is a reasoned guess.
+The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110, and **T-052c** (a `checkTripEnd` throw on
+a released database handle, possibly dev-client-only). **T-052b's detection half is done** — the
+debug screen now says *"recording, but nothing for 2h 2m"* instead of leaving two rows to be
+correlated — but **whether it should ever notify is an open question for the project lead**, not
+something to add: D-011 permits two notifications in seven days and its threshold is provisional.
+
+**No threshold anywhere in this app has met real data** — every number in D-033, D-037, D-039,
+D-041 and now `SILENCE_TOLERANCE` is a reasoned guess.
 
 **3. Content, which only the project lead can produce.** `content/pois.json` is valid and
 **empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
@@ -631,8 +634,11 @@ decision arises at all.
 >
 > Start with **T-105b, the souvenir encoder** (the whole distribution strategy, D-013 — the
 > composition is written, this is the encoding), or **T-063a**, the glyph ranges, which needs a
-> decision rather than a reflex, or **T-052b**, which is how the app notices it has stopped
-> recording.
+> decision rather than a reflex.
+>
+> ⚠ **Two questions are waiting on you, not on work:** whether the silent-recorder check should
+> spend a third notification (T-052b), and whether the passport button needs a text label as well
+> as its mark (T-075, design brief §3.1).
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

@@ -424,6 +424,16 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Also sensor counts, last barometer/step reading, live-ticking last-fix age, the event
       diary, and the delete-all control. Built to D-015 (60dp targets, no colour-only status)
       because it gets read outdoors in sunlight during field tests.
+      — ⚠ **Two defects found 2026-08-12 while verifying T-052b, both making this screen lie in
+      exactly the direction it exists to catch:**
+        · **It never re-read the database.** `health` was fetched once on mount while a 1-second
+          timer ticked the *displayed* age — so `lastFixTs` froze and its age climbed forever, and
+          a perfectly healthy recorder looked deader the longer you watched it. Caught because the
+          screen read `2h 5m` while fixes were landing in `raw_fix` seconds earlier. It now
+          re-reads every 5 s; not 1 s, because `getRecorderHealth` runs a gap scan over every fix
+          in the trip.
+        · **A long value broke the label mid-word**, rendering `Receiving` as `Receivi/ng`. Both
+          sides had `flexShrink: 1`; the label now never shrinks and the value wraps instead.
 
 ### Verification
 
@@ -480,7 +490,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       sent the search to the priority the request was asking for. Suspect 1 was wrong too — the
       task path registers fine. **Neither suspect was the answer, and the experiment that was
       supposed to choose between them found it anyway.**
-- [ ] **T-052b** Detect a recorder that is running but receiving nothing ⇠ T-052a, T-049
+- [~] **T-052b** Detect a recorder that is running but receiving nothing ⇠ T-052a, T-049
       — Raised by D-047. With the walking profile the app's location request was invisible and
       produced nothing while the debug screen reported `Recording: yes` and the foreground-service
       notification sat in the shade — the silent failure CONTEXT §4.5 calls worse than never
@@ -488,6 +498,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       *"recording has been on N minutes and no fix has arrived"* is answerable, and the day-1
       health check (D-011, T-049) already exists to carry it.
       — A tourist on a levada with no SIM and wifi off is not an exotic state.
+      — **Detection done 2026-08-12.** `recording/recorderSilence.ts` (pure, 12 tests) answers
+      `not_recording | warming_up | receiving | silent`, and `RecorderHealth` carries it so the
+      debug screen states it in words — a `Receiving` row directly under `Recording`, because
+      those two rows once read `yes` and `0` for a day and left a human to notice they
+      contradicted each other.
+      — **The threshold is derived, not guessed.** Each profile already declares
+      `deferredIntervalMs` + `minTimeMs` — D-028's battery decisions and the only honest statement
+      anywhere of how long silence is normal — so the tolerance is `(deferred + minTime) ×
+      SILENCE_TOLERANCE`, floored at 2 minutes. Retuning the battery constants retunes this, and
+      a test asserts the derivation so nobody hardcodes a number beside them. In practice:
+      stationary 60 m, walking 17 m, driving 10 m.
+      — ⚠ `SILENCE_TOLERANCE = 3` **is** a guess and is flagged as one. **T-051's soak produces
+      the distribution of real inter-fix gaps, which is what should set it.**
+      — Verified on the emulator in both directions: red *"recording, but nothing for 2h 2m — over
+      the 17m expected on the walking profile"*, then green *"last fix 9s ago"* once positions were
+      injected.
+      — **Still open: whether this should ever notify.** It deliberately does not. D-011 permits
+      two notifications in seven days and T-116 is the budget; spending a third on a *provisional*
+      threshold is a decision, not a fix. The day-1 check already reaches a user who is not
+      looking. **Raise it with the project lead rather than adding it.**
+      — Also unaddressed: the recorder does not log the transition into silence to
+      `recording_event`, which would need persisted state to avoid a diary full of duplicates.
+      Worth doing when the threshold is real.
 - [ ] **T-052c** `checkTripEnd` throws on a released database handle
       — Found in passing 2026-08-12 while reading `recording_event`:
       `trip end: Call to function 'NativeDatabase.prepareAsync' has been rejected. → Caused by:

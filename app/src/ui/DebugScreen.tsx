@@ -169,10 +169,31 @@ export default function DebugScreen() {
 
   useEffect(() => {
     void refresh();
+
     // Tick so "last fix" ages visibly while the screen is open. A stale-looking
     // number that never moves is exactly how you fail to notice a dead service.
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+
+    // ⚠ AND RE-READ THE DATABASE, WHICH IS THE HALF THAT WAS MISSING.
+    //
+    // The tick above only moved the clock. `health` was fetched once on mount
+    // and never again, so `lastFixTs` froze while its displayed age kept
+    // climbing — a **healthy** recorder looked deader the longer you watched
+    // it, which is the precise opposite of what the comment above intended.
+    // Found on 2026-08-12 while verifying T-052b: fixes were landing in
+    // `raw_fix` seconds earlier and the screen said "2h 5m".
+    //
+    // Five seconds, not one: `getRecorderHealth` runs a dozen queries
+    // including a gap scan over every fix in the trip, and this screen is read
+    // for minutes at a time during a field test.
+    const reread = setInterval(() => {
+      void refresh();
+    }, 5000);
+
+    return () => {
+      clearInterval(tick);
+      clearInterval(reread);
+    };
   }, [refresh]);
 
   const runAction = useCallback(
@@ -296,6 +317,21 @@ export default function DebugScreen() {
           label="Recording"
           value={health.isRecording ? 'yes' : 'no'}
           tone={health.isRecording ? 'good' : 'bad'}
+        />
+        {/* ⚠ Directly under `Recording`, and not by accident (T-052b). Those
+            two rows once read `yes` and `0` for a day while the recorder
+            received nothing, and a human was left to notice they contradicted
+            each other. This row is the app saying it instead. */}
+        <Row
+          label="Receiving"
+          value={health.silence.detail}
+          tone={
+            health.silence.state === 'silent'
+              ? 'bad'
+              : health.silence.state === 'receiving'
+                ? 'good'
+                : 'warn'
+          }
         />
         <Row
           label="Geofencing"
@@ -604,13 +640,20 @@ const styles = StyleSheet.create({
   rowLabel: {
     color: colors.textMuted,
     fontSize: fontSize.body,
-    flexShrink: 1,
+    // ⚠ Never shrink the label. When both sides shrank, the first long value
+    // in this screen ("recording, but nothing for 2h 2m…") squeezed the label
+    // narrower than one word and Android broke it mid-word, as `Receivi/ng`.
+    // The label is the thing being scanned down the column, so the value gives
+    // way instead — it has room to wrap and reads fine over two lines.
+    flexShrink: 0,
   },
   rowValue: {
     color: colors.text,
     fontSize: fontSize.body,
     fontWeight: '600',
     textAlign: 'right',
+    // Takes what is left after the label, and wraps within it.
+    flex: 1,
     flexShrink: 1,
   },
   button: {

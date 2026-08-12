@@ -232,7 +232,23 @@ export class ExpoLocationProvider implements LocationProvider {
   }
 
   async isGeofencing(): Promise<boolean> {
-    return Location.hasStartedGeofencingAsync(GEOFENCE_TASK_NAME);
+    try {
+      return await Location.hasStartedGeofencingAsync(GEOFENCE_TASK_NAME);
+    } catch {
+      // ⚠ FOUND ON A DEVICE, AND IT WAS A D-008 VIOLATION. With While-Using
+      // permission only, Expo rejects this call — *"Not authorized to use
+      // background location services"* — rather than returning false. The
+      // rejection travelled up through `getGeofenceStatus` and
+      // `getRecorderHealth` and killed the entire debug screen, for precisely
+      // the permission level D-008 says the app must be fully functional on.
+      //
+      // `false` is the honest answer: if we are not authorized to geofence,
+      // then nothing is being monitored for us. Swallowing it here rather than
+      // at each call site is deliberate — this is the platform boundary
+      // (D-025), and "not authorized" is a platform detail the recorder, the
+      // health check and the debug screen should not each have to know.
+      return false;
+    }
   }
 }
 

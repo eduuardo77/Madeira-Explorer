@@ -17,9 +17,15 @@ stamps by geofence → hero number → trace on a map → passport → trip end 
 user's accommodation masked out of anything shareable. 58 source files and 14 test files in
 `app/`, ~14,900 lines.
 
-**None of it has ever run on a phone.** The pure logic is the only part that has ever executed:
-**270 unit tests**, `cd app && npm test`. The screens can be *looked at* in a browser (D-038).
-Neither substitutes for hardware.
+**It runs on an emulator now** (2026-08-11, T-029b — the project lead enabled CPU
+virtualization). **The map renders**: offline PMTiles, bundled glyphs, hillshaded terrain, on a
+GPU. Screens, permissions and the debug view all work. 270 unit tests still cover the logic.
+
+⚠ **But the recorder does not work.** Recording starts, the foreground service runs, and **no fix
+has ever reached the database** — see **T-052a**, the blocker to start from. The honest statement
+is now narrower, not broader: *the app runs and draws; it has never successfully recorded
+anything.* And the emulator still cannot speak to **battery, background survival or GPS realism**
+(CONTEXT §6.6) — those need T-021a's real Android.
 
 ---
 
@@ -70,9 +76,15 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 | ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
 | ~~**T-139** tune the dark style~~ | **Done 2026-08-11.** Tuned by contrast measurement, not by eye — `map/darkStyle.test.ts` holds D-015 against the shipped style. **T-140's toggle is now wired to the map** and persists. ⚠ Never seen; T-065 outdoors is the verdict. |
 
-**2. Verification that needs a device.** Everything in T-051–T-055, T-063, T-076, T-077–T-080,
-T-110. **No threshold anywhere in this app has met real data** — every number in D-033, D-037,
-D-039 and D-041 is a reasoned guess.
+**2. Verification that needs a device.** ⚠ **START WITH T-052a.** The first device run found
+that **recording starts and no fix ever reaches the database** — the foreground service runs,
+`dumpsys location` shows our uid registering no location request at all, and `raw_fix` stays
+empty. Permission, batching, silent errors and the task definition are all ruled out by
+experiment. Nothing downstream of the recorder can be verified until it is fixed, and D-010
+calls raw traces the only irreplaceable asset.
+
+The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110. **No threshold anywhere in this app has
+met real data** — every number in D-033, D-037, D-039 and D-041 is a reasoned guess.
 
 **3. Content, which only the project lead can produce.** `content/pois.json` is valid and
 **empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
@@ -94,15 +106,21 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 
 ### ⚠ The single most important thing to know
 
-**No line of this app has ever executed on a phone.** What has been verified is that it is
-*well-formed*: `tsc --noEmit` clean under strict, Metro bundles 850 modules, `expo-doctor`
-20/20, and config introspection confirms the entitlements and manifest attributes reach the
-native config. The pure logic is unit-tested — **270 tests**, on Node — and every screen has
-been measured in a browser (D-038). Neither substitutes for hardware.
+**The app executes, and the recorder has never worked.** Both halves matter.
 
-None of that proves a GPS fix would land in the database. No permission dialog has been seen,
-no battery figure measured, no OEM survival tested. Treat every Phase 1 claim as a hypothesis
-until a development build exists — which is the first blocker below.
+*What the emulator proved* (2026-08-11): the app builds, installs, launches and draws the real
+map from the offline pack; permission state is read correctly; the debug view reports honestly;
+tap targets measure 60 dp at 420 dpi, confirming T-113's browser figures.
+
+*What it disproved:* that recording works. **`raw_fix` is empty after 41 replayed positions**
+(T-052a). It also found a **D-008 violation** — `isGeofencing()` threw on While-Using and took
+the whole debug screen down with it — and a camera fitting the wrong rectangle (T-062). Three
+real defects in the first twenty minutes of owning a device, none of which 270 unit tests and a
+browser workbench had caught.
+
+*What no emulator can tell us:* battery, background survival, OEM killers, GPS realism
+(CONTEXT §6.6). No battery figure has been measured and `MEASURED_BATTERY_PERCENT_PER_DAY` stays
+`null` (D-041). Treat every Phase 1 *reliability* claim as a hypothesis until T-021a exists.
 
 ### What is Provisional
 

@@ -427,6 +427,35 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Verification
 
+- [!] **T-052a** ⚠ **BLOCKER: recording starts but no fix ever reaches the database.**
+      Found 2026-08-11, the first time the recorder ran on a device. **Nothing downstream of the
+      recorder can be verified until this is fixed**, and D-010 calls raw traces the only
+      irreplaceable asset — so this is now the most important open item in the project.
+      — **What happens:** starting recording logs `start profile=walking`, Android grants the
+      foreground service (`LocationTaskService`, confirmed in logcat), 41 positions were replayed
+      along a 2.2 km route, and `raw_fix` stayed **empty**. No trip was created either, because a
+      trip is opened lazily on the first fix.
+      — **Ruled out, each by experiment rather than by reading:**
+        · **Not the permission.** Granting `ACCESS_BACKGROUND_LOCATION` changed nothing.
+        · **Not the batching.** `walking` defers 5 minutes (D-028, a deliberate battery win) — but
+          a temporary patch to **1 s / 0 m / no deferral** also produced zero fixes. Patch
+          reverted; the tuned constants are untouched.
+        · **Not a silent failure.** `recording_event` holds no `error` row and logcat no rejection.
+        · **Not the task definition.** `defineTask` runs at module scope via `app/index.ts`,
+          exactly as Expo requires for a headless relaunch.
+      — **The sharpest clue, from `dumpsys location`:** every provider reads `ProviderRequest[OFF]`
+      and **our uid registers no location request at all.** The service is up; nothing is asking.
+      — **Two suspects left, and they need separating before anything is changed:**
+        1. `expo-location`'s Android task path never registers the request. Logcat warns
+           *"Introspectable data is missing for LocationTaskServiceOptions, falling back to
+           reflection-based conversion"*, which is at least adjacent.
+        2. `adb emu geo fix` drives the **GPS** provider while `expo-location` listens to the
+           **fused** provider — in which case this is an emulator limitation, not an app defect.
+      — **Cheapest experiment that distinguishes them:** put a plain foreground
+      `watchPositionAsync` behind a debug button and see whether it receives injected positions.
+      — ⚠ Until this is settled, **"the recorder works" stays unproven**, exactly as HANDOFF has
+      always said. What the emulator changed is that it is now a specific, reproducible question
+      rather than an untested assumption.
 - [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046

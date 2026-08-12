@@ -153,5 +153,19 @@ export interface LocationProvider {
 
   startGeofencing(regions: GeofenceRegion[]): Promise<void>;
   stopGeofencing(): Promise<void>;
+  /**
+   * Is the OS monitoring any regions for us?
+   *
+   * ⚠ **Must answer `false` rather than throw when the app is not authorized
+   * for background location.** D-008 requires the app to be fully functional on
+   * While-Using alone, and "we are not allowed to geofence" is an answer to
+   * this question, not a failure of it.
+   *
+   * This is not hypothetical: the first time the debug screen ran on a device
+   * with While-Using only, Expo rejected the underlying call and the rejection
+   * travelled up through `getGeofenceStatus` and `getRecorderHealth` until the
+   * whole screen died with *"Could not read recorder state"* — for exactly the
+   * permission level D-008 says must work.
+   */
   isGeofencing(): Promise<boolean>;
 }

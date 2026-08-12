@@ -27,8 +27,12 @@ genuinely blocked.
 
 ## Honesty rules, each of which cost something here
 
-- **Nothing in this app has ever run on a phone.** Say so when reporting anything as working.
-  270 unit tests and a browser workbench are the only verification that exists.
+- **The app runs on an emulator; the recorder has never worked.** Be precise about which half
+  you mean. Verified on a device: build, install, launch, the map drawing from the offline pack,
+  screens, permissions, 60 dp tap targets. **Not** verified: any fix reaching the database
+  (**T-052a** is the blocker), and — because no emulator can answer them — battery, background
+  survival and GPS realism (CONTEXT §6.6). 270 unit tests and a browser workbench remain all the
+  verification the *logic* has.
 - **Never state a measured-sounding number that was not measured.** The battery figure is
   `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
   silence — it is a promise the app has not earned.

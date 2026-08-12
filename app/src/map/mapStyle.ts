@@ -16,12 +16,28 @@
 import darkTemplate from '../../assets/map/dark.json';
 import lightTemplate from '../../assets/map/light.json';
 import type { MapAssetUris } from './mapAssets';
+import { applyFontScale, type StyleDocument } from './mapTextScale';
 
 export type MapStyleName = 'light' | 'dark';
 
-export function buildMapStyle(name: MapStyleName, uris: MapAssetUris): string {
+/**
+ * @param fontScale the phone's text-size setting, from `PixelRatio.getFontScale()`.
+ *   Defaults to 1, which returns the template untouched (T-061).
+ */
+export function buildMapStyle(
+  name: MapStyleName,
+  uris: MapAssetUris,
+  fontScale = 1
+): string {
   const template = name === 'light' ? lightTemplate : darkTemplate;
-  return JSON.stringify(template)
+
+  // Label sizes are baked into the style, so MapLibre cannot know about the
+  // phone's accessibility settings the way React Native's own text does
+  // (CONTEXT §6.5). Scaling happens before serialisation because it has to
+  // walk the expression tree, not the string.
+  const scaled = applyFontScale(template as unknown as StyleDocument, fontScale);
+
+  return JSON.stringify(scaled)
     .replaceAll('{{TILES_PMTILES}}', uris.tilesUrl)
     .replaceAll('{{TERRAIN_PMTILES}}', uris.terrainUrl)
     .replaceAll('{{GLYPHS}}', uris.glyphsRoot);

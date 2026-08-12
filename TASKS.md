@@ -619,7 +619,28 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       legible mid-grey, never near-black and never near-invisible. Visited differentiated by
       **weight plus brightness/darkness**, never hue alone — brighter and heavier in the dark
       style, darker and heavier in the light style. ⇠ T-059, T-139
-- [ ] **T-061** Respect system font scaling for all map labels ⇠ T-058
+- [x] **T-061** Respect system font scaling for all map labels ⇠ T-058
+      — Done 2026-08-12. `map/mapTextScale.ts` (pure, 12 tests) scales every symbol layer's
+      `text-size`; `MapScreen` supplies `PixelRatio.getFontScale()`. This was the one screen
+      React Native does not scale for us — MapLibre draws its own labels from the style, which
+      knows nothing about the phone's settings (CONTEXT §6.5).
+      — ⚠ **The obvious fix is invalid and the comment explains why.** Wrapping the size as
+      `["*", scale, …]` breaks the style: a `["zoom"]` expression may only be the input to a
+      *top-level* `interpolate` or `step`, and the shipped `text-size` is exactly that — a zoom
+      interpolate whose outputs are `case` expressions on `population_rank`. The scale has to be
+      pushed down to the output leaves, leaving zoom stops and conditions alone. **Multiplying a
+      zoom stop would move the zoom at which a label changes size, which is not a font change.**
+      — The load-bearing test runs over the **real shipped styles** and asserts every size moved
+      and nothing else did, so a regenerated style with a new expression shape fails the build
+      rather than silently ignoring an accessibility setting.
+      — **Verified on the emulator** at `font_scale` 1.0 and 1.6: labels visibly grow.
+      — ⚠ **And it exposed the cost, which is now measured rather than predicted: at 1.6 the
+      island label "Ilha da Madeira" is DROPPED.** Bigger labels collide sooner and MapLibre
+      resolves a collision by removing one. So a large accessibility setting produces fewer,
+      larger names — more legible per label and arguably less legible overall. No cap is applied,
+      because the rule is to respect the setting and a ceiling would be an unmeasured threshold.
+      **T-065 outdoors is where this gets judged**, at the largest scale a phone offers. If it
+      reads badly, a cap belongs here.
 - [x] **T-062** Camera defaults and sensible pan/zoom bounds ⇠ T-056
       — Done 2026-08-11, **and it was a real defect the first device screenshot found.** The
       camera fitted `madeira:bounds` — the whole tile pack, 1.12° of longitude including Porto
@@ -1044,7 +1065,17 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — The project lead asked for this explicitly: *"definitely something we should research in
       the future"*. Deliverable is a recommendation with a **network-behaviour audit** per D-043 —
       the thing that turns "no data leaves the device" quietly false (CONTEXT §4.8).
-- [ ] **T-105d** Make the passport worth screenshotting ⇠ T-074, D-051
+- [x] ~~**T-105d** Make the passport worth screenshotting~~ **DROPPED 2026-08-12 by the project
+      lead**, the day after it was raised. ⇠ T-074, D-051
+      — ⚠ **The consequence is not neutral and should not be softened: v1 now has no sharing
+      mechanism at all**, designed or accidental. D-051 already removed the souvenir video, which
+      CONTEXT §2.3 calls *the entire distribution strategy*; this was the fallback, and it is gone
+      too. **OD-10 is no longer partly mitigated — it is wide open.**
+      — Nothing is lost technically: the passport screen exists and a user can still take a
+      screenshot by hand. What does not exist is any reason for them to, or any design that makes
+      the result worth posting.
+      — Original framing, kept because it is what to restore if OD-10 is answered by "organic
+      sharing after all":
       — With the video cut, this is the nearest thing v1 has to a way anybody discovers the app,
       and CONTEXT §4.2 already claimed *"a filled passport page is also a second shareable
       screen"*. Nobody has designed an export, and **"they will screenshot it" is a hope, not a

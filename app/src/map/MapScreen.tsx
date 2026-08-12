@@ -18,7 +18,13 @@ import {
   Map as MapLibreMap,
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  PixelRatio,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
@@ -109,7 +115,16 @@ export default function MapScreen({
           prepareMapAssets(),
         ]);
         if (!cancelled) {
-          setStyleJson(buildMapStyle(parseMapStyle(preference), uris));
+          // The phone's text-size setting. Read here rather than inside
+          // `buildMapStyle` so that module stays pure and testable without
+          // React Native (CONTEXT §6.6) — T-061.
+          setStyleJson(
+            buildMapStyle(
+              parseMapStyle(preference),
+              uris,
+              PixelRatio.getFontScale()
+            )
+          );
         }
       } catch (error) {
         // A map that cannot load its files is a bug to fix, not a condition

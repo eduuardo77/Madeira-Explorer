@@ -2417,12 +2417,14 @@ D-043's audit rule says cannot be added without checking what it talks to over t
 the most technically risky item left and the least testable. Shipping without it is a smaller risk
 than not shipping.
 
-**What partly covers the gap, and should be treated as the v1 answer:** CONTEXT §4.2 already notes
-that *"a filled passport page is also a second shareable screen"*. A passport screenshot is a
-static image the app can already produce, it needs no new dependency, and **D-049 has just made it
-look considerably better** — a passport at 31/80 is worth posting in a way that 31/250 is not.
-⚠ **This is not a plan yet.** Nobody has designed a shareable passport export, and "they will
-screenshot it" is a hope, not a mechanism. Raised as **T-105d**.
+**What was going to partly cover the gap — and does not, as of the next day.** CONTEXT §4.2 notes
+that *"a filled passport page is also a second shareable screen"*, and T-105d was raised to design
+an export around it. **The project lead dropped T-105d on 2026-08-12.**
+
+⚠ **So v1 has no sharing mechanism at all, designed or accidental.** The video is gone and the
+fallback is gone. A user can still screenshot the passport by hand, but nothing is designed to
+make that worth doing. **OD-10 is not partly mitigated; it is wide open**, and it is now a question
+about whether v1 is worth launching publicly rather than a question about which channel to use.
 
 **Alternatives considered:**
 

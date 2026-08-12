@@ -63,8 +63,9 @@ available. That convergence is unusual, and everything important rides on it.
 ⚠ **And it is cut from v1 (D-051, 2026-08-12), so v1 has no distribution strategy at all.**
 Everything below still describes the intent and is why the video returns in v2 — but read it
 knowing that the mechanism it describes does not exist in the first release. The nearest thing v1
-has is a shareable passport screenshot (§4.2), which is a hope rather than a designed feature
-until T-105d does something about it.
+had was a shareable passport screenshot (§4.2) — and **T-105d, which would have designed one, was
+dropped by the project lead the following day.** So there is no sharing mechanism in v1 at all.
+See OD-10, which is now a question about whether v1 should launch publicly.
 
 There is no App Store search term that finds this app. Nobody searches "Madeira exploration
 tracker." Users install once, use it for seven days, and go home — no retention loop, no

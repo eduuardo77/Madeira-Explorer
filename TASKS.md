@@ -587,6 +587,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **Airplane mode itself is NOT tested, which is the actual point of this task.** The
       render happened with Metro attached over the network, so it proves the *tile pack* draws,
       not that a cold start works offline. Still open.
+      — ⚠ **Measured 2026-08-12, and it is sharper than "Metro was attached":** the debug APK
+      contains **zero** tile bytes. `unzip -l app-debug.apk | grep -ci 'pmtiles|glyph'` returns
+      **0**, and its whole `assets/` folder is 0.8 MB — of which 0.78 MB is ML Kit barcode models
+      belonging to `expo-dev-launcher`. The 19.1 MB reached the emulator over the dev server,
+      because a debug build serves `require`d assets from Metro rather than packaging them.
+      **So D-036's "19.1 MB rides in the binary" has never actually been observed**; the `require`
+      calls in `mapAssets.ts` make it true of a *release* build, but that build has not been made.
+      **This task needs a release APK, not just airplane mode** — testing offline against a debug
+      build tests the wrong binary.
       — ⚠ MapLibre logs four `Failed to load glyph range` errors. See **T-063a**.
 - [ ] **T-063a** Decide what to do about the four unbundled glyph ranges ⇠ T-063
       — Found 2026-08-11 by the first device render. `fetch-glyphs.mjs` bundles ranges **0–511
@@ -1030,6 +1039,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       fixture cannot run — `app/index.ts` only wraps the catalogue in
       `withDevFixtureFallback` when `__DEV__`, and shipping a ring of invented geofences around
       the user would be absurd. ⇠ T-029
+      — **A third thing to check, measured in the debug APK 2026-08-12:** `expo-dev-launcher`
+      contributes **ML Kit barcode scanning** — `lib/*/libbarhopper_v3.so` at 5.9 MB plus
+      `assets/mlkit_barcode_models/*.tflite` at 0.78 MB. It is there for the dev server's QR
+      scanner. Expected to vanish in release along with the rest of the dev client, but it is a
+      *camera-adjacent, model-carrying* dependency on an app whose entire pitch is that nothing
+      leaves the device, so confirm its absence explicitly rather than by assumption — this is
+      exactly the class T-117 was written to catch (CONTEXT §4.8).
 - [x] **T-118** iOS `PrivacyInfo.xcprivacy` manifest, including third-party SDK declarations
       ⇠ T-117
       — Done 2026-08-11. In `ios.privacyManifests` in `app.json` — Expo's config key, so there

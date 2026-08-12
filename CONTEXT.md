@@ -9,10 +9,11 @@ the outside.
 (T-117, D-043), the privacy policy (T-124, D-044), the battery exemption (T-046, D-045) and
 the stamp artwork (T-070, D-046). Contrast is now enforced by test (T-113). Previously 2026-08-10 (v1
 feature-complete in code) and 2026-08-08 (design session, D-026/D-027/D-028).
-**Repository state:** Git repository, ~20 commits. Planning documents plus the **whole v1
-chain** in `app/` — 58 source files and 14 test files, ~14,900 lines. **None of it has ever run
-on a phone**; 270 unit tests and a browser workbench (D-038) are the only verification that
-exists. Phase 0 is half done: the tile pack is built, the field runs are not.
+**Repository state:** Git repository, 59 commits. Planning documents plus the **whole v1
+chain** in `app/` — 70 source files and 23 test files, ~18,100 lines. **It has never run on a
+phone**, though since 2026-08-12 it records, stores and draws a replayed route on an emulator
+(D-047); 310 unit tests and a browser workbench (D-038) are the rest of the verification. Phase 0
+is half done: the tile pack is built, the field runs are not.
 
 **Read `HANDOFF.md` for what to do next.** This document is the *why*; that one is the state.
 
@@ -513,6 +514,8 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 | OD-5 | Cruise day-trippers as a segment? | Content curation | Open, not blocking. Not designed for; happy accident if it works. |
 | OD-6 | Raw trace retention policy | Phase 1 schema | **Resolved 2026-08-06 — retain**, with a delete-all control (D-010 Accepted) |
 | OD-7 | Levada data source and licensing | ~~Content, matching~~ | **Resolved 2026-08-08 — OSM alone is sufficient** (D-029). The 44 official PR routes are already in OSM, so no external licensing arises. Select by name + relation, never by tag. See `docs/osm-coverage.md` |
+| OD-8 | **The hero number reads as a failure at trip end.** A 7-day trip plausibly collects 25–45 places against a 150–250 canvas, finishing 10–30% full — which is §4.1's own argument against island-wide roads, at a smaller scale | Canvas size (T-066), the primary screen, the souvenir finale | **Open, raised 2026-08-12 by Claude.** Three separable questions in PROJECT_PLAN: is 150–250 right, does the primary screen need a denominator at all, and should per-region progress be the hero instead |
+| OD-9 | **v1 captures barometer and pedometer data on every batch that no v1 feature reads.** Their consumers — tunnel inference, vertical separation, blackout fallback — all moved to v2 with D-032 | The battery figure (T-054), and D-010's irreplaceability argument | **Open, raised 2026-08-12 by Claude.** Decide *before* T-054 measures, or the figure describes work v1 does not use |
 
 ### Recently closed
 

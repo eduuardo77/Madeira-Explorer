@@ -32,7 +32,7 @@ genuinely blocked.
   pack, screens, permissions, 60 dp tap targets, and — since 2026-08-12 — **a replayed route
   reaching `raw_fix` and drawing as a trace** (T-052a, D-047). **Not** verified, because no
   emulator can answer them: battery, background survival and GPS realism (CONTEXT §6.6), and
-  whether a `balanced`-accuracy request works on a real phone. 270 unit tests and a browser
+  whether a `balanced`-accuracy request works on a real phone. 310 unit tests and a browser
   workbench remain all the verification the *logic* has.
 - **On the emulator, record on the `driving` profile.** `walking` and `stationary` ask for
   `balanced` accuracy, which an emulator cannot serve at all, and they produce a perfect
@@ -50,7 +50,7 @@ genuinely blocked.
 ## Verifying work
 
 ```bash
-cd app && npm test          # 270 tests, Node's own runner, no framework
+cd app && npm test          # 310 tests, Node's own runner, no framework
 cd app && npx tsc --noEmit  # strict
 cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolves everything
 node tools/validate-content.mjs                                    # the content pack

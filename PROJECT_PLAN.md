@@ -393,6 +393,68 @@ Store-ready, privacy-clean, and usable without instruction.
 
 These are open and must be resolved. Owner is the project lead unless noted.
 
+### OD-8 — The hero number will read as a failure at trip end ⚠ **raised 2026-08-12**
+
+**Blocking nothing yet, but it invalidates a headline choice if true, and the fix is cheap now
+and expensive after launch.**
+
+D-002 makes stamps the hero and the primary screen shows `collected / total` — `23 / 180`.
+CONTEXT §4.1 rejected island-wide road coverage with the argument that *"the map would stay ~95%
+dark for the entire trip"* and *"our user leaves before the payoff."* **That argument appears to
+apply to the curated canvas too, just at a smaller scale.**
+
+Arithmetic, with the assumptions stated so they can be disputed: a busy 7-day rental-car trip
+might take in 8–12 miradouros, 2–4 levadas, 5–8 villages, 2–3 beaches and 4–6 landmarks —
+call it **25–45 places**. Against the 150–250 target (D-002, CONTEXT §4.1) that finishes at
+**10–30% collected**. The souvenir's headline would read something like `31 / 250`.
+
+D-002's own competitor teardown is the precedent: WalkMe's `0.00%` needed two decimal places to
+avoid reading as zero. `31 / 250` does not read as an achievement.
+
+**Three things to decide, and they are separable:**
+
+1. **Is 150–250 the right canvas?** The extractor (T-066) found ~390 plausible candidates on the
+   whole island, so 150 is already selective. A tighter 80–120 would finish nearer half full.
+2. **Does the primary screen need a denominator at all?** `31 stamps` is a fact about what you
+   did. `31 / 250` is a score against a target nobody set. The passport is where the uncollected
+   places belong — there, they are the recommendation (CONTEXT §4.1), which is the one place the
+   denominator does real work.
+3. **Should per-region progress carry the headline instead?** T-073 already computes it, and
+   *"Machico 6/7"* fills up where an island total never will. ⚠ CONTEXT §4.2 warns that region %
+   *and* stamps *and* roads is three scoring systems and one must be the hero — so this is a
+   swap, not an addition.
+
+*Raised by Claude, not the project lead. The souvenir already carries a related open question —
+T-105b asks whether the finale shows a denominator — so at minimum these should be answered
+together.*
+
+### OD-9 — v1 records sensor data that v1 cannot use ⚠ **raised 2026-08-12**
+
+**Affects the battery figure, which is the number one uninstall trigger (D-032).**
+
+`captureSensorsFor` runs on **every** location batch: a barometer read, a pedometer query, one
+`SELECT` and one `INSERT`. The only thing that ever reads a pressure or step value back is the
+debug screen.
+
+Barometer and pedometer exist to serve tunnel inference, vertical road separation and GPS-blackout
+fallback (CONTEXT §5, ARCHITECTURE §7) — **all of which D-032 moved to v2.** So v1 is paying a
+per-batch cost, all day, for data no v1 feature consumes.
+
+**The counter-argument is real and may win:** D-010 says raw capture is the only irreplaceable
+asset. A trace can be re-matched in v2 over history, but sensor readings that were never taken
+cannot be recovered, and every trip recorded without them is permanently poorer. That is exactly
+the reasoning that justified retaining raw fixes.
+
+**What makes it urgent rather than academic:** T-054 has never measured a battery figure, and
+when it does it will measure v1 *including* work v1 does not use. A number that fails its target
+would be the wrong number to react to. **Decide before T-054 runs, not after.**
+
+Options: keep it (D-010 wins); gate it behind the `driving` profile only (tunnels are the main
+v2 consumer and driving is usually on a charger); or sample it far more cheaply than once per
+batch.
+
+*Raised by Claude. No code has been changed — this reverses nothing and proposes nothing yet.*
+
 ### OD-4 — Monetisation
 **Deferred, not blocking.**
 The printed poster/map idea is explicitly parked. For now: free, no IAP, no ads (ads would

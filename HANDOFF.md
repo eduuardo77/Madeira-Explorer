@@ -17,14 +17,14 @@ implementation session).
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
 
-**Repository state:** git repository, ~20 commits. **The whole v1 chain is written**: record →
+**Repository state:** git repository, 59 commits. **The whole v1 chain is written**: record →
 stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
-user's accommodation masked out of anything shareable. 58 source files and 14 test files in
-`app/`, ~14,900 lines.
+user's accommodation masked out of anything shareable. 70 source files and 23 test files in
+`app/`, ~18,100 lines.
 
 **It runs on an emulator now** (2026-08-11, T-029b — the project lead enabled CPU
 virtualization). **The map renders**: offline PMTiles, bundled glyphs, hillshaded terrain, on a
-GPU. Screens, permissions and the debug view all work. 270 unit tests still cover the logic.
+GPU. Screens, permissions and the debug view all work. 310 unit tests still cover the logic.
 
 ✅ **And as of 2026-08-12, the recorder records.** **T-052a is closed and it was never a defect**
 (D-047): the `walking` and `stationary` profiles ask for `balanced`/`coarse` accuracy, which
@@ -46,7 +46,7 @@ it**.
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
    before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
    §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 40 numbered decisions. **Read D-032 first** — it defines v1 scope and
+2. **`DECISIONS.md`** — 48 numbered decisions. **Read D-032 first** — it defines v1 scope and
    deletes a large amount of work you might otherwise start.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
@@ -624,8 +624,10 @@ decision arises at all.
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
 > **State:** the whole v1 chain is written, and **it now runs on an Android emulator** — the map
-> renders from the offline pack, the screens work. 270 unit tests cover the logic. The tile pack
-> is built (19.1 MB with terrain). `content/pois.json` is valid and empty.
+> renders from the offline pack, the screens work, and the recorder records a replayed route and
+> draws it (D-047). 310 unit tests cover the logic. The tile pack is built (19.1 MB with terrain).
+> `content/pois.json` is valid and **empty — that one file is what stands between this and a
+> usable app**. `node tools/poi-candidates.mjs` writes ~390 candidates to triage into it (T-066).
 >
 > ✅ **The recorder records** (T-052a closed 2026-08-12, D-047) and the trace draws. ⚠ **On the
 > emulator you must record on the `driving` profile** — `walking` and `stationary` ask for

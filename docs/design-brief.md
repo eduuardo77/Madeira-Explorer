@@ -97,21 +97,42 @@ Three things on the primary screen. That is the whole app.
 │                                 │
 │                                 │
 │                                 │
-│                    ┌──────────┐ │   Stamp button — bottom-right
-│                    │ 🛂 23/180│ │   Carries the hero number (T-075)
-│                    └──────────┘ │
+│ ┌──────────┐                    │   Stamp button — bottom-left
+│ │ ◈ 23/180 │                    │   Carries the hero number (T-075)
+│ └──────────┘                    │
 └─────────────────────────────────┘
 ```
 
-### 3.1 The stamp button, bottom-right
+### 3.1 The stamp button, bottom-left
 
-Opens the passport. **It also carries the hero number** — the icon plus `23 / 180`. One element
+Opens the passport. **It also carries the hero number** — the mark plus `23 / 180`. One element
 doing two jobs, which is how T-075's "one hero number" requirement is met without adding a fourth
 thing to the screen.
 
-**Bottom-right, not bottom-left.** On a large phone the bottom-left corner is the hardest reach
-for a right-handed thumb, and this is the app's primary action. Leave clearance from the screen
-edge — both left and right edges are back-gesture territory on Android.
+**Bottom-left, on the project lead's instruction (2026-08-12).** This section previously argued
+for bottom-right, and the argument was thumb reach: on a large phone the bottom-left corner is the
+hardest reach for a right-handed thumb, and this is the app's primary action. That reasoning is
+recorded here rather than deleted, because it is still true and it is what to weigh if the
+placement is ever revisited — a one-handed field test (T-065, outdoors) is what would settle it.
+
+What must be preserved either way: **the two bottom controls stay on opposite sides.** When the
+passport moved left the start/stop control moved right. It is the opposition, not the specific
+side, that stops one being a mis-tap for the other — putting both under the same thumb is the
+actual failure. Leave clearance from the screen edge on both: each is back-gesture territory on
+Android.
+
+**The icon is a drawn stamp mark, not the `🛂` emoji.** That glyph rendered at button size as a
+plain blue rectangle, and on 2026-08-12 the project lead looked at the running app and asked what
+"the button to centre the map" did. It opened the passport. `passport/stampMark.ts` now draws a
+tilted, die-cut octagonal seal, using the same `cutEdge` geometry as the real stamps so the icon
+cannot drift away from the things it stands for.
+
+⚠ **The first attempt at that mark was a 20-gon and it failed the same way**, for a reason worth
+keeping: it passed every geometry test and then rendered as a ring with a dot in it — a record
+button, or a crosshair, which was precisely the wrong thing to draw on a screen where a
+map-centring control had just been removed. At 34 dp a 20-gon *is* a circle and a 1.6-unit scallop
+does not exist. **Corners and tilt are what survive being small.** The tests were rewritten to pin
+those two properties, but they did not find the problem and could not have — looking at it did.
 
 ### 3.2 Settings, top-left
 

@@ -32,6 +32,11 @@ import {
   stampElements,
   toPolygon,
 } from '../app/src/passport/stampArt.ts';
+import { stampMarkPath, TILT_DEG } from '../app/src/passport/stampMark.ts';
+// The real palette, not hexes retyped by eye. `theme.ts` has no imports of its
+// own, so Node can load it directly — and a preview whose colours differ from
+// the app's is exactly the thing this file's header warns against.
+import { colors } from '../app/src/ui/theme.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.join(here, 'out');
@@ -129,6 +134,32 @@ const mixed = CATEGORIES.flatMap((category) =>
   )
   .join('');
 
+/**
+ * The passport *mark* (T-075) — the icon on the primary screen's passport
+ * button, not a stamp for a place.
+ *
+ * Drawn at the sizes it is actually used, because the defect it replaced was
+ * specifically a size failure: a `🛂` emoji that read as a blue rectangle on a
+ * phone. A mark that only works at 104px would be the same mistake again.
+ *
+ * Shown twice: on this page's own dark ground, and — the one that matters — on
+ * `colors.action` in `colors.actionText`, which is what the button actually
+ * does. Judging a button icon anywhere but on its button would flatter it.
+ */
+const MARK_SIZES = [24, 34, 48, 96];
+
+function markRow(ink) {
+  return MARK_SIZES.map(
+    (size) => `
+  <figure class="stamp mark" style="width:${size}px">
+    <svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="width:${size}px;height:${size}px">
+      <path d="${stampMarkPath()}" fill="${ink}" fill-rule="evenodd" transform="rotate(${TILT_DEG} ${CANVAS/2} ${CANVAS/2})" />
+    </svg>
+    <figcaption>${size} dp</figcaption>
+  </figure>`
+  ).join('');
+}
+
 const html = `<!doctype html>
 <meta charset="utf-8">
 <title>Stamp artwork — T-070</title>
@@ -158,6 +189,21 @@ const html = `<!doctype html>
   from, replaying the same composition. If it looks wrong here it is wrong in the app.
   Names are invented; <code>content/pois.json</code> is empty and is yours (T-066).
 </p>
+
+<h2>The passport mark (T-075)</h2>
+<p class="note">
+  The icon on the primary screen's passport button — the <i>idea</i> of a stamp, not a stamp
+  for a place. Cut by the same <code>cutEdge</code> the real stamps use, so it cannot drift
+  away from them. It replaced a <code>🛂</code> emoji that rendered as a blue rectangle at
+  button size. <b>The button draws it at 34 dp</b>; the rest are here to show where it stops
+  working.
+</p>
+<div class="row" style="align-items: flex-end">${markRow(colors.text)}</div>
+<p class="note">And how it actually ships — <code>colors.actionText</code> on
+<code>colors.action</code>, which is the passport button:</p>
+<div class="panel" style="background:${colors.action}">
+  <div class="row" style="align-items: flex-end">${markRow(colors.actionText)}</div>
+</div>
 
 ${sections}
 

@@ -758,6 +758,21 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **The stamp button carries the hero number** (icon + `23 / 180`). One element, two jobs —
       this is how the one-hero-number requirement is met without a fourth element on screen.
       — Never show a coverage percentage as the headline (D-002).
+      — **Amended 2026-08-12, on the project lead's instruction, after looking at the running
+      app.** The stamp button moved to **bottom-left** and the start/stop control to bottom-right;
+      what matters is that they stay on opposite sides, because that is what stops a mis-tap. The
+      old thumb-reach argument for bottom-right is kept in design brief §3.1 rather than deleted —
+      it is still true, and a one-handed outdoor test (T-065) is what would settle it.
+      — **The `🛂` emoji is gone.** At 36 dp it rendered as a plain blue rectangle, and the project
+      lead asked what "the button to centre the map" was — on a screen that has no such control.
+      `passport/stampMark.ts` now draws a tilted die-cut octagonal seal from the same `cutEdge`
+      geometry the real stamps use, so the icon cannot drift from the things it stands for.
+      11 tests, and it is in `tools/preview-stamps.mjs` at four sizes on the real button colour.
+      — ⚠ **The first mark was a 20-gon, passed every test, and rendered as a crosshair** — which
+      on this screen of all screens was the wrong thing to draw. At 34 dp a 20-gon is a circle and
+      a 1.6-unit scallop does not exist. **Corners and tilt are what survive being small**; the
+      tests now pin both, but looking at it is what found it. CLAUDE.md's rule about artwork
+      earning a second renderer is the reason the preview page existed to check it in.
 
 ### Verification
 

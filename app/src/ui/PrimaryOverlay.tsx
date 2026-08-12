@@ -5,7 +5,7 @@
  * -----------------------------------------------
  *   gear, top-left ─── settings, rare and slightly out of the way
  *   [ the map ] ────── the product; everything here is chrome over it
- *   stamp button, bottom-right ─── the passport, carrying the hero number
+ *   stamp button, bottom-left ─── the passport, carrying the hero number
  *
  * And a conditional fourth: an explicit start/stop control, shown **only** to
  * users who have not granted Always (D-008, design brief §3.3). For them
@@ -20,18 +20,31 @@
  * and the competitor teardown in §6.3 shows exactly why: their `0.00%` needed
  * two decimal places to avoid reading as zero.
  *
- * BOTTOM-RIGHT IS NOT ARBITRARY
- * -----------------------------
- * It is the easiest reach for a right-handed thumb on a large phone, and this
- * is the app's primary action. Both screen edges are back-gesture territory on
- * Android, hence the clearance.
+ * ⚠ BOTTOM-**LEFT**, ON THE PROJECT LEAD'S INSTRUCTION (2026-08-12)
+ * ----------------------------------------------------------------
+ * This used to be bottom-right, and the reason recorded here was thumb reach:
+ * the easiest place for a right-handed thumb on a large phone, for the app's
+ * primary action. That reasoning is not wrong and it was overruled deliberately
+ * — see design brief §3.1. The two bottom controls keep their **horizontal**
+ * separation, mirrored: the passport is now left and the recording control
+ * right, so neither is a mis-tap for the other. Both screen edges are
+ * back-gesture territory on Android, hence the clearance on each.
+ *
+ * The icon is `StampMark`, not the `🛂` emoji it replaced. At 36 dp that glyph
+ * rendered as a blue rectangle — the project lead looked at the running app and
+ * asked what "the button to centre the map" did. D-015: minimal is not
+ * unlabelled.
  *
  * Presentational: props in, pixels out, so the workbench can mount it.
  */
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
+import StampMark from './StampMark';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+
+/** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
+const STAMP_MARK_SIZE = 34;
 
 export type PrimaryOverlayProps = {
   progress: TripProgress;
@@ -77,7 +90,11 @@ export default function PrimaryOverlay({
           a While-Using user with a full collection, which is a real
           combination and the worst case for width. Stacking cannot collide at
           any width, and it keeps them horizontally apart so neither is a
-          mis-tap for the other. */}
+          mis-tap for the other.
+          ⚠ The two `alignSelf` values below are a pair. When the passport moved
+          left the recording control moved right, because it is that opposition
+          — not the specific side — that stops a mis-tap. Changing one alone
+          puts both primary controls under the same thumb. */}
       <View style={styles.bottom} pointerEvents="box-none">
         {showRecordingControl ? (
           <Pressable
@@ -111,7 +128,7 @@ export default function PrimaryOverlay({
           onPress={onOpenPassport}
           style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
         >
-          <Text style={styles.stampGlyph}>🛂</Text>
+          <StampMark size={STAMP_MARK_SIZE} color={colors.actionText} />
           <Text style={styles.stampCount}>
             {progress.total === 0
               ? '—'
@@ -153,7 +170,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   recording: {
-    alignSelf: 'flex-start',
+    // Right, because the passport is left. See the pairing note above.
+    alignSelf: 'flex-end',
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
@@ -170,9 +188,9 @@ const styles = StyleSheet.create({
   },
 
   stampButton: {
-    // Bottom-right: the easiest reach for a right-handed thumb on a large
-    // phone, and this is the primary action.
-    alignSelf: 'flex-end',
+    // Bottom-left, on the project lead's instruction — see the header. The
+    // recording control sits opposite it.
+    alignSelf: 'flex-start',
     minHeight: MIN_TAP_TARGET,
     flexDirection: 'row',
     alignItems: 'center',
@@ -181,7 +199,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: colors.action,
   },
-  stampGlyph: { fontSize: fontSize.title },
   stampCount: {
     color: colors.actionText,
     fontSize: fontSize.title,

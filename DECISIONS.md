@@ -2140,3 +2140,78 @@ on bright red at **3.90:1**, and — outside this decision but found by the same
 colourway on every build, so the next palette added cannot ship unreadable. The colours here
 are still unseen outdoors; contrast is a floor, not a verdict.
 
+
+---
+
+## D-047 — The emulator cannot serve a `balanced`-accuracy location request. The recorder was never broken.
+
+**Status:** Provisional — measured on the emulator 2026-08-12 (T-052a). The *finding* is
+measured and reproducible; the **consequence for the walking profile on real hardware is not**,
+and that is the part waiting on T-021a.
+
+**What was actually wrong:** nothing in this codebase. The recorder's whole chain — task
+registration, `expo-location`'s Android task path, the sink, SQLite, lazy trip creation — works
+end to end. What failed was the **requested accuracy priority**.
+
+`samplingPolicy.ts` asks for `balanced` when walking and `coarse` when stationary.
+`expo-location` maps both onto `PRIORITY_BALANCED_POWER_ACCURACY`, which is served by the
+**network** location provider (GMS's `NetworkLocationService` — wifi and cell geolocation). An
+emulator has no real wifi or cell survey to geolocate from, so that request produces nothing,
+registers nothing, and turns nothing on. `adb emu geo fix` drives the **GPS** provider only, and
+only a `PRIORITY_HIGH_ACCURACY` request powers it up. `driving` is the one profile that asks for
+`high`.
+
+**The evidence, in the order it was collected:**
+
+1. A plain foreground `watchPositionAsync` at `Accuracy.High` received **11 positions in 15 s**,
+   and a one-shot `getCurrentPositionAsync` returned a fix. So `expo-location`, the fused client
+   and `adb emu geo fix` all work together on this machine.
+2. Geofencing registered *and delivered crossings* through the same PendingIntent machinery, so
+   the broadcast-receiver path was never implicated either.
+3. With the **walking** profile: `dumpsys location` reads `ProviderRequest[OFF]` on every
+   provider, our uid appears nowhere, and 41 replayed points produce **zero** rows.
+4. With the **driving** profile: `gps provider: ProviderRequest[@+15s0ms, HIGH_ACCURACY,
+   WorkSource{10192 com.madeiraexplorer.app}]` — our uid, at exactly the profile's `minTimeMs` —
+   and the same 41-point replay produces **12 fixes spaced 15 s apart**, which then draw as a
+   trace on the map.
+5. Reversed and re-reversed: walking → `OFF`, driving → registered. The result moves when the
+   input moves, which is the check CLAUDE.md demands before believing any of this.
+
+**This corrects T-052a's second suspect.** It was framed as *GPS provider versus fused provider*.
+The provider family was never the axis — a `HIGH_ACCURACY` request through the very same fused
+client works. **The axis is priority.**
+
+**What this does and does not settle:**
+
+- ✅ **Settled:** the recorder records. The oldest and largest unknown in the project is closed.
+- ✅ **Settled:** T-052a was an environment limitation, not an app defect. Nothing was changed to
+  make it work, which is the strongest available evidence for that claim.
+- ❌ **Not settled:** whether `balanced` produces fixes on a real phone. It should — wifi and cell
+  geolocation are real there — but that is an argument, not a measurement, and this project has
+  been bitten before by exactly that distinction (D-043). **T-051 owes the reading.**
+
+**The risk this exposes, which is the part worth keeping:** with the walking profile the app's
+location request is *invisible* and produces *nothing*, while the debug screen cheerfully reports
+`Recording: yes` and the foreground-service notification sits in the shade. That is precisely the
+silent failure CONTEXT §4.5 calls worse than never installing the app. A tourist on a levada with
+no SIM and wifi off is not an exotic state.
+
+**Alternatives considered:**
+
+- *Raise `walking` to `high` accuracy now.* **Rejected for now, and it is the obvious candidate.**
+  It would have made the emulator record on the first try, but it spends the battery budget
+  (D-028, ARCHITECTURE §7) to fix a machine that has no battery — and T-054 has never measured
+  what that budget actually is. Changing tuned constants to satisfy a simulator is how a
+  measurement gets faked. **Revisit when T-051/T-054 report.**
+- *Reach for the Transistor SDK (T-031a, D-025).* Rejected, and it would have been an expensive
+  mistake: the free stack was working the whole time.
+- *Have the recorder verify its own request registered.* **Not adopted, but the most interesting
+  option** — it is the general fix for the silent-failure class, not just this instance. There is
+  no public Android API for "did my request register", but *"recording has been on for N minutes
+  and no fix has arrived"* is answerable and the health-check machinery (D-011, T-049) already
+  exists to carry it. Raised as **T-052b**.
+
+**Consequences:** `app/src/recording/locationProbe.ts` stays — it is the instrument that settled
+this and it is what settles it again on real hardware. `samplingPolicy.ts` is **untouched**.
+CONTEXT §6.6's list of what an emulator cannot answer gains a fourth entry, and it is the one
+that would have cost the most time to rediscover.

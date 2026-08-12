@@ -30,6 +30,7 @@ import { checkTripEnd } from '../progress/tripEndDetection';
 import { generateFixture, saveFixture } from '../recording/devPoiFixture';
 import { runHealthCheck } from '../recording/healthCheck';
 import { locationProvider } from '../recording/ExpoLocationProvider';
+import { probeForegroundLocation } from '../recording/locationProbe';
 import {
   refreshGeofences,
   stopGeofences,
@@ -215,6 +216,19 @@ export default function DebugScreen() {
     );
     await saveFixture(places);
     await refreshGeofences('debug screen');
+  }, []);
+
+  /**
+   * T-052a. Asks `expo-location` for a position without going anywhere near the
+   * background task path, and reports what came back. See `locationProbe.ts`
+   * for which of the two remaining suspects each outcome accuses.
+   */
+  const runLocationProbe = useCallback(async () => {
+    const result = await probeForegroundLocation();
+    Alert.alert(
+      'Foreground location probe',
+      `One shot: ${result.oneShot}\n\nWatch: ${result.watch}`
+    );
   }, []);
 
   const confirmDeleteAll = useCallback(() => {
@@ -465,6 +479,12 @@ export default function DebugScreen() {
           label="Request Always"
           onPress={() => {
             void runAction(() => locationProvider.requestAlwaysPermission());
+          }}
+        />
+        <Button
+          label="Probe foreground location (T-052a)"
+          onPress={() => {
+            void runAction(runLocationProbe);
           }}
         />
         <Button

@@ -77,9 +77,19 @@ Everything that does not involve a real radio — which is most of the currently
   labels, the lot (T-063, D-035, D-036). This has never been seen.
 - Migrations run, the debug screen works, the content pack loads.
 - Permission dialogs appear and are recorded correctly.
-- **A replayed GPX route** (Extended controls ▸ Location ▸ Routes) drives the whole recorder
-  end-to-end: fixes land in `raw_fix`, the trace draws, the sampling gate switches profiles
-  (T-034), and the geofence set reshuffles around the synthetic fixture (T-039, T-076).
+- **A replayed GPX route** (Extended controls ▸ Location ▸ Routes, or `bash
+  tools/replay-route.sh`) drives the whole recorder end-to-end: fixes land in `raw_fix`, the trace
+  draws, the sampling gate switches profiles (T-034), and the geofence set reshuffles around the
+  synthetic fixture (T-039, T-076). **Verified 2026-08-12** — 41 replayed points produced 12
+  fixes 15 s apart, a trip, and a drawn trace.
+
+  ⚠ **You must record on the `driving` profile for any of that to happen** (D-047). `walking` and
+  `stationary` ask for `balanced`/`coarse` accuracy, which resolves to the *network* provider —
+  wifi and cell geolocation — and an emulator has neither. Those profiles register no request at
+  all and produce a flawless impersonation of a dead recorder; it cost a day before it was
+  understood. **`adb shell dumpsys location` is the one-line check:** while recording you want to
+  see `gps provider: ProviderRequest[@…, HIGH_ACCURACY, WorkSource{… com.madeiraexplorer.app}]`.
+  No line naming our package means nothing is being asked for.
 
 ### What it cannot settle, ever
 
@@ -87,6 +97,9 @@ Everything that does not involve a real radio — which is most of the currently
   to quote (T-042) cannot come from here.
 - **OEM background killers** (ARCHITECTURE §6.2). There is no OEM.
 - **Force-quit relaunch**, barometer, real GPS noise under canopy.
+- **Whether a `balanced`-accuracy request works at all** (D-047). It should on a real phone —
+  wifi and cell geolocation are real there — but that is an argument, not a reading, and the
+  `walking` and `stationary` profiles both depend on it. **T-051 owes the measurement.**
 - Anything iOS: the 20-region cap driving D-033, `CompleteUntilFirstUserAuthentication`,
   `pausesUpdatesAutomatically`.
 

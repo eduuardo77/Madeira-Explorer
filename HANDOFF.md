@@ -1,7 +1,10 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
+**Updated:** 2026-08-12 — **T-052a closed: the recorder records, and it was never broken**
+(D-047). The blocker was the emulator's inability to serve a `balanced`-accuracy request. Raised
+**T-052b** (notice a recorder receiving nothing) and **T-052c** (a `checkTripEnd` throw).
+Earlier 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
 audit (T-117, D-043), the privacy policy (T-124, D-044), the battery exemption (T-046, D-045)
 and the stamp artwork (T-070, D-046). **The small-remainder list is down to T-139**, and what
 is left of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1
@@ -21,11 +24,18 @@ user's accommodation masked out of anything shareable. 58 source files and 14 te
 virtualization). **The map renders**: offline PMTiles, bundled glyphs, hillshaded terrain, on a
 GPU. Screens, permissions and the debug view all work. 270 unit tests still cover the logic.
 
-⚠ **But the recorder does not work.** Recording starts, the foreground service runs, and **no fix
-has ever reached the database** — see **T-052a**, the blocker to start from. The honest statement
-is now narrower, not broader: *the app runs and draws; it has never successfully recorded
-anything.* And the emulator still cannot speak to **battery, background survival or GPS realism**
-(CONTEXT §6.6) — those need T-021a's real Android.
+✅ **And as of 2026-08-12, the recorder records.** **T-052a is closed and it was never a defect**
+(D-047): the `walking` and `stationary` profiles ask for `balanced`/`coarse` accuracy, which
+resolves to the *network* provider, and an emulator has no wifi or cell survey to geolocate from.
+`adb emu geo fix` drives **GPS**, which only a high-accuracy request turns on — and `driving` is
+the one profile that asks for it. On `driving`, a 41-point replay produced **12 fixes 15 s apart**
+and **the trace drew on the map**. Nothing in `app/` was changed to achieve that, which is the
+strongest evidence available that nothing in `app/` was wrong.
+
+⚠ **The emulator still cannot speak to battery, background survival or GPS realism**
+(CONTEXT §6.6) — those need T-021a's real Android. And **whether `balanced` works on a real
+phone is still unmeasured**; it should, but that is an argument, not a reading, and **T-051 owes
+it**.
 
 ---
 
@@ -76,15 +86,15 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 | ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
 | ~~**T-139** tune the dark style~~ | **Done 2026-08-11.** Tuned by contrast measurement, not by eye — `map/darkStyle.test.ts` holds D-015 against the shipped style. **T-140's toggle is now wired to the map** and persists. ⚠ Never seen; T-065 outdoors is the verdict. |
 
-**2. Verification that needs a device.** ⚠ **START WITH T-052a.** The first device run found
-that **recording starts and no fix ever reaches the database** — the foreground service runs,
-`dumpsys location` shows our uid registering no location request at all, and `raw_fix` stays
-empty. Permission, batching, silent errors and the task definition are all ruled out by
-experiment. Nothing downstream of the recorder can be verified until it is fixed, and D-010
-calls raw traces the only irreplaceable asset.
+**2. Verification that needs a device.** ~~T-052a~~ **is closed (D-047) — the recorder records,
+and the trace draws.** What blocked it was the emulator's inability to serve a `balanced`-accuracy
+request, not the code.
 
-The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110. **No threshold anywhere in this app has
-met real data** — every number in D-033, D-037, D-039 and D-041 is a reasoned guess.
+The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110, plus the two items T-052a raised on its
+way out — **T-052b** (notice a recorder that is running and receiving nothing — the silent-failure
+class, and the more valuable of the two) and **T-052c** (a `checkTripEnd` throw on a released
+database handle, possibly dev-client-only). **No threshold anywhere in this app has met real
+data** — every number in D-033, D-037, D-039 and D-041 is a reasoned guess.
 
 **3. Content, which only the project lead can produce.** `content/pois.json` is valid and
 **empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
@@ -106,17 +116,25 @@ Phase 4 map matching is **v2**. The effort saved goes into the interface and the
 
 ### ⚠ The single most important thing to know
 
-**The app executes, and the recorder has never worked.** Both halves matter.
+**The v1 chain now runs end to end on the emulator: record → store → draw.** What is unproven is
+no longer *whether it works* but *what it costs and whether it survives* — and those need real
+hardware.
 
-*What the emulator proved* (2026-08-11): the app builds, installs, launches and draws the real
-map from the offline pack; permission state is read correctly; the debug view reports honestly;
-tap targets measure 60 dp at 420 dpi, confirming T-113's browser figures.
+*What the emulator proved* (2026-08-11 and 2026-08-12): the app builds, installs, launches and
+draws the real map from the offline pack; permission state is read correctly; the debug view
+reports honestly; tap targets measure 60 dp at 420 dpi, confirming T-113's browser figures; and
+**the recorder captures a replayed route into `raw_fix`, opens a trip, and the trace renders**.
 
-*What it disproved:* that recording works. **`raw_fix` is empty after 41 replayed positions**
-(T-052a). It also found a **D-008 violation** — `isGeofencing()` threw on While-Using and took
-the whole debug screen down with it — and a camera fitting the wrong rectangle (T-062). Three
-real defects in the first twenty minutes of owning a device, none of which 270 unit tests and a
-browser workbench had caught.
+*What it found:* a **D-008 violation** — `isGeofencing()` threw on While-Using and took the whole
+debug screen down with it — a camera fitting the wrong rectangle (T-062), and a day spent on
+**T-052a, which turned out to be the emulator and not the app** (D-047). Two real defects in the
+first twenty minutes of owning a device, neither of which 270 unit tests and a browser workbench
+had caught — and one expensive lesson about believing a symptom's obvious reading.
+
+*The lesson worth keeping from T-052a:* the four causes it ruled out were all ruled out
+correctly, and the answer was still outside the space it searched. **When every candidate is
+excluded, widen the axis rather than going deeper on the last one.** The axis here was *which
+priority the request asked for*, and the question was never posed.
 
 *What no emulator can tell us:* battery, background survival, OEM killers, GPS realism
 (CONTEXT §6.6). No battery figure has been measured and `MEASURED_BATTERY_PERCENT_PER_DAY` stays
@@ -126,7 +144,7 @@ browser workbench had caught.
 
 **D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
 
-**Nineteen decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
+**Twenty decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
 is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
 entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
 from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
@@ -134,6 +152,11 @@ from the 2026-08-08 design session; most of the rest were made while building on
 Provisional and the burden is on confirmation, not objection (CONTEXT §9). The ones with
 something specific still outstanding:
 
+- **D-047** *(2026-08-12)* — the emulator cannot serve a `balanced`-accuracy location request, so
+  `walking` and `stationary` record nothing here and `driving` records perfectly. **The finding is
+  measured and reversible; the consequence on real hardware is not.** Whether `balanced` produces
+  fixes on a real phone is the open half, and **T-051 owes the reading**. It also left T-052b —
+  the app cannot currently tell "recording" from "recording nothing".
 - **D-042** *(2026-08-11)* — the souvenir is planned as a storyboard before it is rendered,
   paced by recorded movement rather than by elapsed time, never drops a stamp, and produces
   **no film at all** from a trace masking could not verify. Unit-tested and **never watched** —
@@ -258,20 +281,25 @@ already deleted it.
 
 Two of these are the project lead's and cannot be done for them. The rest is a short list.
 
-**1. ⚠ T-052a — THE RECORDER HAS NEVER RECORDED. Start here.**
+**1. ✅ T-052a is closed (2026-08-12, D-047). The recorder records.**
 
-Recording starts, the foreground service runs, and **no fix ever reaches `raw_fix`.** Found
-2026-08-11, the first time the recorder ran on a device. Nothing downstream of the recorder can
-be verified until it is fixed, and D-010 calls raw traces the only irreplaceable asset.
+It was never a defect. The `walking` and `stationary` profiles ask for `balanced`/`coarse`
+accuracy → `PRIORITY_BALANCED_POWER_ACCURACY` → the *network* provider, and an emulator has no
+wifi or cell survey to geolocate from. `adb emu geo fix` drives **GPS**, which only
+`PRIORITY_HIGH_ACCURACY` turns on, and **`driving` is the only profile that asks for it**.
 
-Permission, batching, silent errors and the task definition are **all ruled out by experiment** —
-read T-052a before touching anything, because the reasoning there is what stops you repeating
-four dead ends. `dumpsys location` shows every provider `OFF` and **our uid registering no
-location request at all**.
+**To watch the recorder work, record on `driving`.** On the debug screen: *Start recording
+(driving)*, then `bash tools/replay-route.sh tools/routes/funchal-seafront.txt`. `dumpsys
+location` should show `gps provider: ProviderRequest[@+15s0ms, HIGH_ACCURACY, WorkSource{…
+com.madeiraexplorer.app}]` — **that line is the single best health check on this machine**, and
+its absence is what a silent recorder looks like.
 
-Two suspects remain and the task names the cheap experiment that separates them. **Do not change
-location options or reach for the Transistor SDK (T-031a) until it is settled** — it is still
-possible the emulator, not the app, is what cannot deliver a position.
+`app/src/recording/locationProbe.ts`, behind *Probe foreground location (T-052a)* on the debug
+screen, is the instrument that settled it. Keep it — it asks the same question on real hardware.
+
+⚠ `samplingPolicy.ts` was **not** changed, and should not be changed to make an emulator happy.
+Raising `walking` to high accuracy is the obvious move and it spends a battery budget nobody has
+measured (T-054). See D-047's rejected alternatives before reaching for it.
 
 **2. ⚠ THE TWO THINGS ONLY THE PROJECT LEAD CAN DO.**
 
@@ -299,8 +327,8 @@ T-046, T-070, T-105a, T-113, T-116/T-116a, T-117, T-118, T-120, T-122, T-124, T-
 **What is left of v1 is a device, the content, and the Play submission**, and none of the three
 is code.
 
-**5. Once T-052a is fixed, in this order**, because each is cheap and each can invalidate the
-next: replay a route and see the trace draw (`tools/replay-route.sh`) → the tunnel route, which
+**5. Now that T-052a is closed, in this order**, because each is cheap and each can invalidate the
+next: ~~replay a route and see the trace draw~~ (**done 2026-08-12**) → the tunnel route, which
 must draw as **two** segments not one (ARCHITECTURE §10) → airplane-mode cold start (T-063, still
 open — the render so far had Metro attached) → permission dialogs on a fresh install → then, on
 real hardware only: the geofence field test (T-076, ~850 m on foot) → an overnight soak (T-051) →
@@ -582,17 +610,17 @@ decision arises at all.
 > renders from the offline pack, the screens work. 270 unit tests cover the logic. The tile pack
 > is built (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
-> ⚠ **But the recorder has never recorded.** `T-052a` is the blocker and the first thing to read:
-> recording starts, the foreground service runs, and no fix ever reaches the database. Four
-> candidate causes are already ruled out by experiment — read the task before touching anything,
-> and do not change location options or reach for the Transistor SDK until the two remaining
-> suspects have been separated.
+> ✅ **The recorder records** (T-052a closed 2026-08-12, D-047) and the trace draws. ⚠ **On the
+> emulator you must record on the `driving` profile** — `walking` and `stationary` ask for
+> `balanced` accuracy, which needs the network provider, and an emulator has no wifi or cell
+> survey to geolocate from. That is the emulator, not the app, and nothing in `app/` was changed.
 >
 > **To see anything:** `bash tools/run-emulator.sh`, then `cd app && npm run android`. Feed it
 > positions with `bash tools/replay-route.sh tools/routes/funchal-seafront.txt` and grab the
 > screen with `bash tools/screenshot.sh <name>`. `adb root` works, and reading
 > `/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` is usually faster than tapping
-> through the UI.
+> through the UI. `adb shell dumpsys location` tells you in one line whether the recorder is
+> actually asking for anything.
 >
 > **Two things are mine, not yours:** getting a *physical* Android — the emulator works but
 > cannot answer battery, background survival or GPS realism — and curating
@@ -601,9 +629,10 @@ decision arises at all.
 > I am done planning and want to build. Do not open new research threads or propose new
 > decisions unless something is genuinely blocked.
 >
-> Start with **T-052a**. After that: **T-105b, the souvenir encoder** (the whole distribution
-> strategy, D-013 — the composition is written, this is the encoding), or **T-063a**, the glyph
-> ranges, which needs a decision rather than a reflex.
+> Start with **T-105b, the souvenir encoder** (the whole distribution strategy, D-013 — the
+> composition is written, this is the encoding), or **T-063a**, the glyph ranges, which needs a
+> decision rather than a reflex, or **T-052b**, which is how the app notices it has stopped
+> recording.
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

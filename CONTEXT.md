@@ -430,6 +430,17 @@ must stay readable.** Full direction and the primary-screen structure are in
   permissions and replayed-route logic* — and worthless for battery, background survival and
   GPS realism. Never let a green result in the emulator close a task that names a battery
   figure or a survival claim.
+  **A fourth thing an emulator cannot answer, added 2026-08-12 (T-052a, D-047), and the one
+  that cost the most:** it cannot serve a **`balanced`- or `coarse`-accuracy** location request
+  at all. Those map to `PRIORITY_BALANCED_POWER_ACCURACY`, which is served by the *network*
+  provider — wifi and cell geolocation — and an emulator has no wifi or cell survey to
+  geolocate from. The request produces nothing, registers nothing, and turns nothing on.
+  `adb emu geo fix` drives **GPS**, which only `PRIORITY_HIGH_ACCURACY` powers up. So the
+  `walking` and `stationary` profiles record **nothing** here and `driving` records perfectly,
+  and that difference is the emulator, not the app. This looked exactly like a dead recorder
+  for a day. **If something location-shaped produces silence on the emulator, check the
+  requested priority before suspecting the code** — `dumpsys location` names the requesting uid
+  and the priority, and is the fastest way to see which of the two you are in.
 - Battery measurements are part of the acceptance criteria for Phase 1, not an afterthought.
 
 ---

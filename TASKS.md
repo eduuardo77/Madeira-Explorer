@@ -427,11 +427,33 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Verification
 
-- [!] **T-052a** ⚠ **BLOCKER: recording starts but no fix ever reaches the database.**
-      Found 2026-08-11, the first time the recorder ran on a device. **Nothing downstream of the
-      recorder can be verified until this is fixed**, and D-010 calls raw traces the only
-      irreplaceable asset — so this is now the most important open item in the project.
-      — **What happens:** starting recording logs `start profile=walking`, Android grants the
+- [x] **T-052a** ✅ **RESOLVED 2026-08-12 — the recorder records. It was never broken (D-047).**
+      — **The answer:** the `walking` and `stationary` profiles ask for `balanced`/`coarse`
+      accuracy, which `expo-location` maps to `PRIORITY_BALANCED_POWER_ACCURACY` — served by the
+      **network** provider (wifi/cell geolocation). An emulator has none, so the request produces
+      nothing and registers nothing. `adb emu geo fix` drives **GPS**, which only a
+      `PRIORITY_HIGH_ACCURACY` request turns on. `driving` is the one profile that asks for it.
+      — **Proof, both directions.** Driving profile: `dumpsys location` shows
+      `gps provider: ProviderRequest[@+15s0ms, HIGH_ACCURACY, WorkSource{10192
+      com.madeiraexplorer.app}]`, and the same 41-point replay that produced nothing now produces
+      **12 fixes, 15 s apart** — matching the profile's `minTimeMs` exactly — which draw as a
+      trace on the map. Switch back to walking and the request vanishes; switch again and it
+      returns.
+      — **The suspect list was right to stop where it did, and its second entry was mis-framed.**
+      It said *GPS provider vs fused provider*. The provider family was never the axis: a
+      `HIGH_ACCURACY` request through the same fused client works. **The axis is priority.**
+      — **Nothing was changed to make it work.** `samplingPolicy.ts` is untouched — the tuned
+      constants are a battery decision (D-028) and there is no battery here to spend.
+      — The instrument that settled it is `app/src/recording/locationProbe.ts`, reachable from the
+      debug screen. Keep it: it is what asks the same question again on real hardware.
+      — ⚠ **What this does not settle:** whether `balanced` produces fixes on a *real* phone. It
+      should; that is an argument, not a measurement. **T-051 owes the reading.**
+      —
+      — ▼ **THE ORIGINAL REPORT (2026-08-11), SUPERSEDED BY EVERYTHING ABOVE.** Kept verbatim
+      because its reasoning is what stopped four dead ends from being repeated, and because its
+      four exclusions were all correct — the answer was simply outside the space it searched.
+      **Nothing below is still open.**
+      — *What happened:* starting recording logs `start profile=walking`, Android grants the
       foreground service (`LocationTaskService`, confirmed in logcat), 41 positions were replayed
       along a 2.2 km route, and `raw_fix` stayed **empty**. No trip was created either, because a
       trip is opened lazily on the first fix.
@@ -453,9 +475,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
            **fused** provider — in which case this is an emulator limitation, not an app defect.
       — **Cheapest experiment that distinguishes them:** put a plain foreground
       `watchPositionAsync` behind a debug button and see whether it receives injected positions.
-      — ⚠ Until this is settled, **"the recorder works" stays unproven**, exactly as HANDOFF has
-      always said. What the emulator changed is that it is now a specific, reproducible question
-      rather than an untested assumption.
+      — ▲ **END OF THE SUPERSEDED REPORT.** That last experiment is exactly the one that was run,
+      and it worked: the probe took 11 positions in 15 s, which killed suspect 2 as written and
+      sent the search to the priority the request was asking for. Suspect 1 was wrong too — the
+      task path registers fine. **Neither suspect was the answer, and the experiment that was
+      supposed to choose between them found it anyway.**
+- [ ] **T-052b** Detect a recorder that is running but receiving nothing ⇠ T-052a, T-049
+      — Raised by D-047. With the walking profile the app's location request was invisible and
+      produced nothing while the debug screen reported `Recording: yes` and the foreground-service
+      notification sat in the shade — the silent failure CONTEXT §4.5 calls worse than never
+      installing the app. There is no Android API for *"did my request register"*, but
+      *"recording has been on N minutes and no fix has arrived"* is answerable, and the day-1
+      health check (D-011, T-049) already exists to carry it.
+      — A tourist on a levada with no SIM and wifi off is not an exotic state.
+- [ ] **T-052c** `checkTripEnd` throws on a released database handle
+      — Found in passing 2026-08-12 while reading `recording_event`:
+      `trip end: Call to function 'NativeDatabase.prepareAsync' has been rejected. → Caused by:
+      Cannot use shared object that was already released`. Logged as an `error` row, so the diary
+      caught it exactly as designed. Seen after a Fast Refresh reload, so it may be a
+      dev-client-only lifecycle artefact — **confirm that before treating it as a product bug**,
+      because a trip that cannot end is a reveal that never arrives (D-012).
 - [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046

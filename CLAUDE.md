@@ -27,12 +27,17 @@ genuinely blocked.
 
 ## Honesty rules, each of which cost something here
 
-- **The app runs on an emulator; the recorder has never worked.** Be precise about which half
-  you mean. Verified on a device: build, install, launch, the map drawing from the offline pack,
-  screens, permissions, 60 dp tap targets. **Not** verified: any fix reaching the database
-  (**T-052a** is the blocker), and — because no emulator can answer them — battery, background
-  survival and GPS realism (CONTEXT §6.6). 270 unit tests and a browser workbench remain all the
-  verification the *logic* has.
+- **The app runs on an emulator, and the recorder records there.** Be precise about which half
+  you mean. Verified on the emulator: build, install, launch, the map drawing from the offline
+  pack, screens, permissions, 60 dp tap targets, and — since 2026-08-12 — **a replayed route
+  reaching `raw_fix` and drawing as a trace** (T-052a, D-047). **Not** verified, because no
+  emulator can answer them: battery, background survival and GPS realism (CONTEXT §6.6), and
+  whether a `balanced`-accuracy request works on a real phone. 270 unit tests and a browser
+  workbench remain all the verification the *logic* has.
+- **On the emulator, record on the `driving` profile.** `walking` and `stationary` ask for
+  `balanced` accuracy, which an emulator cannot serve at all, and they produce a perfect
+  impersonation of a dead recorder (D-047). `adb shell dumpsys location` names the requesting
+  uid and priority, and settles it in one line.
 - **Never state a measured-sounding number that was not measured.** The battery figure is
   `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
   silence — it is a promise the app has not earned.

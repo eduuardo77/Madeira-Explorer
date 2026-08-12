@@ -378,32 +378,17 @@ export default function DebugScreen() {
               : `${health.lastFixAccuracyM.toFixed(0)} m`
           }
         />
-        <Row label="Sensor samples" value={String(health.sensorSampleCount)} />
+        {/* Sensor capture is off in v1 (D-050). Say so rather than reporting
+            zeroes and "no barometer", which read as a broken sensor — this
+            screen exists to be trusted, and a deliberate choice that looks like
+            a fault is the same defect as a fault that looks fine. */}
         <Row
-          label="Pressure"
+          label="Sensors"
           value={
-            health.lastPressureHpa === null
-              ? 'no barometer'
-              : `${health.lastPressureHpa.toFixed(2)} hPa`
+            health.sensorSampleCount === 0
+              ? 'off in v1 (D-050)'
+              : `${health.sensorSampleCount} samples from an earlier build`
           }
-          tone={health.lastPressureHpa === null ? 'warn' : undefined}
-        />
-        <Row
-          label="Rel. altitude"
-          value={
-            health.lastRelativeAltitudeM === null
-              ? 'iOS only'
-              : `${health.lastRelativeAltitudeM.toFixed(1)} m`
-          }
-        />
-        <Row
-          label="Steps (last window)"
-          value={
-            health.lastStepDelta === null
-              ? 'unavailable'
-              : String(health.lastStepDelta)
-          }
-          tone={health.lastStepDelta === null ? 'warn' : undefined}
         />
         <Row
           label="Geofence events"

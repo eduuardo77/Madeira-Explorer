@@ -17,8 +17,13 @@ not a rewrite.
 
 ## Curating `pois.json` (T-066)
 
-**The target is 150–250 places on Madeira only.** Porto Santo is deliberately deferred
-(D-021, D-024) — do not spend effort on it.
+**The target is ~80 places (band 60–100, D-049) on Madeira only.** Porto Santo is deliberately
+deferred (D-021, D-024) — do not spend effort on it.
+
+⚠ **This was 150–250 until 2026-08-12.** It was cut because a 7-day trip takes in 25–45 places,
+so against 250 a visitor finished with a passport about a tenth full and a souvenir reading
+`31 / 250`. At 80 the same trip finishes a third to half full. **The practical effect for you is
+that this job is now less than half the size it was.**
 
 **This is selection, not research.** The OSM survey (`docs/osm-coverage.md`) found 569
 viewpoints, 180 peaks and 79 settlements already mapped inside the bounding box — far more
@@ -31,15 +36,15 @@ the one thing a global competitor cannot buy.
 node tools/poi-candidates.mjs          # → content/pois.candidates.json
 ```
 
-Reads the tile pack that is already in the repository and writes **~390 candidates** — every
+Reads the tile pack that is already in the repository and writes **~200 candidates** — every
 named viewpoint, peak, cape, beach, church, museum, garden and settlement on the main island,
 with coordinates, a suggested category, a suggested radius and a region. Ordered by OSM's own
 prominence signal, so the ones most likely to matter are at the top. `--max 800` shows more.
 
 **It does not curate and cannot.** Everything in it is mechanical — a name, a coordinate and a
-lookup table. The judgement is entirely yours, and the work is mostly **deleting**: 390 down to
-150–250, throwing out the ones nobody would cross a road for, fixing names OSM spells
-differently from how people say them, and widening the radius on anything under canopy.
+lookup table. The judgement is entirely yours, and the work is mostly **deleting**: ~200 down to
+60–100, throwing out the ones nobody would cross a road for, fixing names OSM spells differently
+from how people say them, and widening the radius on anything under canopy.
 
 Two things it deliberately leaves alone:
 
@@ -58,7 +63,7 @@ node tools/validate-content.mjs
 ```
 
 It reuses the app's own parser, so anything it rejects is exactly what the app would drop. It
-prints a per-category and per-region breakdown and your progress toward 150. It also catches
+prints a per-category and per-region breakdown and your progress toward the target. It also catches
 the mistakes that are invisible by eye: a duplicated id, a longitude missing its minus sign, two
 places 40 m apart that are really one place entered twice.
 

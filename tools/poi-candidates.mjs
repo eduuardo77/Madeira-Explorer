@@ -9,7 +9,7 @@
  * `content/pois.json` is empty, and it is the single thing standing between
  * this app and being usable: no places means no stamps, no hero number, no
  * passport and no trip end. T-066 says the work is *"selection, not research"*
- * — OSM already holds far more candidates than the 150–250 target — but until
+ * — OSM already holds far more candidates than the 60–100 target (D-049) — but until
  * now there was no list to select *from*. The file was blank and every
  * coordinate had to be looked up by hand.
  *
@@ -476,6 +476,9 @@ function uniqueId(name) {
 /**
  * How many candidates to write, per category.
  *
+ * 200 against a 60–100 target (D-049): triage means deleting roughly two in
+ * three, which is a job that finishes. It was 400 when the target was 150–250.
+ *
  * ⚠ **Ranking has to happen inside a category, never across them.** The first
  * attempt sorted everything on one scale and produced 397 villages, three
  * landmarks and no viewpoints at all — every named hamlet outranked every
@@ -490,7 +493,7 @@ function uniqueId(name) {
 const SHARE = { viewpoint: 0.42, landmark: 0.28, village: 0.21, beach: 0.09 };
 
 const maxArgument = process.argv.indexOf('--max');
-const MAX = maxArgument === -1 ? 400 : Number(process.argv[maxArgument + 1]);
+const MAX = maxArgument === -1 ? 200 : Number(process.argv[maxArgument + 1]);
 
 const allCandidates = [...candidates.values()].flat();
 const byCategoryRanked = new Map();
@@ -558,6 +561,7 @@ const output = {
     'DELETE anything not worth a stamp — that is most of the work and the whole point.',
     'CHECK each name reads well; OSM names are not always what a visitor calls the place.',
     'ADJUST radiusM: 400-600 for a trailhead under canopy, 150-250 for an exposed miradouro.',
+    'The target is 60-100 places (D-049), so expect to delete well over half of this.',
     'REMOVE the _osmKind and _prominence fields once reviewed; they are hints, not format.',
     'WATCH for OSM mapping artefacts — names like "arvore1" are somebody\'s test node.',
     'Levadas are NOT here: they need a start and an end geofence (D-009). See _trailheads.',

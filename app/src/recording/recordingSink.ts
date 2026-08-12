@@ -41,6 +41,25 @@ import type {
 } from './LocationProvider';
 import { getStepsBetween, readBarometerOnce } from './sensors';
 
+/**
+ * ⚠ **NOT CALLED IN v1, ON PURPOSE (D-050). Deliberately kept, not deleted.**
+ *
+ * This ran on every location batch: a barometer read, a pedometer query, a
+ * `SELECT` and an `INSERT`, all day. Nothing in v1 ever read a pressure or a
+ * step count back — the only consumer was the debug screen. Its real consumers
+ * are tunnel inference, vertical road separation and GPS-blackout fallback,
+ * and **D-032 moved all three to v2**, so v1 was paying a per-batch cost for
+ * data v1 cannot use, against the constraint D-032 itself calls the number one
+ * uninstall trigger.
+ *
+ * It is kept rather than deleted because the step-window logic below is subtle
+ * and worth preserving: a step count is a *delta* since the previous sample, so
+ * the window has to start where the last one ended, falling back to trip start
+ * so the first sample covers everything since install rather than reporting a
+ * silent zero. Re-enabling in v2 is one line in `onLocations`.
+ *
+ * The `sensor_sample` table, its DAO and `sensors.ts` are all untouched.
+ */
 async function captureSensorsFor(
   tripId: number,
   tripStartedTs: number,
@@ -111,9 +130,11 @@ export const databaseSink: RecordingSink = {
         // other way round.
         const inserted = await rawFixDao.insertFixes(rows);
 
-        const latestTs = samples[samples.length - 1].ts;
-        await captureSensorsFor(trip.id, trip.started_ts, latestTs);
-
+        // ⚠ `captureSensorsFor(trip.id, trip.started_ts, samples.at(-1).ts)`
+        // used to run here and does not in v1 (D-050). Nothing in v1 reads the
+        // barometer or the pedometer back, and their consumers moved to v2 with
+        // D-032. Re-enabling is exactly this one call — see the note on the
+        // function itself for why it was kept.
         await recordingEventDao.log('batch', `${inserted} fixes`);
       } catch (error) {
         await recordingEventDao.logError('onLocations', error);

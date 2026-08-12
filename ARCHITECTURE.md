@@ -335,7 +335,7 @@ These are not implementation details; they are constraints that determined the a
   updates are only an enrichment layer.
   *Verify against current Apple documentation before implementing — this behaviour has been
   stable for years but Apple adjusts it.*
-- **Maximum 20 simultaneously monitored regions.** With 150–250 POIs, the geofence set must
+- **Maximum 20 simultaneously monitored regions.** With ~80 POIs (D-049, was 150–250), the geofence set must
   be managed dynamically: register roughly the nearest 18, plus one large "you have left this
   area" region whose exit triggers a reshuffle. This is painful to retrofit, so it is
   designed in from the start.
@@ -585,7 +585,7 @@ simultaneously.** The components are proven; the integration is genuinely new wo
 
 ### Product assumptions (accepted risk)
 
-- A curated canvas of 150–250 places produces visible daily progress over a 7-day trip,
+- A curated canvas of **~80** places (D-049, cut from 150–250 on precisely this argument) produces visible daily progress over a 7-day trip,
   where island-wide road coverage would not.
 - The souvenir video is compelling enough to drive organic installs. **This is the entire
   distribution strategy** — there is no fallback if it fails.

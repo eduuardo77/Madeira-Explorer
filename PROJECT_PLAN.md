@@ -15,7 +15,11 @@ TASKS.md for task-level status and HANDOFF.md for what exists.
 ## v1 scope — read this before anything else (D-032)
 
 **v1 is:** record location → award stamps by geofence → **draw the raw GPS trace** → passport
-screen → souvenir at trip end.
+screen → trip-end reveal.
+
+⚠ **Amended 2026-08-12 (D-051): the souvenir *video* is no longer in v1.** The storyboard
+(T-105a) is written and stays; the encoder moves to v2. **This leaves v1 with no distribution
+strategy** — see OD-10, which is now the largest open question in the project.
 
 **Phase 4 (map matching) is deferred to v2.** It is the largest body of work in the project and
 it produces what D-002 already calls *decoration*. The reward — stamps — comes from geofences,
@@ -200,7 +204,7 @@ highlighted.
 
 ### Scope
 
-- Curate the POI list: **150–250 places**, hand-verified. Every place is assigned exactly one of
+- Curate the POI list: **~80 places** (band 60–100, D-049), hand-verified. Every place is assigned exactly one of
   **five categories — Viewpoints · Levadas · Villages · Beaches · Landmarks** (D-027). There is
   deliberately no "Other": a place that fits nowhere is a signal about the place.
 - Region boundaries for per-region progress. **Regions serve the map screen** ("where should I go
@@ -393,7 +397,12 @@ Store-ready, privacy-clean, and usable without instruction.
 
 These are open and must be resolved. Owner is the project lead unless noted.
 
-### OD-8 — The hero number will read as a failure at trip end ⚠ **raised 2026-08-12**
+### ~~OD-8 — The hero number will read as a failure at trip end~~ → **Resolved 2026-08-12**
+**Canvas cut to ~80 places; the denominator stays** (D-049). At 80 the same 7-day trip finishes a
+third to half full and `31 / 80` reads as encouragement rather than shortfall. Per-region progress
+remains the fallback if 80 proves too many. *Original framing below.*
+
+### OD-8 (original framing) ⚠ **raised 2026-08-12**
 
 **Blocking nothing yet, but it invalidates a headline choice if true, and the fix is cheap now
 and expensive after launch.**
@@ -428,7 +437,20 @@ avoid reading as zero. `31 / 250` does not read as an achievement.
 T-105b asks whether the finale shows a denominator — so at minimum these should be answered
 together.*
 
-### OD-9 — v1 records sensor data that v1 cannot use ⚠ **raised 2026-08-12**
+### ~~OD-9 — v1 records sensor data that v1 cannot use~~ → **Resolved 2026-08-12**
+**Capture stopped until v2 needs it** (D-050). Trips recorded before v2 permanently lack barometer
+and step data; that was weighed against D-010 and accepted. Capturing only on the `driving`
+profile is the compromise to reach for if this is revisited. *Original framing below.*
+
+### OD-10 — v1 has no distribution strategy ⚠ **created by D-051, 2026-08-12**
+**Blocking the question of whether v1 should launch publicly at all.**
+D-051 cut the souvenir video, which CONTEXT §2.3 and D-013 both call *the entire distribution
+strategy*. There is no App Store search term for this app. What remains: a shareable passport
+screenshot, which is not designed yet (**T-105d**), and the partner routes CONTEXT §4.10 set aside
+— rental cars, hotels, quintas, the tourism board — which are **no longer the fallback but the
+only channel**. Owner: the project lead.
+
+### OD-9 (original framing) ⚠ **raised 2026-08-12**
 
 **Affects the battery figure, which is the number one uninstall trigger (D-032).**
 

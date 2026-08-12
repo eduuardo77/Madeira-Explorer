@@ -1,7 +1,11 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-12 — **T-052a closed: the recorder records, and it was never broken**
+**Updated:** 2026-08-12 (later) — four decisions from the project lead: the canvas is cut to
+**~80 places** and keeps its denominator (**D-049**), v1 **stops recording barometer and pedometer
+data** (**D-050**), and the **souvenir video is cut from v1** (**D-051**) — which leaves v1 with no
+distribution strategy and makes **OD-10** the largest open question in the project.
+Earlier 2026-08-12 — **T-052a closed: the recorder records, and it was never broken**
 (D-047). The blocker was the emulator's inability to serve a `balanced`-accuracy request. Then
 **T-052b** (the app can now tell "recording" from "recording nothing") and **T-052c**, which
 turned out to be a **concurrency** bug that was quietly creating two trips (D-048). The passport
@@ -46,7 +50,7 @@ it**.
 1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
    before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
    §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 48 numbered decisions. **Read D-032 first** — it defines v1 scope and
+2. **`DECISIONS.md`** — 51 numbered decisions. **Read D-032 first** — it defines v1 scope and
    deletes a large amount of work you might otherwise start.
 3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
 4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
@@ -82,7 +86,7 @@ end**. Phase 0 is half done. All of it is unproven on hardware.
 
 | | |
 |---|---|
-| **T-105b** the souvenir encoder | 9:16 video. D-013 calls it the entire distribution strategy. **T-105a, the composition, is now written** (D-042): the storyboard — three scenes, camera path, strokes, and the moment each stamp lands — is pure and has 23 tests. What is left is turning that into an MP4, which needs native video encoding nobody can verify without a device. **Nobody has watched anything**; every duration in the composition is a guess. |
+| ~~**T-105b** the souvenir encoder~~ | **CUT FROM v1 2026-08-12 (D-051).** It needed a new native dependency and cannot be verified without a device. T-105a's storyboard stays; the encoder is v2 (**T-105c** researches it first). ⚠ **This leaves v1 with no distribution strategy** — CONTEXT §2.3 called the video the entire mechanism by which anybody finds this app. **OD-10 is now the largest open question in the project.** |
 | ~~**T-070** stamp artwork~~ | **Done 2026-08-11 (D-046).** Generated per place from the category and a hash of the id — eight silhouettes, six colourways, two-tone emblems. The **emblem** carries the category, not the shape or the colour (D-015). `node tools/preview-stamps.mjs` draws them all to a page, which is the only way to judge them here. |
 | ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
 | ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
@@ -95,9 +99,8 @@ request, not the code.
 The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110.
 
 **T-052b's detection half is done** — the debug screen now says *"recording, but nothing for
-2h 2m"* instead of leaving two rows to be correlated — but **whether it should ever notify is an
-open question for the project lead**, not something to add: D-011 permits two notifications in
-seven days and its threshold is provisional.
+2h 2m"* instead of leaving two rows to be correlated. **It does not notify, and that is settled**:
+the budget stays at two (D-011, amended 2026-08-12).
 
 **T-052c is closed, and it was not what it looked like (D-048).** The reported `checkTripEnd`
 throw was guessed to be a Fast Refresh artefact; a reload does not reproduce it and a **cold
@@ -108,7 +111,11 @@ which is the normal case, not an unusual one. The sink is now serialised.
 **No threshold anywhere in this app has met real data** — every number in D-033, D-037, D-039,
 D-041 and now `SILENCE_TOLERANCE` is a reasoned guess.
 
-**3. Content, which only the project lead can produce.** `content/pois.json` is valid and
+**3. Content, which only the project lead can produce — and it is now half the job it was.**
+D-049 cut the canvas from 150–250 places to **~80**, because a 7-day trip takes in 25–45 and a
+passport that finishes a tenth full is the failure CONTEXT §4.1 exists to prevent.
+`node tools/poi-candidates.mjs` writes ~200 ranked candidates to triage down to 60–100.
+`content/pois.json` is valid and
 **empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
 at an airport. See `content/README.md`.
 
@@ -476,7 +483,7 @@ state mutation is the problem. See D-022.
 force-quit. Standard background location updates do not.** This single fact is why geofences
 are the backbone. Re-verify against current Apple docs before implementing.
 
-**iOS caps simultaneous monitored regions at 20.** With 150–250 POIs the geofence set must be
+**iOS caps simultaneous monitored regions at 20.** With ~80 POIs (D-049) the geofence set must be
 swapped dynamically — nearest ~18 plus one large "you left this area" trigger. Painful to
 retrofit; build it in from the start.
 

@@ -60,6 +60,12 @@ available. That convergence is unusual, and everything important rides on it.
 
 ### 2.3 The souvenir video is the entire distribution strategy.
 
+⚠ **And it is cut from v1 (D-051, 2026-08-12), so v1 has no distribution strategy at all.**
+Everything below still describes the intent and is why the video returns in v2 — but read it
+knowing that the mechanism it describes does not exist in the first release. The nearest thing v1
+has is a shareable passport screenshot (§4.2), which is a hope rather than a designed feature
+until T-105d does something about it.
+
 There is no App Store search term that finds this app. Nobody searches "Madeira exploration
 tracker." Users install once, use it for seven days, and go home — no retention loop, no
 in-app virality.
@@ -131,8 +137,15 @@ payoff.**
 It also breaks discovery: "where you can go next" does not fall out of a dark map, because on
 day 2 everywhere is dark. Absence of highlight is noise, not a recommendation.
 
-Fix: a curated set of **150–250 notable places** plus per-region progress. That number moves
-every day, and the uncollected places *are* the recommendations.
+Fix: a curated set of notable places plus per-region progress. That number moves every day, and
+the uncollected places *are* the recommendations.
+
+⚠ **Revised 2026-08-12 (D-049): the canvas is ~80 places, not the 150–250 originally written
+here.** The arithmetic above was never applied to the curated set itself. A 7-day trip takes in
+25–45 places, so against 250 the *passport* finished about a tenth full — the same "our user
+leaves before the payoff" failure this section uses to reject island-wide roads, one scale down.
+At 80 the same trip finishes a third to half full. The `collected / total` headline stays,
+because at 80 the denominator reads as encouragement rather than as a shortfall.
 
 ### 4.2 Why "stamps" and not "stars"
 
@@ -319,7 +332,7 @@ run, not just a biographical detail.
 - **Field testing is continuous, not a milestone.** Any matching threshold, geofence radius or
   battery figure can be re-tested against real terrain the same week it changes. Most teams
   building this would be guessing.
-- **POI curation is first-hand.** The 150–250 place list (T-066) requires exactly the local
+- **POI curation is first-hand.** The ~80 place list (T-066, D-049) requires exactly the local
   knowledge a global competitor cannot buy. This is the moat in D-002 and D-017 made concrete.
 - **Beta recruitment is local.** T-129 no longer depends on finding strangers who happen to be
   flying to Madeira.
@@ -479,7 +492,7 @@ matching throughput **early** in Phase 4, not late.
   after the user force-quits it from the app switcher. Standard continuous background location
   updates do not.** This single fact is why geofences are the backbone. *Re-verify against
   current Apple docs before implementing — stable for years, but Apple adjusts it.*
-- **iOS caps simultaneously monitored regions at 20.** With 150–250 POIs, the geofence set
+- **iOS caps simultaneously monitored regions at 20.** With ~80 POIs (D-049), the geofence set
   must be swapped dynamically (nearest ~18 + one large "you left this area" trigger). Painful
   to retrofit; design it in from the start. Android's cap is around 100, but the same
   mechanism covers both.
@@ -514,8 +527,9 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 | OD-5 | Cruise day-trippers as a segment? | Content curation | Open, not blocking. Not designed for; happy accident if it works. |
 | OD-6 | Raw trace retention policy | Phase 1 schema | **Resolved 2026-08-06 — retain**, with a delete-all control (D-010 Accepted) |
 | OD-7 | Levada data source and licensing | ~~Content, matching~~ | **Resolved 2026-08-08 — OSM alone is sufficient** (D-029). The 44 official PR routes are already in OSM, so no external licensing arises. Select by name + relation, never by tag. See `docs/osm-coverage.md` |
-| OD-8 | **The hero number reads as a failure at trip end.** A 7-day trip plausibly collects 25–45 places against a 150–250 canvas, finishing 10–30% full — which is §4.1's own argument against island-wide roads, at a smaller scale | Canvas size (T-066), the primary screen, the souvenir finale | **Open, raised 2026-08-12 by Claude.** Three separable questions in PROJECT_PLAN: is 150–250 right, does the primary screen need a denominator at all, and should per-region progress be the hero instead |
-| OD-9 | **v1 captures barometer and pedometer data on every batch that no v1 feature reads.** Their consumers — tunnel inference, vertical separation, blackout fallback — all moved to v2 with D-032 | The battery figure (T-054), and D-010's irreplaceability argument | **Open, raised 2026-08-12 by Claude.** Decide *before* T-054 measures, or the figure describes work v1 does not use |
+| OD-8 | The hero number reads as a failure at trip end | ~~Canvas size, the primary screen, the souvenir~~ | **Resolved 2026-08-12 — canvas cut to ~80, denominator kept** (D-049). At 80 the same trip finishes a third to half full and `31 / 80` reads as encouragement |
+| OD-9 | v1 captures barometer and pedometer data no v1 feature reads | ~~The battery figure (T-054)~~ | **Resolved 2026-08-12 — capture stopped until v2 needs it** (D-050). Trips recorded before v2 permanently lack it; that was weighed and accepted |
+| OD-10 | **v1 has no distribution strategy.** D-051 cut the souvenir video, which §2.3 called the entire mechanism by which anybody finds this app | Launch (Phase 7), and whether v1 is worth launching publicly at all | **Open, created by D-051.** A shareable passport screenshot is the nearest thing v1 has and is not designed yet (T-105d). The partner routes §4.10 set aside are now the only other channel |
 
 ### Recently closed
 
@@ -544,8 +558,9 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 
 ### Accepted product risks
 
-- A curated 150–250-place canvas produces visible daily progress where island-wide road
-  coverage would not. *Believed, not proven.*
+- A curated **~80**-place canvas produces visible daily progress where island-wide road coverage
+  would not. *Believed, not proven* — and the size was cut from 150–250 on exactly this argument
+  (D-049), which makes it the assumption a beta trip should test first.
 - The souvenir video is compelling enough to drive organic installs. **This is the entire
   distribution strategy and there is no fallback currently in play.**
 - Tourists will grant background location if asked at the right moment with a clear reason.

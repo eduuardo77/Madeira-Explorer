@@ -50,7 +50,12 @@ covers it.
 **Status:** **Accepted** — re-confirmed by the project lead 2026-08-06 after the question was
 re-explained in plain terms. OD-3 closed.
 
-**Decision:** The headline metric is a curated collection of 150–250 notable places, with
+⚠ **Amended 2026-08-12 by D-049: the canvas is now ~80 places, not 150–250.** The rest of this
+decision — stamps as the hero, geofences as the mechanism, the uncollected places as the
+recommendation — stands unchanged. Only the number moved, and it moved because the arithmetic in
+CONTEXT §4.1 was never applied to the curated set itself.
+
+**Decision:** The headline metric is a curated collection of notable places, with
 per-region progress as supporting detail. Island-wide road coverage percentage is *not* the
 hero number.
 
@@ -2297,3 +2302,130 @@ one bad write must not stop the recorder for the rest of the trip.
 **What would change this:** if `expo-sqlite` fixes its statement race, bug 2's justification goes
 away — but bug 1's does not, and bug 1 is the one that quietly corrupts a trip. The queue should
 stay regardless.
+
+---
+
+## D-049 — The canvas is ~80 places, not 150–250. The denominator stays, and that is why.
+
+**Status:** Accepted — decided by the project lead 2026-08-12, in answer to OD-8.
+
+**Decision:** `content/pois.json` targets **60–100 places, aiming at 80** (was 150–250, D-002 and
+CONTEXT §4.1). The primary screen and the souvenir **keep showing `collected / total`**.
+
+**What prompted it:** arithmetic nobody had done. A busy 7-day rental-car trip plausibly takes in
+8–12 miradouros, 2–4 levadas, 5–8 villages, 2–3 beaches and 4–6 landmarks — **25–45 places**.
+Against a 250-place canvas that finishes around a tenth full, and the souvenir headline reads
+`31 / 250`.
+
+**That is the same failure CONTEXT §4.1 used to reject island-wide road coverage** — *"the map
+would stay ~95% dark for the entire trip … our user leaves before the payoff"* — reintroduced at a
+smaller scale. D-002's own competitor teardown is the precedent: WalkMe's `0.00%` needed two
+decimal places to avoid reading as zero.
+
+**The two halves interact, which is why they are one decision.** The denominator was the obvious
+thing to cut, and cutting the canvas removes the need: `31 / 80` reads as most of a job done and
+`31 / 250` reads as a shortfall, from the same trip. Keeping it preserves what the denominator is
+*for* — showing there is more to find, which is the discovery mechanism CONTEXT §4.1 describes and
+the reason a repeat visitor returns to a partly-filled passport (CONTEXT §4.10).
+
+**Alternatives considered:**
+
+- *Keep 150–250 and drop the denominator from the primary screen.* Rejected: it hides the symptom
+  and keeps the cause. The souvenir would still have to show something, and the passport would
+  still be 88% empty when the user scrolled it.
+- *Make per-region progress the hero instead* — "Machico 6/7" fills up where an island total never
+  will. Rejected for now: CONTEXT §4.2 warns that region % *and* stamps *and* roads is three
+  scoring systems and only one may be the hero, and D-002 already chose stamps. **Still the best
+  fallback if 80 turns out to be too many.**
+- *~120 places.* Rejected as the middle option that solves neither cleanly.
+
+**Consequences:** `tools/validate-content.mjs` targets 60–100. `tools/poi-candidates.mjs` emits
+200 candidates instead of 400, so triage is "delete two in three" rather than "delete nine in ten".
+**Curation gets substantially smaller, which is the other reason this is worth doing** — T-066 is
+the critical path and it belongs to one person. A smaller canvas also means each stamp is rarer,
+and the passport screenshot is fuller, which matters more now that D-051 has cut the video.
+
+**What would reverse this:** a real trip. If a beta tester finishes 70 of 80, the canvas is too
+small and the answer is more places, not a bigger denominator.
+
+---
+
+## D-050 — v1 stops recording barometer and pedometer data.
+
+**Status:** Accepted — decided by the project lead 2026-08-12, in answer to OD-9.
+
+**Decision:** `captureSensorsFor` is no longer called from `recordingSink.onLocations`. The
+`sensor_sample` table, its DAO, `sensors.ts` and the capture function itself are all **kept**.
+
+**Reasoning:** it ran on every location batch — a barometer read, a pedometer query, a `SELECT`
+and an `INSERT`, all day — and **nothing in v1 ever read a value back**. The only consumer was the
+debug screen. Its real consumers are tunnel inference, vertical road separation and GPS-blackout
+fallback, and **D-032 moved all three to v2**. So v1 was paying a continuous cost for data v1
+cannot use, against the constraint D-032 itself names as the number one uninstall trigger.
+
+**The counter-argument, which was weighed and lost:** D-010 says raw capture is the only
+irreplaceable asset — matching can be re-run over stored fixes in v2, but sensor readings never
+taken are gone. Trips recorded before v2 will permanently lack barometer and step data. The
+project lead accepted that: v2 is not close, the tunnel work it feeds is deferred indefinitely,
+and a battery figure that fails its target because of unused work would be the wrong number to
+react to.
+
+**Timing is why this mattered now.** T-054 has never measured a battery figure. Had it run first,
+it would have measured v1 *including* work v1 does not use.
+
+**Alternatives considered:**
+
+- *Keep it (D-010 wins).* The documented position until now, and defensible. Rejected on the
+  grounds that "someday" is not a battery budget.
+- *Capture only on the `driving` profile* — tunnels are the main v2 consumer and a phone in a
+  rental car is usually charging. **Not adopted, and the best option if this is revisited**: it
+  keeps the data that matters most for a fraction of the cost.
+- *Delete the code.* Rejected: the step-window logic is subtle — a step count is a delta since the
+  previous sample, so the window must start where the last one ended and fall back to trip start
+  so the first sample is not a silent zero. Re-enabling in v2 is one line.
+
+**Consequences:** the debug screen says `Sensors — off in v1 (D-050)` rather than reporting zeroes
+and "no barometer", which read as a broken sensor. **T-054's figure will now describe v1 as it
+ships.** The unvalidated assumptions in CONTEXT §8 about barometers in tunnels and pedometers
+through blackouts are untouched — they were always v2 questions and remain unanswered.
+
+---
+
+## D-051 — The souvenir video is cut from v1. v1 therefore ships with no distribution strategy.
+
+**Status:** Accepted — decided by the project lead 2026-08-12. *"Definitely something we should
+research in the future."*
+
+**Decision:** **T-105b (the encoder) moves to v2**, and with it the video half of Phase 5. T-105a's
+composition — the storyboard, pure and tested — **stays**, because it is written, costs nothing to
+keep, and is what v2 starts from.
+
+**What this costs, stated plainly rather than buried:** CONTEXT §2.3 calls the souvenir video *"the
+entire distribution strategy"*, and D-013 says the same. **Cutting it means v1 has no answer to
+the question of how anybody finds this app.** There is no App Store search term for it; nobody
+searches "Madeira exploration tracker". That is not a side effect of this decision, it is the
+decision.
+
+**Why it was cut anyway:** it needs native video encoding — a new third-party dependency, which
+D-043's audit rule says cannot be added without checking what it talks to over the network — and
+**it cannot be verified at all without a device this project does not have.** It is simultaneously
+the most technically risky item left and the least testable. Shipping without it is a smaller risk
+than not shipping.
+
+**What partly covers the gap, and should be treated as the v1 answer:** CONTEXT §4.2 already notes
+that *"a filled passport page is also a second shareable screen"*. A passport screenshot is a
+static image the app can already produce, it needs no new dependency, and **D-049 has just made it
+look considerably better** — a passport at 31/80 is worth posting in a way that 31/250 is not.
+⚠ **This is not a plan yet.** Nobody has designed a shareable passport export, and "they will
+screenshot it" is a hope, not a mechanism. Raised as **T-105d**.
+
+**Alternatives considered:**
+
+- *Ship the video in v1.* Rejected on device availability and dependency risk, above.
+- *Research an encoder now and decide later.* Not chosen, but the project lead explicitly wants it
+  researched in future — recorded as **T-105c** so it is not lost.
+
+**Consequences:** Phase 5's remaining v1 content is the passport and the trip-end reveal, both of
+which exist. **PROJECT_PLAN's launch reasoning needs re-reading with this in mind** — the organic
+sharing loop it assumes is now absent, and the partner-distribution routes CONTEXT §4.10 set aside
+(rental cars, hotels, the tourism board) are no longer the fallback but the only channel.

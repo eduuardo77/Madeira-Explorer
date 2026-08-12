@@ -747,7 +747,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Content curation
 
-- [ ] **T-066** Curate 150–250 POIs on **Madeira only** — hand-verified. Porto Santo POI
+- [ ] **T-066** Curate **~80 POIs (target band 60–100, D-049)** on **Madeira only** — hand-verified. Porto Santo POI
       curation is explicitly deferred (D-021) — do not spend effort on it. ⇠ T-015, T-016d
       — **Every place must be assigned exactly one of the five categories** (D-027):
       **Viewpoints · Levadas · Villages · Beaches · Landmarks**. There is deliberately no
@@ -1033,7 +1033,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       type is a union, so a caller cannot reach the scenes of a refusal.
       — ⚠ **Nobody has watched anything.** Every duration is a guess; `MIN_CUE_GAP_MS` is a
       legibility figure and legibility is measured by watching. T-105b is what confirms them.
-- [ ] **T-105b** Encode the storyboard to an MP4 on the device ⇠ T-105a
+- [~] **T-105b** **MOVED TO v2 2026-08-12 (D-051).** Encode the storyboard to an MP4 ⇠ T-105a
+      — Cut because it needs a new native dependency (D-043 forbids adding one without a network
+      audit) **and cannot be verified at all without a device this project does not have.** It was
+      simultaneously the riskiest remaining item and the least testable.
+      — ⚠ **This removes v1's only distribution mechanism.** CONTEXT §2.3 and D-013 called the
+      video *the entire distribution strategy*. Read D-051 before treating v1 as launchable.
+      — T-105a's composition stays: it is written, tested, and is what v2 starts from.
+- [ ] **T-105c** Research an on-device video encoder, and what it talks to ⇠ D-051
+      — The project lead asked for this explicitly: *"definitely something we should research in
+      the future"*. Deliverable is a recommendation with a **network-behaviour audit** per D-043 —
+      the thing that turns "no data leaves the device" quietly false (CONTEXT §4.8).
+- [ ] **T-105d** Make the passport worth screenshotting ⇠ T-074, D-051
+      — With the video cut, this is the nearest thing v1 has to a way anybody discovers the app,
+      and CONTEXT §4.2 already claimed *"a filled passport page is also a second shareable
+      screen"*. Nobody has designed an export, and **"they will screenshot it" is a hope, not a
+      mechanism.** D-049's smaller canvas helps: a passport at 31/80 is worth posting.
+- [ ] **T-105b-v2** Encode the storyboard to an MP4 on the device ⇠ T-105a, T-105c *(v2)*
       — Needs native video encoding, which is the part that cannot be verified without a
       device. It consumes `Composition` and needs no judgement of its own.
       — Also where the *look* is decided: whether the finale shows a denominator (D-042 carries

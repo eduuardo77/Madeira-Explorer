@@ -56,9 +56,19 @@ const packPath =
  */
 const BOUNDS = { south: 32.4, west: -17.32, north: 33.2, east: -16.2 };
 
-/** D-002 and CONTEXT §4.1: the curated canvas is 150–250 places. */
-const TARGET_MIN_PLACES = 150;
-const TARGET_MAX_PLACES = 250;
+/**
+ * The curated canvas: **60–100 places, aiming at 80** (D-049).
+ *
+ * ⚠ This was 150–250 (D-002, CONTEXT §4.1) until 2026-08-12. It was cut because
+ * of arithmetic nobody had done: a busy 7-day trip takes in perhaps 25–45
+ * places, so against 250 a visitor finished around a tenth full and the
+ * souvenir read `31 / 250`. That is the *same* failure CONTEXT §4.1 used to
+ * reject island-wide road coverage — "the map would stay ~95% dark" — at a
+ * smaller scale. At 80 the same trip finishes a third to half full, and the
+ * headline reads `31 / 80`.
+ */
+const TARGET_MIN_PLACES = 60;
+const TARGET_MAX_PLACES = 100;
 
 /** Below this, two places are probably one place entered twice. */
 const SUSPICIOUSLY_CLOSE_M = 100;

@@ -650,9 +650,9 @@ decision arises at all.
 > composition is written, this is the encoding), or **T-063a**, the glyph ranges, which needs a
 > decision rather than a reflex.
 >
-> ⚠ **Two questions are waiting on you, not on work:** whether the silent-recorder check should
-> spend a third notification (T-052b), and whether the passport button needs a text label as well
-> as its mark (T-075, design brief §3.1).
+> ✅ **Both questions that were waiting on the project lead are answered (2026-08-12):** the
+> silent-recorder check **does not notify** and the budget stays at two (D-011, amended), and the
+> passport button carries **the mark and the number only, no text label** (design brief §3.1).
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

@@ -127,6 +127,19 @@ plain blue rectangle, and on 2026-08-12 the project lead looked at the running a
 tilted, die-cut octagonal seal, using the same `cutEdge` geometry as the real stamps so the icon
 cannot drift away from the things it stands for.
 
+**No text label. The mark and the number, nothing else — decided by the project lead 2026-08-12.**
+The question was live because the emoji had just failed to identify itself, and CONTEXT §6.5 says
+in as many words that *minimal does not mean unlabelled*. A word like "Passport" would have made
+identification certain. It was rejected because this screen is allowed **three things** and the
+button already does two jobs (§3.1); a label makes the app's one hero element wordier than the
+hero number it carries, and the mark is now a drawn seal rather than an unreadable glyph, which is
+the actual fix for the actual failure. The accessible label still says *"Open your passport, 23 of
+180 places collected"* — the reduction is visual, never for a screen reader.
+
+⚠ **This is the one place the "no learning curve for anyone" rule is being traded against
+restraint, so it is the thing to watch in T-065.** If a first-time user outdoors cannot say what
+the button does, the label wins and this paragraph is what to overrule.
+
 ⚠ **The first attempt at that mark was a 20-gon and it failed the same way**, for a reason worth
 keeping: it passed every geometry test and then rendered as a ring with a dot in it — a record
 button, or a crosshair, which was precisely the wrong thing to draw on a screen where a

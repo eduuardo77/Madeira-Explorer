@@ -514,10 +514,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Verified on the emulator in both directions: red *"recording, but nothing for 2h 2m — over
       the 17m expected on the walking profile"*, then green *"last fix 9s ago"* once positions were
       injected.
-      — **Still open: whether this should ever notify.** It deliberately does not. D-011 permits
-      two notifications in seven days and T-116 is the budget; spending a third on a *provisional*
-      threshold is a decision, not a fix. The day-1 check already reaches a user who is not
-      looking. **Raise it with the project lead rather than adding it.**
+      — ✅ **Settled 2026-08-12 by the project lead: it does not notify, and the budget stays at
+      two** (D-011, amended). Its threshold is provisional, and spending a permanent interruption
+      on a guessed number is how a false alarm becomes a habit. The day-1 check already reaches a
+      user who is not looking; this one's value is that it answers in minutes and costs nothing.
+      **T-051 is the revisit trigger** — and if it comes back, probably by sharpening the day-1
+      check rather than adding a third message.
       — Also unaddressed: the recorder does not log the transition into silence to
       `recording_event`, which would need persisted state to avoid a diary full of duplicates.
       Worth doing when the threshold is real.
@@ -820,6 +822,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `passport/stampMark.ts` now draws a tilted die-cut octagonal seal from the same `cutEdge`
       geometry the real stamps use, so the icon cannot drift from the things it stands for.
       11 tests, and it is in `tools/preview-stamps.mjs` at four sizes on the real button colour.
+      — ✅ **No text label — decided by the project lead 2026-08-12.** The mark and the number,
+      nothing else. The screen is allowed three things and this element already does two jobs; the
+      fix for an unidentifiable icon was to draw a real one, not to caption it. The *accessible*
+      label is unchanged and still reads "Open your passport, 23 of 180 places collected".
+      **T-065 outdoors is what could overrule this** (design brief §3.1).
       — ⚠ **The first mark was a 20-gon, passed every test, and rendered as a crosshair** — which
       on this screen of all screens was the wrong thing to draw. At 34 dp a 20-gon is a circle and
       a 1.6-unit scallop does not exist. **Corners and tilt are what survive being small**; the

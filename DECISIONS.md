@@ -350,6 +350,28 @@ difference between a delightful surprise and a silent failure discovered too lat
 - *Daily summaries.* Rejected: destroys the surprise, adds nagging, and contradicts the
   entire product concept.
 
+**Amended 2026-08-12 — the budget holds at two. Confirmed by the project lead.**
+
+T-052b built a continuous check that notices a recorder which is running and receiving nothing
+(D-047 is the day it was needed). The obvious next step was to let it *tell* the user, which
+would have been a third notification. **Rejected, and this is the reasoning to keep:**
+
+- Its threshold, `SILENCE_TOLERANCE`, is **provisional and unmeasured**. Spending a permanent
+  interruption on a guessed number is how a false alarm becomes a habit, and
+  `healthCheckPolicy`'s own header explains at length why a false alarm here is expensive: it
+  teaches a tourist to distrust the app, and the fixes they reach for — reinstalling, revoking
+  permissions — make things worse.
+- **The day-1 check already covers the case for a user who is not looking.** It asks the same
+  question at 14 hours and spends a notification that is already budgeted. The new check's value
+  is that it answers in *minutes* and costs *nothing*, which is worth having on the debug screen
+  and in a field test without being worth an interruption.
+- A third message is also a scope change, and CONTEXT §9 puts that with the project lead rather
+  than in a commit.
+
+**The revisit trigger is T-051.** If the soak shows silence that the day-1 check would miss and a
+user could act on, this comes back — with a measured threshold, and probably by *sharpening the
+day-1 check* rather than adding a third message.
+
 ---
 
 ## D-012 — Airport geofence as the trip-end trigger.

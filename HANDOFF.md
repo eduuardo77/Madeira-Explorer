@@ -258,43 +258,79 @@ already deleted it.
 
 Two of these are the project lead's and cannot be done for them. The rest is a short list.
 
-**1. ⚠ THE TWO THINGS ONLY THE PROJECT LEAD CAN DO.** Everything else is downstream of these,
-and neither is code.
+**1. ⚠ T-052a — THE RECORDER HAS NEVER RECORDED. Start here.**
 
-- **A device.** Nothing in this app has ever run. `docs/dev-build.md` has three paths and their
-  real costs. Summary: there is **no Android phone and no Mac**; the iPhone route needs the
-  Apple Developer Program at $99/year; the free emulator is **parked because it needs a BIOS
-  change the project lead has declined to make** (their call — do not re-litigate it, and see
-  `docs/emulator-setup.md` if they ever change their mind). The two live options are a **cloud
-  device farm** (upload an EAS APK, drive a real Android from a browser — cheapest way to see
-  the map render) or a **used mid-range Android, ~€50–100**, which T-021a already requires
-  regardless and is the only source of real battery and background-survival numbers.
+Recording starts, the foreground service runs, and **no fix ever reaches `raw_fix`.** Found
+2026-08-11, the first time the recorder ran on a device. Nothing downstream of the recorder can
+be verified until it is fixed, and D-010 calls raw traces the only irreplaceable asset.
+
+Permission, batching, silent errors and the task definition are **all ruled out by experiment** —
+read T-052a before touching anything, because the reasoning there is what stops you repeating
+four dead ends. `dumpsys location` shows every provider `OFF` and **our uid registering no
+location request at all**.
+
+Two suspects remain and the task names the cheap experiment that separates them. **Do not change
+location options or reach for the Transistor SDK (T-031a) until it is settled** — it is still
+possible the emulator, not the app, is what cannot deliver a position.
+
+**2. ⚠ THE TWO THINGS ONLY THE PROJECT LEAD CAN DO.**
+
+- **A *physical* device.** The **emulator now works** (T-029b — CPU virtualization was enabled
+  2026-08-11): `bash tools/run-emulator.sh`, then `cd app && npm run android`. It renders the
+  map, runs the screens and answers permissions, and it is **worthless for battery, background
+  survival and GPS realism** (CONTEXT §6.6). So a **used mid-range Android, ~€50–100** is still
+  required — T-021a needs it anyway, and it is the only source of real battery and
+  background-survival numbers. iOS still needs a Mac and $99/year.
 - **The content.** `content/pois.json` is valid and empty. `content/README.md` is the guide;
   `node tools/validate-content.mjs` checks the work and reports progress toward 150. Without it
   the stamp system has nothing to award and the trip cannot end at an airport. **Do not offer
   to curate it** — T-028 established it is selection and editorial judgement, which is the one
   thing a competitor cannot buy.
 
-**2. T-105b — the souvenir encoder.** The largest remaining piece of code and the one D-013
+**3. T-105b — the souvenir encoder.** The largest remaining piece of code and the one D-013
 calls the entire distribution strategy: a 9:16 video good enough that people post it.
 **T-105a split the testable half off and it is done** (D-042) — `souvenir/composition.ts` plans
 the film as a storyboard and `souvenirPlan.ts` feeds it from the database. What remains needs
 native video encoding and therefore a device. It also needs *eyes*: the composition's timings
 are guesses by somebody who has never seen the result.
 
-**3. The small remainder is empty.** Every v1 item that does not need a device is done —
+**4. The small remainder is empty.** Every v1 item that does not need a device is done —
 T-046, T-070, T-105a, T-113, T-116/T-116a, T-117, T-118, T-120, T-122, T-124, T-139, T-140.
 **What is left of v1 is a device, the content, and the Play submission**, and none of the three
 is code.
 
-**4. When a device exists, in this order**, because each is cheap and each can invalidate the
-next: airplane-mode map render (T-063) → permission dialogs → a recorded walk → the geofence
-field test (T-076, ~850 m on foot) → an overnight soak (T-051) → battery over 12 hours (T-054).
+**5. Once T-052a is fixed, in this order**, because each is cheap and each can invalidate the
+next: replay a route and see the trace draw (`tools/replay-route.sh`) → the tunnel route, which
+must draw as **two** segments not one (ARCHITECTURE §10) → airplane-mode cold start (T-063, still
+open — the render so far had Metro attached) → permission dialogs on a fresh install → then, on
+real hardware only: the geofence field test (T-076, ~850 m on foot) → an overnight soak (T-051) →
+battery over 12 hours (T-054).
 `docs/dev-build.md` has the full list and says which check settles which open question.
 
-### How to see things without a device
+### How to see things
 
-Two workbenches exist, and both were load-bearing rather than nice-to-have:
+**On the emulator** (T-029b — this is now the default):
+
+```bash
+bash tools/run-emulator.sh                                      # Android 14 AVD
+cd app && npm run android                                       # build + install
+bash tools/replay-route.sh tools/routes/funchal-seafront.txt     # feed it positions
+bash tools/screenshot.sh <name>                                 # → tools/out/shots/
+```
+
+⚠ Two traps, both learned the hard way and written into the scripts: `adb emu geo fix` takes
+**longitude first**, and `adb shell screencap > file` corrupts the PNG on Windows — use
+`adb exec-out`. A third: Windows reports `VirtualizationFirmwareEnabled: False` even when
+virtualization is on, because a running hypervisor hides the firmware flag. **Ask
+`emulator-check accel`, not Windows.**
+
+Reading the app's own state is often faster than tapping through it. `adb root` works on this
+AVD, and the database is at
+`/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` — `sqlite3` is on the device, and
+the `recording_event` diary is where the app records what it actually did.
+
+**Without a device at all.** Two workbenches exist, and both were load-bearing rather than
+nice-to-have:
 
 ```bash
 cd app && npx expo start --web     # the screens (D-038)
@@ -542,23 +578,32 @@ decision arises at all.
 > **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
 > Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
 >
-> **State:** the whole v1 chain is written and **none of it has ever run on a phone** — 270 unit
-> tests and a browser workbench are all the verification that exists. The tile pack is built
-> (19.1 MB with terrain). `content/pois.json` is valid and empty.
+> **State:** the whole v1 chain is written, and **it now runs on an Android emulator** — the map
+> renders from the offline pack, the screens work. 270 unit tests cover the logic. The tile pack
+> is built (19.1 MB with terrain). `content/pois.json` is valid and empty.
 >
-> **Two things are mine, not yours:** getting a device (see `docs/dev-build.md` — I have an
-> iPhone, a Windows PC, no Android and no Mac, and I am not changing my BIOS), and curating
+> ⚠ **But the recorder has never recorded.** `T-052a` is the blocker and the first thing to read:
+> recording starts, the foreground service runs, and no fix ever reaches the database. Four
+> candidate causes are already ruled out by experiment — read the task before touching anything,
+> and do not change location options or reach for the Transistor SDK until the two remaining
+> suspects have been separated.
+>
+> **To see anything:** `bash tools/run-emulator.sh`, then `cd app && npm run android`. Feed it
+> positions with `bash tools/replay-route.sh tools/routes/funchal-seafront.txt` and grab the
+> screen with `bash tools/screenshot.sh <name>`. `adb root` works, and reading
+> `/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` is usually faster than tapping
+> through the UI.
+>
+> **Two things are mine, not yours:** getting a *physical* Android — the emulator works but
+> cannot answer battery, background survival or GPS realism — and curating
 > `content/pois.json`. Do not offer to do either for me.
 >
 > I am done planning and want to build. Do not open new research threads or propose new
 > decisions unless something is genuinely blocked.
 >
-> I want to work on [pick one]:
-> - **T-105b, the souvenir encoder** — the biggest remaining piece and the whole distribution
->   strategy (D-013). The composition is already written (T-105a, D-042); this is the encoding,
->   and it needs a device.
-> - **T-105b, the souvenir encoder** — needs a device
-> - **the content**, or **a device**, which are the only things left that move v1
+> Start with **T-052a**. After that: **T-105b, the souvenir encoder** (the whole distribution
+> strategy, D-013 — the composition is written, this is the encoding), or **T-063a**, the glyph
+> ranges, which needs a decision rather than a reflex.
 
 Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
 **Provisional**, tier 3 ask first.

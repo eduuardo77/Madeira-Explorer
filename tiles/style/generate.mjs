@@ -84,6 +84,50 @@ const SUBTRACT = {
 };
 
 /**
+ * Label layers whose `text-field` is replaced with a plain Portuguese name
+ * (T-063a). The reason each is here doubles as the reason it is safe.
+ *
+ * WHY THIS EXISTS — AND WHY THE ALTERNATIVE WAS TO SHIP MEGABYTES
+ * ---------------------------------------------------------------
+ * Protomaps builds `text-field` with `get_multiline_name`, which coalesces
+ * `name` / `name2` / `name3` and their `pgf:` variants and tests
+ * `is-supported-script`. That is exactly right for a world basemap and wrong
+ * for a single Portuguese island: the renderer ends up asking for glyph ranges
+ * for scripts the pack contains no text in. The first device render requested
+ * **1024-1279, 1536-1791, 11520-11775 and 65024-65279** — Cyrillic, Arabic,
+ * Georgian and variation selectors — and logged four errors per render,
+ * because the app bundles 0-511 only and **can never fetch the rest** (D-001
+ * forbids the network).
+ *
+ * The other way to silence it was to bundle those ranges: four ranges across
+ * three font stacks, roughly twelve more PBFs of alphabets Madeira does not
+ * use, against a 19.1 MB pack. T-063a's own note says not to bundle megabytes
+ * by reflex, and this is why.
+ *
+ * ⚠ **What is given up.** Bilingual and transliterated labels — a place whose
+ * name is rendered in two scripts on the world basemap shows only the
+ * Portuguese here. On a pack whose bbox is Madeira and Porto Santo that is not
+ * a loss, and if the bounds ever leave Portugal this is the first thing to
+ * revisit.
+ *
+ * Only two label layers survive `SUBTRACT`, which is what makes this cheap; a
+ * check below fails the build if that stops being true.
+ */
+const SIMPLIFY_LABELS = {
+  places_locality:
+    'village and town names — Portuguese, single script (T-063a)',
+  earth_label_islands:
+    'island names — Portuguese, single script (T-063a)',
+};
+
+/**
+ * The replacement: the Portuguese name if the pack carries one, otherwise the
+ * default. No `name2`/`name3`, no `pgf:` fallbacks, no script test — those are
+ * what summon the glyph ranges we cannot serve.
+ */
+const PLAIN_NAME = ['coalesce', ['get', 'name:pt'], ['get', 'name']];
+
+/**
  * The light flavor (T-058): warm paper ground, calm Atlantic, muted greens,
  * roads that whisper. Values not listed fall through to Protomaps LIGHT.
  *
@@ -390,6 +434,39 @@ function buildStyle(name, flavor, hillshadePaint, purpose) {
     (layer) => !(layer.id in SUBTRACT)
   );
 
+  // Simplify the surviving label layers (T-063a). Done here rather than in the
+  // flavor because it is a *text* decision, not a colour one.
+  const simplified = [];
+  for (const layer of generated) {
+    if (layer.id in SIMPLIFY_LABELS) {
+      layer.layout = { ...layer.layout, 'text-field': PLAIN_NAME };
+      simplified.push(layer.id);
+    }
+  }
+
+  // The saving depends on there being almost no label layers left. If a future
+  // change stops subtracting one, this must be reconsidered rather than
+  // silently leaving a world-basemap expression in the style.
+  const remainingLabels = generated
+    .filter((layer) => layer.type === 'symbol')
+    .map((layer) => layer.id);
+  const unsimplified = remainingLabels.filter(
+    (id) => !(id in SIMPLIFY_LABELS)
+  );
+  if (unsimplified.length > 0) {
+    throw new Error(
+      `label layer(s) ${unsimplified.join(', ')} keep Protomaps' multi-script ` +
+        'text-field, which requests glyph ranges the app cannot serve (T-063a). ' +
+        'Add them to SIMPLIFY_LABELS or to SUBTRACT.'
+    );
+  }
+  if (simplified.length !== Object.keys(SIMPLIFY_LABELS).length) {
+    throw new Error(
+      `SIMPLIFY_LABELS names ${Object.keys(SIMPLIFY_LABELS).join(', ')} but only ` +
+        `${simplified.join(', ') || 'none'} were found — the base style's layer ids moved.`
+    );
+  }
+
   const waterIndex = generated.findIndex((layer) => layer.id === 'water');
   if (waterIndex === -1) {
     throw new Error(
@@ -407,6 +484,7 @@ function buildStyle(name, flavor, hillshadePaint, purpose) {
         'by tiles/style/generate.mjs — DO NOT HAND-EDIT, edit the generator',
       'madeira:base': '@protomaps/basemaps 5.7.2 (BSD-3-Clause)',
       'madeira:subtracted': SUBTRACT,
+      'madeira:simplified-labels': SIMPLIFY_LABELS,
     },
     // ⚠ Viewer-only. The app must bundle glyphs before shipping (D-001) —
     // see the header comment.

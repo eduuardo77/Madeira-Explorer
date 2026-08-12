@@ -651,7 +651,41 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **This task needs a release APK, not just airplane mode** — testing offline against a debug
       build tests the wrong binary.
       — ⚠ MapLibre logs four `Failed to load glyph range` errors. See **T-063a**.
-- [ ] **T-063a** Decide what to do about the four unbundled glyph ranges ⇠ T-063
+- [~] **T-063a** Decide what to do about the four unbundled glyph ranges ⇠ T-063
+      — **Decided and mostly done 2026-08-12: simplify the label expression, do not bundle.**
+      Only **two** label layers survive `SUBTRACT` — `places_locality` and `earth_label_islands` —
+      so their `text-field` is now `["coalesce",["get","name:pt"],["get","name"]]` instead of
+      Protomaps' `get_multiline_name`. `SIMPLIFY_LABELS` in `tiles/style/generate.mjs` records the
+      reason per layer, and the generator now **throws** if a symbol layer appears that is in
+      neither list, so this cannot silently regress.
+      — **Measured: four failing ranges → one.** Ranges 1024-1279, 1536-1791 and 11520-11775 are
+      gone. All labels still render (Funchal, Machico, Porto da Cruz, Ilha da Madeira), in
+      Portuguese. As a side effect the shipped style dropped from **4184 to 2470 lines** — that
+      expression was 873 lines per layer, and the app parses it at every launch.
+      — **The root cause, proved rather than guessed.** Decoding the pack's `places` layer shows it
+      carries the full multilingual name set: `name:ru`, `name:ar`, `name:he`, `name:el`,
+      `name:uk`, `name:hi`, `name:zh-Hans/Hant`, `pgf:name:hi`, `pgf:name:mr` — *Фуншал*,
+      *Φουνσάλ*, *פונשל*, *فونشال*. Protomaps' expression was **correctly** asking for Cyrillic,
+      Arabic and Georgian, because the data really contains them.
+      — **Bundling was the wrong answer and now there is a number for it:** range 65024-65279 alone
+      is 68.7 KB (Regular) + 69.7 KB (Medium) + 2.6 KB (Italic) ≈ **141 KB** for alphabets Madeira
+      does not use, and that is one range of four.
+- [ ] **T-063b** One glyph range is still requested, and the pack carries names in nine scripts
+      ⇠ T-063a
+      — **Still failing:** `65024-65279 for font stack Noto Sans Medium` (U+FE00–FEFF), twice per
+      cold start. **No visible label is broken.** Proved data-dependent, not a renderer quirk: with
+      `text-field` replaced by a literal string the request disappears entirely. Which name
+      triggers it is *not* identified — a full MVT decode of every `places` string value found
+      nothing in that range, so the two facts do not yet reconcile. **Do not guess; the literal
+      test is the tool that works.**
+      — **The better fix, which removes the cause instead of the symptom:** strip the non-Portuguese
+      `name:*` and `pgf:name:*` properties in the tile build. The app is English-only (CONTEXT §1)
+      and labels are Portuguese, so nine other scripts are bytes and glyph requests bought for
+      nothing — against a 19.1 MB budget (D-035/D-036). That is a `tiles/pipeline` change and needs
+      a pack rebuild, which is why it is not done here.
+      — Re-check with: `adb logcat -d | grep "glyph range"`.
+- [x] ~~**T-063a** original framing~~ — kept below because the reasoning is what stopped the
+      expensive reflex:
       — Found 2026-08-11 by the first device render. `fetch-glyphs.mjs` bundles ranges **0–511
       only**, and its own header records that as an accepted risk: a label needing an unbundled
       range simply would not render. The device has now proved it happens — ranges 1024-1279,
@@ -665,7 +699,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       is ~12 more PBFs of scripts Madeira does not use, against a 19.1 MB pack budget.
       Simplifying `text-field` to plain `name` would stop the requests instead. **Decide before
       shipping; do not bundle megabytes by reflex.**
-      — Re-check with: `adb logcat -d | grep "glyph range"`.
+      — ▲ That call was right, and the measurement above confirms it.
 - [ ] **T-064** Performance test: recolour **the real graph**, not a sample ⇠ T-059
       — **Target corrected 2026-08-08 (T-028).** The old "5,000+ segments" figure was an order of
       magnitude low: Madeira has **~51,000 highway ways** before splitting at intersections. Test

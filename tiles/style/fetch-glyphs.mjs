@@ -24,6 +24,19 @@
  *
  * Source: protomaps/basemaps-assets (OFL-licensed Noto Sans builds — the same
  * files the viewer uses remotely).
+ *
+ * ⚠ **The "accepted risk" above stopped being theoretical, and was then fixed
+ * at the other end** (T-063a, 2026-08-12). The first device render requested
+ * four ranges we do not bundle — Cyrillic, Arabic, Georgian and variation
+ * selectors — because the pack carries `name:ru`, `name:ar`, `name:he`,
+ * `name:el` and six more for every locality, and Protomaps' `text-field`
+ * quite correctly asked for them. `generate.mjs` now replaces that expression
+ * with a plain Portuguese name, and three of the four requests stopped.
+ *
+ * **Do not add ranges here to silence the fourth.** Range 65024-65279 alone
+ * measures ~141 KB across the three stacks, for alphabets Madeira does not
+ * use. The remaining request is T-063b, and its real fix is upstream of this
+ * file: stop shipping nine languages of place names in the tile pack.
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs';

@@ -1,7 +1,13 @@
 # Session Handoff
 
 **Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-12 (later) — four decisions from the project lead: the canvas is cut to
+**Updated:** 2026-08-12 (end of session) — after the four decisions below, **T-061** (map labels
+obey the phone's text-size setting) and **T-060** (the accessibility styling pass) landed. T-060
+found the trace was one hardcoded colour for both map styles, scoring **2.70:1** on the dark
+ground with a casing five times brighter than the line it outlined; it now has a palette per
+style. `tools/poi-candidates.mjs` turns the blank `pois.json` into ~200 ranked candidates to
+triage. **334 tests.**
+Earlier 2026-08-12 — four decisions from the project lead: the canvas is cut to
 **~80 places** and keeps its denominator (**D-049**), v1 **stops recording barometer and pedometer
 data** (**D-050**), and the **souvenir video is cut from v1** (**D-051**) — which leaves v1 with no
 distribution strategy and makes **OD-10** the largest open question in the project.
@@ -21,14 +27,14 @@ implementation session).
 Do not open new research threads. Do not propose new decisions unless something is actually
 blocked. Build the things in "Start here" below.
 
-**Repository state:** git repository, 59 commits. **The whole v1 chain is written**: record →
+**Repository state:** git repository, 64 commits. **The whole v1 chain is written**: record →
 stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
 user's accommodation masked out of anything shareable. 70 source files and 23 test files in
 `app/`, ~18,100 lines.
 
 **It runs on an emulator now** (2026-08-11, T-029b — the project lead enabled CPU
 virtualization). **The map renders**: offline PMTiles, bundled glyphs, hillshaded terrain, on a
-GPU. Screens, permissions and the debug view all work. 310 unit tests still cover the logic.
+GPU. Screens, permissions and the debug view all work. 334 unit tests still cover the logic.
 
 ✅ **And as of 2026-08-12, the recorder records.** **T-052a is closed and it was never a defect**
 (D-047): the `walking` and `stationary` profiles ask for `balanced`/`coarse` accuracy, which
@@ -303,9 +309,24 @@ already deleted it.
 
 ### The order to actually work in
 
-Two of these are the project lead's and cannot be done for them. The rest is a short list.
+⚠ **The critical path is not code.** Two items belong to the project lead and nothing ships
+without them; the remaining code is a short tail. Read §2 before picking up §3.
 
-**1. ✅ T-052a is closed (2026-08-12, D-047). The recorder records.**
+**1. ⚠ OD-10 — v1 has no way for anybody to discover it.** D-051 cut the souvenir video, which
+CONTEXT §2.3 and D-013 both called *the entire distribution strategy*, and T-105d — a shareable
+passport — was dropped the next day. So there is no sharing mechanism at all, designed or
+accidental. **This is a question about whether v1 should launch publicly**, not about which
+channel to use, and it is the largest open item in the project. PROJECT_PLAN's launch reasoning
+still assumes an organic loop that no longer exists.
+
+**2. The two things only the project lead can do** — see below. They are the whole critical path.
+
+**3. The code tail**, in rough order of value: the **Directions handoff** (an explicit non-goal to
+build ourselves — tap a place, hand off to Apple/Google Maps; not implemented), **T-063b** (one
+glyph range still requested; the real fix is stripping nine languages of place names in the tile
+build), **T-067** (region boundaries), **T-112** (UI reduction pass).
+
+**Reference, not work — ✅ T-052a is closed (2026-08-12, D-047). The recorder records.**
 
 It was never a defect. The `walking` and `stationary` profiles ask for `balanced`/`coarse`
 accuracy → `PRIORITY_BALANCED_POWER_ACCURACY` → the *network* provider, and an emulator has no
@@ -334,7 +355,10 @@ measured (T-054). See D-047's rejected alternatives before reaching for it.
   required — T-021a needs it anyway, and it is the only source of real battery and
   background-survival numbers. iOS still needs a Mac and $99/year.
 - **The content.** `content/pois.json` is valid and empty. `content/README.md` is the guide;
-  `node tools/validate-content.mjs` checks the work and reports progress toward 150. Without it
+  **Start from `node tools/poi-candidates.mjs`**, which writes ~200 ranked candidates with
+  coordinates, categories and radii to triage down — the file is no longer blank.
+  `node tools/validate-content.mjs` checks the work and reports progress toward the **60–100**
+  target (D-049, cut from 150–250). Without it
   the stamp system has nothing to award and the trip cannot end at an airport. **Do not offer
   to curate it** — T-028 established it is selection and editorial judgement, which is the one
   thing a competitor cannot buy.

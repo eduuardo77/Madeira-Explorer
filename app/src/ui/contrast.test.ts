@@ -137,6 +137,36 @@ test('the action button’s label is readable on it', () => {
   assert.ok(contrastRatio(colors.actionText, colors.action) >= BODY);
 });
 
+test('tinted text is readable on every surface it is a button on', () => {
+  // D-054 replaced the outlined secondary buttons with iOS's plain tinted
+  // text — which means this colour is now carrying an action with no fill and
+  // no border behind it, and it is read as body text. It has to clear the body
+  // floor on every surface a card can sit on.
+  for (const surface of [
+    colors.background,
+    colors.surface,
+    colors.surfaceRaised,
+  ]) {
+    const ratio = contrastRatio(colors.tint, surface);
+    assert.ok(
+      ratio >= BODY,
+      `tint on ${surface} is ${ratio.toFixed(2)}:1, below ${BODY}`
+    );
+  }
+});
+
+test('the primary button is legible where Apple’s own would not be', () => {
+  // ⚠ The one place D-054 refuses to copy iOS. Apple's dark-mode filled button
+  // is white on systemBlue `#0A84FF`, which measures 3.65:1 — under this
+  // project's floor for text read in Madeiran sun. This asserts the thing we
+  // did instead is genuinely better, so nobody "corrects" it back later.
+  assert.ok(contrastRatio('#FFFFFF', '#0A84FF') < BODY, 'the premise changed');
+  assert.ok(
+    contrastRatio(colors.actionText, colors.action) >
+      contrastRatio('#FFFFFF', '#0A84FF')
+  );
+});
+
 test('outlines are visible enough to bound a tap target', () => {
   // ⚠ FOUND BY THIS TEST. `border` was `#314856` and measured 1.85:1 against
   // the background — below even WCAG's floor — while drawing the outline of

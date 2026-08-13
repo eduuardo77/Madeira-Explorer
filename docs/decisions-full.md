@@ -2564,3 +2564,56 @@ numbers. It took looking at it.
   null, wait for the map being initialized"* when the native view has not attached yet, which is
   exactly the case when arriving from another screen — and inside an async handler that throw is
   swallowed. The camera is driven by props instead.
+
+---
+
+## D-054 — The app follows iOS conventions, on both platforms.
+
+**Status:** Provisional — 2026-08-13, at the project lead's request: *"I'm looking for the iOS app
+look and feel if you know what I mean."*
+
+**Decision:** the interface is laid out to **iOS conventions**, and the Android build gets the same
+layout rather than a Material one. Concretely:
+
+| | |
+|---|---|
+| **Colour** | Neutral greys, not a tinted dark. `#0E0E10` page, `#1C1C1E` grouped card, `#2C2C2E` raised. The old palette's blue tint was most of what made it read as *a dark app somebody built* |
+| **Type** | A 34 pt large title per screen; body stays 17, which was already iOS's body size |
+| **Lists** | Grouped-inset: the section's name **above** the card in small uppercase grey, the footnote below it, the card holding only content |
+| **Sheets** | The place card is a sheet — 22 pt radius, a grabber, a shadow, and a *raised* surface so it floats over the cards behind it |
+| **Buttons** | One filled primary per surface; every secondary action is plain tinted text with no border. Pills and circles for map chrome |
+| **Navigation** | Back is `‹ Map` at the top left, not a floating pill in a bottom corner |
+
+**⚠ The one place it refuses to copy iOS, and a test now pins it.** Apple's filled button in dark
+mode is white on systemBlue `#0A84FF`, which measures **3.65:1** — under this project's 5:1 floor
+for text read outdoors (D-015, CONTEXT §6.5). The primary button keeps the inverted construction:
+a light blue with a near-black label, 8:1. `contrast.test.ts` asserts both that Apple's own pair
+fails our floor and that ours beats it, so nobody "corrects" it back.
+
+**The typeface is deliberately not shipped.** On iOS this renders in SF Pro because that is the
+system font; on Android, Roboto. Bundling one font for both would replace the right typeface on
+the very platform being imitated — and what actually reads as "iOS" is structure, proportion and
+restraint, not Apple's assets.
+
+**Alternatives considered:**
+
+- *Ship Inter (or similar) on both platforms* so the two builds match exactly. Rejected for now:
+  it costs binary size, and it would override SF Pro on iOS, which is the reference.
+- *Add `expo-blur` for translucent materials*, which is the most recognisable iOS surface of all.
+  **Not rejected — not yet attempted.** It is a new native dependency (D-043's audit rule applies),
+  and a blur view composited over a MapLibre GL surface is exactly the combination that can be
+  slow or wrong on Android. Worth trying deliberately, not as part of a styling pass.
+- *Follow Material 3 on Android and iOS conventions on iOS*, the textbook answer. Rejected: two
+  designs to maintain, two sets of screenshots to judge, for an app whose entire interface is a
+  map plus three controls — and the project lead asked for one of them by name.
+
+**Consequences:**
+
+- Every screen changed appearance. No behaviour changed, and no test needed rewriting except to
+  add two: tinted text must clear the body floor on all three surfaces, and the Apple-blue
+  comparison above.
+- The floating `Debug` chip is gone from the product screens — it now appears only *on* the debug
+  screen, as the way back. Settings was always the way in (design brief §5).
+- ⚠ **The map's chrome is still dark-on-light.** Apple Maps floats *white* circles on a light map;
+  ours are near-black, which is higher contrast outdoors (D-015) but less iOS. It also cannot
+  simply flip, because the same chrome sits over the dark style (D-026). Left as is, deliberately.

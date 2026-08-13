@@ -27,7 +27,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { PlaceCard } from '../places/placeCard';
 import { STRAIGHT_LINE_NOTE } from '../places/placeCard';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 export type PlaceCardViewProps = {
   card: PlaceCard;
@@ -58,6 +58,13 @@ export default function PlaceCardView({
     // it modal hides the rest of the screen from a screen reader, which would
     // make that untrue for exactly the users who can least afford it.
     <View style={styles.card}>
+      {/* The grabber. It is not draggable and does not pretend to be — it is
+          the mark that says "this is a sheet over the thing behind it", which
+          is how iOS distinguishes a temporary surface from a screen. Hidden
+          from screen readers, which get the same information from the fact
+          that this is a group with a Close button in it. */}
+      <View style={styles.grabber} accessibilityElementsHidden />
+
       <Text style={styles.meta}>
         {card.collected ? `${card.categoryLabel} · Collected` : card.categoryLabel}
       </Text>
@@ -77,51 +84,73 @@ export default function PlaceCardView({
 
       {notice === null ? null : <Text style={styles.notice}>{notice}</Text>}
 
-      <View style={styles.buttons}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Directions to ${card.name} in your maps app`}
-          onPress={onDirections}
-          style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
-        >
-          <Text style={styles.directionsText}>Directions</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={onClose}
-          style={({ pressed }) => [styles.close, pressed && styles.pressed]}
-        >
-          <Text style={styles.closeText}>Close</Text>
-        </Pressable>
-      </View>
+      {/* One filled button and the rest as plain tinted text — the iOS
+          convention, and it is also the honest hierarchy: Directions is the
+          thing D-018 promises, the others are ways out. Each row is full
+          width, because three controls sharing a phone's width is how a 60 dp
+          target quietly becomes a 40 dp one at large text sizes. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Directions to ${card.name} in your maps app`}
+        onPress={onDirections}
+        style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
+      >
+        <Text style={styles.directionsText}>Directions</Text>
+      </Pressable>
 
       {onShowOnMap === undefined ? null : (
-        // Its own row rather than a third button squeezed into the one above:
-        // three controls sharing a phone's width is how a 60 dp target
-        // quietly becomes a 40 dp one at large text sizes.
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Show ${card.name} on the map`}
           onPress={onShowOnMap}
-          style={({ pressed }) => [styles.showOnMap, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
         >
-          <Text style={styles.closeText}>Show on map</Text>
+          <Text style={styles.plainButtonText}>Show on map</Text>
         </Pressable>
       )}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Close"
+        onPress={onClose}
+        style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.plainButtonText}>Close</Text>
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
+    // ⚠ `surfaceRaised`, **not** `surface`, and a shadow under it. On the
+    // passport the cards behind this are `surface`, so a sheet painted the
+    // same colour looked like it was *inside* the Levadas card rather than
+    // floating over the screen — a screenshot caught that immediately. A
+    // sheet has to be a step above whatever it covers.
+    backgroundColor: colors.surfaceRaised,
+    // A sheet, not a card: iOS rounds these hard, and the radius is most of
+    // what says "temporary surface" without drawing a single line.
+    borderRadius: radius.sheet,
+    // Both spellings: `elevation` is Android's, the `shadow*` family is iOS's,
+    // and this component ships on both.
+    elevation: 12,
+    shadowColor: '#000000',
+    shadowOpacity: 0.45,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 8 },
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
     gap: spacing.xs,
+  },
+  grabber: {
+    alignSelf: 'center',
+    width: 36,
+    height: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colors.border,
+    marginBottom: spacing.sm,
   },
   pressed: { opacity: 0.75 },
 
@@ -147,49 +176,31 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  buttons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
   directions: {
-    // The card's one action, so it takes the room. 60 dp, D-015.
-    flex: 1,
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
-    borderRadius: 12,
+    borderRadius: radius.control,
     backgroundColor: colors.action,
+    marginTop: spacing.sm,
   },
   directionsText: {
     color: colors.actionText,
     fontSize: fontSize.body,
-    fontWeight: '800',
-  },
-  close: {
-    minHeight: MIN_TAP_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  showOnMap: {
-    minHeight: MIN_TAP_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  closeText: {
-    color: colors.text,
-    fontSize: fontSize.body,
     fontWeight: '700',
+  },
+  plainButton: {
+    // No fill and no border: on iOS a secondary action is tinted text, and
+    // the 60 dp target is held by the row's height rather than by a box drawn
+    // around it (D-015 — the target is a size, not an outline).
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plainButtonText: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '600',
   },
 });

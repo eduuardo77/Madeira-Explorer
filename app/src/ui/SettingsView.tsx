@@ -28,7 +28,7 @@
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { PermissionLevel } from '../recording/LocationProvider';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 export type SettingsViewProps = {
   permission: PermissionLevel;
@@ -64,11 +64,19 @@ function Section({
   children?: React.ReactNode;
 }) {
   return (
-    <View style={[styles.section, destructive === true && styles.sectionDanger]}>
+    // iOS grouped-inset list (D-054): the heading sits **above** the card and
+    // the footnote **below** it, both in the page's margin. The card holds
+    // only the controls. It matches the passport, which is the point — two
+    // screens laid out by two different rules is what "generic" looks like.
+    <View style={styles.group}>
       <Text style={[styles.sectionTitle, destructive === true && styles.dangerText]}>
         {title}
       </Text>
-      {children}
+      {children === undefined ? null : (
+        <View style={[styles.section, destructive === true && styles.sectionDanger]}>
+          {children}
+        </View>
+      )}
       {/* The footnote, not a tooltip. §5: this is what lets the screen grow. */}
       <Text style={styles.footnote}>{footnote}</Text>
     </View>
@@ -260,17 +268,24 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingTop: spacing.xl * 2,
-    paddingBottom: spacing.xl,
+    // The Done button is pinned below this list, and a scroll that ends level
+    // with it hides its last row behind it.
+    paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
   heading: {
     color: colors.text,
-    fontSize: fontSize.title,
+    // The same large title as the passport. Two screens, one rule.
+    fontSize: fontSize.largeTitle,
     fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  group: {
+    gap: spacing.sm,
   },
   section: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.card,
     padding: spacing.md,
     gap: spacing.sm,
   },
@@ -282,15 +297,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: colors.textMuted,
     fontSize: fontSize.small,
-    fontWeight: '700',
+    fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
+    paddingHorizontal: spacing.xs,
   },
   dangerText: { color: colors.bad },
   footnote: {
     color: colors.textMuted,
     fontSize: fontSize.small,
     lineHeight: fontSize.small * 1.4,
+    paddingHorizontal: spacing.xs,
   },
   row: {
     flexDirection: 'row',
@@ -311,11 +328,12 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: radius.control,
+    // Filled rather than outlined: on iOS a row inside a group is a surface,
+    // not a box drawn on one. The 60 dp target is the height (D-015).
+    backgroundColor: colors.surfaceRaised,
   },
-  actionDanger: { borderColor: colors.bad, borderWidth: 2 },
+  actionDanger: { borderWidth: 2, borderColor: colors.bad },
   actionText: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
   choiceRow: { flexDirection: 'row', gap: spacing.sm },
   choice: {
@@ -323,11 +341,12 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: radius.control,
+    backgroundColor: colors.surfaceRaised,
   },
-  choiceActive: { borderColor: colors.action, borderWidth: 2 },
+  // ⚠ The tick in the label carries the state as well — D-015 forbids hue
+  // alone, and a "selected" that is only a border colour is exactly that.
+  choiceActive: { borderWidth: 2, borderColor: colors.action },
   choiceText: { color: colors.textMuted, fontSize: fontSize.body, fontWeight: '700' },
   choiceTextActive: { color: colors.text },
   pressed: { opacity: 0.75 },
@@ -336,7 +355,7 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: radius.control,
     backgroundColor: colors.action,
   },
   doneText: {

@@ -14,7 +14,7 @@ import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './src/ui/theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
 /**
  * ⚠ ONE SUPPRESSED WARNING, AND WHY IT IS NOT A SHRUG
@@ -154,18 +154,23 @@ export default function App() {
       ) : (
         <DebugScreen />
       )}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={
-          screen === 'debug' ? 'Open the map' : 'Open the debug screen'
-        }
-        onPress={() => setScreen(screen === 'debug' ? 'map' : 'debug')}
-        style={styles.switcher}
-      >
-        <Text style={styles.switcherText}>
-          {screen === 'debug' ? 'Map' : 'Debug'}
-        </Text>
-      </Pressable>
+      {/* ⚠ **Only on the debug screen**, where it is the way back.
+          It used to float over every screen, including the map and the
+          passport, and a screenshot showed what that costs: a stray developer
+          control in the corner of the product, overlapping the dev client's
+          own floating bubble. The debug screen is reached from Settings (its
+          row was always there) — which is also where design brief §5 says it
+          belongs. */}
+      {screen === 'debug' ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to the map"
+          onPress={() => setScreen('map')}
+          style={styles.switcher}
+        >
+          <Text style={styles.switcherText}>Map</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -183,11 +188,9 @@ const styles = StyleSheet.create({
     minWidth: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 10,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
     backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   switcherText: {
     color: colors.text,

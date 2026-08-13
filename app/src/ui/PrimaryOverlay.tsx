@@ -42,7 +42,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import StampMark from './StampMark';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
 const STAMP_MARK_SIZE = 34;
@@ -173,12 +173,13 @@ const styles = StyleSheet.create({
     height: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: MIN_TAP_TARGET / 2,
+    // A circle, like every floating control in Apple Maps (D-054). No border:
+    // a filled circle on a pale map needs no outline to be found, and the
+    // outline was the most Android thing on this screen.
+    borderRadius: radius.pill,
     // Chrome sits on a light map, so it carries its own contrast rather than
     // relying on whatever happens to be underneath it.
     backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   gearGlyph: { color: colors.text, fontSize: fontSize.title },
 
@@ -194,13 +195,14 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
+    paddingHorizontal: spacing.lg,
+    // A pill, matching the passport button opposite it.
+    borderRadius: radius.pill,
     backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
   },
-  recordingActive: { borderColor: colors.bad },
+  // ⚠ Recording is signalled by the word on the button ("Stop recording"), and
+  // this only reinforces it — D-015 forbids hue carrying the meaning alone.
+  recordingActive: { borderWidth: 2, borderColor: colors.bad },
   recordingText: {
     color: colors.text,
     fontSize: fontSize.body,
@@ -215,13 +217,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: 14,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
     backgroundColor: colors.action,
   },
   stampCount: {
     color: colors.actionText,
     fontSize: fontSize.title,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

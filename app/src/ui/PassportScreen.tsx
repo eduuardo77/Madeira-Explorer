@@ -175,18 +175,19 @@ export default function PassportScreen({
         </View>
       )}
 
-      {/* Hidden while a card is open: it sits in the same corner, and the
-          card's own Close is the way out of the card. */}
-      {card === null ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back to the map"
-          onPress={onClose}
-          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-        >
-          <Text style={styles.backText}>Map</Text>
-        </Pressable>
-      ) : null}
+      {/* ⚠ **Top-left, in a navigation bar, not floating bottom-right.**
+          A floating pill sat on top of the last category row — the scroll's
+          bottom padding cannot know about a button the *screen* draws — and a
+          back control in the bottom corner is not a convention anyone has.
+          iOS puts it above the large title, and so does this. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Back to the map"
+        onPress={onClose}
+        style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+      >
+        <Text style={styles.backText}>‹ Map</Text>
+      </Pressable>
     </View>
   );
 }
@@ -232,17 +233,16 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   back: {
     position: 'absolute',
-    bottom: spacing.xl,
-    right: spacing.md,
+    top: spacing.xl,
+    left: spacing.sm,
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    borderRadius: 14,
-    backgroundColor: colors.action,
+    paddingHorizontal: spacing.sm,
   },
   backText: {
-    color: colors.actionText,
+    // Tinted text with a chevron: the iOS back button, which carries no fill.
+    color: colors.tint,
     fontSize: fontSize.body,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

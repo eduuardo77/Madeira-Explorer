@@ -40,7 +40,7 @@ import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
  * How big a sticker is drawn, in dp.
@@ -120,11 +120,12 @@ function CategoryRow({
   const isEmpty = collected === 0 || stamps.length === 0;
 
   return (
-    // An empty row is a slim line, not a full card. Five of them at full
-    // height was most of a screen of dark grey slabs saying nothing — the
-    // passport looked emptier than it was, which is the opposite of what
-    // CONTEXT §4.1 asks a nearly-empty collection to feel like.
-    <View style={[styles.row, isEmpty && styles.rowEmptyCard]}>
+    // iOS grouped-inset list (D-054): the section's name sits **above** the
+    // card in small uppercase grey, and the card holds only content. It is the
+    // single change that makes five rows read as one system rather than as
+    // five boxes — and an empty category becomes a heading with nothing under
+    // it, instead of a full-height slab saying "0 of 1".
+    <View style={styles.section}>
       <View style={styles.rowHeader}>
         <Text style={styles.rowTitle}>{CATEGORY_LABELS[category]}</Text>
         {/* The count is text, not a bar. A progress bar at 3/40 reads as
@@ -134,15 +135,15 @@ function CategoryRow({
         </Text>
       </View>
 
-      {/* An empty row is just its header. Five near-identical "no X yet"
-          lines was measured at 1.1 screens on day one — a scroll that reveals
-          nothing — and reads as five small failures rather than one
-          invitation. The invitation is given once, under the hero. */}
+      {/* An empty category is its heading and nothing else — no card, no
+          reserved space. Five near-identical "no X yet" lines was measured at
+          1.1 screens on day one, and read as five small failures rather than
+          one invitation; the invitation is given once, under the hero. */}
       {isEmpty ? null : (
         <View style={styles.stamps}>
           {stamps.map((stamp) => (
-            // The cell is 62 dp, comfortably over D-015's 60 — which is why
-            // the sticker is the tap target rather than a button beside it.
+            // The cell is 96 dp, well over D-015's 60 — which is why the
+            // sticker itself is the tap target rather than a button beside it.
             <Pressable
               key={stamp.placeId}
               accessibilityRole="button"
@@ -243,20 +244,19 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: {
     padding: spacing.md,
-    paddingTop: spacing.xl * 2,
-    // Clear of the floating Map button, which is 60 dp sitting `xl` off the
-    // bottom: without this the last category row slides under it, which a
-    // screenshot caught and the workbench did not (the button is the screen's,
-    // not the view's).
-    paddingBottom: spacing.xl * 2 + MIN_TAP_TARGET,
+    // Room for the navigation bar the screen draws above this (`‹ Map`).
+    paddingTop: spacing.xl + MIN_TAP_TARGET + spacing.sm,
+    paddingBottom: spacing.xl * 2,
     // md, not lg: with five rows the inter-row gap is the largest single
     // contributor to how far a nearly-empty passport scrolls.
     gap: spacing.md,
   },
   heading: {
     color: colors.text,
-    fontSize: fontSize.title,
+    // The iOS large title. One screen, one name, said once and said big.
+    fontSize: fontSize.largeTitle,
     fontWeight: '700',
+    letterSpacing: 0.4,
   },
   hero: {
     alignItems: 'center',
@@ -283,33 +283,28 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     textAlign: 'center',
   },
-  row: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  rowEmptyCard: {
-    // No sticker to hold, so no room held for one.
-    paddingVertical: spacing.sm,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.surface,
+  section: {
+    gap: spacing.sm,
   },
   rowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
     gap: spacing.md,
+    // The heading belongs to the card below it, not to the gap above it.
+    paddingHorizontal: spacing.xs,
   },
   rowTitle: {
-    color: colors.text,
-    fontSize: fontSize.body,
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   rowCount: {
     color: colors.textMuted,
-    fontSize: fontSize.body,
+    fontSize: fontSize.small,
+    fontWeight: '600',
   },
   rowEmpty: {
     color: colors.textMuted,
@@ -319,6 +314,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    padding: spacing.md,
   },
   stampCell: {
     width: STAMP_SIZE,

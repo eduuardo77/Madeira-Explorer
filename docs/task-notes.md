@@ -1167,3 +1167,18 @@ grep -A30 "^### T-052a" docs/task-notes.md
       — ⚠ **Still open and visible in the screenshots:** the `Debug` switcher collides with the
       dev-client's own floating bubble in the top-right corner (development only, T-117a), and the
       sea is a flat slab with no coastal treatment — real cartography, judged outdoors (T-065).
+      — **2026-08-13, second pass: the iOS look (D-054).** The project lead asked for *"the iOS app
+      look and feel"*. What was portable turned out to be structure, not assets: neutral greys
+      instead of a blue-tinted dark, a 34 pt large title, grouped-inset sections with the label
+      outside the card, a real sheet for the place card (raised surface + shadow — painted the same
+      colour as the cards behind it, it looked like it was *inside* one), one filled button with
+      tinted-text secondaries, pills and circles on the map, and `‹ Map` at the top left instead of
+      a floating pill that sat on the last row.
+      — Settings was rebuilt on the same grouped-list rule, so the two list screens now match.
+      — The floating `Debug` chip is gone from the product screens; it appears only on the debug
+      screen, as the way back. Settings was always the way in.
+      — ⚠ **Still not iOS, deliberately:** the map's floating chrome is dark-on-light where Apple
+      Maps is white-on-light. Ours is higher contrast outdoors (D-015) and the same chrome has to
+      survive the dark map style (D-026). And `expo-blur` — the most recognisable iOS material of
+      all — is untried: it is a new native dependency and a blur composited over a MapLibre GL
+      surface is exactly the combination that goes wrong on Android.

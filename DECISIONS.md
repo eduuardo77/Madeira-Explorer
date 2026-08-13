@@ -82,6 +82,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-051** | The souvenir video is cut from v1. v1 therefore ships with no distribution strategy. | Accepted |
 | **D-052** | A place is reached through the passport, and Directions hands off with a fallback. | Provisional |
 | **D-053** | The camera frames what you walked, not the island. | Provisional |
+| **D-054** | The app follows iOS conventions, on both platforms. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

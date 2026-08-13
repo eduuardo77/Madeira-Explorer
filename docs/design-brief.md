@@ -57,6 +57,29 @@ landmass the solidity that a city map gets from building massing, using the thin
 characterises the island. It also reinforces the elevation theme that runs through the whole
 system (CONTEXT §5). Cost: tile pack size, a direct input to T-026.
 
+### 2.2a The interface follows iOS conventions (D-054)
+
+**Added 2026-08-13, at the project lead's request.** Everything in §1 still holds — most of this
+app's design is cartography — but the chrome now has a stated system instead of defaults:
+
+- **Neutral greys, not a tinted dark.** The old palette's blue cast was the single biggest reason
+  the app read as *a dark app somebody built* rather than as a system.
+- **A 34 pt large title per screen.** Body text stays 17, which was already iOS's body size.
+- **Grouped-inset lists**: the section name above the card, the footnote below it, the card
+  holding only content. The passport and settings are laid out by the same rule — two screens
+  following two different rules is what "generic" looks like.
+- **Sheets float**: 22 pt radius, a grabber, a shadow, and a surface one step lighter than
+  whatever they cover.
+- **One filled button per surface**; secondary actions are plain tinted text. Map chrome is
+  circles and pills.
+- **Back is `‹ Map`, top left.** Not a floating pill in a bottom corner, which is not a convention
+  anybody has and which sat on top of the last row of the passport.
+
+⚠ **Where iOS and D-015 disagree, D-015 wins.** Apple's dark-mode filled button is white on
+systemBlue and measures 3.65:1, under this project's 5:1 floor for text read in the sun. Ours is
+inverted — light blue, near-black label — and `contrast.test.ts` pins both halves of that
+reasoning so it does not get "corrected" later.
+
 ### 2.3 The quality bar, stated so it can be tested
 
 Not "looks as good as Apple Maps" — that is the wrong target, because Apple's map is optimised

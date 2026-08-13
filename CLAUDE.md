@@ -1,129 +1,90 @@
 # Working on Madeira Explorer
 
-This file is loaded automatically every session. It is **routing and invariants only** — never
-content that lives in another document. If something here contradicts `DECISIONS.md`, that wins
-and this file is wrong.
+Loaded automatically every session. **Routing and invariants only** — never content that lives
+in another document. If this contradicts a decision, the decision wins and this file is wrong.
 
 ## Read this first
 
-**`HANDOFF.md`** — state, what to do next, and the things that are easy to get wrong. Then
-`CONTEXT.md` (§6 conventions, **§9 the doc-maintenance protocol you must follow**) and
-`DECISIONS.md` **D-032**, which defines v1 scope and deletes work you might otherwise start.
-`TASKS.md` tracks everything task by task.
+**`HANDOFF.md`** — state, what blocks v1, the traps, and the verification commands. Short on
+purpose; read it fully.
 
-**Mode: EXECUTION.** Do not open research threads or propose decisions unless something is
-genuinely blocked.
+Then **look things up rather than reading them.** The reference documents are large, and reading
+them whole is the main reason a session gets expensive.
+
+```bash
+grep -A40 "^## D-032" docs/decisions-full.md   # a decision in full
+grep -A30 "^### T-052a" docs/task-notes.md     # why a finished task went the way it did
+```
+
+- `DECISIONS.md` — a one-line index of 51 decisions; full text in `docs/decisions-full.md`.
+  **Read D-032 before starting anything large**: it defines v1 scope and deletes work you might
+  otherwise begin.
+- `TASKS.md` — the checklist. Open tasks carry their notes inline; post-mortems on finished ones
+  are in `docs/task-notes.md`.
+- `CONTEXT.md` — the *why*. **§6 conventions** and **§9 the doc protocol** before writing code;
+  the rest on demand.
+
+**Mode: EXECUTION.** Do not open research threads or propose decisions unless genuinely blocked.
+
+## Keep sessions cheap
+
+The documents cost more to read than the code does. In order of impact:
+
+1. **Grep, do not read.** A whole-file read of `docs/decisions-full.md`, `docs/task-notes.md` or
+   `TASKS.md` is almost never justified.
+2. **Screenshots are expensive.** Prefer `adb shell uiautomator dump` or a `sqlite3` query. Take
+   a screenshot when the question is genuinely visual — artwork, layout, contrast — and then take
+   one, not five.
+3. **Write less.** A decision earns its length from the alternatives it rejects; a finished task
+   does not need an essay. Say what changed and why it was not the obvious thing.
+4. **Batch independent tool calls** into one block.
 
 ## The two things that are not yours to do
 
-1. **Getting a *physical* device.** No Android phone and no Mac. **The emulator now works** —
-   the project lead enabled CPU virtualization in firmware on 2026-08-11, and
-   `emulator-check accel` returns `0` with WHPX usable. `bash tools/run-emulator.sh` boots an
-   Android 14 AVD. It is legitimate for rendering, storage, UI, permissions and replayed routes,
-   and **worthless for battery, background survival and GPS realism** (CONTEXT §6.6) — those
-   still need real hardware. See `docs/dev-build.md`.
+1. **Getting a physical device.** No Android phone, no Mac. The emulator works
+   (`bash tools/run-emulator.sh`) and is legitimate for rendering, storage, UI, permissions and
+   replayed routes — and **worthless for battery, background survival and GPS realism**
+   (CONTEXT §6.6). See `docs/dev-build.md`.
 2. **Curating `content/pois.json`.** Selection and editorial judgement, deliberately theirs
-   (T-066). Do not offer to do it.
+   (T-066). `tools/poi-candidates.mjs` prepares the list; do not offer to choose.
 
 ## Honesty rules, each of which cost something here
 
-- **The app runs on an emulator, and the recorder records there.** Be precise about which half
-  you mean. Verified on the emulator: build, install, launch, the map drawing from the offline
-  pack, screens, permissions, 60 dp tap targets, and — since 2026-08-12 — **a replayed route
-  reaching `raw_fix` and drawing as a trace** (T-052a, D-047). **Not** verified, because no
-  emulator can answer them: battery, background survival and GPS realism (CONTEXT §6.6), and
-  whether a `balanced`-accuracy request works on a real phone. 310 unit tests and a browser
-  workbench remain all the verification the *logic* has.
-- **On the emulator, record on the `driving` profile.** `walking` and `stationary` ask for
-  `balanced` accuracy, which an emulator cannot serve at all, and they produce a perfect
-  impersonation of a dead recorder (D-047). `adb shell dumpsys location` names the requesting
-  uid and priority, and settles it in one line.
-- **Never state a measured-sounding number that was not measured.** The battery figure is
-  `null` on purpose and a test keeps it that way (D-041). A plausible guess is worse than
-  silence — it is a promise the app has not earned.
-- **Check that a measurement actually ran.** A DOM probe that silently matched nothing once
-  returned three identical numbers that looked exactly like a pass. If a result does not move
-  when the input changes, suspect the probe before believing the result.
-- **Check hardware and environment before advising on them.** Advice about tooling was given
-  once without looking, and was wrong in the direction that costs money.
-
-## Verifying work
-
-```bash
-cd app && npm test          # 310 tests, Node's own runner, no framework
-cd app && npx tsc --noEmit  # strict
-cd app && npx expo export --platform android --output-dir <tmp>   # Metro resolves everything
-node tools/validate-content.mjs                                    # the content pack
-```
-
-Seeing things:
-
-```bash
-bash tools/run-emulator.sh                       # Android 14 AVD (T-029b)
-cd app && npm run android                        # build + install the dev client
-bash tools/replay-route.sh tools/routes/funchal-seafront.txt   # give it a trace to draw
-bash tools/screenshot.sh <name>                  # → tools/out/shots/<name>.png
-```
-
-⚠ **The emulator is legitimate for rendering, storage, UI, permissions and replayed routes, and
-worthless for battery, background survival and GPS realism** (CONTEXT §6.6). A green result here
-never closes a task naming a battery figure or a survival claim.
-
-Without a device at all:
-
-```bash
-cd app && npx expo start --web   # the screens (D-038) — a workbench, never a target
-bash tiles/viewer/serve.sh        # the map styles over the real tile pack
-node tools/preview-stamps.mjs     # the stamp artwork (D-046)
-```
+- **Be precise about which half you mean.** The app runs on an emulator and the recorder records
+  *there*. Battery, background survival and GPS realism are unverified and no emulator can answer
+  them. 334 unit tests and a browser workbench are all the verification the *logic* has.
+- **Never state a measured-sounding number that was not measured.** The battery figure is `null`
+  on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not
+  earned.
+- **Check that a measurement actually ran.** If a result does not move when the input changes,
+  suspect the probe before believing it.
+- **Check hardware and environment before advising on them.** Advice given without looking was
+  once wrong in the direction that costs money.
 
 ## Commit messages
 
-Commit freely — the project lead has said so. Push to `origin main`.
+Commit freely and push to `origin main`. Subject: task IDs, then what it does in plain words —
+`git log --grep=T-071` has to find it later. Body: the *why* — the non-obvious constraint, the
+alternative rejected, and **anything found or broken along the way**. Be honest in the subject
+when a commit is partly a bug: *"settings, and a broken erase-all"*.
 
-**Subject:** the task IDs, then what it does in plain words. Decision in brackets when the
-commit records one. Task IDs are stable and are referenced in commits by design (TASKS.md), so
-`git log --grep=T-071` finds the work later.
+End every message with `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
 
-```
-T-071/T-072: geofence crossings become stamps (D-037)
-T-141/T-140/T-125: settings, and a broken erase-all
-Docs: cut HANDOFF from 826 to 504 lines
-```
-
-**Body: explain the reasoning, not the diff.** `git diff` shows what changed; the message is
-the only place the *why* survives. In practice that means the non-obvious constraint the code
-satisfies, the alternative rejected and why, and — importantly — **anything found or broken
-along the way**, including mistakes made en route. Several commits here carry more value in
-that last part than in the feature.
-
-Be honest in the subject when a commit is partly a bug: *"settings, and a broken erase-all"*.
-
-End every commit with:
-
-```
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-```
-
-⚠ **Write the message to a file and use `git commit -F <file>`.** PowerShell 5.1 mangles
-native-command arguments containing double quotes, so a multi-line `-m` gets word-split. The
-scratchpad directory is the place for that file.
+⚠ **Write the message to a file and use `git commit -F <file>`.** PowerShell 5.1 word-splits
+multi-line `-m` arguments containing double quotes. Use the scratchpad directory.
 
 ## Conventions that are not obvious
 
 - **Pure logic in its own module, impure wrapper beside it** — `stampRules`/`stampAwards`,
-  `geofenceSelection`/`geofenceManager`, `movementPolicy`/`samplingGate`,
-  `composition`/`souvenirPlan`. Only the pure half is testable without a device, which is why
-  the split exists.
-- **A module under unit test imports with an explicit `.ts` extension.** Node's resolver will
-  not guess it; Metro does not mind. Everything else stays extensionless.
-- **No Madeira knowledge in `app/`** (D-017, called absolute). Coordinates, names and bounds
-  come from `content/` or the shipped style's metadata.
-- **Artwork and cartography are judged by eye, and this project has none.** `stampArt.ts` /
-  `preview-stamps.mjs` is the pattern: put the design in a pure module and give it a **second
-  renderer** that draws it to a standalone page, so the thing being looked at is the thing that
-  ships. Measure the output too — three real defects in the stamps were found by reading the
-  generated geometry, none by looking.
-- **Keep the docs current in the same piece of work**, per CONTEXT §9: tier 1 just do it, tier 2
-  record as **Provisional**, tier 3 ask first. Stale docs are the recurring failure here — the
-  handoff twice described a codebase that no longer existed.
+  `geofenceSelection`/`geofenceManager`, `movementPolicy`/`samplingGate`. Only the pure half is
+  testable without a device, which is why the split exists.
+- **A module under unit test imports with an explicit `.ts` extension.** Node's resolver will not
+  guess it; Metro does not mind. Everything else stays extensionless.
+- **No Madeira knowledge in `app/`** (D-017, absolute). Coordinates, names and bounds come from
+  `content/` or the shipped style's metadata.
+- **Artwork and cartography are judged by eye, and this project has none.** Put the design in a
+  pure module and give it a **second renderer** that draws what ships
+  (`tools/preview-stamps.mjs`). Measure the output too — but a mark that passed every geometry
+  test still rendered as a crosshair, so look at it as well.
+- **Keep the docs current in the same piece of work** (CONTEXT §9): tier 1 just do it, tier 2
+  record as **Provisional**, tier 3 ask first.

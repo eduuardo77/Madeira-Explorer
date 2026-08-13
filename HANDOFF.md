@@ -1,691 +1,95 @@
 # Session Handoff
 
-**Written:** 2026-08-06, at the end of the planning conversation.
-**Updated:** 2026-08-12 (end of session) — after the four decisions below, **T-061** (map labels
-obey the phone's text-size setting) and **T-060** (the accessibility styling pass) landed. T-060
-found the trace was one hardcoded colour for both map styles, scoring **2.70:1** on the dark
-ground with a casing five times brighter than the line it outlined; it now has a palette per
-style. `tools/poi-candidates.mjs` turns the blank `pois.json` into ~200 ranked candidates to
-triage. **334 tests.**
-Earlier 2026-08-12 — four decisions from the project lead: the canvas is cut to
-**~80 places** and keeps its denominator (**D-049**), v1 **stops recording barometer and pedometer
-data** (**D-050**), and the **souvenir video is cut from v1** (**D-051**) — which leaves v1 with no
-distribution strategy and makes **OD-10** the largest open question in the project.
-Earlier 2026-08-12 — **T-052a closed: the recorder records, and it was never broken**
-(D-047). The blocker was the emulator's inability to serve a `balanced`-accuracy request. Then
-**T-052b** (the app can now tell "recording" from "recording nothing") and **T-052c**, which
-turned out to be a **concurrency** bug that was quietly creating two trips (D-048). The passport
-button also moved and stopped looking like a map control (T-075).
-Earlier 2026-08-11 — the souvenir **composition** (T-105a, D-042), the dependency network
-audit (T-117, D-043), the privacy policy (T-124, D-044), the battery exemption (T-046, D-045)
-and the stamp artwork (T-070, D-046). **The small-remainder list is down to T-139**, and what
-is left of T-105 is the encoder, which needs a device. Earlier updates: 2026-08-10 (**v1
-feature-complete in code**), 2026-08-08 (design session, D-026/D-027/D-028), 2026-08-06 (first
-implementation session).
-**For:** a fresh Claude Code session picking this project up cold.
-**Mode: EXECUTION.** Planning is over. The project lead said, plainly: *"Tired of planning."*
-Do not open new research threads. Do not propose new decisions unless something is actually
-blocked. Build the things in "Start here" below.
+**For:** a session picking this project up cold. **Updated:** 2026-08-12.
+**Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
+genuinely blocked.
 
-**Repository state:** git repository, 64 commits. **The whole v1 chain is written**: record →
-stamps by geofence → hero number → trace on a map → passport → trip end → reveal, with the
-user's accommodation masked out of anything shareable. 70 source files and 23 test files in
-`app/`, ~18,100 lines.
+## State
 
-**It runs on an emulator now** (2026-08-11, T-029b — the project lead enabled CPU
-virtualization). **The map renders**: offline PMTiles, bundled glyphs, hillshaded terrain, on a
-GPU. Screens, permissions and the debug view all work. 334 unit tests still cover the logic.
+The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
+trace on a map → passport → trip end → reveal. 70 source files, 23 test files, ~18,100 lines,
+**334 tests**, 65 commits.
 
-✅ **And as of 2026-08-12, the recorder records.** **T-052a is closed and it was never a defect**
-(D-047): the `walking` and `stationary` profiles ask for `balanced`/`coarse` accuracy, which
-resolves to the *network* provider, and an emulator has no wifi or cell survey to geolocate from.
-`adb emu geo fix` drives **GPS**, which only a high-accuracy request turns on — and `driving` is
-the one profile that asks for it. On `driving`, a 41-point replay produced **12 fixes 15 s apart**
-and **the trace drew on the map**. Nothing in `app/` was changed to achieve that, which is the
-strongest evidence available that nothing in `app/` was wrong.
+Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
+permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.
 
-⚠ **The emulator still cannot speak to battery, background survival or GPS realism**
-(CONTEXT §6.6) — those need T-021a's real Android. And **whether `balanced` works on a real
-phone is still unmeasured**; it should, but that is an argument, not a reading, and **T-051 owes
-it**.
+⚠ **Never verified, because no emulator can answer it:** battery, background survival, GPS
+realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app has met real data.**
 
----
+## The three things that actually block v1
 
-## Read this in order
+**1. `content/pois.json` is empty.** No places → no stamps, no hero number, no passport, no trip
+end. Everything downstream already works. **This is the project lead's** (T-066) — selection is
+editorial judgement and the one thing a competitor cannot buy. It is no longer a blank page:
 
-1. **`CONTEXT.md`** — the cold-start briefing. Written specifically for you. Read it fully
-   before doing anything, especially §2 (the five load-bearing ideas), §3 (hard constraints),
-   §6 (coding conventions) and **§9 (the doc-maintenance protocol you are expected to follow)**.
-2. **`DECISIONS.md`** — 51 numbered decisions. **Read D-032 first** — it defines v1 scope and
-   deletes a large amount of work you might otherwise start.
-3. **`TASKS.md`** — the ordered checklist. Start here for what to actually do.
-4. `ARCHITECTURE.md`, `PROJECT_PLAN.md`, `README.md` — reference as needed.
-5. `docs/design-brief.md` — visual direction and screen structure. Read before touching anything
-   that renders. Its §1 explains why the "UI work" on this app is mostly cartography.
+```bash
+node tools/poi-candidates.mjs      # ~200 ranked candidates → content/pois.candidates.json
+node tools/validate-content.mjs    # checks the work, targets 60–100 places (D-049)
+```
 
-`CLAUDE.md` at the repository root is loaded automatically and points here. It holds routing
-and invariants only — if it disagrees with a decision, the decision wins.
+**2. No physical device.** The emulator settles rendering, storage, UI, permissions and replayed
+routes. A used mid-range Android (~€50–100) is the only source of battery and background-survival
+numbers. **The project lead's.**
 
-**Reference, read when relevant:** `docs/dev-build.md` (getting it onto hardware),
-`docs/map-style.md` (how the cartography is generated), `docs/field-testing.md` (Track A),
-`content/README.md` (the curation guide), `docs/osm-coverage.md`, `docs/tile-pipeline.md`,
-`docs/dependency-audit.md` (T-117 — what ships and what it can reach),
-`docs/store-privacy-answers.md` (T-120/T-122 — the exact answers for both store forms).
+**3. OD-10 — nothing makes anyone discover this app.** D-051 cut the souvenir video, which
+CONTEXT §2.3 called *the entire distribution strategy*; T-105d, a shareable passport, was dropped
+the next day. This is a question about whether v1 should launch publicly, not which channel to
+use. **The largest open item in the project.**
 
-**These seven documents are the source of truth, not this handoff and not any chat history.**
-If this file and those disagree about a *decision*, they win.
+## The code tail, in rough order of value
 
-The exception is **implementation status**: what is built, what is unverified, and what is
-waiting on the project lead is recorded here and in `TASKS.md`. Read both before writing code —
-this file explains the shape of what exists, `TASKS.md` tracks it task by task.
+- **Directions handoff** — tap a place, hand off to Apple/Google Maps (an explicit non-goal to
+  build ourselves, D-018). Not implemented.
+- **T-063b** — one glyph range still requested. The real fix is upstream: the tile pack ships
+  place names in nine scripts the app never renders.
+- **T-067** region boundaries · **T-112** UI reduction pass.
 
----
+## Traps that each cost something here
 
-## Where the project stands
+- **On the emulator, record on the `driving` profile.** `walking` and `stationary` ask for
+  `balanced` accuracy, which an emulator cannot serve at all, and they produce a perfect
+  impersonation of a dead recorder (D-047). One-line check: `adb shell dumpsys location` should
+  show `gps provider: ProviderRequest[…HIGH_ACCURACY, WorkSource{… com.madeiraexplorer.app}]`.
+  Its absence is what a silent recorder looks like.
+- **`adb root` drops `adb reverse`.** The dev client then cannot reach Metro and shows a stack
+  trace that looks like Metro died. Re-run `adb reverse tcp:8081 tcp:8081`.
+- **Never state a measured-sounding number that was not measured.** The battery figure is `null`
+  on purpose and a test keeps it that way (D-041).
+- **Check the measurement ran.** If a result does not move when the input changes, suspect the
+  probe. A regex over raw tile bytes once "found" a character that was not there.
+- **Artwork is judged by eye and this project has none.** Put the design in a pure module and give
+  it a second renderer (`tools/preview-stamps.mjs`). A stamp mark that passed every geometry test
+  rendered as a crosshair.
 
-Planning is complete, **scope has been cut (D-032)**, and **the v1 chain is written end to
-end**. Phase 0 is half done. All of it is unproven on hardware.
+## Verifying work
 
-### What is left of v1, in three buckets
+```bash
+cd app && npm test          # 334 tests, Node's own runner
+cd app && npx tsc --noEmit  # strict
+bash tools/run-emulator.sh && cd app && npm run android
+bash tools/replay-route.sh tools/routes/funchal-seafront.txt
+bash tools/screenshot.sh <name>
+```
 
-**1. Code nobody has written yet** — and it is a short list:
+Reading `/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` with `adb root` + `sqlite3`
+is usually faster than tapping through the UI.
+
+## Where things are written down
+
+**The documents are the source of truth, not this file and not chat history.** If this disagrees
+with a decision, the decision wins.
 
 | | |
 |---|---|
-| ~~**T-105b** the souvenir encoder~~ | **CUT FROM v1 2026-08-12 (D-051).** It needed a new native dependency and cannot be verified without a device. T-105a's storyboard stays; the encoder is v2 (**T-105c** researches it first). ⚠ **This leaves v1 with no distribution strategy** — CONTEXT §2.3 called the video the entire mechanism by which anybody finds this app. **OD-10 is now the largest open question in the project.** |
-| ~~**T-070** stamp artwork~~ | **Done 2026-08-11 (D-046).** Generated per place from the category and a hash of the id — eight silhouettes, six colourways, two-tone emblems. The **emblem** carries the category, not the shape or the colour (D-015). `node tools/preview-stamps.mjs` draws them all to a page, which is the only way to judge them here. |
-| ~~**T-124** privacy policy~~ | **Written 2026-08-11 (D-044).** Shown offline in the app; `docs/privacy-policy.md` is generated from the same source. ⚠ Not lawyer-reviewed, and `CONTACT_EMAIL` is null — both block T-123. |
-| ~~**T-046** Android battery exemption~~ | **Done 2026-08-11 (D-045).** Opens the system battery screen rather than requesting the restricted permission, because T-123's review is already on the critical path. The app cannot read the exemption state, so the row claims none. |
-| ~~**T-139** tune the dark style~~ | **Done 2026-08-11.** Tuned by contrast measurement, not by eye — `map/darkStyle.test.ts` holds D-015 against the shipped style. **T-140's toggle is now wired to the map** and persists. ⚠ Never seen; T-065 outdoors is the verdict. |
-
-**2. Verification that needs a device.** ~~T-052a~~ **is closed (D-047) — the recorder records,
-and the trace draws.** What blocked it was the emulator's inability to serve a `balanced`-accuracy
-request, not the code.
-
-The rest: T-051–T-055, T-063, T-076, T-077–T-080, T-110.
-
-**T-052b's detection half is done** — the debug screen now says *"recording, but nothing for
-2h 2m"* instead of leaving two rows to be correlated. **It does not notify, and that is settled**:
-the budget stays at two (D-011, amended 2026-08-12).
-
-**T-052c is closed, and it was not what it looked like (D-048).** The reported `checkTripEnd`
-throw was guessed to be a Fast Refresh artefact; a reload does not reproduce it and a **cold
-start** does. Chasing it found a worse bug: `getOrCreateActiveTrip` is a read-then-insert that
-created **a second trip** when the OS delivered a location batch and a geofence crossing at once —
-which is the normal case, not an unusual one. The sink is now serialised.
-
-**No threshold anywhere in this app has met real data** — every number in D-033, D-037, D-039,
-D-041 and now `SILENCE_TOLERANCE` is a reasoned guess.
-
-**3. Content, which only the project lead can produce — and it is now half the job it was.**
-D-049 cut the canvas from 150–250 places to **~80**, because a 7-day trip takes in 25–45 and a
-passport that finishes a tenth full is the failure CONTEXT §4.1 exists to prevent.
-`node tools/poi-candidates.mjs` writes ~200 ranked candidates to triage down to 60–100.
-`content/pois.json` is valid and
-**empty**. Until it has places, the stamp system has nothing to award and the trip cannot end
-at an airport. See `content/README.md`.
-
-**v1 = record → stamps by geofence → draw the raw trace → passport → souvenir.**
-Phase 4 map matching is **v2**. The effort saved goes into the interface and the map.
-
-| | |
-|---|---|
-| Framework | Expo SDK 57, React Native 0.86, **TypeScript strict** |
-| Map | `@maplibre/maplibre-react-native` 11.3.6, **installed and wired** (T-056): offline PMTiles + bundled glyphs, trace drawn from `raw_fix` (T-059). Never rendered on a device. |
-| Location | `expo-location` (free) behind a swappable `LocationProvider` |
-| Storage | SQLite, WAL. *(R-tree and road graph are v2 — D-032)* |
-| Tiles | **Built.** 12.6 MB basemap (D-030) + 6.5 MB terrain (D-035) = 19.1 MB. Styles generated: `tiles/style/generate.mjs` |
-| Backend | **None.** Zero servers, zero accounts, zero analytics. |
-| Dependency cost | **$0** for the app. Track A needs Sensor Logger's paid tier (tooling, not a dependency). |
-| Unavoidable spend | Apple $99/yr, Google Play $25 once — at launch, not now |
-
-### ⚠ The single most important thing to know
-
-**The v1 chain now runs end to end on the emulator: record → store → draw.** What is unproven is
-no longer *whether it works* but *what it costs and whether it survives* — and those need real
-hardware.
-
-*What the emulator proved* (2026-08-11 and 2026-08-12): the app builds, installs, launches and
-draws the real map from the offline pack; permission state is read correctly; the debug view
-reports honestly; tap targets measure 60 dp at 420 dpi, confirming T-113's browser figures; and
-**the recorder captures a replayed route into `raw_fix`, opens a trip, and the trace renders**.
-
-*What it found:* a **D-008 violation** — `isGeofencing()` threw on While-Using and took the whole
-debug screen down with it — a camera fitting the wrong rectangle (T-062), and a day spent on
-**T-052a, which turned out to be the emulator and not the app** (D-047). Two real defects in the
-first twenty minutes of owning a device, neither of which 270 unit tests and a browser workbench
-had caught — and one expensive lesson about believing a symptom's obvious reading.
-
-*The lesson worth keeping from T-052a:* the four causes it ruled out were all ruled out
-correctly, and the answer was still outside the space it searched. **When every candidate is
-excluded, widen the axis rather than going deeper on the last one.** The axis here was *which
-priority the request asked for*, and the question was never posed.
-
-*What no emulator can tell us:* battery, background survival, OEM killers, GPS realism
-(CONTEXT §6.6). No battery figure has been measured and `MEASURED_BATTERY_PERCENT_PER_DAY` stays
-`null` (D-041). Treat every Phase 1 *reliability* claim as a hypothesis until T-021a exists.
-
-### What is Provisional
-
-**D-022 is now Accepted** (confirmed 2026-08-08, T-016a closed).
-
-**Twenty-one decisions are Provisional** — `awk '/^## D-0/{id=$2} /^\*\*Status/{if (/Provisional/) print id}' DECISIONS.md`
-is the authoritative count. ⚠ *This line said "nine" until 2026-08-11 while listing twelve
-entries; the number had simply stopped being maintained. Count it, do not trust it.* Three came
-from the 2026-08-08 design session; most of the rest were made while building on 2026-08-10 and
-2026-08-11 and have never met real data or a real device. The default for anything new is
-Provisional and the burden is on confirmation, not objection (CONTEXT §9). The ones with
-something specific still outstanding:
-
-- **D-048** *(2026-08-12)* — the recording sink is **serialised**. The OS delivers work
-  concurrently and two of our writes assumed it did not: `getOrCreateActiveTrip` is a
-  read-then-insert that produced **a second trip** under overlap, and everything downstream
-  assumes a trip is singular. Found while chasing a much smaller `expo-sqlite` error. ⚠ **Do not
-  add a caller of `getOrCreateActiveTrip` outside the sink** without reading it.
-- **D-047** *(2026-08-12)* — the emulator cannot serve a `balanced`-accuracy location request, so
-  `walking` and `stationary` record nothing here and `driving` records perfectly. **The finding is
-  measured and reversible; the consequence on real hardware is not.** Whether `balanced` produces
-  fixes on a real phone is the open half, and **T-051 owes the reading**. It also left T-052b —
-  the app cannot currently tell "recording" from "recording nothing".
-- **D-042** *(2026-08-11)* — the souvenir is planned as a storyboard before it is rendered,
-  paced by recorded movement rather than by elapsed time, never drops a stamp, and produces
-  **no film at all** from a trace masking could not verify. Unit-tested and **never watched** —
-  every duration in it is a guess. T-105b and a pair of eyes are what confirm or kill it.
-- **D-043** *(2026-08-11)* — `expo-notifications` puts Firebase Cloud Messaging in the Android
-  build, and it stays, because removing it takes the day-1 health check with it. No Firebase
-  configuration ships, so it has nothing to register against — **a static argument about a
-  runtime behaviour. T-117b owes the packet capture.**
-- **D-044** *(2026-08-11)* — the privacy policy is shown offline in the app rather than linked,
-  and `docs/privacy-policy.md` is generated from the same source so the two cannot drift.
-  **Not lawyer-reviewed**, and `CONTACT_EMAIL` is null — both block T-123.
-- **D-045** *(2026-08-11)* — the battery exemption opens the system settings screen instead of
-  requesting the restricted permission, to keep a second reviewed permission off T-123's
-  submission. **Held in reserve, not rejected:** adopt the one-tap dialog if T-053 shows OEMs
-  killing the recorder anyway.
-- **D-046** *(2026-08-11)* — stamp artwork is generated per place from its category and a hash
-  of its id; the **emblem** carries the category, shape and colour are decoration. Seen twice
-  in a browser by one person, never on a device, never outdoors (T-065).
-
-- **D-026** — two map styles, light for use and dark for the souvenir; figure-ground from shaded
-  terrain, not buildings. Confirm after T-025, and after looking at both styles outdoors in
-  Funchal midday sun.
-- **D-027** — the passport is organised by category (five named rows), not by region. Region
-  moves to the map screen.
-- **D-028** — sampling gates on stationary-vs-moving; walking-vs-driving deferred; the pedometer
-  classifies but never gates recording.
-- **D-033** *(2026-08-10)* — the geofence window: rank by edge distance, spend one region slot
-  on an exit-only anchor sized from a stated safety property, and back it up with recorded
-  fixes. Unit-tested but built on three guessed constants; **T-076 is what confirms or kills
-  it**, and it is a five-minute walk.
-- **D-034** *(2026-08-10)* — the content pack: one JSON file outside `app/`, compiled in,
-  validated by the same parser at runtime and in `tools/validate-content.mjs`. A place owns one
-  or more geofences, so a levada can carry a start and an end. **T-066 is what will find its
-  gaps** — the format has never met a real list.
-- **D-035** *(2026-08-10)* — terrain ships as raw elevation (6.5 MB, z≤12), shaded at render
-  time so one pack serves both styles. Confirmed or killed by hillshade rendering on
-  `maplibre-react-native` (T-056) and the outdoor look test (T-065).
-- **D-041** *(2026-08-10)* — onboarding: three screens, every decline a real button, nothing
-  gates on a grant (D-008), and **no battery figure until T-054 measures one** — the constant
-  is null and a test keeps it that way. The Always upgrade is offered once on day 2 and never
-  again.
-- **D-040** *(2026-08-10)* — accommodation masking: one export door, no opt-out parameter, and
-  a trace the app could not verify is **withheld rather than shipped unmasked**. The thresholds
-  err toward hiding — the opposite of D-009's generosity, because masking too much costs a
-  little trace and masking too little publishes an address.
-- **D-039** *(2026-08-10)* — trip end: an airport crossing only counts if the user has been
-  somewhere else first, because **everyone crosses the airport geofence on the way in** and the
-  naive rule ends every holiday forty minutes after it starts. Silence takes three days, not
-  D-012's 24 hours, because a dead recorder and a departed user look identical.
-- **D-038** *(2026-08-10)* — a **web design workbench** (`cd app && npx expo start --web`),
-  because there is no device on this project and an interface nobody can look at cannot be
-  judged. It is not a product target and must never become one. It paid for itself on the
-  first run: it measured T-081 and caught a 38 px control overlap on a 320 dp phone.
-- **D-037** *(2026-08-10)* — stamp awards: dwell **and** speed gates, and levadas verify both
-  endpoints independently so driving between two trailheads cannot earn one. Missing speed
-  lowers confidence rather than vetoing. Every threshold is a guess; T-131 retunes them over
-  holidays already recorded, which is what storing the judgement inputs buys.
-- **D-036** *(2026-08-10)* — the map is bundled in the binary, not downloaded on first run.
-  19.1 MB rides along; first launch copies it into the **cache** directory, which both
-  platforms keep out of backups by construction — so regenerable tiles can never crowd out the
-  irreplaceable trip history (ARCHITECTURE §4a).
-
-Full visual direction and primary-screen structure: **`docs/design-brief.md`**.
-
-## What is already built
-
-Everything below exists and is committed. **Nothing below has run on a phone.**
-
-```
-app/
-├── app.json, eas.json, metro.config.js   config; metro.config.js exists only
-│                                         so the bundler can see content/
-├── plugins/withAndroidBackupRules.js     backup rules + manifest attributes
-├── index.ts                              module-scope side effects — read it
-├── App.tsx / App.web.tsx                 the app / the design workbench (D-038)
-└── src/
-    ├── recording/     ~2,000 lines. COMPLETE, NEVER RUN ON A PHONE.
-    │   LocationProvider.ts (the D-025 seam — read first), ExpoLocationProvider,
-    │   backgroundTasks (+ .web no-op), taskNames, recordingSink, sensors,
-    │   samplingPolicy, distance, geofenceSelection(+test), geofenceManager,
-    │   devPoiFixture, movementPolicy(+test), samplingGate, healthCheckPolicy
-    │   (+test), healthCheck, recorderHealth
-    ├── content/       T-040, the pack's only entry point (D-034)
-    │   contentPack(+test), poiCatalogue
-    ├── progress/      the reward (D-037) and the numbers
-    │   stampRules(+test), stampAwards, tripProgress(+test), currentProgress,
-    │   tripEnd(+test), tripEndDetection
-    ├── souvenir/      T-103/T-104, the privacy hole closed (D-040); T-105a (D-042)
-    │   accommodation(+test), exportTrace  ← THE ONLY DOOR A TRACE LEAVES BY
-    │   composition(+test), souvenirPlan   ← the film, planned but never rendered
-    ├── onboarding/    T-042/T-114/T-121, the hardest permission (D-041)
-    │   permissionPolicy(+test), OnboardingView, OnboardingFlow
-    ├── map/           T-056/T-059
-    │   mapAssets, mapStyle, traceGeoJson(+test), MapScreen
-    ├── storage/       migrations (2), database, types, dao/*,
-    │   deleteAllUserData.test.ts ← guards a bug that already happened once
-    └── ui/            theme (D-015 as values), DebugScreen, PassportView,
-        PassportScreen, PrimaryOverlay, SettingsView, SettingsScreen
-```
-
-**Tables beyond the documented schema:** `recording_event` (the recorder's own diary — a
-silence in `raw_fix` cannot otherwise be told apart from a dead service, and ARCHITECTURE §10
-demands honest gaps) and `app_state` (small key/value: Porto Santo unlock flag, health-check
-timestamp, last permission state).
-
-**Append-only is enforced, not assumed.** SQLite triggers abort any `UPDATE` on `raw_fix` and
-`sensor_sample`. `DELETE` is left open because T-125 has to be able to wipe.
-
-**The sink is a statically imported module, not a runtime callback.** This looks inflexible and
-is deliberate: when the OS relaunches the app headless there is no React tree to hand a callback
-to. Expo's docs are explicit that `defineTask` must run in the global scope of the bundle, which
-is why `index.ts` imports `backgroundTasks` for side effects. Do not "tidy" that import away.
-
-## Start here
-
-**v1 is small on purpose (D-032):** record → stamps by geofence → **draw the raw trace** →
-passport → souvenir. **Phase 4 map matching is deferred to v2.** Do not build a road graph, an
-R-tree, tunnel inference or corridor crediting. If a task feels enormous, check whether D-032
-already deleted it.
-
-### The order to actually work in
-
-⚠ **The critical path is not code.** Two items belong to the project lead and nothing ships
-without them; the remaining code is a short tail. Read §2 before picking up §3.
-
-**1. ⚠ OD-10 — v1 has no way for anybody to discover it.** D-051 cut the souvenir video, which
-CONTEXT §2.3 and D-013 both called *the entire distribution strategy*, and T-105d — a shareable
-passport — was dropped the next day. So there is no sharing mechanism at all, designed or
-accidental. **This is a question about whether v1 should launch publicly**, not about which
-channel to use, and it is the largest open item in the project. PROJECT_PLAN's launch reasoning
-still assumes an organic loop that no longer exists.
-
-**2. The two things only the project lead can do** — see below. They are the whole critical path.
-
-**3. The code tail**, in rough order of value: the **Directions handoff** (an explicit non-goal to
-build ourselves — tap a place, hand off to Apple/Google Maps; not implemented), **T-063b** (one
-glyph range still requested; the real fix is stripping nine languages of place names in the tile
-build), **T-067** (region boundaries), **T-112** (UI reduction pass).
-
-**Reference, not work — ✅ T-052a is closed (2026-08-12, D-047). The recorder records.**
-
-It was never a defect. The `walking` and `stationary` profiles ask for `balanced`/`coarse`
-accuracy → `PRIORITY_BALANCED_POWER_ACCURACY` → the *network* provider, and an emulator has no
-wifi or cell survey to geolocate from. `adb emu geo fix` drives **GPS**, which only
-`PRIORITY_HIGH_ACCURACY` turns on, and **`driving` is the only profile that asks for it**.
-
-**To watch the recorder work, record on `driving`.** On the debug screen: *Start recording
-(driving)*, then `bash tools/replay-route.sh tools/routes/funchal-seafront.txt`. `dumpsys
-location` should show `gps provider: ProviderRequest[@+15s0ms, HIGH_ACCURACY, WorkSource{…
-com.madeiraexplorer.app}]` — **that line is the single best health check on this machine**, and
-its absence is what a silent recorder looks like.
-
-`app/src/recording/locationProbe.ts`, behind *Probe foreground location (T-052a)* on the debug
-screen, is the instrument that settled it. Keep it — it asks the same question on real hardware.
-
-⚠ `samplingPolicy.ts` was **not** changed, and should not be changed to make an emulator happy.
-Raising `walking` to high accuracy is the obvious move and it spends a battery budget nobody has
-measured (T-054). See D-047's rejected alternatives before reaching for it.
-
-**2. ⚠ THE TWO THINGS ONLY THE PROJECT LEAD CAN DO.**
-
-- **A *physical* device.** The **emulator now works** (T-029b — CPU virtualization was enabled
-  2026-08-11): `bash tools/run-emulator.sh`, then `cd app && npm run android`. It renders the
-  map, runs the screens and answers permissions, and it is **worthless for battery, background
-  survival and GPS realism** (CONTEXT §6.6). So a **used mid-range Android, ~€50–100** is still
-  required — T-021a needs it anyway, and it is the only source of real battery and
-  background-survival numbers. iOS still needs a Mac and $99/year.
-- **The content.** `content/pois.json` is valid and empty. `content/README.md` is the guide;
-  **Start from `node tools/poi-candidates.mjs`**, which writes ~200 ranked candidates with
-  coordinates, categories and radii to triage down — the file is no longer blank.
-  `node tools/validate-content.mjs` checks the work and reports progress toward the **60–100**
-  target (D-049, cut from 150–250). Without it
-  the stamp system has nothing to award and the trip cannot end at an airport. **Do not offer
-  to curate it** — T-028 established it is selection and editorial judgement, which is the one
-  thing a competitor cannot buy.
-
-**3. T-105b — the souvenir encoder.** The largest remaining piece of code and the one D-013
-calls the entire distribution strategy: a 9:16 video good enough that people post it.
-**T-105a split the testable half off and it is done** (D-042) — `souvenir/composition.ts` plans
-the film as a storyboard and `souvenirPlan.ts` feeds it from the database. What remains needs
-native video encoding and therefore a device. It also needs *eyes*: the composition's timings
-are guesses by somebody who has never seen the result.
-
-**4. The small remainder is empty.** Every v1 item that does not need a device is done —
-T-046, T-070, T-105a, T-113, T-116/T-116a, T-117, T-118, T-120, T-122, T-124, T-139, T-140.
-**What is left of v1 is a device, the content, and the Play submission**, and none of the three
-is code.
-
-**5. Now that T-052a is closed, in this order**, because each is cheap and each can invalidate the
-next: ~~replay a route and see the trace draw~~ (**done 2026-08-12**) → the tunnel route, which
-must draw as **two** segments not one (ARCHITECTURE §10) → airplane-mode cold start (T-063, still
-open — the render so far had Metro attached) → permission dialogs on a fresh install → then, on
-real hardware only: the geofence field test (T-076, ~850 m on foot) → an overnight soak (T-051) →
-battery over 12 hours (T-054).
-`docs/dev-build.md` has the full list and says which check settles which open question.
-
-### How to see things
-
-**On the emulator** (T-029b — this is now the default):
-
-```bash
-bash tools/run-emulator.sh                                      # Android 14 AVD
-cd app && npm run android                                       # build + install
-bash tools/replay-route.sh tools/routes/funchal-seafront.txt     # feed it positions
-bash tools/screenshot.sh <name>                                 # → tools/out/shots/
-```
-
-⚠ Two traps, both learned the hard way and written into the scripts: `adb emu geo fix` takes
-**longitude first**, and `adb shell screencap > file` corrupts the PNG on Windows — use
-`adb exec-out`. A third: Windows reports `VirtualizationFirmwareEnabled: False` even when
-virtualization is on, because a running hypervisor hides the firmware flag. **Ask
-`emulator-check accel`, not Windows.**
-
-Reading the app's own state is often faster than tapping through it. `adb root` works on this
-AVD, and the database is at
-`/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` — `sqlite3` is on the device, and
-the `recording_event` diary is where the app records what it actually did.
-
-**Without a device at all.** Two workbenches exist, and both were load-bearing rather than
-nice-to-have:
-
-```bash
-cd app && npx expo start --web     # the screens (D-038)
-bash tiles/viewer/serve.sh          # the map styles, over the real tile pack
-```
-
-The web workbench (`App.web.tsx`) mounts every screen against fixture data. **It is not a
-product target and must never become one** — the app needs background location, OS geofences
-and a native renderer, none of which a browser has. It has already caught two defects invisible
-in code review: a passport that scrolled on day one, and two primary-screen controls that
-overlapped by 38 px on a 320 dp phone.
-
-### Where the effort should go, and where it should not
-
-| Spend it on | Do not spend it on |
-|---|---|
-| The interface — one screen, three controls, one number | GPS or trace accuracy |
-| The map's style and terrain | Map matching (deferred, D-032) |
-| Battery, and not failing silently | Perfect road highlighting |
-| Generous geofence radii at trailheads | Corridor widths, hysteresis, portal inference |
-
-Nobody uninstalls because a drawn line was twenty metres off. They uninstall because the battery
-died, because recording stopped silently, or because they walked a famous levada and got nothing
-— and that last one is a **geofence radius** problem, not a matching problem.
-
-### Phase 0 — what is left
-
-**Done:** the tile pipeline (T-022, T-023, T-026 — 19.1 MB with terrain) and the OSM coverage
-survey (T-028, closing OD-7).
-
-**Left, and no longer blocking v1:** the Track A field runs (T-017–T-021). Their output tunes
-*matching* thresholds and matching is now v2 (D-032), so they are worth an afternoon rather
-than a delay. Full procedure — logger, the two runs, ground truth, the sampling-bias warning —
-is **`docs/field-testing.md`**.
-
-### Phase 1 is finished, and unproven
-
-Every line of the recorder is written: scaffold, storage, the provider seam, `expo-location`,
-data protection, the debug screen, the geofence backbone (T-039), the content pack (T-040),
-sampling gating (T-034), the day-1 health check (T-049), the permission flow (T-042/T-043/T-044)
-and settings (T-141). Only T-046, the Android battery-optimisation exemption, remains.
-
-**What is left in the phase is verification, and verification needs a device.** T-051–T-055 are
-what turn Phase 1 from plausible into proven, and they are the trigger for the Transistor
-purchase decision (D-025). T-051 now carries **two** known hazards at once:
-
-1. `pausesUpdatesAutomatically` — iOS may stop location updates and not resume.
-2. The sampling gate can select the stationary profile and then never hear from the OS again —
-   it can put the recorder to sleep and cannot wake it (D-028's implementation note).
-
-Both fail the same way: silently, on somebody's holiday. The day-1 health check (T-049) exists
-to catch exactly this, and it too has never run.
-
----
-
-## Working agreement with the project lead
-
-**Keep the docs current, unprompted.** This was an explicit instruction. When an architectural
-or planning decision is made, update the affected documents in the same piece of work — not
-later. The full protocol, including which document to update for which kind of change, is in
-`CONTEXT.md` §9. Key conventions: `D-0xx` and `T-xxx` IDs are stable and never renumbered;
-supersede rather than delete; always record rejected alternatives; and mark anything the
-project lead has not explicitly confirmed as **Provisional**, not Accepted.
-
-**They have no JavaScript, TypeScript or web background.** They chose React Native on technical
-merit anyway and are learning as they go. Don't assume web idiom — no DOM, no CSS quirks, no
-bundler folklore. Prefer explicit, boring code over idiomatic cleverness. When something is
-JavaScript-ecosystem weirdness rather than a real concept, say so plainly instead of letting
-them think they've misunderstood something fundamental. Full guidance in `CONTEXT.md` §6.7.
-
-**They are not a beginner in general.** They reason carefully about architecture, push back well
-on cost and scope, and improved several designs during planning — the Porto Santo unlock
-mechanic (D-024) was theirs and is better than what was proposed. Explain the language, not the
-thinking.
-
-**They live in Madeira.** Never treat field verification as expensive or something to batch up.
-When a matching threshold, geofence radius or battery figure is in doubt, the right advice is
-"go and measure it."
-
----
-
-## Things that are easy to get wrong
-
-Collected because each one was reasoned about carefully and would be expensive to rediscover.
-
-**`deleteAllUserData` must list every table that references `trip`.** With `foreign_keys = ON`
-and no `ON DELETE CASCADE`, a missing child table does not leave stray rows — it aborts the
-whole transaction, so *nothing* is deleted. `stamp_award` was missed when migration 2 added it
-and erase-all was broken for every user with a stamp until 2026-08-10.
-`deleteAllUserData.test.ts` now derives the list from the migrations and fails if one is
-missing. Add new child tables to both in the same commit.
-
-**`setFeatureState` does not work reliably on MapLibre Native mobile.** It is a GL JS (web) API.
-Do not design around it. Data-driven style *expressions* are fine; only runtime per-feature
-state mutation is the problem. See D-022.
-
-**iOS: region monitoring and significant-location-change relaunch a terminated app even after
-force-quit. Standard background location updates do not.** This single fact is why geofences
-are the backbone. Re-verify against current Apple docs before implementing.
-
-**iOS caps simultaneous monitored regions at 20.** With ~80 POIs (D-049) the geofence set must be
-swapped dynamically — nearest ~18 plus one large "you left this area" trigger. Painful to
-retrofit; build it in from the start.
-
-**iOS Data Protection must be `CompleteUntilFirstUserAuthentication`.** Full `Complete` fails,
-because the app writes while the device is locked.
-
-**Android OEMs kill background work regardless of the official APIs.** Foreground service plus
-battery-optimisation exemption. Also: `expo-location` does not auto-restart a terminated app on
-Android — that is the known gap in the free stack (D-025), and the day-1 health check exists
-partly to catch it.
-
-**Google Play manually reviews background-location apps and rejects many.** Demo video and
-written justification required. Slow re-review cycles. It sits on the critical path — start it
-early.
-
-**Porto Santo stays hidden until the user goes there** (D-024). But two things apply regardless
-of unlock state: both islands count as one region for trip-end detection, or a ferry day trip
-falsely ends the holiday; and gap-bridging must not credit a road route across the ocean. Those
-are Madeira bugs, not Porto Santo features.
-
-**The stamp denominator must count unlocked regions only**, or the headline number breaks in
-exactly the way D-024 exists to prevent.
-
-**Accessibility beats aesthetics.** Unvisited roads stay legible mid-grey, never near-black.
-Differentiate visited by brightness *and* line weight, never hue alone. The dark aesthetic and
-the "usable by an 80-year-old" goal genuinely conflict; accessibility wins (D-015).
-
-**The souvenir video is an export of location history.** Mask the user's accommodation by
-default (D-016). It is the one real privacy hole in an otherwise airtight design.
-
-**Backup policy: include the database, exclude the tile pack** (ARCHITECTURE.md §4a). Android's
-auto-backup cap can be exceeded by the tile pack alone, and exceeding it can silently fail the
-entire backup — taking the user's trip history with it.
-
-**Audit every dependency's network behaviour.** This is where these apps actually leak — not
-through carelessness with the database, but through an analytics or crash-reporting SDK that
-phones home by default. Target zero networked dependencies. Adding any network call requires a
-recorded decision. **T-117 ran this on 2026-08-11 — `docs/dependency-audit.md`.** No analytics,
-no crash reporting, no telemetry, and no network call in the app's own code.
-
-**`expo-notifications` puts Firebase Cloud Messaging in the Android build** (D-043). Found by
-T-117 and the one thing in the audit likely to surface in the Play review. The app uses local
-notifications only and ships no Firebase configuration, so it has nothing to register against —
-but that is a *static* argument about a *runtime* behaviour, and **T-117b still owes the packet
-capture**. Do not repeat the claim as if it were measured. Removing the dependency was
-considered and rejected: it would take the day-1 health check with it, and a recorder that dies
-silently is the failure CONTEXT §4.5 calls worse than never installing the app.
-
-### Learned while implementing Phase 1
-
-**`app/AGENTS.md` tells you to read the versioned SDK 57 docs before writing code. Do it.**
-Expo moves fast enough that writing from memory produces plausible, wrong code. Checking
-`https://docs.expo.dev/versions/v57.0.0/` caught two real errors in this session.
-
-**`newArchEnabled` no longer exists in SDK 57.** The new architecture is the default and the
-flag was removed from the config schema; leaving it in fails `expo-doctor`.
-
-**The `expo-location` config plugin injects a generic `NSLocationAlwaysUsageDescription`** —
-literally "Allow $(PRODUCT_NAME) to access your location". That is exactly the weak purpose
-string Apple pushes back on (D-008, T-119). It is overridden explicitly in `app.json`; if you
-regenerate that file, put the override back.
-
-**`Pedometer.getStepCountAsync` is iOS-only** and stores only the past seven days. `expo-sensors`
-has no historical step query on Android, and its live watcher does not deliver in the
-background. Android therefore stores `null` for steps — which the sensor fallback (T-090) must
-treat as "unknown", never as zero. Fabricating a zero would be exactly the invented continuity
-ARCHITECTURE §10 forbids.
-
-**`Barometer.relativeAltitude` is iOS-only** too. Android gets `pressure` in hPa only, so
-altitude has to be derived later against a reference.
-
-**`pausesUpdatesAutomatically` is a live risk, not a settled choice.** iOS may pause location
-updates when it thinks the user has stopped and historically does not reliably resume until a
-significant location change. That is both the largest battery saving available and a plausible
-cause of silent recording death. It is currently enabled for the stationary and walking
-profiles. **Watch it specifically in the 72-hour soak (T-051).**
-
-**`expo-dev-client` drags in permissions that must not ship**: `SYSTEM_ALERT_WINDOW`,
-`READ/WRITE_EXTERNAL_STORAGE`, and `NSAllowsArbitraryLoads`. Harmless in development, but T-117
-must confirm they are absent from the production build. A reviewer seeing those on a
-"no data leaves the device" app is a bad conversation to have.
-
-**Windows dev-environment quirk:** PowerShell 5.1 mangles native-command arguments containing
-double quotes, so multi-line `git commit -m` messages get word-split. Write the message to a
-file and use `git commit -F` instead.
-
-### Landmines from the design session
-
-**Apple Maps is settled, and the answer is no.** It will come up again. Four hard stops in
-D-026: no offline tile API for third parties, every pan leaks position to a tile server, the
-basemap cannot be dimmed so there is no fog of war, and there is no Apple Maps SDK for Android.
-Familiarity comes from map *conventions* and *gestures*, both of which MapLibre keeps.
-
-**Never gate recording on the pedometer.** Tempting, and the reference app does it, but they are
-a walking-only app and Madeira tourism is rental-car dominated — gating on steps would blind us
-to every tunnel drive and the VR1. The pedometer classifies; it never gates (D-028). Their own
-settings admit 20%/day at the setting that reliably catches walks, so it is not even the battery
-win it appears to be.
-
-**Most "UI work" on this app is cartography.** Asking a UI design tool for "the screen" produces
-generic dashboard chrome, because a map plus three controls is all the space there is. This cost
-the project lead real time before it was diagnosed (`docs/design-brief.md` §1).
-
-**Do not name the app after anything official.** The reference app is under a cease and desist
-from NYC DOT for using the name of the city's own wayfinding programme. Madeira has equivalents
-— *Visit Madeira* and similar. Search INPI and EUIPO first. The shortlist in
-`docs/design-brief.md` §7.4 is **unchecked candidates**, not cleared names.
-
-## Decisions waiting on the project lead
-
-Three of the four questions raised after the first implementation session were **answered
-2026-08-08.** One remains.
-
-| Question | Status |
-|---|---|
-| **Bundle identifier.** | **Still open.** The project lead has no app name and no domain yet. `com.madeiraexplorer.app` stays as a working placeholder — permanent only *after* store publication, so it must not block the dev build. Decide before T-137. **Search INPI and EUIPO first**, and avoid anything reading as an official regional-tourism asset — see `docs/design-brief.md` §7 for the cautionary case. |
-| ~~T-034 activity gating trigger~~ | **Answered — D-028.** Stationary-vs-moving from distance over time; walking-vs-driving deferred to T-034a; pedometer classifies, never gates. |
-| ~~Doc-maintenance latitude~~ | **Answered.** Three-tier protocol now in CONTEXT.md §9. Default for anything new is **Provisional**. |
-| ~~Save the UI design brief to `docs/`?~~ | **Answered — yes.** Written as `docs/design-brief.md`. |
-
-### Older open questions, none blocking
-
-| ID | Question | Status |
-|---|---|---|
-| OD-4 | Monetisation | Deferred. Free for v1, no ads ever (would break the privacy position). |
-| OD-5 | Cruise day-trippers as a segment | Open, affects content curation only. |
-| OD-7 | Levada data source and licensing | **Resolved 2026-08-08 — OSM alone** (D-029, T-028). The 44 official PR routes are already in OSM, so no licensing arises. See `docs/osm-coverage.md`. |
-| — | ~~Confirm D-022~~ | **Accepted 2026-08-08.** T-016a closed. |
-| — | Confirm D-026 / D-027 / D-028 | Provisional. D-026 needs T-025 plus an outdoor look; D-028 needs T-020 data. Neither blocks Phase 0. |
-
-Also unresolved, cheap to settle: whether Transistor Soft debug builds run unlicensed. Only
-matters if the free stack fails its soak tests (T-051–T-054), which is when the $399 purchase
-decision arises at all.
-
-## Suggested opening message for the new session
-
-> This is the Madeira Explorer project (`C:\Users\eduar\Desktop\Madeira`).
->
-> Read `HANDOFF.md` first — it is in **EXECUTION mode**. Then `CONTEXT.md` (especially §9, the
-> doc-maintenance protocol you must follow) and **`DECISIONS.md` D-032**, which defines v1 scope
-> and deletes a lot of work you might otherwise start. `TASKS.md` tracks everything task by
-> task. Those are the source of truth, not chat history.
->
-> **v1 = record → stamps by geofence → draw the raw GPS trace → passport → souvenir.**
-> Phase 4 map matching is deferred to v2. No road graph, no R-tree, no tunnel inference.
->
-> **State:** the whole v1 chain is written, and **it now runs on an Android emulator** — the map
-> renders from the offline pack, the screens work, and the recorder records a replayed route and
-> draws it (D-047). 310 unit tests cover the logic. The tile pack is built (19.1 MB with terrain).
-> `content/pois.json` is valid and **empty — that one file is what stands between this and a
-> usable app**. `node tools/poi-candidates.mjs` writes ~390 candidates to triage into it (T-066).
->
-> ✅ **The recorder records** (T-052a closed 2026-08-12, D-047) and the trace draws. ⚠ **On the
-> emulator you must record on the `driving` profile** — `walking` and `stationary` ask for
-> `balanced` accuracy, which needs the network provider, and an emulator has no wifi or cell
-> survey to geolocate from. That is the emulator, not the app, and nothing in `app/` was changed.
->
-> **To see anything:** `bash tools/run-emulator.sh`, then `cd app && npm run android`. Feed it
-> positions with `bash tools/replay-route.sh tools/routes/funchal-seafront.txt` and grab the
-> screen with `bash tools/screenshot.sh <name>`. `adb root` works, and reading
-> `/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` is usually faster than tapping
-> through the UI. `adb shell dumpsys location` tells you in one line whether the recorder is
-> actually asking for anything.
->
-> **Two things are mine, not yours:** getting a *physical* Android — the emulator works but
-> cannot answer battery, background survival or GPS realism — and curating
-> `content/pois.json`. Do not offer to do either for me.
->
-> I am done planning and want to build. Do not open new research threads or propose new
-> decisions unless something is genuinely blocked.
->
-> Start with **T-105b, the souvenir encoder** (the whole distribution strategy, D-013 — the
-> composition is written, this is the encoding), or **T-063a**, the glyph ranges, which needs a
-> decision rather than a reflex.
->
-> ✅ **Both questions that were waiting on the project lead are answered (2026-08-12):** the
-> silent-recorder check **does not notify** and the budget stays at two (D-011, amended), and the
-> passport button carries **the mark and the number only, no text label** (design brief §3.1).
-
-Keep the docs current as you go, per CONTEXT §9: tier 1 just do it, tier 2 record as
-**Provisional**, tier 3 ask first.
+| `CONTEXT.md` | The *why*. §6 conventions, **§9 the doc protocol you must follow** |
+| `DECISIONS.md` | Index of 51 decisions. Full text in `docs/decisions-full.md` |
+| `TASKS.md` | The checklist. Post-mortems on finished tasks in `docs/task-notes.md` |
+| `PROJECT_PLAN.md` | Phases, and the open questions **OD-4/5/8/9/10** |
+| `docs/design-brief.md` | Read before touching anything that renders |
+
+**Read D-032 before starting anything large** — it cuts map matching from v1 and deletes work you
+might otherwise begin: `grep -A40 "^## D-032" docs/decisions-full.md`.
+
+Reference: `docs/dev-build.md`, `docs/map-style.md`, `docs/field-testing.md`,
+`content/README.md`, `docs/osm-coverage.md`, `docs/dependency-audit.md`,
+`docs/store-privacy-answers.md`.

@@ -12,6 +12,14 @@
  * Region progress is not here. It belongs on the map screen, doing the "where
  * should I go next" job (D-027).
  *
+ * A STAMP IS A DOOR BACK TO THE MAP (T-115, D-052 revised)
+ * -------------------------------------------------------
+ * Tapping one opens its card — the same card the map shows — with *Show on
+ * map* and *Directions*. This is the project lead's instruction of 2026-08-13,
+ * and it replaced a layer of dots drawn over every curated place: the map
+ * belongs to the trace (D-032), and the way to ask about a place is to ask
+ * about the stamp you earned there.
+ *
  * THE LEVADA ROW IS DIFFERENT IN KIND
  * -----------------------------------
  * Every other category means *you arrived somewhere*. A levada means *you
@@ -26,23 +34,31 @@
  * *legible with 3 stamps and with 200* — in a browser, in seconds.
  */
 
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
-import { colors, fontSize, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 /**
  * How big a sticker is drawn, in dp.
  *
- * Sized from T-081's measurement rather than picked: the placeholder disc was
- * 44 and the row density it produced is what the passport was judged at. A
- * sticker carries a name as well as a silhouette, so it needs more room — but
- * not so much that a 40-stamp category becomes a scroll.
+ * ⚠ **Raised from 62 on 2026-08-13, after somebody finally looked at it.** The
+ * old number came from T-081's density measurement, which asked *does it still
+ * fit* and got a yes. A screenshot of the real screen answered a question the
+ * measurement never asked: at 62 dp the stamps are postage stamps in a mostly
+ * empty card, their names are unreadable, and the artwork — the one thing in
+ * this app that is not a rectangle, and the entire reward (D-046) — reads as
+ * an icon rather than as something earned.
+ *
+ * 96 is still three across on a 360 dp phone, which was the constraint the old
+ * number was protecting. D-049 cut the canvas to ~80 places, so the worst row
+ * is now around 20 stamps rather than 40 — the scroll this was guarding
+ * against got shorter at the same time as the reason to grow got clearer.
  */
-const STAMP_SIZE = 62;
+const STAMP_SIZE = 96;
 
 /** The drawing, shrunk so its tilted corners stay inside the cell. */
 const STAMP_DRAW_SIZE = Math.floor(STAMP_SIZE * TILT_FIT);
@@ -72,6 +88,10 @@ export type PassportStamp = {
 
 export type PassportViewProps = {
   progress: TripProgress;
+  /**
+   * A stamp was tapped. Absent in the workbench, where there is nowhere to go.
+   */
+  onSelectStamp?: (stamp: PassportStamp) => void;
   /** Awarded stamps, any order. Used for counts per row and for the dates. */
   awards: StampAward[];
   /**
@@ -88,15 +108,23 @@ function CategoryRow({
   collected,
   total,
   stamps,
+  onSelectStamp,
 }: {
   category: Category;
   collected: number;
   total: number;
   stamps: PassportStamp[];
+  onSelectStamp?: (stamp: PassportStamp) => void;
 }) {
 
+  const isEmpty = collected === 0 || stamps.length === 0;
+
   return (
-    <View style={styles.row}>
+    // An empty row is a slim line, not a full card. Five of them at full
+    // height was most of a screen of dark grey slabs saying nothing — the
+    // passport looked emptier than it was, which is the opposite of what
+    // CONTEXT §4.1 asks a nearly-empty collection to feel like.
+    <View style={[styles.row, isEmpty && styles.rowEmptyCard]}>
       <View style={styles.rowHeader}>
         <Text style={styles.rowTitle}>{CATEGORY_LABELS[category]}</Text>
         {/* The count is text, not a bar. A progress bar at 3/40 reads as
@@ -110,10 +138,25 @@ function CategoryRow({
           lines was measured at 1.1 screens on day one — a scroll that reveals
           nothing — and reads as five small failures rather than one
           invitation. The invitation is given once, under the hero. */}
-      {collected > 0 && stamps.length > 0 ? (
+      {isEmpty ? null : (
         <View style={styles.stamps}>
           {stamps.map((stamp) => (
-            <View key={stamp.placeId} style={styles.stampCell}>
+            // The cell is 62 dp, comfortably over D-015's 60 — which is why
+            // the sticker is the tap target rather than a button beside it.
+            <Pressable
+              key={stamp.placeId}
+              accessibilityRole="button"
+              accessibilityLabel={`${stamp.name}. Open for directions or to show it on the map.`}
+              onPress={
+                onSelectStamp === undefined
+                  ? undefined
+                  : () => onSelectStamp(stamp)
+              }
+              style={({ pressed }) => [
+                styles.stampCell,
+                pressed && styles.stampCellPressed,
+              ]}
+            >
               <StampArt
                 placeId={stamp.placeId}
                 design={designFor(stamp.placeId, stamp.category)}
@@ -121,10 +164,10 @@ function CategoryRow({
                 collected
                 size={STAMP_DRAW_SIZE}
               />
-            </View>
+            </Pressable>
           ))}
         </View>
-      ) : null}
+      )}
     </View>
   );
 }
@@ -133,6 +176,7 @@ export default function PassportView({
   progress,
   awards,
   stamps,
+  onSelectStamp,
 }: PassportViewProps) {
   const hasContent = progress.total > 0;
 
@@ -179,6 +223,7 @@ export default function PassportView({
           stamps={(stamps ?? []).filter(
             (stamp) => stamp.category === row.category
           )}
+          onSelectStamp={onSelectStamp}
         />
       ))}
 
@@ -199,7 +244,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingTop: spacing.xl * 2,
-    paddingBottom: spacing.xl * 2,
+    // Clear of the floating Map button, which is 60 dp sitting `xl` off the
+    // bottom: without this the last category row slides under it, which a
+    // screenshot caught and the workbench did not (the button is the screen's,
+    // not the view's).
+    paddingBottom: spacing.xl * 2 + MIN_TAP_TARGET,
     // md, not lg: with five rows the inter-row gap is the largest single
     // contributor to how far a nearly-empty passport scrolls.
     gap: spacing.md,
@@ -238,7 +287,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 12,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.md,
+  },
+  rowEmptyCard: {
+    // No sticker to hold, so no room held for one.
+    paddingVertical: spacing.sm,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.surface,
   },
   rowHeader: {
     flexDirection: 'row',
@@ -267,9 +323,12 @@ const styles = StyleSheet.create({
   stampCell: {
     width: STAMP_SIZE,
     height: STAMP_SIZE,
+    minWidth: MIN_TAP_TARGET,
+    minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  stampCellPressed: { opacity: 0.6 },
   footnote: {
     color: colors.textMuted,
     fontSize: fontSize.small,

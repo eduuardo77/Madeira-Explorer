@@ -132,3 +132,66 @@ export function buildTrace(
     })),
   };
 }
+
+/**
+ * A rectangle, in the order MapLibre's `fitBounds` wants it.
+ */
+export type TraceBounds = [west: number, south: number, east: number, north: number];
+
+/**
+ * The smallest span the camera will frame, in degrees.
+ *
+ * ⚠ Without a floor this zooms to the maximum on day one: a trace recorded
+ * over a coffee is fifty fixes in a 30 m circle, and framing *that* puts the
+ * user at rooftop level with no idea where they are. 0.02° is roughly 2.2 km
+ * north-south — a neighbourhood, which is the smallest thing worth calling a
+ * view. Longitude gets the same number, which is generous rather than exact at
+ * this latitude, and generous is the right direction for a floor.
+ */
+export const MIN_FRAME_SPAN_DEG = 0.02;
+
+/**
+ * The box around everything drawn, or null when nothing is.
+ *
+ * WHY THE CAMERA PREFERS THIS TO THE ISLAND
+ * -----------------------------------------
+ * Fitting the whole island on a tall phone puts a wide, thin object across the
+ * middle of the frame and fills the rest with flat blue — most of the screen is
+ * then sea the user will never go to. This app is a souvenir of where somebody
+ * went (D-032), so the answer to *what should the camera look at* is **what
+ * they did**, and the island only when they have not done anything yet.
+ */
+export function traceBounds(trace: TraceCollection): TraceBounds | null {
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+
+  for (const feature of trace.features) {
+    for (const [lon, lat] of feature.geometry.coordinates) {
+      west = Math.min(west, lon);
+      east = Math.max(east, lon);
+      south = Math.min(south, lat);
+      north = Math.max(north, lat);
+    }
+  }
+
+  if (!Number.isFinite(west) || !Number.isFinite(south)) {
+    return null;
+  }
+
+  const [left, right] = expand(west, east, MIN_FRAME_SPAN_DEG);
+  const [bottom, top] = expand(south, north, MIN_FRAME_SPAN_DEG);
+
+  return [left, bottom, right, top];
+}
+
+/** Widen a span to the floor, keeping its centre. */
+function expand(low: number, high: number, minimum: number): [number, number] {
+  const span = high - low;
+  if (span >= minimum) {
+    return [low, high];
+  }
+  const grow = (minimum - span) / 2;
+  return [low - grow, high + grow];
+}

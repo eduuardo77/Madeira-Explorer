@@ -553,7 +553,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### UX reduction
 
-- [ ] **T-112** Ruthless UI reduction pass — one primary screen, one hero number ⇠ T-075
+- [~] **T-112** Ruthless UI reduction pass — one primary screen, one hero number ⇠ T-075
+      — **Started 2026-08-13, from screenshots rather than from reading the code.** Three things
+      the running app was doing that no test could see: a LogBox toast for the known T-063b glyph
+      error sat **on top of the passport button** (a tap opened a red error page instead of the
+      passport); the passport's stamps were 62 dp postage stamps in mostly-empty cards; and empty
+      category rows were full-height grey slabs. Now: the known error is silenced by its exact
+      text, stamps are 96 dp, and an empty row is a slim outline.
+      — The rest of T-112 still stands.
       — Target is already set by `docs/design-brief.md` §3: map plus three controls. Watch
       specifically for banner/promo cards accumulating over the map; the reference app loses the
       top third of its map to two stacked dismissible banners.
@@ -566,8 +573,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Notes: `docs/task-notes.md` (T-115). Decision: **D-052**.
       — ⚠ **No photo, and no distance in the common case.** The content pack has no photo field;
       the distance is withheld unless the recorder has a fix under 30 minutes old.
-      — **Emulator-checked** against a temporary fixture pack: markers draw, the card opens, and
-      Directions launched Google Maps. The `geo:` fallback and iOS are still unverified.
+      — ⚠ **Revised the same day by the project lead:** the map no longer draws every place. The
+      route to a place is **passport → tap a stamp → card → Show on map** (D-052 revised).
+      — **Emulator-checked, with screenshots**, against a temporary fixture pack: the stamp opens
+      its card, *Show on map* flies the camera to the trailhead and marks it, and Directions
+      launched Google Maps. The `geo:` fallback and iOS are still unverified.
 - [x] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
       — Notes: `docs/task-notes.md` (T-116)
 - [x] **T-116a** Move the island's name out of the reveal notification (D-017) ⇠ T-102

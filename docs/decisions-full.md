@@ -2434,20 +2434,36 @@ sharing loop it assumes is now absent, and the partner-distribution routes CONTE
 
 ---
 
-## D-052 — The map draws the curated places, and Directions hands off with a fallback.
+## D-052 — A place is reached through the passport, and Directions hands off with a fallback.
 
-**Status:** Provisional — implemented for T-115 on 2026-08-13, verified on the emulator, not
-confirmed by the project lead and **never seen on a real phone**.
+**Status:** **Revised by the project lead the same day (2026-08-13)** — part 1 below was
+implemented, looked at, and deleted at their instruction. The rest is Provisional, verified on the
+emulator, **never seen on a real phone**.
 
-**Decision:** three things, which are one feature:
+**Decision, as it now stands:**
 
-1. **The primary map draws the curated places** as small circles, one per place, built from the
-   content pack. Uncollected is a hollow ring; collected is filled, larger and heavier.
-2. **Tapping one opens a card** — category, name, straight-line distance, a Directions button and
-   a Close button — anchored at the bottom of the screen, above the existing controls.
+1. **The map draws no places.** ~~The primary map draws the curated places as small circles~~ —
+   **deleted 2026-08-13.** The project lead: *"I would like to delete them. I prefer if the user
+   wants to know the levada on the map to click on the badge/stamp and have an option Show on
+   map."* The map draws **one** marker, for the single place the user has asked to see, and
+   nothing the rest of the time.
+2. **A stamp in the passport is the way in.** Tap a sticker → its card — category, name,
+   straight-line distance, **Directions**, **Show on map**, Close. *Show on map* returns to the
+   map, flies the camera to the place and opens the same card there.
 3. **Directions hands off by URL, best-first with a fallback.** Android tries
    `google.navigation:q=…` and falls back to `geo:…?q=…(name)`; iOS tries `maps://?daddr=…` and
    falls back to `http://maps.apple.com/?daddr=…`.
+
+**Why the revision is right, in the project's own terms.** D-032 makes the trace *the entire
+visual product of v1*, and design brief §2.3 sets the bar as *the trace is unambiguously the
+brightest thing on screen*. Eighty dots scattered over one line is a competitor's map — the thing
+CONTEXT §3 calls radical simplicity, spent on markers nobody asked for. The passport route also
+costs the map nothing and gives the passport a job beyond being a scoreboard.
+
+⚠ **What it gives up, stated plainly:** there is now **no way to discover an uncollected place**
+in the app. Everything in the passport is already collected. The "where should I go next" job
+belongs to per-region progress (D-027, T-073) and remains unbuilt. That is a real gap and it is
+the project lead's call to leave it open.
 
 **What prompted it:** T-115 has said *landmark tap → minimal card* since Phase 6 was written, and
 D-018 has said *never build navigation* since the beginning. Neither was implemented, and the
@@ -2457,6 +2473,9 @@ about. So the tap target had to be created before the tap could be handled.
 
 **Alternatives considered:**
 
+- *Draw all the places and let the map be the index.* **Built, then deleted by the project lead
+  on sight** — see above. Kept in the log because it is the obvious design and somebody will
+  propose it again.
 - *Use the basemap's labels as the tap targets.* Rejected: they are the wrong set, they are
   deliberately sparse, and matching a label back to a place id would put Madeira knowledge in
   `app/` (D-017, absolute).
@@ -2491,8 +2510,10 @@ D-015 requires anyway.
 
 **Consequences:**
 
-- The primary screen gains a fourth visual element (the markers) and a fifth transient one (the
-  card). Design brief §3 is updated; the *three controls* rule is untouched.
+- The primary screen gains **one transient element**, the card, and one marker while it is open.
+  Design brief §3 is updated; the *three controls* rule is untouched.
+- `placeMarkers.ts` shrank to the single-place case and its tests with it — the deleted feature is
+  not kept warm in the repo.
 - **Verified on the emulator, with a two-place fixture pack** (reverted afterwards): the markers
   draw, a tap opens the card, the distance is computed from the recorder's own last fix, and
   **`google.navigation:` launched Google Maps** — the emulator image has it, which was not
@@ -2500,3 +2521,46 @@ D-015 requires anyway.
   all, or how any of it behaves on a phone with a text scale set.
 - With `content/pois.json` still empty (T-066), **this feature currently draws nothing.** It is
   the second thing after the passport that turns on the moment places exist.
+
+---
+
+## D-053 — The camera frames what you walked, not the island.
+
+**Status:** Provisional — 2026-08-13. Verified on the emulator; not confirmed by the project lead.
+
+**Decision:** on opening the map, the camera fits the **bounding box of the recorded trace**, with
+a floor of about 2.2 km so a trace recorded over a coffee does not zoom to rooftop level. The
+island's home view (`madeira:home`, T-062) remains the day-one default, for a user who has
+recorded nothing yet.
+
+**What prompted it:** a screenshot. Fitting the island on a tall phone puts a wide, thin object
+across the middle of the frame and fills roughly **60% of the screen with flat blue sea** — an
+expanse the user will never go to, on the screen the app opens to. Nothing about that is visible
+in a unit test, in the workbench (which cannot render the map at all) or in the style's contrast
+numbers. It took looking at it.
+
+**Alternatives considered:**
+
+- *Zoom the island view in and crop the ends.* Rejected: it trades dead sea for a map missing
+  Porto Moniz, and still answers a question — *what does Madeira look like* — that the user
+  standing on it did not ask.
+- *Leave it and fix the water colour instead.* Not adopted, and still worth doing: the sea is a
+  flat slab with no bathymetry or coastal treatment, which is a real cartographic gap (T-058,
+  judged outdoors in T-065). But it makes an empty composition prettier rather than making the
+  composition right.
+- *Follow the user's live position.* Rejected for v1: it needs a location fix to open the map at
+  all, and D-008 requires the app to work for a user who has granted nothing.
+
+**Consequences:**
+
+- The map now opens on the walk, at street level, with the trace across it. This is the single
+  largest visible change to the app since the trace was drawn.
+- ⚠ **Two cameras must never both be in charge.** *Show on map* (D-052) points the camera at a
+  place, and the trace framing arrives a beat later when the fixes finish loading. The first
+  version guarded that with *"is a focus pending"*, which is false by then — the focus is cleared
+  as soon as it is consumed — and the camera flew back to the walk, leaving a card naming a place
+  two valleys away. It is a latch now.
+- ⚠ **The imperative `CameraRef` API is not usable here.** `camera.current.flyTo` throws *"ref is
+  null, wait for the map being initialized"* when the native view has not attached yet, which is
+  exactly the case when arriving from another screen — and inside an async handler that throw is
+  swallowed. The camera is driven by props instead.

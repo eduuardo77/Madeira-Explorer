@@ -1,20 +1,20 @@
 /**
- * Tests for the place marker layer (T-115).
+ * Tests for the focused place marker (T-115).
  *
  *     cd app && npm test
  *
- * What is being pinned down: one marker per place rather than per geofence, a
- * levada marked at its trailhead rather than its exit, and departure points
- * never drawn. The first two are what stop the map growing a second
- * unexplained dot in the mountains; the third is what stops the airport
- * looking like something to collect.
+ * ⚠ These used to cover a layer of every curated place. The project lead
+ * deleted that on 2026-08-13 — the route to a place is now the passport, not a
+ * field of dots over the trace (D-052 revised). What survives is the part that
+ * was always the interesting bit: **which end of a place the app points at**,
+ * because a levada has two and only one of them is where you park.
  */
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import type { ContentPack, Place } from '../content/contentPack.ts';
-import { buildPlaceMarkers, representativeGeofence } from './placeMarkers.ts';
+import type { Place } from '../content/contentPack.ts';
+import { buildFocusMarker, representativeGeofence } from './placeMarkers.ts';
 
 function place(overrides: Partial<Place> & Pick<Place, 'id'>): Place {
   return {
@@ -28,31 +28,15 @@ function place(overrides: Partial<Place> & Pick<Place, 'id'>): Place {
   };
 }
 
-function pack(places: Place[], departurePoints: ContentPack['departurePoints'] = []): ContentPack {
-  return { formatVersion: 1, destination: null, places, departurePoints };
-}
+test('one place, one marker, in [lon, lat] order', () => {
+  const markers = buildFocusMarker(place({ id: 'a' }), false);
 
-test('one marker per place, in [lon, lat] order', () => {
-  const markers = buildPlaceMarkers(
-    pack([
-      place({ id: 'a' }),
-      place({
-        id: 'b',
-        geofences: [
-          { id: 'b-g', role: 'main', lat: 32.7, lon: -17.1, radiusM: 200 },
-        ],
-      }),
-    ]),
-    new Set()
-  );
-
-  assert.equal(markers.features.length, 2);
-  assert.deepEqual(markers.features[1].geometry.coordinates, [-17.1, 32.7]);
+  assert.equal(markers.features.length, 1);
+  assert.deepEqual(markers.features[0].geometry.coordinates, [-16.9, 32.65]);
+  assert.equal(markers.features[0].properties.placeId, 'a');
 });
 
-test('a levada is one marker, at the trailhead', () => {
-  // Two geofences, hours and kilometres apart. The card sends the user to the
-  // start — nobody drives to the exit.
+test('a levada is marked at its trailhead, not its exit', () => {
   const levada = place({
     id: 'lev',
     category: 'levada',
@@ -62,10 +46,9 @@ test('a levada is one marker, at the trailhead', () => {
     ],
   });
 
-  const markers = buildPlaceMarkers(pack([levada]), new Set());
-
-  assert.equal(markers.features.length, 1);
-  assert.deepEqual(markers.features[0].geometry.coordinates, [-16.95, 32.75]);
+  assert.deepEqual(buildFocusMarker(levada, true).features[0].geometry.coordinates, [
+    -16.95, 32.75,
+  ]);
   assert.equal(representativeGeofence(levada).id, 'lev-start');
 });
 
@@ -80,50 +63,21 @@ test('a main geofence wins over a start, whatever the order', () => {
   assert.equal(representativeGeofence(both).id, 'both-main');
 });
 
-test('a place with only an end still draws — a marker at the wrong end beats none', () => {
+test('a place with only an end is still findable — the wrong end beats nowhere', () => {
   const odd = place({
     id: 'odd',
     geofences: [{ id: 'odd-end', role: 'end', lat: 32.7, lon: -17.0, radiusM: 100 }],
   });
-  assert.equal(buildPlaceMarkers(pack([odd]), new Set()).features.length, 1);
+  assert.equal(buildFocusMarker(odd, false).features.length, 1);
 });
 
-test('departure points are never drawn', () => {
-  const markers = buildPlaceMarkers(
-    pack(
-      [place({ id: 'a' })],
-      [{ id: 'airport', name: 'Airport', lat: 32.69, lon: -16.77, radiusM: 1500 }]
-    ),
-    new Set()
-  );
-
-  assert.equal(markers.features.length, 1);
-  assert.equal(markers.features[0].properties.placeId, 'a');
-});
-
-test('collected is set from awarded PLACE ids, not geofence ids', () => {
-  const levada = place({
-    id: 'lev',
-    category: 'levada',
-    geofences: [
-      { id: 'lev-start', role: 'start', lat: 32.75, lon: -16.95, radiusM: 200 },
-      { id: 'lev-end', role: 'end', lat: 32.78, lon: -17.05, radiusM: 200 },
-    ],
-  });
-
-  const markers = buildPlaceMarkers(pack([place({ id: 'a' }), levada]), new Set(['lev']));
-
-  assert.equal(markers.features[0].properties.collected, false);
-  assert.equal(markers.features[1].properties.collected, true);
-
-  // The geofence id is not the place id, and using one for the other would
-  // mark every levada uncollected forever.
-  const wrong = buildPlaceMarkers(pack([levada]), new Set(['lev-start']));
-  assert.equal(wrong.features[0].properties.collected, false);
+test('collected is carried through, because the marker is painted from it', () => {
+  assert.equal(buildFocusMarker(place({ id: 'a' }), true).features[0].properties.collected, true);
+  assert.equal(buildFocusMarker(place({ id: 'a' }), false).features[0].properties.collected, false);
 });
 
 test('properties stay flat — they cross into native and come back as JSON', () => {
-  const markers = buildPlaceMarkers(pack([place({ id: 'a', name: 'Somewhere' })]), new Set());
+  const markers = buildFocusMarker(place({ id: 'a', name: 'Somewhere' }), false);
   for (const value of Object.values(markers.features[0].properties)) {
     assert.ok(
       ['string', 'number', 'boolean'].includes(typeof value),
@@ -133,19 +87,12 @@ test('properties stay flat — they cross into native and come back as JSON', ()
   assert.equal(markers.features[0].properties.name, 'Somewhere');
 });
 
-test('an unusable coordinate is skipped rather than drawn at 0,0', () => {
+test('an unusable coordinate draws nothing rather than a marker at 0,0', () => {
   const broken = place({
     id: 'broken',
     geofences: [
       { id: 'broken-g', role: 'main', lat: Number.NaN, lon: -17, radiusM: 100 },
     ],
   });
-  assert.equal(buildPlaceMarkers(pack([broken]), new Set()).features.length, 0);
-});
-
-test('an empty pack is an empty layer, not a crash', () => {
-  assert.deepEqual(buildPlaceMarkers(pack([]), new Set()), {
-    type: 'FeatureCollection',
-    features: [],
-  });
+  assert.deepEqual(buildFocusMarker(broken, false).features, []);
 });

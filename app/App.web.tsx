@@ -245,7 +245,12 @@ export default function DesignWorkbench() {
               onSkip={() => undefined}
             />
           ) : screen === 'passport' ? (
-            <PassportView progress={progress} awards={awards} stamps={stamps} />
+            <PassportView
+              progress={progress}
+              awards={awards}
+              stamps={stamps}
+              onSelectStamp={() => setScreen('place-card-collected')}
+            />
           ) : screen === 'privacy' ? (
             <PrivacyPolicyView onClose={() => setScreen('settings')} />
           ) : screen === 'settings' ? (
@@ -293,6 +298,12 @@ export default function DesignWorkbench() {
                           : null
                       }
                       onDirections={() => undefined}
+                      // The passport's card carries this; the map's does not.
+                      onShowOnMap={
+                        screen === 'place-card-collected'
+                          ? () => setScreen('primary')
+                          : undefined
+                      }
                       onClose={() => setScreen('primary')}
                     />
                   ) : null

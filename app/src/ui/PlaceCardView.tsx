@@ -37,6 +37,11 @@ export type PlaceCardViewProps = {
    */
   notice: string | null;
   onDirections: () => void;
+  /**
+   * Take me there on the map. Present on the passport's card and absent on
+   * the map's own, where it would mean nothing (T-115, D-052 revised).
+   */
+  onShowOnMap?: () => void;
   onClose: () => void;
 };
 
@@ -44,6 +49,7 @@ export default function PlaceCardView({
   card,
   notice,
   onDirections,
+  onShowOnMap,
   onClose,
 }: PlaceCardViewProps) {
   return (
@@ -90,6 +96,20 @@ export default function PlaceCardView({
           <Text style={styles.closeText}>Close</Text>
         </Pressable>
       </View>
+
+      {onShowOnMap === undefined ? null : (
+        // Its own row rather than a third button squeezed into the one above:
+        // three controls sharing a phone's width is how a 60 dp target
+        // quietly becomes a 40 dp one at large text sizes.
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Show ${card.name} on the map`}
+          onPress={onShowOnMap}
+          style={({ pressed }) => [styles.showOnMap, pressed && styles.pressed]}
+        >
+          <Text style={styles.closeText}>Show on map</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -148,6 +168,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   close: {
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  showOnMap: {
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',

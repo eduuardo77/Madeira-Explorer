@@ -8,21 +8,43 @@
 
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
+import { representativeGeofence } from '../map/placeMarkers';
+import { openDirections } from '../places/openDirections';
+import type { PlaceCard } from '../places/placeCard';
+import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
+import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
 import PassportView, { type PassportStamp } from './PassportView';
+import PlaceCardView from './PlaceCardView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
-export default function PassportScreen({ onClose }: { onClose: () => void }) {
+export default function PassportScreen({
+  onClose,
+  onShowOnMap,
+}: {
+  onClose: () => void;
+  /**
+   * The user asked to see a stamp's place on the map (T-115, D-052 revised).
+   * The whole `Place` travels, because the map needs its representative
+   * geofence and the rule for picking that lives in one module.
+   */
+  onShowOnMap: (place: Place, collected: boolean) => void;
+}) {
   const [progress, setProgress] = useState<TripProgress | null>(null);
   const [awards, setAwards] = useState<StampAward[]>([]);
   const [stamps, setStamps] = useState<PassportStamp[]>([]);
+  /** The tapped stamp's card, or null — which is nearly always. */
+  const [card, setCard] = useState<PlaceCard | null>(null);
+  const [cardNotice, setCardNotice] = useState<string | null>(null);
+  const [cardPlace, setCardPlace] = useState<Place | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,6 +77,73 @@ export default function PassportScreen({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
+  /**
+   * A stamp was tapped (T-115).
+   *
+   * Everything the card needs is looked up now rather than held: the place
+   * from the pack, and the recorder's last fix, which is what decides whether
+   * a distance can honestly be shown at all (`placeCard.ts`).
+   */
+  const openCard = (stamp: PassportStamp) => {
+    void (async () => {
+      const place = getContentPack().places.find(
+        (candidate) => candidate.id === stamp.placeId
+      );
+      if (place === undefined) {
+        return;
+      }
+
+      let position = null;
+      try {
+        const trip = await tripDao.getActiveTrip();
+        position = trip === null ? null : await rawFixDao.getLastFix(trip.id);
+      } catch (error) {
+        await recordingEventDao.logError('place card position', error);
+      }
+
+      const geofence = representativeGeofence(place);
+
+      setCardNotice(null);
+      setCardPlace(place);
+      setCard(
+        buildPlaceCard({
+          placeId: place.id,
+          name: place.name,
+          category: place.category,
+          // Everything in the passport is collected by definition — an
+          // uncollected place has no sticker to tap.
+          collected: true,
+          lat: geofence.lat,
+          lon: geofence.lon,
+          position,
+          nowMs: Date.now(),
+        })
+      );
+    })();
+  };
+
+  const closeCard = () => {
+    setCard(null);
+    setCardNotice(null);
+    setCardPlace(null);
+  };
+
+  const handleDirections = () => {
+    if (card === null) {
+      return;
+    }
+    void (async () => {
+      const opened = await openDirections({
+        name: card.name,
+        lat: card.lat,
+        lon: card.lon,
+      });
+      if (!opened) {
+        setCardNotice('No maps app on this phone could open this place.');
+      }
+    })();
+  };
+
   return (
     <View style={styles.root}>
       {progress === null ? (
@@ -62,17 +151,42 @@ export default function PassportScreen({ onClose }: { onClose: () => void }) {
           <ActivityIndicator size="large" color={colors.action} />
         </View>
       ) : (
-        <PassportView progress={progress} awards={awards} stamps={stamps} />
+        <PassportView
+          progress={progress}
+          awards={awards}
+          stamps={stamps}
+          onSelectStamp={openCard}
+        />
       )}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Back to the map"
-        onPress={onClose}
-        style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-      >
-        <Text style={styles.backText}>Map</Text>
-      </Pressable>
+      {card === null ? null : (
+        <View style={styles.cardHolder} pointerEvents="box-none">
+          <PlaceCardView
+            card={card}
+            notice={cardNotice}
+            onDirections={handleDirections}
+            onShowOnMap={
+              cardPlace === null
+                ? undefined
+                : () => onShowOnMap(cardPlace, true)
+            }
+            onClose={closeCard}
+          />
+        </View>
+      )}
+
+      {/* Hidden while a card is open: it sits in the same corner, and the
+          card's own Close is the way out of the card. */}
+      {card === null ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to the map"
+          onPress={onClose}
+          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+        >
+          <Text style={styles.backText}>Map</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -108,6 +222,12 @@ function resolveStamps(awards: StampAward[]): PassportStamp[] {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  cardHolder: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.xl,
+  },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   pressed: { opacity: 0.75 },
   back: {

@@ -8,11 +8,14 @@ genuinely blocked.
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
 trace on a map → passport → trip end → reveal. 76 source files and 28 test files under `app/src`
-— 13,900 lines of source, 6,200 of tests — **369 tests**.
+— 13,900 lines of source, 6,300 of tests — **372 tests**.
 
-Tap-a-place → Directions (T-115) was added on 2026-08-13 and checked on the emulator against a
-temporary fixture pack: markers draw, the card opens, and **Directions launched Google Maps**.
-The `geo:` fallback and the whole iOS branch are unverified.
+On 2026-08-13 a place became reachable: **passport → tap a stamp → card → Directions / Show on
+map** (T-115, D-052). Checked on the emulator against a temporary fixture pack, with screenshots;
+Directions launched Google Maps. The `geo:` fallback and the whole iOS branch are unverified.
+
+The map also now **opens on your walk rather than on the island** (D-053) — the single largest
+visible change since the trace was drawn.
 
 Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
 permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.
@@ -63,9 +66,14 @@ use. **The largest open item in the project.**
   on purpose and a test keeps it that way (D-041).
 - **Check the measurement ran.** If a result does not move when the input changes, suspect the
   probe. A regex over raw tile bytes once "found" a character that was not there.
-- **Artwork is judged by eye and this project has none.** Put the design in a pure module and give
-  it a second renderer (`tools/preview-stamps.mjs`). A stamp mark that passed every geometry test
-  rendered as a crosshair.
+- **Artwork is judged by eye — and there IS an eye now, so use it.**
+  `bash tools/screenshot.sh <name>` writes a PNG, and a session can open that PNG and look at it.
+  On 2026-08-13 that loop found, in ten minutes and after 369 passing tests: a dev-build error
+  toast sitting **on top of the passport button** (so tapping the passport opened a red error
+  page), stamps drawn at a third of the size the artwork deserves, and a map opening on 60% flat
+  sea. **None of these were findable any other way**, and the second renderer
+  (`tools/preview-stamps.mjs`) is still worth having for the artwork itself.
+  ⚠ Screenshots are still expensive — take the one that answers the question, not five.
 
 ## Verifying work
 

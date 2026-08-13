@@ -166,33 +166,45 @@ not a setting.
 not granted Always. Users on Always never see it. Putting it in settings would bury a frequent
 action in a rare place.
 
-### 3.4 The places, and the card (T-115, D-018, D-052)
+### 3.4 The card, and how you reach a place (T-115, D-018, D-052, D-053)
 
-**Added 2026-08-13, Provisional.** The curated places are drawn on the map as small circles, and
-tapping one opens a card at the bottom of the screen. This is the only detail view in the app.
+**Rewritten 2026-08-13, on the project lead's instruction.** The first version drew a dot on every
+curated place so the map could be tapped. Looked at, it was eighty markers competing with one
+line — so the dots are gone and the way to a place is the **passport**:
 
 ```
-   ○  uncollected — a hollow ring, mid-grey
-   ●  collected  — filled, half again as large, heavier casing
+   passport → tap a stamp → card ─┬─ Directions  → the phone's maps app
+                                  └─ Show on map → the map, flown to it
 ```
 
-- **The markers are quieter than the trace, by measurement.** §2.3's bar is *the trace is
-  unambiguously the brightest thing on screen*, and after D-032 the trace is the whole visual
-  product of v1. Every marker colour measures below the trace's contrast against the same ground,
-  and the style tests fail the build if that stops being true. The consequence is that the two
-  marker states sit in a narrow band of near-identical grey — so **shape, size and weight** carry
-  the difference, which is what D-015 requires anyway.
-- **The card is the fifth thing on the screen, and it is transient.** Category, name, distance,
-  Directions, Close. No description, no photo (there is no photo — see D-052), no route drawn on
-  our map, ever (D-018).
-- **The distance is a straight line and says so.** On this island that is not pedantry: a
-  miradouro 2 km away across a ravine is a 25-minute drive. When the recorder has no recent fix
-  the line is simply absent — a number the app has not earned is worse than no number (D-041's
-  reflex).
-- ⚠ **The card and the bottom controls are one column, not two anchored things.** The first
-  version positioned them independently and the card landed on top of the passport button. The
-  controls step up as the card appears; nothing on this screen becomes unreachable because a card
-  is open.
+- **The map draws one marker at most**, for the place you asked to see, while its card is open.
+  §2.3's bar is *the trace is unambiguously the brightest thing on screen*, and after D-032 the
+  trace is the whole visual product of v1.
+- **The camera opens on your walk, not on the island** (D-053). Fitting Madeira on a tall phone
+  spends 60% of the screen on flat sea.
+- **The card is transient and never modal.** Category, name, distance, one or two actions. No
+  description, no photo (there is none — see below), no route drawn by us, ever (D-018).
+- **The distance is a straight line and says so.** A miradouro 2 km away across a ravine is a
+  25-minute drive. When the recorder has no recent fix the line is absent — a number the app has
+  not earned is worse than no number (D-041's reflex).
+- ⚠ **The card and the bottom controls are one column.** Positioned independently, the card landed
+  on top of the passport button.
+
+### 3.4a Why there is no photo on the card
+
+D-018 describes the card as *name, photo, distance, one Directions button*, and the photo is the
+one part not built. It is not a rendering problem:
+
+- **There is nothing to render.** `content/pois.json` has no photo field, so a photo is a change to
+  the *content format* and then ~80 photographs somebody has to source, licence and crop (T-066,
+  which is the project lead's).
+- **It has to ship in the binary.** D-001 forbids fetching anything, so photos are bytes inside
+  the app against the 19.1 MB tile budget (D-035/D-036). At even 40 KB each that is ~3 MB, and
+  they compete with the map for room.
+- **A missing photo is worse than none.** A card with a grey rectangle where a picture should be
+  reads as broken, and any place without one would look like a mistake rather than a choice.
+
+The card's layout leaves the slot at the top, so adding photos later moves nothing else.
 
 ### 3.5 Accessibility floor (D-015, CONTEXT §6.5)
 

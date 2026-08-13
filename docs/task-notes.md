@@ -958,7 +958,23 @@ grep -A30 "^### T-052a" docs/task-notes.md
         · **tapping Directions launched Google Maps.** The emulator image has it, which was not
           expected — the handoff is real, not just well-formed.
       — ⚠ **Still unverified:** the `geo:` fallback branch (nothing forced it), the whole iOS
-      branch, and every question about a real phone. And the card has still not been *looked* at.
+      branch, and every question about a real phone.
+      —
+      — **REVISED THE SAME DAY, AND THIS IS THE INTERESTING PART.** The project lead looked at the
+      dots and deleted them: *"I prefer if the user wants to know the levada on the map to click on
+      the badge/stamp and have an option Show on map."* The route is now passport → stamp → card →
+      *Show on map*, and the map draws one marker only while that card is open (D-052 revised).
+      The all-places layer and its tests are gone rather than kept warm.
+      — **Two bugs the emulator found that the logic could not**, both about the camera:
+        · the trace framing (D-053) overrode the focus, because it guarded on *"is a focus
+          pending"* — and the focus is cleared the instant it is consumed, a beat before the
+          fixes finish loading. It is a latch now;
+        · `camera.current.flyTo` **throws** *"NativeCameraComponent ref is null, wait for the map
+          being initialized"* when the native view has not attached — which is exactly the case
+          when arriving from the passport — and inside an async handler that throw is swallowed
+          into an unhandled rejection. No crash, no log, a camera that ignores you. The camera is
+          driven by props now.
+      — **And the card has now been looked at**, which is what found both. See the T-112 note.
 
 ### T-116
 
@@ -1128,3 +1144,26 @@ grep -A30 "^### T-052a" docs/task-notes.md
       battery-optimisation exemption (T-046); light/dark preference (T-140); tile pack status
       (T-057); privacy policy (T-124); a hidden debug/trace-export entry (T-050, T-130); and
       erase-all last (T-125).
+
+### T-112 (in progress)
+
+- [~] **T-112** Ruthless UI reduction pass ⇠ T-075
+      — Started 2026-08-13. **The method is the finding: `bash tools/screenshot.sh <name>` and then
+      actually open the PNG.** Every problem below had been in front of the project since the
+      screens were written, passed 369 tests, and was invisible in the workbench.
+      — **1. The app's front door was a red error page.** MapLibre logs the known T-063b glyph
+      failure as an *error*, so in a development build LogBox drew a toast across the bottom of the
+      map — **over the passport button**. Tapping the passport opened a full-screen *Console Error*
+      instead. Silenced in `App.tsx` by the message's exact text, so a different glyph failure
+      still shows and `adb logcat` still has it. Never `ignoreAllLogs`.
+      — **2. The stamps were postage stamps.** 62 dp in a card 270 px tall: the artwork (D-046) is
+      the entire reward and it read as an icon, with its name illegible. Now 96 dp — still three
+      across on a 360 dp phone, which is what the old number was protecting, and D-049's cut to
+      ~80 places shortened the scroll it was protecting against.
+      — **3. Empty categories were full-height grey slabs.** Five of them made a nearly-empty
+      passport look emptier than it is. An empty row is now a slim outline.
+      — **4. The floating *Map* button sat on top of the last category row.** The scroll's bottom
+      padding did not know about a button the *screen* draws, not the view.
+      — ⚠ **Still open and visible in the screenshots:** the `Debug` switcher collides with the
+      dev-client's own floating bubble in the top-right corner (development only, T-117a), and the
+      sea is a flat slab with no coastal treatment — real cartography, judged outdoors (T-065).

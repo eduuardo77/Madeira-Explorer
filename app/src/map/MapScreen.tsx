@@ -16,19 +16,16 @@ import {
   GeoJSONSource,
   Layer,
   Map as MapLibreMap,
-  type PressEventWithFeatures,
 } from '@maplibre/maplibre-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   PixelRatio,
   StyleSheet,
   Text,
   View,
-  type NativeSyntheticEvent,
 } from 'react-native';
-import { getContentPack } from '../content/poiCatalogue';
-import type { Category } from '../content/contentPack';
+import type { Place } from '../content/contentPack';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
 import { openDirections } from '../places/openDirections';
@@ -40,20 +37,19 @@ import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
-import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
 import PrimaryOverlay from '../ui/PrimaryOverlay';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
+import { colors, fontSize, spacing } from '../ui/theme';
 import { prepareMapAssets } from './mapAssets';
 import { buildMapStyle, type MapStyleName } from './mapStyle';
 import { parseMapStyle } from './mapStylePreference';
 import type { PlaceMarkerCollection } from './placeMarkers';
-import { buildPlaceMarkers, EMPTY_PLACE_MARKERS } from './placeMarkers';
+import { buildFocusMarker, EMPTY_PLACE_MARKERS, representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { TRACE_PAINT } from './traceStyle';
 import type { TraceCollection } from './traceGeoJson';
-import { buildTrace } from './traceGeoJson';
+import { buildTrace, traceBounds } from './traceGeoJson';
 
 import lightTemplate from '../../assets/map/light.json';
 
@@ -92,6 +88,42 @@ const EMPTY_TRACE: TraceCollection = {
   features: [],
 };
 
+/**
+ * A place the user asked to see, handed over from the passport (T-115).
+ *
+ * The whole `Place` rather than a coordinate, because the card wants its name
+ * and category and the marker wants the *representative* geofence — which for
+ * a levada is its trailhead, a rule that lives in `placeMarkers.ts` and should
+ * not be re-derived by the caller.
+ */
+/**
+ * A camera instruction, in the shape the native side reads (`CameraStop.kt`).
+ * Either a `center` or a `bounds`, never both.
+ */
+type CameraStop = {
+  center?: [number, number];
+  bounds?: [number, number, number, number];
+  zoom?: number;
+  padding?: { top: number; right: number; bottom: number; left: number };
+  duration: number;
+  easing: 'fly';
+};
+
+export type FocusPlace = {
+  place: Place;
+  collected: boolean;
+};
+
+/**
+ * How close the camera gets when it flies to a place.
+ *
+ * ⚠ Not tuned, and deliberately not tight. 13 puts a place in the context of
+ * the valley it is in, which is the question a levada raises — *where is this,
+ * and how do I get to it?* Framing it at street level answers a question the
+ * app has already refused to be in the business of (D-018).
+ */
+const FOCUS_ZOOM = 13;
+
 const EMPTY_PROGRESS: TripProgress = {
   collected: 0,
   total: 0,
@@ -101,9 +133,19 @@ const EMPTY_PROGRESS: TripProgress = {
 };
 
 export default function MapScreen({
+  focusPlace,
+  onFocusHandled,
   onOpenPassport,
   onOpenSettings,
 }: {
+  /**
+   * A place the user asked to see, from a stamp in the passport (T-115).
+   * The camera flies to it and its card opens. Null the rest of the time,
+   * which is nearly always.
+   */
+  focusPlace: FocusPlace | null;
+  /** Called once the focus has been consumed, so it does not re-fire. */
+  onFocusHandled: () => void;
   onOpenPassport: () => void;
   onOpenSettings: () => void;
 }) {
@@ -113,7 +155,33 @@ export default function MapScreen({
   const [styleName, setStyleName] = useState<MapStyleName>('light');
   const [failure, setFailure] = useState<string | null>(null);
   const [trace, setTrace] = useState<TraceCollection>(EMPTY_TRACE);
-  const [places, setPlaces] = useState<PlaceMarkerCollection>(EMPTY_PLACE_MARKERS);
+  // At most one marker, and only while a card is open (D-052 revised —
+  // the field of dots over every place was deleted by the project lead).
+  const [marker, setMarker] = useState<PlaceMarkerCollection>(EMPTY_PLACE_MARKERS);
+  /**
+   * Where the camera has been told to go, or null for wherever it is.
+   *
+   * ⚠ **Declarative, not the `CameraRef` methods, and that is not a style
+   * preference.** `camera.current.flyTo` throws *"NativeCameraComponent ref is
+   * null, wait for the map being initialized"* when the native view has not
+   * attached yet — which is precisely the case this feature has, because
+   * arriving from the passport remounts this screen and asks it to move the
+   * camera in the same breath. Inside an async handler that throw becomes an
+   * unhandled rejection: no crash, no log, and a camera that silently ignores
+   * you. Passed as a prop it is applied by the native side whenever *it* is
+   * ready, which is the only party that knows.
+   */
+  const [cameraStop, setCameraStop] = useState<CameraStop | null>(null);
+  /**
+   * True once the passport has pointed the camera somewhere.
+   *
+   * ⚠ `focusPlace` is cleared as soon as it is consumed, so guarding the trace
+   * framing with *"is a focus pending"* passes the moment it matters: the
+   * trace finishes loading a beat later, sees no pending focus, and frames the
+   * walk — leaving a card that names a place two valleys from what is on
+   * screen. A latch, not a live check.
+   */
+  const cameraHeldByFocus = useRef(false);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
   // The tapped place (T-115). Null is the normal state — the card is the one
   // thing on this screen that is not always there.
@@ -173,18 +241,6 @@ export default function MapScreen({
         }
 
         const trip = await tripDao.getActiveTrip();
-
-        // The curated places, drawn so they can be tapped (T-115). Built from
-        // the same award set the passport uses, so a stamp earned on this
-        // launch fills its marker in on this launch.
-        const awarded =
-          trip === null
-            ? new Set<string>()
-            : await stampAwardDao.getAwardedPlaceIds(trip.id);
-        if (!cancelled) {
-          setPlaces(buildPlaceMarkers(getContentPack(), awarded));
-        }
-
         if (trip !== null) {
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
@@ -202,6 +258,123 @@ export default function MapScreen({
       cancelled = true;
     };
   }, []);
+
+  /**
+   * Frame what the user actually did (2026-08-13).
+   *
+   * ⚠ **This is the fix for the emptiest-looking screen in the app.** Fitting
+   * the island on a tall phone leaves roughly 60% of the screen as flat blue
+   * sea — a screenshot made that obvious in a way no test could. The island is
+   * still the day-one view, because on day one there is nothing else to show;
+   * from the first recorded fix onward the camera looks at the trace.
+   *
+   * Skipped when the passport asked for a specific place: that request is more
+   * recent than anything this knows about, and two cameras fighting is worse
+   * than either.
+   */
+  useEffect(() => {
+    if (
+      styleJson === null ||
+      focusPlace !== null ||
+      cameraHeldByFocus.current ||
+      trace.features.length === 0
+    ) {
+      return;
+    }
+
+    const bounds = traceBounds(trace);
+    if (bounds === null) {
+      return;
+    }
+
+    setCameraStop({
+      bounds,
+      // Asymmetric on purpose: the bottom of this screen belongs to the
+      // controls and, when it is open, the card. Padding the trace out from
+      // under them is what stops the newest part of a walk sitting behind a
+      // button.
+      padding: { top: 96, right: 48, bottom: 220, left: 48 },
+      duration: 600,
+      easing: 'fly',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trace, styleJson]);
+
+  /**
+   * The passport asked for a place (T-115, D-052 revised).
+   *
+   * ⚠ Waits for `styleJson`, because until the style loads the `Camera` is not
+   * mounted and `camera.current` is null — arriving from the passport is
+   * exactly the case where that race happens, since this screen has just been
+   * remounted.
+   *
+   * The last fix is read here rather than held from mount: the card asserts a
+   * distance, and the freshest thing the app can honestly say is whatever the
+   * recorder has stored at the moment the card opens. `placeCard.ts` throws
+   * the number away if that turns out to be too old.
+   */
+  useEffect(() => {
+    if (focusPlace === null || styleJson === null) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      let position = null;
+      try {
+        const trip = await tripDao.getActiveTrip();
+        position = trip === null ? null : await rawFixDao.getLastFix(trip.id);
+      } catch (error) {
+        // A card without a distance is still a card with a Directions button,
+        // which is the part D-018 actually promises.
+        await recordingEventDao.logError('place card position', error);
+      }
+      if (cancelled) {
+        return;
+      }
+
+      const geofence = representativeGeofence(focusPlace.place);
+
+      // Claimed before the camera moves, so the trace framing cannot win a
+      // race it does not know it is in.
+      cameraHeldByFocus.current = true;
+
+      setMarker(buildFocusMarker(focusPlace.place, focusPlace.collected));
+      setCardNotice(null);
+      setCard(
+        buildPlaceCard({
+          placeId: focusPlace.place.id,
+          name: focusPlace.place.name,
+          category: focusPlace.place.category,
+          collected: focusPlace.collected,
+          lat: geofence.lat,
+          lon: geofence.lon,
+          position,
+          nowMs: Date.now(),
+        })
+      );
+
+      // Flown, not jumped: the movement is what tells the user the map they
+      // are looking at is the same island, moved — a cut leaves them
+      // wondering what they are looking at.
+      setCameraStop({
+        center: [geofence.lon, geofence.lat],
+        zoom: FOCUS_ZOOM,
+        // Room for the card, which opens under it at the same moment.
+        padding: { top: 96, right: 48, bottom: 220, left: 48 },
+        duration: 900,
+        easing: 'fly',
+      });
+
+      onFocusHandled();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusPlace, styleJson]);
 
   if (failure !== null) {
     return (
@@ -224,63 +397,12 @@ export default function MapScreen({
   const tracePaint = TRACE_PAINT[styleName];
   const markerPaint = PLACE_MARKER_PAINT[styleName];
 
-  /**
-   * A marker was pressed (T-115).
-   *
-   * The last fix is read **here**, not held in state from mount: the card
-   * asserts a distance, and the freshest thing the app can honestly say is
-   * whatever the recorder has stored at the moment the card opens.
-   * `placeCard.ts` throws the number away if that turns out to be too old.
-   */
-  const openCard = (event: NativeSyntheticEvent<PressEventWithFeatures>) => {
-    const feature = event.nativeEvent.features[0];
-    const properties = feature?.properties as
-      | { placeId?: string; name?: string; category?: Category; collected?: boolean }
-      | undefined;
-    const geometry = feature?.geometry;
-
-    if (
-      properties?.placeId === undefined ||
-      properties.name === undefined ||
-      properties.category === undefined ||
-      geometry?.type !== 'Point'
-    ) {
-      return;
-    }
-
-    // Native hands the geometry back as JSON, so this is a plain array.
-    const [lon, lat] = geometry.coordinates as [number, number];
-
-    void (async () => {
-      let position = null;
-      try {
-        const trip = await tripDao.getActiveTrip();
-        position = trip === null ? null : await rawFixDao.getLastFix(trip.id);
-      } catch (error) {
-        // A card without a distance is still a card with a Directions button,
-        // which is the part D-018 actually promises.
-        await recordingEventDao.logError('place card position', error);
-      }
-
-      setCardNotice(null);
-      setCard(
-        buildPlaceCard({
-          placeId: properties.placeId!,
-          name: properties.name!,
-          category: properties.category!,
-          collected: properties.collected === true,
-          lat,
-          lon,
-          position,
-          nowMs: Date.now(),
-        })
-      );
-    })();
-  };
-
   const closeCard = () => {
     setCard(null);
     setCardNotice(null);
+    // The marker exists only for the card. Closing one closes the other, and
+    // the map goes back to being the trace and nothing else (D-032).
+    setMarker(EMPTY_PLACE_MARKERS);
   };
 
   const handleDirections = () => {
@@ -328,6 +450,7 @@ export default function MapScreen({
         compass={false}
       >
         <Camera
+          {...(cameraStop ?? {})}
           initialViewState={{
             bounds: [HOME_BOUNDS[0], HOME_BOUNDS[1], HOME_BOUNDS[2], HOME_BOUNDS[3]],
           }}
@@ -376,30 +499,18 @@ export default function MapScreen({
           />
         </GeoJSONSource>
 
-        {/* The curated places (T-115). Drawn *after* the trace, so they sit
-            above it — which is also what makes them hittable: the press goes
-            to the topmost layer under the finger.
+        {/* The one place the user asked to see (T-115, D-052 revised).
+            Empty unless a card is open.
 
-            ⚠ Quiet on purpose. `placeStyle.ts` holds every colour here below
-            the trace's contrast, because D-032 made the trace the whole
-            visual product of v1 and eighty markers are more than enough to
-            drown one line. */}
-        <GeoJSONSource
-          id="places"
-          data={places}
-          onPress={openCard}
-          // The default hitbox is 44 dp. D-015 says 60, and a 4 pt circle is
-          // by far the smallest target in the app — this is where that rule
-          // earns its keep.
-          // ⚠ These are insets *around the press point*, not a size: the box
-          // is 2× each value. Half of 60, therefore, not 60.
-          hitbox={{
-            top: MIN_TAP_TARGET / 2,
-            right: MIN_TAP_TARGET / 2,
-            bottom: MIN_TAP_TARGET / 2,
-            left: MIN_TAP_TARGET / 2,
-          }}
-        >
+            ⚠ This used to be a dot on every curated place, and the project
+            lead deleted it on 2026-08-13: the map belongs to the trace
+            (D-032), and eighty markers over one line is not a map of your
+            holiday. The way in is a stamp in the passport.
+
+            Drawn after the trace so it sits above it, and not pressable —
+            nothing here needs to be tapped, because the card that explains
+            this marker is already open underneath. */}
+        <GeoJSONSource id="place_focus" data={marker}>
           <Layer
             type="circle"
             id="place_uncollected"

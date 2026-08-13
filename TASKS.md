@@ -561,8 +561,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Notes: `docs/task-notes.md` (T-113)
 - [x] **T-114** Minimal plain-English onboarding, no jargon ⇠ T-042
       — Notes: `docs/task-notes.md` (T-114)
-- [ ] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
+- [x] **T-115** Landmark tap → minimal card (name, photo, distance, one Directions button
       handing off to Apple/Google Maps). No in-app navigation. (D-018) ⇠ T-066
+      — Notes: `docs/task-notes.md` (T-115). Decision: **D-052**.
+      — ⚠ **No photo, and no distance in the common case.** The content pack has no photo field;
+      the distance is withheld unless the recorder has a fix under 30 minutes old.
+      — **Emulator-checked** against a temporary fixture pack: markers draw, the card opens, and
+      Directions launched Google Maps. The `geo:` fallback and iOS are still unverified.
 - [x] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102
       — Notes: `docs/task-notes.md` (T-116)
 - [x] **T-116a** Move the island's name out of the reveal notification (D-017) ⇠ T-102

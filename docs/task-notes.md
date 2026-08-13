@@ -911,6 +911,55 @@ grep -A30 "^### T-052a" docs/task-notes.md
       — Measured at 2x text scaling: copy scrolls, buttons stay reachable (D-015).
       — ⚠ The copy has never been read by anybody outside this project. T-112 and T-129.
 
+### T-115
+
+- [x] **T-115** Landmark tap → minimal card, one Directions button (D-018) ⇠ T-066
+      — Done 2026-08-13. Decision recorded as **D-052** (Provisional). Six new modules: the pure
+      half is `map/placeMarkers.ts`, `map/placeStyle.ts`, `places/directionsLink.ts` and
+      `places/placeCard.ts`; the impure half is `places/openDirections.ts` and the wiring in
+      `map/MapScreen.tsx`; `ui/PlaceCardView.tsx` is presentational and mounts in the workbench.
+      35 new tests.
+      — **The blocker was not the card, it was that nothing was drawn to tap.** The map had the
+      trace and nothing else; the basemap's own labels are the wrong set (T-058 strips most of
+      them) and matching one back to a place id would put Madeira knowledge in `app/` (D-017).
+      So the content pack became a point layer, and that layer is both what you see and what you
+      press.
+      — ⚠ **`canOpenURL` is a trap on Android 11+**, and picking it would have shipped a dead
+      button. It answers about package visibility, not about whether an app exists, and returns
+      false for `geo:` and `google.navigation:` unless the manifest declares a `<queries>` entry.
+      `openURL`-and-catch asks the question we actually have.
+      — ⚠ **`encodeURIComponent` does not escape parentheses**, and `geo:` uses them as the
+      label's delimiters. `Miradouro (novo)` would have closed the label early. Escaped
+      explicitly, with a test.
+      — **The first layout was wrong and the workbench found it.** The card was anchored to the
+      bottom corner and the controls were pushed up by its `onLayout`-measured height; the
+      measurement never arrived, and the card rendered **on top of the passport button** — a
+      mis-tap between two primary controls, the exact failure design brief §3.1 exists to
+      prevent. Replaced with a `bottomSlot` on `PrimaryOverlay`: one flex column, so the overlap
+      is impossible at any text size and there is nothing to measure or keep in sync.
+      — **Measured in the workbench** (D-038), both card states: 60 dp buttons, no overlap with
+      either bottom control, and the distance line correctly absent when there is no recent fix.
+      ⚠ It was measured, **not looked at** — the browser pane could not render a screenshot in
+      this session, so nobody has seen this card. It uses only theme colours that
+      `contrast.test.ts` already holds, but "reads as a card" is not something a rectangle
+      measurement can tell you.
+      — **The markers are held below the trace's contrast by the style tests** — D-032 makes the
+      trace the visual product of v1, and eighty markers can drown one line. That ceiling plus
+      D-015's 3:1 floor leaves a narrow band, which is why collected differs from uncollected by
+      shape, size and weight rather than by colour.
+      — **Verified on the emulator** with a temporary two-place fixture pack, since
+      `content/pois.json` is empty and this feature draws nothing without it. The fixture was
+      reverted; `git status` is clean on `content/`. What it showed:
+        · both markers drew, and the levada drew **once**, at its trailhead;
+        · a tap opened the card — `0 / 2` on the passport button, `LEVADA WALK`, the name, and
+          `9.1 km away, in a straight line`, so the distance path works against a real recorded
+          fix rather than a fixture one;
+        · the accessible label reads *"Directions to Fixture Levada Walk in your maps app"*;
+        · **tapping Directions launched Google Maps.** The emulator image has it, which was not
+          expected — the handoff is real, not just well-formed.
+      — ⚠ **Still unverified:** the `geo:` fallback branch (nothing forced it), the whole iOS
+      branch, and every question about a real phone. And the card has still not been *looked* at.
+
 ### T-116
 
 - [x] **T-116** Cap notifications at two per trip (D-011) ⇠ T-049, T-102

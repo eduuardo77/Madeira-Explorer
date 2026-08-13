@@ -88,6 +88,8 @@ for a global app. **The bounded scope is what makes the architecture simple.**
 │  • Two styles over one tile pack: light for use, dark for the         │
 │    souvenir (D-026). Figure-ground from shaded terrain.               │
 │  • Visited-road overlay drawn from local road_graph geometry (D-022)  │
+│  • Curated places as a point layer, tap → card → Directions handoff   │
+│    to the platform's maps app. No routing here, ever (D-018, D-052)   │
 │  • Passport (stamp collection) view — by category (D-027)             │
 │  • Souvenir composition (pure: the storyboard) → renderer             │
 │    (9:16 video + still, on-device). D-042                             │

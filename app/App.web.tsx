@@ -34,6 +34,8 @@ import OnboardingView, {
   type OnboardingScreen,
 } from './src/onboarding/OnboardingView';
 import PassportView, { type PassportStamp } from './src/ui/PassportView';
+import PlaceCardView from './src/ui/PlaceCardView';
+import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
@@ -134,6 +136,8 @@ type Screen =
   | 'passport'
   | 'primary'
   | 'primary-while-using'
+  | 'place-card'
+  | 'place-card-collected'
   | 'settings'
   | 'privacy'
   | `onboarding:${OnboardingScreen}`;
@@ -142,6 +146,8 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
+  { id: 'place-card', label: 'Place card (T-115)' },
+  { id: 'place-card-collected', label: 'Place card — collected, no fix' },
   { id: 'settings', label: 'Settings (T-141/T-125)' },
   { id: 'privacy', label: 'Privacy policy (T-124)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
@@ -152,10 +158,34 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'onboarding:downgrade', label: 'Downgrade (T-044)' },
 ];
 
+/**
+ * The place card in its two interesting states (T-115).
+ *
+ * `distance` false is the ordinary case for a user on While-Using who is not
+ * recording: no recent fix, so no number (`placeCard.ts` rule 1). It is worth
+ * looking at, because it is the layout with a line missing.
+ */
+function makeCard(collected: boolean, distance: boolean) {
+  const now = Date.now();
+  return buildPlaceCard({
+    placeId: 'place-1',
+    name: collected ? 'Long Canal Trail' : 'Miradouro Grande',
+    category: collected ? 'levada' : 'viewpoint',
+    collected,
+    lat: 32.66,
+    lon: -16.91,
+    position: distance
+      ? { ts: now - 120_000, lat: 32.65, lon: -16.91, accuracy_m: 15 }
+      : null,
+    nowMs: now,
+  });
+}
+
 export default function DesignWorkbench() {
   const [scenario, setScenario] = useState<number>(1);
   const [screen, setScreen] = useState<Screen>('passport');
 
+  const showsCard = screen === 'place-card' || screen === 'place-card-collected';
   const collected = SCENARIOS[scenario].collected;
   const progress = makeProgress(collected);
   const awards = makeAwards(collected);
@@ -244,8 +274,29 @@ export default function DesignWorkbench() {
               </Text>
               <PrimaryOverlay
                 progress={progress}
-                showRecordingControl={screen === 'primary-while-using'}
+                showRecordingControl={
+                  screen === 'primary-while-using' || showsCard
+                }
                 isRecording={false}
+                // Worst case on purpose: a While-Using user, so both bottom
+                // controls are present *and* a card is open.
+                bottomSlot={
+                  showsCard ? (
+                    <PlaceCardView
+                      card={makeCard(
+                        screen === 'place-card-collected',
+                        screen === 'place-card'
+                      )}
+                      notice={
+                        screen === 'place-card-collected'
+                          ? 'No maps app on this phone could open this place.'
+                          : null
+                      }
+                      onDirections={() => undefined}
+                      onClose={() => setScreen('primary')}
+                    />
+                  ) : null
+                }
                 onOpenPassport={() => setScreen('passport')}
                 onOpenSettings={() => undefined}
                 onToggleRecording={() => undefined}

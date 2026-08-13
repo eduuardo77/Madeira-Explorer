@@ -31,6 +31,13 @@
  *      history (D-016). Sharing it publishes where they went, to whoever sees
  *      it. Their accommodation is removed first, by default and with no way to
  *      turn it off (D-040), but the rest is theirs to publish knowingly.
+ *   3. **The Directions button** (T-115, D-018, added 2026-08-13). It opens
+ *      another company's maps app, which has its own policy and will usually
+ *      use the network. **Nothing about the user goes with it** — the handoff
+ *      carries the destination we shipped in the content pack and nothing
+ *      else — but "this app never uses the internet" and "this button makes
+ *      your phone talk to Google" both being true at once is exactly the kind
+ *      of gap a reader should not have to discover for themselves.
  *
  * ON NOT LISTING LIBRARIES
  * ------------------------
@@ -53,7 +60,7 @@
  * The date this text last changed, in ISO form. Shown to the user, and the
  * thing a returning reader checks first.
  */
-export const POLICY_VERSION = '2026-08-11';
+export const POLICY_VERSION = '2026-08-13';
 
 /**
  * The app's name as it appears to the user.
@@ -127,6 +134,14 @@ const SECTIONS: PolicySection[] = [
       'Sharing it is the one time your trip leaves your phone, and it goes wherever you send it — not to us. Anyone who sees it can see roughly where you went.',
       'Before making it, the app finds where you slept and removes that part of your map. It does this every time, and there is no setting to switch it off. If it cannot work out where you were staying, it will not make the video at all rather than risk showing your address.',
       'Everything else on the map is yours to share or not.',
+    ],
+  },
+  {
+    heading: 'Getting directions to a place',
+    paragraphs: [
+      'Tapping a place on the map shows a small card with a Directions button. That button opens whichever maps app is already on your phone, with that place set as the destination.',
+      'That other app is not ours. It has its own privacy policy, and it will usually need the internet to work out a route.',
+      'Nothing about your trip goes with you. All it is given is the place you tapped, which is a place this app already knows about.',
     ],
   },
   {

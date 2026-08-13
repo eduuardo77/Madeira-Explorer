@@ -34,6 +34,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { contrastRatio } from '../ui/contrast.ts';
+import { PLACE_MARKER_PAINT, signalColor } from './placeStyle.ts';
+import { TRACE_PAINT } from './traceStyle.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -300,5 +302,61 @@ test('nothing in the basemap takes the brightness the trace needs', () => {
     tooBright,
     [],
     'these compete with the trace for the brightest thing on the map'
+  );
+});
+
+// ---------------------------------------------------------------------------
+// The place markers (T-115)
+// ---------------------------------------------------------------------------
+
+test('a place marker is legible on the dark ground, and quieter than the trace', () => {
+  // The mirror of the light style's assertion, against the opposite ground.
+  // The same two bounds: never dust (D-015), never louder than the trace
+  // (D-032, design brief §2.3).
+  const earth = layerColour(style('dark').layers, 'earth', 'fill-color');
+  assert.ok(earth !== null);
+  const trace = contrastRatio(TRACE_PAINT.dark.coreColor, earth);
+
+  for (const state of ['uncollected', 'collected'] as const) {
+    const paint = PLACE_MARKER_PAINT.dark[state];
+    const ratio = contrastRatio(signalColor(paint, state), earth);
+    assert.ok(ratio >= 3, `the ${state} marker is ${ratio.toFixed(2)}:1`);
+    assert.ok(
+      ratio < trace,
+      `the ${state} marker at ${ratio.toFixed(2)}:1 is louder than the trace at ${trace.toFixed(2)}:1`
+    );
+  }
+});
+
+test('on the dark ground a collected marker is BRIGHTER, and its casing darker', () => {
+  // D-026's inversion, applied to a point: the mark glows and the casing
+  // separates it from hillshade by being darker than the ground — a pale one
+  // would outshine the thing it outlines, which is the defect T-060 found in
+  // the trace.
+  const layers = style('dark').layers;
+  const earth = layerColour(layers, 'earth', 'fill-color');
+  assert.ok(earth !== null);
+
+  const { collected, uncollected } = PLACE_MARKER_PAINT.dark;
+
+  assert.ok(
+    contrastRatio(collected.fillColor, '#000000') >
+      contrastRatio(earth, '#000000'),
+    'the collected marker is not brighter than the ground'
+  );
+  assert.ok(
+    contrastRatio(collected.strokeColor, '#000000') <
+      contrastRatio(earth, '#000000'),
+    'the casing is not darker than the ground'
+  );
+  // Hollow vs filled, the same signal as in the light style.
+  assert.ok(
+    contrastRatio(uncollected.fillColor, earth) < 1.5,
+    'the uncollected disc reads as filled'
+  );
+  assert.ok(collected.radius > uncollected.radius, 'collected is not larger');
+  assert.ok(
+    collected.strokeWidth > uncollected.strokeWidth,
+    'collected is not heavier'
   );
 });

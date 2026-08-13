@@ -166,7 +166,35 @@ not a setting.
 not granted Always. Users on Always never see it. Putting it in settings would bury a frequent
 action in a rare place.
 
-### 3.4 Accessibility floor (D-015, CONTEXT §6.5)
+### 3.4 The places, and the card (T-115, D-018, D-052)
+
+**Added 2026-08-13, Provisional.** The curated places are drawn on the map as small circles, and
+tapping one opens a card at the bottom of the screen. This is the only detail view in the app.
+
+```
+   ○  uncollected — a hollow ring, mid-grey
+   ●  collected  — filled, half again as large, heavier casing
+```
+
+- **The markers are quieter than the trace, by measurement.** §2.3's bar is *the trace is
+  unambiguously the brightest thing on screen*, and after D-032 the trace is the whole visual
+  product of v1. Every marker colour measures below the trace's contrast against the same ground,
+  and the style tests fail the build if that stops being true. The consequence is that the two
+  marker states sit in a narrow band of near-identical grey — so **shape, size and weight** carry
+  the difference, which is what D-015 requires anyway.
+- **The card is the fifth thing on the screen, and it is transient.** Category, name, distance,
+  Directions, Close. No description, no photo (there is no photo — see D-052), no route drawn on
+  our map, ever (D-018).
+- **The distance is a straight line and says so.** On this island that is not pedantry: a
+  miradouro 2 km away across a ravine is a 25-minute drive. When the recorder has no recent fix
+  the line is simply absent — a number the app has not earned is worse than no number (D-041's
+  reflex).
+- ⚠ **The card and the bottom controls are one column, not two anchored things.** The first
+  version positioned them independently and the card landed on top of the passport button. The
+  controls step up as the card appears; nothing on this screen becomes unreachable because a card
+  is open.
+
+### 3.5 Accessibility floor (D-015, CONTEXT §6.5)
 
 - Minimum tap target **60dp**, not 44
 - Every control labelled with text, not icon-only

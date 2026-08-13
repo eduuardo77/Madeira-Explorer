@@ -38,6 +38,7 @@
  * Presentational: props in, pixels out, so the workbench can mount it.
  */
 
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import StampMark from './StampMark';
@@ -55,6 +56,20 @@ export type PrimaryOverlayProps = {
    */
   showRecordingControl: boolean;
   isRecording: boolean;
+  /**
+   * Anything that shares the bottom of the screen — today, the place card
+   * (T-115). Rendered **above** the controls, inside the same column.
+   *
+   * ⚠ A slot rather than a position, because the two must not be laid out
+   * independently. The first attempt anchored the card to the same corner and
+   * pushed the controls up by its measured height; the measurement never
+   * arrived (`onLayout` did not fire in the workbench) and the card landed on
+   * top of the passport button — a mis-tap between two primary controls,
+   * which is the exact failure design brief §3.1's pairing exists to prevent.
+   * In one flex column the overlap is impossible at any text size, with
+   * nothing to measure and nothing to keep in sync.
+   */
+  bottomSlot?: ReactNode;
   onOpenPassport: () => void;
   onOpenSettings: () => void;
   onToggleRecording: () => void;
@@ -64,6 +79,7 @@ export default function PrimaryOverlay({
   progress,
   showRecordingControl,
   isRecording,
+  bottomSlot,
   onOpenPassport,
   onOpenSettings,
   onToggleRecording,
@@ -96,6 +112,10 @@ export default function PrimaryOverlay({
           — not the specific side — that stops a mis-tap. Changing one alone
           puts both primary controls under the same thumb. */}
       <View style={styles.bottom} pointerEvents="box-none">
+        {/* The place card, when there is one (T-115). Above the controls and
+            in the same column, so it can never cover them. */}
+        {bottomSlot}
+
         {showRecordingControl ? (
           <Pressable
             accessibilityRole="button"

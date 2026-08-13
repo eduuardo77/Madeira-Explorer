@@ -2431,3 +2431,72 @@ about whether v1 is worth launching publicly rather than a question about which 
 which exist. **PROJECT_PLAN's launch reasoning needs re-reading with this in mind** — the organic
 sharing loop it assumes is now absent, and the partner-distribution routes CONTEXT §4.10 set aside
 (rental cars, hotels, the tourism board) are no longer the fallback but the only channel.
+
+---
+
+## D-052 — The map draws the curated places, and Directions hands off with a fallback.
+
+**Status:** Provisional — implemented for T-115 on 2026-08-13, verified on the emulator, not
+confirmed by the project lead and **never seen on a real phone**.
+
+**Decision:** three things, which are one feature:
+
+1. **The primary map draws the curated places** as small circles, one per place, built from the
+   content pack. Uncollected is a hollow ring; collected is filled, larger and heavier.
+2. **Tapping one opens a card** — category, name, straight-line distance, a Directions button and
+   a Close button — anchored at the bottom of the screen, above the existing controls.
+3. **Directions hands off by URL, best-first with a fallback.** Android tries
+   `google.navigation:q=…` and falls back to `geo:…?q=…(name)`; iOS tries `maps://?daddr=…` and
+   falls back to `http://maps.apple.com/?daddr=…`.
+
+**What prompted it:** T-115 has said *landmark tap → minimal card* since Phase 6 was written, and
+D-018 has said *never build navigation* since the beginning. Neither was implemented, and the
+reason turned out to be that **nothing was drawn to tap.** The basemap's own labels are OSM's idea
+of what matters, mostly stripped by T-058, and they do not know which ~80 places this app is
+about. So the tap target had to be created before the tap could be handled.
+
+**Alternatives considered:**
+
+- *Use the basemap's labels as the tap targets.* Rejected: they are the wrong set, they are
+  deliberately sparse, and matching a label back to a place id would put Madeira knowledge in
+  `app/` (D-017, absolute).
+- *`https://www.google.com/maps/dir/?api=1&destination=…`* — the form Google documents. Rejected:
+  with no Google Maps installed it opens a **browser**, and this app's user is in a levada valley
+  with no signal. The whole reason the tiles ship in the binary (D-036) is that this user is
+  offline. `google.navigation:` and `geo:` are answered by an installed app or by nothing.
+- *Check `canOpenURL` and pick the one that works.* Rejected, and this is the trap worth
+  remembering: on Android 11+ `canOpenURL` answers a **package-visibility** question, not an "is
+  there an app" question, and returns false for these schemes unless the manifest declares a
+  matching `<queries>` entry. It would have reported every phone as having no maps app — a dead
+  button on a screen nobody here can test. The wrapper calls `openURL` and catches instead.
+- *Ask the OS for a fresh position when the card opens*, so the distance is exact. Rejected: a GPS
+  request per tap, for a number rendered to two significant figures. The card uses the recorder's
+  last stored fix and **withholds the distance entirely** when that fix is older than 30 minutes
+  or less accurate than 120 m — the same cut the trace drawing makes.
+- *Hide the bottom controls while a card is open*, which is what most map apps do. Rejected: the
+  passport button is the app's primary action and the hero number is on it. The card and the
+  controls share one flex column instead, so the card pushes them up and neither can cover the
+  other.
+- *Show a photo, as D-018 describes.* **Deferred, and the card leaves the slot open.** The content
+  pack has no photo field. Adding one is a curation question (T-066) and a bundle-size question
+  against the 19.1 MB budget (D-035/D-036), not a rendering one.
+
+**Why the markers are deliberately quiet:** every colour in `placeStyle.ts` measures **below the
+trace's contrast** against the same ground, and the style tests fail the build if that stops being
+true. D-032 made the trace the entire visual product of v1 and design brief §2.3 states the bar as
+*the trace is unambiguously the brightest thing on screen* — eighty markers are more than enough
+to drown one line. The narrow band left between that ceiling and D-015's 3:1 floor is why
+collected-vs-uncollected is carried by **shape, size and weight** rather than by colour, which
+D-015 requires anyway.
+
+**Consequences:**
+
+- The primary screen gains a fourth visual element (the markers) and a fifth transient one (the
+  card). Design brief §3 is updated; the *three controls* rule is untouched.
+- **Verified on the emulator, with a two-place fixture pack** (reverted afterwards): the markers
+  draw, a tap opens the card, the distance is computed from the recorder's own last fix, and
+  **`google.navigation:` launched Google Maps** — the emulator image has it, which was not
+  expected. What that does *not* prove: that the fallback `geo:` branch works, that iOS works at
+  all, or how any of it behaves on a phone with a text scale set.
+- With `content/pois.json` still empty (T-066), **this feature currently draws nothing.** It is
+  the second thing after the passport that turns on the moment places exist.

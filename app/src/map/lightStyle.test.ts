@@ -25,6 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { contrastRatio } from '../ui/contrast.ts';
+import { PLACE_MARKER_PAINT, signalColor } from './placeStyle.ts';
 import { TRACE_PAINT } from './traceStyle.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -177,6 +178,69 @@ test('place labels are readable, and the island label is at least large-text rea
       `${layer.id} is ${ratio.toFixed(2)}:1, under its ${floor}:1 floor`
     );
   }
+});
+
+// ---------------------------------------------------------------------------
+// The place markers (T-115)
+// ---------------------------------------------------------------------------
+
+test('a place marker is legible, and never louder than the trace', () => {
+  // The whole design rule for `placeStyle.ts`, as two numbers. Eighty markers
+  // that out-shout one line would undo D-032 — the trace is the visual
+  // product of v1 — and markers under 3:1 would be dust (D-015).
+  const trace = contrastRatio(TRACE_PAINT.light.coreColor, GROUND!);
+
+  for (const state of ['uncollected', 'collected'] as const) {
+    const paint = PLACE_MARKER_PAINT.light[state];
+    const ratio = contrastRatio(signalColor(paint, state), GROUND!);
+    assert.ok(ratio >= 3, `the ${state} marker is ${ratio.toFixed(2)}:1`);
+    assert.ok(
+      ratio < trace,
+      `the ${state} marker at ${ratio.toFixed(2)}:1 is louder than the trace at ${trace.toFixed(2)}:1`
+    );
+  }
+});
+
+test('collected differs from uncollected in more than colour', () => {
+  // D-015's "never hue alone" rule, and here it is not optional: the band
+  // between the 3:1 floor and the trace's contrast is narrow enough that the
+  // two states are nearly the same grey. Shape, size and weight carry it.
+  const { collected, uncollected } = PLACE_MARKER_PAINT.light;
+
+  assert.ok(collected.radius > uncollected.radius, 'collected is not larger');
+  assert.ok(
+    collected.strokeWidth > uncollected.strokeWidth,
+    'collected is not heavier'
+  );
+  // Hollow vs filled: the uncollected disc is near the ground colour, so what
+  // the eye sees is a ring. This is the assertion that keeps it that way.
+  const hollow = contrastRatio(uncollected.fillColor, GROUND!);
+  assert.ok(hollow < 1.5, `the uncollected disc reads as filled at ${hollow.toFixed(2)}:1`);
+  assert.ok(
+    contrastRatio(collected.fillColor, GROUND!) >= 3,
+    'the collected disc does not read as filled'
+  );
+});
+
+test('in the light style a collected marker is DARKER than the ground', () => {
+  // The same inversion as the trace: design brief §2.4 makes visited darker
+  // and heavier here, brighter and heavier on the dark style.
+  assert.ok(
+    contrastRatio(PLACE_MARKER_PAINT.light.collected.fillColor, '#ffffff') >
+      contrastRatio(GROUND!, '#ffffff'),
+    'the collected marker is not darker than the ground'
+  );
+});
+
+test('the two styles paint the markers differently, for the same reason as the trace', () => {
+  assert.notEqual(
+    PLACE_MARKER_PAINT.light.collected.fillColor,
+    PLACE_MARKER_PAINT.dark.collected.fillColor
+  );
+  assert.notEqual(
+    PLACE_MARKER_PAINT.light.uncollected.strokeColor,
+    PLACE_MARKER_PAINT.dark.uncollected.strokeColor
+  );
 });
 
 test('the two styles paint the trace differently, and that is the point', () => {

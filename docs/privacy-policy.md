@@ -1,6 +1,6 @@
 # Madeira Explorer — Privacy Policy
 
-**Last changed:** 2026-08-11
+**Last changed:** 2026-08-13
 
 <!--
   GENERATED FILE — DO NOT EDIT.
@@ -48,6 +48,14 @@ Sharing it is the one time your trip leaves your phone, and it goes wherever you
 Before making it, the app finds where you slept and removes that part of your map. It does this every time, and there is no setting to switch it off. If it cannot work out where you were staying, it will not make the video at all rather than risk showing your address.
 
 Everything else on the map is yours to share or not.
+
+## Getting directions to a place
+
+Tapping a place on the map shows a small card with a Directions button. That button opens whichever maps app is already on your phone, with that place set as the destination.
+
+That other app is not ours. It has its own privacy policy, and it will usually need the internet to work out a route.
+
+Nothing about your trip goes with you. All it is given is the place you tapped, which is a place this app already knows about.
 
 ## What the app asks permission for
 

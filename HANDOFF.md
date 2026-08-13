@@ -1,14 +1,18 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-08-12.
+**For:** a session picking this project up cold. **Updated:** 2026-08-13.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked.
 
 ## State
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
-trace on a map → passport → trip end → reveal. 70 source files, 23 test files, ~18,100 lines,
-**334 tests**, 65 commits.
+trace on a map → passport → trip end → reveal. 76 source files and 28 test files under `app/src`
+— 13,900 lines of source, 6,200 of tests — **369 tests**.
+
+Tap-a-place → Directions (T-115) was added on 2026-08-13 and checked on the emulator against a
+temporary fixture pack: markers draw, the card opens, and **Directions launched Google Maps**.
+The `geo:` fallback and the whole iOS branch are unverified.
 
 Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
 permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.
@@ -38,11 +42,13 @@ use. **The largest open item in the project.**
 
 ## The code tail, in rough order of value
 
-- **Directions handoff** — tap a place, hand off to Apple/Google Maps (an explicit non-goal to
-  build ourselves, D-018). Not implemented.
 - **T-063b** — one glyph range still requested. The real fix is upstream: the tile pack ships
   place names in nine scripts the app never renders.
 - **T-067** region boundaries · **T-112** UI reduction pass.
+- ~~Directions handoff~~ — **done 2026-08-13** (T-115, D-052): places are drawn on the map, a tap
+  opens a card, one button hands off to the phone's maps app. ⚠ **It draws nothing until
+  `content/pois.json` has places** — to see it, put two fixture places in that file and revert
+  afterwards.
 
 ## Traps that each cost something here
 

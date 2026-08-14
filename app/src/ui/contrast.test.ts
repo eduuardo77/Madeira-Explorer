@@ -36,7 +36,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { CATEGORIES } from '../content/contentPack.ts';
-import { designFor } from '../passport/stampArt.ts';
+import { designFor, UNCOLLECTED } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
 import { colors } from './theme.ts';
 
@@ -271,15 +271,39 @@ test('the sticker is visible against the passport page behind it', () => {
 test('an uncollected stamp is dimmer than a collected one, and still legible', () => {
   // D-015 exactly: unvisited stays legible mid-grey, never near-invisible —
   // and CONTEXT §4.1 says the uncollected places *are* the recommendations, so
-  // they have a job to do.
+  // they have a job to do. Since D-058 they are also most of the screen for
+  // most of a trip.
+  //
+  // ⚠ These used to be copied literals, which is why the palette could drift
+  // out from under them unnoticed. It is imported now.
   const collected = designFor('somewhere', 'levada');
-  const uncollectedInk = '#A7B8C4';
-  const uncollectedPaper = '#1B2A33';
 
-  const dim = contrastRatio(uncollectedInk, uncollectedPaper);
+  const dim = contrastRatio(UNCOLLECTED.ink, UNCOLLECTED.paper);
   assert.ok(dim >= BODY, `uncollected emblem is ${dim.toFixed(2)}:1`);
   assert.ok(
     dim < contrastRatio(collected.colourway.ink, collected.colourway.paper),
     'uncollected is not actually dimmer than collected'
+  );
+});
+
+test('an uncollected sticker is visible as a SHAPE on the page', () => {
+  // ⚠ **The assertion that was missing, and the defect it would have caught.**
+  // Every colourway was measured against the page except the uncollected one,
+  // so when D-054 changed the card to a neutral grey the uncollected paper
+  // ended up at 1.16:1 against it — an invisible sticker with an emblem
+  // apparently floating on the card. Now that D-058 draws every place, that is
+  // most of the passport.
+  //
+  // The *border* is what has to clear the bar, not the paper: a die-cut
+  // sticker reads by its edge, and keeping the paper muted is the whole point
+  // of the uncollected state.
+  const edge = contrastRatio(UNCOLLECTED.border, colors.surface);
+  assert.ok(
+    edge >= BOUNDARY,
+    `the uncollected sticker's edge is ${edge.toFixed(2)}:1 on the page`
+  );
+  assert.ok(
+    contrastRatio(UNCOLLECTED.bandInk, UNCOLLECTED.band) >= BAND,
+    'the uncollected name band is not readable'
   );
 });

@@ -144,6 +144,71 @@ async function waysNamed(name) {
   return { ways: (await overpass(prefix)).elements ?? [], match: 'prefix' };
 }
 
+/**
+ * The two ends of the walk, found from the geometry rather than guessed.
+ *
+ * ⚠ **This is what a levada's `start` and `end` geofences should be, and the
+ * difference matters more than it looks.** A levada earns its stamp only when
+ * both ends are crossed (D-009) — that is what stops somebody who parked at the
+ * trailhead and turned around from collecting a 10 km walk. Endpoints taken
+ * from an arbitrary OSM way, which is what the first ten places shipped with,
+ * are usually somewhere in the middle of the route: the stamp then either
+ * cannot be earned or can be earned without walking it.
+ *
+ * The method is mechanical. Every way contributes two endpoints; an endpoint
+ * shared by two ways is a **join**, and one that appears exactly once is a
+ * **free end** of the network. The walk runs between the two free ends that are
+ * furthest apart. Junctions and side spurs — a levada often has both — produce
+ * extra free ends, and taking the furthest-apart pair ignores them.
+ *
+ * ⚠ It is still not local knowledge. It finds the ends of the *mapped* way,
+ * which is where OSM stopped drawing, not necessarily where a walker parks.
+ * Treat it as a strong suggestion for T-066, not an answer.
+ */
+function freeEnds(lines) {
+  const key = (point) => `${point[0].toFixed(6)},${point[1].toFixed(6)}`;
+  const seen = new Map();
+
+  for (const line of lines) {
+    for (const point of [line[0], line[line.length - 1]]) {
+      const id = key(point);
+      const entry = seen.get(id);
+      if (entry === undefined) {
+        seen.set(id, { point, count: 1 });
+      } else {
+        entry.count += 1;
+      }
+    }
+  }
+
+  const ends = [...seen.values()].filter((entry) => entry.count === 1);
+  if (ends.length < 2) {
+    return null;
+  }
+
+  // Furthest-apart pair. The lists here are tens of points, so the obvious
+  // quadratic scan is the right one.
+  let best = null;
+  for (let i = 0; i < ends.length; i += 1) {
+    for (let j = i + 1; j < ends.length; j += 1) {
+      const [ax, ay] = ends[i].point;
+      const [bx, by] = ends[j].point;
+      const span = Math.hypot(bx - ax, by - ay);
+      if (best === null || span > best.span) {
+        best = { span, a: ends[i].point, b: ends[j].point };
+      }
+    }
+  }
+
+  return best === null
+    ? null
+    : {
+        start: { lat: best.a[1], lon: best.a[0] },
+        end: { lat: best.b[1], lon: best.b[0] },
+        freeEndCount: ends.length,
+      };
+}
+
 /** Perpendicular distance from `p` to the segment `a`–`b`, in degrees. */
 function perpendicular(p, a, b) {
   const [px, py] = p;
@@ -232,6 +297,7 @@ async function courseFor(place) {
     rawPoints,
     source,
     match,
+    ends: freeEnds(lines),
     wayCount: chosen.length,
     totalNamed: ways.length,
   };
@@ -302,6 +368,19 @@ async function main() {
         `${course.rawPoints} → ${points} points, ` +
         `${span(course.lines)} km across`
     );
+
+    // Printed rather than written into pois.json: the geofences are content,
+    // and content is the project lead's (T-066). This is the suggestion.
+    if (course.ends !== null) {
+      const { start, end, freeEndCount } = course.ends;
+      console.log(
+        `    ends: start ${start.lat.toFixed(4)},${start.lon.toFixed(4)}  ` +
+          `end ${end.lat.toFixed(4)},${end.lon.toFixed(4)}` +
+          (freeEndCount > 2 ? `   (${freeEndCount} free ends — spurs ignored)` : '')
+      );
+    } else {
+      console.log('    ends: could not be found — the ways form a loop or a single line');
+    }
 
     features.push({
       type: 'Feature',

@@ -566,14 +566,24 @@ export type StampElement =
  * What changes is colour and ink weight, never the shape or the emblem — so
  * the category still reads, and the difference survives colour blindness.
  */
-const UNCOLLECTED: Colourway = {
-  border: '#3B4C57',
-  inner: '#4A5D69',
-  paper: '#1B2A33',
-  ink: '#A7B8C4',
-  accent: '#2E4350',
-  band: '#243743',
-  bandInk: '#A7B8C4',
+export const UNCOLLECTED: Colourway = {
+  // ⚠ **Neutral since 2026-08-14, and it was a real defect.** These were
+  // blue-greys taken from the old theme, and when D-054 made the passport card
+  // neutral `#1C1C1E` the sticker's paper measured **1.16:1** against the card
+  // behind it. The shape was invisible: a grey smudge with an emblem floating
+  // in it. Nothing failed, because no test measured the *uncollected* palette
+  // against the page — only the thirty collected ones.
+  //
+  // The **border** carries the shape now (3.36:1 on the card) rather than the
+  // paper, which is what lets the paper stay properly muted. That is how a
+  // real die-cut sticker reads anyway: you see its edge, not its middle.
+  border: '#6E6E73',
+  inner: '#8E8E93',
+  paper: '#3A3A3C',
+  ink: '#D1D1D6',
+  accent: '#48484A',
+  band: '#2C2C2E',
+  bandInk: '#C7C7CC',
 };
 
 /** The most characters on one line of the band before it stops being readable. */

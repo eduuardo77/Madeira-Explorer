@@ -395,6 +395,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       deduping on rounded coordinates left pairs "0 m apart" that the validator flagged. Ranking
       is now per-category and dedupe is by name plus 150 m.
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
+      — ⚠ **Less urgent since D-058.** This was the only answer to "where should I go next"
+      (D-027); the passport now answers it by showing every place, collected or not. Region
+      progress is still worth having — it is the thing that makes a big island feel finishable —
+      but nothing is blocked on it.
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
@@ -436,6 +440,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       next" job that D-002 needs it for. Denominator counts **unlocked regions only** (D-024).
 - [x] **T-074** Passport (stamp collection) screen ⇠ T-070, T-071, T-072a
       — Notes: `docs/task-notes.md` (T-074)
+      — **Extended 2026-08-14 (D-058):** it lists **every** curated place, not only the collected
+      ones. Uncollected are drawn muted, are tappable, and *Show on map* works for them — so the
+      passport is now the discovery surface as well as the reward surface. This is what closes the
+      hole D-052 left when the map's place markers were deleted.
 - [x] **T-075** Primary screen: map, plus **three controls only** ⇠ T-015, T-073, T-074
       — Notes: `docs/task-notes.md` (T-075)
 

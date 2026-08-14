@@ -79,11 +79,25 @@ const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 
-/** A stamp the user has earned, with what it takes to draw it (T-070). */
+/**
+ * A place in the collection, earned or not (T-070, D-058).
+ *
+ * ⚠ **Every curated place appears here, not only the collected ones.** The
+ * project lead asked for that on 2026-08-14, and it closes a hole this app has
+ * had since the map's place markers were deleted (D-052): there was no way to
+ * see somewhere you had *not* been, so a user on day one had an empty passport
+ * and nothing to aim at.
+ *
+ * CONTEXT §4.1 already said this in as many words — *the uncollected places
+ * are the recommendations* — and `stampArt.ts` has drawn a muted version since
+ * T-070. The passport was the only thing that never asked for them.
+ */
 export type PassportStamp = {
   placeId: string;
   name: string;
   category: Category;
+  /** False draws the muted design (`stampArt.ts`) and reads "not collected yet". */
+  collected: boolean;
 };
 
 export type PassportViewProps = {
@@ -95,10 +109,11 @@ export type PassportViewProps = {
   /** Awarded stamps, any order. Used for counts per row and for the dates. */
   awards: StampAward[];
   /**
-   * The collected places, with their names, so the real artwork can be drawn
-   * (T-070). Falls back to nothing when the caller has not resolved them —
-   * the row counts still come from `progress`, so a passport with no names is
-   * a passport with no stickers rather than a broken screen.
+   * Every curated place, with its name and whether it has been collected, so
+   * the real artwork can be drawn (T-070). Falls back to nothing when the
+   * caller has not resolved them — the row counts still come from `progress`,
+   * so a passport with no names is a passport with no stickers rather than a
+   * broken screen.
    */
   stamps?: PassportStamp[];
 };
@@ -117,7 +132,9 @@ function CategoryRow({
   onSelectStamp?: (stamp: PassportStamp) => void;
 }) {
 
-  const isEmpty = collected === 0 || stamps.length === 0;
+  // Empty means *no places curated in this category at all* — not "none
+  // collected". A category with places to aim at always shows them (D-058).
+  const isEmpty = stamps.length === 0;
 
   return (
     // iOS grouped-inset list (D-054): the section's name sits **above** the
@@ -147,7 +164,11 @@ function CategoryRow({
             <Pressable
               key={stamp.placeId}
               accessibilityRole="button"
-              accessibilityLabel={`${stamp.name}. Open for directions or to show it on the map.`}
+              accessibilityLabel={
+                stamp.collected
+                  ? `${stamp.name}, collected. Open to show it on the map.`
+                  : `${stamp.name}, not collected yet. Open to show it on the map.`
+              }
               onPress={
                 onSelectStamp === undefined
                   ? undefined
@@ -162,7 +183,7 @@ function CategoryRow({
                 placeId={stamp.placeId}
                 design={designFor(stamp.placeId, stamp.category)}
                 name={stamp.name}
-                collected
+                collected={stamp.collected}
                 size={STAMP_DRAW_SIZE}
               />
             </Pressable>
@@ -205,7 +226,7 @@ export default function PassportView({
           </Text>
           {progress.collected === 0 ? (
             <Text style={styles.heroInvitation}>
-              Go somewhere. They fill in by themselves.
+              These are the places. Go to one and it fills in by itself.
             </Text>
           ) : null}
         </View>

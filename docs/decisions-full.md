@@ -2779,3 +2779,59 @@ maintained by one person is a real cost too, and a recurring one.
   map is proven on a device — it is the single biggest thing in the binary.
 - **T-117b** (packet capture proving zero outbound connections) now has a different, and much more
   interesting, question to answer: *what exactly does the map SDK send, and when?*
+
+---
+
+## D-058 — The passport shows every place. Uncollected ones are shaded, and still open.
+
+**Status:** **Accepted** — the project lead's instruction, 2026-08-14: *"I want all stamps to be
+visible on the stamp menu however stamps which havent been collected appear shaded. I can still
+click on them to see and also click on 'see on the map' to know where the levada is."*
+
+**Decision:** the passport lists **every curated place**, not only the collected ones. An
+uncollected place is drawn in the muted palette, is tappable, opens the same card, and its *Show on
+map* works — which for a levada draws the whole course (D-055).
+
+**⚠ This closes a hole D-052 opened and I flagged but did not fix.** Deleting the map's place
+markers was right for the map, but it left **no way to see somewhere you had not been**: the
+passport showed only earned stamps, so a user on day one had an empty screen and nothing to aim at.
+Per-region progress was supposed to do the "where should I go next" job (D-027) and **T-067 is
+still unstarted**, so nothing did it. The passport does now.
+
+**The interesting part: almost none of this was new code.**
+
+- `stampArt.ts` has drawn a muted version since T-070, with its own palette, dimmer opacities and
+  an accessible label reading *"not collected yet"*.
+- CONTEXT §4.1 already said *the uncollected places are the recommendations* — in as many words.
+- `StampArt` already took a `collected` prop, and `PassportView` passed a hardcoded `true`.
+
+The passport was simply the one screen that never asked for them. The change is that
+`resolveStamps` is driven by the **content pack** rather than by the awards.
+
+**⚠ And it exposed a defect that had been invisible.** The uncollected palette was blue-greys taken
+from the old theme; when D-054 made the passport card neutral `#1C1C1E`, the uncollected sticker's
+paper measured **1.16:1** against the card behind it. The sticker had no visible shape at all — an
+emblem apparently floating on the page. Nothing failed, because the contrast tests measured the
+thirty *collected* colourways against the page and never the uncollected one.
+
+It is neutral now, and **the border carries the shape** (3.36:1) rather than the paper — which is
+how a die-cut sticker reads anyway, and lets the paper stay properly muted. `contrast.test.ts`
+gained the assertion that was missing, and now imports the palette instead of copying its literals,
+which is why it could drift in the first place.
+
+**Alternatives considered:**
+
+- *Float collected stamps to the top.* Rejected: the passport is a **fixed set of pages to fill**
+  (CONTEXT §4.2), and a sticker that moves when you earn it is a page that rearranges itself under
+  the user.
+- *A separate "places to visit" screen.* Rejected: it is a fourth screen for something the passport
+  is already the right shape for, and design brief §3 is a standing argument against another one.
+- *Show uncollected places on the map instead.* That is D-052, which the project lead deleted.
+
+**Consequences:**
+
+- The passport is now the discovery surface as well as the reward surface. **T-067's urgency drops
+  accordingly** — per-region progress is still worth having, but it is no longer the only answer to
+  "where next".
+- The uncollected artwork is now most of the screen for most of a trip, so it is worth looking at
+  properly. It has been seen once, at ten places.

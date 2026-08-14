@@ -8,7 +8,12 @@
       "category": "viewpoint",
       "regionId": "estreito-de-camara-de-lobos",
       "geofences": [
-        { "id": "pico-do-areeiro-main", "lat": 32.7356, "lon": -16.9286, "radiusM": 250 }
+        {
+          "id": "pico-do-areeiro-main",
+          "lat": 32.7356,
+          "lon": -16.9286,
+          "radiusM": 250
+        }
       ]
     },
     {
@@ -17,7 +22,12 @@
       "category": "viewpoint",
       "regionId": "porto-moniz",
       "geofences": [
-        { "id": "fanal-main", "lat": 32.8094, "lon": -17.1407, "radiusM": 300 }
+        {
+          "id": "fanal-main",
+          "lat": 32.8094,
+          "lon": -17.1407,
+          "radiusM": 300
+        }
       ]
     },
     {
@@ -26,8 +36,20 @@
       "category": "levada",
       "regionId": "machico",
       "geofences": [
-        { "id": "levada-do-furado-start", "role": "start", "lat": 32.7345, "lon": -16.8862, "radiusM": 250 },
-        { "id": "levada-do-furado-end", "role": "end", "lat": 32.758, "lon": -16.83, "radiusM": 250 }
+        {
+          "id": "levada-do-furado-start",
+          "role": "start",
+          "lat": 32.7352,
+          "lon": -16.8863,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-furado-end",
+          "role": "end",
+          "lat": 32.7395,
+          "lon": -16.847,
+          "radiusM": 250
+        }
       ]
     },
     {
@@ -36,8 +58,20 @@
       "category": "levada",
       "regionId": "calheta",
       "geofences": [
-        { "id": "levada-das-25-fontes-start", "role": "start", "lat": 32.7622, "lon": -17.1315, "radiusM": 250 },
-        { "id": "levada-das-25-fontes-end", "role": "end", "lat": 32.7656, "lon": -17.1259, "radiusM": 250 }
+        {
+          "id": "levada-das-25-fontes-start",
+          "role": "start",
+          "lat": 32.7612,
+          "lon": -17.1363,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-das-25-fontes-end",
+          "role": "end",
+          "lat": 32.7655,
+          "lon": -17.1255,
+          "radiusM": 250
+        }
       ]
     },
     {
@@ -46,7 +80,12 @@
       "category": "village",
       "regionId": "porto-moniz",
       "geofences": [
-        { "id": "porto-moniz-main", "lat": 32.8669, "lon": -17.1667, "radiusM": 600 }
+        {
+          "id": "porto-moniz-main",
+          "lat": 32.8669,
+          "lon": -17.1667,
+          "radiusM": 600
+        }
       ]
     },
     {
@@ -55,7 +94,12 @@
       "category": "village",
       "regionId": "camara-de-lobos",
       "geofences": [
-        { "id": "camara-de-lobos-main", "lat": 32.6486, "lon": -16.9752, "radiusM": 600 }
+        {
+          "id": "camara-de-lobos-main",
+          "lat": 32.6486,
+          "lon": -16.9752,
+          "radiusM": 600
+        }
       ]
     },
     {
@@ -64,7 +108,12 @@
       "category": "beach",
       "regionId": "sao-vicente",
       "geofences": [
-        { "id": "praia-do-porto-do-seixal-main", "lat": 32.8219, "lon": -17.1031, "radiusM": 250 }
+        {
+          "id": "praia-do-porto-do-seixal-main",
+          "lat": 32.8219,
+          "lon": -17.1031,
+          "radiusM": 250
+        }
       ]
     },
     {
@@ -73,7 +122,12 @@
       "category": "beach",
       "regionId": "calheta",
       "geofences": [
-        { "id": "praia-da-calheta-main", "lat": 32.7204, "lon": -17.1784, "radiusM": 250 }
+        {
+          "id": "praia-da-calheta-main",
+          "lat": 32.7204,
+          "lon": -17.1784,
+          "radiusM": 250
+        }
       ]
     },
     {
@@ -82,7 +136,12 @@
       "category": "landmark",
       "regionId": "funchal",
       "geofences": [
-        { "id": "jardim-tropical-monte-palace-main", "lat": 32.6742, "lon": -16.9029, "radiusM": 200 }
+        {
+          "id": "jardim-tropical-monte-palace-main",
+          "lat": 32.6742,
+          "lon": -16.9029,
+          "radiusM": 200
+        }
       ]
     },
     {
@@ -91,7 +150,12 @@
       "category": "landmark",
       "regionId": "camara-de-lobos",
       "geofences": [
-        { "id": "cabo-girao-main", "lat": 32.6485, "lon": -17.0004, "radiusM": 250 }
+        {
+          "id": "cabo-girao-main",
+          "lat": 32.6485,
+          "lon": -17.0004,
+          "radiusM": 250
+        }
       ]
     }
   ]

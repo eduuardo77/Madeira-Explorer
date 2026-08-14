@@ -43,6 +43,8 @@ export default function PassportScreen({
   /** The tapped stamp's card, or null — which is nearly always. */
   const [card, setCard] = useState<PlaceCard | null>(null);
   const [cardPlace, setCardPlace] = useState<Place | null>(null);
+  /** Whether the tapped place is collected — the map needs it for the marker. */
+  const [cardCollected, setCardCollected] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,11 +61,15 @@ export default function PassportScreen({
         ]);
         const nextAwards =
           trip === null ? [] : await stampAwardDao.getAwards(trip.id);
+        const awardedIds =
+          trip === null
+            ? new Set<string>()
+            : await stampAwardDao.getAwardedPlaceIds(trip.id);
 
         if (!cancelled) {
           setProgress(nextProgress);
           setAwards(nextAwards);
-          setStamps(resolveStamps(nextAwards));
+          setStamps(resolveStamps(awardedIds));
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -102,14 +108,13 @@ export default function PassportScreen({
       const geofence = representativeGeofence(place);
 
       setCardPlace(place);
+      setCardCollected(stamp.collected);
       setCard(
         buildPlaceCard({
           placeId: place.id,
           name: place.name,
           category: place.category,
-          // Everything in the passport is collected by definition — an
-          // uncollected place has no sticker to tap.
-          collected: true,
+          collected: stamp.collected,
           lat: geofence.lat,
           lon: geofence.lon,
           position,
@@ -146,7 +151,7 @@ export default function PassportScreen({
             onShowOnMap={
               cardPlace === null
                 ? undefined
-                : () => onShowOnMap(cardPlace, true)
+                : () => onShowOnMap(cardPlace, cardCollected)
             }
             onClose={closeCard}
           />
@@ -171,32 +176,26 @@ export default function PassportScreen({
 }
 
 /**
- * Join awards to the places they were earned at, so the artwork has a name and
- * a category to draw from (T-070).
+ * Every curated place, marked with whether it has been collected (D-058).
  *
- * An award whose place has left the pack is skipped rather than drawn nameless
- * — it can only happen when curation changes under an older trip, and a blank
- * sticker is worse than one fewer. The row *count* still comes from
- * `progress`, which is derived from the same pack, so the two agree.
+ * ⚠ **Driven by the content pack, not by the awards.** It used to be the other
+ * way round — awards joined to places — which meant the passport could only
+ * ever show where you had already been. An award whose place has left the pack
+ * simply does not appear, which is right: curation changed under an older
+ * trip, and the row counts come from `progress`, derived from the same pack,
+ * so the two agree.
+ *
+ * Order is the pack's own. Collected ones are **not** floated to the top: the
+ * passport is a fixed set of pages to fill (CONTEXT §4.2), and a sticker that
+ * moves once you earn it is a page that rearranges itself under you.
  */
-function resolveStamps(awards: StampAward[]): PassportStamp[] {
-  const places = new Map(
-    getContentPack().places.map((place) => [place.id, place])
-  );
-
-  const stamps: PassportStamp[] = [];
-  for (const award of awards) {
-    const place = places.get(award.place_id);
-    if (place === undefined) {
-      continue;
-    }
-    stamps.push({
-      placeId: place.id,
-      name: place.name,
-      category: place.category,
-    });
-  }
-  return stamps;
+function resolveStamps(awarded: Set<string>): PassportStamp[] {
+  return getContentPack().places.map((place) => ({
+    placeId: place.id,
+    name: place.name,
+    category: place.category,
+    collected: awarded.has(place.id),
+  }));
 }
 
 const styles = StyleSheet.create({

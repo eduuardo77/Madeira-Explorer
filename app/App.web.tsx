@@ -96,9 +96,13 @@ function makeAwards(count: number): StampAward[] {
 }
 
 /**
- * Collected places for the artwork (T-070). Synthetic names, in the same
- * spread of lengths a real pack will have — including ones long enough to be
- * truncated on the band, which is where the layout breaks if it is going to.
+ * Every place for the artwork (T-070, D-058) — collected *and* not.
+ *
+ * Synthetic names, in the same spread of lengths a real pack will have,
+ * including ones long enough to be truncated on the band, which is where the
+ * layout breaks if it is going to. The uncollected ones matter as much as the
+ * collected: they are the majority of the screen for most of a trip, and they
+ * are drawn in a different palette.
  */
 function makeStamps(count: number, byCategory: TripProgress['byCategory']): PassportStamp[] {
   const names = [
@@ -109,11 +113,14 @@ function makeStamps(count: number, byCategory: TripProgress['byCategory']): Pass
   const stamps: PassportStamp[] = [];
   let index = 0;
   for (const row of byCategory) {
-    for (let i = 0; i < row.collected && index < count; i += 1) {
+    for (let i = 0; i < row.total; i += 1) {
       stamps.push({
         placeId: `place-${index}`,
         name: names[index % names.length],
         category: row.category,
+        // The first `collected` of each category are earned; the rest are the
+        // recommendations (CONTEXT §4.1).
+        collected: i < row.collected && index < count,
       });
       index += 1;
     }

@@ -6,3 +6,6 @@ warning: Bundler cache is empty, rebuilding (this may take a minute)
 Waiting on http://localhost:8081
 
 Logs for your project will appear below.
+Android Bundled 9585ms index.ts (1017 modules)
+Android Bundled 441ms src\onboarding\permissionPolicy.ts (1 module)
+Android Bundled 278ms src\storage\dao\tripDao.ts (710 modules)

@@ -16,8 +16,22 @@
 >
 > ```bash
 > # the debug fingerprint, for the key restriction
-> keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey >   -storepass android -keypass android | grep SHA1
+> # ⚠ NOT ~/.android/debug.keystore — Expo's prebuild writes its own into the
+> # generated project, and that is the one this app is actually signed with.
+> tools/jdk/jdk-21.0.12+8/bin/keytool -list -v >   -keystore app/android/app/debug.keystore -alias androiddebugkey >   -storepass android -keypass android | grep SHA1
 > ```
+>
+> ⚠ **The debug key is not yours and not secret.** It comes from the Expo
+> template, so every Expo project shares it. That is fine for a debug build and
+> is exactly why it must never be the only fingerprint on a released key.
+>
+> ⚠ **THE RELEASE FINGERPRINT IS A DIFFERENT ONE, AND IT IS NOT YOUR UPLOAD
+> KEY.** Google Play re-signs every new app (Play App Signing), so the
+> certificate the store serves is Google's, not the one you uploaded with. The
+> SHA-1 to restrict against is in **Play Console → Test and release → Setup →
+> App integrity → App signing key certificate**. Restricting to the upload key
+> instead is the classic way to ship an app whose map is blank for everyone but
+> the developer. One key can carry several package + SHA-1 pairs, so add both.
 >
 > `app/.env` is gitignored. `app.config.js` injects it; `app.json` holds everything else.
 

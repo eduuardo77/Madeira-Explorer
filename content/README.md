@@ -15,11 +15,21 @@ not a rewrite.
 
 ---
 
-> ### ⚠ The ten places in `pois.json` are a STARTER SET, not curation — 2026-08-14
-> The project lead asked for ten places so the app could be seen working. They are real, they
-> validate, and two of them have levada courses — but **they are not T-066**. They were picked
-> mechanically from `pois.candidates.json` for coverage (two per category, spread across the
-> island), not for whether they deserve a stamp. That judgement is still entirely to be made.
+> ### ⚠ The eighty places in `pois.json` are a STARTER SET, not curation — 2026-08-14
+> The project lead asked for a full set so the app could be used. All 80 are real, they validate,
+> and all 15 levadas have courses — but **they are not T-066**. Selection was by *prominence and
+> coverage*, not by merit: 20 viewpoints, 15 levadas, 16 villages, 11 beaches, 18 landmarks, spread
+> across the island. Nobody has asked of any of them "is this worth a stamp", which is the whole job.
+>
+> **Where each came from:** the non-levadas are entries of `pois.candidates.json`, chosen by name
+> and copied wholesale — coordinates, region and radius are the tile pack's. The levadas were
+> chosen from an OSM survey of all 104 walkable named levadas, taking the longest, and their
+> geofences are the **free ends of the mapped way** (see `tools/build-levadas.mjs`).
+>
+> ⚠ **The viewpoints are the weakest part and it is OSM's fault, not the selection's.** Madeira's
+> miradouros are mostly named in OSM by a single distinguishing word — `Gato`, `Adaga`, `Bodes`,
+> `Alto` — so a stamp reads "GATO" and means nothing. Rewriting those names to what a visitor would
+> recognise is the highest-value hour anybody could spend in this file.
 >
 > **Delete them freely.** `git rm`-ing the lot and starting from the candidate list loses nothing.
 > What they are good for: seeing the passport at real density, checking the artwork against real

@@ -608,9 +608,18 @@ export const MIN_EMBLEM_ROOM = 30;
  *
  * Two lines rather than an ellipsis wherever possible, because the project
  * lead's requirement is that **the place name fits** — and "MIRADOURO GRA…"
- * technically fits while telling the reader nothing. Only a name too long for
- * two lines is truncated, and by then the name beside the sticker in the
- * passport list is carrying it anyway.
+ * technically fits while telling the reader nothing.
+ *
+ * ⚠ **When it does not fit, the cut is now marked.** This used to drop the
+ * leftover words silently, on the reasoning that "the name beside the sticker
+ * in the passport list is carrying it anyway". D-058 made that false: every
+ * place is a sticker now and there is no list beside it, so the band is the
+ * only place the name appears at all.
+ *
+ * What that cost, seen at eighty places: *Alto da Ponta do Pargo* rendered as
+ * **ALTO DA PONTA DO**. Not an abbreviation a reader can complete — a
+ * different, wrong name, and one that reads as finished. An ellipsis is worse
+ * typography and better information.
  */
 export function wrapLabel(name: string, maxChars = MAX_LINE_CHARS): string[] {
   const upper = name.trim().toUpperCase().replace(/\s+/g, ' ');
@@ -621,30 +630,49 @@ export function wrapLabel(name: string, maxChars = MAX_LINE_CHARS): string[] {
   const words = upper.split(' ');
   const lines: string[] = [];
   let current = '';
+  let used = 0;
 
   for (const word of words) {
     const candidate = current === '' ? word : `${current} ${word}`;
     if (candidate.length <= maxChars) {
       current = candidate;
+      used += 1;
       continue;
     }
     if (current !== '') {
       lines.push(current);
     }
     current = word;
+    used += 1;
     if (lines.length === MAX_LINES) {
       break;
     }
   }
   if (current !== '' && lines.length < MAX_LINES) {
     lines.push(current);
+    used = words.length;
   }
 
-  // A single word longer than the line, or more words than two lines hold.
   const capped = lines.slice(0, MAX_LINES);
-  return capped.map((line) =>
+
+  // Did anything fall off the end — whole words, or part of an over-long one?
+  const kept = capped.join(' ');
+  const truncated = kept !== upper;
+
+  const fitted = capped.map((line) =>
     line.length > maxChars + 3 ? `${line.slice(0, maxChars + 2)}…` : line
   );
+
+  if (!truncated || fitted[fitted.length - 1].endsWith('…')) {
+    return fitted;
+  }
+
+  // Mark the cut on the last line, trimming a character if the ellipsis would
+  // push it past the width the band was measured for.
+  const last = fitted[fitted.length - 1];
+  const room = last.length < maxChars ? last : last.slice(0, maxChars - 1);
+  fitted[fitted.length - 1] = `${room}…`;
+  return fitted;
 }
 
 /**

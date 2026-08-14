@@ -115,45 +115,80 @@ function escapeRegex(value) {
 }
 
 /**
- * Every way carrying this name, with its geometry.
+ * Every walkable levada on the island, and every channel, in two requests.
  *
- * ⚠ **Exact match first, and that is not fussiness.** A loose regex was tried
- * and the emulator showed what it costs: `~"Levada do Furado"` also matched a
- * differently-named levada 30 km west, so the course spanned the island and
- * the camera — which frames the course — zoomed out to the whole of Madeira to
- * fit it. A wrong highlight is visible; a wrong *bounding box* just looks like
- * the feature does not work.
+ * ⚠ **This used to be one request per levada, and it did not survive contact
+ * with fifteen of them.** Overpass is a shared free service that is busy more
+ * often than not; at two queries each plus backoff, a fifteen-levada pack meant
+ * up to thirty requests and the run simply never finished. Fetching the whole
+ * island once and matching locally is one request for any number of levadas,
+ * and it is the polite version too.
  *
- * The prefix fallback exists because OSM often appends a route code —
- * `Levada do Furado (PR10)` — and that is a real levada with the right name,
- * not a different one.
- *
- * `out geom` rather than resolving node ids ourselves: one request instead of
- * two, and the response is already coordinates.
+ * The name matching that used to be Overpass's job now happens here, and keeps
+ * the same rule: **exact first, prefix as a fallback.** A loose match once
+ * pulled in a levada 30 km away and the camera — which frames the course —
+ * zoomed out to the whole island to fit it.
  */
-async function waysNamed(name) {
-  const exact = `[out:json][timeout:120];way["name"="${name.replace(/"/g, '\\"')}"](${BBOX});out geom;`;
-  const found = (await overpass(exact)).elements ?? [];
-  if (found.length > 0) {
-    return { ways: found, match: 'exact' };
+async function fetchAllLevadas() {
+  const geometry = async (selector) => {
+    const result = await overpass(
+      `[out:json][timeout:180];way[${selector}]["name"~"^Levada",i](${BBOX});out geom;`
+    );
+    const byName = new Map();
+    for (const way of result.elements ?? []) {
+      const name = way.tags?.name;
+      if (typeof name !== 'string' || !Array.isArray(way.geometry)) {
+        continue;
+      }
+      const list = byName.get(name) ?? [];
+      list.push(way);
+      byName.set(name, list);
+    }
+    return byName;
+  };
+
+  process.stdout.write('fetching every levada on the island … ');
+  const walkable = await geometry('"highway"');
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const channels = await geometry('"waterway"');
+  console.log(`${walkable.size} walkable, ${channels.size} channels`);
+
+  return { walkable, channels };
+}
+
+/**
+ * The ways for one curated name: exact match first, then prefix.
+ *
+ * The prefix fallback is for OSM's route codes — `Levada do Furado (PR10)` is
+ * the same levada — and is anchored at the start so `Levada Nova do Furado` is
+ * not.
+ */
+function waysFor(name, index) {
+  const exact = index.get(name);
+  if (exact !== undefined) {
+    return { ways: exact, match: 'exact' };
   }
 
-  // Anchored at the start, so `Levada do Furado (PR10)` matches and
-  // `Levada Nova do Furado` does not.
-  const prefix = `[out:json][timeout:120];way["name"~"^${escapeRegex(name)}",i](${BBOX});out geom;`;
-  return { ways: (await overpass(prefix)).elements ?? [], match: 'prefix' };
+  const lower = name.toLowerCase();
+  const ways = [];
+  for (const [candidate, list] of index) {
+    if (candidate.toLowerCase().startsWith(lower)) {
+      ways.push(...list);
+    }
+  }
+  return { ways, match: 'prefix' };
 }
 
 /**
  * The two ends of the walk, found from the geometry rather than guessed.
  *
- * ⚠ **This is what a levada's `start` and `end` geofences should be, and the
- * difference matters more than it looks.** A levada earns its stamp only when
- * both ends are crossed (D-009) — that is what stops somebody who parked at the
- * trailhead and turned around from collecting a 10 km walk. Endpoints taken
- * from an arbitrary OSM way, which is what the first ten places shipped with,
- * are usually somewhere in the middle of the route: the stamp then either
- * cannot be earned or can be earned without walking it.
+ * ⚠ **This is what a levada's `start` and `end` geofences should be.** A levada
+ * earns its stamp only when both ends are crossed (D-009) — that is what stops
+ * somebody who parked at the trailhead and turned around from collecting a
+ * 10 km walk. Endpoints taken from an arbitrary OSM way, which is what the
+ * first ten places shipped with, are usually somewhere in the middle of the
+ * route: the stamp then either cannot be earned or can be earned without
+ * walking it.
  *
  * The method is mechanical. Every way contributes two endpoints; an endpoint
  * shared by two ways is a **join**, and one that appears exactly once is a
@@ -186,8 +221,6 @@ function freeEnds(lines) {
     return null;
   }
 
-  // Furthest-apart pair. The lists here are tens of points, so the obvious
-  // quadratic scan is the right one.
   let best = null;
   for (let i = 0; i < ends.length; i += 1) {
     for (let j = i + 1; j < ends.length; j += 1) {
@@ -261,22 +294,18 @@ function simplify(points, tolerance) {
   return points.filter((_, i) => keep[i]);
 }
 
-function isWalkable(way) {
-  return typeof way.tags?.highway === 'string';
-}
-
-function isChannel(way) {
-  return typeof way.tags?.waterway === 'string';
-}
-
-async function courseFor(place) {
-  const { ways, match } = await waysNamed(place.name);
-
+function courseFor(place, index) {
   // D-029: the user walks the path, not the channel. Fall back to the channel
   // only where no walkable way carries the name at all.
-  const walkable = ways.filter(isWalkable);
-  const chosen = walkable.length > 0 ? walkable : ways.filter(isChannel);
-  const source = walkable.length > 0 ? 'highway' : 'waterway';
+  const onFoot = waysFor(place.name, index.walkable);
+  const byWater = onFoot.ways.length > 0
+    ? { ways: [], match: onFoot.match }
+    : waysFor(place.name, index.channels);
+
+  const chosen = onFoot.ways.length > 0 ? onFoot.ways : byWater.ways;
+  const source = onFoot.ways.length > 0 ? 'highway' : 'waterway';
+  const match = onFoot.ways.length > 0 ? onFoot.match : byWater.match;
+  const ways = chosen;
 
   const lines = [];
   let rawPoints = 0;
@@ -306,9 +335,8 @@ async function courseFor(place) {
 /**
  * How far apart the ends of a course are, in kilometres.
  *
- * Printed for every levada because it is the cheap way to catch a bad name
- * match: the longest levada on the island is around 25 km, so a course
- * "60 km across" is two different levadas that happen to share a word.
+ * Printed for every levada, and compared against the path's own length by
+ * `looksLikeTwoLevadas` below.
  */
 function span(lines) {
   let west = Infinity;
@@ -330,6 +358,44 @@ function span(lines) {
   return Math.hypot(dx, dy).toFixed(1);
 }
 
+/**
+ * Total walked length of a course, in kilometres.
+ */
+function pathLength(lines) {
+  let km = 0;
+  for (const line of lines) {
+    for (let i = 1; i < line.length; i += 1) {
+      const [ax, ay] = line[i - 1];
+      const [bx, by] = line[i];
+      km += Math.hypot((bx - ax) * 93, (by - ay) * 111);
+    }
+  }
+  return km;
+}
+
+/**
+ * True when the name has matched more than one levada.
+ *
+ * ⚠ **An invariant, not a threshold, which is why it is worth having.** A
+ * connected path can never be further across than it is long — walk every
+ * metre of it and you cannot end up further from the start than the distance
+ * you walked. So a course whose bounding box is *wider* than its own length is
+ * two or more separate things that happen to share a name.
+ *
+ * Found by exactly this: `Levada do Moinho` is 11.9 km of ways and came out
+ * **21.4 km across**. There are two of them on the island — "mill levada" is
+ * not a distinctive name — and the geofences would have been one levada's
+ * start and another's end, 20 km apart. A stamp nobody could ever earn.
+ *
+ * The margin is generous (1.05) because simplification shortens the path very
+ * slightly, and because a genuinely straight levada sits near the bound.
+ */
+function looksLikeTwoLevadas(lines) {
+  const across = Number(span(lines));
+  const along = pathLength(lines);
+  return along > 0 && across > along * 1.05;
+}
+
 async function main() {
   const packPath = path.join(root, 'content', 'pois.json');
   const pack = JSON.parse(readFileSync(packPath, 'utf8'));
@@ -341,12 +407,15 @@ async function main() {
   }
 
   const features = [];
+  const suspicious = [];
   let simplifiedPoints = 0;
   let rawPoints = 0;
 
+  const index = levadas.length > 0 ? await fetchAllLevadas() : null;
+
   for (const place of levadas) {
     process.stdout.write(`${place.name} … `);
-    const course = await courseFor(place);
+    const course = courseFor(place, index);
 
     if (course.lines.length === 0) {
       // Loud, because a levada with no course is a "Show on map" that does
@@ -369,6 +438,15 @@ async function main() {
         `${span(course.lines)} km across`
     );
 
+    if (looksLikeTwoLevadas(course.lines)) {
+      suspicious.push(place.name);
+      console.log(
+        `    ⚠ WIDER THAN IT IS LONG — this name has matched more than one ` +
+          `levada. Its start and end belong to different walks, so the stamp ` +
+          `cannot be earned. Rename it or drop it.`
+      );
+    }
+
     // Printed rather than written into pois.json: the geofences are content,
     // and content is the project lead's (T-066). This is the suggestion.
     if (course.ends !== null) {
@@ -389,9 +467,6 @@ async function main() {
       properties: { placeId: place.id, source: course.source },
       geometry: { type: 'MultiLineString', coordinates: course.lines },
     });
-
-    // Overpass is a shared free service. Space the requests out.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
   }
 
   const out = path.join(root, 'content', 'levadas.json');
@@ -407,6 +482,13 @@ async function main() {
   if (features.length < levadas.length) {
     console.log();
     console.log('⚠ Some levadas have no course. Those cards will show a marker only.');
+  }
+  if (suspicious.length > 0) {
+    console.log();
+    console.log(
+      `⚠ ${suspicious.length} course(s) span further than they are long, which ` +
+        `is impossible for one path: ${suspicious.join(', ')}`
+    );
   }
 }
 

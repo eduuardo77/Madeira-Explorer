@@ -25,9 +25,13 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { CATEGORIES, type Category } from '../content/contentPack.ts';
 import {
+
   CANVAS,
   EDGE_STYLES,
   MAX_LINE_CHARS,
@@ -579,3 +583,60 @@ function bounds(points: Point[]) {
     maxY: Math.max(...ys),
   };
 }
+
+// ---------------------------------------------------------------------------
+// A cut name says so (D-058)
+// ---------------------------------------------------------------------------
+
+test('a name too long for the band is marked as cut, not silently shortened', () => {
+  // ⚠ **The defect this exists to prevent, seen at eighty places.**
+  // `Alto da Ponta do Pargo` rendered as "ALTO DA PONTA DO" — not an
+  // abbreviation the reader can complete, but a different name that reads as
+  // finished. The old behaviour was justified by the passport showing the full
+  // name beside the sticker; D-058 removed that, so the band is the only place
+  // the name appears.
+  const lines = wrapLabel('Alto da Ponta do Pargo');
+  assert.ok(
+    lines.join(' ').endsWith('…'),
+    `expected a cut to be marked, got ${JSON.stringify(lines)}`
+  );
+  assert.ok(lines.length <= MAX_LINES);
+});
+
+test('a name that fits is left alone — no ellipsis for its own sake', () => {
+  assert.deepEqual(wrapLabel('Pico do Areeiro'), ['PICO DO', 'AREEIRO']);
+  assert.deepEqual(wrapLabel('Fanal'), ['FANAL']);
+  // Two full lines that consume the whole name must not gain an ellipsis.
+  for (const name of ['Câmara de Lobos', "Praia da Baía D'Abra", 'Praia Formosa']) {
+    assert.ok(
+      !wrapLabel(name).join(' ').includes('…'),
+      `${name} was marked as cut when it fits`
+    );
+  }
+});
+
+test('every curated place name still produces a drawable band', () => {
+  // Read rather than imported: JSON import attributes are not available to
+  // the stripper Node's test runner uses, and `lightStyle.test.ts` reads its
+  // fixtures the same way.
+  const realPack = JSON.parse(
+    readFileSync(
+      path.resolve(
+        path.dirname(fileURLToPath(import.meta.url)),
+        '..', '..', '..', 'content', 'pois.json'
+      ),
+      'utf8'
+    )
+  ) as { places: { name: string }[] };
+
+  // The real pack, not a fixture: 80 names, several of them very long
+  // Portuguese ones. Each must give at least one line, never more than two,
+  // and never an empty line.
+  for (const place of realPack.places) {
+    const lines = wrapLabel(place.name);
+    assert.ok(lines.length >= 1 && lines.length <= MAX_LINES, place.name);
+    for (const line of lines) {
+      assert.ok(line.trim().length > 0, `${place.name} produced a blank line`);
+    }
+  }
+});

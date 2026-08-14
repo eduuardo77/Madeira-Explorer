@@ -35,6 +35,61 @@
 >
 > `app/.env` is gitignored. `app.config.js` injects it; `app.json` holds everything else.
 
+---
+
+## Getting the Google Maps key without spending money
+
+**Checked against Google's own pricing and cost-management pages on 2026-08-14.** Pricing changes;
+re-check before trusting this.
+
+### The one fact that makes this safe
+
+**Map display in a native mobile app is SKU `6DE1-4D9C-5B67` — free cap *Unlimited*, no charge at
+any tier.** It is not "free up to N". The 10,000-then-$7/1,000 figure everybody quotes is the
+**web** Dynamic Maps SKU (`FAF4-3B2D-51B2`) and does not apply to an Android app.
+
+What *does* cost money is the rest of the platform: Places, Directions, Geocoding, Static Maps.
+**This app calls none of them.** There is no code path that can — the Directions handoff was
+deleted in D-055, so the only request the app makes is "draw the map".
+
+### The structural protection: enable one API and only one
+
+An API that was never enabled cannot bill you, whatever happens to the key. So:
+
+1. **console.cloud.google.com** → new project (`madeira-explorer`).
+2. **Billing** → link a billing account. ⚠ A card is required even for a free SKU. Steps 3–6 are
+   what make that safe.
+3. **APIs & Services → Library** → **Maps SDK for Android** → *Enable*. **Nothing else.** Not
+   Places, not Directions, not Maps SDK for iOS "for later" — add that the day there is an iOS
+   build.
+4. **APIs & Services → Credentials → Create credentials → API key.**
+5. Edit the key → **Application restrictions → Android apps**, and add the package
+   `com.madeiraexplorer.app` with the SHA-1 fingerprint (see above for which one — debug and
+   release are different, and the release one is Google's, not your upload key).
+6. Same page → **API restrictions → Restrict key** → **Maps SDK for Android** only. Save.
+
+A leaked key can then only draw a map, only from an app signed by you, and that draw is free.
+
+### ⚠ A budget does NOT cap spending
+
+Google's own words: *"Setting a budget does not automatically cap Google Cloud or Google Maps
+Platform usage or spending."* It emails you; it does not stop anything.
+
+- **Budget alert as a tripwire.** Billing → Budgets & alerts → **€1**, alerting at 50/90/100%. With
+  nothing billable enabled the correct lifetime spend is €0.00, so *any* alert means something is
+  enabled that should not be.
+- **Quota limits are the actual hard stop** (APIs & Services → the API → Quotas): requests simply
+  stop being served past the limit. Not needed while nothing billable is enabled — but it is the
+  lever if a paid API is ever added, and setting one too low is its own outage.
+- **Verify after a few days:** Billing → Reports should read €0.00.
+
+### The realistic failure mode
+
+Not this app. It is enabling an extra API later to try something, forgetting, and leaving it
+reachable from a key that is already in a shipped binary. The €1 alert is what catches that.
+
+
+
 
 **This is the only real blocker in the project.** Nothing written so far has ever run, and
 nothing can until this exists — background location and MapLibre both need a native build, so

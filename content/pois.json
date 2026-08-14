@@ -163,8 +163,6 @@
       "name": "Achada do Teixeira",
       "category": "viewpoint",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "achada-do-teixeira",
@@ -175,28 +173,10 @@
       ]
     },
     {
-      "id": "alto-da-ponta-do-pargo",
-      "name": "Alto da Ponta do Pargo",
-      "category": "viewpoint",
-      "regionId": "porto-moniz",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "alto-da-ponta-do-pargo",
-          "lat": 32.80118,
-          "lon": -17.21171,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
       "id": "bica-da-cana",
-      "name": "Bica da cana",
+      "name": "Bica da Cana",
       "category": "viewpoint",
       "regionId": "sao-vicente",
-      "_osmKind": "peak",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "bica-da-cana",
@@ -211,8 +191,6 @@
       "name": "Chão dos Terreiros",
       "category": "viewpoint",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "chao-dos-terreiros",
@@ -227,8 +205,6 @@
       "name": "Encumeada Baixa",
       "category": "viewpoint",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "encumeada-baixa",
@@ -239,220 +215,10 @@
       ]
     },
     {
-      "id": "curral-martinho",
-      "name": "Curral Martinho",
-      "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "curral-martinho",
-          "lat": 32.7295,
-          "lon": -16.93601,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "ruivo",
-      "name": "Ruivo",
-      "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 12,
-      "geofences": [
-        {
-          "id": "ruivo",
-          "lat": 32.75888,
-          "lon": -16.94276,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "cabeco-da-portela",
-      "name": "Cabeço da Portela",
-      "category": "viewpoint",
-      "regionId": "machico",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "cabeco-da-portela",
-          "lat": 32.73305,
-          "lon": -16.75408,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "espigao",
-      "name": "Espigão",
-      "category": "viewpoint",
-      "regionId": "sao-vicente",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "espigao",
-          "lat": 32.7935,
-          "lon": -17.05959,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "cabeco-das-eiras",
-      "name": "Cabeço das Eiras",
-      "category": "viewpoint",
-      "regionId": "canico",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "cabeco-das-eiras",
-          "lat": 32.65621,
-          "lon": -16.85233,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "achada-grande",
-      "name": "Achada Grande",
-      "category": "viewpoint",
-      "regionId": "calheta",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "achada-grande",
-          "lat": 32.78222,
-          "lon": -17.18832,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "lapa-da-cadela",
-      "name": "Lapa da Cadela",
-      "category": "viewpoint",
-      "regionId": "sao-vicente",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "lapa-da-cadela",
-          "lat": 32.75943,
-          "lon": -16.95199,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "fonte-do-bispo",
-      "name": "Fonte do Bispo",
-      "category": "viewpoint",
-      "regionId": "calheta",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "fonte-do-bispo",
-          "lat": 32.7922,
-          "lon": -17.18151,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "chiqueiros-da-queimada",
-      "name": "Chiqueiros da Queimada",
-      "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "chiqueiros-da-queimada",
-          "lat": 32.76106,
-          "lon": -16.90648,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "cabeco-da-vigia",
-      "name": "Cabeço da Vigia",
-      "category": "viewpoint",
-      "regionId": "sao-vicente",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "cabeco-da-vigia",
-          "lat": 32.82691,
-          "lon": -16.89563,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "arrebentao",
-      "name": "Arrebentão",
-      "category": "viewpoint",
-      "regionId": "funchal",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "arrebentao",
-          "lat": 32.71142,
-          "lon": -16.91342,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "escalvado",
-      "name": "Escalvado",
-      "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "escalvado",
-          "lat": 32.72445,
-          "lon": -16.93269,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
-      "id": "assobiadouros",
-      "name": "Assobiadouros",
-      "category": "viewpoint",
-      "regionId": "sao-vicente",
-      "_osmKind": "peak",
-      "_prominence": 14,
-      "geofences": [
-        {
-          "id": "assobiadouros",
-          "lat": 32.76968,
-          "lon": -17.10693,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
       "id": "fortaleza-do-pico",
       "name": "Fortaleza do Pico",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "fort",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "fortaleza-do-pico",
@@ -467,8 +233,6 @@
       "name": "Forte de São Tiago",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "fort",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "forte-de-sao-tiago",
@@ -483,8 +247,6 @@
       "name": "Forte de São João Baptista",
       "category": "landmark",
       "regionId": "porto-moniz",
-      "_osmKind": "fort",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "forte-de-sao-joao-baptista",
@@ -499,8 +261,6 @@
       "name": "Teatro Municipal Baltazar Dias",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "attraction",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "teatro-municipal-baltazar-dias",
@@ -515,8 +275,6 @@
       "name": "Quinta Magnólia",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "park",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "quinta-magnolia",
@@ -531,8 +289,6 @@
       "name": "Parque Ecológico do Funchal",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "nature_reserve",
-      "_prominence": 11,
       "geofences": [
         {
           "id": "parque-ecologico-do-funchal",
@@ -547,8 +303,6 @@
       "name": "Monumento Natural do Cabo Girão",
       "category": "landmark",
       "regionId": "camara-de-lobos",
-      "_osmKind": "nature_reserve",
-      "_prominence": 13,
       "geofences": [
         {
           "id": "monumento-natural-do-cabo-girao",
@@ -563,8 +317,6 @@
       "name": "Reserva Natural do Sítio da Rocha do Navio",
       "category": "landmark",
       "regionId": "machico",
-      "_osmKind": "nature_reserve",
-      "_prominence": 12,
       "geofences": [
         {
           "id": "reserva-natural-do-sitio-da-rocha-do-navio",
@@ -579,8 +331,6 @@
       "name": "Convento de Nossa Senhora da Piedade da Caldeira",
       "category": "landmark",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "place_of_worship",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "convento-de-nossa-senhora-da-piedade-da-caldeira",
@@ -595,8 +345,6 @@
       "name": "Centro de Ciência Viva",
       "category": "landmark",
       "regionId": "porto-moniz",
-      "_osmKind": "museum",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "centro-de-ciencia-viva",
@@ -611,8 +359,6 @@
       "name": "Parque Temático da Madeira",
       "category": "landmark",
       "regionId": "machico",
-      "_osmKind": "park",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "parque-tematico-da-madeira",
@@ -627,8 +373,6 @@
       "name": "Quinta Jardins do Imperador",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "park",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "quinta-jardins-do-imperador",
@@ -643,8 +387,6 @@
       "name": "Igreja da Encarnação",
       "category": "landmark",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "place_of_worship",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "igreja-da-encarnacao",
@@ -659,8 +401,6 @@
       "name": "Hospício da Princesa Dona Maria Amélia",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "place_of_worship",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "hospicio-da-princesa-dona-maria-amelia",
@@ -675,8 +415,6 @@
       "name": "Quinta da Boa Vista",
       "category": "landmark",
       "regionId": "funchal",
-      "_osmKind": "attraction",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "quinta-da-boa-vista",
@@ -691,8 +429,6 @@
       "name": "Parque Urbano de São Vicente",
       "category": "landmark",
       "regionId": "sao-vicente",
-      "_osmKind": "park",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "parque-urbano-de-sao-vicente",
@@ -707,8 +443,6 @@
       "name": "Camacha",
       "category": "village",
       "regionId": "canico",
-      "_osmKind": "locality",
-      "_prominence": -5,
       "geofences": [
         {
           "id": "camacha",
@@ -723,8 +457,6 @@
       "name": "Caniçal",
       "category": "village",
       "regionId": "machico",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "canical",
@@ -739,8 +471,6 @@
       "name": "Caniço",
       "category": "village",
       "regionId": "canico",
-      "_osmKind": "locality",
-      "_prominence": -7,
       "geofences": [
         {
           "id": "canico",
@@ -755,8 +485,6 @@
       "name": "Santa Cruz",
       "category": "village",
       "regionId": "machico",
-      "_osmKind": "locality",
-      "_prominence": -5,
       "geofences": [
         {
           "id": "santa-cruz",
@@ -771,8 +499,6 @@
       "name": "São Vicente",
       "category": "village",
       "regionId": "sao-vicente",
-      "_osmKind": "locality",
-      "_prominence": -6,
       "geofences": [
         {
           "id": "sao-vicente",
@@ -787,8 +513,6 @@
       "name": "Ribeira Brava",
       "category": "village",
       "regionId": "ribeira-brava",
-      "_osmKind": "locality",
-      "_prominence": -6,
       "geofences": [
         {
           "id": "ribeira-brava",
@@ -803,8 +527,6 @@
       "name": "Ponta do Sol",
       "category": "village",
       "regionId": "ponta-do-sol",
-      "_osmKind": "locality",
-      "_prominence": -6,
       "geofences": [
         {
           "id": "ponta-do-sol",
@@ -819,8 +541,6 @@
       "name": "Calheta",
       "category": "village",
       "regionId": "calheta",
-      "_osmKind": "locality",
-      "_prominence": -6,
       "geofences": [
         {
           "id": "calheta",
@@ -835,8 +555,6 @@
       "name": "Campanário",
       "category": "village",
       "regionId": "ribeira-brava",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "campanario",
@@ -851,8 +569,6 @@
       "name": "Canhas",
       "category": "village",
       "regionId": "ponta-do-sol",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "canhas",
@@ -867,8 +583,6 @@
       "name": "Jardim da Serra",
       "category": "village",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "jardim-da-serra",
@@ -883,8 +597,6 @@
       "name": "Estreito de Câmara de Lobos",
       "category": "village",
       "regionId": "estreito-de-camara-de-lobos",
-      "_osmKind": "locality",
-      "_prominence": -6,
       "geofences": [
         {
           "id": "estreito-de-camara-de-lobos",
@@ -899,8 +611,6 @@
       "name": "Achada do Marques",
       "category": "village",
       "regionId": "sao-vicente",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "achada-do-marques",
@@ -915,8 +625,6 @@
       "name": "Chão da Ribeira",
       "category": "village",
       "regionId": "sao-vicente",
-      "_osmKind": "locality",
-      "_prominence": -4,
       "geofences": [
         {
           "id": "chao-da-ribeira",
@@ -931,8 +639,6 @@
       "name": "Praia Formosa",
       "category": "beach",
       "regionId": "camara-de-lobos",
-      "_osmKind": "beach",
-      "_prominence": 13,
       "geofences": [
         {
           "id": "praia-formosa",
@@ -947,8 +653,6 @@
       "name": "Praia dos Reis Magos",
       "category": "beach",
       "regionId": "canico",
-      "_osmKind": "beach",
-      "_prominence": 13,
       "geofences": [
         {
           "id": "praia-dos-reis-magos",
@@ -963,8 +667,6 @@
       "name": "Praia da Prainha",
       "category": "beach",
       "regionId": "machico",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "praia-da-prainha",
@@ -979,8 +681,6 @@
       "name": "Praia de Machico",
       "category": "beach",
       "regionId": "machico",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "praia-de-machico",
@@ -995,8 +695,6 @@
       "name": "Praia da Ponta do Sol",
       "category": "beach",
       "regionId": "ponta-do-sol",
-      "_osmKind": "beach",
-      "_prominence": 14,
       "geofences": [
         {
           "id": "praia-da-ponta-do-sol",
@@ -1011,8 +709,6 @@
       "name": "Praia da Ribeira Brava",
       "category": "beach",
       "regionId": "ribeira-brava",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "praia-da-ribeira-brava",
@@ -1027,8 +723,6 @@
       "name": "Cais do Sardinha",
       "category": "beach",
       "regionId": "machico",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "cais-do-sardinha",
@@ -1043,8 +737,6 @@
       "name": "Praia da Baía D'Abra",
       "category": "beach",
       "regionId": "machico",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "praia-da-baia-d-abra",
@@ -1059,8 +751,6 @@
       "name": "Praia das Lajes",
       "category": "beach",
       "regionId": "porto-moniz",
-      "_osmKind": "beach",
-      "_prominence": 15,
       "geofences": [
         {
           "id": "praia-das-lajes",
@@ -1352,6 +1042,202 @@
           "role": "end",
           "lat": 32.7458359,
           "lon": -17.1472296,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-dos-barcelos",
+      "name": "Pico dos Barcelos",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-dos-barcelos-main",
+          "lat": 32.6587,
+          "lon": -16.9394,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-do-facho",
+      "name": "Pico do Facho",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-do-facho-main",
+          "lat": 32.724,
+          "lon": -16.7589,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-grande",
+      "name": "Pico Grande",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-grande-main",
+          "lat": 32.7371,
+          "lon": -16.9879,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-guindaste",
+      "name": "Pico Guindaste",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-guindaste-main",
+          "lat": 32.7925,
+          "lon": -16.8539,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "ponta-do-rosto",
+      "name": "Ponta do Rosto",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "ponta-do-rosto-main",
+          "lat": 32.7514,
+          "lon": -16.7086,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "ponta-de-sao-jorge",
+      "name": "Ponta de São Jorge",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "ponta-de-sao-jorge-main",
+          "lat": 32.837,
+          "lon": -16.9037,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "ponta-do-garajau",
+      "name": "Ponta do Garajau",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "ponta-do-garajau-main",
+          "lat": 32.6371,
+          "lon": -16.8501,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "ponta-do-tristao",
+      "name": "Ponta do Tristão",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "ponta-do-tristao-main",
+          "lat": 32.8669,
+          "lon": -17.1986,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-da-torre",
+      "name": "Pico da Torre",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-da-torre-main",
+          "lat": 32.6519,
+          "lon": -16.9735,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-da-urze",
+      "name": "Pico da Urze",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-da-urze-main",
+          "lat": 32.7514,
+          "lon": -17.118,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-do-vento",
+      "name": "Pico do Vento",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-do-vento-main",
+          "lat": 32.7589,
+          "lon": -17.1212,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-dos-bodes",
+      "name": "Pico dos Bodes",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-dos-bodes-main",
+          "lat": 32.7769,
+          "lon": -17.1628,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-vermelho",
+      "name": "Pico Vermelho",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-vermelho-main",
+          "lat": 32.8299,
+          "lon": -17.2407,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-da-cruz",
+      "name": "Pico da Cruz",
+      "category": "viewpoint",
+      "regionId": "madeira",
+      "geofences": [
+        {
+          "id": "pico-da-cruz-main",
+          "lat": 32.6421,
+          "lon": -16.9393,
           "radiusM": 250
         }
       ]

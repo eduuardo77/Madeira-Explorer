@@ -26,10 +26,12 @@ not a rewrite.
 > chosen from an OSM survey of all 104 walkable named levadas, taking the longest, and their
 > geofences are the **free ends of the mapped way** (see `tools/build-levadas.mjs`).
 >
-> ⚠ **The viewpoints are the weakest part and it is OSM's fault, not the selection's.** Madeira's
-> miradouros are mostly named in OSM by a single distinguishing word — `Gato`, `Adaga`, `Bodes`,
-> `Alto` — so a stamp reads "GATO" and means nothing. Rewriting those names to what a visitor would
-> recognise is the highest-value hour anybody could spend in this file.
+> **The viewpoints were rebuilt from OSM directly on 2026-08-14**, and the reason is worth knowing
+> if you ever go back to `pois.candidates.json`: the tile pack's `pois` layer carries *fragments* —
+> `Barcelos`, `Bodes`, `Escalvado`, `Facho` — while OSM's own nodes at the same places are named
+> properly: **Pico dos Barcelos**, **Pico dos Bodes**, **Ponta do Rosto**. A stamp reading "GATO"
+> means nothing; one reading "PICO DOS BARCELOS" is a place. The candidate list is still the right
+> starting point for everything else, but check a name against OSM before trusting it.
 >
 > **Delete them freely.** `git rm`-ing the lot and starting from the candidate list loses nothing.
 > What they are good for: seeing the passport at real density, checking the artwork against real

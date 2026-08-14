@@ -621,6 +621,42 @@ export const MIN_EMBLEM_ROOM = 30;
  * different, wrong name, and one that reads as finished. An ellipsis is worse
  * typography and better information.
  */
+/**
+ * The word a category repeats on every one of its stickers.
+ *
+ * ⚠ **The band is small and it was spending a third of itself saying what the
+ * section heading already says.** Under a heading reading LEVADAS, a sticker
+ * reading "LEVADA DO CALDEIRÃO…" has used two thirds of its space on the word
+ * *levada* and then run out before *Verde* — the only part that identifies it.
+ * Measured over the real pack, this alone is the difference for most of the
+ * eighteen names that did not fit.
+ *
+ * Only these two categories have such a word, and only when the rest of the
+ * name survives it: "Praia Formosa" keeps its *Praia*, because "FORMOSA" alone
+ * is not the name of a beach anybody would recognise.
+ */
+const CATEGORY_PREFIX: Partial<Record<Category, RegExp>> = {
+  levada: /^Levada\s+(d[aeo]s?\s+)?/i,
+  beach: /^Praia\s+(d[aeo]s?\s+)/i,
+};
+
+/**
+ * The name as it should appear on the band, with a redundant category word
+ * removed. The *full* name is what the card, the list and the screen reader
+ * use — this is only the sticker.
+ */
+export function bandLabel(name: string, category: Category): string {
+  const prefix = CATEGORY_PREFIX[category];
+  if (prefix === undefined) {
+    return name;
+  }
+
+  const trimmed = name.replace(prefix, '').trim();
+  // Never trim a name down to nothing, and never to a single short word that
+  // would read as a fragment.
+  return trimmed.length >= 4 ? trimmed : name;
+}
+
 export function wrapLabel(name: string, maxChars = MAX_LINE_CHARS): string[] {
   const upper = name.trim().toUpperCase().replace(/\s+/g, ' ');
   if (upper.length <= maxChars) {
@@ -832,7 +868,9 @@ export function stampElements(
   collected: boolean
 ): StampElement[] {
   const colours = collected ? design.colourway : UNCOLLECTED;
-  const lines = wrapLabel(name);
+  // The sticker drops the word its section heading already carries; the full
+  // name is what every other surface shows.
+  const lines = wrapLabel(bandLabel(name, design.category));
   // ⚠ Tuned against the measured emblem scale, not by eye. At 11.5 a two-line
   // band took 28 of the 100 units and squeezed the emblem to 0.21 scale — on a
   // 62 dp sticker that is a 13 dp emblem, which is decoration rather than a

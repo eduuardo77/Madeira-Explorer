@@ -51,6 +51,7 @@ import {
   stampElements,
   sunburstPath,
   toPolygon,
+  bandLabel,
   wrapLabel,
   type Emblem,
   type Point,
@@ -639,4 +640,43 @@ test('every curated place name still produces a drawable band', () => {
       assert.ok(line.trim().length > 0, `${place.name} produced a blank line`);
     }
   }
+});
+
+// ---------------------------------------------------------------------------
+// The band does not repeat its own section heading (D-058)
+// ---------------------------------------------------------------------------
+
+test('a levada sticker drops the word "Levada", which the heading already says', () => {
+  // ⚠ The measurement that prompted this: of 80 real names, 18 did not fit the
+  // band, and the cut landed on the distinguishing word — "LEVADA DO
+  // CALDEIRÃO…" loses *Verde*, which is the entire identity of the place.
+  assert.equal(bandLabel('Levada do Caldeirão Verde', 'levada'), 'Caldeirão Verde');
+  assert.equal(bandLabel('Levada da Serra do Faial', 'levada'), 'Serra do Faial');
+  assert.equal(bandLabel('Levada das 25 Fontes', 'levada'), '25 Fontes');
+  assert.deepEqual(wrapLabel(bandLabel('Levada do Caldeirão Verde', 'levada')), [
+    'CALDEIRÃO',
+    'VERDE',
+  ]);
+});
+
+test('a beach drops "Praia da" but keeps a bare "Praia"', () => {
+  // "Ribeira Brava" under a BEACHES heading is unambiguous. "Formosa" alone is
+  // not the name of anything a visitor would recognise, so that one keeps its
+  // prefix — which is why the rule requires a preposition.
+  assert.equal(bandLabel('Praia da Ribeira Brava', 'beach'), 'Ribeira Brava');
+  assert.equal(bandLabel('Praia Formosa', 'beach'), 'Praia Formosa');
+});
+
+test('categories without a repeated word are left completely alone', () => {
+  for (const category of ['viewpoint', 'village', 'landmark'] as const) {
+    assert.equal(bandLabel('Pico do Areeiro', category), 'Pico do Areeiro');
+    assert.equal(bandLabel('Câmara de Lobos', category), 'Câmara de Lobos');
+  }
+});
+
+test('trimming never leaves a fragment', () => {
+  // A levada named nothing but its category word keeps it, rather than
+  // rendering an empty band.
+  assert.equal(bandLabel('Levada', 'levada'), 'Levada');
+  assert.equal(bandLabel('Levada do Rei', 'levada'), 'Levada do Rei');
 });

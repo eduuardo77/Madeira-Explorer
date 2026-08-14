@@ -112,6 +112,51 @@ is not a styling gap that can be closed by trying harder:
 | Looks like the phone | **Yes**, by construction | Only as far as our own cartography gets us |
 | Souvenir/dark render | Not possible | The whole of Phase 5 |
 
+### What the platform maps actually cost — checked 2026-08-13
+
+The project lead asked. The money answer is **nothing**, which is the surprising part and the
+reason this section exists rather than a shrug.
+
+| | Cost to display a map in a native app |
+|---|---|
+| **Apple MapKit** (iOS) | **€0.** Included in the Apple Developer Program membership (~€99/yr) that shipping any iOS app already requires. Rate limits exist for geocoding and similar, described by Apple as "at user speed" — not reachable by normal use. |
+| **Google Maps SDK** (Android **and** iOS) | **€0, unlimited.** SKU `6DE1-4D9C-5B67` — "Maps SDK", free cap *Unlimited*, no charge at any tier. This is the mobile-native SKU and is **not** the web one (`FAF4-3B2D-51B2`, 10,000 free events then $7/1,000). |
+
+Two caveats on the Google side, neither of them money:
+
+- A **Google Cloud billing account and an API key** are required even for a zero-cost SKU. That is
+  an account somebody owns and a key that ships in the binary.
+- The free SKU is *map display*. Directions, Places and Geocoding are billed — and this app uses
+  **none** of them (D-018, D-055: it is not a navigator).
+
+**Yes, Google Maps can be used on iOS.** Google ships a Maps SDK for iOS, the same free SKU covers
+it, and App Review permits third-party map SDKs. But an iPhone showing Google Maps looks like
+Google Maps, which is the opposite of the reason for asking (D-054) — and it is *not* what the
+reference app does. WalkNYC uses Apple on iOS precisely because that is the native one.
+
+**So the price is not the obstacle. These four things are:**
+
+1. **Offline ends.** Both SDKs stream tiles. In a levada valley with no signal the map is blank —
+   which is the single claim this product is built on (D-001, D-035/D-036, CONTEXT §3).
+2. **The zero-network privacy claim ends.** T-117 audited every dependency to confirm nothing
+   transmits; T-117b was to prove it with a packet capture; the privacy policy (D-044) and both
+   store declarations (T-120, T-128) say so in plain words. A map SDK sends a stream of requests
+   that says, in effect, where the user is looking. All of that copy would need rewriting, honestly.
+3. **The souvenir's dark style becomes impossible on iOS.** MapKit exposes almost no cartographic
+   control; Google allows JSON styling. D-026's fog-of-war look, which is the whole of Phase 5's
+   visual identity, needs a map we control — and the two platforms would stop matching.
+4. **The tile pipeline and the map styles become dead weight** — T-022, T-023, T-026, T-056–T-063,
+   D-030, D-035, D-036. Not wasted (they answered real questions) but no longer shipped.
+
+**A hybrid is technically available and worth naming**: platform SDK for the everyday map, our own
+MapLibre pack retained for the souvenir render and/or an offline fallback. It costs two map
+implementations and two sets of bugs, and it does not restore the privacy claim.
+
+**What it would take in code, if it happened:** `react-native-maps` is the standard path — Apple
+MapKit on iOS by default, Google on Android, `PROVIDER_GOOGLE` to force Google on iOS. The trace
+and the levada course are polylines, which both support. `map/` would be rewritten; nothing outside
+it (recorder, geofences, stamps, passport, storage) is affected.
+
 ⚠ **This is a decision the project lead has not been asked to make, and it is theirs.** Nothing in
 the code assumes it either way beyond `map/` and the tile pipeline. If "looks like the phone's map"
 matters more than "works with no signal", that reverses D-001 and most of Phase 0 — and it should

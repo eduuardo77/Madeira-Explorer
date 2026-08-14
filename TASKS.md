@@ -271,6 +271,43 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Notes: `docs/task-notes.md` (T-052b)
 - [x] **T-052c** ✅ **RESOLVED 2026-08-12 — and it was not what it looked like (D-048).**
       — Notes: `docs/task-notes.md` (T-052c)
+### ⚠ Found 2026-08-14 — the database is being released under the app
+
+- [!] **T-142** **"Cannot use shared object that was already released" — SQLite handles are dying
+      mid-operation.** Found while verifying the trip-end reveal; it is in the diary of a **cold
+      launch**, not a hot reload.
+
+      ```
+      17:50:36  app_launch
+      17:50:37  error  map screen: NativeStatement.runAsync rejected
+                       → Cannot use shared object that was already released
+      17:50:37  trip_end       left_bbox: recorded outside the archipelago
+      17:50:37  notification   reveal: 2 of 2 (D-011)
+      ```
+
+      Earlier in the same diary, the same error from **`onGeofenceTransition`** — which is the
+      path that awards stamps. That is the part that matters: a released handle there means a
+      geofence crossing that is silently not recorded, and D-010 says the trace is the one thing
+      that cannot be recreated.
+
+      — **What is known.** The app never closes the database: `storage/database.ts` opens it once
+      through `onceOrRetry` and there is no `closeAsync` anywhere in `src/`. So the release is
+      coming from underneath — most plausibly the **headless JS context**. `backgroundTasks.ts`
+      defines its tasks in global scope and the OS runs them in a separate context; when that
+      context is torn down, native objects it created are released. If expo-sqlite shares the
+      native database per *process* while each JS context holds its own handle, one context
+      finishing invalidates the other's — which fits every symptom, including why it lands on the
+      foreground map screen at the exact second a background path ran.
+      — **What is not known**, and must not be guessed: whether the *write* was lost or merely the
+      statement. The reveal and the trip end both succeeded in the same second, so it is not
+      failing every time.
+      — ⚠ **Do not "fix" this by catching the error.** It is already caught — that is why it is in
+      the diary and not a crash — and swallowing it is what would turn a lost stamp into silence.
+      — Where to start: reproduce by crossing a geofence while the app is foregrounded, then read
+      the diary. `docs/dev-build.md` has the geofence field-test button. The question to answer
+      first is whether one native database is shared across contexts, which is an expo-sqlite
+      question, not an app one.
+
 - [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046

@@ -1223,3 +1223,23 @@ grep -A30 "^### T-052a" docs/task-notes.md
           the line without one.
       — ⚠ **The marker is now Google's red pin**, not the drawn circle `placeStyle.ts` specifies.
       That palette was measured against our own ground and no longer applies. Not yet judged.
+
+### T-099 / T-102 — the trip end and the reveal, seen for the first time
+
+- **2026-08-14.** Both were written in Phase 5 and neither had ever been observed. With 80 places
+  in the pack there was finally something for the reveal to count, so it was triggered deliberately.
+      — **How, and the invariant that got in the way first.** The obvious route was to backdate the
+      trip into the three-day inactivity window (D-039) — and SQLite refused: *"raw_fix is
+      append-only (CONTEXT 6.2)"*. The database defended D-010 against me, which is exactly what
+      that trigger is for. The right simulation was an **append** anyway: one fix in Lisbon, which
+      is what flying home actually looks like.
+      — **It works.** `trip.end_detection_method = left_bbox`, trip 1 finalised, trip 2 opened, and
+      the diary records `notification | reveal: 2 of 2 (D-011)` — so the reveal went through the
+      one door that owns the two-notification cap, and counted itself as the second.
+      — ⚠ **The Android notification is not in `dumpsys notification`.** The app recorded sending
+      it; the OS does not appear to have posted it. Most likely `POST_NOTIFICATIONS` was never
+      granted on this emulator — but "we logged that we sent it" and "the user saw it" are
+      different claims and only the first is evidenced. **T-102 is not verified end to end.**
+      — ⚠ **And it surfaced T-142**, which is the more serious find: `Cannot use shared object that
+      was already released`, on a cold launch, including from the geofence handler that awards
+      stamps.

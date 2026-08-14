@@ -92,6 +92,15 @@ use. **The largest open item in the project.**
   `content/pois.json` has places** — to see it, put two fixture places in that file and revert
   afterwards.
 
+## ⚠ The one open defect
+
+**T-142 — `Cannot use shared object that was already released`.** SQLite handles are being
+released while the app is still using them, on a **cold launch**, including from
+`onGeofenceTransition` — the path that awards stamps. The app never closes the database, so the
+release comes from underneath; the prime suspect is the headless background context. Full evidence
+and the first question to answer are in TASKS under T-142. **Read it before touching storage or
+background tasks.**
+
 ## Traps that each cost something here
 
 - **On the emulator, record on the `driving` profile.** `walking` and `stationary` ask for

@@ -85,6 +85,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-054** | The app follows iOS conventions, on both platforms. | Provisional |
 | **D-055** | No Directions button. *Show on map* draws the levada's course. | Provisional |
 | **D-056** | The trace is blue, not red. | Provisional |
+| **D-057** | The app uses the platform's map. Google on Android, Apple on iOS later. | **Accepted** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

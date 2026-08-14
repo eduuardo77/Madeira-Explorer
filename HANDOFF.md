@@ -1,6 +1,6 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-08-13.
+**For:** a session picking this project up cold. **Updated:** 2026-08-14.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked.
 
@@ -18,10 +18,22 @@ arent a navigator."*
 The map also now **opens on your walk rather than on the island** (D-053), the interface follows
 **iOS conventions** (D-054), and the trace is **blue rather than red** (D-056). **371 tests.**
 
-⚠ **Read `docs/competitors.md` before any more work on how the map looks.** WalkNYC — the visual
-reference — ships no map: it uses Apple Maps on iOS and Google Maps on Android. Its look is native
-because it *is* native, which is the thing this project traded away for offline and privacy. That
-trade is the project lead's to revisit and has not been put to them as a decision.
+⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
+`expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided
+this deliberately, against a recommendation to keep our own map.
+
+**Our MapLibre map is kept, not deleted** — `app/src/map/MapLibreScreen.tsx`, complete and working.
+Swapping back is one import in `App.tsx`.
+
+⚠ **You need a Google Maps API key to see a map at all.** Copy `app/.env.example` to `app/.env` and
+paste one (Google Cloud → enable *Maps SDK for Android* → restricted key). Without it the map is a
+grey grid and everything else still works. **This is the project lead's to obtain** — like the
+POIs and the physical device.
+
+⚠ **D-001 is partially superseded.** The app is no longer zero-network: the map streams tiles. The
+trip still never leaves the phone. `legal/privacyPolicy.ts` is rewritten to match;
+`docs/store-privacy-answers.md` is **flagged and not rewritten** — it is a compliance artefact and
+needs the project lead to read it.
 
 Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
 permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.
@@ -51,8 +63,8 @@ use. **The largest open item in the project.**
 
 ## The code tail, in rough order of value
 
-- **T-063b** — one glyph range still requested. The real fix is upstream: the tile pack ships
-  place names in nine scripts the app never renders.
+- **T-063b** — ~~one glyph range still requested~~ **moot while the platform map ships** (D-057).
+  It was a MapLibre glyph fetch; nothing requests it now. It returns if the MapLibre path does.
 - **T-067** region boundaries · **T-112** UI reduction pass.
 - ~~Directions handoff~~ — **done 2026-08-13** (T-115, D-052): places are drawn on the map, a tap
   opens a card, one button hands off to the phone's maps app. ⚠ **It draws nothing until

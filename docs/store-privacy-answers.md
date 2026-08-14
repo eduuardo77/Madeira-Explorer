@@ -1,5 +1,24 @@
 # Store privacy answers
 
+> ### ⚠ REWRITE REQUIRED BEFORE SUBMISSION — 2026-08-14 (D-057)
+> This document was written when the app made **no network requests at all**. It now draws
+> **Google Maps on Android**, which streams tiles. Two things follow, and both must be settled
+> before either store form is filled in:
+>
+> 1. **The "zero outbound connections" framing below is no longer true of the app as a whole.** It
+>    remains true of the *trip*: the recorded trace, the stamps and the diary never leave the phone,
+>    there is still no account, no server of ours, no analytics and no ads. The distinction is now
+>    load-bearing and every answer has to make it precisely.
+> 2. **Google Play's Data Safety form asks about third-party SDKs.** The Maps SDK is one, and its
+>    own data collection is Google's to declare, not ours — but the form asks whether the app
+>    *shares* data with third parties, and "which part of the map you are looking at" is a judgement
+>    call a reviewer may read differently than we do. Answer it conservatively and in writing here.
+>
+> `legal/privacyPolicy.ts` is already rewritten (D-044 keeps the two in step). This file is not,
+> because the store answers are a compliance artefact and rewriting them from a code change without
+> the project lead reading them would be exactly the wrong kind of confidence.
+
+
 **T-120** (Apple's App Privacy "nutrition label") and **T-122** (Google Play's Data safety
 form). Two forms, one set of facts — so they live in one document, because the failure mode is
 answering them months apart and contradicting yourself in front of two reviewers.

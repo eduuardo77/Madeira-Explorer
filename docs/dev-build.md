@@ -1,5 +1,27 @@
 # Getting the app onto something that can run it
 
+> ### ⚠ You need a Google Maps API key now — 2026-08-14 (D-057)
+> The app draws Google Maps on Android. Without a key the map is a **grey grid with the Google
+> logo**, which looks exactly like a broken screen and is not one — recording, stamps, the passport
+> and the card all work regardless.
+>
+> ```bash
+> cp app/.env.example app/.env      # then paste your key into it
+> ```
+>
+> The key comes from the Google Cloud console: create a project, enable **Maps SDK for Android**,
+> create an API key, and restrict it to the package `com.madeiraexplorer.app` **plus your build's
+> SHA-1 fingerprint** and to that one API. Map display on the mobile SDK is free and unlimited
+> (SKU `6DE1-4D9C-5B67`); the project still needs billing enabled.
+>
+> ```bash
+> # the debug fingerprint, for the key restriction
+> keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey >   -storepass android -keypass android | grep SHA1
+> ```
+>
+> `app/.env` is gitignored. `app.config.js` injects it; `app.json` holds everything else.
+
+
 **This is the only real blocker in the project.** Nothing written so far has ever run, and
 nothing can until this exists — background location and MapLibre both need a native build, so
 Expo Go is out and every claim is a hypothesis until then.

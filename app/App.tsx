@@ -2,7 +2,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { LogBox, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from './src/content/contentPack';
-import MapScreen, { type FocusPlace } from './src/map/MapScreen';
+// ⚠ The platform's own map (D-057). `src/map/MapLibreScreen.tsx` is the same
+// screen on our offline tile pack, kept deliberately — swapping this import
+// back is the whole of the way back.
+import MapScreen, { type FocusPlace } from './src/map/NativeMapScreen';
 import OnboardingFlow, {
   pendingPermissionPrompt,
 } from './src/onboarding/OnboardingFlow';

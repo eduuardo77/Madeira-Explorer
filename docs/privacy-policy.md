@@ -1,6 +1,6 @@
 # Madeira Explorer — Privacy Policy
 
-**Last changed:** 2026-08-13
+**Last changed:** 2026-08-14
 
 <!--
   GENERATED FILE — DO NOT EDIT.
@@ -15,7 +15,9 @@
 
 Madeira Explorer records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.
 
-There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because nothing is ever sent to us. We do not know who you are and we cannot find out.
+There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.
+
+The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because your trip never leaves the phone.
 
 Nobody is paying us for your data. There are no adverts and nothing is measuring how you use the app.
 
@@ -49,13 +51,15 @@ Before making it, the app finds where you slept and removes that part of your ma
 
 Everything else on the map is yours to share or not.
 
-## Getting directions to a place
+## The map itself
 
-Tapping a place on the map shows a small card with a Directions button. That button opens whichever maps app is already on your phone, with that place set as the destination.
+The map you see is Google’s, the same map used by most apps on an Android phone. It is downloaded a piece at a time as you move around it, so Google can see which part of the island is on your screen.
 
-That other app is not ours. It has its own privacy policy, and it will usually need the internet to work out a route.
+Google does not see your trip. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. That record is never sent to them or to us.
 
-Nothing about your trip goes with you. All it is given is the place you tapped, which is a place this app already knows about.
+This does mean the map needs an internet connection. Recording carries on regardless — your trip is still being saved with no signal at all, and it will appear on the map once you have one.
+
+Google has its own privacy policy, which covers what they do with those map requests.
 
 ## What the app asks permission for
 

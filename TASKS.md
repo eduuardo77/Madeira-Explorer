@@ -285,6 +285,17 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ## Phase 2 — Offline map rendering
 
+> ### ⚠ Superseded as the shipping path, 2026-08-14 (D-057)
+> The app draws **Google Maps on Android** now, and Apple Maps on iOS when there is an iOS build.
+> Everything below was built, works, and is **kept rather than deleted** at the project lead's
+> instruction — `app/src/map/MapLibreScreen.tsx` and the whole `tiles/` pipeline. It is the answer
+> if offline, privacy or the dark souvenir style ever outranks looking native.
+>
+> **What this means for the tasks below:** T-056–T-062 and T-139/T-140 stay done. **T-063b is
+> moot** (nothing fetches glyphs). **T-064** (recolour the real graph) and **T-065** (outdoor
+> sunlight legibility) no longer gate v1 — they judge a renderer that is not shipping — but T-065's
+> *question* survives in a new form: is **Google's** map legible in Funchal at midday?
+
 - [x] **T-056** Integrate MapLibre GL Native ⇠ T-029, T-025
       — Notes: `docs/task-notes.md` (T-056)
 - [x] **T-057** Bundle or WiFi-gated first-run download of the tile pack ⇠ T-026, T-056

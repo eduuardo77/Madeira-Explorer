@@ -2706,3 +2706,76 @@ case that made the light style's contrast test exist.
   the problem rather than the thickness.
 - *Match the app's accent exactly* (`#5AA9FF`). Rejected for the light style — at 3.4:1 on land it
   is too pale for a line read outdoors. The dark style uses a bright blue for the opposite reason.
+
+---
+
+## D-057 — The app uses the platform's map. Google on Android, Apple on iOS later.
+
+**Status:** **Accepted** — the project lead's decision, 2026-08-13, made explicitly and against a
+recommendation to keep the existing map.
+
+**Decision:** the shipping map is **Google Maps on Android**, via `expo-maps`. When an iOS build
+exists it will be **Apple Maps on iOS** — `expo-maps` splits exactly that way, which is the split
+the project lead wants and is what the reference app (WalkNYC) does.
+
+**Our own MapLibre map is kept, not deleted**, at their instruction: *"Don't delete the map we've
+created as It might come useful in the future."* It lives at `map/MapLibreScreen.tsx`, complete and
+working, and `App.tsx` swaps between the two with one import.
+
+**⚠ This partially supersedes D-001, and that is the real content of this decision.** D-001 said the
+app makes no network requests at all, and that is no longer true: the map streams tiles. Everything
+*else* about D-001 stands — no account, no server, no analytics, no telemetry, and the trace itself
+never leaves the phone. `legal/privacyPolicy.ts` and `docs/store-privacy-answers.md` have been
+rewritten in the same change rather than left to drift.
+
+**The project lead's reasoning, in their words:**
+
+- *"from what I'm seeing on the android emulator, the map looks a bit like google maps but more
+  laggy and less optimized. I feel a lot of time needs to be spent to polish the map, and I feel I
+  won't ever be 100% happy with it."*
+- *"most users already use google maps or waze or apple maps to navigate on this island, their
+  privacy is already compromise. For that reason I don't see as a big deal."*
+- The offline case is *"not a big deal in my view, but still inconvenient."*
+
+**The counter-argument, recorded because it was made and rejected on the merits, not missed.** The
+map was already built and working; the effort was sunk, not ahead. The blocker on this project is
+`content/pois.json`, not cartography. And the zero-network claim was provable and unusual. The
+project lead weighed all three and chose otherwise — the polish ceiling of a hand-authored style
+maintained by one person is a real cost too, and a recurring one.
+
+**What it costs, stated plainly so nobody rediscovers it as a surprise:**
+
+1. **No map without a network.** The recorder is unaffected — GPS, geofences, stamps and the trace
+   all work offline exactly as before — but the *map* is grey where there is no signal, which on
+   this island means the interior and the north, where the levadas are.
+2. **The privacy claim changes shape.** Not "nothing ever leaves your phone" but "your trip never
+   leaves your phone; the map itself comes from Google."
+3. **The dark souvenir style is gone as designed** (D-026, Phase 5). Google offers JSON styling and
+   Apple offers almost none, so the fog-of-war look either becomes per-platform or is rendered by
+   the MapLibre path that is being kept.
+4. **A Google Cloud account, a billing account and an API key** are now required to build a working
+   Android app. `app/.env` holds the key; `app.config.js` injects it; neither is committed.
+5. **`expo-maps` is alpha** and says so — *"will frequently experience breaking changes"*. It is
+   pinned, the API surface used here is small (basemap, two polylines, one marker, a camera), and
+   the fallback is one import away.
+6. **`fitBounds` is gone.** MapLibre had it natively; `expo-maps` takes only a centre and a zoom, so
+   D-053's "frame what you walked" and D-055's "frame the whole course" are now arithmetic in
+   `map/cameraFit.ts` — Web Mercator, with the latitude projected rather than averaged, and tested.
+
+**Alternatives considered:**
+
+- *`react-native-maps` instead of `expo-maps`.* Mature, huge install base, and it can put Google on
+  iOS too. Rejected: `expo-maps` is the SDK's own module and version-matched to SDK 57, which is the
+  best odds of surviving RN 0.86 with the New Architecture — and Google-on-iOS is not wanted, since
+  the whole point of the iOS build is Apple's map.
+- *Keep MapLibre for v1 and revisit after T-065.* This was the recommendation. Not taken.
+- *A hybrid — platform map in the app, MapLibre for the souvenir render.* Not decided either way. It
+  is now cheap to try, because the MapLibre path is still in the tree.
+
+**Still open, deliberately:**
+
+- **The tile pack is still bundled** (~19 MB) even though nothing draws it, because deleting the
+  assets would strand `MapLibreScreen.tsx`. Worth stripping from the release build once the platform
+  map is proven on a device — it is the single biggest thing in the binary.
+- **T-117b** (packet capture proving zero outbound connections) now has a different, and much more
+  interesting, question to answer: *what exactly does the map SDK send, and when?*

@@ -1,4 +1,24 @@
 /**
+ * ⚠ NOT THE SHIPPING SCREEN SINCE 2026-08-13. KEPT ON PURPOSE (D-057).
+ * ====================================================================
+ * The app now draws the platform's own map — `NativeMapScreen.tsx`. This is
+ * the same screen on **our** offline tile pack, and it works: offline, private,
+ * with two hand-authored styles and a levada course drawn as a styled layer.
+ *
+ * The project lead's instruction when they chose the platform map was explicit:
+ * *"Don't delete the map we've created as It might come useful in the future."*
+ * So this is here, complete, and the way back is one line in `App.tsx`.
+ *
+ * **What it is still the answer to**, if any of these become the priority
+ * again: working with no signal at all; a provable zero-network claim; the
+ * dark fog-of-war style the souvenir renderer wants (D-026, Phase 5); and a
+ * map nobody can change under us.
+ *
+ * ⚠ It will rot. Nothing runs it, no test covers the screen, and the tile
+ * assets it needs are still bundled. Before trusting it again, run it.
+ *
+ * ---
+ *
  * The primary screen (T-075): the map (T-056) with the recorded trace over it
  * (T-059) and the three controls (`PrimaryOverlay`).
  *
@@ -133,7 +153,7 @@ const EMPTY_PROGRESS: TripProgress = {
   lockedRegionCount: 0,
 };
 
-export default function MapScreen({
+export default function MapLibreScreen({
   focusPlace,
   onFocusHandled,
   onOpenPassport,

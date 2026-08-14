@@ -1,5 +1,19 @@
 # Context
 
+> ### ⚠ The map is no longer ours — 2026-08-14 (D-057)
+> Several sections below describe an app that ships its own offline map and makes **no network
+> requests at all**. As of 2026-08-14 the app draws **Google Maps on Android** (and will draw Apple
+> Maps on iOS), so:
+>
+> - **"Works with no signal" now means the *recorder*, not the map.** The trip is still recorded,
+>   stamped and stored entirely offline; the map underneath it needs a connection.
+> - **"Zero network" is now "the trip never leaves the phone".** No account, no server of ours, no
+>   analytics — but Google sees which tiles the phone requests.
+>
+> Our MapLibre map is kept and still works (`app/src/map/MapLibreScreen.tsx`). Read D-057 before
+> changing anything that depends on either statement.
+
+
 **Read this first.** Everything a fresh contributor — human or AI — needs before touching
 anything in this project, including the reasoning behind decisions that look arbitrary from
 the outside.

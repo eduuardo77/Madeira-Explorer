@@ -84,7 +84,10 @@ for a global app. **The bounded scope is what makes the architecture simple.**
                            │
 ┌──────────────────────────▼────────────────────────────────────────────┐
 │                        PRESENTATION LAYER                             │
-│  • MapLibre GL Native + offline PMTiles/MBTiles                       │
+│  • The PLATFORM's map (D-057): Google on Android via expo-maps;       │
+│    Apple on iOS when an iOS build exists. Streams tiles.              │
+│  • ~~MapLibre GL Native + offline PMTiles/MBTiles~~ — kept, not       │
+│    shipping: map/MapLibreScreen.tsx, one import away (D-057)          │
 │  • Two styles over one tile pack: light for use, dark for the         │
 │    souvenir (D-026). Figure-ground from shaded terrain.               │
 │  • Visited-road overlay drawn from local road_graph geometry (D-022)  │
@@ -96,9 +99,16 @@ for a global app. **The bounded scope is what makes the architecture simple.**
 │  • Accommodation masking filter                                       │
 └───────────────────────────────────────────────────────────────────────┘
 
-              NO NETWORK BOUNDARY EXISTS BELOW THIS POINT.
-   The only network activity in the app's entire lifetime is the optional
-        one-time tile pack download on first run, over WiFi.
+     ⚠ THE NETWORK BOUNDARY MOVED ON 2026-08-14 (D-057, partially
+                          superseding D-001).
+
+   The MAP is fetched from Google as the user pans. Everything below the
+   presentation layer is unchanged and still never transmits: the trace,
+   the stamps, the diary and the sensors stay on the device, there is no
+   account and no server of ours, and the trip is sent nowhere.
+
+   What Google sees: which tiles the phone asks for — i.e. which part of
+   the island is on screen. What they do not see: the trip.
 ```
 
 ---

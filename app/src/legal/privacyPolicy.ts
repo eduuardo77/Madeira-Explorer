@@ -31,13 +31,19 @@
  *      history (D-016). Sharing it publishes where they went, to whoever sees
  *      it. Their accommodation is removed first, by default and with no way to
  *      turn it off (D-040), but the rest is theirs to publish knowingly.
- *   3. **The Directions button** (T-115, D-018, added 2026-08-13). It opens
- *      another company's maps app, which has its own policy and will usually
- *      use the network. **Nothing about the user goes with it** — the handoff
- *      carries the destination we shipped in the content pack and nothing
- *      else — but "this app never uses the internet" and "this button makes
- *      your phone talk to Google" both being true at once is exactly the kind
- *      of gap a reader should not have to discover for themselves.
+ *   3. **The map itself** (D-057, 2026-08-14). ⚠ **This is the big one, and it
+ *      is new.** The app used to ship its own map and make no network requests
+ *      at all. It now draws the platform's map — Google's on Android — which
+ *      streams tiles as the user pans and zooms. Google therefore sees requests
+ *      from the phone that amount to *which part of the island is on screen*.
+ *
+ *      What has **not** changed, and the policy has to be exact about the
+ *      difference: there is still no account, no server of ours, no analytics,
+ *      and **the recorded trip is never sent anywhere**. The map is a picture
+ *      the phone fetches to draw under the trip; the trip stays put.
+ *
+ *      The Directions button that briefly existed here (D-018) is gone (D-055),
+ *      so there is no longer a handoff to disclose.
  *
  * ON NOT LISTING LIBRARIES
  * ------------------------
@@ -60,7 +66,7 @@
  * The date this text last changed, in ISO form. Shown to the user, and the
  * thing a returning reader checks first.
  */
-export const POLICY_VERSION = '2026-08-13';
+export const POLICY_VERSION = '2026-08-14';
 
 /**
  * The app's name as it appears to the user.
@@ -105,7 +111,8 @@ const SECTIONS: PolicySection[] = [
     heading: 'The short version',
     paragraphs: [
       `${APP_NAME} records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.`,
-      'There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because nothing is ever sent to us. We do not know who you are and we cannot find out.',
+      'There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.',
+      'The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because your trip never leaves the phone.',
       'Nobody is paying us for your data. There are no adverts and nothing is measuring how you use the app.',
     ],
   },
@@ -137,11 +144,12 @@ const SECTIONS: PolicySection[] = [
     ],
   },
   {
-    heading: 'Getting directions to a place',
+    heading: 'The map itself',
     paragraphs: [
-      'Tapping a place on the map shows a small card with a Directions button. That button opens whichever maps app is already on your phone, with that place set as the destination.',
-      'That other app is not ours. It has its own privacy policy, and it will usually need the internet to work out a route.',
-      'Nothing about your trip goes with you. All it is given is the place you tapped, which is a place this app already knows about.',
+      'The map you see is Google\u2019s, the same map used by most apps on an Android phone. It is downloaded a piece at a time as you move around it, so Google can see which part of the island is on your screen.',
+      'Google does not see your trip. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. That record is never sent to them or to us.',
+      'This does mean the map needs an internet connection. Recording carries on regardless \u2014 your trip is still being saved with no signal at all, and it will appear on the map once you have one.',
+      'Google has its own privacy policy, which covers what they do with those map requests.',
     ],
   },
   {

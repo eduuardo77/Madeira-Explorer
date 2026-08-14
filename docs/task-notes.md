@@ -1243,3 +1243,77 @@ grep -A30 "^### T-052a" docs/task-notes.md
       — ⚠ **And it surfaced T-142**, which is the more serious find: `Cannot use shared object that
       was already released`, on a cold launch, including from the geofence handler that awards
       stamps.
+
+### T-142 — the released handle, and why the fix is three lines of predicate
+
+- **2026-08-14.** Fixed. `expo-sqlite` intermittently rejects a call with `Cannot use shared
+  object that was already released`; the handle is fine a moment later. `serialQueue.ts` had
+  already diagnosed it in August and its reading held: our data access is plain
+  `runAsync(sql, ...params)` with no shared statements, so **this is the library's own
+  prepare/finalize racing itself**, and serialising the recording sink only removed the overlap
+  that provoked it *there*. T-142 was the same race arriving from the paths the sink's queue does
+  not cover — the map screen's first reads, `checkTripEnd` and the health check, all firing at
+  once from `App.tsx` on a cold launch.
+      — **The fix is a retry, and the argument for it is one sentence:** the call is rejected
+      *before the statement executes* — the argument could not be cast, so native code was never
+      entered and nothing was written. Repeating it therefore cannot write twice. That argument
+      holds for this signature and nothing else, which is why `releasedObject.ts` matches one
+      string and why its test pins that a constraint violation, a full disk, a locked database and
+      `raw_fix is append-only` all still propagate. If that predicate ever widens, the retry stops
+      being safe and starts hiding defects.
+      — **Where it is applied.** Once, wrapping the handle in `resilient()`, rather than at the
+      call sites. Two attempts, no delay: the race is another call finalising a statement at the
+      same instant, and by the time the promise rejects that has already happened.
+      — ⚠ **The wrapper is a `Proxy`, and the obvious alternative is wrong.** Copying the handle's
+      properties onto a new object and overriding six of them looks tidier and breaks on a JSI
+      object: the state lives in native slots, not enumerable properties, so the copy is hollow
+      and anything reached through it runs with the wrong `this`. The proxy forwards to the real
+      handle and binds methods *and getters* back to it.
+      — ⚠ **It is applied after the migrations run.** A migration failing this way must be loud;
+      a half-applied schema on a user's phone is not recoverable.
+      — **And it is visible.** A recovered retry writes a `db_retry` line to the diary — its own
+      kind, not `error`, so the day-1 health check does not cry wolf. That is what turned this
+      from a claim into evidence: after the fix, a cold launch and a replayed route produced
+      `runAsync: released object, repeated once and succeeded` and **no errors at all**. Without
+      that line, a silent recovery would look exactly like the bug not firing.
+
+### T-143 — the highlighted line was wrong, twice over
+
+- **2026-08-14.** The project lead said the trace was wrong three times, and was right three
+  times. There were two independent causes producing one complaint.
+      — **Ours (now D-059).** `splitIntoSegments` broke a stroke only where the recorder had been
+      silent longer than the gap threshold. It never asked whether the movement was *possible*, so
+      two fixes a second apart and 900 km apart — the seafront walk and the Lisbon fix from the
+      trip-end simulation — were drawn as one confident line, along with a dozen island-wide
+      teleports from geofence testing. The gate is now 55 m/s over jumps of 250 m or more: double
+      the island's fastest road, so it can only remove a stroke that is impossible, never one that
+      is merely fast.
+      — **The other one was the fixture, and it is the more embarrassing.** Every point in
+      `tools/routes/funchal-seafront.txt` was about 245 m offshore, so the app faithfully drew the
+      trace across open water. **Nothing about this was visible while the map was a plain style
+      with no coastline worth trusting.** Google's cartography made it obvious in one screenshot.
+      — **How the correction was made without inventing anything.** The route's *shape* was right
+      and only its latitude was wrong, so the whole file moved by one constant. The constant came
+      from `content/pois.json`: Forte de São Tiago stands on the seafront at 32.64672 and the
+      route passed 275 m south of it; the Teatro Municipal agreed within 10 m over the 1.2 km
+      between them. Two independent anchors giving the same offset is what makes a uniform shift a
+      correction rather than a fudge.
+      — ⚠ **What is still not verified.** No real GPS has ever been drawn by this code. 55 m/s and
+      the 250 m floor are arguments, not measurements (T-131).
+
+### T-144 — the passport rows swipe
+
+- **2026-08-14.** The project lead's instruction. Each category is a horizontal strip with the
+  next sticker deliberately half-cut at the card's edge, and a **See all** in the section header
+  that unwraps that row into the wrapped grid the screen used to show.
+      — **Why it was needed.** With 80 places the five grids were one very long page and the hero —
+      the number the user opened the screen to see — scrolled away before the second category.
+      — **The grid stays**, and that is the point of the button rather than an accident: D-058 says
+      the uncollected places are the recommendations, and surveying a category needs a view where
+      all of them are on screen at once.
+      — **Two details that are load-bearing.** The horizontal padding lives on the scroll
+      *content*, not the container, or the last sticker stops short of the card edge and the row
+      reads as finished; and the card needs `overflow: hidden` or the strip scrolls out over its
+      rounded corners.
+      — Verified on the emulator, collapsed and expanded, at 80 places.
+

@@ -16,9 +16,27 @@
  *      user knows is false. Skipping it changes only the picture — the stored
  *      row is untouched (D-010), and v2's matching will read the full data.
  *
+ *   3. **A jump nobody could have made becomes a break too** (2026-08-14).
+ *      Rule 1 only ever asked *how long was the silence*, so two fixes a second
+ *      apart and 500 km apart were drawn as one confident straight line. That
+ *      is the same fabricated continuity as bridging a blackout, arriving
+ *      through the other door, and it is what the project lead was looking at
+ *      when they said the highlighted line was wrong: the diary's own database
+ *      held the seafront walk, a dozen island-wide geofence test positions and
+ *      one fix in Lisbon, and the map joined all of them up.
+ *
+ *      It is not only a test artefact. Android's fused provider emits the
+ *      occasional wild fix with a *good* reported accuracy — which is exactly
+ *      the case rule 2 cannot catch — and a user who flies home mid-trip
+ *      produces a real one.
+ *
  * Pure: no database, no Expo. `raw_fix` rows in, GeoJSON out. Tested in
  * `traceGeoJson.test.ts`.
  */
+
+// Explicit `.ts`: this module is under unit test and Node's resolver will
+// not guess the extension (CLAUDE.md). Metro does not mind.
+import { distanceM } from '../recording/distance.ts';
 
 /** What this module needs of a fix — a subset of the `raw_fix` row. */
 export type TraceFix = {
@@ -38,6 +56,37 @@ export type TraceFix = {
  * field.
  */
 export const MAX_DRAWN_ACCURACY_M = 120;
+
+/**
+ * The fastest travel the line will be drawn through, in metres per second.
+ *
+ * 55 m/s is about 200 km/h. Madeira's fastest road is the VR1 at 100 km/h, so
+ * this is double anything achievable on the island and the line survives a
+ * sparse motorway drive where two fixes are minutes apart. A plane is roughly
+ * 250 m/s and does not survive it, which is the point: flying home is a real
+ * discontinuity and drawing a stroke across the Atlantic claims the user
+ * boated it.
+ *
+ * ⚠ **Deliberately far above walking speed, not near it.** The temptation is to
+ * set this to something like 5 m/s and smooth the trace into a tidy line. That
+ * would delete the drive between two levadas — real movement the user made —
+ * and D-032 says the trace is the souvenir. This gate exists to remove strokes
+ * that are *impossible*, never strokes that are merely fast.
+ *
+ * ⚠ NOT TUNED against field data, like `MAX_DRAWN_ACCURACY_M` above it. The
+ * number is an argument from the island's speed limits, not a measurement.
+ */
+export const MAX_DRAWN_SPEED_MPS = 55;
+
+/**
+ * The shortest jump this rule will judge, in metres.
+ *
+ * Two fixes 40 ms apart — which a burst delivery produces — turn 3 m of GPS
+ * jitter into 75 m/s and would break the line in the middle of a walk. Below
+ * this distance nothing is impossible enough to be worth breaking for; above
+ * it, the speed is what decides.
+ */
+const MIN_JUMP_FOR_SPEED_CHECK_M = 250;
 
 export type TraceFeature = {
   type: 'Feature';
@@ -87,7 +136,7 @@ export function splitIntoSegments(
 
   const segments: TraceSegment[] = [];
   let current: TraceFix[] = [];
-  let previousTs: number | null = null;
+  let previous: TraceFix | null = null;
 
   const flush = () => {
     // The dropped point is not lost — it is still in the database — it just
@@ -99,15 +148,52 @@ export function splitIntoSegments(
   };
 
   for (const fix of drawable) {
-    if (previousTs !== null && fix.ts - previousTs > gapThresholdMs) {
+    if (previous !== null && breaksHere(previous, fix, gapThresholdMs)) {
       flush();
     }
     current.push(fix);
-    previousTs = fix.ts;
+    previous = fix;
   }
   flush();
 
   return segments;
+}
+
+/**
+ * Should the line break between these two fixes?
+ *
+ * The two rules are one question — *can this stroke be drawn honestly* — so
+ * they are answered in one place rather than as two conditions in the loop.
+ */
+function breaksHere(
+  previous: TraceFix,
+  fix: TraceFix,
+  gapThresholdMs: number
+): boolean {
+  const elapsedMs = fix.ts - previous.ts;
+
+  // Rule 1: the recorder was silent for longer than it admits to.
+  if (elapsedMs > gapThresholdMs) {
+    return true;
+  }
+
+  // Rule 3: the movement is impossible.
+  const jumpM = distanceM(
+    { lat: previous.lat, lon: previous.lon },
+    { lat: fix.lat, lon: fix.lon }
+  );
+  if (jumpM < MIN_JUMP_FOR_SPEED_CHECK_M) {
+    return false;
+  }
+
+  // ⚠ Two fixes at the same instant that are far apart cannot be reconciled —
+  // the speed is infinite, and dividing by zero would quietly say `Infinity >
+  // limit` and get the right answer for the wrong reason. Say it outright.
+  if (elapsedMs <= 0) {
+    return true;
+  }
+
+  return jumpM / (elapsedMs / 1000) > MAX_DRAWN_SPEED_MPS;
 }
 
 /**

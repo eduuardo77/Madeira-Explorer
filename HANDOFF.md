@@ -7,8 +7,8 @@ genuinely blocked.
 ## State
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
-trace on a map → passport → trip end → reveal. 76 source files and 28 test files under `app/src`
-— roughly 14,000 lines of source and 6,300 of tests.
+trace on a map → passport → trip end → reveal. 79 source files and 30 test files under `app/src`
+— roughly 15,600 lines of source and 6,600 of tests.
 
 On 2026-08-13 a place became reachable: **passport → tap a stamp → card → Show on map** (T-115,
 D-052, D-055). For a levada that draws **its real course** from `content/levadas.json`, built by
@@ -16,7 +16,10 @@ D-052, D-055). For a levada that draws **its real course** from `content/levadas
 arent a navigator."*
 
 The map also now **opens on your walk rather than on the island** (D-053), the interface follows
-**iOS conventions** (D-054), and the trace is **blue rather than red** (D-056). **371 tests.**
+**iOS conventions** (D-054), and the trace is **blue rather than red** (D-056).
+
+On 2026-08-14 the passport's five categories became **swipeable strips with a *See all*** that
+expands one into the old grid (T-144) — 80 places would not fit as five grids. **399 tests.**
 
 ⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
 `expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided
@@ -87,19 +90,24 @@ use. **The largest open item in the project.**
 - **T-063b** — ~~one glyph range still requested~~ **moot while the platform map ships** (D-057).
   It was a MapLibre glyph fetch; nothing requests it now. It returns if the MapLibre path does.
 - **T-067** region boundaries · **T-112** UI reduction pass.
-- ~~Directions handoff~~ — **done 2026-08-13** (T-115, D-052): places are drawn on the map, a tap
-  opens a card, one button hands off to the phone's maps app. ⚠ **It draws nothing until
-  `content/pois.json` has places** — to see it, put two fixture places in that file and revert
-  afterwards.
+- ~~Directions handoff~~ — **deleted 2026-08-13, and do not bring it back.** It was built, then
+  removed the same day on the project lead's instruction: *"we arent a navigator."* The dots over
+  every curated place went with it. The route to a place is passport → stamp → card → *Show on
+  map*, which draws its course.
 
-## ⚠ The one open defect
+## Closed on 2026-08-14, and worth knowing about
 
-**T-142 — `Cannot use shared object that was already released`.** SQLite handles are being
-released while the app is still using them, on a **cold launch**, including from
-`onGeofenceTransition` — the path that awards stamps. The app never closes the database, so the
-release comes from underneath; the prime suspect is the headless background context. Full evidence
-and the first question to answer are in TASKS under T-142. **Read it before touching storage or
-background tasks.**
+- **T-142 — `Cannot use shared object that was already released`** is fixed. One retry, for one
+  error signature, applied once by wrapping the handle (`storage/database.ts`, `resilient()`).
+  The safety argument is that the call is rejected *before the statement executes*, so repeating
+  it cannot write twice — which is why `releasedObject.ts` matches one narrow string and why
+  widening it would quietly make the retry unsafe. A recovered retry writes a **`db_retry`** line
+  to the diary; that is how you tell the fix working apart from the bug not firing.
+- **The trace no longer draws strokes nobody could have walked** (D-059, Provisional). It broke
+  only on silence before, so a fix in Funchal and a fix in Lisbon became one straight line.
+- ⚠ **`tools/routes/funchal-seafront.txt` was 245 m out to sea**, and the app was faithfully
+  drawing it there. Invisible on the old plain style; obvious in one screenshot on Google's
+  cartography. If a fixture looks wrong on the map, suspect the fixture as readily as the code.
 
 ## Traps that each cost something here
 
@@ -126,7 +134,7 @@ background tasks.**
 ## Verifying work
 
 ```bash
-cd app && npm test          # 334 tests, Node's own runner
+cd app && npm test          # 399 tests, Node's own runner
 cd app && npx tsc --noEmit  # strict
 bash tools/run-emulator.sh && cd app && npm run android
 bash tools/replay-route.sh tools/routes/funchal-seafront.txt
@@ -144,7 +152,7 @@ with a decision, the decision wins.
 | | |
 |---|---|
 | `CONTEXT.md` | The *why*. §6 conventions, **§9 the doc protocol you must follow** |
-| `DECISIONS.md` | Index of 51 decisions. Full text in `docs/decisions-full.md` |
+| `DECISIONS.md` | Index of 59 decisions. Full text in `docs/decisions-full.md` |
 | `TASKS.md` | The checklist. Post-mortems on finished tasks in `docs/task-notes.md` |
 | `PROJECT_PLAN.md` | Phases, and the open questions **OD-4/5/8/9/10** |
 | `docs/design-brief.md` | Read before touching anything that renders |

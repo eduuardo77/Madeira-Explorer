@@ -254,6 +254,22 @@ go next" job that D-002 needs it for.
 
 Must be legible with 3 stamps and with 200 (T-081).
 
+### 4.1 A row is a strip you swipe (T-144, project lead, 2026-08-14)
+
+Each category is **one horizontal row you swipe**, with the next sticker deliberately half-cut at
+the card's edge so the row reads as *"there are more"* rather than *"that is all of them"*. The
+section header carries a tinted **See all** at its trailing edge — the iOS control, in the iOS
+place (§2.2a) — which unwraps that one row into the wrapped grid.
+
+T-081 asked *is it legible at 200 stamps* and got a yes; what it never asked was **how far you
+scroll to reach the fifth category**. At 80 places the five grids were one very long page, and the
+hero — the number the user opened the screen for — was gone before the second heading.
+
+⚠ **The grid is not a fallback, it is the survey view.** D-058 puts every uncollected place on
+this screen precisely so the user has somewhere to aim; that only works if there is a way to see a
+whole category at once. Collapsing the rows without *See all* would have taken the recommendation
+back.
+
 ---
 
 ## 5. Settings

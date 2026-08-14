@@ -16,7 +16,7 @@ grep -A40 "^## D-032" docs/decisions-full.md   # a decision in full
 grep -A30 "^### T-052a" docs/task-notes.md     # why a finished task went the way it did
 ```
 
-- `DECISIONS.md` — a one-line index of 51 decisions; full text in `docs/decisions-full.md`.
+- `DECISIONS.md` — a one-line index of 59 decisions; full text in `docs/decisions-full.md`.
   **Read D-032 before starting anything large**: it defines v1 scope and deletes work you might
   otherwise begin.
 - `TASKS.md` — the checklist. Open tasks carry their notes inline; post-mortems on finished ones
@@ -56,7 +56,7 @@ The documents cost more to read than the code does. In order of impact:
 
 - **Be precise about which half you mean.** The app runs on an emulator and the recorder records
   *there*. Battery, background survival and GPS realism are unverified and no emulator can answer
-  them. 334 unit tests and a browser workbench are all the verification the *logic* has.
+  them. 399 unit tests and a browser workbench are all the verification the *logic* has.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not
   earned.

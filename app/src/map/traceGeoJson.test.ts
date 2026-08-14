@@ -15,6 +15,7 @@ import assert from 'node:assert/strict';
 import {
   buildTrace,
   MAX_DRAWN_ACCURACY_M,
+  MAX_DRAWN_SPEED_MPS,
   MIN_FRAME_SPAN_DEG,
   traceBounds,
   type TraceFix,
@@ -168,8 +169,12 @@ test('nothing recorded means no opinion — the caller falls back to the island'
 });
 
 test('the bounds are in MapLibre order: west, south, east, north', () => {
+  // ⚠ Twenty minutes apart, not one. These two points are 55 km apart — the
+  // width of the island — and covering that in a minute is the impossible
+  // movement `MAX_DRAWN_SPEED_MPS` now breaks the line for. At 20 minutes it
+  // is a drive, which is a stroke this app is glad to draw.
   const trace = buildTrace(
-    [fix(0, 32.60, -17.20), fix(1, 32.80, -16.70)],
+    [fix(0, 32.60, -17.20), fix(20, 32.80, -16.70)],
     GAP_MS
   );
   const [west, south, east, north] = traceBounds(trace)!;
@@ -177,4 +182,89 @@ test('the bounds are in MapLibre order: west, south, east, north', () => {
   assert.ok(west < east, 'west is not west of east');
   assert.ok(south < north, 'south is not south of north');
   assert.ok(west < 0 && east < 0, 'Madeira is west of Greenwich; a sign flipped');
+});
+
+// ---------------------------------------------------------------------------
+// Rule 3: a jump nobody could have made (2026-08-14)
+// ---------------------------------------------------------------------------
+
+test('⚠ flying home does not draw a line across the Atlantic', () => {
+  // The exact shape of the defect the project lead saw: a walk on the Funchal
+  // seafront, then one fix in Lisbon, joined into a single confident stroke
+  // 900 km long. Two strokes is the honest drawing; the flight is not one.
+  const trace = buildTrace(
+    [
+      fix(0, 32.6445, -16.9075),
+      fix(1, 32.6448, -16.9068),
+      fix(2, 32.6451, -16.9061),
+      fix(20, 38.7742, -9.1342),
+    ],
+    GAP_MS
+  );
+
+  assert.equal(trace.features.length, 1);
+  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+});
+
+test('⚠ a teleport between geofence tests is not a route', () => {
+  // What the emulator produces, and what an Android fused-provider glitch
+  // produces: a wild fix with a *good* reported accuracy, which is precisely
+  // the case the accuracy filter cannot catch.
+  const trace = buildTrace(
+    [fix(0, 32.65, -16.90), fix(1, 32.75, -17.19), fix(2, 32.65, -16.90)],
+    GAP_MS
+  );
+
+  // Three points, three impossible hops, so nothing survives as a stroke —
+  // and a blank map is the correct answer to "we do not know where you went".
+  assert.equal(trace.features.length, 0);
+});
+
+test('a drive between two levadas is still one line', () => {
+  // The gate must not become a smoother. This is 12 km of VR1 in ten minutes
+  // — 20 m/s, entirely ordinary — and deleting it would delete real movement.
+  const trace = buildTrace(
+    [fix(0, 32.65, -16.91), fix(10, 32.68, -16.78), fix(20, 32.70, -16.65)],
+    GAP_MS
+  );
+
+  assert.equal(trace.features.length, 1);
+  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+});
+
+test('GPS jitter at a standstill never breaks the line', () => {
+  // Fixes delivered in a burst are milliseconds apart, so a few metres of
+  // jitter is arithmetically hundreds of m/s. Below the minimum jump the
+  // speed is not consulted at all — this is what that floor is for.
+  const jitter: TraceFix[] = [
+    { ts: T0, lat: 32.6445, lon: -16.9075, accuracy_m: 8 },
+    { ts: T0 + 40, lat: 32.64453, lon: -16.90747, accuracy_m: 8 },
+    { ts: T0 + 80, lat: 32.64449, lon: -16.90752, accuracy_m: 8 },
+  ];
+
+  const trace = buildTrace(jitter, GAP_MS);
+  assert.equal(trace.features.length, 1);
+  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+});
+
+test('two fixes at the same instant in different places break the line', () => {
+  // Division by zero would say `Infinity > limit` and reach the right answer
+  // by accident; this pins that it is decided on purpose.
+  const trace = buildTrace(
+    [
+      fix(0, 32.6445, -16.9075),
+      fix(1, 32.6448, -16.9068),
+      { ts: T0 + 60_000, lat: 32.75, lon: -17.19, accuracy_m: 10 },
+    ],
+    GAP_MS
+  );
+
+  assert.equal(trace.features.length, 1);
+});
+
+test('the speed limit is far above anything the island allows', () => {
+  // ⚠ The number is an argument, not a measurement, so what is pinned is the
+  // argument: it must stay well clear of a car so it can never smooth a drive.
+  assert.ok(MAX_DRAWN_SPEED_MPS > 30, 'a car on the VR1 must survive this');
+  assert.ok(MAX_DRAWN_SPEED_MPS < 100, 'an aircraft must not');
 });

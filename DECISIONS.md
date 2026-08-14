@@ -87,6 +87,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-056** | The trace is blue, not red. | Provisional |
 | **D-057** | The app uses the platform's map. Google on Android, Apple on iOS later. | **Accepted** |
 | **D-058** | The passport shows every place. Uncollected ones are shaded, and still open. | **Accepted** |
+| **D-059** | The trace breaks where the movement was impossible, not only where time passed. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

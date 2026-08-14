@@ -10,47 +10,65 @@
 # in `content/pois.json` and are the project lead's (T-066), and no threshold
 # may be tuned against a route that was invented.
 #
+#
+# ⚠ MOVED 245 m NORTH ON 2026-08-14, BECAUSE IT WAS IN THE SEA.
+# Every point here was about a quarter of a kilometre offshore, so the app drew
+# the trace across open water — and the project lead reasonably read that as the
+# highlighted line being wrong. It was not: the app drew exactly what this file
+# fed it. Nothing was detectable while the map was a plain style with no
+# coastline worth trusting; switching to Google's cartography made it obvious,
+# which is the argument for looking at the screen rather than at the numbers.
+#
+# The shape was right and only the latitude was wrong, so the whole route moved
+# by one constant. That constant is not a guess: `content/pois.json` puts Forte
+# de São Tiago — which stands on the seafront — at 32.64672, and this route
+# passed 275 m south of it; the Teatro Municipal agreed within 10 m over the
+# 1.2 km between them. Two independent anchors giving the same offset is what
+# makes a uniform shift the right correction rather than a fudge.
+#
+# It is still approximate and still not content.
+#
 # Walking pace, continuous signal, no gaps. This is the route that should
 # produce an unbroken trace: if `traceGeoJson` breaks this into segments,
 # something is wrong with the gap threshold rather than with the data.
-32.645500 -16.921000
-32.645430 -16.920200
-32.645360 -16.919400
-32.645290 -16.918600
-32.645220 -16.917800
-32.645150 -16.917000
-32.645080 -16.916200
-32.645010 -16.915400
-32.644940 -16.914600
-32.644870 -16.913800
-32.644800 -16.913000
-32.644720 -16.912450
-32.644640 -16.911900
-32.644560 -16.911350
-32.644480 -16.910800
-32.644400 -16.910250
-32.644320 -16.909700
-32.644240 -16.909150
-32.644160 -16.908600
-32.644080 -16.908050
-32.644000 -16.907500
-32.643960 -16.906950
-32.643920 -16.906400
-32.643880 -16.905850
-32.643840 -16.905300
-32.643800 -16.904750
-32.643760 -16.904200
-32.643720 -16.903650
-32.643680 -16.903100
-32.643640 -16.902550
-32.643600 -16.902000
-32.643690 -16.901550
-32.643780 -16.901100
-32.643870 -16.900650
-32.643960 -16.900200
-32.644050 -16.899750
-32.644140 -16.899300
-32.644230 -16.898850
-32.644320 -16.898400
-32.644410 -16.897950
-32.644500 -16.897500
+32.647700 -16.921000
+32.647630 -16.920200
+32.647560 -16.919400
+32.647490 -16.918600
+32.647420 -16.917800
+32.647350 -16.917000
+32.647280 -16.916200
+32.647210 -16.915400
+32.647140 -16.914600
+32.647070 -16.913800
+32.647000 -16.913000
+32.646920 -16.912450
+32.646840 -16.911900
+32.646760 -16.911350
+32.646680 -16.910800
+32.646600 -16.910250
+32.646520 -16.909700
+32.646440 -16.909150
+32.646360 -16.908600
+32.646280 -16.908050
+32.646200 -16.907500
+32.646160 -16.906950
+32.646120 -16.906400
+32.646080 -16.905850
+32.646040 -16.905300
+32.646000 -16.904750
+32.645960 -16.904200
+32.645920 -16.903650
+32.645880 -16.903100
+32.645840 -16.902550
+32.645800 -16.902000
+32.645890 -16.901550
+32.645980 -16.901100
+32.646070 -16.900650
+32.646160 -16.900200
+32.646250 -16.899750
+32.646340 -16.899300
+32.646430 -16.898850
+32.646520 -16.898400
+32.646610 -16.897950
+32.646700 -16.897500

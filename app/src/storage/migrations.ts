@@ -110,8 +110,9 @@ export const MIGRATIONS: Migration[] = [
       `CREATE TABLE recording_event (
          id     INTEGER PRIMARY KEY AUTOINCREMENT,
          ts     INTEGER NOT NULL,
-         -- start | stop | permission_change | batch | error | geofence | stamp |
-         -- health_check | trip_end | export | app_launch
+         -- Free text on purpose, so that adding a kind never needs a
+         -- migration. RecordingEventKind in types.ts is the enforced list;
+         -- do not copy it here, where it can only go stale.
          kind   TEXT    NOT NULL,
          detail TEXT
        );`,

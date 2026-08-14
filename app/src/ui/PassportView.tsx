@@ -15,10 +15,24 @@
  * A STAMP IS A DOOR BACK TO THE MAP (T-115, D-052 revised)
  * -------------------------------------------------------
  * Tapping one opens its card — the same card the map shows — with *Show on
- * map* and *Directions*. This is the project lead's instruction of 2026-08-13,
- * and it replaced a layer of dots drawn over every curated place: the map
- * belongs to the trace (D-032), and the way to ask about a place is to ask
- * about the stamp you earned there.
+ * map*, which draws the place's course on the map. This is the project lead's
+ * instruction of 2026-08-13, and it replaced a layer of dots drawn over every
+ * curated place: the map belongs to the trace (D-032), and the way to ask about
+ * a place is to ask about the stamp you earned there. There is no *Directions*
+ * button and there was one for a day: *we aren't a navigator*.
+ *
+ * A ROW SWIPES; "SEE ALL" OPENS IT (project lead, 2026-08-14)
+ * ----------------------------------------------------------
+ * With 80 curated places the five wrapped grids were one very long page, and
+ * the hero — the number you came to see — scrolled away before the second
+ * category. Each row is now a **single horizontal strip** you swipe, with the
+ * next sticker deliberately half-visible at the edge so it reads as "there are
+ * more" rather than as "that is all of them", and a **See all** that unwraps
+ * that row into the grid this file drew before.
+ *
+ * ⚠ The grid did not go away, and that matters: *See all* is the only way to
+ * survey a category, and D-058's point — the uncollected places are the
+ * recommendations — needs a view where you can see them all at once.
  *
  * THE LEVADA ROW IS DIFFERENT IN KIND
  * -----------------------------------
@@ -34,6 +48,7 @@
  * *legible with 3 stamps and with 200* — in a browser, in seconds.
  */
 
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
@@ -77,6 +92,21 @@ const CATEGORY_LABELS: Record<Category, string> = {
   beach: 'Beaches',
   landmark: 'Landmarks',
 };
+
+/**
+ * How many stickers a row may hold before *See all* is worth offering.
+ *
+ * Three fit across a 360 dp phone at `STAMP_SIZE`, so four is the first count
+ * that genuinely scrolls. Below that the strip already shows everything and the
+ * button would expand a row into the identical row.
+ *
+ * ⚠ A constant rather than a measurement. `onLayout` would be exact and would
+ * also arrive a frame late, and this project has already paid for one
+ * measured-inset-arrives-late bug (the card that overlapped the passport
+ * button, 2026-08-13). The cost of being wrong here is a button that opens a
+ * row you could already see.
+ */
+const MIN_STAMPS_FOR_SEE_ALL = 4;
 
 
 /**
@@ -136,6 +166,41 @@ function CategoryRow({
   // collected". A category with places to aim at always shows them (D-058).
   const isEmpty = stamps.length === 0;
 
+  // Collapsed by default, per row, and not remembered. A passport you reopen
+  // looks the way it looked the first time; the hero is at the top and the five
+  // categories are all on one screen.
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = stamps.length >= MIN_STAMPS_FOR_SEE_ALL;
+
+  const cells = stamps.map((stamp) => (
+    // The cell is 96 dp, well over D-015's 60 — which is why the sticker
+    // itself is the tap target rather than a button beside it.
+    <Pressable
+      key={stamp.placeId}
+      accessibilityRole="button"
+      accessibilityLabel={
+        stamp.collected
+          ? `${stamp.name}, collected. Open to show it on the map.`
+          : `${stamp.name}, not collected yet. Open to show it on the map.`
+      }
+      onPress={
+        onSelectStamp === undefined ? undefined : () => onSelectStamp(stamp)
+      }
+      style={({ pressed }) => [
+        styles.stampCell,
+        pressed && styles.stampCellPressed,
+      ]}
+    >
+      <StampArt
+        placeId={stamp.placeId}
+        design={designFor(stamp.placeId, stamp.category)}
+        name={stamp.name}
+        collected={stamp.collected}
+        size={STAMP_DRAW_SIZE}
+      />
+    </Pressable>
+  ));
+
   return (
     // iOS grouped-inset list (D-054): the section's name sits **above** the
     // card in small uppercase grey, and the card holds only content. It is the
@@ -147,47 +212,56 @@ function CategoryRow({
         <Text style={styles.rowTitle}>{CATEGORY_LABELS[category]}</Text>
         {/* The count is text, not a bar. A progress bar at 3/40 reads as
             failure; "3 of 40" reads as a start (CONTEXT §4.1). */}
-        <Text style={styles.rowCount}>
-          {total === 0 ? '—' : `${collected} of ${total}`}
-        </Text>
+        <View style={styles.rowHeaderRight}>
+          <Text style={styles.rowCount}>
+            {total === 0 ? '—' : `${collected} of ${total}`}
+          </Text>
+          {/* iOS puts this exact control here — a tinted word at the trailing
+              edge of a section header — which is most of why the row reads as
+              a system list rather than as an app-shaped box (D-054). */}
+          {canExpand ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                expanded
+                  ? `Collapse ${CATEGORY_LABELS[category]} back to one row`
+                  : `See all ${total} ${CATEGORY_LABELS[category]}`
+              }
+              onPress={() => setExpanded((open) => !open)}
+              // The word is small, so the tap target is grown around it
+              // rather than left at the size of the text (D-015).
+              hitSlop={spacing.sm}
+              style={({ pressed }) => [pressed && styles.seeAllPressed]}
+            >
+              <Text style={styles.seeAll}>
+                {expanded ? 'Show less' : 'See all'}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
       {/* An empty category is its heading and nothing else — no card, no
           reserved space. Five near-identical "no X yet" lines was measured at
           1.1 screens on day one, and read as five small failures rather than
           one invitation; the invitation is given once, under the hero. */}
-      {isEmpty ? null : (
-        <View style={styles.stamps}>
-          {stamps.map((stamp) => (
-            // The cell is 96 dp, well over D-015's 60 — which is why the
-            // sticker itself is the tap target rather than a button beside it.
-            <Pressable
-              key={stamp.placeId}
-              accessibilityRole="button"
-              accessibilityLabel={
-                stamp.collected
-                  ? `${stamp.name}, collected. Open to show it on the map.`
-                  : `${stamp.name}, not collected yet. Open to show it on the map.`
-              }
-              onPress={
-                onSelectStamp === undefined
-                  ? undefined
-                  : () => onSelectStamp(stamp)
-              }
-              style={({ pressed }) => [
-                styles.stampCell,
-                pressed && styles.stampCellPressed,
-              ]}
-            >
-              <StampArt
-                placeId={stamp.placeId}
-                design={designFor(stamp.placeId, stamp.category)}
-                name={stamp.name}
-                collected={stamp.collected}
-                size={STAMP_DRAW_SIZE}
-              />
-            </Pressable>
-          ))}
+      {isEmpty ? null : expanded ? (
+        <View style={styles.stampsGrid}>{cells}</View>
+      ) : (
+        <View style={styles.stampsStrip}>
+          <ScrollView
+            horizontal
+            // The bar would sit across the bottom of the stickers, and the
+            // half-visible sticker at the edge already says "there is more".
+            showsHorizontalScrollIndicator={false}
+            // ⚠ The padding lives on the *content*, not on the strip. Put it on
+            // the container and the last sticker stops short of the card edge
+            // with a gap of dead space behind it, which reads as the end of the
+            // row — the opposite of what the strip is for.
+            contentContainerStyle={styles.stripContent}
+          >
+            {cells}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -322,22 +396,51 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
+  rowHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.md,
+  },
   rowCount: {
     color: colors.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
   },
+  seeAll: {
+    // Tinted, because it is the only thing in the header you can press.
+    color: colors.tint,
+    fontSize: fontSize.small,
+    fontWeight: '600',
+  },
+  seeAllPressed: { opacity: 0.5 },
   rowEmpty: {
     color: colors.textMuted,
     fontSize: fontSize.small,
   },
-  stamps: {
+  /** Expanded: the wrapped grid, unchanged since T-074. */
+  stampsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
     backgroundColor: colors.surface,
     borderRadius: radius.card,
     padding: spacing.md,
+  },
+  /** Collapsed: the same card, holding one scrolling row. */
+  stampsStrip: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    // Vertical only. The horizontal padding belongs to the content, so that a
+    // sticker can scroll all the way to the rounded edge and be clipped by it.
+    paddingVertical: spacing.md,
+    // ⚠ Without this the row scrolls out over the card's corners. The card is
+    // the frame; the strip has to be cut by it.
+    overflow: 'hidden',
+  },
+  stripContent: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   stampCell: {
     width: STAMP_SIZE,

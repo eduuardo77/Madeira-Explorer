@@ -68,7 +68,18 @@ export type RecordingEventKind =
    * *how many were actually sent* can be checked after the fact.
    */
   | 'notification'
-  | 'app_launch';
+  | 'app_launch'
+  /**
+   * A database call was rejected for a released object and **succeeded when
+   * repeated** (T-142).
+   *
+   * ⚠ Its own kind, and not `error`, for two reasons. It is not a failure —
+   * nothing was lost, which is the whole point — so counting it as one would
+   * make the day-1 health check (T-049) cry wolf. And it must still be
+   * *visible*: a fix that works silently cannot be told apart from a bug that
+   * did not happen to fire, and this one is intermittent.
+   */
+  | 'db_retry';
 
 export type Trip = {
   id: number;

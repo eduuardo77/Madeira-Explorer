@@ -2835,3 +2835,51 @@ which is why it could drift in the first place.
   "where next".
 - The uncollected artwork is now most of the screen for most of a trip, so it is worth looking at
   properly. It has been seen once, at ten places.
+
+## D-059 — The trace breaks where the movement was impossible, not only where time passed
+
+**Status: Provisional** — 2026-08-14. Recommended after looking at the map; the threshold has
+never met real GPS.
+
+**The decision.** `traceGeoJson` ends a stroke when two consecutive fixes imply a speed above
+`MAX_DRAWN_SPEED_MPS` (55 m/s, ~200 km/h) over a jump of at least 250 m. Until now it ended a
+stroke only on a silence longer than the recorder's gap threshold.
+
+**What went wrong without it.** The project lead said three times that the highlighted line was
+wrong. It was, and for two reasons that looked like one:
+
+1. Two fixes a second apart and 900 km apart were drawn as a confident straight line. The
+   database on the emulator held a seafront walk, a dozen island-wide geofence test positions and
+   one fix in Lisbon from the trip-end simulation, and the map joined all of them into a star.
+   This is the fabricated continuity ARCHITECTURE §10 forbids, arriving through the door nobody
+   had shut: the old rule asked only *how long was the silence*, never *is this movement
+   possible*.
+2. The test route was 245 m out to sea (fixed in `tools/routes/funchal-seafront.txt`) — an
+   entirely separate defect that produced the same complaint.
+
+**Why a speed gate and not smoothing.** The tempting fix is a Douglas–Peucker pass or a low speed
+limit that tidies the line into something pretty. Both would delete real movement: the drive
+between two levadas is 20 m/s and is exactly as much a part of the trip as the walk. The gate is
+set at double the island's fastest road so it can only ever remove a stroke that is *impossible*,
+never one that is merely fast. An aircraft, at ~250 m/s, does not survive it — which is correct,
+because flying home is a real discontinuity.
+
+**Why not drop the offending fix instead of breaking the line.** Because we do not know which of
+the two is wrong. Breaking the stroke says "we do not know how you got from here to there", which
+is true; deleting a fix would assert that the other one is right. `raw_fix` is untouched either
+way (D-010) — this is a drawing rule, not a data rule.
+
+**⚠ Not tuned.** 55 m/s and the 250 m floor are arguments from the island's speed limits and from
+burst-delivered fixes, not measurements. Real GPS under canopy has never been seen by this
+project. T-131 is where they get tuned against a real trip.
+
+**Alternatives rejected.**
+
+- *Filter by reported accuracy alone* (what existed). Cannot catch this: Android's fused provider
+  emits wild fixes with a **good** reported accuracy, and every fix in the emulator's teleporting
+  set claimed 5 m.
+- *Use `speed_mps` from the fix.* It is often null, and it describes the instant of the fix rather
+  than the interval between two — the wrong quantity for deciding whether a stroke is drawable.
+- *Break on distance alone.* A 2 km jump is impossible in one second and ordinary in ten minutes.
+  Only the pair carries the information.
+

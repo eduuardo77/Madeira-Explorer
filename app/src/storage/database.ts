@@ -13,6 +13,10 @@
 import * as SQLite from 'expo-sqlite';
 import { MIGRATIONS } from './migrations';
 import { onceOrRetry } from './onceOrRetry';
+import {
+  isReleasedSharedObject,
+  MAX_RELEASED_OBJECT_RETRIES,
+} from './releasedObject';
 
 const DATABASE_NAME = 'madeira.db';
 
@@ -39,6 +43,144 @@ const DATABASE_NAME = 'madeira.db';
 export const getDatabase = onceOrRetry<SQLite.SQLiteDatabase>(() =>
   openAndMigrate()
 );
+
+/**
+ * Retry one database call when `expo-sqlite` rejects it for a released object
+ * (T-142).
+ *
+ * The safety argument is in `releasedObject.ts` and rests on one fact: the call
+ * is **rejected before the statement executes**, so nothing was written and a
+ * fresh attempt cannot write twice. Every other failure propagates untouched on
+ * the first throw.
+ *
+ * No delay between attempts, deliberately. The race is another call finalising
+ * a statement at the same moment; by the time this promise rejects and we call
+ * again, that has already happened. A timer here would add latency to the
+ * recorder's write path to solve nothing.
+ */
+async function retryOnRelease<T>(
+  operation: () => Promise<T>,
+  onRecovered: (attempt: number) => void,
+  attempts = MAX_RELEASED_OBJECT_RETRIES
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= attempts; attempt += 1) {
+    try {
+      const result = await operation();
+      if (attempt > 0) {
+        onRecovered(attempt);
+      }
+      return result;
+    } catch (error) {
+      if (!isReleasedSharedObject(error)) {
+        throw error;
+      }
+      lastError = error;
+    }
+  }
+
+  // Out of attempts. This reaches the caller and therefore the diary, which is
+  // the point: a handle that fails this way repeatedly is a different problem
+  // from the momentary race, and it must not be silent.
+  throw lastError;
+}
+
+/**
+ * The database handle every caller gets, with the released-object race handled
+ * once instead of at thirty call sites (T-142).
+ *
+ * ⚠ **A `Proxy`, and the alternative is genuinely wrong.** The obvious version
+ * — copy the handle's properties onto a new object and override six of them —
+ * breaks on a JSI object: its state lives in native slots, not in enumerable
+ * properties, so the copy is a hollow shell and any method reached through it
+ * runs with the wrong `this`. The proxy forwards everything to the real handle,
+ * binds inherited methods back to it, and substitutes only the six below.
+ *
+ * The `wrapped` map immediately underneath is therefore the one thing worth
+ * reading here: it is exactly the list of calls that retry.
+ *
+ * ⚠ `withTransactionAsync` is retried as a whole. That is safe for the same
+ * reason and one more: a transaction that fails part-way rolls back, so the
+ * retry starts from the same state. It is also why the retry must never be
+ * moved *inside* a transaction body.
+ */
+function resilient(db: SQLite.SQLiteDatabase): SQLite.SQLiteDatabase {
+  // ⚠ Only the **variadic** overload of each method is stood in for, because
+  // that is the only one this app uses — `runAsync(sql, a, b)`, never
+  // `runAsync(sql, { $a: 1 })`. Writing it out this way keeps the generics
+  // (`getAllAsync<Row>`) and needs no cast; if somebody reaches for the
+  // object-parameter form later, TypeScript will say so here rather than
+  // silently dropping the retry.
+  /**
+   * Write down that a call had to be repeated (T-142).
+   *
+   * ⚠ Through the **raw** handle, never through the wrapper. A retried write of
+   * the retry notice would be able to call itself, and a diary that can recurse
+   * is worse than no diary. It is also fire-and-forget and swallows its own
+   * failure, for the reason `logError` gives: if the database is the problem
+   * there is nowhere left to write this, and saying so must not break the
+   * caller who has just succeeded.
+   */
+  const noteRecovery = (operation: string) => (attempt: number) => {
+    const times = attempt === 1 ? 'once' : `${attempt} times`;
+    void db
+      .runAsync(
+        'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
+        Date.now(),
+        'db_retry',
+        `${operation}: released object, repeated ${times} and succeeded`
+      )
+      .catch(() => {});
+  };
+
+  const wrapped = {
+    execAsync: (source: string) =>
+      retryOnRelease(() => db.execAsync(source), noteRecovery('execAsync')),
+
+    runAsync: (source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
+      retryOnRelease(
+        () => db.runAsync(source, ...params),
+        noteRecovery('runAsync')
+      ),
+
+    getAllAsync: <T>(source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
+      retryOnRelease(
+        () => db.getAllAsync<T>(source, ...params),
+        noteRecovery('getAllAsync')
+      ),
+
+    getFirstAsync: <T>(source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
+      retryOnRelease(
+        () => db.getFirstAsync<T>(source, ...params),
+        noteRecovery('getFirstAsync')
+      ),
+
+    prepareAsync: (source: string) =>
+      retryOnRelease(() => db.prepareAsync(source), noteRecovery('prepareAsync')),
+
+    withTransactionAsync: (task: () => Promise<void>) =>
+      retryOnRelease(
+        () => db.withTransactionAsync(task),
+        noteRecovery('withTransactionAsync')
+      ),
+  };
+
+  return new Proxy(db, {
+    get(target, property) {
+      if (Object.hasOwn(wrapped, property)) {
+        return wrapped[property as keyof typeof wrapped];
+      }
+
+      // ⚠ `target` is passed as the receiver, and functions are bound to it,
+      // so nothing on the real handle — getter or method — is ever invoked
+      // with the proxy as `this`. A native object cannot reach its own
+      // internal state through a stand-in.
+      const value = Reflect.get(target, property, target);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
+}
 
 async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
@@ -88,7 +230,10 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
     });
   }
 
-  return db;
+  // Wrapped only after the migrations have run. A migration failing for a
+  // released object should be loud and should not be retried behind anyone's
+  // back — a half-applied schema is not recoverable on a user's phone.
+  return resilient(db);
 }
 
 /**

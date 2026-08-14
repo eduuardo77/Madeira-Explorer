@@ -271,42 +271,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Notes: `docs/task-notes.md` (T-052b)
 - [x] **T-052c** ✅ **RESOLVED 2026-08-12 — and it was not what it looked like (D-048).**
       — Notes: `docs/task-notes.md` (T-052c)
-### ⚠ Found 2026-08-14 — the database is being released under the app
+- [x] **T-142** ✅ **FIXED 2026-08-14 — `Cannot use shared object that was already released`.**
+      One retry, for one error signature, applied once at the handle rather than at thirty call
+      sites. The rejection happens *before the statement executes*, which is the whole of the
+      safety argument and is why the predicate matching it is deliberately narrow.
+      — Notes: `docs/task-notes.md` (T-142)
 
-- [!] **T-142** **"Cannot use shared object that was already released" — SQLite handles are dying
-      mid-operation.** Found while verifying the trip-end reveal; it is in the diary of a **cold
-      launch**, not a hot reload.
+### ⚠ Found 2026-08-14 — the trace was drawn across water it could not have crossed
 
-      ```
-      17:50:36  app_launch
-      17:50:37  error  map screen: NativeStatement.runAsync rejected
-                       → Cannot use shared object that was already released
-      17:50:37  trip_end       left_bbox: recorded outside the archipelago
-      17:50:37  notification   reveal: 2 of 2 (D-011)
-      ```
+- [x] **T-143** ✅ **The highlighted line was wrong, twice over, and the second one was ours.**
+      The map joined two fixes 900 km apart into one straight stroke (now D-059), *and* the test
+      route was 245 m out to sea. Both are fixed and both are pinned by tests.
+      — Notes: `docs/task-notes.md` (T-143)
 
-      Earlier in the same diary, the same error from **`onGeofenceTransition`** — which is the
-      path that awards stamps. That is the part that matters: a released handle there means a
-      geofence crossing that is silently not recorded, and D-010 says the trace is the one thing
-      that cannot be recreated.
-
-      — **What is known.** The app never closes the database: `storage/database.ts` opens it once
-      through `onceOrRetry` and there is no `closeAsync` anywhere in `src/`. So the release is
-      coming from underneath — most plausibly the **headless JS context**. `backgroundTasks.ts`
-      defines its tasks in global scope and the OS runs them in a separate context; when that
-      context is torn down, native objects it created are released. If expo-sqlite shares the
-      native database per *process* while each JS context holds its own handle, one context
-      finishing invalidates the other's — which fits every symptom, including why it lands on the
-      foreground map screen at the exact second a background path ran.
-      — **What is not known**, and must not be guessed: whether the *write* was lost or merely the
-      statement. The reveal and the trip end both succeeded in the same second, so it is not
-      failing every time.
-      — ⚠ **Do not "fix" this by catching the error.** It is already caught — that is why it is in
-      the diary and not a crash — and swallowing it is what would turn a lost stamp into silence.
-      — Where to start: reproduce by crossing a geofence while the app is foregrounded, then read
-      the diary. `docs/dev-build.md` has the geofence field-test button. The question to answer
-      first is whether one native database is shared across contexts, which is an expo-sqlite
-      question, not an app one.
+- [x] **T-144** ✅ **Passport categories swipe; "See all" expands one into the grid.**
+      The project lead's instruction of 2026-08-14. Five wrapped grids of 80 places was one very
+      long page; five strips is one and a half screens with the hero still on it.
+      — Notes: `docs/task-notes.md` (T-144)
 
 - [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047

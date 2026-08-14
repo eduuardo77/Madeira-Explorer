@@ -37,6 +37,7 @@ import { GoogleMapsMapType } from 'expo-maps/build/google/GoogleMaps.types';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  PixelRatio,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -106,6 +107,35 @@ type Polyline = {
   color: string;
   width: number;
 };
+
+/**
+ * ⚠ NO CASING, AND THAT IS A RETREAT RATHER THAN A CHOICE.
+ *
+ * MapLibre drew a casing under the trace for free, and it earned its place:
+ * it separates a coloured line from ground of a similar tone. `expo-maps` has
+ * no such concept, so it was tried as two polylines — the wide pale one first,
+ * the core after, with every casing emitted before every core so one segment's
+ * casing could not paint over another's core.
+ *
+ * **It rendered wrong on the device anyway.** One segment came out as a bare
+ * white casing with a hairline core; another came out correct. The colours and
+ * widths in the array were right, so the most likely cause is `expo-maps`
+ * binding polyline updates by **position** rather than by `id` — which is the
+ * kind of thing an alpha library does, and which no amount of care on this side
+ * fixes.
+ *
+ * So: one polyline per segment, weighted to carry itself. Google's basemap is
+ * pale enough that the trace reads without a casing, which is exactly the
+ * property our own dark hillshaded style did *not* have. Worth revisiting when
+ * `expo-maps` leaves alpha — the casing matters more on the dark map (D-026).
+ *
+ * ⚠ **Widths are in PIXELS here; the style constants are in points.** MapLibre
+ * scaled them itself. A width of 4 on a 2.75× screen is four physical pixels —
+ * a hairline, which is exactly how the first build looked.
+ */
+function px(points: number): number {
+  return points * PixelRatio.get();
+}
 
 export default function NativeMapScreen({
   focusPlace,
@@ -189,7 +219,7 @@ export default function NativeMapScreen({
                   longitude: fix.lon,
                 })),
                 color: tracePaint.coreColor,
-                width: tracePaint.coreWidth,
+                width: px(tracePaint.coreWidth),
               }))
             );
           }
@@ -220,7 +250,9 @@ export default function NativeMapScreen({
     }
 
     const drawn = tracePolylines.flatMap((line) =>
-      line.coordinates.map((point) => [point.longitude, point.latitude] as [number, number])
+      line.coordinates.map(
+        (point) => [point.longitude, point.latitude] as [number, number]
+      )
     );
 
     setCamera(frame(drawn.length > 0 ? traceBoundsOf(drawn) : HOME_BOUNDS));
@@ -264,7 +296,7 @@ export default function NativeMapScreen({
                 longitude: lon,
               })),
               color: coursePaint.color,
-              width: coursePaint.width,
+              width: px(coursePaint.width),
             }))
       );
 
@@ -358,7 +390,9 @@ export default function NativeMapScreen({
       <GoogleMaps.View
         style={styles.map}
         cameraPosition={camera ?? undefined}
-        polylines={[...coursePolylines, ...tracePolylines]}
+        // The trace under the course: the course is only ever on screen in
+        // answer to a direct question, so for those few seconds it wins.
+        polylines={[...tracePolylines, ...coursePolylines]}
         markers={marker}
         properties={{
           // Google's own night styling when the user chose dark (D-026's

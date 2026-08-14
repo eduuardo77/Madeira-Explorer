@@ -365,8 +365,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Content curation
 
-- [ ] **T-066** Curate **~80 POIs (target band 60–100, D-049)** on **Madeira only** — hand-verified. Porto Santo POI
+- [~] **T-066** Curate **~80 POIs (target band 60–100, D-049)** on **Madeira only** — hand-verified. Porto Santo POI
       curation is explicitly deferred (D-021) — do not spend effort on it. ⇠ T-015, T-016d
+      — ⚠ **A starter set of 80 exists as of 2026-08-14, and it is not this task.** The project
+      lead asked for it twice; selection was by prominence and coverage, so the app can be used
+      and looked at. **The hand-verification this task is actually about has not happened for a
+      single place.** `content/README.md` says how to redo it and what the traps are.
+      — What the starter set did prove: the passport at 80 is legible, the artwork survives real
+      Portuguese names, and 12 of 80 names are too long for the sticker band (they end in an
+      ellipsis; the card carries the full name).
       — **Every place must be assigned exactly one of the five categories** (D-027):
       **Viewpoints · Levadas · Villages · Beaches · Landmarks**. There is deliberately no
       "Other" — if a place fits nowhere, that is a signal about the place, not a missing row.

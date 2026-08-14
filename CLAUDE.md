@@ -47,6 +47,10 @@ The documents cost more to read than the code does. In order of impact:
    (CONTEXT §6.6). See `docs/dev-build.md`.
 2. **Curating `content/pois.json`.** Selection and editorial judgement, deliberately theirs
    (T-066). `tools/poi-candidates.mjs` prepares the list; do not offer to choose.
+   ⚠ **The file is not empty any more.** On 2026-08-14 the project lead asked twice for a full
+   set, overriding this rule on purpose, so it holds **80 places picked by prominence and
+   coverage — not by merit**. Treat them as scaffolding the project lead is expected to replace,
+   not as a decision already taken, and do not add more without being asked.
 
 ## Honesty rules, each of which cost something here
 

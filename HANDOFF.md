@@ -43,16 +43,35 @@ permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and dr
 ⚠ **Never verified, because no emulator can answer it:** battery, background survival, GPS
 realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app has met real data.**
 
-## The three things that actually block v1
+## What actually blocks v1
 
-**1. `content/pois.json` is empty.** No places → no stamps, no hero number, no passport, no trip
-end. Everything downstream already works. **This is the project lead's** (T-066) — selection is
-editorial judgement and the one thing a competitor cannot buy. It is no longer a blank page:
+⚠ **The content is no longer the blocker; the two below are.** What changed on 2026-08-14 is that
+the app became usable — there are places to collect, the passport lists all of them, and every
+finished feature turned on at once.
+
+**1. ~~`content/pois.json` is empty~~ — it holds 80 places as of 2026-08-14, and they are a
+STARTER SET, not curation.** The project lead asked for them twice, so the standing "do not
+curate" rule was overridden deliberately. 20 viewpoints · 15 levadas · 16 villages · 11 beaches ·
+18 landmarks, all 15 levadas with drawn courses.
+
+**Selection was by prominence and coverage, not by merit.** Nobody has asked of any single place
+*is this worth a stamp*, which is the whole of T-066. `content/README.md` says so at the top and
+says how to redo it. **Deleting the lot and starting again from the candidate list loses nothing.**
 
 ```bash
 node tools/poi-candidates.mjs      # ~200 ranked candidates → content/pois.candidates.json
+node tools/build-levadas.mjs       # levada courses → content/levadas.json (re-run after any edit)
 node tools/validate-content.mjs    # checks the work, targets 60–100 places (D-049)
 ```
+
+⚠ **Two traps that cost something here, both now caught by tools:**
+
+- **The tile pack names viewpoints in fragments.** `pois.candidates.json` gives `Barcelos`,
+  `Bodes`, `Escalvado`; OSM's own nodes at those places say **Pico dos Barcelos**, **Pico dos
+  Bodes**. A stamp reading "GATO" means nothing. Check a name against OSM before trusting it.
+- **A levada name can match two different levadas.** `Levada do Moinho` came out 21.4 km across
+  from 11.9 km of ways — impossible for one path, so it was two. `build-levadas.mjs` now checks
+  span against length and says so.
 
 **2. No physical device.** The emulator settles rendering, storage, UI, permissions and replayed
 routes. A used mid-range Android (~€50–100) is the only source of battery and background-survival

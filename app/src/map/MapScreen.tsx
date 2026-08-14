@@ -26,9 +26,9 @@ import {
   View,
 } from 'react-native';
 import type { Place } from '../content/contentPack';
+import { getLevadaCourse, type LevadaCourse } from '../content/levadaCourses';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
-import { openDirections } from '../places/openDirections';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
@@ -47,6 +47,7 @@ import { parseMapStyle } from './mapStylePreference';
 import type { PlaceMarkerCollection } from './placeMarkers';
 import { buildFocusMarker, EMPTY_PLACE_MARKERS, representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
+import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { TRACE_PAINT } from './traceStyle';
 import type { TraceCollection } from './traceGeoJson';
 import { buildTrace, traceBounds } from './traceGeoJson';
@@ -186,7 +187,11 @@ export default function MapScreen({
   // The tapped place (T-115). Null is the normal state — the card is the one
   // thing on this screen that is not always there.
   const [card, setCard] = useState<PlaceCard | null>(null);
-  const [cardNotice, setCardNotice] = useState<string | null>(null);
+  /**
+   * The course of the levada being shown, or null — which is the normal state
+   * and the state for everything that is not a levada.
+   */
+  const [course, setCourse] = useState<LevadaCourse | null>(null);
   // D-008: the start/stop control exists only for users without Always, for
   // whom it is a primary action rather than a setting (design brief §3.3).
   const [needsRecordingControl, setNeedsRecordingControl] = useState(false);
@@ -341,7 +346,14 @@ export default function MapScreen({
       cameraHeldByFocus.current = true;
 
       setMarker(buildFocusMarker(focusPlace.place, focusPlace.collected));
-      setCardNotice(null);
+      // The course, when there is one to draw (D-055). A viewpoint has none,
+      // and neither does a levada whose name did not match OSM when
+      // `tools/build-levadas.mjs` last ran — that one gets a marker and says
+      // nothing it cannot back up.
+      const nextCourse = hasCourse(focusPlace.place.category)
+        ? getLevadaCourse(focusPlace.place.id)
+        : null;
+      setCourse(nextCourse);
       setCard(
         buildPlaceCard({
           placeId: focusPlace.place.id,
@@ -355,12 +367,22 @@ export default function MapScreen({
         })
       );
 
+      // Frame the **whole walk** where there is one: a levada is 6–12 km of
+      // contour and "where does this go" is the question being asked. Only
+      // when there is no course does the camera fall back to the trailhead.
+      //
       // Flown, not jumped: the movement is what tells the user the map they
       // are looking at is the same island, moved — a cut leaves them
       // wondering what they are looking at.
+      const bounds =
+        nextCourse === null
+          ? null
+          : courseBounds(nextCourse.features[0].geometry.coordinates);
+
       setCameraStop({
-        center: [geofence.lon, geofence.lat],
-        zoom: FOCUS_ZOOM,
+        ...(bounds === null
+          ? { center: [geofence.lon, geofence.lat], zoom: FOCUS_ZOOM }
+          : { bounds }),
         // Room for the card, which opens under it at the same moment.
         padding: { top: 96, right: 48, bottom: 220, left: 48 },
         duration: 900,
@@ -396,30 +418,15 @@ export default function MapScreen({
 
   const tracePaint = TRACE_PAINT[styleName];
   const markerPaint = PLACE_MARKER_PAINT[styleName];
+  const coursePaint = COURSE_PAINT[styleName];
 
   const closeCard = () => {
     setCard(null);
-    setCardNotice(null);
-    // The marker exists only for the card. Closing one closes the other, and
-    // the map goes back to being the trace and nothing else (D-032).
+    // The marker and the course exist only for the card. Closing one closes
+    // all of them, and the map goes back to being the trace and nothing else
+    // (D-032).
     setMarker(EMPTY_PLACE_MARKERS);
-  };
-
-  const handleDirections = () => {
-    if (card === null) {
-      return;
-    }
-    void (async () => {
-      const opened = await openDirections({
-        name: card.name,
-        lat: card.lat,
-        lon: card.lon,
-      });
-      if (!opened) {
-        // The one button on the card did nothing, so it has to say so.
-        setCardNotice('No maps app on this phone could open this place.');
-      }
-    })();
+    setCourse(null);
   };
 
   const toggleRecording = () => {
@@ -499,6 +506,35 @@ export default function MapScreen({
           />
         </GeoJSONSource>
 
+        {/* The levada's course (D-055) — its own geometry, from
+            `content/levadas.geojson`, because the basemap does not carry
+            levada names (the measurement is in `levadaHighlight.ts`).
+            Drawn over the trace and under the marker, and only while a levada
+            card is open. */}
+        {course === null ? null : (
+          <GeoJSONSource id="levada_course" data={course}>
+            <Layer
+              type="line"
+              id="levada_course_casing"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': coursePaint.casingColor,
+                'line-opacity': coursePaint.casingOpacity,
+                'line-width': coursePaint.casingWidth,
+              }}
+            />
+            <Layer
+              type="line"
+              id="levada_course_line"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': coursePaint.color,
+                'line-width': coursePaint.width,
+              }}
+            />
+          </GeoJSONSource>
+        )}
+
         {/* The one place the user asked to see (T-115, D-052 revised).
             Empty unless a card is open.
 
@@ -547,12 +583,7 @@ export default function MapScreen({
         // a card is open (design brief §3).
         bottomSlot={
           card === null ? null : (
-            <PlaceCardView
-              card={card}
-              notice={cardNotice}
-              onDirections={handleDirections}
-              onClose={closeCard}
-            />
+            <PlaceCardView card={card} onClose={closeCard} />
           )
         }
         onOpenPassport={onOpenPassport}

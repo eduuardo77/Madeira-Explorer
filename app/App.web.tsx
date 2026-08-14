@@ -292,12 +292,6 @@ export default function DesignWorkbench() {
                         screen === 'place-card-collected',
                         screen === 'place-card'
                       )}
-                      notice={
-                        screen === 'place-card-collected'
-                          ? 'No maps app on this phone could open this place.'
-                          : null
-                      }
-                      onDirections={() => undefined}
                       // The passport's card carries this; the map's does not.
                       onShowOnMap={
                         screen === 'place-card-collected'

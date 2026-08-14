@@ -1,13 +1,17 @@
 /**
- * The place card (T-115, D-018) — the app's only detail view.
+ * The place card (T-115) — the app's only detail view.
  *
- * WHAT D-018 ALLOWS ON IT
- * -----------------------
- * *Name, photo, distance, and a single Directions button.* No description, no
- * opening hours, no reviews, no "nearby" list, and above all no route drawn on
- * our map. Every one of those is a content obligation somebody has to maintain
- * offline, and the app's answer to all of them is the maps app the user
- * already has.
+ * THERE IS NO DIRECTIONS BUTTON, AS OF 2026-08-13 (D-055)
+ * -------------------------------------------------------
+ * D-018 put one here and it was built, tested and shipped. The project lead
+ * removed it on sight: *"delete the Directions to the levada, we arent a
+ * navigator. Just have the show on map."* D-018's reasoning — never build
+ * navigation — is intact and now goes one step further: we do not hand off to
+ * one either.
+ *
+ * What is left is deliberately almost nothing: what this place is, how far it
+ * is, and a way to see it on the map. No description, no opening hours, no
+ * reviews, no "nearby" list.
  *
  * ⚠ **No photo, because there is no photo.** The content pack has no image
  * field (`placeCard.ts` explains why that is a T-066 question, not a rendering
@@ -32,14 +36,9 @@ import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 export type PlaceCardViewProps = {
   card: PlaceCard;
   /**
-   * Something to tell the user, or null. Set when the handoff found no maps
-   * app — a silent no-op on the one button the card has would be indefensible.
-   */
-  notice: string | null;
-  onDirections: () => void;
-  /**
-   * Take me there on the map. Present on the passport's card and absent on
-   * the map's own, where it would mean nothing (T-115, D-052 revised).
+   * Show me this on the map — and, for a levada, its whole course (D-055).
+   * Present on the passport's card and absent on the map's own, where it
+   * would mean nothing.
    */
   onShowOnMap?: () => void;
   onClose: () => void;
@@ -47,8 +46,6 @@ export type PlaceCardViewProps = {
 
 export default function PlaceCardView({
   card,
-  notice,
-  onDirections,
   onShowOnMap,
   onClose,
 }: PlaceCardViewProps) {
@@ -82,30 +79,22 @@ export default function PlaceCardView({
         </Text>
       )}
 
-      {notice === null ? null : <Text style={styles.notice}>{notice}</Text>}
-
-      {/* One filled button and the rest as plain tinted text — the iOS
-          convention, and it is also the honest hierarchy: Directions is the
-          thing D-018 promises, the others are ways out. Each row is full
-          width, because three controls sharing a phone's width is how a 60 dp
-          target quietly becomes a 40 dp one at large text sizes. */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Directions to ${card.name} in your maps app`}
-        onPress={onDirections}
-        style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
-      >
-        <Text style={styles.directionsText}>Directions</Text>
-      </Pressable>
-
+      {/* One filled button when there is somewhere to go, and a plain tinted
+          way out — the iOS convention (D-054). Each row is full width, because
+          controls sharing a phone's width is how a 60 dp target quietly
+          becomes a 40 dp one at large text sizes. */}
       {onShowOnMap === undefined ? null : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Show ${card.name} on the map`}
+          accessibilityLabel={
+            card.hasCourse
+              ? `Show ${card.name} and the course of the walk on the map`
+              : `Show ${card.name} on the map`
+          }
           onPress={onShowOnMap}
-          style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
         >
-          <Text style={styles.plainButtonText}>Show on map</Text>
+          <Text style={styles.directionsText}>Show on map</Text>
         </Pressable>
       )}
 
@@ -170,12 +159,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: fontSize.small,
   },
-  notice: {
-    color: colors.warn,
-    fontSize: fontSize.small,
-    fontWeight: '700',
-  },
-
   directions: {
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',

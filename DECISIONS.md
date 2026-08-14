@@ -83,6 +83,8 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-052** | A place is reached through the passport, and Directions hands off with a fallback. | Provisional |
 | **D-053** | The camera frames what you walked, not the island. | Provisional |
 | **D-054** | The app follows iOS conventions, on both platforms. | Provisional |
+| **D-055** | No Directions button. *Show on map* draws the levada's course. | Provisional |
+| **D-056** | The trace is blue, not red. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

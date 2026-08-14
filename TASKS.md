@@ -387,7 +387,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
-- [ ] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028, T-028a
+- [~] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028, T-028a
+      — **Half done 2026-08-13 (D-055).** `tools/build-levadas.mjs` extracts the named ways of each
+      curated levada from Overpass into `content/levadas.json`, applying the rule below —
+      `highway=*` preferred, `waterway=*` as the fallback. Simplified for drawing: Levada do Furado
+      is 39 ways, 654 → 181 points, **4 kB**. The app draws it when you ask to see the walk.
+      — ⚠ **What is done is the *drawing*, not the corridor.** No entry/exit nodes and no
+      connectivity check, so trailhead-to-exit crediting (D-009, T-089) still has nothing to stand
+      on. That is the half this task is really about, and it is v2 work after D-032.
+      — ⚠ **The name is the weak point, and a mismatch is a curation signal.** The tool matches OSM
+      exactly first, then by prefix (for `(PR10)` suffixes), and prints each course's span in km —
+      a course "60 km across" is two levadas sharing a word, which is what a loose regex produced
+      on the first run. `Levada dos Balcões` matched nothing at all; until T-066 resolves the
+      spelling, that card shows a marker and no course.
       — **Select by name (`Levada*`) plus hiking-relation membership, never by a single tag**
       (D-029). A levada is two parallel ways sharing one name: the channel (usually
       `waterway=drain`, 2,357 ways) and the footpath beside it (usually `highway=path`, 922).

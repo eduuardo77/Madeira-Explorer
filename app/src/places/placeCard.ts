@@ -1,9 +1,14 @@
 /**
- * What the card says about a place (T-115, D-018).
+ * What the card says about a place (T-115, D-055).
  *
- * D-018 specifies the card as *name, photo, distance, and a single Directions
- * button*. This module is the middle of that: it turns a place, the user's
- * last known position, and the clock into the strings the card renders.
+ * It turns a place, the user's last known position, and the clock into the
+ * strings the card renders.
+ *
+ * ⚠ D-018 specified this card as *name, photo, distance, and a single
+ * Directions button*. The button was built and then deleted by the project
+ * lead on 2026-08-13 — *"we arent a navigator"* — and there is no photo (see
+ * below). What is left is a name, a category, a distance the app can vouch
+ * for, and a way onto the map.
  *
  * ⚠ **There is no photo, and it is not an oversight.** The content pack has no
  * photo field (`contentPack.ts`), so there is nothing to show and nothing to
@@ -24,7 +29,8 @@
  * **2. The distance is a straight line, and the card says so.** On this island
  * that is not pedantry. A miradouro 2 km away across a ravine is a 25-minute
  * drive, and a user who reads "2 km" as walking distance and sets off is
- * exactly the failure D-018 hands to the navigation apps on purpose. The
+ * exactly the failure this app must not invite — the more so now that there is
+ * no Directions button to hand the problem to somebody better at it. The
  * wording lives here, next to the arithmetic, so it cannot be dropped by a
  * later tidy-up of the view.
  *
@@ -33,6 +39,7 @@
  */
 
 import type { Category } from '../content/contentPack.ts';
+import { hasCourse } from '../map/levadaHighlight.ts';
 import { distanceM, isUsableCoordinate } from '../recording/distance.ts';
 import { MAX_DRAWN_ACCURACY_M } from '../map/traceGeoJson.ts';
 
@@ -75,6 +82,12 @@ export type PlaceCard = {
   /** The category as a word, not a slug. */
   categoryLabel: string;
   collected: boolean;
+  /**
+   * True when *Show on map* will draw a course rather than only a marker —
+   * a levada (D-055). The accessible label says which, because "show on map"
+   * means two different things.
+   */
+  hasCourse: boolean;
   lat: number;
   lon: number;
   /** Metres, straight line. Null when rule 1 above withholds it. */
@@ -175,6 +188,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     name,
     categoryLabel: CATEGORY_LABELS[category],
     collected,
+    hasCourse: hasCourse(category),
     lat,
     lon,
     distanceM: metres,

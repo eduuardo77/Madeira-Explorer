@@ -53,15 +53,29 @@ export type TracePaint = {
 
 export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
   /**
-   * Core 4.80:1 on land, 3.28:1 over water. Was `#c2402a`, which measured
-   * 2.97:1 over water — the case a ferry crossing would have exposed.
+   * ⚠ **BLUE, NOT RED, SINCE 2026-08-13.** The project lead looked at the
+   * running app and said the red line was *"all wrong"*, and they were right
+   * for a reason worth writing down: on a pale beige-and-green ground a
+   * saturated red reads as a **warning**, not as a route. It is the colour of
+   * a closed road, and it was drawn over the user's holiday.
+   *
+   * Blue is what every maps app on both platforms draws *your* path in, which
+   * is the association to borrow rather than fight (D-054). It also frees red
+   * entirely, and it separates the trace from the levada course, which is
+   * green (`levadaHighlight.ts`).
+   *
+   * Core 5.01:1 on land, 3.42:1 over water — better than the red it replaced
+   * on both grounds, and the water case is the one a ferry crossing exposes.
+   * The casing is opaque white and wider than before: on the light ground the
+   * line needs separating from hillshade, and at street zoom the old 55%
+   * casing was doing almost nothing.
    */
   light: {
     casingColor: '#ffffff',
-    casingOpacity: 0.55,
-    casingWidth: 7,
-    coreColor: '#b83a26',
-    coreWidth: 3.5,
+    casingOpacity: 0.9,
+    casingWidth: 8,
+    coreColor: '#0A5FCC',
+    coreWidth: 4,
   },
 
   /**
@@ -73,8 +87,11 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
   dark: {
     casingColor: '#0d1319',
     casingOpacity: 0.7,
-    casingWidth: 7,
-    coreColor: '#ff6b4a',
-    coreWidth: 3.5,
+    casingWidth: 8,
+    // 6.31:1 on land, 8.91:1 over water. Bright rather than deep, because on
+    // this ground brightness is what reads — the same hue as the light style's
+    // trace, lifted for the opposite background.
+    coreColor: '#64B5F6',
+    coreWidth: 4,
   },
 };

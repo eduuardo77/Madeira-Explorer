@@ -1182,3 +1182,26 @@ grep -A30 "^### T-052a" docs/task-notes.md
       survive the dark map style (D-026). And `expo-blur` — the most recognisable iOS material of
       all — is untried: it is a new native dependency and a blur composited over a MapLibre GL
       surface is exactly the combination that goes wrong on Android.
+      — **2026-08-13, third pass: no Directions, and the course is real (D-055, D-056).**
+      The project lead: *"ON the stamps delete the Directions to the levada, we arent a navigator.
+      Just have the show on map which will highlight on the map the path / course of the levada."*
+      The button is gone everywhere and `places/directionsLink.ts` and `places/openDirections.ts`
+      are deleted — recoverable from `10b2dc0` if it is ever reversed.
+      — ⚠ **The cheap way to draw the course does not work, and it was measured rather than
+      assumed.** `tiles/pipeline/build.sh` claims the pack "keeps names on road/path features, so
+      levadas stay identifiable". On the emulator, a highlight layer over the pack's own `roads`
+      layer with `["has","name"]` lights up roads; with `["in","Levada",["get","name"]]` it lights
+      up **nothing, anywhere**. Two screenshots, ten minutes, and it saved building the feature on
+      a false premise. `docs/tile-pipeline.md` carries the correction.
+      — So the course ships as its own geometry (`tools/build-levadas.mjs` → `content/levadas.json`,
+      keyed by place id). 4 kB for a full levada after simplification.
+      — ⚠ **A loose name match is worse than no match, in a way that looks like a different bug.**
+      `~"Levada do Furado"` also matched a levada 30 km west; the course then spanned the island and
+      the camera — which frames the *course* — zoomed out to the whole of Madeira. It reads as "the
+      camera is broken", not "the data is wrong". Exact match first, prefix as fallback, and the
+      tool prints each span in km so the next one is caught on a laptop.
+      — **The trace is blue now (D-056).** The project lead: *"the highlight on the map which is in
+      red is all wrong."* On a pale ground a saturated red reads as a warning — a closed road drawn
+      across the user's holiday. Blue is what both platforms draw *your* path in, it frees red, and
+      it separates the trace from the green course. It also measures better: 5.01:1 on land and
+      3.42:1 over water against the red's 4.80 and 3.28.

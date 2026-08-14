@@ -11,7 +11,6 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
-import { openDirections } from '../places/openDirections';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
@@ -43,7 +42,6 @@ export default function PassportScreen({
   const [stamps, setStamps] = useState<PassportStamp[]>([]);
   /** The tapped stamp's card, or null — which is nearly always. */
   const [card, setCard] = useState<PlaceCard | null>(null);
-  const [cardNotice, setCardNotice] = useState<string | null>(null);
   const [cardPlace, setCardPlace] = useState<Place | null>(null);
 
   useEffect(() => {
@@ -103,7 +101,6 @@ export default function PassportScreen({
 
       const geofence = representativeGeofence(place);
 
-      setCardNotice(null);
       setCardPlace(place);
       setCard(
         buildPlaceCard({
@@ -124,24 +121,7 @@ export default function PassportScreen({
 
   const closeCard = () => {
     setCard(null);
-    setCardNotice(null);
     setCardPlace(null);
-  };
-
-  const handleDirections = () => {
-    if (card === null) {
-      return;
-    }
-    void (async () => {
-      const opened = await openDirections({
-        name: card.name,
-        lat: card.lat,
-        lon: card.lon,
-      });
-      if (!opened) {
-        setCardNotice('No maps app on this phone could open this place.');
-      }
-    })();
   };
 
   return (
@@ -163,8 +143,6 @@ export default function PassportScreen({
         <View style={styles.cardHolder} pointerEvents="box-none">
           <PlaceCardView
             card={card}
-            notice={cardNotice}
-            onDirections={handleDirections}
             onShowOnMap={
               cardPlace === null
                 ? undefined

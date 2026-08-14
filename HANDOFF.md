@@ -8,15 +8,20 @@ genuinely blocked.
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
 trace on a map → passport → trip end → reveal. 76 source files and 28 test files under `app/src`
-— roughly 14,000 lines of source and 6,300 of tests — **374 tests**.
+— roughly 14,000 lines of source and 6,300 of tests.
 
-On 2026-08-13 a place became reachable: **passport → tap a stamp → card → Directions / Show on
-map** (T-115, D-052). Checked on the emulator against a temporary fixture pack, with screenshots;
-Directions launched Google Maps. The `geo:` fallback and the whole iOS branch are unverified.
+On 2026-08-13 a place became reachable: **passport → tap a stamp → card → Show on map** (T-115,
+D-052, D-055). For a levada that draws **its real course** from `content/levadas.json`, built by
+`tools/build-levadas.mjs`. There is **no Directions button** — the project lead removed it: *"we
+arent a navigator."*
 
-The map also now **opens on your walk rather than on the island** (D-053), and the whole interface
-was rebuilt to **iOS conventions** (D-054) at the project lead's request — neutral greys, large
-titles, grouped-inset lists, sheets, one filled button per surface. **374 tests.**
+The map also now **opens on your walk rather than on the island** (D-053), the interface follows
+**iOS conventions** (D-054), and the trace is **blue rather than red** (D-056). **371 tests.**
+
+⚠ **Read `docs/competitors.md` before any more work on how the map looks.** WalkNYC — the visual
+reference — ships no map: it uses Apple Maps on iOS and Google Maps on Android. Its look is native
+because it *is* native, which is the thing this project traded away for offline and privacy. That
+trade is the project lead's to revisit and has not been put to them as a decision.
 
 Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
 permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.

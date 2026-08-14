@@ -2617,3 +2617,92 @@ restraint, not Apple's assets.
 - ⚠ **The map's chrome is still dark-on-light.** Apple Maps floats *white* circles on a light map;
   ours are near-black, which is higher contrast outdoors (D-015) but less iOS. It also cannot
   simply flip, because the same chrome sits over the dark style (D-026). Left as is, deliberately.
+
+---
+
+## D-055 — No Directions button. *Show on map* draws the levada's course.
+
+**Status:** Provisional — 2026-08-13, on the project lead's instruction:
+*"ON the stamps delete the 'Directions' to the levada, we arent a navigator. Just have the 'show
+on map' which will highlight on the map the path / course of the levada."*
+
+**Decision, in two halves:**
+
+1. **The Directions handoff is withdrawn from v1.** The card has no Directions button, on any
+   category, and `places/directionsLink.ts` and `places/openDirections.ts` are deleted. D-018 said
+   *never build navigation*; this goes one step further and does not hand off to one either.
+2. **The card's action is *Show on map*, and for a levada that means its whole course** — the real
+   OSM geometry of the walk, drawn in green, with the camera framed to the whole of it rather than
+   to the trailhead.
+
+**⚠ This partly supersedes D-018.** That decision's reasoning is untouched — turn-by-turn is an
+enormous surface, needs live routing data, and is a battery catastrophe — but its *conclusion*,
+"handing off costs one button", no longer holds: the button is gone. The code that implemented it
+was working and emulator-verified (it launched Google Maps); it is recoverable from commit
+`10b2dc0` if this is ever reversed.
+
+**Where the course geometry comes from, and the wrong answer that was tried first.**
+
+The cheap approach was to filter the shipped basemap by name. `tiles/pipeline/build.sh` states that
+the Protomaps schema "keeps names on road/path features, so levadas stay identifiable", which would
+have made this a five-line feature with no new bytes. **Measured on the emulator, that is false for
+the pack we ship:**
+
+| Filter over the pack's own `roads` layer | Result |
+|---|---|
+| `["has", "name"]` | Highlights plenty — ER-103 and friends. The plumbing works. |
+| `["in", "Levada", ["get","name"]]` | **Nothing, anywhere.** |
+
+So the pack carries names for roads and not for levada paths. `docs/tile-pipeline.md` carries the
+correction. The course therefore ships as its own geometry: `tools/build-levadas.mjs` pulls it from
+Overpass at build time into `content/levadas.json`, keyed by **place id** so a rename in
+`pois.json` cannot silently unlink it.
+
+**Alternatives considered:**
+
+- *Ship `content/levadas.geojson` for all 3,981 named ways* (the full T-068 corridor set). Rejected
+  for v1: the app only needs the ~20 curated levadas, and building only those keeps the file at a
+  few kilobytes each — `Levada do Furado` is **4 kB** after simplification, 654 points down to 181.
+- *Parse `tiles/src/portugal-latest.osm.pbf` locally* rather than calling Overpass. Not needed: the
+  survey tool already had the Overpass pattern, and the query is small and by name.
+- *A loose name match.* **Tried, and the emulator showed the cost.** `~"Levada do Furado"` also
+  matched a different levada 30 km west, so the course spanned the island and the camera — which
+  frames the course — zoomed out to the whole of Madeira. Exact match first, prefix as fallback for
+  OSM's `(PR10)` suffixes. The tool now prints each course's span in km, because "60 km across" is
+  what a bad match looks like.
+
+**Consequences:**
+
+- **T-068 is partly done**: the geometry pipeline exists and produces drawable courses. What is
+  *not* done is corridor connectivity and entry/exit nodes, which is what v2 matching needs.
+- A levada whose name does not match OSM gets a marker and no course, and the build tool says so
+  loudly rather than shipping a button that does half of what it says. That happened on the first
+  run — `Levada dos Balcões` returned nothing — and it is a **curation** signal, not a bug.
+- The app gains a second file under `content/`, generated and never hand-edited.
+
+---
+
+## D-056 — The trace is blue, not red.
+
+**Status:** Provisional — 2026-08-13. The project lead, looking at the running app: *"the highlight
+on the map which is in red is all wrong."*
+
+**Decision:** the recorded trace is drawn in a **route blue** (`#0A5FCC` on the light style,
+`#64B5F6` on the dark), with an opaque white casing, replacing the saturated red.
+
+**Reasoning.** On a pale beige-and-green ground a saturated red reads as a **warning** — the colour
+of a closed road — drawn across the user's holiday. Blue is what every maps app on both platforms
+draws *your* path in, which is an association to borrow rather than fight (D-054). It also frees
+red entirely, and separates the trace from the levada course, which is green and can be on screen
+at the same time.
+
+It is not a downgrade in legibility, which is the part D-015 cares about: **5.01:1 on land and
+3.42:1 over water, against the red's 4.80 and 3.28.** Better on both grounds, including the ferry
+case that made the light style's contrast test exist.
+
+**Alternatives considered:**
+
+- *Keep red and change the weight.* Rejected: the objection was the colour, and the association is
+  the problem rather than the thickness.
+- *Match the app's accent exactly* (`#5AA9FF`). Rejected for the light style — at 3.4:1 on land it
+  is too pale for a line read outdoors. The dark style uses a bright blue for the opposite reason.

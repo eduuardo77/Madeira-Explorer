@@ -17,6 +17,19 @@ reproducibly, and is it small enough to ship?
 > measurement record of the rejected route; §2's toolchain remains valid as the documented
 > fallback. Current numbers: **12 MB, zoom 0–15, 8.5s**.
 
+> ### ⚠ Correction, 2026-08-13 — the pack does NOT carry levada names
+> `tiles/pipeline/build.sh` claims the Protomaps schema "keeps names on road/path features, so
+> levadas stay identifiable". **Measured on a device, that is false for the pack we ship.** A
+> highlight layer over the pack's own `roads` layer with `["has","name"]` lights up roads; the same
+> layer with `["in","Levada",["get","name"]]` lights up **nothing, anywhere**.
+>
+> Names survive for roads and not for the levada paths. This does not reopen D-030 — the CC0
+> licence and the styles were the other reasons, and both stand — but the levada course now ships
+> as its own geometry (**D-055**, `tools/build-levadas.mjs` → `content/levadas.json`).
+>
+> ⚠ Whoever rebuilds the pack should re-check this rather than trust either claim: it may be a
+> zoom-level filter in the extract, in which case a different build could restore the names.
+
 **Built:** 2026-08-08. Reproduce with `bash tools/fetch-toolchain.sh` then
 `bash tiles/pipeline/build.sh`.
 

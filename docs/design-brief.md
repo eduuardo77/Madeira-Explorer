@@ -301,6 +301,20 @@ pedestrian wayfinding signage system** (the street pylons, PentaCityGroup / T-Ka
 signage system's design language — heads-up orientation, walk-time circles, building massing on a
 warm ground, ruthless label editing — is what most references to "WalkNYC design" mean. See §6.4.
 
+### 6.0 ⚠ It is Apple Maps on iOS and Google Maps on Android
+
+**The project lead, 2026-08-13.** WalkNYC ships no map of its own: it uses each platform's native
+SDK. Two consequences for everything else in this section:
+
+- **Its map cannot be a target for ours.** Comparing our MapLibre style to Apple's cartography is
+  comparing a style file to a decade of a mapping division's output. What *is* transferable is
+  everything around the map — the chrome, the type, the restraint (D-054) — which is where §6.1
+  below already points.
+- **Their look is native because it is native.** That is not a technique to copy; it is a
+  consequence of a choice this project made in the opposite direction, for offline and privacy.
+  `docs/competitors.md` has the full trade written out — including that reversing it is a live
+  option that belongs to the project lead.
+
 ### 6.1 Worth stealing
 
 - **The battery figure in the toggle label.** See §5.

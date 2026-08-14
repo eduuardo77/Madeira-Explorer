@@ -186,6 +186,31 @@ Four decimal places is about 11 m, which is plenty. More is harmless.
 
 ---
 
+## `levadas.json` — generated, never hand-edited (D-055)
+
+The course of each curated levada, as drawn when the user taps *Show on map*. One feature per
+levada, keyed by **place id**.
+
+```bash
+node tools/build-levadas.mjs   # reads pois.json, writes levadas.json
+```
+
+Re-run it whenever a levada is added, removed or **renamed** in `pois.json`. The tool matches the
+name against OSM — exactly first, then by prefix — and is loud when it finds nothing:
+
+```
+Levada do Furado … 39 highway ways (exact name match), 654 → 181 points, 3.8 km across
+Levada dos Balcões … NOTHING FOUND (0 ways carry a matching name). Check the spelling against OSM.
+```
+
+⚠ **Both of those lines are for you, not for the log.**
+
+- *NOTHING FOUND* means the curated spelling and OSM's disagree — accents included. The app still
+  shows that levada's card and marker; it just cannot draw the walk.
+- **The span in kilometres is the sanity check.** The longest levada on the island is around 25 km,
+  so anything much larger means the name matched a second levada somewhere else, and the map will
+  zoom out to fit both.
+
 ## How the pack reaches the app
 
 `app/src/content/poiCatalogue.ts` imports this directory across the `app/` boundary, which

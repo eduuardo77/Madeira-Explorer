@@ -84,6 +84,42 @@ minute to find out. Worth doing before any marketing copy is written.
 
 ---
 
+## ⚠ WalkNYC uses the platform's own maps — Apple on iOS, Google on Android
+
+**From the project lead, 2026-08-13, "for the record".** The app held up as the visual reference
+does not ship a map. It uses **Apple Maps on iOS and Google Maps on Android**.
+
+This is the single most useful fact anybody has recorded about why our map looks different, and it
+is not a styling gap that can be closed by trying harder:
+
+- **Their cartography is Apple's and Google's.** Decades of label placement, generalisation, colour
+  and terrain work, rendered by the platform, updated without them shipping anything. Nobody
+  matches that with a MapLibre style, and the attempt is the most expensive way to lose.
+- **Their map therefore looks native on each platform, because it *is* native.** An iPhone user
+  sees the map they already know. That is most of the "feel" being asked for (D-054).
+- **And it is exactly what this project traded away.** D-001 forbids the network; D-035/D-036 ship
+  a 19.1 MB tile pack inside the binary so the app works in a levada valley with no signal. Both
+  Apple's and Google's SDKs stream tiles and talk to their servers — adopting either would end the
+  offline guarantee, the zero-network privacy claim (D-044, `docs/store-privacy-answers.md`), and
+  the souvenir renderer's dark style (D-026/D-139), which needs a map we control.
+
+**So the honest framing is a fork, not a defect:**
+
+| | WalkNYC's route | Ours |
+|---|---|---|
+| Map | Platform SDK — free, native-looking, always current | Own pack — offline, private, ours to style |
+| Works with no signal | **No** (their offline claim is about trail data, see above) | **Yes**, entirely |
+| Looks like the phone | **Yes**, by construction | Only as far as our own cartography gets us |
+| Souvenir/dark render | Not possible | The whole of Phase 5 |
+
+⚠ **This is a decision the project lead has not been asked to make, and it is theirs.** Nothing in
+the code assumes it either way beyond `map/` and the tile pipeline. If "looks like the phone's map"
+matters more than "works with no signal", that reverses D-001 and most of Phase 0 — and it should
+be decided deliberately, not drifted into. It is **not** recorded as a D-0xx because no
+recommendation has been made.
+
+---
+
 ## The wider field
 
 | App | Map stack | Backend | Evidence |

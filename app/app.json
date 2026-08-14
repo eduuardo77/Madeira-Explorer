@@ -100,6 +100,7 @@
         }
       ],
       "./plugins/withAndroidBackupRules",
+      "./plugins/withGoogleMapsApiKey",
       "expo-dev-client",
       "@maplibre/maplibre-react-native",
       "expo-asset",

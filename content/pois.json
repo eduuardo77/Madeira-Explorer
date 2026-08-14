@@ -1,5 +1,98 @@
 {
   "formatVersion": 1,
   "destination": "Madeira",
-  "places": []
+  "places": [
+    {
+      "id": "pico-do-areeiro",
+      "name": "Pico do Areeiro",
+      "category": "viewpoint",
+      "regionId": "estreito-de-camara-de-lobos",
+      "geofences": [
+        { "id": "pico-do-areeiro-main", "lat": 32.7356, "lon": -16.9286, "radiusM": 250 }
+      ]
+    },
+    {
+      "id": "fanal",
+      "name": "Fanal",
+      "category": "viewpoint",
+      "regionId": "porto-moniz",
+      "geofences": [
+        { "id": "fanal-main", "lat": 32.8094, "lon": -17.1407, "radiusM": 300 }
+      ]
+    },
+    {
+      "id": "levada-do-furado",
+      "name": "Levada do Furado",
+      "category": "levada",
+      "regionId": "machico",
+      "geofences": [
+        { "id": "levada-do-furado-start", "role": "start", "lat": 32.7345, "lon": -16.8862, "radiusM": 250 },
+        { "id": "levada-do-furado-end", "role": "end", "lat": 32.758, "lon": -16.83, "radiusM": 250 }
+      ]
+    },
+    {
+      "id": "levada-das-25-fontes",
+      "name": "Levada das 25 Fontes",
+      "category": "levada",
+      "regionId": "calheta",
+      "geofences": [
+        { "id": "levada-das-25-fontes-start", "role": "start", "lat": 32.7622, "lon": -17.1315, "radiusM": 250 },
+        { "id": "levada-das-25-fontes-end", "role": "end", "lat": 32.7656, "lon": -17.1259, "radiusM": 250 }
+      ]
+    },
+    {
+      "id": "porto-moniz",
+      "name": "Porto Moniz",
+      "category": "village",
+      "regionId": "porto-moniz",
+      "geofences": [
+        { "id": "porto-moniz-main", "lat": 32.8669, "lon": -17.1667, "radiusM": 600 }
+      ]
+    },
+    {
+      "id": "camara-de-lobos",
+      "name": "Câmara de Lobos",
+      "category": "village",
+      "regionId": "camara-de-lobos",
+      "geofences": [
+        { "id": "camara-de-lobos-main", "lat": 32.6486, "lon": -16.9752, "radiusM": 600 }
+      ]
+    },
+    {
+      "id": "praia-do-porto-do-seixal",
+      "name": "Praia do Porto do Seixal",
+      "category": "beach",
+      "regionId": "sao-vicente",
+      "geofences": [
+        { "id": "praia-do-porto-do-seixal-main", "lat": 32.8219, "lon": -17.1031, "radiusM": 250 }
+      ]
+    },
+    {
+      "id": "praia-da-calheta",
+      "name": "Praia da Calheta",
+      "category": "beach",
+      "regionId": "calheta",
+      "geofences": [
+        { "id": "praia-da-calheta-main", "lat": 32.7204, "lon": -17.1784, "radiusM": 250 }
+      ]
+    },
+    {
+      "id": "jardim-tropical-monte-palace",
+      "name": "Jardim Tropical Monte Palace",
+      "category": "landmark",
+      "regionId": "funchal",
+      "geofences": [
+        { "id": "jardim-tropical-monte-palace-main", "lat": 32.6742, "lon": -16.9029, "radiusM": 200 }
+      ]
+    },
+    {
+      "id": "cabo-girao",
+      "name": "Cabo Girão",
+      "category": "landmark",
+      "regionId": "camara-de-lobos",
+      "geofences": [
+        { "id": "cabo-girao-main", "lat": 32.6485, "lon": -17.0004, "radiusM": 250 }
+      ]
+    }
+  ]
 }

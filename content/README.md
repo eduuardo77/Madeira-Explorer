@@ -15,6 +15,20 @@ not a rewrite.
 
 ---
 
+> ### ⚠ The ten places in `pois.json` are a STARTER SET, not curation — 2026-08-14
+> The project lead asked for ten places so the app could be seen working. They are real, they
+> validate, and two of them have levada courses — but **they are not T-066**. They were picked
+> mechanically from `pois.candidates.json` for coverage (two per category, spread across the
+> island), not for whether they deserve a stamp. That judgement is still entirely to be made.
+>
+> **Delete them freely.** `git rm`-ing the lot and starting from the candidate list loses nothing.
+> What they are good for: seeing the passport at real density, checking the artwork against real
+> Portuguese names, and proving the chain end to end.
+>
+> ⚠ **The two levada endpoints are approximate.** They are OSM way endpoints, not the trailhead
+> and exit a walker would recognise, and the stamp rule (D-009) needs both crossed. Pairing the
+> right entry with the right exit is exactly the local knowledge this file exists to hold.
+
 ## Curating `pois.json` (T-066)
 
 **The target is ~80 places (band 60–100, D-049) on Madeira only.** Porto Santo is deliberately

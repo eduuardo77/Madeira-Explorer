@@ -195,6 +195,40 @@ async function main() {
     );
   }
 
+  // Every levada should have a course to draw (D-055). A missing one is not a
+  // broken pack — the card still works, it just shows a marker and no walk —
+  // but it is invisible in the app and obvious here, which is the right place
+  // for it to be noticed. Almost always a spelling difference against OSM.
+  const levadas = places.filter((place) => place.category === 'levada');
+  if (levadas.length > 0) {
+    const coursePath = path.resolve(repositoryRoot, 'content', 'levadas.json');
+    let courses = new Set();
+    try {
+      const raw = JSON.parse(await readFile(coursePath, 'utf8'));
+      for (const feature of raw.features ?? []) {
+        const id = feature?.properties?.placeId;
+        if (typeof id === 'string') {
+          courses.add(id);
+        }
+      }
+    } catch {
+      warn(
+        'levadas.json',
+        'missing or unreadable - run: node tools/build-levadas.mjs'
+      );
+    }
+
+    for (const levada of levadas) {
+      if (!courses.has(levada.id)) {
+        warn(
+          levada.id,
+          `no course in levadas.json, so "Show on map" draws a marker and no walk. ` +
+            `Check the name against OSM, then re-run: node tools/build-levadas.mjs`
+        );
+      }
+    }
+  }
+
   const byCategory = countByCategory(parsed.pack);
   const byRegion = new Map();
   for (const place of places) {

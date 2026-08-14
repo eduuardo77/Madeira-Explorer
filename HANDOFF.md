@@ -26,9 +26,11 @@ this deliberately, against a recommendation to keep our own map.
 Swapping back is one import in `App.tsx`.
 
 ⚠ **You need a Google Maps API key to see a map at all.** Copy `app/.env.example` to `app/.env` and
-paste one (Google Cloud → enable *Maps SDK for Android* → restricted key). Without it the map is a
-grey grid and everything else still works. **This is the project lead's to obtain** — like the
-POIs and the physical device.
+paste one — `docs/dev-build.md` has the click path, the restriction to apply, and why none of it
+costs money. Without a key the map is blank and everything else still works.
+
+**The chain is verified on Google Maps** (2026-08-14): passport → stamp → card → *Show on map* →
+the camera frames the levada's whole course and draws it. Screenshots in `tools/out/shots/`.
 
 ⚠ **D-001 is partially superseded.** The app is no longer zero-network: the map streams tiles. The
 trip still never leaves the phone. `legal/privacyPolicy.ts` is rewritten to match;

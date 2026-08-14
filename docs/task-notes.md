@@ -1205,3 +1205,21 @@ grep -A30 "^### T-052a" docs/task-notes.md
       across the user's holiday. Blue is what both platforms draw *your* path in, it frees red, and
       it separates the trace from the green course. It also measures better: 5.01:1 on land and
       3.42:1 over water against the red's 4.80 and 3.28.
+      — **2026-08-14: verified end to end on Google Maps (D-057).** The project lead supplied an
+      API key; the whole chain was re-run on the new renderer with a temporary fixture pack
+      (reverted): passport → tap the stamp → card → *Show on map* → the camera framed the whole
+      course and drew it in green along the contour from Ribeiro Frio east. Google's own labels —
+      *Parque Natural do Ribeiro Frio*, the ER103 shield — turn out to add real context our own
+      style never had.
+      — Three defects the migration introduced, all found by looking rather than by a test:
+        · **the key never reached the manifest.** Expo's `withGoogleMapsApiKey` mod runs only as a
+          fallback for `react-native-maps`; with `expo-maps` nothing wrote it. A correct key and a
+          blank map, which reads as a billing or restriction problem and is neither. Fixed with
+          `app/plugins/withGoogleMapsApiKey.js`;
+        · **the trace drew as a hairline** — `expo-maps` widths are pixels, ours are points;
+        · **the casing cannot be drawn.** Two polylines with all casings before all cores still
+          rendered one segment as a bare casing with a hairline core, which points at `expo-maps`
+          binding polylines by position rather than by id. Dropped; Google's pale basemap carries
+          the line without one.
+      — ⚠ **The marker is now Google's red pin**, not the drawn circle `placeStyle.ts` specifies.
+      That palette was measured against our own ground and no longer applies. Not yet judged.

@@ -64,7 +64,8 @@ tools/out/shots/
 # uiautomator hierarchy dumps (throwaway diagnostics)
 tools/out/ui*.xml
 
-# Gradle build logs, written by `npx expo run:android > tools/out/build.log`.
+# Gradle build logs, written by `npx expo run:android > tools/out/build.log
+tools/out/metro.log`.
 tools/out/build.log
 
 # The POI triage list is generated (tools/poi-candidates.mjs) and is not content.

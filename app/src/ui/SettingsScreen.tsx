@@ -156,7 +156,6 @@ export default function SettingsScreen({
     <SettingsView
       permission={permission}
       mapStyle={mapStyle}
-      mapPackBytes={null}
       onChangeMapStyle={changeMapStyle}
       onOpenSystemSettings={() => {
         void Linking.openSettings().catch(() => undefined);

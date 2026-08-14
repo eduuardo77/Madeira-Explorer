@@ -264,7 +264,6 @@ export default function DesignWorkbench() {
             <SettingsView
               permission="while_using"
               mapStyle="light"
-              mapPackBytes={19_100_000}
               onChangeMapStyle={() => undefined}
               onOpenSystemSettings={() => undefined}
               // Forced on so the row can be looked at (D-038). On the web

@@ -34,8 +34,6 @@ export type SettingsViewProps = {
   permission: PermissionLevel;
   /** Light for use, dark for the souvenir (D-026). */
   mapStyle: 'light' | 'dark';
-  /** Bytes on disk, or null while unknown. */
-  mapPackBytes: number | null;
   onChangeMapStyle: (style: 'light' | 'dark') => void;
   onOpenSystemSettings: () => void;
   /**
@@ -137,7 +135,6 @@ function describePermission(permission: PermissionLevel): string {
 export default function SettingsView({
   permission,
   mapStyle,
-  mapPackBytes,
   onChangeMapStyle,
   onOpenSystemSettings,
   onOpenBatterySettings,
@@ -213,19 +210,25 @@ export default function SettingsView({
           </View>
         </Section>
 
+        {/* ⚠ This section said the opposite until 2026-08-14: *the whole island
+            is already on your phone, so the map works with no signal and uses
+            no data*. That was true of the offline pack and became false the
+            day the app switched to Google's map (D-057), which streams. It is
+            the kind of stale reassurance that is worse than no reassurance,
+            because the user finds out in a laurel forest with no signal.
+
+            The row that reported the pack's size went with it. It was already
+            dead — the caller had been passing `null` — and it implied the map
+            on screen was the one on the phone.
+
+            What replaces it is the distinction that actually matters: the map
+            needs a connection, and the recording does not. If the MapLibre
+            path ever ships again (`map/MapLibreScreen.tsx` is kept), this is
+            one of the places that has to change back. */}
         <Section
           title="Map"
-          footnote="The whole island is already on your phone, so the map works with no signal and uses no data."
-        >
-          <Row
-            label="Map of Madeira"
-            value={
-              mapPackBytes === null
-                ? 'Ready'
-                : `Ready · ${(mapPackBytes / 1_000_000).toFixed(0)} MB`
-            }
-          />
-        </Section>
+          footnote="The map is Google's and needs a connection to draw. Your trip is recorded either way — losing signal on a levada costs you the map, never the walk."
+        />
 
         <Section
           title="About"

@@ -1432,3 +1432,37 @@ grep -A30 "^### T-052a" docs/task-notes.md
       colour** rather than a guessed grey. It was the guessed grey that let the whole palette be
       crushed downwards without any test objecting.
 
+### T-147 — keeping the dark map OEM, and what that actually took
+
+- **2026-08-15.** The project lead looked at the authored night style and asked the right
+  question: *isn't there a native Google Maps dark mode?* There is. The app was already passing
+  `colorScheme: DARK` for it, and was also passing an authored style that **overrode it on every
+  device** — including the ones where Google's own would have worked. That was the wrong default
+  for a project whose whole map decision (D-057) is "use the platform's".
+      — **Why the native one had never worked.** It needs the *latest* Maps renderer. Which
+      renderer loads is Play services' choice **unless the app asks**, and nothing in `expo-maps`
+      asks — the emulator's log said `preferredRenderer: null` and `loadedRenderer: LEGACY`. A
+      config plugin now asks for LATEST during `Application.onCreate`, before any map exists,
+      which is the documented point to do it.
+      — ⚠ **It needed a dependency nobody would guess.** `MapsInitializer` would not resolve:
+      `expo-maps` pulls the Maps SDK in as its own `implementation` dependency, which by design
+      keeps it off the consuming module's compile classpath. One line in `app/build.gradle`,
+      pinned to the version Gradle already resolves (19.2.0) so it adds a name rather than a
+      second copy.
+      — ⚠ **And asking still was not getting.** With the plugin in place the emulator reports
+      `preferredRenderer: LATEST` and `loadedRenderer: LEGACY` — its Play services does not have
+      the new renderer at all. Verified by screenshot: with the native path alone, choosing Dark
+      produced **Google's light map**, silently. That is what would have shipped to every user on
+      an older phone.
+      — **So the choice is made from fact rather than from a constant.** The SDK's callback writes
+      one word — `LATEST` or `LEGACY` — into the app's files directory, and `mapsRenderer.ts`
+      reads it synchronously (an async read would flash a white map for a frame, which is the
+      original complaint). `darkMode.ts` then hands the map Google's dark cartography untouched
+      where it works, and the authored style only where it cannot.
+      — **Why a file and not a native module.** A module for this would be a bridge, a
+      registration and a package to keep working across Expo upgrades, all to move a string that
+      changes at most once per launch. `expo-file-system` was already a dependency.
+      — ⚠ **What this means for testing here.** The emulator is now the one device that can never
+      show what most users will see. Its dark map is the fallback; a current phone gets Google's.
+      Both paths are covered by tests, but only the fallback has been seen.
+

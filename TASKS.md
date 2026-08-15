@@ -279,6 +279,25 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 
 ### Settings, polished — 2026-08-15
 
+- [x] **T-147** **Google's own dark map, where the device can draw it.** The project lead asked to
+      keep it OEM; the app was drawing an authored style on every device instead.
+      — ⚠ **`colorScheme: DARK` needs the latest Maps renderer**, and nothing in `expo-maps` ever
+      asks Play services for it — the log said `preferredRenderer: null`.
+      `plugins/withLatestMapsRenderer.js` now asks in `Application.onCreate`, which is the
+      documented way and has to happen before any map exists.
+      — ⚠ **Asking is not getting.** This emulator asks for LATEST and is handed **LEGACY**: Play
+      services there does not have the new renderer. So the app records what it actually got and
+      chooses from that (`map/mapsRenderer.ts` → `map/darkMode.ts`) — Google's dark map where it
+      works, the authored one where it cannot. Nobody gets a white map after choosing dark.
+      — The renderer reaches JavaScript as **one word in a file**, written by the SDK's own
+      callback. A native module for that would be a bridge, a registration and a package to keep
+      alive across Expo upgrades, to carry a string that changes once per launch.
+      — ⚠ Needed `play-services-maps` declared in the app module: `expo-maps` keeps it as an
+      `implementation` dependency, so `MapsInitializer` is not on the consuming classpath.
+      — Notes: `docs/task-notes.md` (T-147)
+
+
+
 - [x] **T-146** Background tracking, its three tiers, *Start walk*, a drawn settings icon, and a
       dark map that is actually dark. The project lead's list of 2026-08-15.
       — **Tiers are named, not priced** (D-060). Asked for as *~3% / medium / ~15–20%*; they ship

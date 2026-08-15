@@ -19,7 +19,7 @@ The map also now **opens on your walk rather than on the island** (D-053), the i
 **iOS conventions** (D-054), and the trace is **blue rather than red** (D-056).
 
 On 2026-08-14 the passport's five categories became **swipeable strips with a *See all*** that
-expands one into the old grid (T-144) — 80 places would not fit as five grids. **415 tests.**
+expands one into the old grid (T-144) — 80 places would not fit as five grids. **420 tests.**
 
 ⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
 `expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided
@@ -97,11 +97,16 @@ use. **The largest open item in the project.**
 
 ## Closed on 2026-08-14/15, and worth knowing about
 
-- ⚠ **Dark mode needs two implementations, and one of them is invisible on most phones.**
-  `expo-maps` `colorScheme: DARK` is a **latest-renderer** feature; where Google Play services
-  loads the legacy renderer — this emulator, and plenty of cheap Android phones — it is ignored
-  **in silence**. `map/googleNightStyle.ts` is the authored style that works on both. Check
-  `adb logcat | grep loadedRenderer` before believing a map property does nothing.
+- ⚠ **The dark map is Google's own where the device can draw it, and ours where it cannot**
+  (T-147). `colorScheme: DARK` needs the **latest** Maps renderer; on the legacy one it is ignored
+  in silence and the user gets a white map. A config plugin asks Play services for LATEST and
+  records what it was actually given; `map/mapsRenderer.ts` reads that and `map/darkMode.ts`
+  chooses. ⚠ **This emulator is handed LEGACY**, so it always shows the fallback — it cannot show
+  what most users will see. One line tells you which you are looking at:
+
+  ```bash
+  adb logcat -s MadeiraExplorer
+  ```
 - ⚠ **The dark map takes the floating chrome with it.** The settings control measures 15.36:1 on
   Google's light map and **1.13:1** on the night one. Anything new that floats over the map has to
   be checked against both.
@@ -150,7 +155,7 @@ use. **The largest open item in the project.**
 ## Verifying work
 
 ```bash
-cd app && npm test          # 415 tests, Node's own runner
+cd app && npm test          # 420 tests, Node's own runner
 cd app && npx tsc --noEmit  # strict
 bash tools/run-emulator.sh && cd app && npm run android
 bash tools/replay-route.sh tools/routes/funchal-seafront.txt

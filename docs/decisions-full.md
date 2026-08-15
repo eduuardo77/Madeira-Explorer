@@ -2883,3 +2883,41 @@ project. T-131 is where they get tuned against a real trip.
 - *Break on distance alone.* A 2 km jump is impossible in one second and ordinary in ten minutes.
   Only the pair carries the information.
 
+## D-060 — The battery tiers are named by what they do, not by a percentage
+
+**Status: Provisional** — 2026-08-15. The project lead asked for three tiers labelled *~3%*,
+*medium* and *~15–20%*. They ship as **Battery saver / Balanced / Best detail**, each with a
+sentence describing its behaviour, and no number anywhere.
+
+**The decision.** Until a real 12-hour day has been measured on real hardware (T-054), the
+settings screen describes the difference between the tiers instead of pricing it.
+
+**Why, and it is the same rule that made the battery figure `null`.** D-041 keeps the app's
+reported battery cost null on purpose and a test holds it there, because no figure in this project
+has ever been measured — there has never been a physical device (CONTEXT §6.6). A percentage in a
+settings screen is not a smaller claim than one in a report; it is a larger one, because it is the
+number a tracking app is judged on and the user will check it against their own battery screen.
+"~3%" printed next to a tier that turns out to cost 9% is the kind of thing that gets an app a
+one-star review saying it lies.
+
+**What the tiers do differ by, which is knowable without a device.** `trackingPreference.ts`
+scales the activity profiles: the cheap tier asks less often, over longer distances, at coarse
+accuracy, and lets the OS pause the GPS entirely; the expensive one asks more often and never
+pauses. A test pins the *ordering*, so no tier is ever cheaper in one dimension and dearer in
+another. Direction is provable, magnitude is not.
+
+**What the user loses.** A number they can plan around. That is a real loss, and it is why the
+footnote says plainly that we would rather show a measured figure than a guess — it turns the
+absence into a statement about the app's honesty rather than a gap.
+
+**Alternatives rejected.**
+
+- *Print the project lead's numbers.* They were plausible, and plausible is exactly the problem.
+- *Print a range with a disclaimer.* A disclaimer under a number does not stop the number being
+  remembered; the number is what gets quoted back.
+- *Measure it on the emulator.* The emulator cannot answer a battery question at all (CONTEXT
+  §6.6), and a number from it would be worse than none because it would look measured.
+
+**When this reverses.** T-054, on a real phone, over a real day, per tier. The numbers then go in
+the same three labels and this decision becomes Superseded.
+

@@ -31,6 +31,18 @@ import {
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { parseMapStyle } from '../map/mapStylePreference';
+import type { TrackingQuality } from '../recording/trackingPreference';
+import {
+  DEFAULT_BACKGROUND_TRACKING,
+  DEFAULT_TRACKING_QUALITY,
+} from '../recording/trackingPreference';
+import {
+  getTrackingQuality,
+  isBackgroundTrackingAllowed,
+  setBackgroundTrackingAllowed,
+  setTrackingQuality,
+} from '../recording/trackingSettings';
+import { applyBackgroundTrackingChange } from '../recording/tripRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -47,6 +59,12 @@ export default function SettingsScreen({
 }) {
   const [permission, setPermission] = useState<PermissionLevel>('undetermined');
   const [mapStyle, setMapStyle] = useState<'light' | 'dark'>('light');
+  const [backgroundTracking, setBackgroundTracking] = useState(
+    DEFAULT_BACKGROUND_TRACKING
+  );
+  const [trackingQuality, setQuality] = useState<TrackingQuality>(
+    DEFAULT_TRACKING_QUALITY
+  );
   const [confirmingErase, setConfirmingErase] = useState(false);
   const [erased, setErased] = useState(false);
   const [showingPolicy, setShowingPolicy] = useState(false);
@@ -61,6 +79,51 @@ export default function SettingsScreen({
       .get(appStateDao.AppStateKey.MapStyle)
       .then((raw) => setMapStyle(parseMapStyle(raw)))
       .catch(() => undefined);
+
+    void isBackgroundTrackingAllowed()
+      .then(setBackgroundTracking)
+      .catch(() => undefined);
+
+    void getTrackingQuality().then(setQuality).catch(() => undefined);
+  }, []);
+
+  /**
+   * The background-tracking switch (T-146).
+   *
+   * ⚠ Unlike the map style, this one is **not** just remembered for the next
+   * screen to read. It starts or stops the recorder there and then, because
+   * the user has just told the app whether it may follow them — and a consent
+   * switch that takes effect when you next happen to open a different screen
+   * is not consent.
+   *
+   * The optimistic `setBackgroundTracking` keeps the switch under the thumb
+   * that moved it; the write and the recorder change happen behind it.
+   */
+  const changeBackgroundTracking = useCallback((allowed: boolean) => {
+    setBackgroundTracking(allowed);
+    void (async () => {
+      try {
+        await setBackgroundTrackingAllowed(allowed);
+        await applyBackgroundTrackingChange(allowed);
+      } catch (error) {
+        await recordingEventDao.logError('background tracking switch', error);
+      }
+    })();
+  }, []);
+
+  /**
+   * The tier (T-146).
+   *
+   * Stored only. The recorder picks it up the next time it sets a sampling
+   * profile, which `samplingGate` does on every OS wake-up — within minutes,
+   * without restarting location updates and so without ending the trip. A
+   * restart here would cost the user the continuity of a walk in progress to
+   * apply a preference about battery, which is the wrong trade in both
+   * directions.
+   */
+  const changeTrackingQuality = useCallback((next: TrackingQuality) => {
+    setQuality(next);
+    void setTrackingQuality(next).catch(() => undefined);
   }, []);
 
   /**
@@ -157,6 +220,10 @@ export default function SettingsScreen({
       permission={permission}
       mapStyle={mapStyle}
       onChangeMapStyle={changeMapStyle}
+      backgroundTracking={backgroundTracking}
+      onChangeBackgroundTracking={changeBackgroundTracking}
+      trackingQuality={trackingQuality}
+      onChangeTrackingQuality={changeTrackingQuality}
       onOpenSystemSettings={() => {
         void Linking.openSettings().catch(() => undefined);
       }}

@@ -1379,3 +1379,45 @@ grep -A30 "^### T-052a" docs/task-notes.md
       **not** verified is the rule's two-gate path, or any of it under real GPS. T-077 stays open
       for the field.
 
+### T-146 — the settings polish, and the three things it uncovered
+
+- **2026-08-15.** The project lead asked for five things. Three of them were the thing they looked
+  like; two were symptoms.
+      — **The settings icon read as a re-center button**, and that is the *second* time: the
+      passport button was once `🛂`, rendered as a blue rectangle, and drew the same complaint in
+      almost the same words. A `⚙` at 22 dp anti-aliases into a circle with a dot in it, which is
+      what "centre on me" looks like on every map app the user owns. It is now `SettingsMark` —
+      sliders, drawn, chosen because it has **no radial symmetry** and so cannot be read as a
+      target. A font glyph is not a design decision, it is a request that somebody else's font
+      make one.
+      — **The Light/Dark toggle really was broken**, and the comment beside it claimed otherwise:
+      *"Google's own night styling when the user chose dark"*, next to a `GoogleMaps.View` that
+      was passed no `colorScheme` at all. The preference had only ever recoloured the trace.
+      — ⚠ **Fixing it properly took two mechanisms.** `colorScheme: DARK` exists in expo-maps
+      57.0.1 and does nothing here, because logcat says `loadedRenderer: LEGACY` — it is a
+      latest-renderer feature, ignored without a word where Play services falls back. That fallback
+      is common on the cheap Android phones this app is aimed at. So the app also ships an
+      **authored night style** through `mapStyleOptions`, the classic API both renderers honour.
+      Written to this project's palette, with the trace as the brightest thing on screen (D-026)
+      and Google's POI pins off, because D-052 deleted our own markers and letting somebody else's
+      back in would undo that decision without anybody making it.
+      — ⚠ **The dark map broke the chrome, measurably.** The floating settings control is
+      `colors.surface`: **15.36:1** on Google's light map, **1.13:1** on the night one. It did not
+      fade, it vanished. A hairline border, dark map only, at 5.91:1 — and a test now holds it.
+      — **Background tracking** is a switch plus three tiers, and the tiers scale the existing
+      activity profiles rather than replacing them (`trackingPreference.ts`, pure and tested).
+      Keeping them a separate axis matters: `SamplingProfile` answers *what is the user doing*, and
+      the app decides that; the tier answers *how much battery may you spend*, and only the user
+      decides that.
+      — **On the numbers**, see D-060. Asked for as percentages, shipped as descriptions, because
+      no battery figure in this project has been measured and the settings screen is the worst
+      possible place to start guessing.
+      — ⚠ **And a third missing seam.** Nothing had ever started recording for a user who granted
+      Always — onboarding set a flag and stopped, and those users are deliberately shown no start
+      button (design brief §3.3) because the app is supposed to do it for them. So the app's one
+      promise was kept by nobody, exactly like T-145 one screen along. `syncRecordingWithPreferences`
+      now starts it on launch, re-registers geofences if it is already running, and never stops a
+      walk the user began by hand.
+      — Verified on the emulator: the icon, both map styles, the switch, the three tiers, and
+      *Start walk* appearing when the switch is off.
+

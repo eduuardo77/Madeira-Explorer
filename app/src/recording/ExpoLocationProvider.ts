@@ -17,6 +17,8 @@ import type {
   SamplingProfile,
 } from './LocationProvider';
 import { getSamplingParameters } from './samplingPolicy';
+import { scaleForQuality } from './trackingPreference';
+import { getTrackingQuality } from './trackingSettings';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 function toExpoAccuracy(
@@ -48,10 +50,20 @@ function toExpoActivityType(profile: SamplingProfile): Location.ActivityType {
   }
 }
 
-function buildOptions(
+/**
+ * ⚠ Async, because the user's tier is stored (T-146).
+ *
+ * The activity profile says what the *app* wants; `scaleForQuality` then
+ * applies what the *user* allowed. In that order, never the reverse: a tier is
+ * a ceiling on cost, and a ceiling applied before the request is not a ceiling.
+ */
+async function buildOptions(
   profile: SamplingProfile
-): Location.LocationTaskOptions {
-  const parameters = getSamplingParameters(profile);
+): Promise<Location.LocationTaskOptions> {
+  const parameters = scaleForQuality(
+    getSamplingParameters(profile),
+    await getTrackingQuality()
+  );
 
   return {
     accuracy: toExpoAccuracy(parameters.desiredAccuracy),
@@ -148,7 +160,7 @@ export class ExpoLocationProvider implements LocationProvider {
 
     await Location.startLocationUpdatesAsync(
       LOCATION_TASK_NAME,
-      buildOptions(profile)
+      await buildOptions(profile)
     );
     await recordingEventDao.log('start', `profile=${profile}`);
   }
@@ -171,7 +183,7 @@ export class ExpoLocationProvider implements LocationProvider {
     // switch, and activity transitions are exactly when movement is happening.
     await Location.startLocationUpdatesAsync(
       LOCATION_TASK_NAME,
-      buildOptions(profile)
+      await buildOptions(profile)
     );
   }
 

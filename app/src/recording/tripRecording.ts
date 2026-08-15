@@ -44,6 +44,7 @@
 import { locationProvider } from './ExpoLocationProvider';
 import type { SamplingProfile } from './LocationProvider';
 import { refreshGeofences, stopGeofences } from './geofenceManager';
+import { isBackgroundTrackingAllowed } from './trackingSettings';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 
 /**
@@ -71,21 +72,72 @@ export async function stopTrip(): Promise<void> {
 }
 
 /**
- * On launch: if the recorder is running, make sure the OS is still monitoring.
+ * Bring the recorder into line with what the user has allowed. Runs on launch.
  *
- * Silent when recording is off — there is nothing to repair, and registering
- * regions for a user who has not started would collect stamps behind their
- * back. Failures are written to the diary rather than raised: this runs beside
- * the health check on a screen that has other things to do, and a phone that
- * cannot register regions is a fact to be recorded, not a modal.
+ * ⚠ **This is also the fix for a second missing seam.** Onboarding set a flag
+ * and stopped; nothing ever started recording for a user who granted Always,
+ * and those users are shown no start button at all (design brief §3.3) because
+ * the app is supposed to do it for them. So the app's one promise — *your map
+ * fills in by itself* (D-002) — was kept by nobody. Same family as T-145, found
+ * the same way, one screen along.
+ *
+ * The three cases, and none of them may be merged:
+ *
+ *   - **Allowed, granted, not yet running.** Start. This is the promise.
+ *   - **Already running.** Do not restart it — that would end the trip and open
+ *     a new one — but do re-register the regions, because Android drops every
+ *     geofence when the phone reboots and says nothing.
+ *   - **Not allowed, or not granted.** Do nothing at all, and in particular do
+ *     not stop anything: the user may be part-way through a walk they started
+ *     by hand, and silently ending it would lose the one thing that cannot be
+ *     recreated (D-010).
  */
-export async function ensureGeofencesIfRecording(): Promise<void> {
+export async function syncRecordingWithPreferences(): Promise<void> {
   try {
-    if (!(await locationProvider.isRecording())) {
+    const [allowed, permission, recording] = await Promise.all([
+      isBackgroundTrackingAllowed(),
+      locationProvider.getPermissionLevel(),
+      locationProvider.isRecording(),
+    ]);
+
+    if (recording) {
+      await refreshGeofences('app launch');
       return;
     }
-    await refreshGeofences('app launch');
+
+    if (allowed && permission === 'always') {
+      await startTrip('walking');
+      await recordingEventDao.log(
+        'start',
+        'recording started automatically: background tracking is on'
+      );
+    }
   } catch (error) {
-    await recordingEventDao.logError('geofence launch check', error);
+    await recordingEventDao.logError('recording launch sync', error);
   }
+}
+
+/**
+ * The user just moved the background-tracking switch.
+ *
+ * ⚠ Turning it **off stops recording**, and that is the whole meaning of the
+ * switch — leaving the recorder running after the user said "not when the app
+ * is closed" would make the setting a decoration. Turning it back on starts
+ * again only if the OS permission is there to support it; without Always, the
+ * switch cannot deliver what it promises, and the map screen's *Start walk*
+ * button is what the user gets instead.
+ */
+export async function applyBackgroundTrackingChange(
+  allowed: boolean
+): Promise<void> {
+  if (!allowed) {
+    await stopTrip();
+    await recordingEventDao.log(
+      'stop',
+      'recording stopped: background tracking turned off'
+    );
+    return;
+  }
+
+  await syncRecordingWithPreferences();
 }

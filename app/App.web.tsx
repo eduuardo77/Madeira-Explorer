@@ -264,6 +264,10 @@ export default function DesignWorkbench() {
             <SettingsView
               permission="while_using"
               mapStyle="light"
+              backgroundTracking
+              onChangeBackgroundTracking={() => undefined}
+              trackingQuality="balanced"
+              onChangeTrackingQuality={() => undefined}
               onChangeMapStyle={() => undefined}
               onOpenSystemSettings={() => undefined}
               // Forced on so the row can be looked at (D-038). On the web
@@ -284,6 +288,7 @@ export default function DesignWorkbench() {
                 the map (native only — see tiles/viewer)
               </Text>
               <PrimaryOverlay
+                mapStyle="light"
                 progress={progress}
                 showRecordingControl={
                   screen === 'primary-while-using' || showsCard

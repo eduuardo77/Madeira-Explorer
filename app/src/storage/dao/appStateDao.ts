@@ -29,6 +29,25 @@ export const AppStateKey = {
    * get, and what the day-1 check counts from (T-049, D-011).
    */
   InstalledTs: 'installed_ts',
+  /**
+   * May the app record while it is not open (T-146)? `true` / `false`.
+   *
+   * ⚠ Not a substitute for the OS permission, which is the real gate and is
+   * asked for in words during onboarding. This is the user's answer to a
+   * different question — whether the app should *use* what it was granted —
+   * and it is the switch that decides whether the map screen offers a manual
+   * "Start walk" instead.
+   */
+  BackgroundTracking: 'background_tracking',
+  /**
+   * How closely to follow, when background recording is allowed (T-146):
+   * `saver` / `balanced` / `precise`.
+   *
+   * ⚠ The settings screen names these by what they do, never by a battery
+   * percentage. No figure in this project has been measured on real hardware
+   * and D-041 keeps the reported one null on purpose.
+   */
+  TrackingQuality: 'tracking_quality',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
   /**

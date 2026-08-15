@@ -41,14 +41,28 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
+import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
 const STAMP_MARK_SIZE = 34;
 
+/** The settings mark, a little smaller: it is the quietest control here. */
+const SETTINGS_MARK_SIZE = 22;
+
 export type PrimaryOverlayProps = {
   progress: TripProgress;
+  /**
+   * Which map is underneath (T-146).
+   *
+   * ⚠ The chrome cannot be style-blind any more. Its circle is
+   * `colors.surface`, which measures **15.36:1** on Google's light map and
+   * **1.13:1** on our night one — the control does not disappear gradually,
+   * it disappears. The dark map arrived on 2026-08-15 and took the settings
+   * button with it.
+   */
+  mapStyle: 'light' | 'dark';
   /**
    * Show the start/stop control. True only for users without Always
    * permission (D-008) — the caller decides, because permission state is not
@@ -77,6 +91,7 @@ export type PrimaryOverlayProps = {
 
 export default function PrimaryOverlay({
   progress,
+  mapStyle,
   showRecordingControl,
   isRecording,
   bottomSlot,
@@ -92,12 +107,18 @@ export default function PrimaryOverlay({
         accessibilityRole="button"
         accessibilityLabel="Settings"
         onPress={onOpenSettings}
-        style={({ pressed }) => [styles.gear, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.gear,
+          mapStyle === 'dark' && styles.gearOnDarkMap,
+          pressed && styles.pressed,
+        ]}
       >
-        {/* A gear, never three lines. A hamburger is a learned convention that
-            promises a drawer of destinations; this is one screen with a
+        {/* ⚠ Drawn, not a `⚙` glyph — that read as a re-center button to the
+            project lead, exactly as the `🛂` on the passport button once read
+            as one (see `SettingsMark`). Still not three lines: a hamburger
+            promises a drawer of destinations, and this is one screen with a
             handful of toggles (design brief §3.2, CONTEXT §6.5). */}
-        <Text style={styles.gearGlyph}>⚙</Text>
+        <SettingsMark size={SETTINGS_MARK_SIZE} color={colors.text} />
       </Pressable>
 
       {/* The two bottom controls stack rather than share a row.
@@ -121,8 +142,8 @@ export default function PrimaryOverlay({
             accessibilityRole="button"
             accessibilityLabel={
               isRecording
-                ? 'Stop recording this trip'
-                : 'Start recording this trip'
+                ? 'Stop recording this walk'
+                : 'Start recording this walk'
             }
             onPress={onToggleRecording}
             style={({ pressed }) => [
@@ -131,9 +152,14 @@ export default function PrimaryOverlay({
               pressed && styles.pressed,
             ]}
           >
-            {/* Labelled with words, never an icon alone (D-015). */}
+            {/* ⚠ "Start walk", not "Start recording" — the project lead's
+                wording, 2026-08-15, and it is the better one. "Recording" names
+                the mechanism; "walk" names the thing the user came to do, and
+                this button is now the primary action for anybody who has turned
+                background tracking off (T-146). Labelled with words, never an
+                icon alone (D-015). */}
             <Text style={styles.recordingText}>
-              {isRecording ? 'Stop recording' : 'Start recording'}
+              {isRecording ? 'Stop walk' : 'Start walk'}
             </Text>
           </Pressable>
         ) : null}
@@ -181,7 +207,14 @@ const styles = StyleSheet.create({
     // relying on whatever happens to be underneath it.
     backgroundColor: colors.surface,
   },
-  gearGlyph: { color: colors.text, fontSize: fontSize.title },
+  // A hairline, and only on the dark map. `colors.textMuted` measures 5.91:1
+  // against the night land — comfortably past the 3:1 a non-text control needs
+  // — while staying quiet enough that the button is still the least shouty
+  // thing on the screen, which is what §3.2 asks of it.
+  gearOnDarkMap: {
+    borderWidth: 1,
+    borderColor: colors.textMuted,
+  },
 
   bottom: {
     position: 'absolute',

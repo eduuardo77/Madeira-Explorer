@@ -172,6 +172,15 @@ those two properties, but they did not find the problem and could not have — l
 
 ### 3.2 Settings, top-left
 
+⚠ **Drawn, never a font glyph.** The `⚙` was reported as looking like a re-center button on
+2026-08-15 — the same complaint the `🛂` passport icon drew before it. The mark is now sliders
+(`SettingsMark`), chosen for having no radial symmetry: it cannot be mistaken for a target or a
+locate control, which is the property being bought rather than the style.
+
+⚠ **The chrome carries its own contrast, and on the dark map that needs a border.** The control's
+circle measures 15.36:1 on Google's light map and 1.13:1 on our night one. Dark map only, a
+hairline in `textMuted` (5.91:1). A test holds the number.
+
 **A gear, not three lines.** Three stacked lines is a convention learned from apps and websites,
 and it conventionally promises a drawer full of destinations. This is one screen with a handful
 of toggles. A gear reads as "settings" to someone who is not fluent in app idiom — which is the

@@ -10,7 +10,7 @@ import OnboardingFlow, {
   pendingPermissionPrompt,
 } from './src/onboarding/OnboardingFlow';
 import type { OnboardingScreen } from './src/onboarding/OnboardingView';
-import { ensureGeofencesIfRecording } from './src/recording/tripRecording';
+import { syncRecordingWithPreferences } from './src/recording/tripRecording';
 import { checkTripEnd } from './src/progress/tripEndDetection';
 import * as appStateDao from './src/storage/dao/appStateDao';
 import { runHealthCheck } from './src/recording/healthCheck';
@@ -105,11 +105,11 @@ export default function App() {
     // means it is finalised the next time anybody looks (T-099).
     void checkTripEnd();
 
-    // ⚠ Android forgets every registered geofence when the phone reboots, and
-    // says nothing. Without this, a user who restarts their phone stops
-    // collecting stamps for the rest of their holiday (T-145). Idempotent:
-    // registering replaces the region set rather than adding to it.
-    void ensureGeofencesIfRecording();
+    // Start recording if the user has allowed it and has not already been
+    // started (T-146), and re-register the regions if they have — ⚠ Android
+    // forgets every geofence when the phone reboots and says nothing, which
+    // would otherwise stop a holiday's collecting silently (T-145).
+    void syncRecordingWithPreferences();
   }, []);
 
   if (onboarding === null) {

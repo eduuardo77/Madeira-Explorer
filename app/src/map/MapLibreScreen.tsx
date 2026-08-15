@@ -600,6 +600,7 @@ export default function MapLibreScreen({
 
       <PrimaryOverlay
         progress={progress}
+        mapStyle={styleName}
         showRecordingControl={needsRecordingControl}
         isRecording={isRecording}
         // The card shares the bottom of the screen with the controls, and the

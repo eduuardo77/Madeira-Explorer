@@ -277,6 +277,25 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       safety argument and is why the predicate matching it is deliberately narrow.
       — Notes: `docs/task-notes.md` (T-142)
 
+### Settings, polished — 2026-08-15
+
+- [x] **T-146** Background tracking, its three tiers, *Start walk*, a drawn settings icon, and a
+      dark map that is actually dark. The project lead's list of 2026-08-15.
+      — **Tiers are named, not priced** (D-060). Asked for as *~3% / medium / ~15–20%*; they ship
+      as Battery saver / Balanced / Best detail because no battery figure here has ever been
+      measured and D-041 exists for that reason.
+      — ⚠ **Dark mode needed two implementations.** `colorScheme: DARK` is a *latest-renderer*
+      feature and Play services loads the **legacy** renderer on plenty of devices, this emulator
+      included, where it is ignored in silence. An authored night style
+      (`map/googleNightStyle.ts`) works on both.
+      — ⚠ **And it took the settings button with it**: the chrome measured 1.13:1 on the night
+      map against 15.36:1 on the light one. A hairline border on the dark map only, with the
+      number pinned by a test.
+      — **A third missing seam, same family as T-145**: nothing had ever started recording for a
+      user who granted Always, and those users are shown no start button by design. Fixed in
+      `syncRecordingWithPreferences`.
+      — Notes: `docs/task-notes.md` (T-146). Decision: **D-060**.
+
 ### ⚠⚠ Found 2026-08-14 — no stamp could ever have been awarded
 
 - [x] **T-145** ✅ **Nothing in the app ever started geofence monitoring.** `refreshGeofences`

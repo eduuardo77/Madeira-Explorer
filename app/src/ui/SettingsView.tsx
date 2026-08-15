@@ -26,14 +26,28 @@
  * Presentational: props in, pixels out, so the workbench can mount it (D-038).
  */
 
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import type { PermissionLevel } from '../recording/LocationProvider';
+import type { TrackingQuality } from '../recording/trackingPreference';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 export type SettingsViewProps = {
   permission: PermissionLevel;
   /** Light for use, dark for the souvenir (D-026). */
   mapStyle: 'light' | 'dark';
+  /** May the app record while it is closed (T-146)? */
+  backgroundTracking: boolean;
+  onChangeBackgroundTracking: (allowed: boolean) => void;
+  /** How closely, when it may. Only shown when the switch above is on. */
+  trackingQuality: TrackingQuality;
+  onChangeTrackingQuality: (quality: TrackingQuality) => void;
   onChangeMapStyle: (style: 'light' | 'dark') => void;
   onOpenSystemSettings: () => void;
   /**
@@ -118,6 +132,92 @@ function Action({
   );
 }
 
+/**
+ * A labelled switch (T-146).
+ *
+ * A real `Switch` rather than two buttons, because a switch is *the* iOS
+ * settings control and this screen follows iOS conventions (D-054). D-015 is
+ * satisfied by the row's own words: the state is never carried by the switch's
+ * colour alone — the section footnote below it changes with the state and says
+ * in a sentence what is currently true.
+ */
+function Toggle({
+  label,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (next: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <View style={[styles.row, disabled === true && styles.rowDisabled]}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Switch
+        accessibilityLabel={label}
+        value={value}
+        onValueChange={onChange}
+        disabled={disabled}
+        // Explicit colours: the platform default is a green that belongs to no
+        // other part of this interface.
+        trackColor={{ false: colors.surfaceRaised, true: colors.action }}
+        thumbColor={colors.actionText}
+      />
+    </View>
+  );
+}
+
+/**
+ * One of several exclusive choices, with room to say what it means (T-146).
+ *
+ * ⚠ The description is not decoration. These three options differ in a way the
+ * user cannot see and the app is not allowed to price — see
+ * `trackingPreference.ts` on why there are no percentages here — so the
+ * sentence under each label is the entire basis for choosing. A row of bare
+ * words would be three synonyms for "tracking".
+ */
+function Choice({
+  label,
+  description,
+  selected,
+  onPress,
+}: {
+  label: string;
+  description: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${label}. ${description}`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.stackedChoice,
+        selected && styles.stackedChoiceActive,
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={styles.stackedChoiceHeader}>
+        <Text
+          style={[
+            styles.stackedChoiceLabel,
+            selected && styles.stackedChoiceLabelActive,
+          ]}
+        >
+          {label}
+        </Text>
+        {/* The tick, not just a border — D-015 forbids state carried by hue. */}
+        {selected ? <Text style={styles.stackedChoiceTick}>✓</Text> : null}
+      </View>
+      <Text style={styles.stackedChoiceDescription}>{description}</Text>
+    </Pressable>
+  );
+}
+
 /** Permission, in the user's words rather than the platform's. */
 function describePermission(permission: PermissionLevel): string {
   switch (permission) {
@@ -135,6 +235,10 @@ function describePermission(permission: PermissionLevel): string {
 export default function SettingsView({
   permission,
   mapStyle,
+  backgroundTracking,
+  onChangeBackgroundTracking,
+  trackingQuality,
+  onChangeTrackingQuality,
   onChangeMapStyle,
   onOpenSystemSettings,
   onOpenBatterySettings,
@@ -176,9 +280,60 @@ export default function SettingsView({
           </Section>
         ) : null}
 
+        {/* Between "Recording" (what the phone allows) and everything else:
+            this is the user's own answer, and it only means anything once they
+            have read what the phone has granted. */}
+        <Section
+          title="Background tracking"
+          footnote={
+            permission !== 'always'
+              ? 'Your phone has not given this app permission to record in the background, so this is off. You can still record a walk from the map screen whenever you like.'
+              : backgroundTracking
+                ? 'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start a walk yourself.'
+                : 'Nothing is recorded while the app is closed. Use Start walk on the map to record one.'
+          }
+        >
+          <Toggle
+            label="Record while the app is closed"
+            value={backgroundTracking && permission === 'always'}
+            onChange={onChangeBackgroundTracking}
+            // ⚠ Disabled rather than hidden when the permission is missing. A
+            // control that vanishes leaves the user hunting for a setting they
+            // remember seeing; one that is visible and explained tells them
+            // where the real gate is — which is the phone, not this screen.
+            disabled={permission !== 'always'}
+          />
+        </Section>
+
+        {backgroundTracking && permission === 'always' ? (
+          <Section
+            title="How closely"
+            footnote="Each one changes how often the app asks your phone where you are, which is what uses the battery. We would rather show you a measured number than a guess, and measuring it needs a real phone — so for now the difference is described instead."
+          >
+            <Choice
+              label="Battery saver"
+              description="Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher."
+              selected={trackingQuality === 'saver'}
+              onPress={() => onChangeTrackingQuality('saver')}
+            />
+            <Choice
+              label="Balanced"
+              description="The usual choice. Enough detail to recognise the walk you did, without following every step."
+              selected={trackingQuality === 'balanced'}
+              onPress={() => onChangeTrackingQuality('balanced')}
+            />
+            <Choice
+              label="Best detail"
+              description="Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way."
+              selected={trackingQuality === 'precise'}
+              onPress={() => onChangeTrackingQuality('precise')}
+            />
+          </Section>
+        ) : null}
+
         <Section
           title="Appearance"
-          footnote="Light is easier to read outdoors. Dark is what your end-of-trip video uses, whichever you pick here."
+          footnote="Light is easier to read outdoors. Dark dims the whole map, Google's own included, and is what your end-of-trip souvenir uses whichever you pick here."
         >
           {/* Two labelled buttons rather than a switch: a switch needs the
               user to know which state is which, and D-015 forbids meaning
@@ -338,6 +493,40 @@ const styles = StyleSheet.create({
   },
   actionDanger: { borderWidth: 2, borderColor: colors.bad },
   actionText: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
+  rowDisabled: { opacity: 0.5 },
+  stackedChoice: {
+    borderRadius: radius.control,
+    backgroundColor: colors.surfaceRaised,
+    padding: spacing.md,
+    gap: spacing.xs,
+    // Transparent rather than absent, so selecting a row cannot shift the rows
+    // around it by two pixels.
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  stackedChoiceActive: { borderColor: colors.action },
+  stackedChoiceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  stackedChoiceLabel: {
+    color: colors.textMuted,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+  },
+  stackedChoiceLabelActive: { color: colors.text },
+  stackedChoiceTick: {
+    color: colors.action,
+    fontSize: fontSize.small,
+    fontWeight: '700',
+  },
+  stackedChoiceDescription: {
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+    lineHeight: Math.round(fontSize.small * 1.4),
+  },
   choiceRow: { flexDirection: 'row', gap: spacing.sm },
   choice: {
     flex: 1,

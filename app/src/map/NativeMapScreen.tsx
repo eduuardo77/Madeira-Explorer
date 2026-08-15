@@ -33,7 +33,10 @@
  */
 
 import { GoogleMaps } from 'expo-maps';
-import { GoogleMapsMapType } from 'expo-maps/build/google/GoogleMaps.types';
+import {
+  GoogleMapsColorScheme,
+  GoogleMapsMapType,
+} from 'expo-maps/build/google/GoogleMaps.types';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -52,6 +55,7 @@ import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import { startTrip, stopTrip } from '../recording/tripRecording';
+import { isBackgroundTrackingAllowed } from '../recording/trackingSettings';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -65,6 +69,7 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { representativeGeofence } from './placeMarkers';
+import { GOOGLE_NIGHT_STYLE_JSON } from './googleNightStyle';
 import { splitIntoSegments, traceBounds } from './traceGeoJson';
 import { TRACE_PAINT } from './traceStyle';
 
@@ -194,14 +199,22 @@ export default function NativeMapScreen({
       try {
         await runAwardPass();
 
-        const [nextProgress, permission, recording] = await Promise.all([
-          getCurrentProgress(),
-          locationProvider.getPermissionLevel(),
-          locationProvider.isRecording(),
-        ]);
+        const [nextProgress, permission, recording, backgroundAllowed] =
+          await Promise.all([
+            getCurrentProgress(),
+            locationProvider.getPermissionLevel(),
+            locationProvider.isRecording(),
+            isBackgroundTrackingAllowed(),
+          ]);
         if (!cancelled) {
           setProgress(nextProgress);
-          setNeedsRecordingControl(permission !== 'always');
+          // ⚠ Two different reasons to show it, and both are the same to the
+          // user: the app cannot fill the map in by itself. Either the OS did
+          // not grant Always, or the user turned background tracking off
+          // themselves (T-146) — and somebody who turned it off deliberately
+          // still needs a way to record the walk they are on right now, which
+          // is the project lead's point in asking for this button.
+          setNeedsRecordingControl(permission !== 'always' || !backgroundAllowed);
           setIsRecording(recording);
         }
 
@@ -398,11 +411,38 @@ export default function NativeMapScreen({
         // answer to a direct question, so for those few seconds it wins.
         polylines={[...tracePolylines, ...coursePolylines]}
         markers={marker}
+        // ⚠ THE DARK/LIGHT SETTING NOW ACTUALLY REACHES THE MAP.
+        //
+        // Until 2026-08-15 it did not, and the comment sitting here claimed it
+        // did — the preference only ever recoloured the trace, so a user who
+        // chose Dark got a dark blue line on a bright white map and reasonably
+        // reported the toggle as broken. `expo-maps` has had `colorScheme`
+        // since 57.0.0; nobody had passed it.
+        //
+        // LIGHT and DARK explicitly rather than FOLLOW_SYSTEM: this is a
+        // preference the user set in *this app*, for reading a map outdoors in
+        // Madeiran sunlight (D-026), and it must not be silently overridden by
+        // a phone-wide theme they set for something else.
+        colorScheme={
+          styleName === 'dark'
+            ? GoogleMapsColorScheme.DARK
+            : GoogleMapsColorScheme.LIGHT
+        }
         properties={{
-          // Google's own night styling when the user chose dark (D-026's
-          // preference survives the migration, even though the hand-authored
-          // style does not).
           mapType: GoogleMapsMapType.NORMAL,
+          // ⚠ The belt to `colorScheme`'s braces, and the one that actually
+          // works on most phones. `colorScheme` is a *latest-renderer* feature
+          // and Play services falls back to the legacy renderer on plenty of
+          // devices — this emulator included, which is how it was caught — and
+          // there it is ignored without a word. `mapStyleOptions` is the
+          // classic styling API and both renderers honour it.
+          //
+          // Undefined for light, never an "empty" style: passing a style at
+          // all replaces Google's default, and an empty one is a blank map.
+          mapStyleOptions:
+            styleName === 'dark'
+              ? { json: GOOGLE_NIGHT_STYLE_JSON }
+              : undefined,
           isMyLocationEnabled: false,
           isTrafficEnabled: false,
           isBuildingEnabled: false,
@@ -422,6 +462,7 @@ export default function NativeMapScreen({
 
       <PrimaryOverlay
         progress={progress}
+        mapStyle={styleName}
         showRecordingControl={needsRecordingControl}
         isRecording={isRecording}
         bottomSlot={

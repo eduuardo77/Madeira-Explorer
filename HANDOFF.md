@@ -19,7 +19,7 @@ The map also now **opens on your walk rather than on the island** (D-053), the i
 **iOS conventions** (D-054), and the trace is **blue rather than red** (D-056).
 
 On 2026-08-14 the passport's five categories became **swipeable strips with a *See all*** that
-expands one into the old grid (T-144) — 80 places would not fit as five grids. **399 tests.**
+expands one into the old grid (T-144) — 80 places would not fit as five grids. **415 tests.**
 
 ⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
 `expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided
@@ -95,7 +95,16 @@ use. **The largest open item in the project.**
   every curated place went with it. The route to a place is passport → stamp → card → *Show on
   map*, which draws its course.
 
-## Closed on 2026-08-14, and worth knowing about
+## Closed on 2026-08-14/15, and worth knowing about
+
+- ⚠ **Dark mode needs two implementations, and one of them is invisible on most phones.**
+  `expo-maps` `colorScheme: DARK` is a **latest-renderer** feature; where Google Play services
+  loads the legacy renderer — this emulator, and plenty of cheap Android phones — it is ignored
+  **in silence**. `map/googleNightStyle.ts` is the authored style that works on both. Check
+  `adb logcat | grep loadedRenderer` before believing a map property does nothing.
+- ⚠ **The dark map takes the floating chrome with it.** The settings control measures 15.36:1 on
+  Google's light map and **1.13:1** on the night one. Anything new that floats over the map has to
+  be checked against both.
 
 - ⚠⚠ **T-145 — nothing ever started geofence monitoring, so no stamp could ever be awarded.**
   `refreshGeofences` had one caller and it was the debug screen. 399 passing tests could not see
@@ -141,7 +150,7 @@ use. **The largest open item in the project.**
 ## Verifying work
 
 ```bash
-cd app && npm test          # 399 tests, Node's own runner
+cd app && npm test          # 415 tests, Node's own runner
 cd app && npx tsc --noEmit  # strict
 bash tools/run-emulator.sh && cd app && npm run android
 bash tools/replay-route.sh tools/routes/funchal-seafront.txt
@@ -159,7 +168,7 @@ with a decision, the decision wins.
 | | |
 |---|---|
 | `CONTEXT.md` | The *why*. §6 conventions, **§9 the doc protocol you must follow** |
-| `DECISIONS.md` | Index of 59 decisions. Full text in `docs/decisions-full.md` |
+| `DECISIONS.md` | Index of 60 decisions. Full text in `docs/decisions-full.md` |
 | `TASKS.md` | The checklist. Post-mortems on finished tasks in `docs/task-notes.md` |
 | `PROJECT_PLAN.md` | Phases, and the open questions **OD-4/5/8/9/10** |
 | `docs/design-brief.md` | Read before touching anything that renders |

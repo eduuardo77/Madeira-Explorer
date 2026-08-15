@@ -277,6 +277,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       safety argument and is why the predicate matching it is deliberately narrow.
       — Notes: `docs/task-notes.md` (T-142)
 
+- [x] **T-148** Housekeeping, 2026-08-15. 2.9 GB of regenerable Gradle output removed, screenshots
+      pruned to the six that show current state, a stray `metro.log` untracked. **The checkout is
+      ~12 GB and none of it is the app** — the breakdown, what is safe to delete and what only
+      looks safe are in `docs/dev-build.md`. Two unused test seams deleted.
+
 ### Settings, polished — 2026-08-15
 
 - [x] **T-147** **Google's own dark map, where the device can draw it.** The project lead asked to

@@ -7,8 +7,8 @@ genuinely blocked.
 ## State
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps by geofence →
-trace on a map → passport → trip end → reveal. 79 source files and 30 test files under `app/src`
-— roughly 15,600 lines of source and 6,600 of tests.
+trace on a map → passport → trip end → reveal. 86 source files and 33 test files under `app/src`
+— roughly 16,800 lines of source and 7,000 of tests.
 
 On 2026-08-13 a place became reachable: **passport → tap a stamp → card → Show on map** (T-115,
 D-052, D-055). For a levada that draws **its real course** from `content/levadas.json`, built by
@@ -95,40 +95,25 @@ use. **The largest open item in the project.**
   every curated place went with it. The route to a place is passport → stamp → card → *Show on
   map*, which draws its course.
 
-## Closed on 2026-08-14/15, and worth knowing about
+## The four traps found on 2026-08-14/15
 
-- ⚠ **The dark map is Google's own where the device can draw it, and ours where it cannot**
-  (T-147). `colorScheme: DARK` needs the **latest** Maps renderer; on the legacy one it is ignored
-  in silence and the user gets a white map. A config plugin asks Play services for LATEST and
-  records what it was actually given; `map/mapsRenderer.ts` reads that and `map/darkMode.ts`
-  chooses. ⚠ **This emulator is handed LEGACY**, so it always shows the fallback — it cannot show
-  what most users will see. One line tells you which you are looking at:
+Each cost a session to find and none was visible from the tests. Full write-ups are in
+`docs/task-notes.md` under the task id — this list is here to stop you rediscovering them.
 
-  ```bash
-  adb logcat -s MadeiraExplorer
-  ```
+- ⚠⚠ **T-145 — nothing started geofence monitoring, so no stamp could ever be awarded.**
+  `refreshGeofences` had one caller: the debug screen. 399 passing tests could not see it, and
+  neither could months of emulator sessions, because the debug screen registers a **synthetic
+  fixture** — every crossing anybody ever watched carried a `dev-near-*` id. **If you are about
+  to trust a subsystem because its tests pass, read this one first.**
+- ⚠ **T-146 — nothing auto-started recording for an Always user either.** Same shape, one screen
+  along: onboarding set a flag and stopped, and those users are shown no start button by design.
+- ⚠ **T-147 — the dark map is Google's own only where the renderer allows it.** `colorScheme:
+  DARK` needs the **latest** Maps renderer; on the legacy one it is ignored in silence and the
+  user gets a white map. **This emulator is handed LEGACY**, so it always shows our fallback and
+  can never show what most users see. `adb logcat -s MadeiraExplorer` says which is in play.
 - ⚠ **The dark map takes the floating chrome with it.** The settings control measures 15.36:1 on
-  Google's light map and **1.13:1** on the night one. Anything new that floats over the map has to
-  be checked against both.
-
-- ⚠⚠ **T-145 — nothing ever started geofence monitoring, so no stamp could ever be awarded.**
-  `refreshGeofences` had one caller and it was the debug screen. 399 passing tests could not see
-  it, and neither could months of emulator sessions, because the debug screen registers a
-  **synthetic fixture** — so every geofence anybody had ever watched fire carried a `dev-near-*`
-  id rather than a real place. Fixed in `recording/tripRecording.ts`. **If you are about to trust
-  a subsystem because its tests pass, this is the entry to read first.**
-
-- **T-142 — `Cannot use shared object that was already released`** is fixed. One retry, for one
-  error signature, applied once by wrapping the handle (`storage/database.ts`, `resilient()`).
-  The safety argument is that the call is rejected *before the statement executes*, so repeating
-  it cannot write twice — which is why `releasedObject.ts` matches one narrow string and why
-  widening it would quietly make the retry unsafe. A recovered retry writes a **`db_retry`** line
-  to the diary; that is how you tell the fix working apart from the bug not firing.
-- **The trace no longer draws strokes nobody could have walked** (D-059, Provisional). It broke
-  only on silence before, so a fix in Funchal and a fix in Lisbon became one straight line.
-- ⚠ **`tools/routes/funchal-seafront.txt` was 245 m out to sea**, and the app was faithfully
-  drawing it there. Invisible on the old plain style; obvious in one screenshot on Google's
-  cartography. If a fixture looks wrong on the map, suspect the fixture as readily as the code.
+  Google's light map and **1.13:1** on the night one. Anything that floats over the map has to be
+  checked against both.
 
 ## Traps that each cost something here
 

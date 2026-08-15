@@ -79,8 +79,3 @@ function readRenderer(): string | null {
     return null;
   }
 }
-
-/** Test seam. Not used in normal operation. */
-export function forgetRendererForTests(): void {
-  cached = null;
-}

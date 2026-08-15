@@ -70,8 +70,3 @@ export async function setBackgroundTrackingAllowed(
     allowed ? 'true' : 'false'
   );
 }
-
-/** Test seam, and the debug screen's reset. Not used in normal operation. */
-export function forgetCachedTrackingQuality(): void {
-  cachedQuality = null;
-}

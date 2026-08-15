@@ -38,6 +38,8 @@ The documents cost more to read than the code does. In order of impact:
 3. **Write less.** A decision earns its length from the alternatives it rejects; a finished task
    does not need an essay. Say what changed and why it was not the obvious thing.
 4. **Batch independent tool calls** into one block.
+5. **Do not re-measure the checkout's size.** ~12 GB, none of it the app; the breakdown and what
+   is safe to delete are in `docs/dev-build.md`.
 
 ## The two things that are not yours to do
 

@@ -51,6 +51,7 @@ import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
+import { startTrip, stopTrip } from '../recording/tripRecording';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -354,12 +355,15 @@ export default function NativeMapScreen({
     void (async () => {
       try {
         if (isRecording) {
-          await locationProvider.stopRecording();
+          await stopTrip();
         } else {
           // The same profile the MapLibre screen used. ⚠ On the emulator this
           // must stay `driving` in practice — `walking` asks for `balanced`
           // accuracy, which an emulator cannot serve at all (D-047).
-          await locationProvider.startRecording('walking');
+          // ⚠ `startTrip`, never `locationProvider.startRecording` — the
+          // geofences have to be registered in the same breath, and for
+          // months they were not (T-145).
+          await startTrip('walking');
         }
         setIsRecording(await locationProvider.isRecording());
       } catch (error) {

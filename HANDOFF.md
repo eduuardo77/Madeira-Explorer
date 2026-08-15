@@ -97,6 +97,13 @@ use. **The largest open item in the project.**
 
 ## Closed on 2026-08-14, and worth knowing about
 
+- ⚠⚠ **T-145 — nothing ever started geofence monitoring, so no stamp could ever be awarded.**
+  `refreshGeofences` had one caller and it was the debug screen. 399 passing tests could not see
+  it, and neither could months of emulator sessions, because the debug screen registers a
+  **synthetic fixture** — so every geofence anybody had ever watched fire carried a `dev-near-*`
+  id rather than a real place. Fixed in `recording/tripRecording.ts`. **If you are about to trust
+  a subsystem because its tests pass, this is the entry to read first.**
+
 - **T-142 — `Cannot use shared object that was already released`** is fixed. One retry, for one
   error signature, applied once by wrapping the handle (`storage/database.ts`, `resilient()`).
   The safety argument is that the call is rejected *before the statement executes*, so repeating

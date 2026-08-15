@@ -336,8 +336,24 @@ export async function noteRecordedPosition(at: Coordinate): Promise<void> {
     // for a catalogue sort and twenty region registrations it did not ask for,
     // out of the location callback's execution budget.
     const state = await readState();
-    if (state === null || state.anchor === null) {
-      // Not monitoring, or the whole catalogue fits and nothing can go stale.
+
+    // ⚠ Never built. `startTrip` asks for a window the moment recording
+    // starts, and on a cold install that arrives before the provider has any
+    // position to build one around — `refreshGeofences` logs "rebuild
+    // deferred" and there is nothing left to retry it. This fix *is* the
+    // position it was waiting for (T-145).
+    //
+    // Distinct from an empty state, which `stopGeofences` writes deliberately:
+    // that one is non-null with a null anchor, and must stay unmonitored.
+    if (state === null) {
+      await serialise(() =>
+        rebuildAround(at, 'first position after recording started')
+      );
+      return;
+    }
+
+    if (state.anchor === null) {
+      // The whole catalogue fits, so nothing can go stale.
       return;
     }
     if (Date.now() - state.updatedTs < MIN_BACKSTOP_INTERVAL_MS) {

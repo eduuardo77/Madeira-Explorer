@@ -265,6 +265,11 @@ T-081 asked *is it legible at 200 stamps* and got a yes; what it never asked was
 scroll to reach the fifth category**. At 80 places the five grids were one very long page, and the
 hero — the number the user opened the screen for — was gone before the second heading.
 
+**In the strip, collected stickers come first.** The row shows about three and a half, and in
+pack order the one place you had actually been sat half off the right edge — the reward behind a
+swipe, underneath eighteen places you have never seen. The expanded grid keeps pack order,
+because a survey that reorders itself as you collect is one you cannot find anything in twice.
+
 ⚠ **The grid is not a fallback, it is the survey view.** D-058 puts every uncollected place on
 this screen precisely so the user has somewhere to aim; that only works if there is a way to see a
 whole category at once. Collapsing the rows without *See all* would have taken the recommendation

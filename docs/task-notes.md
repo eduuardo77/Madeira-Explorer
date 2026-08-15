@@ -1317,3 +1317,65 @@ grep -A30 "^### T-052a" docs/task-notes.md
       rounded corners.
       — Verified on the emulator, collapsed and expanded, at 80 places.
 
+### T-145 — the reward loop was never connected, and four hundred tests said nothing
+
+- **2026-08-14.** The worst defect found in this project so far, and it was found by trying to do
+  the thing the app is for rather than by reading code.
+      — **What was wrong.** `refreshGeofences` was called from the debug screen and from nowhere
+      else. Recording started; monitoring never did. Every geofence-driven feature — stamps, the
+      passport filling in, the levada endpoint rule, the trip-end departure points — was
+      unreachable on a real phone, and the app reported perfect health throughout, because from
+      the recorder's point of view nothing was wrong.
+      — **Why 399 tests missed it.** They test the parts. The parts are right. Nothing tested that
+      anybody ever *calls* them, and there is no test that can, short of driving the built app.
+      — **Why months of emulator sessions missed it.** Because the first thing a session does when
+      it wants to see geofences work is press the debug screen's button — which registers the
+      synthetic ring fixture. So the crossings were real, the plumbing downstream of them was
+      real, and the ids were `dev-near-17`. The scaffolding was standing in for the missing
+      wiring, which is the most expensive way for scaffolding to fail.
+      — ⚠ **The erase made it visible.** After "erase everything", `app_state` no longer held the
+      dev fixture, and the OS went on delivering transitions for the stale `dev-*` regions it was
+      still monitoring — regions belonging to places that no longer existed in the database. That
+      mismatch is what made somebody look.
+      — **The fix, and the second bug it closes.** `recording/tripRecording.ts` pairs starting the
+      recorder with registering regions, and stopping it with deregistering them (a crossing
+      delivered while recording is off would award a stamp for a walk the user chose not to
+      record). `ensureGeofencesIfRecording` runs on launch beside the health check, because
+      **Android forgets every registered geofence on reboot** — without it, a user who restarts
+      their phone silently stops collecting for the rest of the holiday.
+      — ⚠ **Still not verified on hardware.** What was verified is the emulator chain.
+
+### T-099 — the departure points exist now, and D-012's best moment can happen
+
+- **2026-08-14.** `validate-content.mjs` had been warning for weeks that no `departurePoints` were
+  defined, which meant the *primary* trip-end trigger in D-012 — the airport geofence, the moment
+  the whole souvenir idea is built around — could never fire. Only the `left_bbox` fallback could,
+  and that one needs the user to already be somewhere else.
+      — Added the three D-012 names: Madeira Airport, Porto Santo Airport, Funchal ferry terminal.
+      — ⚠ **Coordinates came from OSM, not from memory.** One Overpass query for
+      `aeroway=aerodrome` and `amenity=ferry_terminal` in the archipelago's bbox. Recalling
+      airport coordinates would have been a measured-sounding number that was never measured.
+      — **This is not curation and does not touch T-066.** Departure points are not places to
+      collect; nobody earns a stamp at an airport. They are functional configuration named by an
+      Accepted decision, which is why adding them did not need to wait for the project lead.
+      — ⚠ Still unverified: no trip has ended by crossing one. `left_bbox` is the only trip-end
+      mechanism ever observed working.
+
+### T-077 — a stamp, awarded, on a real screen, at last
+
+- **2026-08-14.** The first stamp this app has ever given anybody: **Forte de São Tiago**,
+  landmarks 1 of 18, in colour among the grey. It took fixing T-145 to become possible at all.
+      — **How.** `tools/routes/forte-sao-tiago-dwell.txt` walks in at 1.5 m/s and stands there.
+      The seafront route could never do it: it moves at driving pace, and D-037 refuses a stamp
+      above 2.0 m/s — correctly, which is why it earned nothing and why nobody noticed for months
+      that nothing *could*.
+      — ⚠ **Read the confidence before celebrating.** 0.60, via the documented `no speed data`
+      branch, not via the two-gate pass. The emulator delivered **no fixes at all** during the
+      dwell — D-047 again: it cannot serve the profile the recorder asks for when you stop moving,
+      so the recorder looks dead in exactly the situation a stamp depends on. The visit therefore
+      never closed and the dwell reads 43,735 s, which is a fixture artefact and not a walk.
+      — **So what is verified is the plumbing**: geofence registration from the real content pack
+      → a crossing with a real place id → a visit → an award → the passport drawing it. What is
+      **not** verified is the rule's two-gate path, or any of it under real GPS. T-077 stays open
+      for the field.
+

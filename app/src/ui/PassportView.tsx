@@ -172,7 +172,22 @@ function CategoryRow({
   const [expanded, setExpanded] = useState(false);
   const canExpand = stamps.length >= MIN_STAMPS_FOR_SEE_ALL;
 
-  const cells = stamps.map((stamp) => (
+  // ⚠ In the strip, what you earned comes first. The collapsed row shows about
+  // three and a half stickers, and with 18 landmarks in pack order the one you
+  // actually collected sat half off the edge — the reward (D-046) hidden behind
+  // a swipe, underneath places you have never been.
+  //
+  // The expanded grid deliberately keeps pack order: that view is the survey
+  // D-058 asks for, and a list that reorders itself as you collect is a list
+  // you cannot find anything in twice.
+  const ordered = expanded
+    ? stamps
+    : [
+        ...stamps.filter((stamp) => stamp.collected),
+        ...stamps.filter((stamp) => !stamp.collected),
+      ];
+
+  const cells = ordered.map((stamp) => (
     // The cell is 96 dp, well over D-015's 60 — which is why the sticker
     // itself is the tap target rather than a button beside it.
     <Pressable

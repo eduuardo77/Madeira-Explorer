@@ -277,6 +277,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       safety argument and is why the predicate matching it is deliberately narrow.
       — Notes: `docs/task-notes.md` (T-142)
 
+### ⚠⚠ Found 2026-08-14 — no stamp could ever have been awarded
+
+- [x] **T-145** ✅ **Nothing in the app ever started geofence monitoring.** `refreshGeofences`
+      had exactly one caller: the debug screen. On a user's phone the sequence was install →
+      grant permission → press record → walk to a miradouro → **collect nothing, for ever**,
+      with a diary full of healthy-looking location batches and no error anywhere.
+      — **Why nothing caught it.** Every part works and is tested: `geofenceManager`,
+      `geofenceSelection`, the stamp rules, the content pack, and `index.ts` really does register
+      the catalogue (T-040). The *seam* between "recording started" and "monitor these places"
+      was never joined, and a seam is exactly what unit tests cannot see.
+      — **Why the emulator never showed it either.** Every session that ever saw a geofence fire
+      had started monitoring by hand from the debug screen — which registers the **synthetic
+      fixture**, so the events carried `dev-near-*` ids. The dev tool was standing in for the
+      missing wiring and hiding it at the same time.
+      — **How it was found.** By trying to earn a stamp: a replayed route that arrives at Forte
+      de São Tiago and stands there for four minutes awarded nothing, and the diary had no
+      `geofence` line at all since the database was erased.
+      — **The fix** is `recording/tripRecording.ts`: `startTrip`/`stopTrip` pair the two halves so
+      they cannot be started separately again, and `ensureGeofencesIfRecording` re-registers on
+      launch — ⚠ **Android drops every geofence when the phone reboots**, which would have been
+      the same silent failure arriving a second way.
+      — Notes: `docs/task-notes.md` (T-145)
+
 ### ⚠ Found 2026-08-14 — the trace was drawn across water it could not have crossed
 
 - [x] **T-143** ✅ **The highlighted line was wrong, twice over, and the second one was ours.**
@@ -419,6 +442,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       categories on one scale produced **397 villages, three landmarks and no viewpoints**, and
       deduping on rounded coordinates left pairs "0 m apart" that the validator flagged. Ranking
       is now per-category and dedupe is by name plus 150 m.
+- [x] **T-099a** Departure points defined in `content/pois.json` (D-012) — Madeira Airport,
+      Porto Santo Airport, Funchal ferry terminal, coordinates from OSM. The validator had been
+      warning that **no trip could ever end at an airport**, which is the primary trigger for the
+      one moment D-012 calls the best in the product.
+      — Notes: `docs/task-notes.md` (T-099)
+
 - [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
       — ⚠ **Less urgent since D-058.** This was the only answer to "where should I go next"
       (D-027); the passport now answers it by showing every place, collected or not. Region
@@ -482,7 +511,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Walk that far and the diary should show a `geofence` rebuild with a different set.
       — This is what sets the three guessed constants in **D-033**. Note the delivery *lateness*
       of the anchor exit at driving speed, not just that it arrived.
-- [ ] **T-077** Verify a stamp fires reliably on arrival at a miradouro ⇠ T-071
+- [~] **T-077** Verify a stamp fires reliably on arrival at a miradouro ⇠ T-071
+      — **The emulator half is done 2026-08-14, and it was worth doing**: it is what uncovered
+      T-145. First stamp ever awarded — Forte de São Tiago — via a route that arrives and stands
+      still (`tools/routes/forte-sao-tiago-dwell.txt`).
+      — ⚠ **Confidence 0.60, through the `no speed data` branch, not the two-gate pass.** The
+      emulator serves nothing once you stop moving (D-047), so the arrival case cannot be
+      verified properly here. **The field half is untouched.**
+      — Notes: `docs/task-notes.md` (T-077)
 - [ ] **T-078** Verify driving past a levada trailhead does **not** award it ⇠ T-071
 - [ ] **T-079** Verify stamps still award with GPS accuracy degraded to 100m ⇠ T-071
 - [ ] **T-080** Verify geofencing battery cost is not measurable above baseline ⇠ T-076

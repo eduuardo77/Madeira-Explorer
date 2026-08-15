@@ -1242,5 +1242,28 @@
         }
       ]
     }
+  ],
+  "departurePoints": [
+    {
+      "id": "aeroporto-da-madeira",
+      "name": "Madeira Airport",
+      "lat": 32.69884,
+      "lon": -16.77368,
+      "radiusM": 1500
+    },
+    {
+      "id": "aeroporto-do-porto-santo",
+      "name": "Porto Santo Airport",
+      "lat": 33.07364,
+      "lon": -16.3506,
+      "radiusM": 1200
+    },
+    {
+      "id": "terminal-do-funchal",
+      "name": "Funchal ferry terminal",
+      "lat": 32.64139,
+      "lon": -16.91666,
+      "radiusM": 500
+    }
   ]
 }

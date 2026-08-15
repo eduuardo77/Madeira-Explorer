@@ -20,6 +20,7 @@ import {
   NIGHT_LAND,
   NIGHT_STYLE_RULES,
 } from './googleNightStyle.ts';
+import { TRACE_PAINT } from './traceStyle.ts';
 
 /** Relative luminance, the WCAG definition — the same one `contrast.ts` uses. */
 function luminance(hex: string): number {
@@ -99,10 +100,11 @@ test('⚠ the sea does not look like the land', () => {
 });
 
 test('⚠ nothing in the basemap outshines the trace', () => {
-  // D-026's dark map exists so the trace glows on it (`traceStyle.ts`). If a
-  // road or a label ever gets brighter than mid-grey, the souvenir stops being
-  // a picture of where you walked and becomes a picture of Madeira's roads.
-  const CEILING = luminance('#8E8E93');
+  // D-026's dark map exists so the trace glows on it. The ceiling is the
+  // trace's own colour, not a guessed grey: if a road or a label ever gets
+  // brighter than the line, the souvenir stops being a picture of where you
+  // walked and becomes a picture of Madeira's roads.
+  const CEILING = luminance(TRACE_PAINT.dark.coreColor);
 
   for (const rule of NIGHT_STYLE_RULES) {
     for (const styler of rule.stylers) {
@@ -145,4 +147,45 @@ test('⚠ the floating controls survive the night map', () => {
     contrastRatio(colors.action, NIGHT_LAND) >= 3,
     'the passport button does not stand off the night map'
   );
+});
+
+test('⚠ the road network is legible, or the map is a dark rectangle', () => {
+  // The first version of this style used the app's near-black chrome colour
+  // for land, which left roads 1.35:1 above it — texture, not roads. The
+  // project lead's report was "too dark, and not like Google's dark mode".
+  //
+  // 1.4:1 is not a WCAG threshold; nothing here is text. It is the floor below
+  // which a filled shape on a filled ground stops being separable at arm's
+  // length in daylight, which is the only condition this map is used in.
+  const land = String(
+    NIGHT_STYLE_RULES.find(
+      (rule) => rule.elementType === 'geometry' && rule.featureType === undefined
+    )?.stylers[0].color
+  );
+
+  const road = colorFor('road', 'geometry');
+  const major = colorFor('road.highway', 'geometry');
+  assert.ok(road !== null && major !== null);
+
+  assert.ok(
+    contrastRatio(road!, land) >= 1.4,
+    `roads are ${contrastRatio(road!, land).toFixed(2)}:1 on the land`
+  );
+  // And the motorways step above the ordinary roads, or the hierarchy that
+  // makes a map readable at a glance is flat.
+  assert.ok(contrastRatio(major!, land) > contrastRatio(road!, land));
+});
+
+test('⚠ the sea is darker than the land as well as bluer', () => {
+  // Hue alone separates them for most people; luminance alone survives
+  // sunlight and polarised sunglasses. The coastline is the orientation on an
+  // island, so it has to work both ways.
+  const water = colorFor('water', 'geometry');
+  const land = String(
+    NIGHT_STYLE_RULES.find(
+      (rule) => rule.elementType === 'geometry' && rule.featureType === undefined
+    )?.stylers[0].color
+  );
+  assert.ok(water !== null);
+  assert.ok(luminance(water!) < luminance(land), 'the sea is not darker');
 });

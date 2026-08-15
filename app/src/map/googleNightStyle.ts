@@ -44,24 +44,47 @@ type StyleRule = {
 };
 
 /**
- * Land, and the base everything else is drawn over. `theme.background`.
+ * Land, and the base everything else is drawn over.
  *
- * Exported because the chrome floating on top has to be legible against it,
- * and that is a measured claim rather than a matter of taste — see the
- * contrast test in `googleNightStyle.test.ts`.
+ * ⚠ **Not `theme.background`, and that was the first version's mistake.** The
+ * app's chrome palette is near-black (`#0E0E10`) because chrome sits *on* a
+ * map; a map has to hold roads, water, parks and labels apart from each other
+ * *inside itself*, and there is no room below near-black to do that. The
+ * result was a map the project lead described as too dark and not like Google's
+ * dark mode, which is exactly what it was: land and roads within 1.35:1 of each
+ * other, so the road network read as texture rather than as roads.
+ *
+ * A dark blue-grey instead, in the same family Google's night mode uses, with
+ * the road network stepped clearly above it. Exported because the chrome
+ * floating on top has to stay legible against it, and that is a measured claim
+ * rather than a matter of taste — see the tests.
  */
-export const NIGHT_LAND = '#0E0E10';
+export const NIGHT_LAND = '#243040';
 const LAND = NIGHT_LAND;
-/** Sea. Blue enough to read as water at a glance, dark enough to stay quiet. */
-const WATER = '#0B1A24';
-/** Roads: present, never bright. The trace outranks them, deliberately. */
-const ROAD = '#2A2A2E';
-const ROAD_MAJOR = '#37373C';
+/**
+ * Sea. Darker than the land *and* bluer than it.
+ *
+ * Both, deliberately: hue alone separates them for most people and luminance
+ * alone survives being looked at in sunlight through polarised glasses. On an
+ * island the coastline is the orientation, so this is the one boundary on the
+ * map that has to work twice over.
+ */
+const WATER = '#16263B';
+/**
+ * Roads. Legibly above the land — 1.48:1, and 1.99:1 for the major ones —
+ * because a night map whose roads you cannot follow is a dark rectangle with
+ * labels on it.
+ *
+ * ⚠ There is still a ceiling: nothing here may outshine the trace (D-026), and
+ * a test measures that against the trace's own colour rather than a guess.
+ */
+const ROAD = '#3C4A5C';
+const ROAD_MAJOR = '#4E5D70';
 /** Label ink and its halo. The halo is what makes small text survive. */
-const LABEL = '#8E8E93';
-const LABEL_HALO = '#000000';
-/** Terrain and parks — a hint of the island's shape, no more. */
-const TERRAIN = '#14181A';
+const LABEL = '#9AA7B5';
+const LABEL_HALO = '#0B1420';
+/** Terrain and parks — hue-separated from the land rather than brightness. */
+const TERRAIN = '#23342F';
 
 const NIGHT_STYLE: StyleRule[] = [
   { elementType: 'geometry', stylers: [{ color: LAND }] },
@@ -90,7 +113,7 @@ const NIGHT_STYLE: StyleRule[] = [
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
 
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: WATER }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#4A6572' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#5D7A96' }] },
 
   // Administrative boundaries: off. They are the one thing on a Madeira map
   // that means nothing to a visitor, and they cross the island in straight

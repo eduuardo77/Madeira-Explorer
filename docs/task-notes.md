@@ -1420,4 +1420,15 @@ grep -A30 "^### T-052a" docs/task-notes.md
       walk the user began by hand.
       — Verified on the emulator: the icon, both map styles, the switch, the three tiers, and
       *Start walk* appearing when the switch is off.
+      — ⚠ **The first night style was too dark, and the project lead said so the same day.** The
+      cause was reusing `theme.background` (`#0E0E10`) for the land: a chrome palette is built to
+      sit *under* content, and a basemap has to hold roads, water, parks and labels apart *within
+      itself*. Below near-black there is no room to do that, so roads landed 1.35:1 above the
+      land and read as texture. The palette is now a dark blue-grey with the network stepped
+      clearly above it — 1.48:1 for roads, 1.99:1 for motorways — and the sea both darker and
+      bluer than the land, which is the same 1.14:1 separation Google's own night style uses.
+      Two tests hold it: one that the roads stay legible, one that the sea stays darker.
+      — ⚠ **The "nothing outshines the trace" ceiling now measures against the trace's own
+      colour** rather than a guessed grey. It was the guessed grey that let the whole palette be
+      crushed downwards without any test objecting.
 

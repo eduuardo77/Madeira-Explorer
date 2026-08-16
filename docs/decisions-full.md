@@ -3129,3 +3129,100 @@ confident list is worse than no list**, because it invites approval rather than 
 
 **When this reverses.** If the first draft comes back mostly deleted, the assistant's judgement is
 not good enough to draft and the arrangement returns to prepare-and-select.
+
+---
+
+## D-065 — Two ways to earn every stamp, and a levada is credited by how much of it you walked
+
+**Status:** Provisional — proposed 2026-08-16 after the project lead raised it: *"doing such a
+levada and it not counting can be a bit frustrating… skipping just a bit of the levada path and it
+not counting can also be frustrating. We need some flexibility."*
+
+**Decision:** Every award now has **two independent detectors**, and levadas get a rule that does
+not depend on endpoints at all.
+
+| | Primary | Redundant |
+|---|---|---|
+| Any place | OS geofence crossing + dwell + pace (`stampRules`) | The raw trace shows you inside the circle, same dwell, same pace (`arrivalFromTrace`) |
+| A levada | Both endpoint geofences (D-009) | **How much of the drawn course you walked** (`levadaCoverage`) |
+
+### Why one detector was not enough
+
+Everything the user earns rests on the operating system delivering a geofence callback. That is
+the right primary mechanism — nearly free, works with the app shut (D-005) — and it is a **single
+point of failure for the entire reward**. Android drops callbacks under battery saver and in Doze;
+an OEM process killer does it deliberately (T-053, unrun); under laurel canopy the OS may never be
+confident enough to declare a crossing; the working set is a *window* (D-033), so a place can be
+entered before it is registered. And T-145 is the case that already happened: **nothing registered
+any geofence at all for months, and 399 tests said nothing.**
+
+In every one of those the raw trace still holds the fixes, because the recorder is the thing that
+never stops writing (D-010). Asking it costs one query — already needed for coverage — and turns
+one mechanism into two that fail differently.
+
+⚠ **A second detector, not a second standard.** Dwell and pace are `stampRules`'s own constants.
+What the trace route adds is tolerance for a fix that *admits imprecision*: a ±40 m fix on the
+boundary of a 200 m circle is evidence of being inside it, and refusing that refuses the honest
+fixes — which under canopy are the only ones there are.
+
+### Why a levada is credited by coverage
+
+The two-endpoint rule is correct and brittle. It fails on the ordinary case, not the exotic one:
+
+- **Out-and-back is how most levadas are walked.** Park at Rabaçal, walk to the 25 Fontes, return
+  the way you came. There is no second trailhead in that day, so the stamp cannot be earned.
+- **The endpoints are guesses.** They are where OSM stopped drawing (`build-levadas.mjs` says so).
+  `tools/levada-ends.mjs` improves them from parking, guideposts and bus stops, and **cannot make
+  them right from a laptop** — for four of the fifteen there is no access evidence at either end.
+- **People skip sections** — a closure, a shuttle, a stretch walked on the road.
+
+So: measure how much of the drawn course had a walking-pace fix beside it. Credited at **60% of
+the course, or 3 km of it, whichever comes first**.
+
+⚠ **The 3 km rule is what makes a long levada earnable at all.** Levada do Norte is 40 km of drawn
+ways and Levada dos Tornos 36 km; nobody walks either end to end, so a fraction gate alone would
+have made those two stamps unearnable — the same failure this decision exists to fix, in a
+different disguise.
+
+⚠ **This is not map matching and does not reopen D-032.** Matching asks *which of ten thousand
+roads is this fix on*. This asks *how far is this fix from one known line* — the line already
+shipped to draw the course (D-055). Two hundred points, not a graph.
+
+### What still refuses
+
+- **A road beside the levada.** Pace is derived from covered distance over elapsed time, so a car
+  covering 3 km of corridor in four minutes is refused for being too fast — and on this island the
+  road above the channel is the normal case, not an exotic one.
+- **Standing still.** A segment counts once however many fixes are beside it, so an hour in one
+  spot covers no more ground than walking past.
+- **A fix too vague to place.** Past 150 m of claimed accuracy it is not evidence of being
+  anywhere.
+
+### The third outcome: ask
+
+Between "walked it" and "was never there" is real evidence of a real walk — 30% of the course, or
+1.5 km. That is recorded as `awaitingConfirmation`, and **the user should be asked**, with the
+evidence attached: *"the trace shows 2.1 km along the Levada do Furado — did you walk it?"*
+
+⚠ **A confirmation, never a claim.** The user completes a record the app already half-holds. An
+unconditional "mark as collected" would make every stamp meaningless, which is the one thing D-002
+cannot afford.
+
+⚠ **Nothing shows it to anybody yet (T-149), and that is the weak point of this decision.** A list
+nobody sees is the shape of T-145 and T-146, so it is flagged in TASKS and in the code rather than
+left to be found.
+
+**Alternatives considered:**
+
+- *Loosen the endpoint radii.* Cheapest, and wrong: a bigger circle at the trailhead is more
+  generous to somebody who parked and turned round, and no more generous to the walk itself.
+- *Waypoints along the levada instead of two endpoints.* Better in principle, unaffordable in
+  practice — the OS geofence budget is ~100 and the working set is already a window (D-033).
+- *Count any fix on the course.* Rejected: that credits a levada for driving over the bridge it
+  passes under.
+- *Ask the user whenever the evidence is partial.* Rejected as the primary rule. A prompt is a
+  cost; the app should decide when it can, and ask only when it genuinely cannot.
+
+**When this reverses or retunes.** Every threshold here is a guess (T-131 retunes them against
+real trips, which works because each award stores what it was judged on). The corridor is the
+number most likely to be wrong, and the first real walk under canopy will say so.

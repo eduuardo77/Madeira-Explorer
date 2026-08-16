@@ -53,6 +53,13 @@ Re-verified 2026-08-16 after T-067: the app bundles with `content/regions.json` 
 the hero number reads `1 / 79`, and the card reads **VIEWPOINT · Pico do Areeiro · Santana** —
 the municipality, from the boundaries, on a device.
 
+⚠ **THE STAMP RULES CHANGED ON 2026-08-16 (D-065).** Every place now has **two independent
+detectors** — the OS geofence, and a sweep of the raw trace for when the OS never fired — and a
+levada is credited by **how much of its course you walked** (60%, or 3 km) rather than by touching
+both endpoints. Out-and-back walks, skipped sections and lost crossings all earn the stamp now.
+⚠ **The one loose end is T-149**: `runAwardPass` returns `awaitingConfirmation` for walks that
+nearly qualified, and no screen asks the user about them yet.
+
 ⚠ **Never verified, because no emulator can answer it:** battery, background survival, GPS
 realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app has met real data.**
 

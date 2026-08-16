@@ -93,6 +93,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-062** | v1 ships region progress computed and unshown. The passport already answers "where next". | **Accepted** |
 | **D-063** | The souvenir returns to v1. Still image first, video as research-then-spike. | **Accepted** |
 | **D-064** | The canvas is greatest hits, not coverage. Thin regions are allowed to stay thin. | **Accepted** |
+| **D-065** | Two ways to earn every stamp. A levada is credited by how much of it you walked. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

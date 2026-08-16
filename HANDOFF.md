@@ -139,6 +139,11 @@ Each cost a session to find and none was visible from the tests. Full write-ups 
   on purpose and a test keeps it that way (D-041).
 - **Check the measurement ran.** If a result does not move when the input changes, suspect the
   probe. A regex over raw tile bytes once "found" a character that was not there.
+- ⚠ **The workbench cannot see `hitSlop`, so a measured tap target may be a lie.** react-native-web
+  does not render the prop: the DOM gives you the *word*, not the target. T-113 measured every
+  control and passed; T-144's *See all* still shipped at 57 × 35 against the 60 dp floor, found on
+  2026-08-16. Measure with `tools/ui-audit.js`, then **read the code for a `hitSlop`** on anything
+  it reports as small. A test now refuses a `hitSlop` written as a single number.
 - **Artwork is judged by eye — and there IS an eye now, so use it.**
   `bash tools/screenshot.sh <name>` writes a PNG, and a session can open that PNG and look at it.
   On 2026-08-13 that loop found, in ten minutes and after 369 passing tests: a dev-build error

@@ -901,6 +901,15 @@ grep -A30 "^### T-052a" docs/task-notes.md
       `MIN_TAP_TARGET` in their styles, which is an argument, not a measurement.
       — ⚠ **Nothing has been touched by a finger.** Real tap targets, the text size an
       80-year-old actually has set, and sunlight (T-065) are all still untested.
+      — ⚠ **AMENDED 2026-08-16 — "26 controls, none under 60 dp" had a blind spot, and something
+      shipped through it.** react-native-web does not render `hitSlop`, so the DOM shows the word
+      rather than the target. T-144 then added the passport's *See all*: a 41 × 19 dp word with
+      `hitSlop={spacing.sm}`, which is **57 × 35** on a device. The measurement above would have
+      reported 41 × 19 and been dismissed as "it has a hitSlop" — which is exactly what a reader
+      does with a number that cannot be checked. Fixed under T-112, and
+      `accessibility.test.ts` now refuses a `hitSlop` written as a single number. The
+      measurement itself is checked in as `tools/ui-audit.js` so the next one is a paste rather
+      than a rewrite.
 
 ### T-114
 

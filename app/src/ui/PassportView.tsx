@@ -108,6 +108,31 @@ const CATEGORY_LABELS: Record<Category, string> = {
  */
 const MIN_STAMPS_FOR_SEE_ALL = 4;
 
+/**
+ * What *See all* has to be pressed by, given that it is two small words.
+ *
+ * ⚠ **It was `spacing.sm` on every side, and that was not enough.** The word
+ * renders as a **41 × 19 dp** box, so eight all round made a **57 × 35** target
+ * against the 60 dp `MIN_TAP_TARGET` that D-015 chose over the platform's 44 —
+ * failing in both directions, on the one control an older user needs in order
+ * to see a whole category.
+ *
+ * ⚠ **No measurement could have caught it, and one was run.** T-113 measured
+ * every control in the workbench and found nothing, because `hitSlop` is a
+ * prop rather than a style: react-native-web does not render it, so the DOM
+ * shows the *word*, not the target. The workbench sees 41 × 19 whatever this
+ * value is. It is the same shape as T-145 — the thing under test was not the
+ * thing that ships.
+ *
+ * The numbers are asymmetric because the room is. Measured at both 320 and
+ * 390 dp: **32 dp of clear header above, 24 dp to the first sticker below,
+ * 21 dp to the screen edge on the right.** These leave ~8 dp of clearance on
+ * each side, so a grown target still cannot become a mis-tap for a sticker —
+ * which is the failure the two bottom controls are separated to avoid, one
+ * screen along.
+ */
+const SEE_ALL_HIT_SLOP = { top: 24, bottom: 17, left: 12, right: 12 };
+
 
 /**
  * A place in the collection, earned or not (T-070, D-058).
@@ -245,7 +270,7 @@ function CategoryRow({
               onPress={() => setExpanded((open) => !open)}
               // The word is small, so the tap target is grown around it
               // rather than left at the size of the text (D-015).
-              hitSlop={spacing.sm}
+              hitSlop={SEE_ALL_HIT_SLOP}
               style={({ pressed }) => [pressed && styles.seeAllPressed]}
             >
               <Text style={styles.seeAll}>

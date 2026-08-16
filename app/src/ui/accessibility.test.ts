@@ -115,6 +115,37 @@ test('every screen that has a control knows what a tap target is', () => {
   );
 });
 
+test('a hit target is computed on four sides, never guessed as one number', () => {
+  // ⚠ **The rule this exists for cost a shipped control.** The passport's
+  // *See all* carried `hitSlop={spacing.sm}` — eight on every side, which
+  // looks like care and is not: two small words are a 41 × 19 dp box, so
+  // eight all round reaches 57 × 35 against MIN_TAP_TARGET's 60.
+  //
+  // A scalar cannot be checked against anything, because it does not say what
+  // it was trying to reach. An object per side is what somebody writes when
+  // they have measured the word and the room around it — see
+  // `SEE_ALL_HIT_SLOP`.
+  //
+  // ⚠ And no workbench measurement can catch this: react-native-web does not
+  // render `hitSlop`, so the DOM shows the word rather than the target. This
+  // rule is the only mechanical check that exists for it.
+  const offenders: string[] = [];
+
+  for (const file of sources()) {
+    // `hitSlop={8}` or `hitSlop={spacing.sm}`. An object literal passes, and so
+    // does a named constant — those are the two shapes that carry four sides.
+    if (/hitSlop\s*=\s*\{\s*(\d|spacing\.)/.test(code(file))) {
+      offenders.push(relative(file));
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    'these size a tap target with one number — give it four sides, measured (D-015)'
+  );
+});
+
 test('the rules above actually match something, so they are not vacuous', () => {
   // Probe check. Every assertion here is "this list is empty", which is also
   // what a broken pattern produces. So: prove the patterns fire on text that
@@ -127,6 +158,14 @@ test('the rules above actually match something, so they are not vacuous', () => 
 
   assert.match('<Text allowFontScaling={false}>', /allowFontScaling\s*=\s*\{?\s*false/);
   assert.match('  fontSize: 12,', /fontSize:\s*\d/);
+  // The scalar hit target, in both the shapes it has actually been written in.
+  assert.match('hitSlop={8}', /hitSlop\s*=\s*\{\s*(\d|spacing\.)/);
+  assert.match('hitSlop={spacing.sm}', /hitSlop\s*=\s*\{\s*(\d|spacing\.)/);
+  assert.doesNotMatch('hitSlop={SEE_ALL_HIT_SLOP}', /hitSlop\s*=\s*\{\s*(\d|spacing\.)/);
+  assert.doesNotMatch(
+    'hitSlop={{ top: 24, bottom: 17, left: 12, right: 12 }}',
+    /hitSlop\s*=\s*\{\s*(\d|spacing\.)/
+  );
   // And the shape the app actually uses must NOT trip it.
   assert.doesNotMatch('  fontSize: fontSize.body,', /fontSize:\s*\d/);
   assert.doesNotMatch('  fontSize: bandHeight * 0.62,', /fontSize:\s*\d/);

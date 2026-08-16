@@ -716,7 +716,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       passport); the passport's stamps were 62 dp postage stamps in mostly-empty cards; and empty
       category rows were full-height grey slabs. Now: the known error is silenced by its exact
       text, stamps are 96 dp, and an empty row is a slim outline.
-      — The rest of T-112 still stands.
+      — **Measured again 2026-08-16, this time from a checked-in script**
+      (`tools/ui-audit.js`, run in the workbench). Every screen, every control:
+      **13 screens, no overlaps, no clipped text, nothing off the edge**, and the primary screen
+      is at **2 controls (Always) / 3 (While-Using)** — which is design brief §3's target met,
+      and no sign of the banner accumulation the reference app suffers.
+      — ⚠ **One failure, and it was invisible to the last measurement pass.** The passport's
+      *See all* (added by T-144) is a 41 × 19 dp word carrying `hitSlop={spacing.sm}` — a
+      **57 × 35** target against the 60 dp floor D-015 chose over the platform's 44. Now
+      `SEE_ALL_HIT_SLOP`, four measured sides, 65 × 60, with ~8 dp of clearance to the sticker
+      below it.
+      — ⚠ **Why T-113's pass could not have seen it: react-native-web does not render `hitSlop`.**
+      The DOM shows the *word*, not the target, whatever the prop says. So the measurement is
+      necessary and not sufficient, and `accessibility.test.ts` now refuses a `hitSlop` written
+      as one number — the shape that cannot be checked against anything. Probed: the rule fails
+      on the old line and passes on the new.
+      — **What is left is judgement, not measurement**: whether anything on these screens should
+      be *removed*. That wants the project lead's eye and T-065 (outdoors, at arm's length).
       — Target is already set by `docs/design-brief.md` §3: map plus three controls. Watch
       specifically for banner/promo cards accumulating over the map; the reference app loses the
       top third of its map to two stacked dismissible banners.

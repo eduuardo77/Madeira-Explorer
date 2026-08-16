@@ -59,10 +59,15 @@ realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app h
 the app became usable — there are places to collect, the passport lists all of them, and every
 finished feature turned on at once.
 
-**1. ~~`content/pois.json` is empty~~ — it holds 80 places as of 2026-08-14, and they are a
+**1. ~~`content/pois.json` is empty~~ — it holds 79 places as of 2026-08-16, and they are a
 STARTER SET, not curation.** The project lead asked for them twice, so the standing "do not
-curate" rule was overridden deliberately. 20 viewpoints · 15 levadas · 16 villages · 11 beaches ·
-18 landmarks, all 15 levadas with drawn courses.
+curate" rule was overridden deliberately. 21 viewpoints · 15 levadas · 16 villages · 11 beaches ·
+16 landmarks, all 15 levadas with drawn courses.
+⚠ **Three editorial edits have been made since, each on the project lead's explicit instruction**
+(2026-08-16, T-066): two coordinates that were curated in the sea, one place renamed
+*Miradouro da Rocha do Navio* and recategorised, and one duplicate deleted — *Monumento Natural
+do Cabo Girão* was the same cliff as *Cabo Girão*, 745 m away. `node tools/check-names.mjs` and
+`node tools/validate-content.mjs` are what found all three.
 
 **Selection was by prominence and coverage, not by merit.** Nobody has asked of any single place
 *is this worth a stamp*, which is the whole of T-066. `content/README.md` says so at the top and
@@ -97,6 +102,9 @@ use. **The largest open item in the project.**
 
 - **T-063b** — ~~one glyph range still requested~~ **moot while the platform map ships** (D-057).
   It was a MapLibre glyph fetch; nothing requests it now. It returns if the MapLibre path does.
+- ⚠ **`byRegion` is computed and shown nowhere, and that is now a decision (D-062), not a gap.**
+  The passport already answers "where next" (D-058), and the map screen is allowed three controls.
+  Do not "finish" it by adding a region row without reopening D-062.
 - ~~**T-067** region boundaries~~ — **done 2026-08-16 (D-061).** `content/regions.json` holds the
   eleven municipalities, `regionId` is now derived from the polygon a place stands in, and the
   card names it. It found that **46 of the 80 places were filed under the wrong region**, 27 of

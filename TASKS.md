@@ -532,7 +532,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Girão`, 745 m apart** — the cliff and its protected-area designation, curated as two
       landmarks, the second sitting at an administrative centroid with nothing named within
       400 m. The validator now warns on it (same category · one name inside the other · under
-      1 km). **Left for T-066: which of the two is the stamp.**
+      1 km). **Resolved the same day: the project lead kept the skywalk and deleted the
+      designation**, so the pack is 79 places — 21 viewpoints, 15 levadas, 16 villages, 11
+      beaches, 16 landmarks.
       — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
@@ -732,6 +734,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 ### UX reduction
 
 - [~] **T-112** Ruthless UI reduction pass — one primary screen, one hero number ⇠ T-075
+      — ⚠ **D-062 (2026-08-16) is this task winning an argument, and it is worth reading as
+      precedent**: region progress had a decision behind it (D-027) and a computed number ready
+      to render, and it still does not go on the map screen, because the screen is allowed three
+      things. The fourth control has to be asked for by the product, not by the data.
       — **Started 2026-08-13, from screenshots rather than from reading the code.** Three things
       the running app was doing that no test could see: a LogBox toast for the known T-063b glyph
       error sat **on top of the passport button** (a tap opened a red error page instead of the

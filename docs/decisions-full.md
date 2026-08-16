@@ -2985,3 +2985,47 @@ next* — and it can only do it if a region is somewhere you can be in or not in
 **When this reverses.** If the project lead wants the guidebook's regions rather than the
 council's. The tool would then read a hand-drawn GeoJSON instead of Overpass, and everything
 downstream — ids, names, the assignment, the card — stays as it is.
+
+---
+
+## D-062 — v1 ships region progress computed and unshown
+
+**Status:** Accepted — chosen by the project lead 2026-08-16, offered as one of three options.
+
+**Decision:** `byRegion` is computed, correct and **rendered nowhere in v1**. D-027 gave region
+progress the map screen and the *"where should I go next"* job; that half is deferred, not
+cancelled.
+
+**Reasoning.** Two things changed after D-027 was written:
+
+- **D-058 answers the same question better.** The passport now shows *every* curated place,
+  collected or not, so the uncollected ones are already the recommendation — which is exactly what
+  D-002 said they would be. A region list would be a second, coarser answer to a question that has
+  a good one.
+- **The map screen's restraint is the product.** Design brief §3 allows three controls, and the
+  competitor teardown in §6.3 is a screen losing its top third to stacked banners. Region progress
+  would be the fourth thing, and T-112 exists to stop precisely that accumulation.
+
+**Alternatives considered:**
+
+- *One line on the map screen* — "Machico — 3 of 9", the region you have started but not
+  finished. This is D-027 fulfilled literally, and `suggestNextRegion` already computes it. It
+  costs the screen's fourth element, and nothing in the product is asking for it yet.
+- *A row in the passport.* Rejected: it reverses D-027, which moved region off the passport so the
+  passport only collects.
+
+**Consequences, and the honest one first.**
+
+⚠ **This leaves a number with no reader, which is a documented way for this project to be
+wrong.** T-067 found 46 of 80 places filed under the wrong region, undetected for three weeks,
+*because* `byRegion` was computed and displayed nowhere. The mitigation is that region assignment
+is now derived by tool and checked by `validate-content.mjs` on every run, so correctness no
+longer depends on somebody looking at a screen. The field's own comment says all of this, so the
+next reader does not mistake it for a tested surface.
+
+- `regionId` is still user-visible in one place: the municipality on a place card (T-067).
+- The rows stay computed because the denominator rule (D-024) walks the same list, and because
+  T-067a needs them.
+
+**When this reverses.** If field use shows the passport is not answering "where next" — T-065, or
+anyone using the app on a real trip.

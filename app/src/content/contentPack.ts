@@ -76,7 +76,14 @@ export type Place = {
   /** Display name. The only field here a user ever reads. */
   name: string;
   category: Category;
-  /** Drives per-region progress on the map screen, not the passport (D-027). */
+  /**
+   * The municipality this place is in — derived from the boundaries in
+   * `content/regions.json`, never typed by hand (D-061).
+   *
+   * Feeds per-region progress, which v1 computes and does not show (D-062),
+   * and the one region string a user does read: the line under the name on a
+   * place card.
+   */
   regionId: string;
   /** One for most places; a start and an end for a levada. */
   geofences: PlaceGeofence[];

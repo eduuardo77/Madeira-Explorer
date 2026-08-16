@@ -299,20 +299,6 @@
       ]
     },
     {
-      "id": "monumento-natural-do-cabo-girao",
-      "name": "Monumento Natural do Cabo Girão",
-      "category": "landmark",
-      "regionId": "camara-de-lobos",
-      "geofences": [
-        {
-          "id": "monumento-natural-do-cabo-girao",
-          "lat": 32.65387,
-          "lon": -17.0119,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
       "id": "miradouro-da-rocha-do-navio",
       "name": "Miradouro da Rocha do Navio",
       "category": "viewpoint",

@@ -7,8 +7,9 @@
  *     primary screen (T-075, design brief §3.1). One number, and it must be
  *     stamps rather than road coverage (D-002).
  *   - **Five category rows** — the passport's primary axis (D-027).
- *   - **Per-region rows** — which live on the *map* screen, doing the "where
- *     should I go next" job, not in the passport (D-027).
+ *   - **Per-region rows** — which D-027 gave to the *map* screen, and which
+ *     **v1 does not show at all** (D-062). See the field for why they are
+ *     still computed.
  *
  * THE DENOMINATOR IS THE DANGEROUS PART
  * -------------------------------------
@@ -52,7 +53,20 @@ export type TripProgress = {
    * of the metaphor is a fixed set of pages to fill.
    */
   byCategory: CategoryProgress[];
-  /** Unlocked regions only, most-collected first. Drives the map screen. */
+  /**
+   * Unlocked regions only, most-collected first.
+   *
+   * ⚠ **Nothing renders this in v1, on purpose (D-062).** D-027 gave it the
+   * map screen and the "where should I go next" job; D-058 then made the
+   * passport show every place, collected or not, which answers the same
+   * question without spending the map screen's third control on it.
+   *
+   * It is computed anyway because the denominator rule below depends on the
+   * same walk, and because a lock gate (T-067a) needs these rows. **But do not
+   * mistake it for a tested surface** — a number nobody displays is a number
+   * nobody checks, which is exactly how a third of the pack sat in the wrong
+   * region for three weeks (T-067).
+   */
   byRegion: RegionProgress[];
   /**
    * How many regions are hidden. Shown to nobody — it exists so the debug

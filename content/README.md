@@ -19,7 +19,7 @@ not a rewrite.
 > ### ⚠ The eighty places in `pois.json` are a STARTER SET, not curation — 2026-08-14
 > The project lead asked for a full set so the app could be used. All 80 are real, they validate,
 > and all 15 levadas have courses — but **they are not T-066**. Selection was by *prominence and
-> coverage*, not by merit: 20 viewpoints, 15 levadas, 16 villages, 11 beaches, 18 landmarks, spread
+> coverage*, not by merit: 21 viewpoints, 15 levadas, 16 villages, 11 beaches, 16 landmarks, spread
 > across the island. Nobody has asked of any of them "is this worth a stamp", which is the whole job.
 >
 > **Where each came from:** the non-levadas are entries of `pois.candidates.json`, chosen by name
@@ -42,8 +42,10 @@ not a rewrite.
 > and exit a walker would recognise, and the stamp rule (D-009) needs both crossed. Pairing the
 > right entry with the right exit is exactly the local knowledge this file exists to hold.
 >
-> ⚠ **Two coordinates were hand-corrected on 2026-08-16**, on the project lead's instruction, and
-> they are the only editorial edits in this file: **Cabo Girão** and **Rocha do Navio** were both
+> ⚠ **Three editorial edits were made on 2026-08-16**, each on the project lead's instruction.
+> One was a deletion: **Monumento Natural do Cabo Girão** was the same cliff as **Cabo Girão**,
+> 745 m away and sitting on an administrative centroid — one stamp for one place, so the pack is
+> 79. The other two were coordinates: **Cabo Girão** and **Rocha do Navio** were both
 > curated *in the sea* — 525 m and 1.4 km out — so neither stamp could have been earned by anybody
 > standing at the place. See the `regions.json` section below for what they are now and why the
 > reserve is a harder case than it looks. **This is the failure mode of copying a label wholesale:

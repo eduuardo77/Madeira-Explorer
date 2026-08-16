@@ -1,0 +1,3518 @@
+[
+  {
+    "name": "Câmara de Lobos",
+    "category": "village",
+    "lat": 32.6486,
+    "lon": -16.9752,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 7,
+    "evidence": {
+      "wikidata": "Q623736",
+      "wikipedia": "pt:Câmara de Lobos",
+      "website": "https://www.cm-camaradelobos.pt/"
+    },
+    "wikipediaLanguages": 38
+  },
+  {
+    "name": "Machico",
+    "category": "village",
+    "lat": 32.7226,
+    "lon": -16.76582,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 32,
+    "evidence": {
+      "wikidata": "Q693243",
+      "wikipedia": "en:Machico, Madeira"
+    },
+    "wikipediaLanguages": 36
+  },
+  {
+    "name": "Santa Cruz",
+    "category": "village",
+    "lat": 32.68735,
+    "lon": -16.79123,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 14,
+    "evidence": {
+      "wikidata": "Q658823",
+      "wikipedia": "en:Santa Cruz, Madeira"
+    },
+    "wikipediaLanguages": 35
+  },
+  {
+    "name": "São Vicente",
+    "category": "village",
+    "lat": 32.80228,
+    "lon": -17.04718,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 6,
+    "evidence": {
+      "wikidata": "Q304464",
+      "wikipedia": "en:São Vicente, Madeira"
+    },
+    "wikipediaLanguages": 35
+  },
+  {
+    "name": "Ribeira Brava",
+    "category": "village",
+    "lat": 32.67009,
+    "lon": -17.06503,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q250139",
+      "wikipedia": "en:Ribeira Brava, Madeira"
+    },
+    "wikipediaLanguages": 33
+  },
+  {
+    "name": "Calheta",
+    "category": "village",
+    "lat": 32.72188,
+    "lon": -17.17833,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 10,
+    "evidence": {
+      "wikidata": "Q757078",
+      "wikipedia": "pt:Calheta (Madeira)"
+    },
+    "wikipediaLanguages": 32
+  },
+  {
+    "name": "Porto Moniz",
+    "category": "village",
+    "lat": 32.8669,
+    "lon": -17.1667,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 10,
+    "evidence": {
+      "wikidata": "Q221412",
+      "wikipedia": "en:Porto Moniz"
+    },
+    "wikipediaLanguages": 32
+  },
+  {
+    "name": "Ponta do Sol",
+    "category": "village",
+    "lat": 32.68129,
+    "lon": -17.104,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 9,
+    "evidence": {
+      "wikidata": "Q943911",
+      "wikipedia": "en:Ponta do Sol, Madeira"
+    },
+    "wikipediaLanguages": 30
+  },
+  {
+    "name": "Ruivo",
+    "category": "viewpoint",
+    "lat": 32.75888,
+    "lon": -16.94276,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "wikidata": "Q473169",
+      "wikipedia": "pt:Pico Ruivo",
+      "ele": "1862",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 30
+  },
+  {
+    "name": "Caniço",
+    "category": "village",
+    "lat": 32.65238,
+    "lon": -16.84101,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "wikidata": "Q857346",
+      "wikipedia": "pt:Caniço (Santa Cruz)",
+      "website": "https://www.jf-canico.pt/"
+    },
+    "wikipediaLanguages": 25
+  },
+  {
+    "name": "Arieiro",
+    "category": "viewpoint",
+    "lat": 32.73556,
+    "lon": -16.92864,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "wikidata": "Q1192102",
+      "wikipedia": "pt:Pico do Areeiro (Madeira)",
+      "ele": "1818",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 22
+  },
+  {
+    "name": "Camacha",
+    "category": "village",
+    "lat": 32.67944,
+    "lon": -16.84487,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "wikidata": "Q857666",
+      "wikipedia": "pt:Camacha"
+    },
+    "wikipediaLanguages": 19
+  },
+  {
+    "name": "Caniçal",
+    "category": "village",
+    "lat": 32.73913,
+    "lon": -16.7393,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "wikidata": "Q857987",
+      "wikipedia": "pt:Caniçal"
+    },
+    "wikipediaLanguages": 17
+  },
+  {
+    "name": "Área Protegida do Cabo Girão",
+    "category": "landmark",
+    "lat": 32.64848,
+    "lon": -17.00044,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 62,
+    "evidence": {
+      "wikidata": "Q856866",
+      "wikipedia": "pt:Cabo Girão",
+      "leisure": "nature_reserve",
+      "website": "https://ifcn.madeira.gov.pt/areas-protegidas/cabo-girao.html",
+      "opening_hours": "24/7",
+      "operator": "Instituto das Florestas e Conservação da Natureza, IP-RAM"
+    },
+    "wikipediaLanguages": 16
+  },
+  {
+    "name": "Campanário",
+    "category": "village",
+    "lat": 32.66846,
+    "lon": -17.03254,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "wikidata": "Q2467260",
+      "wikipedia": "pt:Campanário (Ribeira Brava)"
+    },
+    "wikipediaLanguages": 16
+  },
+  {
+    "name": "Arco da Calheta",
+    "category": "village",
+    "lat": 32.7144,
+    "lon": -17.14653,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "wikidata": "Q241974",
+      "wikipedia": "en:Arco da Calheta"
+    },
+    "wikipediaLanguages": 15
+  },
+  {
+    "name": "Estreito de Câmara de Lobos",
+    "category": "village",
+    "lat": 32.67117,
+    "lon": -16.98006,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 11,
+    "evidence": {
+      "wikidata": "Q2991222",
+      "wikipedia": "de:Estreito de Câmara de Lobos"
+    },
+    "wikipediaLanguages": 14
+  },
+  {
+    "name": "Canhas",
+    "category": "village",
+    "lat": 32.69718,
+    "lon": -17.11743,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "wikidata": "Q2936371",
+      "wikipedia": "pt:Canhas"
+    },
+    "wikipediaLanguages": 13
+  },
+  {
+    "name": "Jardim da Serra",
+    "category": "village",
+    "lat": 32.68544,
+    "lon": -16.9895,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "wikidata": "Q2652508",
+      "wikipedia": "pt:Jardim da Serra"
+    },
+    "wikipediaLanguages": 12
+  },
+  {
+    "name": "Forte de São Tiago",
+    "category": "landmark",
+    "lat": 32.64672,
+    "lon": -16.89875,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 15,
+    "evidence": {
+      "wikidata": "Q3510244",
+      "wikipedia": "en:Fort of São Tiago",
+      "historic": "fort"
+    },
+    "wikipediaLanguages": 8
+  },
+  {
+    "name": "Funchal",
+    "category": "landmark",
+    "lat": 32.64717,
+    "lon": -16.90226,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "wikidata": "Q3289157",
+      "wikipedia": "pt:Teleférico Funchal-Monte",
+      "tourism": "attraction",
+      "website": "https://madeiracablecar.com/"
+    },
+    "wikipediaLanguages": 8
+  },
+  {
+    "name": "Achada do Teixeira",
+    "category": "viewpoint",
+    "lat": 32.76533,
+    "lon": -16.92086,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q9580033",
+      "wikipedia": "en:Achada do Teixeira",
+      "ele": "1592",
+      "tourism": "viewpoint",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 5
+  },
+  {
+    "name": "Praia Formosa",
+    "category": "beach",
+    "lat": 32.63919,
+    "lon": -16.95117,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 26,
+    "evidence": {
+      "wikidata": "Q10352428",
+      "wikipedia": "en:Praia Formosa",
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 5
+  },
+  {
+    "name": "Babosas",
+    "category": "landmark",
+    "lat": 32.67764,
+    "lon": -16.89794,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "wikidata": "Q1875811",
+      "wikipedia": "pt:Teleférico do Jardim Botânico da Madeira",
+      "tourism": "attraction",
+      "website": "https://www.telefericojardimbotanico.com/"
+    },
+    "wikipediaLanguages": 4
+  },
+  {
+    "name": "Forte de Nossa Senhora do Amparo",
+    "category": "landmark",
+    "lat": 32.71762,
+    "lon": -16.76485,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 5,
+    "evidence": {
+      "wikidata": "Q10283862",
+      "wikipedia": "pt:Forte de Nossa Senhora do Amparo de Machico",
+      "historic": "castle"
+    },
+    "wikipediaLanguages": 4
+  },
+  {
+    "name": "Fortaleza do Pico",
+    "category": "landmark",
+    "lat": 32.65087,
+    "lon": -16.91638,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q10283643",
+      "wikipedia": "pt:Fortaleza de São João Batista do Pico",
+      "historic": "fort",
+      "opening_hours": "Mo-Fr 10:00-12:30,14:00-17:00"
+    },
+    "wikipediaLanguages": 3
+  },
+  {
+    "name": "Eira do Mourão",
+    "category": "village",
+    "lat": 32.69313,
+    "lon": -17.04005,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "wikidata": "Q44967093"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Facho",
+    "category": "viewpoint",
+    "lat": 32.72439,
+    "lon": -16.7594,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q31797379",
+      "ele": "295",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Forte dos Louros",
+    "category": "landmark",
+    "lat": 32.64718,
+    "lon": -16.88901,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "wikidata": "Q10284153",
+      "wikipedia": "pt:Forte dos Louros",
+      "historic": "fort"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Jardim Tropical Monte Palace",
+    "category": "landmark",
+    "lat": 32.6742,
+    "lon": -16.9029,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 36,
+    "evidence": {
+      "wikidata": "Q43179137",
+      "tourism": "attraction",
+      "leisure": "garden",
+      "website": "https://montepalace.com/desktop/?sid=28&lang=en",
+      "opening_hours": "Mo-Su 09:30-18:00",
+      "fee": "yes"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Parque Temático da Madeira",
+    "category": "landmark",
+    "lat": 32.80216,
+    "lon": -16.8856,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 28,
+    "evidence": {
+      "wikidata": "Q10345378",
+      "wikipedia": "pt:Parque Temático da Madeira",
+      "tourism": "theme_park",
+      "leisure": "park",
+      "website": "https://www.parquetematicodamadeira.pt/",
+      "opening_hours": "Mo off"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Praia da Ponta do Sol",
+    "category": "beach",
+    "lat": 32.6795,
+    "lon": -17.10538,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 10,
+    "evidence": {
+      "wikidata": "Q10352657",
+      "wikipedia": "pt:Praia da Ponta do Sol",
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Quinta da Boa Vista",
+    "category": "landmark",
+    "lat": 32.65354,
+    "lon": -16.89653,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 11,
+    "evidence": {
+      "wikidata": "Q86361520",
+      "wikipedia": "en:Quinta da Boa Vista (Madeira)",
+      "tourism": "attraction"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Teatro Municipal Baltazar Dias",
+    "category": "landmark",
+    "lat": 32.64695,
+    "lon": -16.91141,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q10378871",
+      "wikipedia": "pt:Teatro Municipal Baltazar Dias",
+      "tourism": "attraction",
+      "website": "https://teatrobaltazardias.funchal.pt/"
+    },
+    "wikipediaLanguages": 2
+  },
+  {
+    "name": "Curral Martinho",
+    "category": "viewpoint",
+    "lat": 32.7295,
+    "lon": -16.93601,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q31797480",
+      "ele": "1785",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Fernandes",
+    "category": "viewpoint",
+    "lat": 32.75935,
+    "lon": -17.11392,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q31797342",
+      "ele": "1403",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Forte de São João Baptista",
+    "category": "landmark",
+    "lat": 32.86731,
+    "lon": -17.16542,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "wikidata": "Q76957433",
+      "historic": "fort"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Forte do Porto Novo",
+    "category": "landmark",
+    "lat": 32.66029,
+    "lon": -16.81083,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q10284131",
+      "wikipedia": "pt:Forte do Porto Novo",
+      "historic": "castle"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Hospício da Princesa Dona Maria Amélia",
+    "category": "landmark",
+    "lat": 32.64676,
+    "lon": -16.91522,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q66816036"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Infante",
+    "category": "viewpoint",
+    "lat": 32.67749,
+    "lon": -16.8744,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q31797255",
+      "ele": "944",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Pico dos Barcelos",
+    "category": "viewpoint",
+    "lat": 32.6587,
+    "lon": -16.9394,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "wikidata": "Q98821938",
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Praia dos Reis Magos",
+    "category": "beach",
+    "lat": 32.64584,
+    "lon": -16.82432,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 138,
+    "evidence": {
+      "wikidata": "Q107117651",
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "Quinta Magnólia",
+    "category": "landmark",
+    "lat": 32.644,
+    "lon": -16.92508,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 36,
+    "evidence": {
+      "wikidata": "Q111889668"
+    },
+    "wikipediaLanguages": 1
+  },
+  {
+    "name": "A Igreja de Jesus Cristo dos Santos dos Últimos Dias",
+    "category": "landmark",
+    "lat": 32.6448,
+    "lon": -16.92055,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "A Torre do Capitão - Núcleo Histórico e Museológico de Santo Amaro",
+    "category": "landmark",
+    "lat": 32.65736,
+    "lon": -16.94467,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "historic": "monument"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Achada do Marques",
+    "category": "village",
+    "lat": 32.79839,
+    "lon": -16.9083,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Achada e Levada do Poiso",
+    "category": "village",
+    "lat": 32.70523,
+    "lon": -17.11537,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Achada Grande",
+    "category": "viewpoint",
+    "lat": 32.78222,
+    "lon": -17.18832,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1194.407",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Adaga",
+    "category": "viewpoint",
+    "lat": 32.74157,
+    "lon": -16.95004,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Agricultural Plants",
+    "category": "landmark",
+    "lat": 32.66195,
+    "lon": -16.89575,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 9,
+    "evidence": {
+      "leisure": "garden"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Alto",
+    "category": "viewpoint",
+    "lat": 32.69286,
+    "lon": -16.90278,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1129",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Alto da Ponta do Pargo",
+    "category": "viewpoint",
+    "lat": 32.80118,
+    "lon": -17.21171,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "998.747",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Amparo",
+    "category": "village",
+    "lat": 32.80199,
+    "lon": -17.24081,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Área Protegida da Ponta do Pargo",
+    "category": "landmark",
+    "lat": 32.83864,
+    "lon": -17.24175,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Areo",
+    "category": "viewpoint",
+    "lat": 32.72301,
+    "lon": -17.13496,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "846",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Arrebentão",
+    "category": "viewpoint",
+    "lat": 32.71142,
+    "lon": -16.91342,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Arrudas",
+    "category": "viewpoint",
+    "lat": 32.64879,
+    "lon": -16.94442,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "arvore1",
+    "category": "landmark",
+    "lat": 32.6601,
+    "lon": -16.84421,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "leisure": "park"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Arvoredo",
+    "category": "viewpoint",
+    "lat": 32.67098,
+    "lon": -16.83581,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Assobiadouros",
+    "category": "viewpoint",
+    "lat": 32.76968,
+    "lon": -17.10693,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Assumada",
+    "category": "viewpoint",
+    "lat": 32.86317,
+    "lon": -17.18231,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "456",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Atalaia",
+    "category": "viewpoint",
+    "lat": 32.65113,
+    "lon": -16.81682,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Barcelos",
+    "category": "viewpoint",
+    "lat": 32.65879,
+    "lon": -16.93941,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "355",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Bardo",
+    "category": "viewpoint",
+    "lat": 32.69625,
+    "lon": -16.92864,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Bica da Cana",
+    "category": "viewpoint",
+    "lat": 32.7561,
+    "lon": -17.05527,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Boa Morte",
+    "category": "village",
+    "lat": 32.68129,
+    "lon": -17.04366,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Bodes",
+    "category": "viewpoint",
+    "lat": 32.69887,
+    "lon": -16.98008,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Boneca",
+    "category": "viewpoint",
+    "lat": 32.8029,
+    "lon": -16.8662,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Bonito",
+    "category": "viewpoint",
+    "lat": 32.8128,
+    "lon": -17.19767,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1074",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Buraco",
+    "category": "viewpoint",
+    "lat": 32.76641,
+    "lon": -16.99294,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1423",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Buxo",
+    "category": "viewpoint",
+    "lat": 32.65167,
+    "lon": -16.93858,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Búzio",
+    "category": "viewpoint",
+    "lat": 32.73356,
+    "lon": -17.01443,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço da Cancela",
+    "category": "viewpoint",
+    "lat": 32.64919,
+    "lon": -16.8647,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço da Lapa",
+    "category": "viewpoint",
+    "lat": 32.75654,
+    "lon": -16.80068,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço da Portela",
+    "category": "viewpoint",
+    "lat": 32.73305,
+    "lon": -16.75408,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço da Vigia",
+    "category": "viewpoint",
+    "lat": 32.82691,
+    "lon": -16.89563,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço das Covas",
+    "category": "viewpoint",
+    "lat": 32.81623,
+    "lon": -17.20795,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "915",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço das Eiras",
+    "category": "viewpoint",
+    "lat": 32.65621,
+    "lon": -16.85233,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabeço dos Pernais",
+    "category": "viewpoint",
+    "lat": 32.64583,
+    "lon": -16.86178,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "408",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cabo Girão",
+    "category": "landmark",
+    "lat": 32.65705,
+    "lon": -17.0049,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 19,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cacti",
+    "category": "landmark",
+    "lat": 32.66173,
+    "lon": -16.89492,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 6,
+    "evidence": {
+      "leisure": "garden"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cais do Sardinha",
+    "category": "beach",
+    "lat": 32.74212,
+    "lon": -16.68565,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Caldeirão",
+    "category": "viewpoint",
+    "lat": 32.85849,
+    "lon": -17.16718,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "418",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Camelia",
+    "category": "landmark",
+    "lat": 32.66314,
+    "lon": -16.89578,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 16,
+    "evidence": {
+      "leisure": "garden"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Canário",
+    "category": "viewpoint",
+    "lat": 32.77514,
+    "lon": -16.95523,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Capela da Casa de Saúde Câmara Pestana",
+    "category": "landmark",
+    "lat": 32.64728,
+    "lon": -16.88388,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Capela de Jesus. Maria e José",
+    "category": "landmark",
+    "lat": 32.7267,
+    "lon": -17.16596,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q56071388"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Capela de Nossa Senhora de Fátima",
+    "category": "landmark",
+    "lat": 32.66008,
+    "lon": -17.00437,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cardo",
+    "category": "viewpoint",
+    "lat": 32.66638,
+    "lon": -16.95199,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "wikidata": "Q112107185",
+      "ele": "430",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cardosas",
+    "category": "viewpoint",
+    "lat": 32.7478,
+    "lon": -17.18122,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "735",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Casado",
+    "category": "viewpoint",
+    "lat": 32.75684,
+    "lon": -16.98393,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1728",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Castanho",
+    "category": "viewpoint",
+    "lat": 32.74522,
+    "lon": -16.76362,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "587",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cavalo",
+    "category": "viewpoint",
+    "lat": 32.7222,
+    "lon": -16.99239,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1349",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cedro",
+    "category": "viewpoint",
+    "lat": 32.72803,
+    "lon": -16.9433,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1759",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Centro de Ciência Viva",
+    "category": "landmark",
+    "lat": 32.86728,
+    "lon": -17.16791,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "tourism": "museum",
+      "website": "http://www.portomoniz.cienciaviva.pt/home/"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Chão da Ribeira",
+    "category": "village",
+    "lat": 32.80791,
+    "lon": -17.11447,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Chão dos Terreiros",
+    "category": "viewpoint",
+    "lat": 32.71611,
+    "lon": -17.00198,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1436",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Chiqueiros da Queimada",
+    "category": "viewpoint",
+    "lat": 32.76106,
+    "lon": -16.90648,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Choreographed Gardens",
+    "category": "landmark",
+    "lat": 32.66216,
+    "lon": -16.89566,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "leisure": "garden"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cidrão",
+    "category": "viewpoint",
+    "lat": 32.74024,
+    "lon": -16.94196,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Coelho",
+    "category": "viewpoint",
+    "lat": 32.76188,
+    "lon": -16.95699,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Coentros",
+    "category": "viewpoint",
+    "lat": 32.79404,
+    "lon": -17.18727,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1247",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Convento de Nossa Senhora da Piedade da Caldeira",
+    "category": "landmark",
+    "lat": 32.66267,
+    "lon": -16.99892,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Coroa",
+    "category": "viewpoint",
+    "lat": 32.68375,
+    "lon": -17.03444,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cortado",
+    "category": "viewpoint",
+    "lat": 32.80693,
+    "lon": -16.86665,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Cruz",
+    "category": "viewpoint",
+    "lat": 32.64247,
+    "lon": -16.93914,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "260",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Eirinhas",
+    "category": "viewpoint",
+    "lat": 32.75942,
+    "lon": -16.96568,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1535",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Encumeada Baixa",
+    "category": "viewpoint",
+    "lat": 32.76332,
+    "lon": -16.92711,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1655",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Environmental Education Center Ribero Frio",
+    "category": "landmark",
+    "lat": 32.73426,
+    "lon": -16.88606,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 29,
+    "evidence": {
+      "leisure": "park"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Escalvado",
+    "category": "viewpoint",
+    "lat": 32.72445,
+    "lon": -16.93269,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1700",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Espigão",
+    "category": "viewpoint",
+    "lat": 32.7935,
+    "lon": -17.05959,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "963",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Esteias",
+    "category": "viewpoint",
+    "lat": 32.70582,
+    "lon": -16.92692,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1343",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Estrela",
+    "category": "village",
+    "lat": 32.73022,
+    "lon": -17.1779,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Etnografico",
+    "category": "landmark",
+    "lat": 32.67987,
+    "lon": -16.84458,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "tourism": "museum"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fajã das Galinhas",
+    "category": "village",
+    "lat": 32.69357,
+    "lon": -16.96847,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fajã das Murtas",
+    "category": "village",
+    "lat": 32.76332,
+    "lon": -16.87689,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fajã do Penedo",
+    "category": "village",
+    "lat": 32.80445,
+    "lon": -16.96444,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fajã dos Vinháticos",
+    "category": "village",
+    "lat": 32.78756,
+    "lon": -17.01688,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Falca de Baixo",
+    "category": "village",
+    "lat": 32.79622,
+    "lon": -16.96993,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fanal",
+    "category": "viewpoint",
+    "lat": 32.8094,
+    "lon": -17.1407,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "ele": "1236",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ferreiro",
+    "category": "viewpoint",
+    "lat": 32.75638,
+    "lon": -16.99884,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1582",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Folhado",
+    "category": "viewpoint",
+    "lat": 32.72544,
+    "lon": -17.04973,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1250",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fontainhas",
+    "category": "village",
+    "lat": 32.67514,
+    "lon": -17.00551,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fonte da Pedra",
+    "category": "viewpoint",
+    "lat": 32.82535,
+    "lon": -17.19336,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1024.15",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fonte do Barro",
+    "category": "viewpoint",
+    "lat": 32.80715,
+    "lon": -17.19525,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1166.887",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Fonte do Bispo",
+    "category": "viewpoint",
+    "lat": 32.7922,
+    "lon": -17.18151,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1297",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Forte de São Lourenço",
+    "category": "landmark",
+    "lat": 32.64728,
+    "lon": -16.91024,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "historic": "fort"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Forte do Portinho",
+    "category": "landmark",
+    "lat": 32.64861,
+    "lon": -16.82256,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "historic": "castle"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Forte São João Baptista",
+    "category": "landmark",
+    "lat": 32.71824,
+    "lon": -16.75861,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "historic": "fort"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Funcho",
+    "category": "viewpoint",
+    "lat": 32.65218,
+    "lon": -16.94884,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Furado",
+    "category": "viewpoint",
+    "lat": 32.73902,
+    "lon": -16.68095,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Furão",
+    "category": "viewpoint",
+    "lat": 32.75095,
+    "lon": -16.95978,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Furnas",
+    "category": "village",
+    "lat": 32.70577,
+    "lon": -17.04563,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Galinheiros",
+    "category": "viewpoint",
+    "lat": 32.7393,
+    "lon": -16.95117,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Garachico",
+    "category": "village",
+    "lat": 32.66973,
+    "lon": -16.99113,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 5,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Gato",
+    "category": "viewpoint",
+    "lat": 32.74297,
+    "lon": -16.93964,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Geada",
+    "category": "viewpoint",
+    "lat": 32.73655,
+    "lon": -16.95985,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ginda",
+    "category": "viewpoint",
+    "lat": 32.74188,
+    "lon": -16.95483,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ginjas",
+    "category": "village",
+    "lat": 32.7859,
+    "lon": -17.04091,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Gordo",
+    "category": "viewpoint",
+    "lat": 32.7623,
+    "lon": -17.15038,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1264",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Hortensia Gardens",
+    "category": "landmark",
+    "lat": 32.66664,
+    "lon": -16.87915,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 8,
+    "evidence": {
+      "leisure": "garden"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Boa Ventura",
+    "category": "landmark",
+    "lat": 32.81983,
+    "lon": -16.973,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Encarnação",
+    "category": "landmark",
+    "lat": 32.66891,
+    "lon": -16.96812,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Fajã da Ovelha",
+    "category": "landmark",
+    "lat": 32.77445,
+    "lon": -17.23439,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Nazaré",
+    "category": "landmark",
+    "lat": 32.64441,
+    "lon": -16.9326,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 11,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Quinta Grande",
+    "category": "landmark",
+    "lat": 32.66227,
+    "lon": -17.01146,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Raposeira",
+    "category": "landmark",
+    "lat": 32.76654,
+    "lon": -17.21427,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Ribeira Seca",
+    "category": "landmark",
+    "lat": 32.73364,
+    "lon": -16.77603,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Igreja da Serra de Água",
+    "category": "landmark",
+    "lat": 32.72775,
+    "lon": -17.02538,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Jorge",
+    "category": "viewpoint",
+    "lat": 32.75397,
+    "lon": -16.98524,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1691",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "José da Casta",
+    "category": "viewpoint",
+    "lat": 32.75383,
+    "lon": -16.88905,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "754",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Juncal",
+    "category": "viewpoint",
+    "lat": 32.73523,
+    "lon": -16.92485,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "1718",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lage",
+    "category": "viewpoint",
+    "lat": 32.75814,
+    "lon": -16.97161,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lagoa",
+    "category": "viewpoint",
+    "lat": 32.71995,
+    "lon": -16.91737,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Laguinhas",
+    "category": "viewpoint",
+    "lat": 32.77838,
+    "lon": -16.9586,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lamaçeiros",
+    "category": "village",
+    "lat": 32.85331,
+    "lon": -17.16936,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lapa da Cadela",
+    "category": "viewpoint",
+    "lat": 32.75943,
+    "lon": -16.95199,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada da Ribeira da Janela",
+    "category": "levada",
+    "lat": 32.804483,
+    "lon": -17.157439,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 167,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada da Rocha Vermelha",
+    "category": "levada",
+    "lat": 32.7886753,
+    "lon": -17.1383313,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 79,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada da Serra do Faial",
+    "category": "levada",
+    "lat": 32.677654,
+    "lon": -16.854165,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada das 25 Fontes",
+    "category": "levada",
+    "lat": 32.7612,
+    "lon": -17.1363,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 6,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada das Faias",
+    "category": "levada",
+    "lat": 32.783125,
+    "lon": -16.976107,
+    "sources": [
+      "curated"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Caldeirão Verde",
+    "category": "levada",
+    "lat": 32.77028,
+    "lon": -16.945094,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 8,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Caniçal",
+    "category": "levada",
+    "lat": 32.748843,
+    "lon": -16.741089,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Castelejo",
+    "category": "levada",
+    "lat": 32.753473,
+    "lon": -16.826119,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 61,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Furado",
+    "category": "levada",
+    "lat": 32.7352,
+    "lon": -16.8863,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 12,
+    "evidence": {
+      "ref": "PR10",
+      "tourism": "information",
+      "fee": "yes"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Norte",
+    "category": "levada",
+    "lat": 32.778877,
+    "lon": -17.106852,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 174,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada do Rei",
+    "category": "levada",
+    "lat": 32.815922,
+    "lon": -16.925383,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 15,
+    "evidence": {
+      "fee": "yes"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada dos Cedros",
+    "category": "levada",
+    "lat": 32.806189,
+    "lon": -17.140803,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 5,
+    "evidence": {
+      "ref": "PR14",
+      "website": "https://ifcn.madeira.gov.pt/images/FotosArtigos/ActivNatureza/PercPedRecom/paineis/pr14.jpg",
+      "fee": "yes"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada dos Piornais",
+    "category": "levada",
+    "lat": 32.644012,
+    "lon": -16.928491,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada dos Tornos",
+    "category": "levada",
+    "lat": 32.775925,
+    "lon": -16.987153,
+    "sources": [
+      "curated"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Levada Nova da Calheta",
+    "category": "levada",
+    "lat": 32.746751,
+    "lon": -17.149771,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 12,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Loiral",
+    "category": "viewpoint",
+    "lat": 32.74316,
+    "lon": -17.10429,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1415",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lombada",
+    "category": "village",
+    "lat": 32.68923,
+    "lon": -17.09146,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lombada dos Marinheiros",
+    "category": "village",
+    "lat": 32.78886,
+    "lon": -17.23557,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lombo de Cima",
+    "category": "village",
+    "lat": 32.77039,
+    "lon": -16.86453,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lombo do Galego",
+    "category": "village",
+    "lat": 32.77324,
+    "lon": -16.87418,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lombo do Urzal",
+    "category": "village",
+    "lat": 32.78107,
+    "lon": -16.97911,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Loreto",
+    "category": "village",
+    "lat": 32.71978,
+    "lon": -17.15691,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Lugar da Serra",
+    "category": "village",
+    "lat": 32.69506,
+    "lon": -17.01817,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Meio",
+    "category": "viewpoint",
+    "lat": 32.7257,
+    "lon": -16.97141,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Meio-Vintém",
+    "category": "viewpoint",
+    "lat": 32.7306,
+    "lon": -17.01089,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Meires",
+    "category": "viewpoint",
+    "lat": 32.72829,
+    "lon": -16.92631,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Melros",
+    "category": "viewpoint",
+    "lat": 32.7894,
+    "lon": -17.18842,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "ele": "1264.742",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Mesa",
+    "category": "viewpoint",
+    "lat": 32.74291,
+    "lon": -16.88312,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "ele": "959",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Milhafre",
+    "category": "viewpoint",
+    "lat": 32.76652,
+    "lon": -16.95741,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 0,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Miradouro da Rocha do Navio",
+    "category": "viewpoint",
+    "lat": 32.81463,
+    "lon": -16.87652,
+    "sources": [
+      "curated"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Monumento Natural da Ponta do Pargo",
+    "category": "landmark",
+    "lat": 32.82987,
+    "lon": -17.24308,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Monumento Natural do Cabo Girão",
+    "category": "landmark",
+    "lat": 32.65387,
+    "lon": -17.0119,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Murta",
+    "category": "viewpoint",
+    "lat": 32.73366,
+    "lon": -17.026,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Paisagem Protegida da Ponta do Pargo",
+    "category": "landmark",
+    "lat": 32.80849,
+    "lon": -17.25986,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Paisagem Protegida do Cabo Girão",
+    "category": "landmark",
+    "lat": 32.65302,
+    "lon": -17.01598,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Parque Ecológico do Funchal",
+    "category": "landmark",
+    "lat": 32.71112,
+    "lon": -16.90899,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Parque Natural da Madeira",
+    "category": "landmark",
+    "lat": 32.76072,
+    "lon": -17.03499,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Parque Ribeira Primeira",
+    "category": "landmark",
+    "lat": 32.72967,
+    "lon": -16.83698,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 23,
+    "evidence": {
+      "leisure": "park"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Parque Urbano de São Vicente",
+    "category": "landmark",
+    "lat": 32.80726,
+    "lon": -17.04702,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 14,
+    "evidence": {
+      "leisure": "park"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico da Cruz",
+    "category": "viewpoint",
+    "lat": 32.6421,
+    "lon": -16.9393,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "tourism": "viewpoint",
+      "leisure": "sports_centre"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico da Torre",
+    "category": "viewpoint",
+    "lat": 32.6519,
+    "lon": -16.9735,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 3,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico da Urze",
+    "category": "viewpoint",
+    "lat": 32.7514,
+    "lon": -17.118,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico do Areeiro",
+    "category": "viewpoint",
+    "lat": 32.7356,
+    "lon": -16.9286,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 10,
+    "evidence": {
+      "ele": "1818.781"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico do Facho",
+    "category": "viewpoint",
+    "lat": 32.724,
+    "lon": -16.7589,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "wikidata": "Q108260229",
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico do Vento",
+    "category": "viewpoint",
+    "lat": 32.7589,
+    "lon": -17.1212,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico dos Bodes",
+    "category": "viewpoint",
+    "lat": 32.7769,
+    "lon": -17.1628,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico Grande",
+    "category": "viewpoint",
+    "lat": 32.7371,
+    "lon": -16.9879,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 7,
+    "evidence": {
+      "ele": "1654",
+      "natural": "peak"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico Guindaste",
+    "category": "viewpoint",
+    "lat": 32.7925,
+    "lon": -16.8539,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Pico Vermelho",
+    "category": "viewpoint",
+    "lat": 32.8299,
+    "lon": -17.2407,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ponta de São Jorge",
+    "category": "viewpoint",
+    "lat": 32.837,
+    "lon": -16.9037,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ponta do Garajau",
+    "category": "viewpoint",
+    "lat": 32.6371,
+    "lon": -16.8501,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 4,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ponta do Rosto",
+    "category": "viewpoint",
+    "lat": 32.7514,
+    "lon": -16.7086,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "wikidata": "Q108259734",
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Ponta do Tristão",
+    "category": "viewpoint",
+    "lat": 32.8669,
+    "lon": -17.1986,
+    "sources": [
+      "curated"
+    ],
+    "matched": true,
+    "metresFromMatch": 5,
+    "evidence": {
+      "tourism": "viewpoint"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Alagoa",
+    "category": "beach",
+    "lat": 32.77499,
+    "lon": -16.82939,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 40,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Baía D'Abra",
+    "category": "beach",
+    "lat": 32.74723,
+    "lon": -16.69667,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 41,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Calheta",
+    "category": "beach",
+    "lat": 32.7204,
+    "lon": -17.1784,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 20,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Maiata",
+    "category": "beach",
+    "lat": 32.76817,
+    "lon": -16.82248,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 82,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Prainha",
+    "category": "beach",
+    "lat": 32.74281,
+    "lon": -16.71572,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 1,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Ribeira Brava",
+    "category": "beach",
+    "lat": 32.67147,
+    "lon": -17.0672,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 22,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia da Ribeira das Galinhas",
+    "category": "beach",
+    "lat": 32.75989,
+    "lon": -17.23236,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 58,
+    "evidence": {
+      "ref": "PTME9L",
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia das Lajes",
+    "category": "beach",
+    "lat": 32.82662,
+    "lon": -17.11413,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 8,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia de Machico",
+    "category": "beach",
+    "lat": 32.7184,
+    "lon": -16.76228,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 253,
+    "evidence": {
+      "natural": "shingle"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia do Arieiro",
+    "category": "beach",
+    "lat": 32.64284,
+    "lon": -16.95928,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 12,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia do Porto do Seixal",
+    "category": "beach",
+    "lat": 32.8219,
+    "lon": -17.1031,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 11,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia dos Namorados",
+    "category": "beach",
+    "lat": 32.64246,
+    "lon": -16.95847,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia dos Surfistas",
+    "category": "beach",
+    "lat": 32.7529,
+    "lon": -17.22551,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 2,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Praia Nova",
+    "category": "beach",
+    "lat": 32.64209,
+    "lon": -16.95707,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 16,
+    "evidence": {
+      "natural": "beach"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Quinta do Santo da Serra",
+    "category": "landmark",
+    "lat": 32.72579,
+    "lon": -16.81697,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 15,
+    "evidence": {
+      "leisure": "park",
+      "fee": "yes",
+      "operator": "IFCN"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Quinta Jardins do Imperador",
+    "category": "landmark",
+    "lat": 32.67505,
+    "lon": -16.90741,
+    "sources": [
+      "curated",
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 5,
+    "evidence": {
+      "leisure": "park",
+      "opening_hours": "Mo-Fr 08:30-20:00",
+      "fee": "no"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Reserva Natural do Sítio da Rocha do Navio",
+    "category": "landmark",
+    "lat": 32.82908,
+    "lon": -16.86968,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Reserva Natural Marinha da Ponta do Pargo",
+    "category": "landmark",
+    "lat": 32.8386,
+    "lon": -17.24301,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Reserva Natural Marinha do Cabo Girão",
+    "category": "landmark",
+    "lat": 32.64847,
+    "lon": -17.00044,
+    "sources": [
+      "candidate"
+    ],
+    "matched": true,
+    "metresFromMatch": 71,
+    "evidence": {
+      "leisure": "nature_reserve",
+      "protect_class": "6",
+      "website": "https://ifcn.madeira.gov.pt/areas-protegidas/cabo-girao.html",
+      "opening_hours": "24/7",
+      "operator": "Instituto das Florestas e Conservação da Natureza, IP-RAM"
+    },
+    "wikipediaLanguages": 0
+  },
+  {
+    "name": "Reserva Natural Parcial do Garajau",
+    "category": "landmark",
+    "lat": 32.63856,
+    "lon": -16.83981,
+    "sources": [
+      "candidate"
+    ],
+    "matched": false,
+    "metresFromMatch": null,
+    "evidence": {},
+    "wikipediaLanguages": 0
+  }
+]

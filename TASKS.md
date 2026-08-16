@@ -540,6 +540,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       reads **VIEWPOINT · Pico do Areeiro · Santana**. Which is also the assignment being right —
       the old guess said Estreito de Câmara de Lobos, and the peak is in Santana.
       — Notes: `docs/task-notes.md` (T-067)
+- [~] **T-066a** **The curation draft, 2026-08-16 (D-064).** `docs/curation-draft.md` — a veto
+      sheet: every one of the 79 kept or cut with a one-line reason, plus ten proposed additions,
+      landing at ~71. `tools/curation-evidence.mjs` gathered what it is defended with (OSM tags,
+      elevation, PR routes, Wikipedia language counts via Wikidata).
+      — ⚠ **A third of the calls rest on `[knowledge]` — my own impression, unverifiable here.**
+      They are marked as such on every line, which is D-064's condition and the difference
+      between a veto sheet and a confident list.
+      — **Three findings the evidence produced on its own**: **Pico Ruivo** (1,862 m, the island's
+      highest point, 30 language Wikipedias) is **not in the pack** — the tile pack labels it
+      `Ruivo` and the fragment never matched; seven of the 21 viewpoints are roadside pull-ins
+      with no evidence of any kind; and **Machico** (36 wikis, the second town) is missing while
+      two drive-through parishes are in.
+      — Waiting on the project lead's veto. ⇠ T-066, D-064
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073

@@ -1556,6 +1556,28 @@ grep -A30 "^### T-052a" docs/task-notes.md
   being labelled is the sea. That is where both bad coordinates came from, and it is now a printed
   warning rather than a discovery.
 
+- **The other trap in HANDOFF's list turned out to be smaller than feared.** `check-names.mjs`
+  (new) asks OSM what is named within 400 m of every curated geofence: **63 exact, 0 fragments**
+  of 65 non-levada places. The `Barcelos` / `Pico dos Barcelos` problem was real and was already
+  confined to the viewpoints rebuilt on 2026-08-14 — the villages, beaches and landmarks were
+  copied with their full names.
+      — ⚠ **Two flaws in the first version of that tool, both worth knowing.** It compared a
+      point against a point, so every **levada** failed — Overpass returns a *way's centre*,
+      kilometres from the trailhead the geofence sits at — and one of them "matched" `Madre da
+      Levada dos Tornos`, which is the levada's **spring**, and would have suggested renaming the
+      walk after it. Levadas are now skipped, because `build-levadas.mjs` already checks their
+      names exactly and prints NOTHING FOUND in capitals. The second flaw: a curated name
+      *longer* than OSM's read as a failure, so the rename of the Rocha do Navio flagged itself.
+      That is now its own benign verdict.
+      — **It found a duplicate instead: `Cabo Girão` and `Monumento Natural do Cabo Girão`,
+      745 m apart**, both `landmark` — the cliff and its protected-area designation. The second
+      has nothing named within 400 m of it, because its coordinate is an administrative centroid.
+      The 100 m proximity check could never have seen it. The validator now warns on **same
+      category · one name wholly inside the other · under 1 km**, which is narrow on purpose: the
+      loose version flags *Calheta* against *Praia da Calheta* and *Caniçal* against *Levada do
+      Caniçal*, which are real pairs, and *Câmara de Lobos* against *Estreito de Câmara de Lobos*,
+      which clears on distance at 2.5 km. Which of the two Cabo Girãos is the stamp is T-066's.
+
 - **Two tools now share one geometry module.** `tools/lib/geo.mjs` (Douglas-Peucker,
   point-in-polygon, distances) and `tools/lib/overpass.mjs` (the backoff, and the reason for
   it). `build-levadas.mjs` was moved onto both and **re-run: `content/levadas.json` came back

@@ -287,6 +287,25 @@ you forget.
   the pack, so that award simply stops appearing. Harmless before release, a stamp taken away
   after it.
 
+## Checking the names against OSM (T-066)
+
+```bash
+node tools/check-names.mjs      # talks to OSM; ~1 minute
+```
+
+The name is the whole of the reward — a stamp is a seal with a place's name across it — and the
+tile pack's `pois` layer carries **fragments**: `Barcelos` where OSM says **Pico dos Barcelos**.
+This asks OSM what is named within 400 m of every curated geofence and sorts each place into
+*exact*, *fragment*, *more specific* or *unmatched*.
+
+**On the starter set (2026-08-16): 63 exact, 0 fragments** of the 65 non-levada places. The
+fragment problem was confined to the viewpoints, which were rebuilt from OSM on 2026-08-14.
+
+⚠ **Levadas are skipped, deliberately.** Overpass returns a way's *centre*, which for a 12 km
+contour is kilometres from the trailhead — the first version reported every levada as wrong and
+suggested renaming *Levada dos Tornos* after its spring. `build-levadas.mjs` checks those names
+instead, exactly, and shouts when one does not match.
+
 ## How the pack reaches the app
 
 `app/src/content/poiCatalogue.ts` imports this directory across the `app/` boundary, which

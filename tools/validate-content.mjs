@@ -76,6 +76,13 @@ const TARGET_MAX_PLACES = 100;
 const SUSPICIOUSLY_CLOSE_M = 100;
 
 /**
+ * Below this, two places of the same kind whose names contain one another are
+ * probably one place under two names. See the check for why all three
+ * conditions are needed.
+ */
+const DUPLICATE_NAME_M = 1000;
+
+/**
  * How far outside its region a place may sit before it is the coordinate's
  * fault rather than the file's (T-067).
  *
@@ -224,6 +231,51 @@ async function main() {
         warn(
           `${a.geofence.id} / ${b.geofence.id}`,
           `${Math.round(metres)} m apart — duplicate, or two stamps for one arrival?`
+        );
+      }
+    }
+  }
+
+  // Two stamps for one place, which the 100 m check above cannot see.
+  //
+  // ⚠ **Found by this: `Cabo Girão` and `Monumento Natural do Cabo Girão`,
+  // 745 m apart** — the cliff and its protected-area designation, curated as
+  // two landmarks. A visitor who walks to the skywalk would earn one of them
+  // and wonder about the other.
+  //
+  // The rule is deliberately narrow, because the loose version is useless
+  // here: half the island's places share a word with their neighbour, and
+  // legitimately — *Calheta* the village and *Praia da Calheta* its beach,
+  // *Caniçal* and *Levada do Caniçal*. What is suspicious is all three of
+  // **same category**, one name **wholly contained** in the other, and **under
+  // a kilometre apart**. *Câmara de Lobos* and *Estreito de Câmara de Lobos*
+  // are two real villages and clear it on distance, at 2.5 km.
+  for (let i = 0; i < places.length; i += 1) {
+    for (let j = i + 1; j < places.length; j += 1) {
+      const a = places[i];
+      const b = places[j];
+      if (a.category !== b.category) {
+        continue;
+      }
+      const wordsOf = (place) =>
+        place.name
+          .normalize('NFD')
+          .replace(/[̀-ͯ]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim()
+          .split(' ');
+      const [shorter, longer] =
+        a.name.length <= b.name.length ? [a, b] : [b, a];
+      const longerWords = wordsOf(longer);
+      if (!wordsOf(shorter).every((word) => longerWords.includes(word))) {
+        continue;
+      }
+      const metres = distanceM(a.geofences[0], b.geofences[0]);
+      if (metres < DUPLICATE_NAME_M) {
+        warn(
+          `${a.id} / ${b.id}`,
+          `two ${a.category}s ${Math.round(metres)} m apart, and one name contains the other — the same place twice?`
         );
       }
     }

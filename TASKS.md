@@ -521,6 +521,18 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       candidate. Re-run: exactly six of 200 come out empty, and **all six are marine protected
       areas** whose OSM point is the water — the class of feature both bad coordinates came from.
       The tool now prints them as a warning.
+      — **`tools/check-names.mjs` (new) checks every curated name against OSM**, which HANDOFF
+      lists as one of the two traps that cost a session. Result on the starter set: **63 exact,
+      0 fragments** of the 65 non-levada places — the villages, beaches and landmarks turned out
+      to be OSM's own names, so the fragment problem really was confined to the viewpoints that
+      were rebuilt on 2026-08-14. Levadas are skipped for a reason written into the tool: a way's
+      *centre* is kilometres from its trailhead, and `build-levadas.mjs` already checks their
+      names exactly.
+      — ⚠ **What it found instead was a duplicate: `Cabo Girão` and `Monumento Natural do Cabo
+      Girão`, 745 m apart** — the cliff and its protected-area designation, curated as two
+      landmarks, the second sitting at an administrative centroid with nothing named within
+      400 m. The validator now warns on it (same category · one name inside the other · under
+      1 km). **Left for T-066: which of the two is the stamp.**
       — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

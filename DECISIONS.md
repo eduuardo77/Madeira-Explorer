@@ -97,6 +97,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-066** | The drawn trace is cleaned before it is drawn, and cleaning never moves a point. | Provisional |
 | **D-067** | The accuracy cut is a preference, not a veto. A canopy stretch still draws. | Provisional |
 | **D-068** | A levada is credited by time as well as distance. You cannot always finish one. | Provisional |
+| **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

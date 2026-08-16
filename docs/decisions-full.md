@@ -3400,3 +3400,55 @@ one that loses a user.
 
 **When this retunes.** The first recorded walks. Every award stores what it was judged on (T-072),
 so the threshold can be argued from real trips rather than from another guess.
+
+---
+
+## D-069 — A walk the user sends, never a walk the app collects
+
+**Status:** Provisional — 2026-08-16, answering OD-11 after the project lead asked for a way to
+collect data from users rather than walking all eleven levadas themselves.
+
+**Decision:** Settings gains **Send a walk**. It writes one file — the **masked** trace, every
+stamp decision with the reason and numbers it turned on, and the thresholds in force — and hands it
+to the ordinary share sheet. **The app never transmits anything.** There is no endpoint, no
+account, no install id, no background upload.
+
+**Why this shape and not telemetry.** Every threshold in this project is a guess, and only real
+walks can settle them. But *nothing collected* is the store declaration (T-120, T-122), the thing
+WalkMe cannot copy (`docs/competitors.md`), and the reason D-031 reaffirmed no backend. An
+analytics SDK would make the declaration false and hand a third party the precise location of
+everybody's holiday.
+
+So the only acceptable shape is the one D-001 already allows: **the trip never leaves the phone
+unless the user sends it.** This is the user sending it, deliberately, one walk at a time, through
+the same share sheet the souvenir uses (T-108).
+
+**What is in it, and what is deliberately not.**
+
+- The masked fixes — through `exportTrace.ts`, the single door (D-016, D-040) — so a donated walk
+  cannot reveal where somebody slept even if this feature forgot to think about it.
+- Every decision the app made, **including refusals**. A refusal is the more valuable half: it is
+  the case where somebody walked a levada and the app said nothing.
+- The thresholds, so a report from an old build is still readable years later.
+- ⚠ **No identifier of any kind.** No install id, no device model, no locale, nothing linking two
+  reports from one phone. That costs real analytical power — ten walks from one walker are
+  indistinguishable from ten walkers — and it is the right trade. A test asserts the payload's
+  exact key list, so a helpful new field fails CI rather than a promise.
+
+**The consent sentence lives beside the payload**, in `walkReport.ts`, not in the screen: a
+sentence in a screen file drifts from what the file actually contains the first time somebody adds
+a field.
+
+**Alternatives considered:**
+
+- *A receive-only endpoint*, so it is one tap rather than five. Genuinely better for volume and it
+  is where "no backend" starts to bend. Deferred rather than rejected — if donations arrive and the
+  friction is what limits them, this is the next step, and it needs the store answers revisited.
+- *Automatic anonymous telemetry.* Rejected: it is the thing this app is against, and no wording of
+  a consent screen makes background collection into user-initiated sending.
+- *Ask at trip end.* Rejected for now — the reveal (D-012) is the best moment in the product and
+  putting a request for data in it would spend that moment on the developer's problem.
+
+**Its weakness, stated plainly.** It needs somebody to bother. With no prompt and no reward, most
+users will never open Settings and press it. That is the price of the position, and it is why the
+recommendation in OD-11 was this *first* rather than this *only*.

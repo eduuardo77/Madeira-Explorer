@@ -61,6 +61,15 @@ export type SettingsViewProps = {
   onOpenDebug: () => void;
   /** Opens the confirmation. Must never erase on its own (T-125). */
   onEraseRequested: () => void;
+  /**
+   * Send one walk back so the thresholds can stop being guesses (OD-11, D-069).
+   *
+   * ⚠ Optional, and absent is a legitimate state — the workbench mounts this
+   * screen with no database behind it.
+   */
+  onDonateWalk?: () => void;
+  /** True while the file is being built, so the row can say so. */
+  donating?: boolean;
   onClose: () => void;
 };
 
@@ -245,6 +254,8 @@ export default function SettingsView({
   onOpenPrivacyPolicy,
   onOpenDebug,
   onEraseRequested,
+  onDonateWalk,
+  donating,
   onClose,
 }: SettingsViewProps) {
   return (
@@ -392,6 +403,22 @@ export default function SettingsView({
           <Action label="Privacy" onPress={onOpenPrivacyPolicy} />
           <Action label="Technical details" onPress={onOpenDebug} />
         </Section>
+
+        {/* A rare action, so it lives where rare lives (design brief §3.2) —
+            not on the passport beside the reward (OD-11, D-069). */}
+        {onDonateWalk === undefined ? null : (
+          <Section
+            title="Help improve the app"
+            footnote={
+              'Sends one walk and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. Nothing leaves this phone unless you send it — and you choose where it goes.'
+            }
+          >
+            <Action
+              label={donating === true ? 'Preparing…' : 'Send a walk'}
+              onPress={onDonateWalk}
+            />
+          </Section>
+        )}
 
         {/* Last, its own section, red, with an icon. §5, T-125. */}
         <Section

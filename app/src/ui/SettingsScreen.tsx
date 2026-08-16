@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -47,6 +48,8 @@ import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
+import Constants from 'expo-constants';
+import { buildDonation, sendDonation } from '../souvenir/donateWalk';
 import SettingsView from './SettingsView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
@@ -68,6 +71,8 @@ export default function SettingsScreen({
   const [confirmingErase, setConfirmingErase] = useState(false);
   const [erased, setErased] = useState(false);
   const [showingPolicy, setShowingPolicy] = useState(false);
+  /** True while a walk report is being assembled (OD-11, D-069). */
+  const [donating, setDonating] = useState(false);
 
   useEffect(() => {
     void locationProvider
@@ -215,6 +220,50 @@ export default function SettingsScreen({
     );
   }
 
+    /**
+   * Build a walk report and hand it to the share sheet (OD-11, D-069).
+   *
+   * ⚠ **The user is shown what it contains before the sheet opens**, in the
+   * sentence `walkReport.ts` keeps beside the payload — so the description
+   * cannot drift from what is actually in the file.
+   */
+  const donateWalk = useCallback(() => {
+    if (donating) {
+      return;
+    }
+    setDonating(true);
+
+    void (async () => {
+      // The version the rules came from, read from the manifest rather than
+      // typed here — a report claiming the wrong version is worse than one
+      // claiming none.
+      const built = await buildDonation(
+        Constants.expoConfig?.version ?? 'unknown'
+      );
+      if (!built.ok) {
+        setDonating(false);
+        Alert.alert('Nothing to send yet', built.reason);
+        return;
+      }
+
+      Alert.alert('Send this walk?', built.description, [
+        { text: 'Not now', style: 'cancel', onPress: () => setDonating(false) },
+        {
+          text: 'Send',
+          onPress: () => {
+            void (async () => {
+              const sent = await sendDonation(built.report);
+              setDonating(false);
+              if (!sent.ok && sent.reason !== undefined) {
+                Alert.alert('Could not send', sent.reason);
+              }
+            })();
+          },
+        },
+      ]);
+    })();
+  }, [donating]);
+
   return (
     <SettingsView
       permission={permission}
@@ -241,6 +290,8 @@ export default function SettingsScreen({
       onOpenPrivacyPolicy={() => setShowingPolicy(true)}
       onOpenDebug={onOpenDebug}
       onEraseRequested={() => setConfirmingErase(true)}
+      donating={donating}
+      onDonateWalk={donateWalk}
       onClose={onClose}
     />
   );

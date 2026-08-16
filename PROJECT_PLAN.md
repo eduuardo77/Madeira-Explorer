@@ -469,6 +469,10 @@ NOT TUNED.
 4. **An analytics SDK.** Rejected outright: it would make the store declaration false and hand a
    third party the precise location of everybody's holiday. It is the thing this app is *against*.
 
+⚠ **ANSWERED 2026-08-16 (D-069): option 2 is built.** Settings → *Send a walk*. Everything below
+stands as the reasoning; option 3 (a receive-only endpoint) is the next step if friction turns out
+to be what limits donations.
+
 **Recommendation: option 2, and it is nearly free** — the share sheet exists, the export door
 exists, and every award already stores what it was judged on. It should be built the moment there
 is anybody to send a walk.

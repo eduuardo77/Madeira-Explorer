@@ -97,9 +97,39 @@ export const WALKED_FRACTION = 0.6;
  */
 export const WALKED_ABSOLUTE_M = 3000;
 
+/**
+ * …or this long on the levada, on foot, having got somewhere.
+ *
+ * ⚠ **THIS RULE COMES FROM THE FIRST REAL WALK ANYONE HAS DONE WITH THIS APP IN
+ * MIND (PR18, Levada do Rei, 2026-08-16), and it corrects two assumptions the
+ * distance rules were built on.**
+ *
+ *   1. **You cannot always finish a levada, and stopping is not failing.** Many
+ *      run on indefinitely — the project lead turned back at a waterfall on
+ *      PR18 because that was the good bit. Measuring against the *mapped*
+ *      course punishes a complete walk for the arbitrary length of what OSM
+ *      happens to have drawn.
+ *   2. **Most levadas are walked twice.** You park, walk out, and come back to
+ *      the car. Coverage counts a metre of course once however often you pass
+ *      it, so a two-hour there-and-back to the halfway point scores 50% — and
+ *      would have been refused at the 60% bar.
+ *
+ * Time is what those two have in common: the walk took the time a levada walk
+ * takes. Paired with a distance floor so that an hour in a café beside the
+ * channel is not a levada.
+ *
+ * ⚠ NOT TUNED, and deliberately generous. The project lead's instruction is
+ * explicit: *"I prefer to mistakenly give the levada stamp than doing the
+ * levada and not earning it."* That is D-009's bias, stated by the person whose
+ * app it is.
+ */
+export const WALKED_MINUTES = 45;
+export const WALKED_MINUTES_FLOOR_M = 800;
+
 /** Below the thresholds above but far past nothing — worth asking the user about. */
 export const CONFIRMABLE_FRACTION = 0.3;
 export const CONFIRMABLE_ABSOLUTE_M = 1500;
+export const CONFIRMABLE_MINUTES = 25;
 
 /**
  * The fastest average pace that can still be walking, over the covered ground.
@@ -380,10 +410,20 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
     };
   }
 
+  const minutes = coverage.secondsOnCourse / 60;
+  const wentSomewhere = coverage.coveredM >= WALKED_MINUTES_FLOOR_M;
+
   const enough =
-    coverage.fraction >= WALKED_FRACTION || coverage.coveredM >= WALKED_ABSOLUTE_M;
+    coverage.fraction >= WALKED_FRACTION ||
+    coverage.coveredM >= WALKED_ABSOLUTE_M ||
+    // The walk took as long as a levada walk takes, and covered ground while it
+    // did. See `WALKED_MINUTES` for the two field observations behind this.
+    (minutes >= WALKED_MINUTES && wentSomewhere);
+
   const nearly =
-    coverage.fraction >= CONFIRMABLE_FRACTION || coverage.coveredM >= CONFIRMABLE_ABSOLUTE_M;
+    coverage.fraction >= CONFIRMABLE_FRACTION ||
+    coverage.coveredM >= CONFIRMABLE_ABSOLUTE_M ||
+    (minutes >= CONFIRMABLE_MINUTES && wentSomewhere);
 
   // A pace faster than walking, over kilometres, is a road beside the levada —
   // which on this island is the normal case, not an exotic one.
@@ -404,9 +444,10 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
     return {
       credited: true,
       offerConfirmation: false,
-      // The number that earned it, so a retune (T-131) can be argued from the
-      // award rows rather than from a re-walk.
-      reason: `walked ${walked} of the course`,
+      // The numbers that earned it, so a retune (T-131) can be argued from the
+      // award rows rather than from a re-walk — including the time, which is
+      // what credits a there-and-back that never reached the far end.
+      reason: `walked ${walked} of the course over ${Math.round(minutes)} min`,
       confidence: Math.min(1, 0.6 + coverage.fraction * 0.4),
     };
   }

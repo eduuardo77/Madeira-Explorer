@@ -3354,3 +3354,49 @@ purpose — both ends of such a bridge are observed and only its *shape* is unkn
 deletes real movement (D-032 keeps the raw record). **The alternative worth putting to the project
 lead is a dashed stroke**: honest about the shape, without denying the journey. That is a design
 change rather than a threshold, so it is recorded here and not taken.
+
+---
+
+## D-068 — A levada is credited by time as well as by distance, because you cannot always finish one
+
+**Status:** Provisional — 2026-08-16, from the first field observation this project has
+(`docs/field-notes.md`, PR18 Levada do Rei).
+
+**Decision:** A levada is credited when **45 minutes** were spent on its corridor at walking pace,
+having covered at least **800 m** of it — in addition to D-065's existing distance rules (60% of
+the course, or 3 km of it, or both endpoints).
+
+**Why the distance rules alone were wrong.** They measure a walk against the *mapped course*, and
+the project lead's walk showed two ways that fails:
+
+- **A levada has no finish line.** The drawn course is however much channel OSM has mapped; some
+  run on for tens of kilometres. Turning back at a waterfall is a complete walk, and measuring it
+  against 30 km of channel measures it against nothing. *"That's not fair"* — and it is not.
+- **Most levadas are walked twice.** Out to a point, back to the car. Coverage counts a metre of
+  course once however often you pass it, so a two-hour there-and-back scores 50% and was refused
+  by a 60% bar.
+
+Time is what both cases have in common: the walk took as long as a levada walk takes.
+
+**The distance floor is what stops it being a free stamp.** Without it, an hour over lunch at a
+restaurant beside the channel earns the levada. 800 m of covered course means somebody went
+somewhere.
+
+**⚠ It is deliberately generous, and that is an instruction rather than an accident.** The project
+lead: *"I prefer to mistakenly give the levada stamp than doing the levada and not earning it."*
+That is D-009's bias — *be generous filling in gaps between things you are certain about* — stated
+by the person whose app it is. It will credit some walks that were not really levada walks. The
+alternative failure is somebody walking four hours and being told nothing happened, which is the
+one that loses a user.
+
+**Alternatives considered:**
+
+- *Lower the fraction to 30%.* Helps the there-and-back case, does nothing for a 30 km channel,
+  and makes a short levada trivially earnable.
+- *Per-levada typical durations in the content pack.* Better, and it needs data nobody has — which
+  is what OD-11 is about. The single 45-minute figure is the version that can ship today.
+- *Ask the user every time.* T-149's prompt already exists for the band below this. Making it the
+  primary path turns a reward into a form.
+
+**When this retunes.** The first recorded walks. Every award stores what it was judged on (T-072),
+so the threshold can be argued from real trips rather than from another guess.

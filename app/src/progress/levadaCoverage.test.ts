@@ -22,6 +22,7 @@ import {
   computeCoverage,
   judgeCoverage,
   MAX_USABLE_ACCURACY_M,
+  WALKED_ABSOLUTE_M,
   type CoursePoint,
   type TraceFix,
 } from './levadaCoverage.ts';
@@ -186,4 +187,52 @@ test('the course is measured, not assumed — an empty course credits nothing', 
   assert.equal(coverage.courseM, 0);
   assert.equal(coverage.fraction, 0);
   assert.equal(judgeCoverage(coverage).credited, false);
+});
+
+test('a there-and-back that turns round at the waterfall counts (PR18)', () => {
+  // ⚠ The first real walk this project has field data from. Levada do Rei,
+  // 2026-08-16: the project lead walked out to a waterfall, decided that was
+  // the good bit, and came back. They never reached the far end of the mapped
+  // course — and the 60% bar would have refused a two-hour levada walk.
+  const course = [straightCourse(5000, 100)];
+  const out = walk(0, 2000, { paceMps: 0.9 });
+  const back = walk(0, 2000, {
+    paceMps: 0.9,
+    startTs: 1_800_000_000_000 + 2_300_000,
+  }).reverse();
+
+  const coverage = computeCoverage(course, [...out, ...back]);
+  assert.ok(coverage.fraction < 0.6, `fraction ${coverage.fraction}`);
+  assert.ok(coverage.coveredM < 3000, `covered ${coverage.coveredM}`);
+  assert.ok(coverage.secondsOnCourse / 60 >= 45, `${coverage.secondsOnCourse / 60} min`);
+
+  const verdict = judgeCoverage(coverage);
+  assert.equal(verdict.credited, true, verdict.reason);
+  assert.match(verdict.reason, /min/);
+});
+
+test('an hour in a café beside the levada is not a levada walk', () => {
+  // The time rule needs a distance floor, or the channel that runs behind a
+  // restaurant hands out stamps to people having lunch.
+  const still = Array.from({ length: 80 }, (_, i) => ({
+    ts: 1_800_000_000_000 + i * 60_000,
+    lat: 32.7,
+    lon: -17 + 20 * LON_PER_M,
+    accuracy_m: 8,
+  }));
+
+  const coverage = computeCoverage([straightCourse(4000)], still);
+  assert.ok(coverage.secondsOnCourse / 60 >= 45);
+  assert.equal(judgeCoverage(coverage).credited, false);
+});
+
+test('a levada that runs on forever is not measured against its whole length', () => {
+  // Some levadas continue past any sensible turning point. Measuring a good
+  // walk against 30 km of drawn channel would refuse every honest walker.
+  // Fifty minutes and 1.8 km of a thirty-kilometre channel: 6% of the mapped
+  // course, and unmistakably a levada walk.
+  const coverage = computeCoverage([straightCourse(30_000, 100)], walk(0, 1800, { paceMps: 0.6 }));
+  assert.ok(coverage.fraction < 0.07, `fraction ${coverage.fraction}`);
+  assert.ok(coverage.coveredM < WALKED_ABSOLUTE_M, `covered ${coverage.coveredM}`);
+  assert.equal(judgeCoverage(coverage).credited, true);
 });

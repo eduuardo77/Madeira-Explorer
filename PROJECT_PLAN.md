@@ -442,6 +442,37 @@ together.*
 and step data; that was weighed against D-010 and accepted. Capturing only on the `driving`
 profile is the compromise to reach for if this is revisited. *Original framing below.*
 
+### OD-11 — how does anything get measured, if nothing is collected? ⚠ **raised 2026-08-16**
+
+**The project lead, after walking PR18:** *"we'll need to find a way to collect some data from
+users for improvement. It would be way better than going by myself test all levadas."* They are
+right, and it runs straight into D-001 and D-031 — no backend, nothing collected — and into the
+store declaration that says so (T-120, T-122).
+
+**What data would actually settle:** the corridor width, the 45-minute rule (D-068), how much GPS
+drops under canopy, per-levada durations, and every other number in this project currently marked
+NOT TUNED.
+
+**The options, roughly in order of how much they cost the privacy position:**
+
+1. **Nothing.** Status quo. Every threshold stays a guess forever, or is tuned by one person
+   walking 11 levadas.
+2. ⭐ **A walk the user deliberately sends.** After a trip, *"help improve the app — send this
+   walk"*: the app writes a file (the **masked** trace via `exportTrace.ts`, the award decisions,
+   and what each was judged on) and hands it to the ordinary share sheet — the one T-105d just
+   built. **No backend, no accounts, no background upload, and no change to the store
+   declaration**, because the user is doing the sending, exactly as D-001 always allowed.
+   Its weakness is volume: it needs a person to bother.
+3. **A receive-only endpoint** for the same file, so it is one tap instead of five. This is where
+   "no backend" starts to bend — D-031 rejected a backend for *product* reasons, not only privacy,
+   and a write-only bucket is not the same animal. Needs the store answers revisited.
+4. **An analytics SDK.** Rejected outright: it would make the store declaration false and hand a
+   third party the precise location of everybody's holiday. It is the thing this app is *against*.
+
+**Recommendation: option 2, and it is nearly free** — the share sheet exists, the export door
+exists, and every award already stores what it was judged on. It should be built the moment there
+is anybody to send a walk.
+
 ### OD-10 — v1 has no distribution strategy ⚠ **created by D-051, 2026-08-12**
 ⚠ **PARTLY ANSWERED 2026-08-16 (D-063): the souvenir is back in scope.** A shareable still
 (T-105d) goes first and is unblocked; the video (T-105b) returns as a spike, not a promise, and

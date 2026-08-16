@@ -3037,6 +3037,14 @@ anyone using the app on a real trip.
 **Status:** Accepted — the project lead reopened it 2026-08-16. **Supersedes D-051 in part**: the
 scope decision is reversed, the risks D-051 named are not.
 
+⚠ **AMENDED THE SAME DAY: it is in scope, and it is LAST.** The project lead: *"leave it to end as
+it's not a thing which is big on the priority list. We still need stronger foundations before
+focusing on that."* Nothing below changes except when it happens — **do not start any part of this,
+including the shareable still, while a foundation item is open.** The foundations they mean are the
+ones the app is judged on before anybody shares anything: the recorder surviving a night, the
+battery figure, the drawn trace being accurate, and the content being worth collecting. A souvenir
+of an app that loses your afternoon is worse than no souvenir.
+
 **Decision:** Phase 5's souvenir is back in v1, in three pieces with different levels of
 commitment:
 

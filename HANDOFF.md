@@ -122,6 +122,9 @@ use. **The largest open item in the project.**
    thing the user actually looks at after the stamps (D-032 spent the whole map-matching budget on
    making this half good), and nothing about it has been examined since T-059: not the accuracy
    filter, not the breaking rule (D-059), not what a canopy-degraded walk looks like drawn.
+4. ⚠ **The souvenir is LAST (D-063, amended 2026-08-16).** It is in scope and it is not a
+   priority: *"we still need stronger foundations before focusing on that"*. **Do not start it —
+   not even the shareable still — while a foundation item is open.**
 
 ## The code tail, in rough order of value
 

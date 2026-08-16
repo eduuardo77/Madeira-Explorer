@@ -107,7 +107,12 @@ node tools/validate-content.mjs       # checks the work, targets 60–100 places
 routes. A used mid-range Android (~€50–100) is the only source of battery and background-survival
 numbers. **The project lead's.**
 
-**3. OD-10 — nothing makes anyone discover this app. ⚠ Partly reopened 2026-08-16 (D-063).**
+**3. OD-10 — nothing makes anyone discover this app. ⚠ Options written 2026-08-16 —
+[`docs/distribution-options.md`](docs/distribution-options.md), awaiting the project lead.**
+The recommendation is **not to launch publicly yet**: nobody has completed a single trip with this
+app, so a launch would spend the first impression on a version that cannot be measured. ⚠ **And a
+consequence worth its own line: a privacy-first app cannot run a growth loop.** After a launch you
+will know installs and nothing else — not trips recorded, not stamps earned.
 The souvenir is back in v1: a **shareable still first** (T-105d, no unknowns), and the **video as
 a spike** (T-105c → T-105b) once the physical Android exists. ⚠ **The video is not a commitment
 until one five-second MP4 exists on a real phone.** The channel question below is untouched. D-051 cut the souvenir video, which

@@ -447,6 +447,14 @@ profile is the compromise to reach for if this is revisited. *Original framing b
 (T-105d) goes first and is unblocked; the video (T-105b) returns as a spike, not a promise, and
 needs the physical Android. **What is still open is the channel** — even a shareable image needs
 somebody to see it, and the partner routes below are untouched.
+⚠ **OPTIONS WRITTEN 2026-08-16: [`docs/distribution-options.md`](docs/distribution-options.md).**
+Six of them, with a recommendation and the two facts that decide most of it — **this app has to be
+installed on day one of a trip to have anything to show on day seven**, which makes arrival the
+only moment worth buying and partner routes the only channel that fires there; and **a
+privacy-first app cannot measure its own launch** (D-001, D-031), so any channel is chosen blind.
+The recommendation is *make it true, then make it known*: no public launch until one real trip has
+been completed with it. **Awaiting the project lead.**
+
 **Blocking the question of whether v1 should launch publicly at all.**
 D-051 cut the souvenir video, which CONTEXT §2.3 and D-013 both call *the entire distribution
 strategy*. There is no App Store search term for this app. What remains: a shareable passport

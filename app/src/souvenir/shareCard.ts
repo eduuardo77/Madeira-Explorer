@@ -318,6 +318,12 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
  * exactly this and knows where the day goes. ⚠ Hermes ships a partial `Intl`,
  * so it is feature-detected rather than assumed, and the fallback spells both
  * dates out in full — longer, and correct everywhere.
+ *
+ * ⚠ **MEASURED ON THE EMULATOR 2026-08-16: Hermes takes the fallback.** The
+ * shared card reads *"August 14, 2026 – August 16, 2026"*, not *"14–16 August"*.
+ * The feature detection was not defensive programming, it is the live path — so
+ * if the long form is ever judged too heavy for the card, the fix is to write
+ * the compact form by hand from the parts, not to reach for `formatRange`.
  */
 export function formatDateRange(startTs: number, endTs: number): string {
   const start = new Date(startTs);

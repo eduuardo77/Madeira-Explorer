@@ -831,6 +831,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Share lives on the passport**, opposite the back control where iOS puts it. The card is
       mounted off-screen to be photographed and unmounted after: `captureRef` photographs a view,
       not a description.
+      — ✅ **VERIFIED ON THE EMULATOR 2026-08-16.** Rebuilt with the new native modules, tapped
+      Share, and the Android share sheet opened with the real card in its preview: *Madeira*, the
+      dates, `1 / 60`, the drawn trace, *Forte de São Tiago*, the app's mark. The SVG → PNG →
+      share-sheet path works end to end.
+      — ⚠ **And it settled a question the tests could not**: Hermes has no
+      `Intl.DateTimeFormat.formatRange`, so the card takes the spelled-out fallback — *"August 14,
+      2026 – August 16, 2026"*. The feature detection is the live path, not a precaution.
       — ⚠ **Two bugs found while building it, both by tests.** `formatDateRange` printed
       *"12–August 19, 2026"* on a month-first locale, because the same-month shortcut assumed the
       day comes first; it uses `Intl.DateTimeFormat.formatRange` now, feature-detected because

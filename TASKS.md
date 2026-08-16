@@ -811,7 +811,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       anything depends on it**; if it holds, the likely path is a small native module over
       Android's own `MediaCodec`, which adds no third party at all and so has no network to
       audit — which is the better outcome for D-001 anyway.
-- [ ] **T-105d** ~~DROPPED 2026-08-12~~ **REVIVED 2026-08-16 (D-063), and it goes first.** Make
+- [~] **T-105d** ✅ **STARTED 2026-08-16 — the card is composed and can be looked at.**
+      `app/src/souvenir/shareCard.ts`: a 9:16 layout — destination, dates, the hero `23 / 60`, the
+      trace, the places named, the app's mark — plus an SVG renderer, which is what
+      `react-native-svg` (already a dependency) draws. 12 tests.
+      `tools/preview-souvenir.mjs` writes the same card to `tools/out/souvenir-card.svg`, from a
+      real route cleaned by the app's own `traceCleanup`, so the souvenir cannot flatter the map.
+      — ⚠ **The preview earned its keep immediately**: the names were set on one line and shrunk to
+      fit, which took the most personal line on the card down to 20 px on a 1080 px image. They
+      wrap now, at a size chosen to be read.
+      — **What is left**: getting the SVG *out of the app* as a file to share. `react-native-svg`
+      draws it; saving a PNG needs either a capture library (a new dependency, and D-043 says any
+      new dependency needs a network-behaviour audit) or shipping the SVG itself. **That is the
+      next decision, and it is small.**
+      — ~~DROPPED 2026-08-12~~ **REVIVED 2026-08-16 (D-063), and it goes first.** Make
       the trip worth sharing as a **still image** — the trace, the number, the stamps earned —
       plus the share sheet. ⇠ T-074, T-107, T-108
       — **Why first: it is the only part with no unknowns.** No native code, no new dependency,

@@ -3037,7 +3037,13 @@ anyone using the app on a real trip.
 **Status:** Accepted — the project lead reopened it 2026-08-16. **Supersedes D-051 in part**: the
 scope decision is reversed, the risks D-051 named are not.
 
-⚠ **AMENDED THE SAME DAY: it is in scope, and it is LAST.** The project lead: *"leave it to end as
+⚠ **AMENDED AGAIN, 2026-08-16: started now.** The project lead: *"you can start it now."* The
+sequencing argument below stands for the **video** — it needs the phone, and the soak tests come
+first — but the **shareable still needs nothing**, so it is being built. First piece landed the
+same day: `shareCard.ts`, the card as a layout plus an SVG renderer, drawn from the same cleaned
+strokes the map draws.
+
+⚠ **Previously amended: it is in scope, and it is LAST.** The project lead: *"leave it to end as
 it's not a thing which is big on the priority list. We still need stronger foundations before
 focusing on that."* Nothing below changes except when it happens — **do not start any part of this,
 including the shareable still, while a foundation item is open.** The foundations they mean are the

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+<rect width="1080" height="1920" fill="#101014"/>
+<text x="96" y="220" fill="#F5F5F7" font-size="96" font-weight="700" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="start">Madeira</text>
+<text x="96" y="300" fill="#9A9AA2" font-size="40" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="start">12–19 August 2026</text>
+<text x="96" y="470" fill="#F5F5F7" font-size="150" font-weight="700" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="start">23 / 60</text>
+<text x="96" y="540" fill="#9A9AA2" font-size="40" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="start">places collected</text>
+<polyline points="96.0,1017.4 398.3,1048.8 606.1,1084.7 814.0,1102.6 984.0,1062.2" fill="none" stroke="#4A8BEF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="540" y="1608" fill="#9A9AA2" font-size="32" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="middle">Pico do Areeiro · Levada das 25 Fontes</text>
+<text x="540" y="1654" fill="#9A9AA2" font-size="32" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="middle">Câmara de Lobos · Cabo Girão · Fanal</text>
+<text x="540" y="1700" fill="#9A9AA2" font-size="32" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="middle">Praia do Porto do Seixal · and 2 more</text>
+<text x="540" y="1810" fill="#9A9AA2" font-size="32" font-weight="400" font-family="system-ui, -apple-system, Roboto, sans-serif" text-anchor="middle">Madeira Explorer</text>
+</svg>

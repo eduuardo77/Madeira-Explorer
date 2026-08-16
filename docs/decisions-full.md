@@ -3078,3 +3078,54 @@ runs, spike the encoder after.
 **What would reverse it again.** The spike failing, or the encoder needing a dependency whose
 network behaviour cannot be audited (D-043) — "no data leaves the device" (D-001, CONTEXT §4.8) is
 worth more than a video.
+
+---
+
+## D-064 — The canvas is greatest hits, not coverage. And the curator drafts, the project lead vetoes
+
+**Status:** Accepted — decided by the project lead 2026-08-16, from three options.
+
+**Two decisions, recorded together because the second only makes sense given the first.**
+
+### 1. What the collection is *of*
+
+**Only places worth going to.** A stamp must always mean something, which is D-002's premise, and
+since D-058 the passport shows every place from day one — so **every entry is also a
+recommendation made to a stranger on their holiday**. A place included to fill a gap is bad
+advice, displayed.
+
+**The cost, accepted deliberately: thin regions stay thin.** The north and west hold most of the
+good-but-not-great places, so some municipalities will finish with three or four entries while
+Funchal has a dozen. **Do not add a mediocre place to make a municipality finishable** — that is
+exactly the dilution D-002 exists to prevent, and D-062 has already decided that region progress
+is not shown in v1, so an uneven region list is not even visible to the user.
+
+**Rejected:**
+
+- *A complete map* — every municipality finishable. Better for the "where next" job, worse for
+  every stamp's meaning, and the job it serves is not shown in v1 anyway.
+- *A ladder of effort* — trivial places alongside hard ones for progression. Real merit: it makes
+  the first stamp cheap and the last one earned. Rejected because entries that exist to be easy
+  are entries that exist for the mechanic rather than for the visitor, and the categories already
+  provide the ladder — a viewpoint you drive to next to a levada you walk for four hours.
+
+### 2. Who does the selecting
+
+**Draft-and-veto.** The assistant produces a **defended list — one line per place saying why it
+earns a stamp, with the uncertain ones flagged** — and the project lead deletes down it. This
+supersedes the standing rule in CLAUDE.md that selection is never the assistant's to offer.
+
+**Why the rule changed.** It existed because selection is the one thing a global competitor cannot
+buy (CONTEXT §5a) and because a machine ranking prominence produces a list nobody would defend.
+Neither is untrue. What changed is the arithmetic of effort: selecting from ~200 candidates is a
+weekend of the project lead's judgement; **vetoing a defended list is an hour**, and the veto
+retains every decision that matters. The rule was protecting the quality of the outcome, and
+draft-and-veto protects it better than a list nobody has time to finish.
+
+⚠ **The draft must be defensible, not confident.** A one-line reason per place, evidence where
+evidence exists — a Wikipedia entry, an official PR route number, a heritage listing, an
+elevation — and an explicit flag on anything the assistant is guessing about. **A quietly
+confident list is worse than no list**, because it invites approval rather than judgement.
+
+**When this reverses.** If the first draft comes back mostly deleted, the assistant's judgement is
+not good enough to draft and the arrangement returns to prepare-and-select.

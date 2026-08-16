@@ -47,12 +47,17 @@ The documents cost more to read than the code does. In order of impact:
    (`bash tools/run-emulator.sh`) and is legitimate for rendering, storage, UI, permissions and
    replayed routes — and **worthless for battery, background survival and GPS realism**
    (CONTEXT §6.6). See `docs/dev-build.md`.
-2. **Curating `content/pois.json`.** Selection and editorial judgement, deliberately theirs
-   (T-066). `tools/poi-candidates.mjs` prepares the list; do not offer to choose.
-   ⚠ **The file is not empty any more.** On 2026-08-14 the project lead asked twice for a full
-   set, overriding this rule on purpose, so it holds **80 places picked by prominence and
-   coverage — not by merit**. Treat them as scaffolding the project lead is expected to replace,
-   not as a decision already taken, and do not add more without being asked.
+2. ~~**Curating `content/pois.json`.**~~ **CHANGED 2026-08-16 — the arrangement is now
+   *draft-and-veto* (D-064).** Selection was deliberately theirs (T-066) and the project lead has
+   now overridden that twice; on 2026-08-16 they set the standing method: **you produce a
+   defended draft — one line per place saying why it earns a stamp, unsure ones flagged — and
+   they veto down it.** The final say is still theirs and the judgement calls are still to be
+   surfaced, not buried.
+   ⚠ **The selection principle is fixed: greatest hits, no filler (D-064).** Only places worth
+   going to. Thin regions stay thin — do not add a mediocre place to make a municipality
+   finishable, which is the failure D-002 exists to prevent.
+   ⚠ The file holds **79 places** as of 2026-08-16, still the prominence-and-coverage starter set
+   apart from three edits the project lead asked for. It is scaffolding, not a decision taken.
 
 ## Honesty rules, each of which cost something here
 

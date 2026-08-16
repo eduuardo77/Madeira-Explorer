@@ -1522,7 +1522,22 @@ grep -A30 "^### T-052a" docs/task-notes.md
   been earned, in a starter set nobody had walked. The threshold is 50 m, which is twice the
   file's own simplification error, so the slack is bounded by arithmetic rather than by taste:
   Douglas-Peucker cannot move a shoreline further than its tolerance, ~22 m here.
-  ⚠ **The coordinates were not changed.** That is curation (T-066).
+
+- **Both were then fixed, on the project lead's instruction (2026-08-16)** — the same deliberate
+  override of the "curation is not yours" rule as the 80 places themselves.
+      — **Cabo Girão** 32.6485,-17.0004 → **32.65705,-17.0049**, 1.04 km north-west: the
+      *Miradouro do Cabo Girão*, the glass skywalk, where three OSM features agree to within
+      40 m. The cape itself (`node 9114890712`) is 330 m further south and is the headland, not
+      the place anybody visits.
+      — **Rocha do Navio** 32.82908,-16.86968 → **32.81463,-16.87652**, 1.73 km south-west: the
+      clifftop viewpoint above the cable car. ⚠ **The old coordinate was not a typo — it was the
+      reserve's own centre**, and the reserve is mostly sea (`relation 9321122`, centre
+      32.8291,-16.8730). A marine protected area has no honest centre on land, so the geofence
+      has to be its access point. **That leaves the name describing the reserve and the stamp
+      describing the viewpoint**, which is a curation question left open rather than answered.
+      — Verified against our own boundaries before editing: both land inside the municipality
+      each place was already filed under, so no region id moved. `validate-content.mjs` now
+      passes with no warnings at all.
 
 - **Two tools now share one geometry module.** `tools/lib/geo.mjs` (Douglas-Peucker,
   point-in-polygon, distances) and `tools/lib/overpass.mjs` (the backoff, and the reason for

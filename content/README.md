@@ -41,6 +41,13 @@ not a rewrite.
 > ⚠ **The two levada endpoints are approximate.** They are OSM way endpoints, not the trailhead
 > and exit a walker would recognise, and the stamp rule (D-009) needs both crossed. Pairing the
 > right entry with the right exit is exactly the local knowledge this file exists to hold.
+>
+> ⚠ **Two coordinates were hand-corrected on 2026-08-16**, on the project lead's instruction, and
+> they are the only editorial edits in this file: **Cabo Girão** and **Rocha do Navio** were both
+> curated *in the sea* — 525 m and 1.4 km out — so neither stamp could have been earned by anybody
+> standing at the place. See the `regions.json` section below for what they are now and why the
+> reserve is a harder case than it looks. **This is the failure mode of copying a label wholesale:
+> the label sits where the map drew the word, not where the visitor stands.**
 
 ## Curating `pois.json` (T-066)
 
@@ -261,8 +268,13 @@ you forget.
   The old ids came from a nearest-settlement guess and a third of them named the island itself.
 - *"N place(s) fall outside every boundary"* — with the distance. Up to ~22 m is this file's own
   simplification; **beyond that the place is in the sea**, and a geofence in the sea is a stamp
-  nobody standing at the place can earn. Two of the starter set are: Cabo Girão (525 m) and the
-  Rocha do Navio reserve (1.4 km). Those are coordinates to re-read against OSM.
+  nobody standing at the place can earn. Two of the starter set were, and were corrected on
+  2026-08-16 on the project lead's instruction: **Cabo Girão** was 525 m offshore and is now the
+  skywalk viewpoint, **Rocha do Navio** was 1.4 km offshore — the marine reserve's own centre —
+  and is now the clifftop viewpoint above the cable car. Both coordinates are OSM's.
+  ⚠ **A marine reserve has no coordinate on land, so the geofence is its access point, not its
+  middle.** If a stamp is going to be earned by standing somewhere, the place has to be somewhere
+  you can stand. Worth deciding whether that place should still be named after the reserve.
 
 ## How the pack reaches the app
 

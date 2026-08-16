@@ -152,8 +152,8 @@
       "geofences": [
         {
           "id": "cabo-girao-main",
-          "lat": 32.6485,
-          "lon": -17.0004,
+          "lat": 32.65705,
+          "lon": -17.0049,
           "radiusM": 250
         }
       ]
@@ -320,8 +320,8 @@
       "geofences": [
         {
           "id": "reserva-natural-do-sitio-da-rocha-do-navio",
-          "lat": 32.82908,
-          "lon": -16.86968,
+          "lat": 32.81463,
+          "lon": -16.87652,
           "radiusM": 200
         }
       ]

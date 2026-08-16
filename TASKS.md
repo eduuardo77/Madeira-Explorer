@@ -508,9 +508,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       DE LOBOS · COLLECTED" needs 347 px of the 324 the card has at 390 px wide, so the worst
       realistic case wrapped into two lines of tracked capitals above the name — invisible until
       a levada in the longest-named municipality is collected. Measured, not eyeballed (D-038).
-      — ⚠ **Two stamps could never have been earned.** The validator now checks each place
-      against the boundaries and found Cabo Girão **525 m out to sea** and the Rocha do Navio
-      reserve **1.4 km** out. Coordinates are T-066's; this only reports them.
+      — ⚠ **Two stamps could never have been earned, and both are fixed.** The validator checks
+      each place against the boundaries and found Cabo Girão **525 m out to sea** and the Rocha
+      do Navio reserve **1.4 km** out. The project lead asked for the coordinates to be corrected
+      (2026-08-16), so they were, from OSM: the Cabo Girão skywalk and the Rocha do Navio
+      clifftop viewpoint. ⚠ The reserve's old coordinate was its **own centre** — a marine
+      reserve has none on land — which leaves its *name* describing the reserve and its stamp
+      describing the viewpoint. Curation question, deliberately not answered here.
       — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

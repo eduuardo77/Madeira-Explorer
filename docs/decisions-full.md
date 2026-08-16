@@ -2978,8 +2978,9 @@ next* — and it can only do it if a region is somewhere you can be in or not in
   that position rather than chosen (see the T-067 note).
 - `validate-content.mjs` now fails on a place filed under the wrong region, and warns when a place
   sits **out to sea** — which found two: Cabo Girão is 525 m offshore and the Rocha do Navio
-  reserve 1.4 km, so neither stamp could have been earned by standing at the place. Those are
-  coordinates for T-066 to fix; nothing here changes them.
+  reserve 1.4 km, so neither stamp could have been earned by standing at the place. Both were
+  corrected the same day on the project lead's instruction, to the coordinates OSM gives for the
+  places a visitor stands. The check is what will catch the next one.
 
 **When this reverses.** If the project lead wants the guidebook's regions rather than the
 council's. The tool would then read a hand-drawn GeoJSON instead of Overpass, and everything

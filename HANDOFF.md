@@ -23,8 +23,10 @@ expands one into the old grid (T-144) — 80 places would not fit as five grids.
 
 On 2026-08-16 regions became real (T-067, D-061): the place card names the municipality under
 the place, and `tools/validate-content.mjs` now checks every place against the boundaries.
-⚠ **It found two stamps nobody could ever have earned** — Cabo Girão is curated 525 m out to sea
-and the Rocha do Navio reserve 1.4 km. Coordinates are T-066's to fix.
+⚠ **It found two stamps nobody could ever have earned** — Cabo Girão was curated 525 m out to sea
+and the Rocha do Navio reserve 1.4 km. **Both fixed the same day on the project lead's
+instruction**, to the coordinates OSM gives for the places a visitor actually stands: the Cabo
+Girão skywalk and the Rocha do Navio clifftop viewpoint. The validator now passes clean.
 
 ⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
 `expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided

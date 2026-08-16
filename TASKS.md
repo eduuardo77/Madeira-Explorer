@@ -540,19 +540,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       reads **VIEWPOINT · Pico do Areeiro · Santana**. Which is also the assignment being right —
       the old guess said Estreito de Câmara de Lobos, and the peak is in Santana.
       — Notes: `docs/task-notes.md` (T-067)
-- [~] **T-066a** **The curation draft, 2026-08-16 (D-064).** `docs/curation-draft.md` — a veto
-      sheet: every one of the 79 kept or cut with a one-line reason, plus ten proposed additions,
-      landing at ~71. `tools/curation-evidence.mjs` gathered what it is defended with (OSM tags,
-      elevation, PR routes, Wikipedia language counts via Wikidata).
-      — ⚠ **A third of the calls rest on `[knowledge]` — my own impression, unverifiable here.**
-      They are marked as such on every line, which is D-064's condition and the difference
-      between a veto sheet and a confident list.
-      — **Three findings the evidence produced on its own**: **Pico Ruivo** (1,862 m, the island's
-      highest point, 30 language Wikipedias) is **not in the pack** — the tile pack labels it
-      `Ruivo` and the fragment never matched; seven of the 21 viewpoints are roadside pull-ins
-      with no evidence of any kind; and **Machico** (36 wikis, the second town) is missing while
-      two drive-through parishes are in.
-      — Waiting on the project lead's veto. ⇠ T-066, D-064
+- [x] **T-066a** ✅ **The curation draft, applied 2026-08-16 (D-064).** The project lead took it
+      as drafted with one correction — *Praia da Prainha* is not a name anybody uses, so the place
+      is **Prainha** — and said plainly of the rest: *"I don't have any idea to be fair."* Which is
+      an answer: where there is no local knowledge to overrule the evidence, the evidence stands.
+      — **79 → 60 places**: 16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks.
+      Twenty-two cut, three renamed or corrected, and ten added — including **Pico Ruivo**, the
+      island's highest point, which had never been in the pack.
+      — ⚠ **Every check passes**: names verified against OSM (48 exact, 0 fragments), every place
+      inside the region it claims, nothing offshore, no duplicates, 11 of 11 levadas with a drawn
+      course.
+      — ⚠ **The riskiest entries are the two kept on no evidence at all** — *Achada do Marques*
+      and *Chão da Ribeira* — and one cut for the same reason, *Parque Ecológico do Funchal*,
+      which I believe burned. Those three are where this pack is most likely to be wrong.
+      — Notes: `docs/curation-draft.md` is the sheet as proposed. ⇠ T-066, D-064
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
@@ -573,10 +574,16 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       and which could never earn a stamp before), skipped sections, and a lost crossing.
       — ⚠ **Every threshold is a guess and marked NOT TUNED.** The corridor — 60 m, widened by
       whatever accuracy a fix admits to — is the one most likely to be wrong.
-      — `tools/levada-ends.mjs` (new) proposes better endpoints from parking, guideposts and bus
-      stops near each path end, into `tools/out/levada-ends.md`. ⚠ **For four of the fifteen there
-      is no access evidence at either end**, which is precisely why crediting can no longer depend
-      on endpoints alone.
+      — `tools/levada-ends.mjs` (new) proposes endpoints from signed guideposts, roads and bus
+      stops near each path end.
+      — ⚠ **AND THE ENDPOINT HUNT IS CLOSED, 2026-08-16.** The project lead answered the review
+      sheet by rejecting its premise: *"where you park the car is not part of the levada… those
+      parks are full and people leave in the middle of the road, illegally parked."* A mapped car
+      park is evidence that somebody expected walkers, not evidence of where they begin — so the
+      tool's strongest signal was its weakest, and it is re-weighted towards guideposts.
+      **The endpoints stay as they are.** All eleven pairs span 31–56% of their course, so none is
+      the dangerous shape — two points close together on a long walk, a stamp earned by parking
+      and turning round. Coverage does the work now, which is what D-065 was for.
 - [x] **T-151** ✅ **The accuracy filter and the break rule, 2026-08-16 (D-067).**
       — **The 120 m cut was a veto and is now a preference.** Under canopy every fix can be worse
       than 120 m, and the flat rule drew **nothing at all** for the stretch — a levada walk

@@ -70,10 +70,13 @@ realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app h
 the app became usable — there are places to collect, the passport lists all of them, and every
 finished feature turned on at once.
 
-**1. ~~`content/pois.json` is empty~~ — it holds 79 places as of 2026-08-16, and they are a
-STARTER SET, not curation.** The project lead asked for them twice, so the standing "do not
-curate" rule was overridden deliberately. 21 viewpoints · 15 levadas · 16 villages · 11 beaches ·
-16 landmarks, all 15 levadas with drawn courses.
+**1. ~~`content/pois.json` is empty~~ ~~a STARTER SET~~ — **CURATED 2026-08-16 (D-064, T-066a).**
+It holds **60 places**: 16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks. The
+assistant drafted, the project lead vetoed, and their one correction was a name (*Prainha*). Every
+name is verified against OSM, every place sits inside the region it claims, nothing is offshore and
+nothing duplicates another. ⚠ **The weakest entries are the two kept on no evidence at all** —
+*Achada do Marques* and *Chão da Ribeira* — and *Parque Ecológico do Funchal*, cut because I believe
+it burned. Those three are where this pack is most likely to be wrong.
 ⚠ **Three editorial edits have been made since, each on the project lead's explicit instruction**
 (2026-08-16, T-066): two coordinates that were curated in the sea, one place renamed
 *Miradouro da Rocha do Navio* and recategorised, and one duplicate deleted — *Monumento Natural
@@ -114,8 +117,11 @@ use. **The largest open item in the project.**
 
 ## What the project lead asked for next, 2026-08-16
 
-1. **Their corrections to two review sheets** — `docs/curation-draft.md` (the place list) and
-   `tools/out/levada-ends.md` (the trailheads). Both are waiting on them, not on code.
+1. ~~**Their corrections to two review sheets**~~ — **both closed 2026-08-16.** The place list is
+   applied (T-066a); the trailhead sheet was answered by rejecting its premise — parking is not
+   where a levada starts on this island, and after D-065 the endpoints barely matter.
+   ⚠ **One question is open and deliberately parked: dashed bridges** (T-151, D-067). The project
+   lead wants to *see* it before deciding, and it cannot be seen without the phone.
 2. ~~**T-149**, the confirmation prompt~~ — **done 2026-08-16.**
 3. ~~⚠ **Then: the accuracy and reliability of the drawn trace**~~ — **first pass done
    2026-08-16 (D-066, T-150).** Outliers, standing-still scribble and redundant vertices are

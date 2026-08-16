@@ -62,18 +62,32 @@ const root = path.resolve(here, '..');
 /** How far from a path end to look for signs that walkers start there. */
 const ACCESS_RADIUS_M = 300;
 
-/** What counts as access, and how much each is worth when ranking an end. */
+/**
+ * What counts as access, and how much each is worth when ranking an end.
+ *
+ * ⚠ **PARKING WAS WEIGHTED HIGHEST AND THE PROJECT LEAD SAYS IT SHOULD NOT BE
+ * (2026-08-16).** The reasoning here was that a car park is where walkers
+ * start. On Madeira: *"where you park the car is not part of the levada.
+ * Moreover, most of the time those parks are full and you need to find another
+ * irregular place to park — most of the time people leave in the middle of the
+ * road, illegally parked."*
+ *
+ * So a mapped car park is evidence that somebody expected walkers here, and
+ * **not** evidence of where they actually begin. What survives as a real signal
+ * is the **signed guidepost** — the regional government marks its PR routes at
+ * the entrance — and the point where the path meets a road at all.
+ */
 const ACCESS_SIGNALS = [
-  { score: 5, label: 'parking', match: (t) => t.amenity === 'parking' },
+  { score: 2, label: 'parking', match: (t) => t.amenity === 'parking' },
   {
-    score: 4,
+    score: 5,
     label: 'trail sign',
     match: (t) => t.information === 'guidepost' || t.information === 'board',
   },
   { score: 3, label: 'bus stop', match: (t) => t.highway === 'bus_stop' || t.public_transport === 'platform' },
   { score: 2, label: 'café/restaurant', match: (t) => t.amenity === 'cafe' || t.amenity === 'restaurant' },
   { score: 2, label: 'viewpoint', match: (t) => t.tourism === 'viewpoint' },
-  { score: 1, label: 'road', match: (t) => typeof t.highway === 'string' && DRIVEABLE.has(t.highway) },
+  { score: 3, label: 'road', match: (t) => typeof t.highway === 'string' && DRIVEABLE.has(t.highway) },
 ];
 
 const DRIVEABLE = new Set([

@@ -95,6 +95,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-064** | The canvas is greatest hits, not coverage. Thin regions are allowed to stay thin. | **Accepted** |
 | **D-065** | Two ways to earn every stamp. A levada is credited by how much of it you walked. | Provisional |
 | **D-066** | The drawn trace is cleaned before it is drawn, and cleaning never moves a point. | Provisional |
+| **D-067** | The accuracy cut is a preference, not a veto. A canopy stretch still draws. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

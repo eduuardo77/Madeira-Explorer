@@ -3319,3 +3319,32 @@ tolerance. What is at risk is a real switchback, and Madeira's paths are made of
 **When this reverses or retunes.** T-018's real traces, which is also when the thresholds stop
 being guesses. If a real levada walk comes back with its switchbacks flattened, the tolerance is
 the first number to drop.
+
+---
+
+## D-067 — The accuracy cut is a preference, not a veto
+
+**Status:** Provisional — 2026-08-16, extending D-066.
+
+**Decision:** `MAX_DRAWN_ACCURACY_M` (120 m) no longer decides alone whether a fix is drawn. Within
+each two-minute window, poor fixes are dropped **only when a better fix covers the same minutes**;
+where every fix is poor, the least bad one is drawn. `NEVER_DRAWN_ACCURACY_M` (500 m) is the
+absolute veto.
+
+**Why.** The flat cut has a failure mode this project cares about more than tidiness: under laurel
+canopy *every* fix can be worse than 120 m, so the whole stretch drew **nothing**. A levada walk
+that appears as a hole in the trace is exactly what D-009's generosity rule exists to prevent — the
+walk must still appear — and it fails silently, since a missing line looks like a recorder that was
+off rather than a filter that was strict.
+
+**What was rejected.** *Raising the cut* — that draws junk everywhere to fix a problem that only
+occurs where there is nothing better. *Dropping the cut entirely* — a 300 m fix beside a 15 m one is
+never worth drawing.
+
+**And one rule was written and then removed.** A break for silences under the gap threshold that
+still covered more than a kilometre: twenty quiet minutes between Funchal and Santana draw as a
+straight stroke across mountains the user never crossed. Two existing tests say the opposite on
+purpose — both ends of such a bridge are observed and only its *shape* is unknown, so deleting it
+deletes real movement (D-032 keeps the raw record). **The alternative worth putting to the project
+lead is a dashed stroke**: honest about the shape, without denying the journey. That is a design
+change rather than a threshold, so it is recorded here and not taken.

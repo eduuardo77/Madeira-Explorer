@@ -18,6 +18,7 @@ import {
   MAX_DRAWN_SPEED_MPS,
   MIN_FRAME_SPAN_DEG,
   traceBounds,
+  NEVER_DRAWN_ACCURACY_M,
   type TraceFix,
 } from './traceGeoJson.ts';
 
@@ -285,4 +286,50 @@ test('the speed limit is far above anything the island allows', () => {
   // argument: it must stay well clear of a car so it can never smooth a drive.
   assert.ok(MAX_DRAWN_SPEED_MPS > 30, 'a car on the VR1 must survive this');
   assert.ok(MAX_DRAWN_SPEED_MPS < 100, 'an aircraft must not');
+});
+
+test('a canopy stretch still draws — the walk must appear (D-067)', () => {
+  // Every fix under the laurel is worse than 120 m. The flat cut drew nothing
+  // at all for the stretch, which turns a levada walk into a hole in the trace.
+  const canopy = [
+    fix(0, 32.735, -16.886, 20),
+    fix(2, 32.736, -16.884, 160),
+    fix(4, 32.737, -16.882, 190),
+    fix(6, 32.738, -16.88, 175),
+    fix(8, 32.739, -16.878, 25),
+  ];
+
+  const trace = buildTrace(canopy, GAP_MS);
+  assert.equal(trace.features.length, 1, 'the stretch must not vanish');
+
+  // Asserted as reach rather than as a vertex count: D-066 simplifies a nearly
+  // straight walk down to its ends, and what matters here is that the walk is
+  // drawn at all, from where it started to where it finished.
+  const drawn = trace.features[0].geometry.coordinates;
+  assert.ok(drawn[0][1] < 32.7355);
+  assert.ok(drawn[drawn.length - 1][1] > 32.7385);
+});
+
+test('a poor fix is still dropped when a good one covers the same minutes', () => {
+  const both = [
+    fix(0, 32.735, -16.886, 15),
+    // Same two-minute window, and far worse. The good one wins.
+    fix(1, 32.75, -16.9, 300),
+    fix(1.5, 32.7351, -16.8858, 12),
+    fix(3, 32.7352, -16.8856, 12),
+  ];
+
+  const drawn = buildTrace(both, GAP_MS).features[0].geometry.coordinates;
+  assert.ok(
+    drawn.every(([, lat]) => lat < 32.74),
+    'the 300 m fix must not be drawn beside a 15 m one'
+  );
+});
+
+test('a fix too vague to place is never drawn, however alone it is', () => {
+  const useless = [
+    fix(0, 32.735, -16.886, NEVER_DRAWN_ACCURACY_M + 1),
+    fix(2, 32.736, -16.884, NEVER_DRAWN_ACCURACY_M + 1),
+  ];
+  assert.equal(buildTrace(useless, GAP_MS).features.length, 0);
 });

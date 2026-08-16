@@ -577,6 +577,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       stops near each path end, into `tools/out/levada-ends.md`. ⚠ **For four of the fifteen there
       is no access evidence at either end**, which is precisely why crediting can no longer depend
       on endpoints alone.
+- [x] **T-151** ✅ **The accuracy filter and the break rule, 2026-08-16 (D-067).**
+      — **The 120 m cut was a veto and is now a preference.** Under canopy every fix can be worse
+      than 120 m, and the flat rule drew **nothing at all** for the stretch — a levada walk
+      appearing as a hole in the trace, which is the opposite of what D-009 asks for. A poor fix is
+      now dropped only when a better one covers the same two minutes; past 500 m nothing is drawn,
+      because a fix that vague is not evidence of a position.
+      — ⚠ **A break rule was written and then removed, and the removal is the finding.** Twenty
+      quiet minutes covering 20 km are drawn as a straight stroke over mountains nobody crossed —
+      but two existing tests state on purpose that such a bridge *should* be drawn, because both
+      its ends are observed and only its shape is unknown. Overturning that is the project lead's
+      call, not a threshold change. **The open option: draw long sparse bridges dashed** — honest
+      about the shape without deleting the journey. Written into `traceGeoJson.ts` where the rule
+      would have gone. ⇠ T-150, D-059
 - [x] **T-150** ✅ **The drawn trace, cleaned — 2026-08-16 (D-066).** The project lead asked for
       the accuracy and reliability of *"the highlighted path of where you've been"*. Three things
       got through every existing filter and were what made it look wrong: **spikes** the accuracy

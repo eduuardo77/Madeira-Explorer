@@ -66,6 +66,46 @@ export type TraceFix = {
 export const MAX_DRAWN_ACCURACY_M = 120;
 
 /**
+ * Worse than this and a fix is not evidence of being anywhere, at any price.
+ *
+ * ⚠ **The 120 m above is a preference; this is the veto.** They are different
+ * numbers because "poor" and "useless" are different questions, and conflating
+ * them is what made a canopy stretch disappear: see `drawableFixes`.
+ */
+export const NEVER_DRAWN_ACCURACY_M = 500;
+
+/**
+ * How long a stretch of trace has to keep at least one point, whatever its
+ * quality.
+ *
+ * Two minutes: short enough that a poor fix is never preferred to a good one
+ * nearby, long enough that a walk under canopy keeps a shape.
+ */
+export const ACCURACY_RESCUE_WINDOW_MS = 2 * 60 * 1000;
+
+/**
+ * ⚠ **A LONG, SPARSE BRIDGE IS DRAWN STRAIGHT, AND THAT IS A DECISION RATHER
+ * THAN AN OVERSIGHT — 2026-08-16.**
+ *
+ * A rule was written here that broke the line when a silence *under* the gap
+ * threshold covered more than a kilometre: twenty quiet minutes between Funchal
+ * and Santana are drawn as a straight stroke over mountains the user did not
+ * cross, which reads as the same fabricated continuity the other rules exist to
+ * prevent.
+ *
+ * **It was removed, because two tests already state the opposite on purpose**:
+ * *"a drive between two levadas is still one line"* (12 km of VR1 in ten
+ * minutes) and the bounds test's *"at 20 minutes it is a drive, which is a
+ * stroke this app is glad to draw"*. Both ends of such a bridge are observed;
+ * only its shape is unknown. Deleting it deletes real movement, and D-032's
+ * whole position is that the trace is the raw record.
+ *
+ * **The tension is real and belongs to the project lead**: the alternative is
+ * to draw such bridges *dashed* — honest about the shape without deleting the
+ * journey — which is a design change, not a threshold.
+ */
+
+/**
  * The fastest travel the line will be drawn through, in metres per second.
  *
  * 55 m/s is about 200 km/h. Madeira's fastest road is the VR1 at 100 km/h, so
@@ -133,14 +173,7 @@ export function splitIntoSegments(
   fixes: TraceFix[],
   gapThresholdMs: number
 ): TraceSegment[] {
-  const drawable = fixes
-    .filter(
-      (fix) =>
-        Number.isFinite(fix.lat) &&
-        Number.isFinite(fix.lon) &&
-        (fix.accuracy_m === null || fix.accuracy_m <= MAX_DRAWN_ACCURACY_M)
-    )
-    .sort((a, b) => a.ts - b.ts);
+  const drawable = drawableFixes(fixes);
 
   const segments: TraceSegment[] = [];
   let current: TraceFix[] = [];
@@ -165,6 +198,61 @@ export function splitIntoSegments(
   flush();
 
   return segments;
+}
+
+/**
+ * Which fixes are worth drawing, in time order.
+ *
+ * ⚠ **A poor fix is dropped only when a better one covers the same minutes.**
+ * The rule used to be a flat cut at `MAX_DRAWN_ACCURACY_M`, and it has a
+ * failure mode this project cares about more than tidiness: under laurel canopy
+ * *every* fix can be worse than 120 m, so the flat rule drew **nothing at all**
+ * for the stretch — and a levada walk that appears as a gap is the exact
+ * outcome D-009's generosity rule exists to prevent. The walk must still appear.
+ *
+ * So the cut becomes a preference, applied within a window: if any fix in those
+ * two minutes is good, the poor ones go; if none is, the best available one
+ * stays. Past `NEVER_DRAWN_ACCURACY_M` nothing is drawn, because a fix that
+ * vague is not evidence of a position.
+ */
+export function drawableFixes(fixes: TraceFix[]): TraceFix[] {
+  const ordered = fixes
+    .filter(
+      (fix) =>
+        Number.isFinite(fix.lat) &&
+        Number.isFinite(fix.lon) &&
+        (fix.accuracy_m === null || fix.accuracy_m <= NEVER_DRAWN_ACCURACY_M)
+    )
+    .sort((a, b) => a.ts - b.ts);
+
+  const kept: TraceFix[] = [];
+  let index = 0;
+
+  while (index < ordered.length) {
+    // Everything reported within one window of the first fix in it.
+    const from = ordered[index].ts;
+    let end = index;
+    while (end + 1 < ordered.length && ordered[end + 1].ts - from < ACCURACY_RESCUE_WINDOW_MS) {
+      end += 1;
+    }
+
+    const window = ordered.slice(index, end + 1);
+    const good = window.filter(
+      (fix) => fix.accuracy_m === null || fix.accuracy_m <= MAX_DRAWN_ACCURACY_M
+    );
+
+    if (good.length > 0) {
+      kept.push(...good);
+    } else {
+      // Nothing good happened here. Keep the least bad, so the stretch exists.
+      kept.push(
+        window.reduce((a, b) => ((b.accuracy_m ?? 0) < (a.accuracy_m ?? 0) ? b : a))
+      );
+    }
+    index = end + 1;
+  }
+
+  return kept;
 }
 
 /**

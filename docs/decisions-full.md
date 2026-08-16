@@ -3208,9 +3208,11 @@ evidence attached: *"the trace shows 2.1 km along the Levada do Furado — did y
 unconditional "mark as collected" would make every stamp meaningless, which is the one thing D-002
 cannot afford.
 
-⚠ **Nothing shows it to anybody yet (T-149), and that is the weak point of this decision.** A list
-nobody sees is the shape of T-145 and T-146, so it is flagged in TASKS and in the code rather than
-left to be found.
+⚠ ~~Nothing shows it to anybody yet (T-149)~~ — **closed the same day.** The passport asks, under
+the hero and above the rows, and remembers a refusal so it never asks twice. The rules it is built
+on are in T-149's note; the one worth repeating here is that **the question can only ever be raised
+by evidence the recorder gathered** — there is no "mark as collected" button in this app, and if
+there were, the stamps would stop meaning anything.
 
 **Alternatives considered:**
 

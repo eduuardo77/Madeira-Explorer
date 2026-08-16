@@ -50,7 +50,7 @@ export type AwardPassResult = {
    * sees, which is a state this project has been bitten by twice (T-145,
    * T-146); it is called out in TASKS rather than left to be discovered.
    */
-  awaitingConfirmation: string[];
+  awaitingConfirmation: { placeId: string; evidence: string }[];
 };
 
 const EMPTY: AwardPassResult = {
@@ -241,7 +241,10 @@ async function creditLevadasByCoverage(
     result.considered += 1;
 
     if (verdict.offerConfirmation) {
-      result.awaitingConfirmation.push(place.id);
+      // The evidence travels with the id: the screen that asks must not
+      // recompute D-065's arithmetic, because a second implementation is free
+      // to disagree with the first.
+      result.awaitingConfirmation.push({ placeId: place.id, evidence: verdict.reason });
       await recordingEventDao.log(
         'stamp',
         `${place.name}: ${verdict.reason} — not awarded, worth asking (T-149)`

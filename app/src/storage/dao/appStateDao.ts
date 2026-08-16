@@ -87,6 +87,15 @@ export const AppStateKey = {
    * and made redundant by the real content pack (T-040).
    */
   DevPoiFixture: 'dev_poi_fixture',
+  /**
+   * JSON: place ids the user has been asked about and said no to (T-149).
+   *
+   * ⚠ **Asking twice is the whole reason this is stored.** A levada with real
+   * but partial evidence stays partial for the rest of the trip, so without
+   * this the passport would put the same question up every time it opened —
+   * which reads as the app not believing the answer.
+   */
+  ConfirmationsDeclined: 'confirmations_declined',
 } as const;
 
 export type AppStateKeyName =

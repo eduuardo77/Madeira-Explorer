@@ -57,8 +57,9 @@ the municipality, from the boundaries, on a device.
 detectors** — the OS geofence, and a sweep of the raw trace for when the OS never fired — and a
 levada is credited by **how much of its course you walked** (60%, or 3 km) rather than by touching
 both endpoints. Out-and-back walks, skipped sections and lost crossings all earn the stamp now.
-⚠ **The one loose end is T-149**: `runAwardPass` returns `awaitingConfirmation` for walks that
-nearly qualified, and no screen asks the user about them yet.
+A walk that *nearly* qualified now raises one question on the passport (T-149) — *"Walked 2.1 km
+of 5.0 km (42%) — did you walk it?"* — and a refusal is remembered. ⚠ **A confirmation, never a
+claim: there is no "mark as collected" control anywhere, deliberately.**
 
 ⚠ **Never verified, because no emulator can answer it:** battery, background survival, GPS
 realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app has met real data.**
@@ -110,6 +111,17 @@ until one five-second MP4 exists on a real phone.** The channel question below i
 CONTEXT §2.3 called *the entire distribution strategy*; T-105d, a shareable passport, was dropped
 the next day. This is a question about whether v1 should launch publicly, not which channel to
 use. **The largest open item in the project.**
+
+## What the project lead asked for next, 2026-08-16
+
+1. **Their corrections to two review sheets** — `docs/curation-draft.md` (the place list) and
+   `tools/out/levada-ends.md` (the trailheads). Both are waiting on them, not on code.
+2. ~~**T-149**, the confirmation prompt~~ — **done 2026-08-16.**
+3. ⚠ **Then: the accuracy and reliability of the drawn trace** — *"the highlighted path of where
+   you've been shown on the map"*. **Do not start a new subject before this one.** It is the only
+   thing the user actually looks at after the stamps (D-032 spent the whole map-matching budget on
+   making this half good), and nothing about it has been examined since T-059: not the accuracy
+   filter, not the breaking rule (D-059), not what a canopy-degraded walk looks like drawn.
 
 ## The code tail, in rough order of value
 

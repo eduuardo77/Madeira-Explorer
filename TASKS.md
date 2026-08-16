@@ -577,13 +577,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       stops near each path end, into `tools/out/levada-ends.md`. ⚠ **For four of the fifteen there
       is no access evidence at either end**, which is precisely why crediting can no longer depend
       on endpoints alone.
-- [ ] **T-149** ⚠ **The loose end of D-065.** Ask the user about a levada the app *nearly*
-      credited: *"the trace shows 2.1 km along the Levada do Furado — did you walk it?"*
-      `runAwardPass` already returns `awaitingConfirmation` and writes the evidence to the diary;
-      **no screen reads either.** A list nobody sees is the shape of T-145 and T-146, which is why
-      this is written down the same day rather than discovered in three weeks.
-      — ⚠ A **confirmation**, never a claim. No unconditional "mark as collected" button, or the
-      stamps stop meaning anything (D-002). ⇠ D-065, T-074
+- [x] **T-149** ✅ **The app asks, 2026-08-16.** A levada it nearly credited raises one question
+      on the passport, under the hero and above the rows: *"Did you walk the Long Canal Trail?
+      Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure."*
+      `stampConfirmation.ts` (pure, 7 tests) decides what to ask; `PassportView` renders it;
+      `PassportScreen` awards or remembers the refusal.
+      — **The four rules it is built on**: a confirmation and never a claim — there is no
+      unconditional "mark as collected" anywhere in the app, and the question can only be raised
+      by evidence the recorder gathered; **ask once**, because being asked twice about a walk you
+      did not do is the app politely calling you a liar; **the evidence is in the question**, so
+      the answer is a memory check rather than a guess at what the app wants; and **never more
+      than one at a time**, because three stacked questions is a form and this screen is a reward.
+      — **The evidence travels with the id** from `runAwardPass`, so the screen never recomputes
+      D-065's arithmetic — a second implementation would be free to disagree with the first.
+      — A confirmed stamp stores `confidence 0.9` and keeps the machine's own words in its
+      reason. **Not 1.0**: the app cannot tell a careful memory from a generous one, and a stored
+      1.0 would later read as *measured*. Every confirmed row is also a data point for T-131
+      saying the bar was too high here.
+      — Measured in the workbench: both controls 320 × 60, no overlap, nothing clipped. ⇠ D-065
 - [~] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028, T-028a
       — **Half done 2026-08-13 (D-055).** `tools/build-levadas.mjs` extracts the named ways of each
       curated levada from Overpass into `content/levadas.json`, applying the rule below —

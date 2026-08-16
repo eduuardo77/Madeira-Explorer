@@ -16,7 +16,15 @@ import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
+import {
+  CONFIRMED_CONFIDENCE,
+  confirmationReason,
+  nextPrompt,
+  type ConfirmationCandidate,
+  type ConfirmationPrompt,
+} from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
+import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
@@ -46,6 +54,9 @@ export default function PassportScreen({
   const [cardPlace, setCardPlace] = useState<Place | null>(null);
   /** Whether the tapped place is collected — the map needs it for the marker. */
   const [cardCollected, setCardCollected] = useState(false);
+  /** The one walk the app wants settled (T-149), or null — which is usually. */
+  const [confirmation, setConfirmation] = useState<ConfirmationPrompt | null>(null);
+  const [confirmationEvidence, setConfirmationEvidence] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -53,8 +64,9 @@ export default function PassportScreen({
     (async () => {
       try {
         // Opening the passport is the moment the user most expects it to be
-        // right, so judge before reading (T-071). Idempotent and cheap.
-        await runAwardPass();
+        // right, so judge before reading (T-071). Idempotent and cheap — and
+        // its result carries the walks worth asking about (T-149, D-065).
+        const pass = await runAwardPass();
 
         const [nextProgress, trip] = await Promise.all([
           getCurrentProgress(),
@@ -67,10 +79,14 @@ export default function PassportScreen({
             ? new Set<string>()
             : await stampAwardDao.getAwardedPlaceIds(trip.id);
 
+        const prompt = await resolvePrompt(pass.awaitingConfirmation, awardedIds);
+
         if (!cancelled) {
           setProgress(nextProgress);
           setAwards(nextAwards);
           setStamps(resolveStamps(awardedIds));
+          setConfirmation(prompt?.prompt ?? null);
+          setConfirmationEvidence(prompt?.evidence ?? '');
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -131,6 +147,63 @@ export default function PassportScreen({
     setCardPlace(null);
   };
 
+  /**
+   * The user says they walked it (T-149).
+   *
+   * The award carries the machine's own evidence in its reason, so a confirmed
+   * stamp is never indistinguishable from a measured one — and T-131 can read
+   * these rows as "the bar was too high here".
+   */
+  const confirmWalk = (placeId: string) => {
+    void (async () => {
+      const trip = await tripDao.getActiveTrip();
+      if (trip === null) {
+        return;
+      }
+      try {
+        await stampAwardDao.award({
+          trip_id: trip.id,
+          place_id: placeId,
+          awarded_ts: Date.now(),
+          // Neither was measured on this route, and filling a column with a
+          // plausible number is what ARCHITECTURE section 10 forbids.
+          dwell_seconds: null,
+          mean_speed_mps: null,
+          confidence: CONFIRMED_CONFIDENCE,
+          reason: confirmationReason(confirmationEvidence),
+        });
+        const awardedIds = await stampAwardDao.getAwardedPlaceIds(trip.id);
+        setConfirmation(null);
+        setAwards(await stampAwardDao.getAwards(trip.id));
+        setStamps(resolveStamps(awardedIds));
+        setProgress(await getCurrentProgress());
+      } catch (error) {
+        await recordingEventDao.logError('confirm walk', error);
+      }
+    })();
+  };
+
+  /** The user says they did not. Remembered, so it is never asked again. */
+  const declineWalk = (placeId: string) => {
+    void (async () => {
+      setConfirmation(null);
+      try {
+        const declined =
+          (await appStateDao.getJson<string[]>(
+            appStateDao.AppStateKey.ConfirmationsDeclined
+          )) ?? [];
+        if (!declined.includes(placeId)) {
+          await appStateDao.setJson(appStateDao.AppStateKey.ConfirmationsDeclined, [
+            ...declined,
+            placeId,
+          ]);
+        }
+      } catch (error) {
+        await recordingEventDao.logError('decline walk', error);
+      }
+    })();
+  };
+
   return (
     <View style={styles.root}>
       {progress === null ? (
@@ -143,6 +216,9 @@ export default function PassportScreen({
           awards={awards}
           stamps={stamps}
           onSelectStamp={openCard}
+          confirmation={confirmation ?? undefined}
+          onConfirm={confirmWalk}
+          onDecline={declineWalk}
         />
       )}
 
@@ -191,6 +267,54 @@ export default function PassportScreen({
  * passport is a fixed set of pages to fill (CONTEXT §4.2), and a sticker that
  * moves once you earn it is a page that rearranges itself under you.
  */
+/**
+ * Turn the award pass's list of *nearly* into one question, or nothing (T-149).
+ *
+ * The pass hands over the evidence with each id, so nothing here recomputes
+ * D-065's arithmetic — a second implementation would be free to disagree with
+ * the first. All this adds is the place's name and the memory of what the user
+ * has already declined.
+ */
+async function resolvePrompt(
+  awaitingConfirmation: readonly { placeId: string; evidence: string }[],
+  awarded: Set<string>
+): Promise<{ prompt: ConfirmationPrompt; evidence: string } | null> {
+  if (awaitingConfirmation.length === 0) {
+    return null;
+  }
+
+  let declined: string[] = [];
+  try {
+    declined =
+      (await appStateDao.getJson<string[]>(
+        appStateDao.AppStateKey.ConfirmationsDeclined
+      )) ?? [];
+  } catch (error) {
+    // A read failure must not cost the question. Worst case the user is asked
+    // about something they already declined, which is annoying, not wrong.
+    await recordingEventDao.logError('confirmations declined', error);
+  }
+
+  const places = getContentPack().places;
+  const candidates: ConfirmationCandidate[] = [];
+  for (const { placeId, evidence } of awaitingConfirmation) {
+    const place = places.find((candidate) => candidate.id === placeId);
+    if (place !== undefined) {
+      candidates.push({ placeId, name: place.name, evidence });
+    }
+  }
+
+  const prompt = nextPrompt(candidates, new Set(declined), awarded);
+  if (prompt === null) {
+    return null;
+  }
+  return {
+    prompt,
+    evidence:
+      candidates.find((candidate) => candidate.placeId === prompt.placeId)?.evidence ?? '',
+  };
+}
+
 function resolveStamps(awarded: Set<string>): PassportStamp[] {
   return getContentPack().places.map((place) => ({
     placeId: place.id,

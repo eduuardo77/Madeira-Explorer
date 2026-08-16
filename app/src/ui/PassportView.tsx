@@ -52,6 +52,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
+import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
@@ -171,6 +172,18 @@ export type PassportViewProps = {
    * broken screen.
    */
   stamps?: PassportStamp[];
+  /**
+   * The one walk the app wants settled (T-149, D-065), or absent.
+   *
+   * ⚠ **Above the rows and below the hero, on purpose.** It is a question the
+   * app is asking *the user*, so burying it under five category rows would
+   * mean it is never seen; putting it above the hero would mean the passport
+   * greets you with a chore instead of your number. It is also the only thing
+   * on this screen that is ever more than one tap deep.
+   */
+  confirmation?: ConfirmationPrompt;
+  onConfirm?: (placeId: string) => void;
+  onDecline?: (placeId: string) => void;
 };
 
 function CategoryRow({
@@ -313,6 +326,9 @@ export default function PassportView({
   awards,
   stamps,
   onSelectStamp,
+  confirmation,
+  onConfirm,
+  onDecline,
 }: PassportViewProps) {
   const hasContent = progress.total > 0;
 
@@ -348,6 +364,33 @@ export default function PassportView({
         <Text style={styles.rowEmpty}>
           No places are curated yet, so there is nothing to collect. (T-066)
         </Text>
+      )}
+
+      {confirmation === undefined ? null : (
+        <View style={styles.confirmation}>
+          <Text style={styles.confirmQuestion}>{confirmation.question}</Text>
+          {/* The evidence, in the question. The answer should be a memory
+              check, not a guess about what the app wants to hear. */}
+          <Text style={styles.confirmDetail}>{confirmation.detail}</Text>
+          <View style={styles.confirmActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${confirmation.confirmLabel} — ${confirmation.question}`}
+              onPress={() => onConfirm?.(confirmation.placeId)}
+              style={({ pressed }) => [styles.confirmYes, pressed && styles.confirmPressed]}
+            >
+              <Text style={styles.confirmYesText}>{confirmation.confirmLabel}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${confirmation.declineLabel} — ${confirmation.question}`}
+              onPress={() => onDecline?.(confirmation.placeId)}
+              style={({ pressed }) => [styles.confirmNo, pressed && styles.confirmPressed]}
+            >
+              <Text style={styles.confirmNoText}>{confirmation.declineLabel}</Text>
+            </Pressable>
+          </View>
+        </View>
       )}
 
       {progress.byCategory.map((row) => (
@@ -453,6 +496,55 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   seeAllPressed: { opacity: 0.5 },
+  // A card, like a category row, because it belongs to this screen rather than
+  // floating over it — and bordered rather than filled, so it reads as a
+  // question rather than as an award already won.
+  confirmation: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    borderWidth: 2,
+    borderColor: colors.tint,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  confirmQuestion: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+  },
+  confirmDetail: {
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+  },
+  // Stacked, never side by side: two 60 dp targets sharing a phone's width is
+  // how a tap target quietly becomes 40 dp at large text sizes (T-113).
+  confirmActions: {
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  confirmYes: {
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.control,
+    backgroundColor: colors.action,
+  },
+  confirmYesText: {
+    color: colors.actionText,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+  },
+  confirmNo: {
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmPressed: { opacity: 0.75 },
+  confirmNoText: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '600',
+  },
   rowEmpty: {
     color: colors.textMuted,
     fontSize: fontSize.small,

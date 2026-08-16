@@ -147,10 +147,12 @@ type Screen =
   | 'place-card-collected'
   | 'settings'
   | 'privacy'
+  | 'passport-confirm'
   | `onboarding:${OnboardingScreen}`;
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
+  { id: 'passport-confirm', label: 'Passport — "did you walk it?" (T-149)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
   { id: 'place-card', label: 'Place card (T-115)' },
@@ -254,12 +256,27 @@ export default function DesignWorkbench() {
               onContinue={() => undefined}
               onSkip={() => undefined}
             />
-          ) : screen === 'passport' ? (
+          ) : screen === 'passport' || screen === 'passport-confirm' ? (
             <PassportView
               progress={progress}
               awards={awards}
               stamps={stamps}
               onSelectStamp={() => setScreen('place-card-collected')}
+              // The question D-065 leaves the app holding, at the length it
+              // actually renders — a real levada name and a real evidence
+              // string, invented rather than imported (D-017, D-038).
+              confirmation={
+                screen === 'passport-confirm'
+                  ? {
+                      placeId: 'long-canal-trail',
+                      question: 'Did you walk the Long Canal Trail?',
+                      detail:
+                        'Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure.',
+                      confirmLabel: 'I walked it',
+                      declineLabel: 'Not this time',
+                    }
+                  : undefined
+              }
             />
           ) : screen === 'privacy' ? (
             <PrivacyPolicyView onClose={() => setScreen('settings')} />

@@ -301,6 +301,44 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
   return { width: CARD_WIDTH, height: CARD_HEIGHT, background: BACKGROUND, elements };
 }
 
+/**
+ * `12–19 August 2026`, or one date when the trip lasted a day.
+ *
+ * ⚠ **The device's own locale, never a hardcoded format.** The app is English
+ * (CONTEXT §1) but a date is not copy, and a visitor reading `08/12` as
+ * December is a small betrayal of a souvenir.
+ *
+ * ⚠ **AND THE OBVIOUS SHORTCUT IS A BUG.** The first version special-cased a
+ * trip inside one month by printing the start day, a dash, then the full end
+ * date — which reads "12–19 August 2026" only in locales that put the day
+ * first. On a month-first device it produced **"12–August 19, 2026"**. A test
+ * running under a different locale than the author's caught it.
+ *
+ * So the range is left to `Intl.DateTimeFormat.formatRange`, which exists for
+ * exactly this and knows where the day goes. ⚠ Hermes ships a partial `Intl`,
+ * so it is feature-detected rather than assumed, and the fallback spells both
+ * dates out in full — longer, and correct everywhere.
+ */
+export function formatDateRange(startTs: number, endTs: number): string {
+  const start = new Date(startTs);
+  const end = new Date(endTs);
+  const long: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  };
+
+  if (start.toDateString() === end.toDateString()) {
+    return start.toLocaleDateString(undefined, long);
+  }
+
+  const formatter = new Intl.DateTimeFormat(undefined, long);
+  if (typeof formatter.formatRange === 'function') {
+    return formatter.formatRange(start, end);
+  }
+  return `${formatter.format(start)} – ${formatter.format(end)}`;
+}
+
 /** The largest size at or below `preferred` that keeps the text inside `maxWidth`. */
 export function fitSize(text: string, preferred: number, maxWidth: number): number {
   const needed = approximateTextWidth(text, preferred);

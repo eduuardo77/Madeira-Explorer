@@ -179,3 +179,28 @@ to Apple is not the kind of thing to add speculatively.
   applied to `react-native-svg` on the day it was added, which is the point of writing the rule
   down — and it found Fresco's OkHttp image pipeline, which nobody would have guessed was in a
   vector-drawing library.
+
+---
+
+## `react-native-view-shot` 5.1.0 and `expo-sharing` — added 2026-08-16 (T-105d, D-063)
+
+**Why they exist:** the shareable still (D-063). `react-native-view-shot` photographs a mounted
+view into a PNG; `expo-sharing` opens the operating system's own share sheet. Installed with
+`npx expo install`, so both are the versions Expo SDK 57 expects.
+
+**Network behaviour — the question D-043 exists to ask:**
+
+| | What it does | Network |
+|---|---|---|
+| `react-native-view-shot` | Renders a native view hierarchy into a bitmap and writes it to the app's own cache directory | **None.** Its entire surface is a view reference in, a file path out. |
+| `expo-sharing` | Hands a local file URI to `UIActivityViewController` (iOS) or an `ACTION_SEND` intent (Android) | **None of ours.** The OS sheet may hand the file to an app that uploads it — **which is the user choosing to share it**, and is the point. |
+
+⚠ **The distinction worth keeping straight:** this app still makes no outbound request. What
+changes is that the user can now *hand a file to another app on purpose*. D-001's claim — "the trip
+never leaves the phone" unless the user sends it — survives intact, and `legal/privacyPolicy.ts`
+already says exactly that.
+
+⚠ **What is shared has been through the export door.** `shareTrip.ts` reads the trace only via
+`getExportableTrace()`, so accommodation masking is applied before any pixel is drawn (D-016,
+D-040). A capture library that photographed the *map screen* instead would bypass that entirely,
+which is why the card is drawn from data rather than screenshotted from the UI.

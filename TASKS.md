@@ -820,10 +820,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **The preview earned its keep immediately**: the names were set on one line and shrunk to
       fit, which took the most personal line on the card down to 20 px on a 1080 px image. They
       wrap now, at a size chosen to be read.
-      — **What is left**: getting the SVG *out of the app* as a file to share. `react-native-svg`
-      draws it; saving a PNG needs either a capture library (a new dependency, and D-043 says any
-      new dependency needs a network-behaviour audit) or shipping the SVG itself. **That is the
-      next decision, and it is small.**
+      — ✅ **And it can now leave the app, 2026-08-16.** The project lead chose the capture
+      library. `react-native-view-shot` photographs the drawn card; `expo-sharing` hands the PNG to
+      the OS share sheet; both are audited in `docs/dependency-audit.md` and **neither makes a
+      network request** — what changed is that the user can hand a file to another app *on purpose*,
+      which is what D-001 always allowed.
+      — ⚠ **The card is drawn from data, never screenshotted from the UI**, so the trace goes
+      through `getExportableTrace()` and the accommodation masking D-016 requires. A capture of the
+      map screen would have bypassed the only door D-040 permits.
+      — **Share lives on the passport**, opposite the back control where iOS puts it. The card is
+      mounted off-screen to be photographed and unmounted after: `captureRef` photographs a view,
+      not a description.
+      — ⚠ **Two bugs found while building it, both by tests.** `formatDateRange` printed
+      *"12–August 19, 2026"* on a month-first locale, because the same-month shortcut assumed the
+      day comes first; it uses `Intl.DateTimeFormat.formatRange` now, feature-detected because
+      Hermes ships a partial `Intl`. And the pure/impure split earned itself again: the formatter
+      could not be tested while it sat in the module that imports `expo-sharing`.
       — ~~DROPPED 2026-08-12~~ **REVIVED 2026-08-16 (D-063), and it goes first.** Make
       the trip worth sharing as a **still image** — the trace, the number, the stamps earned —
       plus the share sheet. ⇠ T-074, T-107, T-108

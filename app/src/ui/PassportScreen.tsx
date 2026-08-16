@@ -6,8 +6,8 @@
  * without a device, which is how T-081 was actually answered.
  */
 
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
@@ -30,6 +30,9 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
+import ShareCardView from '../souvenir/ShareCardView';
+import type { ShareCard } from '../souvenir/shareCard';
+import { buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
@@ -57,6 +60,16 @@ export default function PassportScreen({
   /** The one walk the app wants settled (T-149), or null — which is usually. */
   const [confirmation, setConfirmation] = useState<ConfirmationPrompt | null>(null);
   const [confirmationEvidence, setConfirmationEvidence] = useState('');
+  /**
+   * The share card, built only when asked for (T-105d).
+   *
+   * ⚠ It has to be *mounted* to be photographed — `captureRef` photographs a
+   * view, not a description — so it is rendered off to the side of the screen
+   * while the share sheet is being prepared, and unmounted afterwards.
+   */
+  const [shareCard, setShareCard] = useState<ShareCard | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const shareCardRef = useRef<View>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +152,41 @@ export default function PassportScreen({
           nowMs: Date.now(),
         })
       );
+    })();
+  };
+
+  /**
+   * Build the card, let React draw it, photograph it, hand it to the OS.
+   *
+   * The wait is not a guess at a render time — `requestAnimationFrame` fires
+   * after the frame the card was drawn in, which is exactly the moment it
+   * becomes photographable.
+   */
+  const shareTrip = () => {
+    if (sharing) {
+      return;
+    }
+    setSharing(true);
+
+    void (async () => {
+      const built = await buildCardForTrip();
+      if (!built.ok) {
+        setSharing(false);
+        // The honest sentence from the export door, shown rather than swallowed
+        // (ARCHITECTURE §10) — most often "the trace could not be masked".
+        Alert.alert('Nothing to share yet', built.reason);
+        return;
+      }
+
+      setShareCard(built.card);
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+
+      const shared = await shareCardImage(shareCardRef);
+      setShareCard(null);
+      setSharing(false);
+      if (!shared.ok && shared.reason !== undefined) {
+        Alert.alert('Could not share', shared.reason);
+      }
     })();
   };
 
@@ -235,6 +283,24 @@ export default function PassportScreen({
           />
         </View>
       )}
+
+      {/* The card being photographed. Off-screen rather than hidden: a view
+          with zero opacity or `display: none` is not guaranteed to have pixels
+          to capture, and one placed beyond the edge always does. */}
+      {shareCard === null ? null : (
+        <View style={styles.offscreen} pointerEvents="none">
+          <ShareCardView ref={shareCardRef} card={shareCard} />
+        </View>
+      )}
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Share your trip as an image"
+        onPress={shareTrip}
+        style={({ pressed }) => [styles.share, pressed && styles.pressed]}
+      >
+        <Text style={styles.shareText}>{sharing ? 'Preparing…' : 'Share'}</Text>
+      </Pressable>
 
       {/* ⚠ **Top-left, in a navigation bar, not floating bottom-right.**
           A floating pill sat on top of the last category row — the scroll's
@@ -334,6 +400,23 @@ const styles = StyleSheet.create({
   },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   pressed: { opacity: 0.75 },
+  // Off the side of the screen, where it can be drawn and photographed without
+  // ever being seen.
+  offscreen: { position: 'absolute', left: -4000, top: 0 },
+  // Opposite the back control, where iOS puts a share action.
+  share: {
+    position: 'absolute',
+    top: spacing.xl,
+    right: spacing.sm,
+    minHeight: MIN_TAP_TARGET,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  shareText: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '600',
+  },
   back: {
     position: 'absolute',
     top: spacing.xl,

@@ -18,6 +18,7 @@ import {
   CARD_HEIGHT,
   CARD_WIDTH,
   fitSize,
+  formatDateRange,
   MAX_NAMED_STAMPS,
   renderShareCardSvg,
   wrapStampNames,
@@ -168,4 +169,20 @@ test('a name is never split across two lines', () => {
       `${name} was broken up`
     );
   }
+});
+
+test('a date range carries both dates, in the order the reader expects', () => {
+  // ⚠ Asserted without assuming where the day goes. The first version of this
+  // test expected "12–19 August 2026" and passed only in day-first locales; the
+  // code under it produced "12–August 19, 2026" everywhere else.
+  const range = formatDateRange(Date.UTC(2026, 7, 12, 12), Date.UTC(2026, 7, 19, 12));
+  assert.ok(range.includes('12'), range);
+  assert.ok(range.includes('19'), range);
+  assert.ok(range.includes('2026'), range);
+});
+
+test('a day trip is one date, not a range of one', () => {
+  const morning = Date.UTC(2026, 7, 12, 8);
+  const evening = Date.UTC(2026, 7, 12, 20);
+  assert.ok(!formatDateRange(morning, evening).includes('–'));
 });

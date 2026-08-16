@@ -43,10 +43,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { simplify } from './lib/geo.mjs';
+import { overpass } from './lib/overpass.mjs';
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-
-const ENDPOINT = 'https://overpass-api.de/api/interpreter';
 
 /** Madeira + Porto Santo + Desertas, as south,west,north,east (D-021). */
 const BBOX = '32.40,-17.32,33.20,-16.20';
@@ -61,58 +62,6 @@ const BBOX = '32.40,-17.32,33.20,-16.20';
  * that), so there is nothing downstream to degrade.
  */
 const TOLERANCE_DEG = 0.00008;
-
-/**
- * One Overpass query, with the backoff a shared free service deserves.
- *
- * ⚠ Two failure modes, both routine and neither a bug in the query:
- *   - **406** to Node's default user agent. It identifies itself below; an
- *     anonymous scraper is exactly what they are blocking.
- *   - **429 / 504** when the service is busy, which it often is. `osm-survey.py`
- *     takes the same approach and for the same reason: back off rather than
- *     fail the run.
- */
-async function overpass(query, attempts = 5) {
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const response = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'madeira-explorer build-levadas (contact via repository)',
-      },
-      body: new URLSearchParams({ data: query }),
-    });
-
-    const body = await response.text();
-    // A 200 can still carry a runtime error in its body — Overpass reports
-    // "server is probably too busy" that way as often as it uses a status code.
-    const busy =
-      response.status === 429 ||
-      response.status === 504 ||
-      body.includes('too busy');
-
-    if (response.ok && !busy) {
-      return JSON.parse(body);
-    }
-    if (!busy) {
-      throw new Error(`Overpass ${response.status}: ${body.slice(0, 300)}`);
-    }
-    if (attempt === attempts) {
-      throw new Error(`Overpass stayed busy after ${attempts} attempts.`);
-    }
-
-    const waitMs = attempt * 8000;
-    process.stdout.write(`(busy, retrying in ${waitMs / 1000}s) `);
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-  }
-
-  throw new Error('unreachable');
-}
-
-/** Overpass regex-escaping. A levada name can contain `(` and `)`. */
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /**
  * Every walkable levada on the island, and every channel, in two requests.
@@ -132,7 +81,8 @@ function escapeRegex(value) {
 async function fetchAllLevadas() {
   const geometry = async (selector) => {
     const result = await overpass(
-      `[out:json][timeout:180];way[${selector}]["name"~"^Levada",i](${BBOX});out geom;`
+      `[out:json][timeout:180];way[${selector}]["name"~"^Levada",i](${BBOX});out geom;`,
+      { tool: 'build-levadas' }
     );
     const byName = new Map();
     for (const way of result.elements ?? []) {
@@ -240,58 +190,6 @@ function freeEnds(lines) {
         end: { lat: best.b[1], lon: best.b[0] },
         freeEndCount: ends.length,
       };
-}
-
-/** Perpendicular distance from `p` to the segment `a`–`b`, in degrees. */
-function perpendicular(p, a, b) {
-  const [px, py] = p;
-  const [ax, ay] = a;
-  const [bx, by] = b;
-  const dx = bx - ax;
-  const dy = by - ay;
-
-  if (dx === 0 && dy === 0) {
-    return Math.hypot(px - ax, py - ay);
-  }
-
-  const t = Math.max(
-    0,
-    Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))
-  );
-  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
-}
-
-/** Douglas-Peucker. Iterative, because a levada can be thousands of points. */
-function simplify(points, tolerance) {
-  if (points.length < 3) {
-    return points;
-  }
-
-  const keep = new Array(points.length).fill(false);
-  keep[0] = true;
-  keep[points.length - 1] = true;
-
-  const stack = [[0, points.length - 1]];
-  while (stack.length > 0) {
-    const [first, last] = stack.pop();
-    let worst = 0;
-    let index = -1;
-
-    for (let i = first + 1; i < last; i += 1) {
-      const distance = perpendicular(points[i], points[first], points[last]);
-      if (distance > worst) {
-        worst = distance;
-        index = i;
-      }
-    }
-
-    if (index !== -1 && worst > tolerance) {
-      keep[index] = true;
-      stack.push([first, index], [index, last]);
-    }
-  }
-
-  return points.filter((_, i) => keep[i]);
 }
 
 function courseFor(place, index) {

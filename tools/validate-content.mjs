@@ -22,6 +22,8 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
+import { degreesToRing, pointInPolygon } from './lib/geo.mjs';
+
 // Node grumbles once about `app/package.json` not declaring `"type": "module"`
 // when it loads a TypeScript file from there. It cannot declare it — Expo's own
 // config files are CommonJS — and the warning says nothing useful to anybody
@@ -73,8 +75,73 @@ const TARGET_MAX_PLACES = 100;
 /** Below this, two places are probably one place entered twice. */
 const SUSPICIOUSLY_CLOSE_M = 100;
 
+/**
+ * How far outside its region a place may sit before it is the coordinate's
+ * fault rather than the file's (T-067).
+ *
+ * `content/regions.json` is simplified at ~22 m, and a municipality boundary is
+ * the shoreline, so a clifftop viewpoint can legitimately measure a few tens of
+ * metres out to sea. Twice the tolerance is the slack; past it, the place is
+ * genuinely in the water — and a geofence in the water is a stamp that cannot
+ * be earned by standing at the place, which is the whole mechanic.
+ */
+const OFFSHORE_SLACK_M = 50;
+
 const errors = [];
 const warnings = [];
+
+/**
+ * The region boundaries, as `{ id, name, polygons }`.
+ *
+ * Missing is a warning rather than an error: the boundaries are derived from
+ * OSM and can be rebuilt in a minute, and a curator checking a draft list
+ * should not be blocked by a file they did not touch.
+ */
+async function readRegions() {
+  const regionPath = path.resolve(repositoryRoot, 'content', 'regions.json');
+  let raw;
+  try {
+    raw = JSON.parse(await readFile(regionPath, 'utf8'));
+  } catch {
+    warn('regions.json', 'missing or unreadable - run: node tools/build-regions.mjs');
+    return [];
+  }
+
+  return (raw.features ?? []).flatMap((feature) => {
+    const { id, name } = feature?.properties ?? {};
+    const geometry = feature?.geometry;
+    if (typeof id !== 'string' || typeof name !== 'string') {
+      return [];
+    }
+    // One feature per region, whether the region is one island or several.
+    const polygons =
+      geometry?.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry?.type === 'MultiPolygon'
+          ? geometry.coordinates
+          : [];
+    return polygons.length === 0 ? [] : [{ id, name, polygons }];
+  });
+}
+
+/** A `[lon, lat]` for a place: its first geofence. */
+function pointOf(place) {
+  const first = place.geofences[0];
+  return first === undefined ? null : [first.lon, first.lat];
+}
+
+/** How far outside every region a point is, in metres. */
+function metresOutside(point, regions) {
+  let degrees = Infinity;
+  for (const region of regions) {
+    for (const polygon of region.polygons) {
+      for (const ring of polygon) {
+        degrees = Math.min(degrees, degreesToRing(point, ring));
+      }
+    }
+  }
+  return Math.round(degrees * 111000);
+}
 
 function error(where, message) {
   errors.push(`${where}: ${message}`);
@@ -229,6 +296,53 @@ async function main() {
     }
   }
 
+  // Every place should be in the region it claims, and every region should
+  // exist (T-067). `regionId` is derived from the boundaries rather than typed,
+  // so a mismatch means the boundaries or the coordinates moved since the last
+  // build — not that somebody made a judgement call.
+  const regions = await readRegions();
+  const regionNames = new Map(regions.map((region) => [region.id, region.name]));
+
+  for (const place of places) {
+    if (regions.length === 0) {
+      break;
+    }
+    if (!regionNames.has(place.regionId)) {
+      error(
+        place.id,
+        `region "${place.regionId}" is not in regions.json — run: node tools/build-regions.mjs --assign`
+      );
+    }
+
+    const point = pointOf(place);
+    if (point === null) {
+      continue;
+    }
+
+    const containing = regions.find((region) =>
+      region.polygons.some((polygon) => pointInPolygon(point, polygon))
+    );
+    if (containing !== undefined) {
+      if (containing.id !== place.regionId) {
+        error(
+          place.id,
+          `sits in ${containing.name} but is filed under "${place.regionId}" — run: node tools/build-regions.mjs --assign`
+        );
+      }
+      continue;
+    }
+
+    // Outside every boundary. Distance decides whether that is the simplified
+    // shoreline or a coordinate in the sea.
+    const metres = metresOutside(point, regions);
+    if (metres > OFFSHORE_SLACK_M) {
+      warn(
+        place.id,
+        `${metres} m out to sea — no geofence there can be reached on foot. Check the coordinate against OSM.`
+      );
+    }
+  }
+
   const byCategory = countByCategory(parsed.pack);
   const byRegion = new Map();
   for (const place of places) {
@@ -245,10 +359,13 @@ async function main() {
   }
 
   if (byRegion.size > 0) {
-    console.log('\nBy region:');
+    // Named, because a slug is not what the user will read and a region with
+    // no name here is a region that does not exist (D-027, T-067).
+    console.log('\nBy region (the map screen’s "where next", D-027):');
     const sorted = [...byRegion.entries()].sort((a, b) => b[1] - a[1]);
     for (const [regionId, count] of sorted) {
-      console.log(`  ${regionId.padEnd(20)} ${String(count).padStart(4)}`);
+      const name = regionNames.get(regionId) ?? `${regionId} — UNKNOWN REGION`;
+      console.log(`  ${name.padEnd(24)} ${String(count).padStart(4)}`);
     }
   }
 

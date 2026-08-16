@@ -1466,3 +1466,58 @@ grep -A30 "^### T-052a" docs/task-notes.md
       show what most users will see. Its dark map is the fallback; a current phone gets Google's.
       Both paths are covered by tests, but only the fallback has been seen.
 
+
+---
+
+### T-067 — the regions were real; the assignment was not
+
+- **2026-08-16.** T-067 asked for boundaries. What it uncovered is that the `regionId` every
+  place already carried was **mechanically wrong for 46 of the 80**, and that no part of the app
+  could have told anyone.
+      — **Where the wrong ids came from.** `poi-candidates.mjs` assigns a region as *the nearest
+      of the twelve largest settlements*. One of those settlements is the island itself — OSM has
+      a `place` node named Madeira — and it sits near the middle, so it swallowed **27 places**
+      into a region called `madeira`. Nineteen more landed in the neighbouring municipality
+      because a smaller settlement happened to be nearer than the right town's centre: Praia
+      Formosa, in Funchal, was filed under Câmara de Lobos.
+      — **Why nothing caught it.** `computeTripProgress` has returned `byRegion` since T-073 and
+      **no screen has ever rendered it** — `NativeMapScreen` and `MapLibreScreen` both declare an
+      `EMPTY_PROGRESS` with `byRegion: []` and never look at the real one. This is the T-145 shape
+      again, one floor down: not a subsystem with no caller, but a *number with no reader*. A
+      number nobody displays is a number nobody checks.
+      — **The fix is a polygon, not a better heuristic.** `tools/build-regions.mjs` pulls the
+      eleven `admin_level=7` relations out of Overpass and asks, of each place, which one contains
+      it. D-061 has the reasoning and the rejected alternatives.
+
+- **Three things about OSM boundaries that cost time here, all now in the tool's comments.**
+      — ⚠ **A boundary relation is a bag of fragments, not a ring.** Its member ways arrive in no
+      order and in no consistent direction, because a coastal way is shared by two municipalities
+      and belongs to one of them backwards. Drawn as they come, the polygon zig-zags across the
+      island and the inside/outside test returns nonsense **without erroring**. The tool stitches
+      by matching endpoints exactly — OSM ways share node identity, so no tolerance is needed.
+      — ⚠ **A municipality is not one polygon, and the count is the surprise.** Every offshore
+      rock is its own ring: Machico arrives as 102 parts, Porto Santo as 60. Funchal owns the
+      **Ilhas Selvagens**, 250 km south, and Overpass returns them in full because the *relation*
+      matched the bounding box even though the geometry does not. Kept whole, the file is 291 kB
+      of rocks. Parts under 500 m across, and parts outside the archipelago, are dropped: 108 kB.
+      — ⚠ **The first island assignment was wrong in a way that looked right.** Taking each
+      region's bounding-box centre put Funchal's in the open Atlantic — halfway to the Selvagens —
+      so its nearest island came out as the **Bugio**, and Santa Cruz's as Deserta Grande. Island
+      is what D-024's lock gate keys on, so that would have hidden two Madeira municipalities from
+      a user standing in them. It is now the centre of the *largest* part.
+
+- **The check that came free, and what it found.** With land polygons in hand, the validator can
+  ask whether a curated place is on land at all. Two are not: **Cabo Girão is 525 m out to sea**
+  and the **Rocha do Navio** reserve 1.4 km. A geofence at those coordinates, radius 250 m and
+  200 m, cannot be entered by anybody standing at the place — two stamps that could never have
+  been earned, in a starter set nobody had walked. The threshold is 50 m, which is twice the
+  file's own simplification error, so the slack is bounded by arithmetic rather than by taste:
+  Douglas-Peucker cannot move a shoreline further than its tolerance, ~22 m here.
+  ⚠ **The coordinates were not changed.** That is curation (T-066).
+
+- **Two tools now share one geometry module.** `tools/lib/geo.mjs` (Douglas-Peucker,
+  point-in-polygon, distances) and `tools/lib/overpass.mjs` (the backoff, and the reason for
+  it). `build-levadas.mjs` was moved onto both and **re-run: `content/levadas.json` came back
+  byte-identical**, which is the only evidence worth having that a shared numerical routine is
+  the same routine. Its unused `escapeRegex` went with the move — dead since the name matching
+  stopped being Overpass's job.

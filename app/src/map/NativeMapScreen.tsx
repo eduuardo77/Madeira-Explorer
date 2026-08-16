@@ -48,6 +48,7 @@ import {
 } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getLevadaCourse } from '../content/levadaCourses';
+import { getRegionName } from '../content/regionCatalogue';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
@@ -329,6 +330,7 @@ export default function NativeMapScreen({
           name: focusPlace.place.name,
           category: focusPlace.place.category,
           collected: focusPlace.collected,
+          regionName: getRegionName(focusPlace.place.regionId),
           lat: geofence.lat,
           lon: geofence.lon,
           position,

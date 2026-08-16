@@ -179,6 +179,9 @@ function makeCard(collected: boolean, distance: boolean) {
     name: collected ? 'Long Canal Trail' : 'Miradouro Grande',
     category: collected ? 'levada' : 'viewpoint',
     collected,
+    // Invented, like every other string here: the workbench judges the layout
+    // and must not become a second content pack (D-017, D-038).
+    regionName: 'North Parish',
     lat: 32.66,
     lon: -16.91,
     position: distance

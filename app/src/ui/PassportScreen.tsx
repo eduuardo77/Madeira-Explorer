@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
+import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
@@ -115,6 +116,7 @@ export default function PassportScreen({
           name: place.name,
           category: place.category,
           collected: stamp.collected,
+          regionName: getRegionName(place.regionId),
           lat: geofence.lat,
           lon: geofence.lon,
           position,

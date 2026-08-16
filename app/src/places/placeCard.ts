@@ -68,6 +68,12 @@ export type PlaceCardInput = {
   name: string;
   category: Category;
   collected: boolean;
+  /**
+   * The region's display name, or null when the pack does not name it (T-067).
+   * Resolved by the caller from `regionCatalogue`, because this module stays
+   * pure and a region id is not a word (D-017 keeps both in `content/`).
+   */
+  regionName: string | null;
   /** The representative geofence's coordinate — see `placeMarkers.ts`. */
   lat: number;
   lon: number;
@@ -81,6 +87,14 @@ export type PlaceCard = {
   name: string;
   /** The category as a word, not a slug. */
   categoryLabel: string;
+  /**
+   * The municipality, as a word — `"Machico"` (T-067, D-027).
+   *
+   * Null when the pack cannot name it, and the card then simply says one thing
+   * less. A slug would read as a bug to the user and as a placeholder to a
+   * store reviewer.
+   */
+  regionLabel: string | null;
   collected: boolean;
   /**
    * True when *Show on map* will draw a course rather than only a marker —
@@ -168,6 +182,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     name,
     category,
     collected,
+    regionName,
     lat,
     lon,
     position,
@@ -187,6 +202,9 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     placeId,
     name,
     categoryLabel: CATEGORY_LABELS[category],
+    // Trimmed, and whitespace becomes null: a card with an empty line where
+    // the municipality should be is worse than one that never claimed to know.
+    regionLabel: regionName?.trim() || null,
     collected,
     hasCourse: hasCourse(category),
     lat,

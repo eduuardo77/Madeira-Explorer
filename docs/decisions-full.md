@@ -2921,3 +2921,66 @@ absence into a statement about the app's honesty rather than a gap.
 **When this reverses.** T-054, on a real phone, over a real day, per tier. The numbers then go in
 the same three labels and this decision becomes Superseded.
 
+
+---
+
+## D-061 — A region is a municipality, taken from OSM's boundaries
+
+**Status:** Provisional — proposed 2026-08-16 while building T-067. Nobody has confirmed that
+"Machico" is the word a visitor wants; it is the word the island uses.
+
+**Decision:** The regions of D-027 are Madeira's **eleven concelhos** (municipalities), with their
+real boundaries, built from OSM's `admin_level=7` relations by `tools/build-regions.mjs` into
+`content/regions.json`. A place's `regionId` is **derived** from those boundaries — the polygon it
+stands in — and never typed by hand.
+
+**What it replaces, and why that had to go.** `poi-candidates.mjs` assigned a region by *nearest
+sizeable settlement*, and its settlement list contains the island itself. So **27 of the 80
+curated places — a third of the pack — were filed under a region called `madeira`**, which is not
+a place anybody can go to and finish. Another 19 were in the wrong municipality: Praia Formosa,
+which is in Funchal, was filed under Câmara de Lobos because a different settlement was nearer to
+it than the city centre. Nothing in the app displayed a region, so nothing ever complained.
+
+That is the failure D-027 was most exposed to. Region has exactly one job — *where should I go
+next* — and it can only do it if a region is somewhere you can be in or not in.
+
+**Why municipalities.**
+
+- **The visitor already believes in them.** They are on the road signs, on every tourist map, and
+  in how a local answers "where is that?".
+- **A boundary is not a heuristic.** Nearest-anything moves when the content changes; a
+  municipality does not, so a curator adding a place cannot silently re-file four others.
+- **Eleven is the right count for a progress list.** Enough that a region is finishable in a day
+  or two, few enough to fit a screen.
+- **It answers D-024 for free.** Porto Santo is one of the eleven, and each region carries the
+  island it belongs to, which is what the lock gate keys on (T-067a).
+
+**Alternatives considered:**
+
+- *Keep clustering by nearest settlement.* Rejected above; it produced the `madeira` bin.
+- *Freguesias* (parishes, `admin_level=8`). Fifty-odd of them. A denominator of 54 regions with
+  one or two places each is the demoralising-progress failure D-002 exists to prevent, at a
+  second scale.
+- *Hand-drawn tourist areas* — "the north coast", "the east". Better names, and they are what a
+  guidebook uses. Rejected for v1 because they are **editorial**: someone has to draw them,
+  defend the line, and redraw it when the content moves. If the project lead wants them, the same
+  file format takes them and nothing downstream changes.
+- *No regions at all.* Defensible — D-058 made the passport show every place, which answers "where
+  next" in its own way — but it leaves the map screen with nothing to say and throws away the one
+  thing that makes a 60 km island feel finishable.
+
+**Consequences.**
+
+- `content/regions.json` ships (~108 kB, boundaries included) and `regionCatalogue.ts` reads the
+  **names** out of it. The geometry is not parsed by the app; it is there for T-067a and for
+  anything that eventually draws a region.
+- The place card names the municipality, on its own line under the place's name — measured into
+  that position rather than chosen (see the T-067 note).
+- `validate-content.mjs` now fails on a place filed under the wrong region, and warns when a place
+  sits **out to sea** — which found two: Cabo Girão is 525 m offshore and the Rocha do Navio
+  reserve 1.4 km, so neither stamp could have been earned by standing at the place. Those are
+  coordinates for T-066 to fix; nothing here changes them.
+
+**When this reverses.** If the project lead wants the guidebook's regions rather than the
+council's. The tool would then read a hand-drawn GeoJSON instead of Overpass, and everything
+downstream — ids, names, the assignment, the card — stays as it is.

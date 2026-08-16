@@ -36,6 +36,7 @@ function input(overrides: Partial<PlaceCardInput> = {}): PlaceCardInput {
     name: 'A place',
     category: 'viewpoint',
     collected: false,
+    regionName: 'Machico',
     lat: 32.66,
     lon: -16.91,
     position: position(),
@@ -123,6 +124,16 @@ test('an unusable coordinate on either side yields no distance', () => {
 test('the category is a word, not a slug', () => {
   assert.equal(buildPlaceCard(input({ category: 'levada' })).categoryLabel, 'Levada walk');
   assert.equal(buildPlaceCard(input({ category: 'beach' })).categoryLabel, 'Beach');
+});
+
+test('the region is a word too, or nothing at all (T-067)', () => {
+  assert.equal(buildPlaceCard(input()).regionLabel, 'Machico');
+  // A pack built before the boundaries existed, or a place filed under a
+  // region that has since been renamed. The card drops the word rather than
+  // showing a slug or an empty separator.
+  assert.equal(buildPlaceCard(input({ regionName: null })).regionLabel, null);
+  assert.equal(buildPlaceCard(input({ regionName: '  ' })).regionLabel, null);
+  assert.equal(buildPlaceCard(input({ regionName: ' Machico ' })).regionLabel, 'Machico');
 });
 
 test('collected is carried through untouched — the card states it, it does not decide it', () => {

@@ -6,7 +6,7 @@
       "id": "pico-do-areeiro",
       "name": "Pico do Areeiro",
       "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "pico-do-areeiro-main",
@@ -34,7 +34,7 @@
       "id": "levada-do-furado",
       "name": "Levada do Furado",
       "category": "levada",
-      "regionId": "machico",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "levada-do-furado-start",
@@ -106,7 +106,7 @@
       "id": "praia-do-porto-do-seixal",
       "name": "Praia do Porto do Seixal",
       "category": "beach",
-      "regionId": "sao-vicente",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "praia-do-porto-do-seixal-main",
@@ -162,7 +162,7 @@
       "id": "achada-do-teixeira",
       "name": "Achada do Teixeira",
       "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "achada-do-teixeira",
@@ -190,7 +190,7 @@
       "id": "chao-dos-terreiros",
       "name": "Chão dos Terreiros",
       "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "ribeira-brava",
       "geofences": [
         {
           "id": "chao-dos-terreiros",
@@ -204,7 +204,7 @@
       "id": "encumeada-baixa",
       "name": "Encumeada Baixa",
       "category": "viewpoint",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "encumeada-baixa",
@@ -316,7 +316,7 @@
       "id": "reserva-natural-do-sitio-da-rocha-do-navio",
       "name": "Reserva Natural do Sítio da Rocha do Navio",
       "category": "landmark",
-      "regionId": "machico",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "reserva-natural-do-sitio-da-rocha-do-navio",
@@ -330,7 +330,7 @@
       "id": "convento-de-nossa-senhora-da-piedade-da-caldeira",
       "name": "Convento de Nossa Senhora da Piedade da Caldeira",
       "category": "landmark",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "camara-de-lobos",
       "geofences": [
         {
           "id": "convento-de-nossa-senhora-da-piedade-da-caldeira",
@@ -358,7 +358,7 @@
       "id": "parque-tematico-da-madeira",
       "name": "Parque Temático da Madeira",
       "category": "landmark",
-      "regionId": "machico",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "parque-tematico-da-madeira",
@@ -386,7 +386,7 @@
       "id": "igreja-da-encarnacao",
       "name": "Igreja da Encarnação",
       "category": "landmark",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "camara-de-lobos",
       "geofences": [
         {
           "id": "igreja-da-encarnacao",
@@ -442,7 +442,7 @@
       "id": "camacha",
       "name": "Camacha",
       "category": "village",
-      "regionId": "canico",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "camacha",
@@ -470,7 +470,7 @@
       "id": "canico",
       "name": "Caniço",
       "category": "village",
-      "regionId": "canico",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "canico",
@@ -484,7 +484,7 @@
       "id": "santa-cruz",
       "name": "Santa Cruz",
       "category": "village",
-      "regionId": "machico",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "santa-cruz",
@@ -582,7 +582,7 @@
       "id": "jardim-da-serra",
       "name": "Jardim da Serra",
       "category": "village",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "camara-de-lobos",
       "geofences": [
         {
           "id": "jardim-da-serra",
@@ -596,7 +596,7 @@
       "id": "estreito-de-camara-de-lobos",
       "name": "Estreito de Câmara de Lobos",
       "category": "village",
-      "regionId": "estreito-de-camara-de-lobos",
+      "regionId": "camara-de-lobos",
       "geofences": [
         {
           "id": "estreito-de-camara-de-lobos",
@@ -610,7 +610,7 @@
       "id": "achada-do-marques",
       "name": "Achada do Marques",
       "category": "village",
-      "regionId": "sao-vicente",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "achada-do-marques",
@@ -624,7 +624,7 @@
       "id": "chao-da-ribeira",
       "name": "Chão da Ribeira",
       "category": "village",
-      "regionId": "sao-vicente",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "chao-da-ribeira",
@@ -638,7 +638,7 @@
       "id": "praia-formosa",
       "name": "Praia Formosa",
       "category": "beach",
-      "regionId": "camara-de-lobos",
+      "regionId": "funchal",
       "geofences": [
         {
           "id": "praia-formosa",
@@ -652,7 +652,7 @@
       "id": "praia-dos-reis-magos",
       "name": "Praia dos Reis Magos",
       "category": "beach",
-      "regionId": "canico",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "praia-dos-reis-magos",
@@ -764,7 +764,7 @@
       "id": "levada-do-norte",
       "name": "Levada do Norte",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "levada-do-norte-start",
@@ -786,7 +786,7 @@
       "id": "levada-dos-tornos",
       "name": "Levada dos Tornos",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "sao-vicente",
       "geofences": [
         {
           "id": "levada-dos-tornos-start",
@@ -808,7 +808,7 @@
       "id": "levada-nova-da-calheta",
       "name": "Levada Nova da Calheta",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "calheta",
       "geofences": [
         {
           "id": "levada-nova-da-calheta-start",
@@ -830,7 +830,7 @@
       "id": "levada-da-serra-do-faial",
       "name": "Levada da Serra do Faial",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "levada-da-serra-do-faial-start",
@@ -852,7 +852,7 @@
       "id": "levada-do-canical",
       "name": "Levada do Caniçal",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "machico",
       "geofences": [
         {
           "id": "levada-do-canical-start",
@@ -874,7 +874,7 @@
       "id": "levada-da-ribeira-da-janela",
       "name": "Levada da Ribeira da Janela",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "levada-da-ribeira-da-janela-start",
@@ -896,7 +896,7 @@
       "id": "levada-do-castelejo",
       "name": "Levada do Castelejo",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "machico",
       "geofences": [
         {
           "id": "levada-do-castelejo-start",
@@ -918,7 +918,7 @@
       "id": "levada-das-faias",
       "name": "Levada das Faias",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "sao-vicente",
       "geofences": [
         {
           "id": "levada-das-faias-start",
@@ -940,7 +940,7 @@
       "id": "levada-dos-piornais",
       "name": "Levada dos Piornais",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "funchal",
       "geofences": [
         {
           "id": "levada-dos-piornais-start",
@@ -962,7 +962,7 @@
       "id": "levada-do-caldeirao-verde",
       "name": "Levada do Caldeirão Verde",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "levada-do-caldeirao-verde-start",
@@ -984,7 +984,7 @@
       "id": "levada-dos-cedros",
       "name": "Levada dos Cedros",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "levada-dos-cedros-start",
@@ -1006,7 +1006,7 @@
       "id": "levada-do-rei",
       "name": "Levada do Rei",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "levada-do-rei-start",
@@ -1028,7 +1028,7 @@
       "id": "levada-da-rocha-vermelha",
       "name": "Levada da Rocha Vermelha",
       "category": "levada",
-      "regionId": "madeira",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "levada-da-rocha-vermelha-start",
@@ -1050,7 +1050,7 @@
       "id": "pico-dos-barcelos",
       "name": "Pico dos Barcelos",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "funchal",
       "geofences": [
         {
           "id": "pico-dos-barcelos-main",
@@ -1064,7 +1064,7 @@
       "id": "pico-do-facho",
       "name": "Pico do Facho",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "machico",
       "geofences": [
         {
           "id": "pico-do-facho-main",
@@ -1078,7 +1078,7 @@
       "id": "pico-grande",
       "name": "Pico Grande",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "ribeira-brava",
       "geofences": [
         {
           "id": "pico-grande-main",
@@ -1092,7 +1092,7 @@
       "id": "pico-guindaste",
       "name": "Pico Guindaste",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "pico-guindaste-main",
@@ -1106,7 +1106,7 @@
       "id": "ponta-do-rosto",
       "name": "Ponta do Rosto",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "machico",
       "geofences": [
         {
           "id": "ponta-do-rosto-main",
@@ -1120,7 +1120,7 @@
       "id": "ponta-de-sao-jorge",
       "name": "Ponta de São Jorge",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "santana",
       "geofences": [
         {
           "id": "ponta-de-sao-jorge-main",
@@ -1134,7 +1134,7 @@
       "id": "ponta-do-garajau",
       "name": "Ponta do Garajau",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "santa-cruz",
       "geofences": [
         {
           "id": "ponta-do-garajau-main",
@@ -1148,7 +1148,7 @@
       "id": "ponta-do-tristao",
       "name": "Ponta do Tristão",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "porto-moniz",
       "geofences": [
         {
           "id": "ponta-do-tristao-main",
@@ -1162,7 +1162,7 @@
       "id": "pico-da-torre",
       "name": "Pico da Torre",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "camara-de-lobos",
       "geofences": [
         {
           "id": "pico-da-torre-main",
@@ -1176,7 +1176,7 @@
       "id": "pico-da-urze",
       "name": "Pico da Urze",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "calheta",
       "geofences": [
         {
           "id": "pico-da-urze-main",
@@ -1190,7 +1190,7 @@
       "id": "pico-do-vento",
       "name": "Pico do Vento",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "calheta",
       "geofences": [
         {
           "id": "pico-do-vento-main",
@@ -1204,7 +1204,7 @@
       "id": "pico-dos-bodes",
       "name": "Pico dos Bodes",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "calheta",
       "geofences": [
         {
           "id": "pico-dos-bodes-main",
@@ -1218,7 +1218,7 @@
       "id": "pico-vermelho",
       "name": "Pico Vermelho",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "calheta",
       "geofences": [
         {
           "id": "pico-vermelho-main",
@@ -1232,7 +1232,7 @@
       "id": "pico-da-cruz",
       "name": "Pico da Cruz",
       "category": "viewpoint",
-      "regionId": "madeira",
+      "regionId": "funchal",
       "geofences": [
         {
           "id": "pico-da-cruz-main",

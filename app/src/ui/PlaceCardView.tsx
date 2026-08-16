@@ -70,6 +70,20 @@ export default function PlaceCardView({
           than be cut, and at 2× text scaling most of them will. */}
       <Text style={styles.name}>{card.name}</Text>
 
+      {/* The municipality (T-067, D-027) — *where is this*, which is the one
+          question the card could not answer.
+          ⚠ **Its own line, and not appended to the line above.** Measured in
+          the workbench at 390 px: the meta line has 324 px, and
+          "LEVADA WALK · CÂMARA DE LOBOS · COLLECTED" needs 347 — so the worst
+          realistic case wraps into two lines of tracked capitals above the
+          name, and the wrapping is invisible until a levada in the longest-named
+          municipality is collected. Down here it is sentence case, it is the
+          geography rather than the status, and it sits next to the distance,
+          which is the other answer to the same question. */}
+      {card.regionLabel === null ? null : (
+        <Text style={styles.region}>{card.regionLabel}</Text>
+      )}
+
       {card.distanceLabel === null ? null : (
         // The qualification travels with the number (`placeCard.ts` rule 2).
         // On this island a straight line and a drive are very different
@@ -154,6 +168,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: fontSize.title,
     fontWeight: '800',
+  },
+  // Body weight, a step above the distance under it. The municipality is a
+  // fact about the place; the distance is a qualified estimate about the
+  // reader, and reads as the footnote it is.
+  region: {
+    color: colors.text,
+    fontSize: fontSize.body,
   },
   distance: {
     color: colors.textMuted,

@@ -7,9 +7,10 @@ not a rewrite.
 
 | File | What it is | Task |
 |---|---|---|
-| `pois.json` | The curated places, and the departure points that end a trip. **The only file that currently exists.** | T-066, T-099 |
-| `regions.geojson` | Region boundaries, for per-region progress on the map screen | T-067 |
-| `levadas.geojson` | Levada corridors with entry/exit nodes | T-068 — *v2* |
+| `pois.json` | The curated places, and the departure points that end a trip | T-066, T-099 |
+| `regions.json` | The eleven municipalities, with their boundaries. Generated | T-067, D-061 |
+| `levadas.json` | The course of each curated levada, as drawn. Generated | T-068, D-055 |
+| `levadas.geojson` | Levada corridors with entry/exit **nodes** — not the same file as above | T-068 — *v2* |
 | `tunnels.geojson` | Tunnel portal pairs | T-069 — *v2* |
 | `stamps/` | Stamp artwork | T-070 |
 
@@ -236,6 +237,32 @@ Levada dos Balcões … NOTHING FOUND (0 ways carry a matching name). Check the 
 - **The span in kilometres is the sanity check.** The longest levada on the island is around 25 km,
   so anything much larger means the name matched a second levada somewhere else, and the map will
   zoom out to fit both.
+
+## `regions.json` — generated, never hand-edited (D-061)
+
+The eleven **concelhos** (municipalities), with their real boundaries, from OSM's own
+`admin_level=7` relations. They are what the map screen means by "where should I go next"
+(D-027), and each one carries the island it belongs to, which is what the Porto Santo gate keys
+on (D-024, T-067a).
+
+```bash
+node tools/build-regions.mjs            # build, and report what would change
+node tools/build-regions.mjs --assign   # …and write the region ids into pois.json
+```
+
+⚠ **`regionId` is derived, not curated.** It is the answer to *which polygon is this place in*,
+so the tool computes it and writes it back; everything else in `pois.json` is yours. Re-run
+`--assign` after adding or moving a place, and `node tools/validate-content.mjs` will tell you if
+you forget.
+
+⚠ **It reports two things you have to read.**
+
+- *"46 of 80 places have the wrong region id"* — the state this file was found in on 2026-08-16.
+  The old ids came from a nearest-settlement guess and a third of them named the island itself.
+- *"N place(s) fall outside every boundary"* — with the distance. Up to ~22 m is this file's own
+  simplification; **beyond that the place is in the sea**, and a geofence in the sea is a stamp
+  nobody standing at the place can earn. Two of the starter set are: Cabo Girão (525 m) and the
+  Rocha do Navio reserve (1.4 km). Those are coordinates to re-read against OSM.
 
 ## How the pack reaches the app
 

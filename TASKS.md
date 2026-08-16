@@ -491,14 +491,35 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       one moment D-012 calls the best in the product.
       — Notes: `docs/task-notes.md` (T-099)
 
-- [ ] **T-067** Define region boundaries as `content/regions.geojson` ⇠ T-014
-      — ⚠ **Less urgent since D-058.** This was the only answer to "where should I go next"
-      (D-027); the passport now answers it by showing every place, collected or not. Region
-      progress is still worth having — it is the thing that makes a big island feel finishable —
-      but nothing is blocked on it.
+- [x] **T-067** ✅ **Region boundaries, 2026-08-16 — and a third of the pack was in the wrong
+      one.** `tools/build-regions.mjs` fetches Madeira's eleven municipalities from OSM
+      (`admin_level=7`) into `content/regions.json`, and `--assign` derives each place's
+      `regionId` from the polygon it stands in. Decision: **D-061**.
+      — ⚠ **`.json`, not the `.geojson` this task asked for.** The contents are GeoJSON; the
+      extension is what Metro and TypeScript resolve without a bundler config, which is the same
+      reason `levadas.json` has it.
+      — **46 of 80 places were misfiled, and nothing could see it**: 27 sat in a region called
+      `madeira` — the island had ranked as a settlement in `poi-candidates.mjs`'s nearest-anchor
+      heuristic — and 19 more were in a neighbouring municipality. `byRegion` has been computed
+      since T-073 and displayed nowhere, so the numbers were never looked at.
+      — The card names the municipality on a line under the place's name. That is the whole of
+      the UI: a region strip over the map is a T-112 question, not this task's.
+      — ⚠ **It went on the status line first, and the workbench said no.** "LEVADA WALK · CÂMARA
+      DE LOBOS · COLLECTED" needs 347 px of the 324 the card has at 390 px wide, so the worst
+      realistic case wrapped into two lines of tracked capitals above the name — invisible until
+      a levada in the longest-named municipality is collected. Measured, not eyeballed (D-038).
+      — ⚠ **Two stamps could never have been earned.** The validator now checks each place
+      against the boundaries and found Cabo Girão **525 m out to sea** and the Rocha do Navio
+      reserve **1.4 km** out. Coordinates are T-066's; this only reports them.
+      — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
+      — **The data half is done (T-067).** Every region in `content/regions.json` carries its
+      `islandId`, and `regionPack.ts` parses it: Porto Santo is `porto-santo`, everything else is
+      `ilha-da-madeira`. What is missing is the gate — the island-level geofence, the persisted
+      unlock, and passing `lockedRegionIds` into `computeTripProgress`, which has taken that
+      argument since T-073 and has never been given a non-empty set.
 - [~] **T-068** Define levada corridors with entry/exit nodes ⇠ T-028, T-028a
       — **Half done 2026-08-13 (D-055).** `tools/build-levadas.mjs` extracts the named ways of each
       curated levada from Overpass into `content/levadas.json`, applying the rule below —

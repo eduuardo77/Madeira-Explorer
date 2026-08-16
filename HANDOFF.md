@@ -19,7 +19,12 @@ The map also now **opens on your walk rather than on the island** (D-053), the i
 **iOS conventions** (D-054), and the trace is **blue rather than red** (D-056).
 
 On 2026-08-14 the passport's five categories became **swipeable strips with a *See all*** that
-expands one into the old grid (T-144) — 80 places would not fit as five grids. **420 tests.**
+expands one into the old grid (T-144) — 80 places would not fit as five grids. **428 tests.**
+
+On 2026-08-16 regions became real (T-067, D-061): the place card names the municipality under
+the place, and `tools/validate-content.mjs` now checks every place against the boundaries.
+⚠ **It found two stamps nobody could ever have earned** — Cabo Girão is curated 525 m out to sea
+and the Rocha do Navio reserve 1.4 km. Coordinates are T-066's to fix.
 
 ⚠ **THE MAP CHANGED ON 2026-08-14 (D-057).** The app now draws **Google Maps on Android** via
 `expo-maps`, and will draw **Apple Maps on iOS** when an iOS build exists. The project lead decided
@@ -62,9 +67,10 @@ curate" rule was overridden deliberately. 20 viewpoints · 15 levadas · 16 vill
 says how to redo it. **Deleting the lot and starting again from the candidate list loses nothing.**
 
 ```bash
-node tools/poi-candidates.mjs      # ~200 ranked candidates → content/pois.candidates.json
-node tools/build-levadas.mjs       # levada courses → content/levadas.json (re-run after any edit)
-node tools/validate-content.mjs    # checks the work, targets 60–100 places (D-049)
+node tools/poi-candidates.mjs         # ~200 ranked candidates → content/pois.candidates.json
+node tools/build-levadas.mjs          # levada courses → content/levadas.json (re-run after any edit)
+node tools/build-regions.mjs --assign # boundaries → content/regions.json, and each place's region
+node tools/validate-content.mjs       # checks the work, targets 60–100 places (D-049)
 ```
 
 ⚠ **Two traps that cost something here, both now caught by tools:**
@@ -89,7 +95,12 @@ use. **The largest open item in the project.**
 
 - **T-063b** — ~~one glyph range still requested~~ **moot while the platform map ships** (D-057).
   It was a MapLibre glyph fetch; nothing requests it now. It returns if the MapLibre path does.
-- **T-067** region boundaries · **T-112** UI reduction pass.
+- ~~**T-067** region boundaries~~ — **done 2026-08-16 (D-061).** `content/regions.json` holds the
+  eleven municipalities, `regionId` is now derived from the polygon a place stands in, and the
+  card names it. It found that **46 of the 80 places were filed under the wrong region**, 27 of
+  them under the island itself, because `byRegion` has been computed since T-073 and displayed
+  nowhere. **T-067a** (the Porto Santo gate) now has its data half.
+- **T-112** UI reduction pass.
 - ~~Directions handoff~~ — **deleted 2026-08-13, and do not bring it back.** It was built, then
   removed the same day on the project lead's instruction: *"we arent a navigator."* The dots over
   every curated place went with it. The route to a place is passport → stamp → card → *Show on

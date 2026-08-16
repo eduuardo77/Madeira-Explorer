@@ -34,8 +34,12 @@ function fix(
 }
 
 test('a continuous walk is one line, in [lon, lat] order', () => {
+  // ⚠ The walk turns. It used to be three points in a straight line, and after
+  // D-066 the middle one is simplified away — correctly, since it added nothing
+  // to the drawing — which made this test about cleanup rather than about
+  // ordering. A corner is what the assertion below actually needs.
   const trace = buildTrace(
-    [fix(0, 32.65, -16.9), fix(1, 32.651, -16.901), fix(2, 32.652, -16.902)],
+    [fix(0, 32.65, -16.9), fix(1, 32.651, -16.901), fix(2, 32.65, -16.902)],
     GAP_MS
   );
 
@@ -43,7 +47,7 @@ test('a continuous walk is one line, in [lon, lat] order', () => {
   assert.deepEqual(trace.features[0].geometry.coordinates, [
     [-16.9, 32.65],
     [-16.901, 32.651],
-    [-16.902, 32.652],
+    [-16.902, 32.65],
   ]);
 });
 
@@ -73,8 +77,10 @@ test('a silence just under the threshold does NOT break the line', () => {
 });
 
 test('fixes arrive in any order and the line is still chronological', () => {
+  // Cornered, for the same reason as the test above: a straight line loses its
+  // middle to simplification, and this test is about time, not geometry.
   const trace = buildTrace(
-    [fix(2, 32.652, -16.902), fix(0, 32.65, -16.9), fix(1, 32.651, -16.901)],
+    [fix(2, 32.65, -16.902), fix(0, 32.65, -16.9), fix(1, 32.651, -16.901)],
     GAP_MS
   );
   assert.deepEqual(
@@ -203,7 +209,15 @@ test('⚠ flying home does not draw a line across the Atlantic', () => {
   );
 
   assert.equal(trace.features.length, 1);
-  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+  // ⚠ Asserted as "Lisbon is not in the drawing" rather than as a vertex count:
+  // the seafront fixes are nearly collinear, so D-066's simplification keeps
+  // two of the three, and counting them tested cleanup instead of the flight.
+  const drawn = trace.features[0].geometry.coordinates;
+  assert.ok(drawn.length >= 2);
+  assert.ok(
+    drawn.every(([lon]) => lon < -16 && lon > -17.5),
+    'no vertex may be on the mainland'
+  );
 });
 
 test('⚠ a teleport between geofence tests is not a route', () => {
@@ -243,8 +257,12 @@ test('GPS jitter at a standstill never breaks the line', () => {
   ];
 
   const trace = buildTrace(jitter, GAP_MS);
-  assert.equal(trace.features.length, 1);
-  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+  assert.equal(trace.features.length, 1, 'the line must not break');
+  // ⚠ The jitter is now *simplified away* as well as not broken (D-066): three
+  // fixes within a few metres of each other are one point to look at, and were
+  // drawn as a knot before. The rule under test — the minimum-jump floor that
+  // stops a burst delivery breaking the stroke — is the feature count above.
+  assert.ok(trace.features[0].geometry.coordinates.length <= 3);
 });
 
 test('two fixes at the same instant in different places break the line', () => {

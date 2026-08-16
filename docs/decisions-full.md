@@ -3236,3 +3236,86 @@ there were, the stamps would stop meaning anything.
 **When this reverses or retunes.** Every threshold here is a guess (T-131 retunes them against
 real trips, which works because each award stores what it was judged on). The corridor is the
 number most likely to be wrong, and the first real walk under canopy will say so.
+
+---
+
+## D-066 — The drawn trace is cleaned before it is drawn, and cleaning never moves a point
+
+**Status:** Provisional — proposed 2026-08-16, after the project lead asked for *"the accuracy and
+reliability of the highlighted path of where you've been shown on the map"*.
+
+**Decision:** Between the raw fixes and the line the map draws there is now a cleanup pass
+(`traceCleanup.ts`) that removes three things, and **the one rule it obeys is that every point
+which survives is a position the device actually reported.** Nothing is averaged, snapped,
+interpolated or invented.
+
+1. **Outliers** — a fix nowhere near where the surrounding fixes say the path was, which could not
+   have been reached and left in the time available.
+2. **Standing still** — a cluster inside 25 m lasting two minutes becomes *one of its own fixes*
+   (the one with the best reported accuracy), instead of a scribble the size of a building.
+3. **Redundant vertices** — Douglas-Peucker at 16 m, which removes points and moves none.
+
+### Why removing is allowed and moving is not
+
+A smoothed line claims the user was somewhere no instrument ever said they were. A line made only
+of real fixes can be *approximate* — and visibly so, which is the honest state — but it is never
+**confidently wrong**. That is also the argument against the obvious alternative:
+
+⚠ **No snapping to roads or paths.** That is map matching, cut from v1 by D-032, and the reason is
+not only its cost: a trace snapped to the wrong path looks exactly as certain as one snapped to
+the right path. The wobble is a form of honesty.
+
+### What it is worth, measured
+
+`node tools/preview-trace.mjs` walks a real route file, models a plausible GPS over it, runs the
+**app's own module** on the result, and measures the drawn line against the path that was walked:
+
+| | drawn length | mean off the path | worst |
+|---|---|---|---|
+| Recorded (2.23 km walk) | 4.49 km | 13.9 m | 151 m |
+| Cleaned | 2.55 km | 6.3 m | 20 m |
+
+**Noise roughly doubles the apparent distance walked**, and cleanup gives most of it back. The
+worst excursion falls from 151 m to 20 m, which is the spike a user recognises as false.
+
+⚠ **The noise is modelled, not measured.** `tools/fixtures/` is empty until T-018. This proves the
+rules do what they claim against the noise they were designed for, and says nothing about the
+noise Madeira actually produces.
+
+### The tolerance, and why not more
+
+The sweep (`--sweep`) walks the simplification tolerance from 8 m to 40 m. **Accuracy barely
+moves** — mean deviation stays between 5 and 8 m throughout — while the drawn length falls to the
+true length and the vertex count collapses. So the number buys tidiness, not correctness.
+
+At 12 m the line still visibly zigzags; at 20 m it tracks the path cleanly. **16 m is the
+compromise, and the reason not to take 20 m is that the sweep cannot see what it would cost**: the
+ground truth is straight lines between waypoints, which is the exact shape that flatters a large
+tolerance. What is at risk is a real switchback, and Madeira's paths are made of them.
+
+### Two bugs found while building it, both by tests
+
+- **Bad fixes arrive in bursts.** The obvious rule — compare a fix to its neighbours — lets two
+  wild fixes in a row vouch for each other, and *also* deletes an honest fix sitting next to a
+  spike. Both are the common case under canopy. The rule is now a **vote**: the median of the four
+  fixes either side says where the path was, and a median survives a minority of liars.
+- **A neighbourhood cannot cross a silence.** Cleaning the whole trace before cutting it into
+  strokes let the fixes voting on a point sit 15 km away on the other side of a 45-minute gap, and
+  the last fix before dinner was deleted as an outlier from a place it had nothing to do with.
+  Cleaning now runs per stroke.
+
+### Consequences
+
+- `splitIntoSegments` stays **raw** and `drawableSegments` is the cleaned one. The souvenir
+  composition (T-105a) paces its animation by the timestamps of every fix, and folding cleanup
+  into the shared function coarsened that until a stamp cue landed at the very start of the draw.
+  Its own tests caught it.
+- Crediting is untouched: `levadaCoverage` and `arrivalFromTrace` read the raw rows, because a
+  stamp should be judged on everything recorded, not on what was worth drawing.
+- **The project can now look at geometry without a device.** `tools/lib/png.mjs` is a minimal PNG
+  writer — there was no image library and no displayed browser, so a line's shape could only be
+  judged on a phone. It is the same argument as the stamps' second renderer.
+
+**When this reverses or retunes.** T-018's real traces, which is also when the thresholds stop
+being guesses. If a real levada walk comes back with its switchbacks flattened, the tolerance is
+the first number to drop.

@@ -117,7 +117,12 @@ use. **The largest open item in the project.**
 1. **Their corrections to two review sheets** — `docs/curation-draft.md` (the place list) and
    `tools/out/levada-ends.md` (the trailheads). Both are waiting on them, not on code.
 2. ~~**T-149**, the confirmation prompt~~ — **done 2026-08-16.**
-3. ⚠ **Then: the accuracy and reliability of the drawn trace** — *"the highlighted path of where
+3. ~~⚠ **Then: the accuracy and reliability of the drawn trace**~~ — **first pass done
+   2026-08-16 (D-066, T-150).** Outliers, standing-still scribble and redundant vertices are
+   removed before drawing; nothing is moved. On a modelled walk the drawn line went from 4.49 km
+   to 2.55 km for a 2.23 km route, worst excursion 151 m → 20 m. ⚠ **Modelled, not measured** —
+   the thresholds are guesses until T-018. `node tools/preview-trace.mjs` draws it.
+   — *(original note)* ⚠ **Then: the accuracy and reliability of the drawn trace** — *"the highlighted path of where
    you've been shown on the map"*. **Do not start a new subject before this one.** It is the only
    thing the user actually looks at after the stamps (D-032 spent the whole map-matching budget on
    making this half good), and nothing about it has been examined since T-059: not the accuracy

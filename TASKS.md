@@ -577,6 +577,28 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       stops near each path end, into `tools/out/levada-ends.md`. ⚠ **For four of the fifteen there
       is no access evidence at either end**, which is precisely why crediting can no longer depend
       on endpoints alone.
+- [x] **T-150** ✅ **The drawn trace, cleaned — 2026-08-16 (D-066).** The project lead asked for
+      the accuracy and reliability of *"the highlighted path of where you've been"*. Three things
+      got through every existing filter and were what made it look wrong: **spikes** the accuracy
+      gate cannot see (a fix 150 m off reporting ±12 m), **scribble** where somebody stood still,
+      and **jitter** that made a straight walk measurably longer than it was.
+      — **Measured on a modelled walk**: drawn length 4.49 km → 2.55 km for a 2.23 km route, worst
+      excursion **151 m → 20 m**, mean 13.9 m → 6.3 m. Noise roughly doubles the apparent distance
+      walked, and this gives most of it back.
+      — **The rule: cleaning only ever removes.** Every surviving point is a position the device
+      reported — no averaging, no snapping, no interpolation. A wobbly line is approximate and
+      visibly so; a smoothed one is confidently wrong, which is worse.
+      — ⚠ **Two bugs, both caught by tests, both written into the module**: bad fixes arrive in
+      **bursts** and vouch for each other (the rule is now a median vote of the four fixes either
+      side); and a fix's neighbourhood **must not cross a silence**, or the last fix before dinner
+      is judged against fixes 15 km away.
+      — **`tools/preview-trace.mjs` and `tools/lib/png.mjs` (new).** There was no way to look at
+      geometry without a device — no image library, no displayed browser — so the project now
+      writes its own PNG. Same argument as the stamps' second renderer.
+      — ⚠ **Every threshold is a guess against modelled noise.** `tools/fixtures/` is empty until
+      T-018. The simplification tolerance (16 m) is the first to revisit: the sweep says accuracy
+      barely moves between 8 m and 40 m, and it **cannot see** the thing that would be lost — a
+      real switchback, which this island's paths are made of. ⇠ T-059, D-059
 - [x] **T-149** ✅ **The app asks, 2026-08-16.** A levada it nearly credited raises one question
       on the passport, under the hero and above the rows: *"Did you walk the Long Canal Trail?
       Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure."*

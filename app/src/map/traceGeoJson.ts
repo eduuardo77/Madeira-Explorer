@@ -16,6 +16,13 @@
  *      user knows is false. Skipping it changes only the picture — the stored
  *      row is untouched (D-010), and v2's matching will read the full data.
  *
+ *   4. **What is left is cleaned before it is drawn** (2026-08-16, D-066).
+ *      Spikes the accuracy filter cannot see, scribble where somebody stood
+ *      still, and vertices too close together to be worth drawing all go —
+ *      `traceCleanup.ts` has the rules and the one they all obey: **every point
+ *      that survives is a position the device actually reported.** Nothing is
+ *      averaged, snapped or invented.
+ *
  *   3. **A jump nobody could have made becomes a break too** (2026-08-14).
  *      Rule 1 only ever asked *how long was the silence*, so two fixes a second
  *      apart and 500 km apart were drawn as one confident straight line. That
@@ -37,6 +44,7 @@
 // Explicit `.ts`: this module is under unit test and Node's resolver will
 // not guess the extension (CLAUDE.md). Metro does not mind.
 import { distanceM } from '../recording/distance.ts';
+import { cleanTrace } from './traceCleanup.ts';
 
 /** What this module needs of a fix — a subset of the `raw_fix` row. */
 export type TraceFix = {
@@ -197,6 +205,34 @@ function breaksHere(
 }
 
 /**
+ * The strokes, cleaned for drawing (D-066).
+ *
+ * ⚠ **Why this is separate from `splitIntoSegments` rather than folded into
+ * it.** Two callers want different things from the same trace. The **map** wants
+ * the tidied line — no spikes, no scribble where somebody stood still, no
+ * vertices too close together to see. The **souvenir composition** (T-105a)
+ * wants every timestamp, because it paces the animation by them and a stamp cue
+ * lands where the drawn line reaches that place; folding cleanup into the shared
+ * function coarsened that timing until a cue landed at the very start of the
+ * draw. Its tests caught it.
+ *
+ * ⚠ **And cleaning happens per stroke, after the breaks are cut — which was a
+ * bug before it was a decision.** Cleaning the whole trace first let a fix's
+ * "neighbourhood" span a 45-minute silence: the fixes voting on where it should
+ * be were 15 km away on the other side of the gap, so the last fix before
+ * dinner was deleted as an outlier from a place it had nothing to do with. A
+ * neighbourhood cannot cross a discontinuity, and a stroke is exactly that.
+ */
+export function drawableSegments(
+  fixes: TraceFix[],
+  gapThresholdMs: number
+): TraceSegment[] {
+  return splitIntoSegments(fixes, gapThresholdMs)
+    .map((segment) => ({ fixes: cleanTrace(segment.fixes).fixes }))
+    .filter((segment) => segment.fixes.length >= 2);
+}
+
+/**
  * Build the trace. `fixes` in any order; `gapThresholdMs` decides where the
  * line honestly breaks.
  */
@@ -206,7 +242,7 @@ export function buildTrace(
 ): TraceCollection {
   return {
     type: 'FeatureCollection',
-    features: splitIntoSegments(fixes, gapThresholdMs).map((segment) => ({
+    features: drawableSegments(fixes, gapThresholdMs).map((segment) => ({
       type: 'Feature',
       properties: {},
       geometry: {

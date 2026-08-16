@@ -94,6 +94,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-063** | The souvenir returns to v1 — but **last**. Foundations first. | **Accepted** |
 | **D-064** | The canvas is greatest hits, not coverage. Thin regions are allowed to stay thin. | **Accepted** |
 | **D-065** | Two ways to earn every stamp. A levada is credited by how much of it you walked. | Provisional |
+| **D-066** | The drawn trace is cleaned before it is drawn, and cleaning never moves a point. | Provisional |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

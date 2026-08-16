@@ -48,6 +48,12 @@ not a rewrite.
 > standing at the place. See the `regions.json` section below for what they are now and why the
 > reserve is a harder case than it looks. **This is the failure mode of copying a label wholesale:
 > the label sits where the map drew the word, not where the visitor stands.**
+>
+> ⚠ **And the class of place it happens to is now known: marine protected areas.** Re-running the
+> candidate tool against the boundaries leaves exactly six entries with no municipality, and all
+> six are reserves whose OSM point is the *water* — including the two that got into `pois.json`.
+> `poi-candidates.mjs` now prints them as a warning instead of guessing a region for them. A
+> marine reserve is a real place and not a stampable one: take the viewpoint you see it from.
 
 ## Curating `pois.json` (T-066)
 

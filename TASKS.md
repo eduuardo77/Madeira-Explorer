@@ -515,6 +515,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       clifftop viewpoint. ⚠ The reserve's old coordinate was its **own centre** — a marine
       reserve has none on land — which leaves its *name* describing the reserve and its stamp
       describing the viewpoint. Curation question, deliberately not answered here.
+      — **The generator was fixed too, so the defect cannot come back.**
+      `poi-candidates.mjs` derived its region from the nearest settlement; it now asks the
+      boundaries, and leaves the field **empty** rather than guessing when nothing contains the
+      candidate. Re-run: exactly six of 200 come out empty, and **all six are marine protected
+      areas** whose OSM point is the water — the class of feature both bad coordinates came from.
+      The tool now prints them as a warning.
       — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

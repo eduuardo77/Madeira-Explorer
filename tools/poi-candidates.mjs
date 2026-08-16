@@ -43,9 +43,13 @@
  */
 
 import { gunzipSync } from 'node:zlib';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+
+// The same geometry `build-regions.mjs` uses, so a candidate's region and the
+// validator's opinion of it can never be computed two different ways.
+import { metresBetween, pointInPolygon, slug } from './lib/geo.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, '..');
@@ -302,26 +306,6 @@ function toLonLat(z, tileX, tileY, x, y, extent) {
   return [lon, lat];
 }
 
-/** Metres between two coordinates. Equirectangular is ample at island scale. */
-function metresBetween(a, b) {
-  const R = 6371000;
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
-  const dLon = ((b.lon - a.lon) * Math.PI) / 180;
-  const meanLat = ((a.lat + b.lat) / 2) * (Math.PI / 180);
-  const x = dLon * Math.cos(meanLat);
-  return Math.sqrt(dLat * dLat + x * x) * R;
-}
-
-function slug(name) {
-  return name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48);
-}
-
 /* -------------------------------------------------------------------- main */
 
 const raw = readFileSync(PACK);
@@ -445,19 +429,65 @@ for (const s of uniqueSettlements) {
   candidates.set(s.name, sameName);
 }
 
-/** Region = the nearest sizeable settlement. Mechanical, and easy to overrule. */
-const regionAnchors = uniqueSettlements.slice(0, 12);
-function regionFor(place) {
-  let best = null;
-  let bestDistance = Infinity;
-  for (const anchor of regionAnchors) {
-    const d = metresBetween(place, anchor);
-    if (d < bestDistance) {
-      bestDistance = d;
-      best = anchor;
-    }
+/**
+ * Region = the municipality whose boundary contains the place (T-067, D-061).
+ *
+ * ⚠ **THIS USED TO BE "THE NEAREST SIZEABLE SETTLEMENT", AND IT WAS WRONG FOR A
+ * THIRD OF THE PACK.** The twelve largest settlements were taken as anchors and
+ * each place was given the nearest — except that OSM's settlement list contains
+ * a node named *Madeira*, the island itself, sitting near the middle. It
+ * swallowed 27 of the 80 curated places into a region called `madeira`, which
+ * is not a place anybody can go to and finish, and nineteen more landed in a
+ * neighbouring municipality because a smaller town happened to be nearer than
+ * the right one's centre. Nothing displayed a region, so nothing complained for
+ * three weeks.
+ *
+ * The boundaries are not a heuristic: a place is in Machico or it is not.
+ *
+ * ⚠ **The fallback is deliberately not the old heuristic.** If the boundaries
+ * are missing, this leaves `regionId` empty and says so, loudly — an empty
+ * field is a question, and a plausible wrong answer is what caused the problem
+ * in the first place. `build-regions.mjs --assign` fills it in either way, and
+ * `validate-content.mjs` refuses a place whose region does not contain it.
+ */
+const REGIONS_PATH = path.join(root, 'content', 'regions.json');
+const regionBoundaries = readRegionBoundaries();
+
+function readRegionBoundaries() {
+  if (!existsSync(REGIONS_PATH)) {
+    console.warn(
+      'content/regions.json is missing, so no candidate gets a region. ' +
+        'Build it first: node tools/build-regions.mjs'
+    );
+    return [];
   }
-  return best === null ? 'unassigned' : slug(best.name);
+
+  const raw = JSON.parse(readFileSync(REGIONS_PATH, 'utf8'));
+  return (raw.features ?? []).flatMap((feature) => {
+    const id = feature?.properties?.id;
+    const geometry = feature?.geometry;
+    if (typeof id !== 'string') {
+      return [];
+    }
+    const polygons =
+      geometry?.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry?.type === 'MultiPolygon'
+          ? geometry.coordinates
+          : [];
+    return polygons.length === 0 ? [] : [{ id, polygons }];
+  });
+}
+
+function regionFor(place) {
+  const point = [place.lon, place.lat];
+  const found = regionBoundaries.find((region) =>
+    region.polygons.some((polygon) => pointInPolygon(point, polygon))
+  );
+  // Empty rather than guessed. A candidate just offshore — which happens on
+  // this coast — is a coordinate worth looking at, not a region worth
+  // inventing.
+  return found === undefined ? '' : found.id;
 }
 
 const usedIds = new Set();
@@ -593,5 +623,30 @@ if (heldBack > 0) {
       "min_zoom, so the ones most likely to matter are in. `--max 800` to see more."
   );
 }
+/**
+ * Candidates no municipality contains — which is to say, candidates in the sea.
+ *
+ * ⚠ **Every one of these so far has been a marine protected area**, and that is
+ * not a coincidence: the *Reserva Natural Marinha do Cabo Girão* has its OSM
+ * point 525 m offshore, because the thing being labelled is the water. One was
+ * copied into `pois.json` as a stamp and sat there for two days — a geofence
+ * nobody standing at the place could enter (T-066, 2026-08-16).
+ *
+ * So an empty region is printed as the warning it is, rather than being filled
+ * in with the nearest guess.
+ */
+const homeless = places.filter((place) => place.regionId === '');
+if (homeless.length > 0) {
+  console.log(`\n⚠ ${homeless.length} candidate(s) are not inside any municipality:`);
+  for (const place of homeless) {
+    console.log(`  ${place.name}`);
+  }
+  console.log(
+    '  These are in the water. A marine reserve is a real place and not a\n' +
+      '  stampable one: its point is the sea, not the clifftop you look at it\n' +
+      '  from. Take the viewpoint instead, or drop it.'
+  );
+}
+
 console.log('\nThis is a triage list, not content. Deleting is the work (T-066).');
 console.log('Check it with: node tools/validate-content.mjs content/pois.candidates.json');

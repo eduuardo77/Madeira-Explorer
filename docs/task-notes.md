@@ -1548,6 +1548,14 @@ grep -A30 "^### T-052a" docs/task-notes.md
       each place was already filed under, so no region id moved. `validate-content.mjs` now
       passes with no warnings at all.
 
+- **The generator was fixed too, which is the half that stops it recurring.** `poi-candidates.mjs`
+  asks the boundaries now, and where nothing contains a candidate it leaves `regionId` **empty and
+  says so** rather than reaching for the nearest anything — a plausible wrong answer being exactly
+  what caused this. Re-running it: six of 200 come out empty and **all six are marine protected
+  areas** — *Reserva Natural Marinha do Cabo Girão* has its point 525 m offshore because the thing
+  being labelled is the sea. That is where both bad coordinates came from, and it is now a printed
+  warning rather than a discovery.
+
 - **Two tools now share one geometry module.** `tools/lib/geo.mjs` (Douglas-Peucker,
   point-in-polygon, distances) and `tools/lib/overpass.mjs` (the backoff, and the reason for
   it). `build-levadas.mjs` was moved onto both and **re-run: `content/levadas.json` came back

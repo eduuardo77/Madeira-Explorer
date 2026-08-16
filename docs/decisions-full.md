@@ -3029,3 +3029,52 @@ next reader does not mistake it for a tested surface.
 
 **When this reverses.** If field use shows the passport is not answering "where next" — T-065, or
 anyone using the app on a real trip.
+
+---
+
+## D-063 — The souvenir returns to v1. Still image first, video as research-then-spike
+
+**Status:** Accepted — the project lead reopened it 2026-08-16. **Supersedes D-051 in part**: the
+scope decision is reversed, the risks D-051 named are not.
+
+**Decision:** Phase 5's souvenir is back in v1, in three pieces with different levels of
+commitment:
+
+1. **A shareable still (T-105d, T-107, T-108) — committed, and first.** The trace, the number and
+   the stamps earned, rendered to an image, plus the share sheet. No native code, no new
+   dependency, both platforms, judgeable in the workbench.
+2. **The video on Android (T-105c → T-105b) — a spike, not a promise.** The composition already
+   exists and is tested (T-105a, D-042); only the encoder is missing. **What turns this into a
+   commitment is one five-second MP4 written on a real device**, and nothing before that.
+3. **The video on iOS — deferred by hardware, not by choice.** It needs a Mac to build at all.
+
+**Why D-051 cut it, and what actually changed.** The recorded reasons were a native encoding
+dependency and *"cannot be verified at all without a device this project does not have"*. The
+project lead has since given the fuller reason: the app was struggling to reach an MVP at the
+time, and the video was a second front. Three things are different now:
+
+- **The MVP exists and runs on a device.** Record → stamps → trace → passport → card → trip end,
+  verified on the emulator, most recently 2026-08-16.
+- **A physical Android is being obtained**, which removes "cannot be verified at all" for the
+  Android half.
+- **The expensive half was already built.** T-105a's storyboard — what appears when, paced by
+  movement — is written, pure and tested. What was cut was the encoder alone.
+
+**Sequencing, which is the part most likely to be got wrong.** When the phone arrives, the video
+must not be first. Battery over a real day (T-054) and surviving a night (T-051) are **v1
+blockers** and take days of mostly unattended elapsed time; the video is a v1 *feature*. An app
+that dies overnight has no trip to make a film of. Run the soak, build the still export while it
+runs, spike the encoder after.
+
+**Alternatives considered:**
+
+- *Leave it in v2 and ship v1 silent.* This is D-051, and its own text says the cost plainly:
+  nobody finds the app. Rejected now that the MVP is not at risk.
+- *Commit to the video outright.* Rejected: the encoder is the one item in the project with no
+  proven path, and a promise made before the spike is a promise made on nothing.
+- *Still image only, video stays cut.* Tempting, and it may still be where this lands — but the
+  storyboard is already written, and the spike is a day or two once hardware exists.
+
+**What would reverse it again.** The spike failing, or the encoder needing a dependency whose
+network behaviour cannot be audited (D-043) — "no data leaves the device" (D-001, CONTEXT §4.8) is
+worth more than a video.

@@ -443,6 +443,10 @@ and step data; that was weighed against D-010 and accepted. Capturing only on th
 profile is the compromise to reach for if this is revisited. *Original framing below.*
 
 ### OD-10 — v1 has no distribution strategy ⚠ **created by D-051, 2026-08-12**
+⚠ **PARTLY ANSWERED 2026-08-16 (D-063): the souvenir is back in scope.** A shareable still
+(T-105d) goes first and is unblocked; the video (T-105b) returns as a spike, not a promise, and
+needs the physical Android. **What is still open is the channel** — even a shareable image needs
+somebody to see it, and the partner routes below are untouched.
 **Blocking the question of whether v1 should launch publicly at all.**
 D-051 cut the souvenir video, which CONTEXT §2.3 and D-013 both call *the entire distribution
 strategy*. There is no App Store search term for this app. What remains: a shareable passport

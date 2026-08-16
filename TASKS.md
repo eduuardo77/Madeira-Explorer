@@ -707,14 +707,28 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-105a** The **composition** — what appears when, in what order, and where the camera
       is pointing ⇠ T-059, T-104
       — Notes: `docs/task-notes.md` (T-105a)
-- [~] **T-105b** **MOVED TO v2 2026-08-12 (D-051).** Encode the storyboard to an MP4 ⇠ T-105a
+- [~] **T-105b** ~~MOVED TO v2 2026-08-12 (D-051)~~ **BACK IN v1 SCOPE 2026-08-16 (D-063).**
+      Encode the storyboard to an MP4 ⇠ T-105a, T-105c
+      — ⚠ **Not a commitment yet — a spike.** The deliverable that turns this into a promise is
+      **one five-second MP4 written on the project lead's own Android**, not a plan. Until that
+      exists, treat the video as unproven.
       — Notes: `docs/task-notes.md` (T-105b)
-- [ ] **T-105c** Research an on-device video encoder, and what it talks to ⇠ D-051
+- [ ] **T-105c** Research an on-device video encoder, and what it talks to ⇠ D-051, D-063
       — The project lead asked for this explicitly: *"definitely something we should research in
       the future"*. Deliverable is a recommendation with a **network-behaviour audit** per D-043 —
       the thing that turns "no data leaves the device" quietly false (CONTEXT §4.8).
-- [x] ~~**T-105d** Make the passport worth screenshotting~~ **DROPPED 2026-08-12 by the project
-      lead**, the day after it was raised. ⇠ T-074, D-051
+      — ⚠ **The obvious dependency may not exist any more.** `ffmpeg-kit`, the usual React Native
+      answer, was retired by its maintainer and its binaries pulled. **Confirm that before
+      anything depends on it**; if it holds, the likely path is a small native module over
+      Android's own `MediaCodec`, which adds no third party at all and so has no network to
+      audit — which is the better outcome for D-001 anyway.
+- [ ] **T-105d** ~~DROPPED 2026-08-12~~ **REVIVED 2026-08-16 (D-063), and it goes first.** Make
+      the trip worth sharing as a **still image** — the trace, the number, the stamps earned —
+      plus the share sheet. ⇠ T-074, T-107, T-108
+      — **Why first: it is the only part with no unknowns.** No native code, no new dependency,
+      both platforms, and it can be judged in the workbench before it reaches a phone. It is most
+      of the distribution value at a small fraction of the risk, and it does not compete with the
+      soak tests for the phone's time.
       — Notes: `docs/task-notes.md` (T-105d)
 - [ ] **T-105b-v2** Encode the storyboard to an MP4 on the device ⇠ T-105a, T-105c *(v2)*
       — Needs native video encoding, which is the part that cannot be verified without a

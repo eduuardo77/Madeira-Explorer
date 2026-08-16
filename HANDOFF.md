@@ -96,7 +96,10 @@ node tools/validate-content.mjs       # checks the work, targets 60–100 places
 routes. A used mid-range Android (~€50–100) is the only source of battery and background-survival
 numbers. **The project lead's.**
 
-**3. OD-10 — nothing makes anyone discover this app.** D-051 cut the souvenir video, which
+**3. OD-10 — nothing makes anyone discover this app. ⚠ Partly reopened 2026-08-16 (D-063).**
+The souvenir is back in v1: a **shareable still first** (T-105d, no unknowns), and the **video as
+a spike** (T-105c → T-105b) once the physical Android exists. ⚠ **The video is not a commitment
+until one five-second MP4 exists on a real phone.** The channel question below is untouched. D-051 cut the souvenir video, which
 CONTEXT §2.3 called *the entire distribution strategy*; T-105d, a shareable passport, was dropped
 the next day. This is a question about whether v1 should launch publicly, not which channel to
 use. **The largest open item in the project.**

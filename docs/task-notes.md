@@ -1533,8 +1533,17 @@ grep -A30 "^### T-052a" docs/task-notes.md
       clifftop viewpoint above the cable car. ⚠ **The old coordinate was not a typo — it was the
       reserve's own centre**, and the reserve is mostly sea (`relation 9321122`, centre
       32.8291,-16.8730). A marine protected area has no honest centre on land, so the geofence
-      has to be its access point. **That leaves the name describing the reserve and the stamp
-      describing the viewpoint**, which is a curation question left open rather than answered.
+      has to be its access point. **That left the name describing the reserve and the stamp
+      describing the viewpoint**, so the project lead renamed it the same day: *Reserva Natural do
+      Sítio da Rocha do Navio* → **Miradouro da Rocha do Navio**, id and geofence id with it, and
+      `landmark` → `viewpoint` because every other lookout in the pack is one and it would
+      otherwise have been the only *Miradouro* in Landmarks. The passport's rows are now 21
+      viewpoints and 17 landmarks.
+      — ⚠ **The id changed too** (`reserva-natural-…` → `miradouro-da-rocha-do-navio`), which is
+      safe here and would not always be: an id is what `stamp_award` stores, so a rename orphans
+      any award already earned at that place. The passport is driven by the pack, so an orphaned
+      award simply stops appearing rather than breaking anything — but on a phone that has been
+      collecting, this is a stamp taken away.
       — Verified against our own boundaries before editing: both land inside the municipality
       each place was already filed under, so no region id moved. `validate-content.mjs` now
       passes with no warnings at all.

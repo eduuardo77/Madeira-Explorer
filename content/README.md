@@ -274,7 +274,12 @@ you forget.
   and is now the clifftop viewpoint above the cable car. Both coordinates are OSM's.
   ⚠ **A marine reserve has no coordinate on land, so the geofence is its access point, not its
   middle.** If a stamp is going to be earned by standing somewhere, the place has to be somewhere
-  you can stand. Worth deciding whether that place should still be named after the reserve.
+  you can stand — so that place was renamed **Miradouro da Rocha do Navio** and recategorised as a
+  `viewpoint`, which is what its geofence now describes.
+  ⚠ **Renaming changes the id, and an id is what a stamp is stored against.** A phone that had
+  already collected the old place keeps an award pointing at nothing; the passport is driven by
+  the pack, so that award simply stops appearing. Harmless before release, a stamp taken away
+  after it.
 
 ## How the pack reaches the app
 

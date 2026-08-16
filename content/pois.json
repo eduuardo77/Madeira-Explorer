@@ -313,13 +313,13 @@
       ]
     },
     {
-      "id": "reserva-natural-do-sitio-da-rocha-do-navio",
-      "name": "Reserva Natural do Sítio da Rocha do Navio",
-      "category": "landmark",
+      "id": "miradouro-da-rocha-do-navio",
+      "name": "Miradouro da Rocha do Navio",
+      "category": "viewpoint",
       "regionId": "santana",
       "geofences": [
         {
-          "id": "reserva-natural-do-sitio-da-rocha-do-navio",
+          "id": "miradouro-da-rocha-do-navio-main",
           "lat": 32.81463,
           "lon": -16.87652,
           "radiusM": 200

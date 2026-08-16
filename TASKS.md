@@ -535,6 +535,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       1 km). **Resolved the same day: the project lead kept the skywalk and deleted the
       designation**, so the pack is 79 places — 21 viewpoints, 15 levadas, 16 villages, 11
       beaches, 16 landmarks.
+      — **Verified on the emulator 2026-08-16**, not only in tests: the Android bundle resolves
+      `content/regions.json` (1044 modules), carries every region name, and the card on the device
+      reads **VIEWPOINT · Pico do Areeiro · Santana**. Which is also the assignment being right —
+      the old guess said Estreito de Câmara de Lobos, and the peak is in Santana.
       — Notes: `docs/task-notes.md` (T-067)
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must

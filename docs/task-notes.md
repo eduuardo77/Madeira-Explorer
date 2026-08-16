@@ -1578,6 +1578,18 @@ grep -A30 "^### T-052a" docs/task-notes.md
       Caniçal*, which are real pairs, and *Câmara de Lobos* against *Estreito de Câmara de Lobos*,
       which clears on distance at 2.5 km. Which of the two Cabo Girãos is the stamp is T-066's.
 
+- **Verified on the device, and a probe lied on the way there.** The workbench never imports
+  `regionCatalogue`, so before this the new content import had only ever been typechecked — Metro
+  had never resolved `content/regions.json` for Android. `npx expo export --platform android`
+  bundled it (920 modules), and the dev build on the emulator shows the card reading
+  **VIEWPOINT · Pico do Areeiro · Santana**.
+      — ⚠ **The first check of the bundle's contents said the Portuguese names were missing.**
+      `grep -a "Câmara de Lobos"` found nothing while `Machico` was found, and even the ASCII
+      substring `mara de Lobos` failed — which is what made it obvious the probe was wrong rather
+      than the bundle: **Hermes stores an ASCII-only string as 8-bit and anything accented as
+      UTF-16.** A probe that checks both encodings finds every name, and finds that the two names
+      deleted today are correctly absent. HANDOFF has it as a trap.
+
 - **Two tools now share one geometry module.** `tools/lib/geo.mjs` (Douglas-Peucker,
   point-in-polygon, distances) and `tools/lib/overpass.mjs` (the backoff, and the reason for
   it). `build-levadas.mjs` was moved onto both and **re-run: `content/levadas.json` came back

@@ -49,6 +49,9 @@ needs the project lead to read it.
 
 Verified on the emulator: build, install, launch, the map drawing from the offline pack, screens,
 permissions, 60 dp tap targets, and **a replayed route reaching `raw_fix` and drawing as a trace**.
+Re-verified 2026-08-16 after T-067: the app bundles with `content/regions.json` (1044 modules),
+the hero number reads `1 / 79`, and the card reads **VIEWPOINT · Pico do Areeiro · Santana** —
+the municipality, from the boundaries, on a device.
 
 ⚠ **Never verified, because no emulator can answer it:** battery, background survival, GPS
 realism (CONTEXT §6.6). Those need a real Android. **No threshold in this app has met real data.**
@@ -149,6 +152,12 @@ Each cost a session to find and none was visible from the tests. Full write-ups 
   on purpose and a test keeps it that way (D-041).
 - **Check the measurement ran.** If a result does not move when the input changes, suspect the
   probe. A regex over raw tile bytes once "found" a character that was not there.
+- ⚠ **Grepping the Android bundle for a Portuguese name will tell you it is missing.** Hermes
+  stores an ASCII-only string as 8-bit and anything with an accent as **UTF-16**, so
+  `grep -a "Câmara de Lobos" index.hbc` finds nothing while `Machico` is found — and the obvious
+  conclusion, that half the content did not ship, is wrong. Search both encodings. Found
+  2026-08-16 while verifying T-067; it is the same class of mistake as the tile-byte regex above,
+  and it took a second probe to see it.
 - ⚠ **The workbench cannot see `hitSlop`, so a measured tap target may be a lie.** react-native-web
   does not render the prop: the DOM gives you the *word*, not the target. T-113 measured every
   control and passed; T-144's *See all* still shipped at 57 × 35 against the 60 dp floor, found on

@@ -107,8 +107,8 @@ is not a styling gap that can be closed by trying harder:
 
 | | WalkNYC's route | Ours |
 |---|---|---|
-| Map | Platform SDK — free, native-looking, always current | Own pack — offline, private, ours to style |
-| Works with no signal | **No** (their offline claim is about trail data, see above) | **Yes**, entirely |
+| Map | Platform SDK — free, native-looking, always current | ⚠ **Also the platform SDK, since D-057** |
+| Works with no signal | **No** (their offline claim is about trail data, see above) | ⚠ **Recording yes, map no** — D-057 traded the offline basemap away. Corrected 2026-08-17; this row said *"Yes, entirely"* for three days after it stopped being true |
 | Looks like the phone | **Yes**, by construction | Only as far as our own cartography gets us |
 | Souvenir/dark render | Not possible | The whole of Phase 5 |
 

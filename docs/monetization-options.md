@@ -94,9 +94,12 @@ Sources: [App Store](https://apps.apple.com/us/app/walkme-levadas-madeira/id5770
 This matters more here than in a normal app, because of what this project has promised:
 
 - **A paid-up-front app** is bought in the *store*, outside our binary. There is no billing
-  library, no receipt validation, no purchase state, **and not one network call added to our
-  app.** `T-117b` and `T-127` — "verify zero outbound requests" — stay literally true and
-  literally verifiable.
+  library, no receipt validation, no purchase state, **and not one network call added to our app.**
+  ⚠ **CORRECTED 2026-08-17: this originally said T-117b and T-127's "zero outbound requests" would
+  stay literally true. That was already false when written.** D-057 moved the app to Google's map,
+  which streams tiles — its own text says *"the app makes no network requests at all, and that is no
+  longer true."* The narrow point survives (billing adds requests **on our account**, tied to a
+  purchase); the absolute claim was spent in August. See `docs/marketing-plan.md` §0.
 - **Any IAP** means Play Billing and StoreKit inside the app. StoreKit 2 can validate on-device
   via JWS with no server of ours ([Qonversion](https://qonversion.io/blog/storekit-2-capabilities-deep-dive)),
   which is genuinely good news for D-001 — but Play's `queryPurchasesAsync` **makes a network call

@@ -3,7 +3,7 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-17 — **OD-4 resolved (D-072): free on Play, 10 stamps + your first levada free, €4.99 unlocks the rest** (T-155–T-159). Also — the **Sensor Logger importer** (T-021), so a real walk becomes a
+**Last updated:** 2026-08-17 — **marketing planned (D-073): ASO on one free listing** (T-160–T-163), and ⚠ **D-071 partly reversed — stamps are a priority again** now D-072 makes them the revenue. Also — **OD-4 resolved (D-072): free on Play, 10 stamps + your first levada free, €4.99 unlocks the rest** (T-155–T-159). Also — the **Sensor Logger importer** (T-021), so a real walk becomes a
 fixture and the app's own `cleanTrace` can be run against it; plus three checkboxes that were
 stale — **T-107**, **T-108** and **T-130** all shipped on 2026-08-16 and were still unticked.
 **Previously 2026-08-16** — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
@@ -714,6 +714,37 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       yet. ⚠ The argument to weigh is D-013: the souvenir is the distribution strategy, so charging
       for it taxes the growth engine. The **still image stays free** either way, which is what makes
       charging for the video defensible at all.
+- [ ] **T-160** ⚠ **Localise the app — Portuguese and German** ⇠ T-114
+      — **The biggest free marketing lever, and it is blocked by a missing feature.** Madeira's
+      visitors are **Portuguese 20.3%, British 14.9%, German 14.8%** of overnight stays. Play
+      localises a listing per language for nothing and runs five localised experiments at once.
+      — ⚠ **But the app has no i18n at all** — no `expo-localization`, every string English. A German
+      listing pointing at an English-only app is the mismatch that causes an **uninstall**, which is
+      Play's most heavily weighted negative signal. **So the app comes first, the listing second.**
+      — Portuguese especially: an app made in Madeira that cannot speak Portuguese is a strange thing
+      to hand a Portuguese visitor.
+      — ⚠ Watch `formatDateRange` and anything else already feature-detecting `Intl` on Hermes
+      (T-105d found `formatRange` missing). Localisation multiplies those paths.
+- [ ] **T-161** **Write and ship the Play listing** ⇠ T-160 *(English first, does not wait for T-160)*
+      — Copy drafted in `docs/marketing-plan.md` §4: title **"Madeira Explorer"** (16 of 30), a
+      76-character short description, and a full description whose first 167 characters carry the
+      hook before "Read more".
+      — ⚠ **The listing is a compliance surface.** It must agree with `privacyPolicy.ts`, the Data
+      Safety form and D-044 — and **it may never say "works offline" or "nothing leaves your phone"**,
+      both false since D-057 (D-073). It must also state the free/paid boundary exactly as T-155
+      builds it.
+- [ ] **T-162** **Screenshots from a real trip, not a replayed route** ⇠ T-161, T-134
+      — Five shots, and the first two are what appear in search results: **the trace on the map**,
+      then **the passport part-filled**. Then a place card, the souvenir, and the privacy line.
+      — ⚠ **Take them from a real recorded trip.** The emulator shots in `tools/out/shots/` are close
+      enough to judge layout but they are a replayed seafront route, and a screenshot of a fake trip
+      is the kind of thing that reads as fake.
+- [ ] **T-163** **Store listing experiments, once traffic can carry them** ⇠ T-161
+      — Free A/B testing on real store traffic, three variants against the current listing. Run **one
+      at a time**: short description first (cheapest, high weight), then the first screenshot — *does
+      the map or the collection sell it?*, which nobody knows — then the icon.
+      — ⚠ **Wait for enough installs to make a result mean anything.** At tens of installs a week an
+      experiment is noise, and acting on noise is worse than not testing.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

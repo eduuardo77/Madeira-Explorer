@@ -3804,3 +3804,81 @@ by argument, tunable against real trips (T-134), and **not to be defended as if 
 can't be changed to paid."* Charging up front on Android would require a new app with a new package
 name. **This decision is one-way on that platform.** Apple allows both directions, so paid-up-front
 remains testable on iOS if it ever appeals.
+
+### D-071 reversed, 2026-08-17 — the stamps are a priority again
+
+**The project lead, on being shown the consequence of D-072:** *"Yes, stamps are now a priority."*
+
+D-071 recorded the opposite a few hours earlier — *the map is the product, the stamp system is not
+top of the priority list, WalkNYC is successful without a badge system.* That reasoning was sound
+**for a free app with no monetisation**. D-072 changed the premise: **the entire revenue model is now
+the passport.** Ten stamps free, the first levada free, €4.99 for the rest. If the stamps are not
+worth buying, nothing is.
+
+**What stands from D-071:** the map is still the primary screen and still where the product lives.
+D-002 was never in doubt, and the map work done under D-071 (T-152, T-153) was right and stays.
+
+**What reverses:** stamp quality moves from *"important, not top of the list"* to **on the critical
+path**. T-158 is the work, and it is no longer deferred by default.
+
+⚠ **The lesson worth keeping, because it will recur:** a priority decision made about the *product*
+was invalidated within hours by a decision about the *business*. Neither was wrong when made. When a
+monetisation boundary moves, the feature it is drawn around inherits its importance — so **check
+D-071-class priorities whenever D-072-class boundaries change.**
+
+---
+
+## D-073 — Marketing is ASO on one free listing. Rank honestly, and never claim offline.
+
+**Status:** Provisional · **Date:** 2026-08-17 · **Plan:** [`docs/marketing-plan.md`](marketing-plan.md)
+
+### Context
+
+D-072 made the app free on Google Play. That leaves exactly one channel worth working, it costs
+nothing, and the project lead named learning as the upside. **~65% of installs start with a search**,
+and Play indexes ~4,110 characters (title 30, short 80, full description 4,000 — the full description
+**is** indexed, unlike Apple's).
+
+### The decision
+
+1. **The store listing is the primary channel**, not a formality. No paid acquisition: there is no
+   budget, and with no analytics the attribution would be guesswork anyway.
+2. **Rank honestly.** Target destination terms — *Madeira*, *levada*, *walk*, *map*, *trip* — and
+   **not** navigation intent. ⚠ The app deliberately never navigates (D-018, D-055); ranking for
+   *"levada navigation"* buys arrivals who uninstall, and **uninstall rate is Play's most heavily
+   weighted negative signal**. Winning that keyword would be worse than losing it.
+3. **Differentiate in the pictures, not the keywords.** Keywords get the listing into the pool;
+   screenshots and the short description convert. Shot 1 is the trace on the map, shot 2 the passport.
+4. **Keep the name "Madeira Explorer."** Destination-first carries the search weight, and the
+   family-later worry is answered by the competitor: WalkMe ships **separate listings per region**.
+5. **App localisation precedes listing localisation** (T-160).
+
+### ⚠ The claims that may never be made
+
+- **"Works offline."** False since D-057: the map streams tiles from Google. What *is* true and worth
+  saying: **recording needs no network**, so the trip is captured in a levada valley.
+- **"Nothing leaves your phone."** Also false since D-057, and **I asserted it twice during the
+  monetisation debate before checking.** The policy's exact wording is the ceiling for marketing:
+  *"Your trip never leaves the phone"* and *"Google sees which part of the island you are looking at.
+  It does not see your trip."*
+
+**A false privacy claim in a store listing is the one lie this project cannot survive**, because the
+privacy position is the whole differentiator. The listing copy is therefore a **compliance surface**:
+it must agree with `privacyPolicy.ts`, the Data Safety form and D-044, and it must change when T-156
+ships billing.
+
+### What was rejected
+
+- **Competing head-on for WalkMe's keywords** — fourteen years, 100,000+ installs, and §2 above:
+  winning would hurt.
+- **A keyword-loaded title** (*"Madeira Explorer: Levadas"*) — small gain, pulls in navigation intent,
+  and Play suspends for stuffing.
+- **Paid ads** — no budget, no attribution.
+- **Localising the listing now** — the app is English-only, so a German listing would send users to an
+  app they cannot read: the exact mismatch that produces uninstalls.
+
+### ⚠ Expect the retention numbers to look bad, and do not chase them
+
+The audience is a tourist who stays a week and leaves. **D30 retention will be poor for everyone**,
+permanently, because the product's life is one holiday. The curve is holiday-shaped; Play's metrics
+assume daily-forever apps. Optimising against D30 here is optimising against holidays ending.

@@ -99,8 +99,9 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-068** | A levada is credited by time as well as distance. You cannot always finish one. | Provisional |
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
 | **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. | Provisional |
-| **D-071** | The map is the product; the stamp system is not top priority. Sequencing, not scope. | **Provisional — needs confirming** |
+| **D-071** | The map is the product. ⚠ **Partly reversed 2026-08-17: stamps are a priority again** (D-072 made them the revenue). | **Superseded in part** |
 | **D-072** | **Free on Play. Trace always free; 10 stamps + your first levada free; €4.99 unlocks the rest.** | **Accepted** |
+| **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

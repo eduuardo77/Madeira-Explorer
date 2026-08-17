@@ -434,7 +434,7 @@ possible moment to absorb the lesson.
 
 **On the bundle identifier:** it does not require a domain — reverse-DNS is convention, not
 requirement. It is permanent only **after store publication**; changing it during development
-costs a rebuild. So `com.madeiraexplorer.app` stays as a working placeholder, must not block the
+costs a rebuild. So `com.proa.madeira` stays as a working placeholder, must not block the
 dev build, and needs a deliberate decision before T-137. The app's public name and its bundle
 identifier are independent.
 
@@ -466,7 +466,7 @@ spike renders the real style (T-025) and a souvenir exists (T-105), there is far
 - **No place name in it.** D-017 says the moat must not become the ceiling; a Madeira-locked name
   makes an Azores or Canaries content pack into a new store listing, losing reviews, ranking and
   watermark recognition.
-- The working title **"Madeira Explorer" fails two of these** — it locks the scope, and
+- The working title **"Proa" fails two of these** — it locks the scope, and
   *Explorer* is generic and Microsoft-shaped.
 
 ### 7.3 Why the name does not need to describe the app
@@ -485,7 +485,28 @@ explicitly is not (D-013).
 **So: distinctive name, and the App Store subtitle carries the meaning.** The name is what gets
 remembered off a video watermark; the subtitle explains.
 
-### 7.4 Shortlist — candidates, not cleared names
+### 7.4 ✅ DECIDED 2026-08-17 — **Proa**, store listing **Proa - Madeira** (D-074)
+
+**The name is settled.** `com.proa.madeira` is the package, and it is **permanent once published**.
+The full reasoning, the availability screen and the two silent consequences are in D-074; what
+follows is the shortlist as it stood, kept because the rejected candidates are the valuable part.
+
+⚠ **Fanal — this section's own favourite — was disqualified by the content pack.** *Fanal* is one of
+the curated 60 (a viewpoint). The pack was curated on **2026-08-16, eight days after this section
+was written**, so the collision could not have been known here. *"You collected Fanal in Fanal."*
+
+⚠ **Rasto was disqualified on meaning, not availability.** Three apps already use it, one of them
+*Rasto Rastreamento* — a Brazilian **vehicle-tracking** app. *Rasto/rastreamento* reads as
+**tracking** in Portuguese, which is the exact connotation §7.2 bans, on an app that must pass a
+manual background-location review (T-123) in a market that is 20% Portuguese-speaking.
+
+⚠ **And §7.3's premise expired.** It argued that descriptive names suit *search-driven* businesses,
+*"which this app explicitly is not (D-013)"* — because distribution was to be the souvenir video.
+D-051 cut that video and **D-072 made the app free with ASO as its primary channel**, so the app *is*
+search-driven now. That is why the answer is **brand plus keyword** rather than either alone: *Proa*
+for the watermark, *Madeira* for the search box.
+
+### 7.5 Shortlist as it stood — candidates, not cleared names
 
 **None of these has been checked** against INPI, EUIPO, either app store, or domain
 availability. They are candidates to check.

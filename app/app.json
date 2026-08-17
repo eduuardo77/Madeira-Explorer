@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "Madeira Explorer",
-    "slug": "madeira-explorer",
+    "name": "Proa",
+    "slug": "proa-madeira",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "madeiraexplorer",
+    "scheme": "proa",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.madeiraexplorer.app",
+      "bundleIdentifier": "com.proa.madeira",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Madeira Explorer notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone and is never uploaded.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
-        "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
-        "NSMotionUsageDescription": "Madeira Explorer uses the step counter and air-pressure sensor to work out where you walked when GPS is blocked by tunnels or forest canopy.",
+        "NSLocationWhenInUseUsageDescription": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone and is never uploaded.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
+        "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
+        "NSMotionUsageDescription": "Proa uses the step counter and air-pressure sensor to work out where you walked when GPS is blocked by tunnels or forest canopy.",
         "UIBackgroundModes": [
           "location",
           "fetch",
@@ -59,7 +59,7 @@
       }
     },
     "android": {
-      "package": "com.madeiraexplorer.app",
+      "package": "com.proa.madeira",
       "allowBackup": true,
       "adaptiveIcon": {
         "backgroundColor": "#1B2A33",
@@ -84,8 +84,8 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Madeira Explorer notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone.",
-          "locationAlwaysAndWhenInUsePermission": "So your map keeps filling in while the app is closed, Madeira Explorer needs to record your location in the background. Nothing is uploaded and there is no account.",
+          "locationWhenInUsePermission": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone.",
+          "locationAlwaysAndWhenInUsePermission": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true

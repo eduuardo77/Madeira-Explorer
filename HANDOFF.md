@@ -7,12 +7,21 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 ## State, in one paragraph
 
 The whole v1 chain is written and **runs on an Android emulator**: record → stamps → trace on
-Google Maps → passport → place card → trip end. **500 tests**, `tsc` strict clean. `content/pois.json`
+Google Maps → passport → place card → trip end. **522 tests**, `tsc` strict clean. `content/pois.json`
 holds **60 curated places** (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks),
 all names verified against OSM, all inside the region they claim, none offshore, no duplicates.
 The souvenir **still image works end to end on a device** — Share on the passport produces a PNG
 through the OS share sheet. ⚠ **Nothing has ever run on real hardware**, and no threshold in the app
 has met real GPS.
+
+## Settled 2026-08-17 — name, money, marketing
+
+| | |
+|---|---|
+| **D-074** | The app is **Proa**; the store listing is **Proa - Madeira**. ⚠ Package **`com.proa.madeira`, permanent once published**. The Maps API key must be re-restricted to it or the map goes grey. |
+| **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ One-way: Play forbids free→paid. |
+| **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |
+| **D-071** | ⚠ **Partly reversed**: stamps are a priority again, because D-072 makes them the revenue. |
 
 ## What blocks v1 — three things, none of them code
 
@@ -86,7 +95,7 @@ than doing the levada and not earning it."*
   platform's map; nothing in the app rasterises tiles any more. **A stale reason outlived the
   thing it justified.**
 - ⚠ **T-147 — the dark map is Google's own only on the *latest* Maps renderer.** The emulator is
-  handed LEGACY, so it can never show what most users see. `adb logcat -s MadeiraExplorer` says which.
+  handed LEGACY, so it can never show what most users see. `adb logcat -s Proa` says which.
 - ⚠ **Anything floating over the map must be checked on both styles.** The settings control measures
   15.36:1 on the light map and **1.13:1** on the night one.
 - ⚠ **The workbench cannot see `hitSlop`.** react-native-web does not render it, so a measured tap
@@ -125,7 +134,7 @@ bash tools/replay-route.sh tools/routes/funchal-seafront.txt
 ⚠ **A Google Maps API key is needed to see a map at all** — `app/.env.example` → `app/.env`.
 `docs/dev-build.md` has the click path and why it costs nothing.
 
-Reading `/data/data/com.madeiraexplorer.app/files/SQLite/madeira.db` with `adb root` + `sqlite3` is
+Reading `/data/data/com.proa.madeira/files/SQLite/madeira.db` with `adb root` + `sqlite3` is
 usually faster than tapping through the UI.
 
 ## Content and preview tools

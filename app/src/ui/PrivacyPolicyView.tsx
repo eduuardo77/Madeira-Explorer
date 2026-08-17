@@ -20,9 +20,9 @@
  * Presentational: props in, pixels out, so the workbench can mount it (D-038).
  */
 
+import { APP_NAME } from '../brand';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
-  APP_NAME,
   POLICY_VERSION,
   policySections,
 } from '../legal/privacyPolicy';

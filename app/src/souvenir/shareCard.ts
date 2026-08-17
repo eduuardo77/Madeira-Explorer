@@ -40,6 +40,8 @@
  */
 
 /** A point of the trace, in [lon, lat]. */
+import { APP_NAME } from '../brand.ts';
+
 export type CardPoint = [lon: number, lat: number];
 
 export type ShareCardInput = {
@@ -291,7 +293,7 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
     kind: 'text',
     x: CARD_WIDTH / 2,
     y: 1810,
-    text: 'Madeira Explorer',
+    text: APP_NAME,
     size: 32,
     weight: 'regular',
     colour: MUTED,

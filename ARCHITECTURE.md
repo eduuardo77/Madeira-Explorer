@@ -1,6 +1,6 @@
 # Architecture
 
-System design for the Madeira Explorer app.
+System design for the Proa app.
 
 **Document date:** 2026-08-06
 **Updated:** 2026-08-08 — §2 diagram corrected for D-022/D-026/D-027; status corrected.

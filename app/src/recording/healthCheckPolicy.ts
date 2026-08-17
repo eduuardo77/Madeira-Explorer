@@ -31,6 +31,7 @@
  * `healthCheckPolicy.test.ts`.
  */
 
+import { APP_NAME } from '../brand.ts';
 import type { PermissionLevel } from './LocationProvider';
 
 /**
@@ -114,7 +115,7 @@ export function decideHealthCheck(
       notify: true,
       reason: 'permission denied',
       title: 'Your trip is not being recorded',
-      body: 'Madeira Explorer cannot see where you go, so your map will stay empty. Open the app to turn location back on — there is still plenty of your trip left.',
+      body: `${APP_NAME} cannot see where you go, so your map will stay empty. Open the app to turn location back on — there is still plenty of your trip left.`,
     };
   }
 
@@ -123,7 +124,7 @@ export function decideHealthCheck(
       notify: true,
       reason: 'permission never granted',
       title: 'One tap to start your map',
-      body: 'Madeira Explorer has not started recording yet. Open the app and allow location, and it will fill in the rest of your trip by itself.',
+      body: `${APP_NAME} has not started recording yet. Open the app and allow location, and it will fill in the rest of your trip by itself.`,
     };
   }
 
@@ -144,7 +145,7 @@ export function decideHealthCheck(
       notify: true,
       reason: `only ${input.fixCount} fixes since install`,
       title: 'Your map is not filling in',
-      body: 'Madeira Explorer is running, but your phone is not letting it record. Open the app — it will show you the one setting to change.',
+      body: `${APP_NAME} is running, but your phone is not letting it record. Open the app — it will show you the one setting to change.`,
     };
   }
 
@@ -157,7 +158,7 @@ export function decideHealthCheck(
       notify: true,
       reason: `last fix ${Math.round(silence / 3600000)}h ago`,
       title: 'Your map is not filling in',
-      body: 'Madeira Explorer has not recorded anything for several hours. Open the app to check it — the rest of your trip can still be saved.',
+      body: `${APP_NAME} has not recorded anything for several hours. Open the app to check it — the rest of your trip can still be saved.`,
     };
   }
 
@@ -168,6 +169,6 @@ export function decideHealthCheck(
     notify: true,
     reason: `healthy — ${input.fixCount} fixes`,
     title: 'Your map is filling in nicely',
-    body: 'Madeira Explorer is recording your trip in the background. You will not hear from it again until you are heading home.',
+    body: `${APP_NAME} is recording your trip in the background. You will not hear from it again until you are heading home.`,
   };
 }

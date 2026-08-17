@@ -1,4 +1,4 @@
-# Working on Madeira Explorer
+# Working on Proa
 
 Loaded automatically every session. **Routing and invariants only** — never content that lives
 in another document. If this contradicts a decision, the decision wins and this file is wrong.

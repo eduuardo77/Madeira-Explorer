@@ -23,8 +23,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { APP_NAME } from '../brand.ts';
 import {
-  APP_NAME,
   CONTACT_EMAIL,
   POLICY_VERSION,
   policySections,

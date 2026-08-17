@@ -3849,8 +3849,13 @@ and Play indexes ~4,110 characters (title 30, short 80, full description 4,000 �
    weighted negative signal**. Winning that keyword would be worse than losing it.
 3. **Differentiate in the pictures, not the keywords.** Keywords get the listing into the pool;
    screenshots and the short description convert. Shot 1 is the trace on the map, shot 2 the passport.
-4. **Keep the name "Madeira Explorer."** Destination-first carries the search weight, and the
-   family-later worry is answered by the competitor: WalkMe ships **separate listings per region**.
+4. ~~**Keep the name "Madeira Explorer."**~~ ⚠ **WRONG, AND SUPERSEDED BY D-074 THE SAME DAY.**
+   This was written without reading **design brief §7**, which had argued against that name since
+   2026-08-08 on two grounds — it locks the scope, and *Explorer* is generic. The ASO reasoning here
+   was not wrong, but it was incomplete: **§7's own premise had also expired** (it assumed the app
+   was not search-driven, per D-013, which D-072 reversed by making the app free). The synthesis is
+   D-074: **brand plus keyword**, `Proa - Madeira`, which serves the watermark and the search box at
+   once.
 5. **App localisation precedes listing localisation** (T-160).
 
 ### ⚠ The claims that may never be made
@@ -3882,3 +3887,72 @@ ships billing.
 The audience is a tourist who stays a week and leaves. **D30 retention will be poor for everyone**,
 permanently, because the product's life is one holiday. The curve is holiday-shaped; Play's metrics
 assume daily-forever apps. Optimising against D30 here is optimising against holidays ending.
+
+---
+
+## D-074 — The app is called **Proa**. The store listing is **Proa - Madeira**.
+
+**Status:** Accepted 2026-08-17 · **Resolves:** design brief §7, open since 2026-08-08 ·
+**Package:** `com.proa.madeira` — ⚠ **permanent once published**
+
+### The two names, and why they differ
+
+| | Value | Where it is set | Changeable? |
+|---|---|---|---|
+| **On the device**, under the icon | **Proa** | `app.json` → `expo.name`, and `src/brand.ts` | ✅ any time |
+| **Store listing title** | **Proa - Madeira** | Play Console | ✅ any time |
+| **Package / bundle id** | **`com.proa.madeira`** | `app.json` | ❌ **never, once published** |
+
+A home screen truncates and a search result does not, so the short name goes on the phone and the
+keyword goes in the store. **`Madeira` is the word people actually search**, and Play indexes the
+title, which is its highest-weighted field.
+
+⚠ **The title cannot be A/B tested.** Play's store listing experiments cover the icon, feature
+graphic, screenshots, short description and full description — **not the title**. So this was decided
+on principle rather than deferred to data. Everything else in the listing stays testable (T-163).
+
+### Why Proa
+
+*Proa* is the prow of a ship. It satisfies every constraint design brief §7.2 set in August:
+
+- **Short enough for the souvenir watermark**, which §7.2 calls the primary distribution surface.
+- **Spellable by a UK, German or Nordic visitor who heard it once** — no `lh`, no `ã`, no `-eiro`.
+- **No surveillance connotation**, which §7.2 banned because the app faces a manual Google Play
+  background-location review (T-123).
+- **Not a place name**, so an Azores content pack does not need a new identity (Part 3 §16).
+- Madeira was the Age of Discovery's launchpad, so the association is the island's own history
+  rather than a borrowed metaphor.
+
+### What the availability screen found
+
+| Name | Result |
+|---|---|
+| **Proa** | ✅ **No travel or maps app on either store.** Only *Fundación Proa* (Buenos Aires art foundation), *Plataforma PROA* (Brazilian education), and *La Proa Beach* in Spain. Also a real English word — a Pacific outrigger — which fits rather than fights |
+| **Rasto** | ❌ Three existing apps, including **Rasto Rastreamento, a Brazilian vehicle-tracking app**. ⚠ Disqualified on meaning, not availability: *rasto/rastreamento* reads as **tracking** in Portuguese — the exact connotation §7.2 banned, on an app requesting background location from a Portuguese-speaking market that is 20% of its visitors |
+| **Lume** | ❌ Crowded — an existing *Lume* app on Play, a *Lume Apps* developer account, and at least one registered LUME trademark |
+| ~~Fanal~~ | ❌ **§7.4's own favourite, disqualified by the content pack.** *Fanal* is one of the curated 60 — a viewpoint. The pack was curated on 2026-08-16, eight days after §7 named it. "You collected Fanal in Fanal" |
+
+⚠ **This was a store-and-web screen, not legal clearance.** EUIPO's TMview and Portugal's INPI were
+**not** queried, and no registrar was checked for domains. §7.4 has flagged that work since August and
+it is still outstanding. **Proportionality:** registering a trademark for a €4.99 app is likely not
+worth it; a conflict *search* is, because renaming after publication costs the listing, the reviews
+and the ranking.
+
+### ⚠ Two consequences that bite silently
+
+1. **The Google Maps API key is restricted by package name.** It was restricted to
+   `com.madeiraexplorer.app`; after this change it must be re-restricted to `com.proa.madeira` in the
+   Google Cloud console. **The symptom of forgetting is a grey grid** — which `app.config.js` warns
+   reads as a broken app rather than a stale console setting. The SHA-1 fingerprint does not change.
+2. **`app/android/` must be regenerated** (`npx expo prebuild --clean`). It is gitignored and
+   generated, but an existing tree still carries the old package.
+
+### The repair this rename exposed
+
+`privacyPolicy.ts` had exported `APP_NAME` since T-124, and **five files hardcoded the string
+anyway** — the souvenir card, the settings footnote, the foreground-service notification and two
+health-check notification bodies. The two that would have been missed are the ones nobody looks at:
+notifications that only appear once recording has already gone wrong.
+
+The name now lives in `src/brand.ts`, above both `legal/` and `souvenir/`, and **`brand.test.ts`
+fails the build if any source file hardcodes it again.**

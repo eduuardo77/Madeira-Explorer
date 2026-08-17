@@ -9,6 +9,7 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
+import { APP_NAME } from '../brand';
 import type {
   CoarsePosition,
   GeofenceRegion,
@@ -102,7 +103,7 @@ async function buildOptions(
     // (ARCHITECTURE §6.2).
     foregroundService: {
       notificationTitle: 'Recording your trip',
-      notificationBody: 'Madeira Explorer is noting where you have been.',
+      notificationBody: `${APP_NAME} is noting where you have been.`,
       notificationColor: '#1B2A33',
       killServiceOnDestroy: false,
     },

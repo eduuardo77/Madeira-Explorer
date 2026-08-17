@@ -1,4 +1,4 @@
-# Madeira Explorer — Privacy Policy
+# Proa — Privacy Policy
 
 **Last changed:** 2026-08-14
 
@@ -13,7 +13,7 @@
 
 ## The short version
 
-Madeira Explorer records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.
+Proa records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.
 
 There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.
 

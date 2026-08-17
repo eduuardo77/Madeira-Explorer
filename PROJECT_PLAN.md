@@ -1,6 +1,6 @@
 # Project Plan
 
-Implementation roadmap for the Madeira Explorer app.
+Implementation roadmap for the Proa app.
 
 **Document date:** 2026-08-06
 **Updated:** 2026-08-10 — the geofence backbone (T-039) built and pulled forward out of Phase 3;
@@ -613,7 +613,7 @@ low.
 ### Still open
 
 **The app has no name and no domain** (as of 2026-08-08). The bundle identifier
-`com.madeiraexplorer.app` is a working placeholder — permanent only after store publication, so
+`com.proa.madeira` is a working placeholder — permanent only after store publication, so
 it must not block the dev build.
 
 **Deliberately deferred, not merely outstanding.** Nothing before Phase 5 depends on it, and

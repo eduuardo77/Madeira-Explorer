@@ -76,7 +76,7 @@ export const POLICY_VERSION = '2026-08-14';
  * for naming itself after a city's own wayfinding programme. Changing it is a
  * one-line edit here plus `app.json`.
  */
-export const APP_NAME = 'Madeira Explorer';
+import { APP_NAME } from '../brand.ts';
 
 /**
  * Where a user can write to about their data.

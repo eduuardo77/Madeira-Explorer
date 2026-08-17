@@ -10,7 +10,7 @@
 > ```
 >
 > The key comes from the Google Cloud console: create a project, enable **Maps SDK for Android**,
-> create an API key, and restrict it to the package `com.madeiraexplorer.app` **plus your build's
+> create an API key, and restrict it to the package `com.proa.madeira` **plus your build's
 > SHA-1 fingerprint** and to that one API. Map display on the mobile SDK is free and unlimited
 > (SKU `6DE1-4D9C-5B67`); the project still needs billing enabled.
 >
@@ -64,7 +64,7 @@ An API that was never enabled cannot bill you, whatever happens to the key. So:
    build.
 4. **APIs & Services → Credentials → Create credentials → API key.**
 5. Edit the key → **Application restrictions → Android apps**, and add the package
-   `com.madeiraexplorer.app` with the SHA-1 fingerprint (see above for which one — debug and
+   `com.proa.madeira` with the SHA-1 fingerprint (see above for which one — debug and
    release are different, and the release one is Google's, not your upload key).
 6. Same page → **API restrictions → Restrict key** → **Maps SDK for Android** only. Save.
 
@@ -179,7 +179,7 @@ Everything that does not involve a real radio — which is most of the currently
   wifi and cell geolocation — and an emulator has neither. Those profiles register no request at
   all and produce a flawless impersonation of a dead recorder; it cost a day before it was
   understood. **`adb shell dumpsys location` is the one-line check:** while recording you want to
-  see `gps provider: ProviderRequest[@…, HIGH_ACCURACY, WorkSource{… com.madeiraexplorer.app}]`.
+  see `gps provider: ProviderRequest[@…, HIGH_ACCURACY, WorkSource{… com.proa.madeira}]`.
   No line naming our package means nothing is being asked for.
 
 ### What it cannot settle, ever
@@ -327,7 +327,7 @@ Each is cheap and each can invalidate the next.
   T-117 confirms they are absent from the production one.
 - **The Android foreground-service notification is permanent** while recording. The deliberate
   trade in ARCHITECTURE §6.2 — OEM battery managers kill everything quieter.
-- **The bundle identifier is still `com.madeiraexplorer.app`**, a placeholder. Permanent only
+- **The bundle identifier is still `com.proa.madeira`**, a placeholder. Permanent only
   after store publication (T-137).
 - **The emulator's map may look slightly soft.** It renders through a translated GPU. Judge
   cartography on real hardware, and the final verdict outdoors (T-065).

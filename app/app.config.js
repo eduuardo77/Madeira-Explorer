@@ -16,11 +16,17 @@
  * ⚠ THE KEY IS RESTRICTED, NOT SECRET. Android map keys ship inside the APK by
  * design and can be extracted from any build; Google's own guidance is to
  * restrict them rather than hide them. Restrict by **package name**
- * (`com.madeiraexplorer.app`) **and SHA-1 certificate fingerprint**, and to the
+ * (`com.proa.madeira`) **and SHA-1 certificate fingerprint**, and to the
  * *Maps SDK for Android* API only. An unrestricted key on a public repository
  * is the one that ends up on somebody else's bill. Keeping it out of git is
  * still worth doing — public-repo scanners will disable a leaked key, and the
  * debug and release builds have different fingerprints anyway.
+ *
+ * ⚠⚠ **THE PACKAGE NAME CHANGED ON 2026-08-17** — `com.madeiraexplorer.app` →
+ * `com.proa.madeira` (D-074). **An existing key restricted to the old package will
+ * silently stop working**, and the symptom is the grey grid above, which reads as a
+ * broken app rather than a stale console setting. Update the restriction in Google
+ * Cloud console before the next build. The SHA-1 does not change.
  *
  * Getting one: Google Cloud console → new project → enable *Maps SDK for
  * Android* → Credentials → create API key → restrict as above. Map display on

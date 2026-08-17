@@ -325,7 +325,7 @@ grep -A30 "^### T-052a" docs/task-notes.md
       `PRIORITY_HIGH_ACCURACY` request turns on. `driving` is the one profile that asks for it.
       — **Proof, both directions.** Driving profile: `dumpsys location` shows
       `gps provider: ProviderRequest[@+15s0ms, HIGH_ACCURACY, WorkSource{10192
-      com.madeiraexplorer.app}]`, and the same 41-point replay that produced nothing now produces
+      com.proa.madeira}]`, and the same 41-point replay that produced nothing now produces
       **12 fixes, 15 s apart** — matching the profile's `minTimeMs` exactly — which draw as a
       trace on the map. Switch back to walking and the request vanishes; switch again and it
       returns.

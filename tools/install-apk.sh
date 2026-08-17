@@ -28,4 +28,4 @@ fi
 echo
 echo "Installed. Useful from here:"
 echo "  $ADB logcat -s ReactNativeJS   app console output"
-echo "  $ADB shell pm clear com.madeiraexplorer.app   wipe app data (destroys the trace)"
+echo "  $ADB shell pm clear com.proa.madeira   wipe app data (destroys the trace)"

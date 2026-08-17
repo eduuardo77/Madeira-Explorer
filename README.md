@@ -1,4 +1,4 @@
-# Madeira Explorer (working title)
+# Proa (working title)
 
 A mobile app for tourists visiting Madeira Island that passively records where they have
 been and reveals it back to them as a beautiful, shareable map at the end of their trip.

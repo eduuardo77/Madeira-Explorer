@@ -726,7 +726,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ Watch `formatDateRange` and anything else already feature-detecting `Intl` on Hermes
       (T-105d found `formatRange` missing). Localisation multiplies those paths.
 - [ ] **T-161** **Write and ship the Play listing** ⇠ T-160 *(English first, does not wait for T-160)*
-      — Copy drafted in `docs/marketing-plan.md` §4: title **"Madeira Explorer"** (16 of 30), a
+      — Copy drafted in `docs/marketing-plan.md` §4: title **"Proa"** (16 of 30), a
       76-character short description, and a full description whose first 167 characters carry the
       hook before "Read more".
       — ⚠ **The listing is a compliance surface.** It must agree with `privacyPolicy.ts`, the Data

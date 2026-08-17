@@ -65,23 +65,34 @@ uninstall, which costs ranking on every other term too.
 The differentiator is **not** "trails". It is *a record of your own trip* and *nothing collected*.
 That belongs in the pictures and the first line, not in a keyword list.
 
-## 3. The name: keep **Madeira Explorer**
+## 3. The name: **Proa**
 
-Destination-first is right for search — *Madeira* is the word people type, and it sits in the title
-where the weight is. The "could it carry a family later?" worry is answered by the competitor
-himself: WalkMe ships **separate listings per region** (*Walking in Madeira*, *Portugal Trails*).
-A second island would be a second listing, not a rename. **Do not trade ASO value now for optionality
-later.**
+✅ **Decided 2026-08-17 (D-074): the app is *Proa*; the listing is *Proa - Madeira*.**
+
+Brand plus keyword, so nothing is traded away: **Proa** carries the souvenir watermark — design brief
+§7.2's primary distribution surface — and **Madeira** sits in the title where the search weight is.
+
+The "could it carry a family later?" worry is answered twice: the brand survives a second island
+(*Proa - Azores*), and the competitor already ships **separate listings per region** (*Walking in
+Madeira*, *Portugal Trails*).
+
+⚠ *Rasto* was rejected on meaning rather than availability — it reads as **tracking** in Portuguese,
+which is what §7.2 bans on an app facing a manual background-location review. *Fanal* was rejected
+because it is one of the curated 60. D-074 has the full screen.
 
 ## 4. The listing, drafted
 
 ### Title (30 max)
 
-> **Madeira Explorer** — 16 characters
+> **Proa - Madeira** — 14 characters ✅ **decided 2026-08-17 (D-074)**
 
-⚠ **Recommended over keyword-loaded variants** like *"Madeira Explorer: Levadas"* (25). The gain is
-small, and it pulls in people looking for a levada *navigator* — see §2. Room is left for a
-qualifier if experiments later say it earns its place.
+⚠ **Superseded what this section first said.** It recommended keeping *"Madeira Explorer"* on ASO
+grounds, without having read **design brief §7**, which had argued against that name since August.
+D-074 is the synthesis: **brand plus keyword** — *Proa* for the souvenir watermark, *Madeira* for
+the search box, and no *Explorer*, which §7.2 called generic.
+
+⚠ **The title cannot be A/B tested** — Play's experiments cover the icon, feature graphic,
+screenshots and both descriptions, but not the title. It had to be decided on principle.
 
 ### Short description (80 max) — the most weighted field after the title, and what shows in search
 
@@ -95,7 +106,7 @@ Alternatives worth A/B testing (§7):
 ### Full description — the first 167 characters carry the hook, before "Read more"
 
 ```
-Madeira Explorer draws the map of your own trip.
+Proa draws the map of your own trip.
 
 Walk a levada, drive a mountain road, wander into a village — the app records where you
 went and draws it on the map. At the end of the week you have a picture of your holiday

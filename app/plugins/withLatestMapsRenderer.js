@@ -70,7 +70,7 @@ const INITIALISER = `    MapsInitializer.initialize(
       applicationContext,
       MapsInitializer.Renderer.LATEST
     ) { renderer ->
-      android.util.Log.i("MadeiraExplorer", "Maps renderer: " + renderer.name)
+      android.util.Log.i("Proa", "Maps renderer: " + renderer.name)
       // ⚠ Written where JavaScript can read it (\`map/mapsRenderer.ts\`).
       //
       // Which renderer Play services actually gave us decides whether Google's
@@ -82,7 +82,7 @@ const INITIALISER = `    MapsInitializer.initialize(
       try {
         java.io.File(filesDir, "maps-renderer").writeText(renderer.name)
       } catch (error: Exception) {
-        android.util.Log.w("MadeiraExplorer", "Could not record the renderer", error)
+        android.util.Log.w("Proa", "Could not record the renderer", error)
       }
     }
 `;

@@ -34,6 +34,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { APP_NAME } from '../brand';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import type { TrackingQuality } from '../recording/trackingPreference';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
@@ -282,7 +283,7 @@ export default function SettingsView({
         {onOpenBatterySettings !== null ? (
           <Section
             title="If recording keeps stopping"
-            footnote="Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let this app keep running. Look for Madeira Explorer in the list."
+            footnote={`Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let this app keep running. Look for ${APP_NAME} in the list.`}
           >
             <Action
               label="Let this app keep running"

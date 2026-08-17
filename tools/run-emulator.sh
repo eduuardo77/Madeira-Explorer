@@ -33,10 +33,27 @@ fi
 #
 # `swiftshader_indirect` is slower to boot and the map is unmistakably there.
 # Override if a future host handles `host` correctly: MADEIRA_GPU=host bash …
+#
+# ⚠⚠ **THE GPU FLAG IS NOT THE WHOLE STORY, and the first version of this comment
+# claimed it was.** With swiftshader the map draws after a **fresh boot** and then
+# goes black again after an `am force-stop` and relaunch. So the honest statement
+# is: the map surface on this emulator is fragile across app restarts, and
+# swiftshader is the setting where it comes back.
+#
+# **If the map is black, cold-boot the emulator** rather than debugging the app.
+# The AVD reloads its snapshot by default, and a snapshot taken while the surface
+# was broken restores it broken — which is how this wasted a session in the first
+# place. `-no-snapshot-load` forces a genuinely cold boot:
+#
+#     MADEIRA_COLD=1 bash tools/run-emulator.sh
 GPU="${MADEIRA_GPU:-swiftshader_indirect}"
+COLD=""
+if [ -n "${MADEIRA_COLD:-}" ]; then
+  COLD="-no-snapshot-load"
+fi
 
 # ⚠ Independent of the GPU: Play services hands this emulator the **LEGACY**
 # Maps renderer (T-147), and Google's own dark map is a latest-renderer
 # feature. So the dark style cannot be judged here at any GPU setting.
 # `adb logcat -d | grep "renderer version"` says which one you got.
-exec "$ANDROID_HOME/emulator/emulator" -avd madeira -no-boot-anim -gpu "$GPU"
+exec "$ANDROID_HOME/emulator/emulator" -avd madeira -no-boot-anim -gpu "$GPU" $COLD

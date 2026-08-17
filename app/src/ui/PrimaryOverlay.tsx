@@ -43,7 +43,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
-import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
 const STAMP_MARK_SIZE = 34;
@@ -56,11 +56,13 @@ export type PrimaryOverlayProps = {
   /**
    * Which map is underneath (T-146).
    *
-   * ⚠ The chrome cannot be style-blind any more. Its circle is
-   * `colors.surface`, which measures **15.36:1** on Google's light map and
-   * **1.13:1** on our night one — the control does not disappear gradually,
-   * it disappears. The dark map arrived on 2026-08-15 and took the settings
-   * button with it.
+   * ⚠ The chrome cannot be style-blind, and it took two goes to get right.
+   * First it was `colors.surface` in both styles, which measures **15.36:1** on
+   * Google's light map and **1.13:1** on our night one — the control does not
+   * fade on the dark map, it vanishes. A hairline border fixed that and left the
+   * light map with a solid near-black disc as its quietest control, which is what
+   * looking at it on 2026-08-17 found. Now the whole treatment inverts with the
+   * map: `mapChrome` in `theme.ts`.
    */
   mapStyle: 'light' | 'dark';
   /**
@@ -99,6 +101,10 @@ export default function PrimaryOverlay({
   onOpenSettings,
   onToggleRecording,
 }: PrimaryOverlayProps) {
+  // The floating controls take their colours from the map underneath, not from
+  // the app's (dark-only) palette. See `mapChrome` in `theme.ts`.
+  const chrome = mapChrome[mapStyle];
+
   return (
     // `box-none` so the map underneath still receives pans and pinches —
     // only the controls themselves capture touches.
@@ -109,7 +115,21 @@ export default function PrimaryOverlay({
         onPress={onOpenSettings}
         style={({ pressed }) => [
           styles.gear,
-          mapStyle === 'dark' && styles.gearOnDarkMap,
+          // ⚠ Chrome follows the map, not the app (`theme.ts` → `mapChrome`).
+          // This used to be `colors.surface` in both styles, which on the light
+          // map drew a solid near-black disc — the heaviest object on a pale
+          // map, and the one control §3.2 wants quietest.
+          {
+            backgroundColor: chrome.surface,
+            // Elevation is what separates a white control from a pale map; see
+            // `mapChrome`. Zero on the dark map, where the border does that job.
+            elevation: chrome.elevation,
+            shadowColor: '#000000',
+            shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+            shadowRadius: chrome.elevation,
+            shadowOffset: { width: 0, height: 1 },
+          },
+          chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
           pressed && styles.pressed,
         ]}
       >
@@ -118,7 +138,7 @@ export default function PrimaryOverlay({
             as one (see `SettingsMark`). Still not three lines: a hamburger
             promises a drawer of destinations, and this is one screen with a
             handful of toggles (design brief §3.2, CONTEXT §6.5). */}
-        <SettingsMark size={SETTINGS_MARK_SIZE} color={colors.text} />
+        <SettingsMark size={SETTINGS_MARK_SIZE} color={chrome.content} />
       </Pressable>
 
       {/* The two bottom controls stack rather than share a row.
@@ -148,6 +168,17 @@ export default function PrimaryOverlay({
             onPress={onToggleRecording}
             style={({ pressed }) => [
               styles.recording,
+              {
+                backgroundColor: chrome.surface,
+                // Elevation is what separates a white control from a pale map; see
+                // `mapChrome`. Zero on the dark map, where the border does that job.
+                elevation: chrome.elevation,
+                shadowColor: '#000000',
+                shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+                shadowRadius: chrome.elevation,
+                shadowOffset: { width: 0, height: 1 },
+              },
+              chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
               isRecording && styles.recordingActive,
               pressed && styles.pressed,
             ]}
@@ -158,7 +189,7 @@ export default function PrimaryOverlay({
                 this button is now the primary action for anybody who has turned
                 background tracking off (T-146). Labelled with words, never an
                 icon alone (D-015). */}
-            <Text style={styles.recordingText}>
+            <Text style={[styles.recordingText, { color: chrome.content }]}>
               {isRecording ? 'Stop walk' : 'Start walk'}
             </Text>
           </Pressable>
@@ -203,19 +234,9 @@ const styles = StyleSheet.create({
     // a filled circle on a pale map needs no outline to be found, and the
     // outline was the most Android thing on this screen.
     borderRadius: radius.pill,
-    // Chrome sits on a light map, so it carries its own contrast rather than
-    // relying on whatever happens to be underneath it.
-    backgroundColor: colors.surface,
+    // ⚠ No `backgroundColor` here: it comes from `mapChrome` at render time,
+    // because it depends on which map is underneath.
   },
-  // A hairline, and only on the dark map. `colors.textMuted` measures 5.91:1
-  // against the night land — comfortably past the 3:1 a non-text control needs
-  // — while staying quiet enough that the button is still the least shouty
-  // thing on the screen, which is what §3.2 asks of it.
-  gearOnDarkMap: {
-    borderWidth: 1,
-    borderColor: colors.textMuted,
-  },
-
   bottom: {
     position: 'absolute',
     left: spacing.md,
@@ -231,13 +252,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     // A pill, matching the passport button opposite it.
     borderRadius: radius.pill,
-    backgroundColor: colors.surface,
+    // Filled from `mapChrome` at render time, like the gear.
   },
   // ⚠ Recording is signalled by the word on the button ("Stop recording"), and
   // this only reinforces it — D-015 forbids hue carrying the meaning alone.
   recordingActive: { borderWidth: 2, borderColor: colors.bad },
   recordingText: {
-    color: colors.text,
     fontSize: fontSize.body,
     fontWeight: '700',
   },

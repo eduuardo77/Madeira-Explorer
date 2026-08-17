@@ -33,6 +33,7 @@
  */
 
 import { GoogleMaps } from 'expo-maps';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import {
   GoogleMapsColorScheme,
   GoogleMapsMapType,
@@ -41,6 +42,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   PixelRatio,
+  StatusBar,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -48,6 +50,7 @@ import {
 } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getLevadaCourse } from '../content/levadaCourses';
+import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
@@ -60,16 +63,19 @@ import { isBackgroundTrackingAllowed } from '../recording/trackingSettings';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
+import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
 import PrimaryOverlay from '../ui/PrimaryOverlay';
-import { colors, fontSize, spacing } from '../ui/theme';
+import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
+import { buildCollectedMarks } from './collectedMarks';
 import { representativeGeofence } from './placeMarkers';
+import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { splitIntoSegments, traceBounds } from './traceGeoJson';
@@ -92,8 +98,32 @@ const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as Bounds;
  *
  * MapLibre took this as `fitBounds` padding; here it is fed to `cameraFit`,
  * which does the same arithmetic by hand (D-057).
+ *
+ * ⚠ **THE BOTTOM VALUE WAS 220 AND THAT WAS THE FRAMING BUG** (found by looking,
+ * 2026-08-17). `fitBounds` centres the trace in the area chrome does *not* cover,
+ * which is correct — but 220 pt overstated the chrome by a wide margin, so the
+ * "centre" sat high and the trace was drawn at 43% of screen height with the
+ * whole lower half left empty. On a coastal walk that half is featureless sea,
+ * and it read as the app failing to fill the screen.
+ *
+ * Measured against `PrimaryOverlay` instead of guessed: the passport pill is
+ * `MIN_TAP_TARGET` (60) plus `spacing.xl` (32) of bottom inset; the recording
+ * control, when shown, adds another 60 and a `spacing.sm` (8) gap. So the real
+ * numbers are 92 and 160 — and which one applies depends on whether the user
+ * granted Always, which is why this is a function now rather than a constant.
  */
-const CAMERA_PADDING = { top: 96, right: 48, bottom: 220, left: 48 };
+function cameraPadding(hasRecordingControl: boolean) {
+  const bottomChrome = hasRecordingControl
+    ? MIN_TAP_TARGET * 2 + spacing.sm + spacing.xl
+    : MIN_TAP_TARGET + spacing.xl;
+  return {
+    // The settings control plus the status bar it sits below.
+    top: MIN_TAP_TARGET + spacing.xl + (StatusBar.currentHeight ?? 0),
+    right: spacing.lg,
+    bottom: bottomChrome + spacing.md,
+    left: spacing.lg,
+  };
+}
 
 const EMPTY_PROGRESS: TripProgress = {
   collected: 0,
@@ -178,13 +208,49 @@ export default function NativeMapScreen({
   const [card, setCard] = useState<PlaceCard | null>(null);
   const [needsRecordingControl, setNeedsRecordingControl] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  /**
+   * Which places have actually been awarded, and the live zoom needed to size
+   * their marks (T-112). Zoom comes from `onCameraMove` because the user's own
+   * pans and pinches change it and nothing else tells us.
+   */
+  const [collectedIds, setCollectedIds] = useState<ReadonlySet<string>>(new Set());
+  const [places, setPlaces] = useState<readonly Place[]>([]);
+  const [zoom, setZoom] = useState<number | null>(null);
+  /**
+   * A place tapped on the map, as opposed to one arriving from the passport.
+   *
+   * ⚠ Kept separate from the `focusPlace` **prop** and merged below rather than
+   * duplicating the focus effect. That effect flies the camera, draws the
+   * course, sets the marker and builds the card; a second copy of it would be
+   * two places for the same behaviour to drift apart.
+   */
+  const [tappedPlace, setTappedPlace] = useState<FocusPlace | null>(null);
 
   const darkMap = darkMapPropsFor(styleName, supportsNativeDarkMap);
   const tracePaint = TRACE_PAINT[styleName];
   const coursePaint = COURSE_PAINT[styleName];
 
+  /**
+   * The marks for places already earned.
+   *
+   * ⚠ Only ever the **collected** ones — `collectedMarks.ts` explains why that
+   * is not the all-places layer the project lead deleted in D-052 revised.
+   * Falls back to the camera's own zoom before the first `onCameraMove` lands,
+   * so the marks appear on the first frame rather than after the first pan.
+   */
+  const collectedMarks = buildCollectedMarks(
+    places,
+    collectedIds,
+    zoom ?? camera?.zoom ?? 0,
+    PLACE_MARKER_PAINT[styleName].collected
+  );
+
   const frame = (bounds: Bounds): CameraFit | null =>
-    fitBounds(bounds, { width, height, padding: CAMERA_PADDING });
+    fitBounds(bounds, {
+      width,
+      height,
+      padding: cameraPadding(needsRecordingControl),
+    });
 
   useEffect(() => {
     let cancelled = false;
@@ -221,8 +287,19 @@ export default function NativeMapScreen({
           setIsRecording(recording);
         }
 
+        // The places, and which of them have been earned. Both are needed to
+        // mark the collected ones on the map (T-112).
+        const pack = getContentPack();
+        if (!cancelled) {
+          setPlaces(pack.places);
+        }
+
         const trip = await tripDao.getActiveTrip();
         if (trip !== null) {
+          const awarded = await stampAwardDao.getAwardedPlaceIds(trip.id);
+          if (!cancelled) {
+            setCollectedIds(awarded);
+          }
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
             // The same gap rule as before: where the recorder admits silence,
@@ -276,9 +353,15 @@ export default function NativeMapScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, tracePolylines]);
 
-  /** The passport asked for a place (T-115, D-052, D-055). */
+  /**
+   * Somebody asked for a place — the passport via the prop (T-115, D-052,
+   * D-055), or a tap on one of the collected marks (T-112). One effect, either
+   * way, so the two entry points cannot drift.
+   */
+  const requestedPlace = focusPlace ?? tappedPlace;
+
   useEffect(() => {
-    if (focusPlace === null || !ready) {
+    if (requestedPlace === null || !ready) {
       return;
     }
 
@@ -296,9 +379,9 @@ export default function NativeMapScreen({
         return;
       }
 
-      const geofence = representativeGeofence(focusPlace.place);
-      const course = hasCourse(focusPlace.place.category)
-        ? getLevadaCourse(focusPlace.place.id)
+      const geofence = representativeGeofence(requestedPlace.place);
+      const course = hasCourse(requestedPlace.place.category)
+        ? getLevadaCourse(requestedPlace.place.id)
         : null;
 
       cameraHeldByFocus.current = true;
@@ -320,17 +403,17 @@ export default function NativeMapScreen({
       setMarker([
         {
           coordinates: { latitude: geofence.lat, longitude: geofence.lon },
-          title: focusPlace.place.name,
+          title: requestedPlace.place.name,
         },
       ]);
 
       setCard(
         buildPlaceCard({
-          placeId: focusPlace.place.id,
-          name: focusPlace.place.name,
-          category: focusPlace.place.category,
-          collected: focusPlace.collected,
-          regionName: getRegionName(focusPlace.place.regionId),
+          placeId: requestedPlace.place.id,
+          name: requestedPlace.place.name,
+          category: requestedPlace.place.category,
+          collected: requestedPlace.collected,
+          regionName: getRegionName(requestedPlace.place.regionId),
           lat: geofence.lat,
           lon: geofence.lon,
           position,
@@ -360,12 +443,16 @@ export default function NativeMapScreen({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusPlace, ready]);
+  }, [requestedPlace, ready]);
 
   const closeCard = () => {
     setCard(null);
     setMarker([]);
     setCoursePolylines([]);
+    // ⚠ Must clear too, or the same mark can never be tapped twice: the effect
+    // is keyed on `requestedPlace`, so leaving it set means the second tap
+    // changes nothing and the card does not come back.
+    setTappedPlace(null);
   };
 
   const toggleRecording = () => {
@@ -415,6 +502,23 @@ export default function NativeMapScreen({
         // answer to a direct question, so for those few seconds it wins.
         polylines={[...tracePolylines, ...coursePolylines]}
         markers={marker}
+        // The places already earned (T-112). Circles rather than markers
+        // because a marker needs an image ref and therefore `expo-image`, which
+        // this app does not carry — see `collectedMarks.ts`.
+        circles={collectedMarks}
+        onCircleClick={(circle) => {
+          const place = places.find((candidate) => candidate.id === circle.id);
+          if (place !== undefined) {
+            // Same route in as the passport's *Show on map* (D-052), so a mark
+            // on the map and a stamp in the passport open the identical card.
+            // Only collected places are drawn, so `collected` is known.
+            setTappedPlace({ place, collected: true });
+          }
+        }}
+        // ⚠ The only source of the user's own zoom. Without it the marks keep
+        // the size they had when the camera was last set by the app, and a
+        // pinch makes them grow or shrink with the ground.
+        onCameraMove={(event) => setZoom(event.zoom)}
         // The dark/light choice, and which of the two dark maps it draws —
         // Google's own by default (T-147). `darkMode.ts` holds that decision
         // and the reason it is not obvious.
@@ -451,6 +555,40 @@ export default function NativeMapScreen({
         }}
       />
 
+      {/* ⚠ A scrim under the status bar (T-112, found by looking 2026-08-17).
+          Google draws its place and road labels right to the top of the view, so
+          "SÃO ROQUE" and "MONTE" collided with the clock and the battery icon —
+          two sets of white text over each other, neither readable.
+
+          Faked as stacked bands rather than a real gradient, because a gradient
+          needs `expo-linear-gradient` and this app does not carry it: four steps
+          over the status bar's own height read as smooth at this size, and a
+          single hard-edged block would look like a title bar the app does not
+          have. The colour is the map's own chrome colour, so it darkens the dark
+          map and lightens the light one — the same inversion as every other
+          floating control here. */}
+      {/* ⚠ The status bar's own icons have to invert with the map too, and
+          forgetting this made the first version of the scrim worse than no
+          scrim: `App.tsx` sets `style="light"` because every screen in this app
+          is dark, so on the **light** map a white clock was being laid over a
+          white scrim. The map is the one screen that is not always dark, so it
+          is the one screen that has to say so. Mounted here, below App's, and
+          the last one mounted wins. */}
+      <ExpoStatusBar style={styleName === 'dark' ? 'light' : 'dark'} />
+
+      <View style={styles.statusScrim} pointerEvents="none">
+        {SCRIM_BANDS.map((opacity, index) => (
+          <View
+            key={index}
+            style={{
+              flex: 1,
+              backgroundColor: mapChrome[styleName].surface,
+              opacity,
+            }}
+          />
+        ))}
+      </View>
+
       <PrimaryOverlay
         progress={progress}
         mapStyle={styleName}
@@ -483,8 +621,26 @@ function traceBoundsOf(points: [number, number][]): Bounds {
   }) as Bounds;
 }
 
+/**
+ * The scrim's opacity per band, densest against the top edge.
+ *
+ * Four bands, easing out: enough that the system clock sits on a settled ground,
+ * little enough that the map still plainly continues underneath. The last band is
+ * nearly clear so the scrim has no visible bottom edge.
+ */
+const SCRIM_BANDS = [0.55, 0.34, 0.16, 0.05];
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  statusScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    // A little past the status bar, so the fade finishes below the clock rather
+    // than at it. 24 is Android's own default where the platform reports none.
+    height: (StatusBar.currentHeight ?? 24) * 1.6,
+  },
   map: { flex: 1 },
   centred: {
     flex: 1,

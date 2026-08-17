@@ -38,7 +38,8 @@ import assert from 'node:assert/strict';
 import { CATEGORIES } from '../content/contentPack.ts';
 import { designFor, UNCOLLECTED } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
-import { colors } from './theme.ts';
+import { NIGHT_LAND } from '../map/googleNightStyle.ts';
+import { colors, mapChrome } from './theme.ts';
 
 /** Body text. Above WCAG's 4.5, because this is read outdoors. */
 const BODY = 5;
@@ -306,4 +307,46 @@ test('an uncollected sticker is visible as a SHAPE on the page', () => {
     contrastRatio(UNCOLLECTED.bandInk, UNCOLLECTED.band) >= BAND,
     'the uncollected name band is not readable'
   );
+});
+
+/**
+ * The map's floating chrome (T-112).
+ *
+ * ⚠ These controls are the one part of the app that does **not** live on the
+ * app's dark palette — they sit on whichever map the user chose, so they are
+ * measured against the map, not against `colors.background`. `mapChrome` has the
+ * reasoning; this holds the numbers.
+ */
+test('⚠ the glyph on a floating map control is readable in both map styles', () => {
+  for (const style of ['light', 'dark'] as const) {
+    const { surface, content } = mapChrome[style];
+    const ratio = contrastRatio(content, surface);
+    assert.ok(
+      ratio >= BODY,
+      `map chrome glyph on the ${style} map is ${ratio.toFixed(2)}:1, below ${BODY}`
+    );
+  }
+});
+
+test('⚠ a map control that does not contrast with its map must carry an edge or a shadow', () => {
+  // Google's light land, sampled from a device screenshot 2026-08-17. White
+  // chrome on it is ~1.06:1 — legible inside itself and invisible against the
+  // map — which is exactly why `mapChrome.light` carries elevation. The dark
+  // control has the same problem against the night ground and solves it with a
+  // border. Either answer is acceptable; *neither* is not, and that is the thing
+  // worth failing a build over.
+  const grounds = { light: '#F2EFE9', dark: NIGHT_LAND } as const;
+
+  for (const style of ['light', 'dark'] as const) {
+    const chrome = mapChrome[style];
+    const againstMap = contrastRatio(chrome.surface, grounds[style]);
+    if (againstMap >= 3) {
+      continue;
+    }
+    assert.ok(
+      chrome.border !== null || chrome.elevation > 0,
+      `${style} map chrome is ${againstMap.toFixed(2)}:1 against its map and has ` +
+        'neither a border nor a shadow to separate it'
+    );
+  }
 });

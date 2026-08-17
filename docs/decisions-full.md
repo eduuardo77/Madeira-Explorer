@@ -3452,3 +3452,88 @@ a field.
 **Its weakness, stated plainly.** It needs somebody to bother. With no prompt and no reward, most
 users will never open Settings and press it. That is the price of the position, and it is why the
 recommendation in OD-11 was this *first* rather than this *only*.
+
+---
+
+## D-070 — The map shows the places you earned, and nothing else. Chrome follows the map.
+
+**Status:** Provisional · **Date:** 2026-08-17 · **Tasks:** T-152, T-153, T-112
+
+### The problem, found by looking rather than by testing
+
+The primary screen said `1 / 60` in its hero and **marked nothing on the map**. Worse, Google's
+own POI layer *was* drawing the collected place — Forte de São Tiago — identically to five places
+the user had never visited. The app's only achievement was indistinguishable from basemap clutter,
+on the screen whose entire purpose is showing what you have done.
+
+Separately, the app's chrome is a **dark-only palette** (`theme.ts`), and the map is the one
+surface whose brightness the user chooses. On the light map the settings control drew as a solid
+near-black disc — the heaviest object on a pale map, and the one control design brief §3.2 wants
+quietest. Its 15.36:1 contrast had been read as a pass when it was the symptom.
+
+### The decision
+
+1. **Google's POI pins come off both map styles.** Visibility rules only, no colour changes, so
+   Google keeps drawing the cartography D-057 chose them for. A test fails the build on any
+   `color` styler.
+2. **Collected places are marked; nothing else is.** Tappable, opening the same card the passport
+   opens (D-052).
+3. **Map chrome inverts with the map.** White control and dark glyph on the light map, dark control
+   and light glyph on the dark one — plus the status bar's own icons, which is the part that was
+   missed first time and made a white clock sit on a white scrim.
+
+### What was rejected, and why
+
+- **Marking all 60 places.** This is the layer the project lead deleted by name in D-052 revised
+  (*"I would like to delete them"*), and that was right: sixty dots compete with the one line D-032
+  makes the entire visual product. Only *earned* places are drawn — 1 to 20, not 60 — which is a
+  reward rather than a directory. The passport keeps the "where next" job D-058 gave it.
+- **Markers with a custom icon.** `expo-maps` types `icon` as `SharedRefType<'image'>`, which in
+  practice means `expo-image` — a dependency this app does not carry and would have to audit for
+  network behaviour (D-043) on an app whose whole claim is that nothing leaves the device. Without
+  an icon a marker is Google's default red pin: louder than the trace, and visibly another app's
+  furniture. Circles take our own colours, so the mark is ours.
+- **Inventing a marker colour.** `placeStyle.ts` already carried a designed, contrast-measured
+  `collected` state, written for MapLibre's point-sized circles and never wired to anything. The
+  work was the unit bridge — `expo-maps` circles take ground metres — not the design.
+- **A border on the light chrome.** White on Google's light land is ~1.06:1, so the control needs
+  separating from the map. An outline is what §3.2 already removed once for looking like an Android
+  control; elevation is what floating map controls use on both platforms. ⚠ A shadow's contrast
+  cannot be measured, so T-065 outdoors is the only judge of whether it is findable in sunlight.
+
+### What is deliberately not done
+
+The **native dark map on the latest renderer** still draws Google's POIs. Layering the rules over
+`colorScheme: DARK` ought to work and cannot be verified on an emulator that only ever loads
+LEGACY (T-147). Guessing there risks the silent failure that trap is about — a user asks for dark
+and quietly gets light. **T-154**, and it needs the phone.
+
+---
+
+## D-071 — The map is the product. The stamp system is not the top priority.
+
+**Status:** Provisional — **stated by the project lead 2026-08-17 and recorded for confirmation**
+
+### What they said
+
+> *"How's the main page (which is the most important) the map with the highlighted path you've been
+> through. Also, if the UI is good. The stamp even though is important is not on top of the priority
+> list. WalkNYC is pretty successful and hasn't even developed their badge system."*
+
+### Why this needs writing down rather than just acting on
+
+It sits in tension with three **Accepted** decisions: D-002 (stamps are the score, not coverage),
+D-003 (passport stamps as the reward metaphor) and D-049 (the ~60-place denominator stays). Those
+are not overturned — the project lead was explicit that stamps are *still important* — so this is a
+**sequencing** decision, not a scope cut, which is a much cheaper thing to change and a much easier
+thing to reverse.
+
+**What it changes in practice:** polish, review effort and any remaining v1 budget go to the map
+screen and the trace before they go to the stamp system. T-152/T-153 are the first work done under
+it.
+
+**What it does not change:** the hero number stays stamps (D-002), the passport stays the way into a
+place (D-052/D-058), and nothing in the crediting rules is relaxed.
+
+⚠ **Marked Provisional rather than Accepted deliberately** (CONTEXT §9): a decision that quietly
+reorders three Accepted ones should be confirmed in as many words, not inferred from one remark.

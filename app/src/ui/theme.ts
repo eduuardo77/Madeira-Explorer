@@ -98,6 +98,64 @@ export const colors = {
   tint: '#5AA9FF',
 } as const;
 
+/**
+ * The floating controls that sit **on the map**, per map style (T-112).
+ *
+ * ⚠ WHY THE APP'S PALETTE CANNOT SERVE THIS, FOUND BY LOOKING 2026-08-17
+ * ---------------------------------------------------------------------
+ * Everything above is a **dark** palette — this is a dark app, and every screen
+ * in it is dark. The map is the exception: the user picks its style, and on the
+ * light map `colors.surface` (`#1C1C1E`) drew the settings control as a **solid
+ * near-black disc** — the heaviest, darkest object on a pale map, and therefore
+ * the first thing the eye lands on. Design brief §3.2 asks for the opposite in as
+ * many words: *the least shouty thing on the screen*. Its 15.36:1 against
+ * Google's light map was being read as a pass when it was actually the symptom.
+ *
+ * So map chrome follows the map, which is what every maps app on either platform
+ * does: a white control on the light map, a dark one on the dark map. The glyph
+ * inverts with it. Nothing here changes the app's own screens.
+ *
+ * ⚠ The dark map still needs the hairline (`border`) that T-112 added: the dark
+ * circle measures 1.13:1 against the night ground, so its *edge* is what makes it
+ * findable. The light map needs no border — a white disc on a pale map is found
+ * by its shadowless contrast, and an outline there was the most Android thing on
+ * the screen.
+ *
+ * Held to the contrast floors by `contrast.test.ts`.
+ */
+export const mapChrome = {
+  light: {
+    /** The circle or pill. White, like Apple Maps' floating controls. */
+    surface: '#FFFFFF',
+    /** The glyph or label on it. Near-black, so it reads at a glance. */
+    content: '#1C1C1E',
+    /**
+     * ⚠ **No border, and therefore a shadow — this is not a style flourish.**
+     *
+     * White on Google's light land (~`#F2EFE9`) measures about **1.06:1**. The
+     * disc is legible *inside* itself and nearly invisible *against the map*, so
+     * something has to separate the two. An outline would do it and looks like
+     * the Android control this screen already removed once (§3.2); elevation is
+     * what every floating map control on either platform uses, and it is why
+     * they read as sitting above the map rather than being drawn on it.
+     *
+     * ⚠ **A shadow's contrast cannot be measured**, so no test can hold this the
+     * way the colour pairs are held. T-065 — outdoors, at arm's length — is the
+     * judge of whether a white control is findable on a sunlit map.
+     */
+    border: null,
+    elevation: 3,
+  },
+  dark: {
+    surface: '#1C1C1E',
+    content: '#FFFFFF',
+    /** 1.13:1 against the night ground, so the *edge* is what finds it. */
+    border: '#6E6E73',
+    /** No shadow: a dark shadow under a dark control on dark ground is nothing. */
+    elevation: 0,
+  },
+} as const;
+
 /** Minimum tap target, in dp. D-015: 60, not 44. */
 export const MIN_TAP_TARGET = 60;
 

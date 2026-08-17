@@ -641,6 +641,33 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       T-018. The simplification tolerance (16 m) is the first to revisit: the sweep says accuracy
       barely moves between 8 m and 40 m, and it **cannot see** the thing that would be lost — a
       real switchback, which this island's paths are made of. ⇠ T-059, D-059
+- [x] **T-152** ✅ **Google's POI pins off the light map, 2026-08-17 (T-112, D-032).**
+      The light map shipped with **no style at all**, so Google's whole POI layer drew — six
+      saturated pins on one screen of Funchal. ⚠ **One of them was Forte de São Tiago, a place the
+      user had collected**, drawn identically to five they had not: the app's achievement was
+      indistinguishable from basemap clutter. `mapClutter.ts`, visibility rules only, and a test
+      fails the build on any `color` styler — a recoloured basemap is the cartography obligation
+      D-057 exists to avoid. Parks keep their geometry, road names stay, road icons go.
+      — ⚠ **The night style had done this months earlier**, which is why nobody reviewing the dark
+      map ever saw it.
+- [x] **T-153** ✅ **The map now shows what you have earned, 2026-08-17 (T-112, D-058).**
+      The hero said `1 / 60` and nothing on the map marked that one place. `collectedMarks.ts`
+      draws **only collected** places, tappable into the same card the passport opens (D-052).
+      — ⚠ **Not the layer D-052 deleted.** That was all ~80 places competing with the trace; this
+      is 1–20 earned ones, and it is the reward rather than a directory.
+      — The paint is `placeStyle.ts`'s existing measured `collected` state, written for MapLibre's
+      point-sized circles and never wired to anything. The work was the unit bridge: `expo-maps`
+      circles take **ground metres**, so the radius is recomputed from the live zoom via
+      `onCameraMove`. Nothing below z10, where the dots read as speckle.
+      — **Circles, not markers**: `icon` needs `SharedRefType<'image'>` and therefore `expo-image`,
+      a dependency this app does not carry and would have to audit (D-043). Without an icon a
+      marker is Google's default red pin — louder than the trace and somebody else's app.
+- [ ] **T-154** Apply the clutter rules to the **native dark map on the latest renderer**
+      ⇠ a physical Android
+      — Google's own dark map still draws its POIs. Layering `mapClutter.ts` over
+      `colorScheme: DARK` ought to work and **cannot be verified on this emulator**, which only
+      ever loads LEGACY (T-147). Guessing risks the silent failure that trap is about: a user asks
+      for dark and quietly gets light.
 - [x] **T-149** ✅ **The app asks, 2026-08-16.** A levada it nearly credited raises one question
       on the passport, under the hero and above the rows: *"Did you walk the Long Canal Trail?
       Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure."*

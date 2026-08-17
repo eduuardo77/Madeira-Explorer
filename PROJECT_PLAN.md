@@ -524,34 +524,29 @@ batch.
 
 *Raised by Claude. No code has been changed — this reverses nothing and proposes nothing yet.*
 
-### OD-4 — Monetisation
-⚠ **RESEARCHED 2026-08-17: [`docs/monetization-options.md`](docs/monetization-options.md).**
-Seven models costed, with store fees, the competitor's actual prices and the market's size.
-**Awaiting the project lead**, who set the goal as *break even and finally see some online money*,
-and asked it be treated as a premium app.
+### ~~OD-4 — Monetisation~~ → **RESOLVED 2026-08-17**
+**Accepted as D-072**, after a long debate with the project lead. Research:
+[`docs/monetization-options.md`](docs/monetization-options.md).
 
-**The finding that reframes it: break-even is $25.** Google Play charges $25 once and nothing
-annually; the Maps SDK is free; there are no servers (D-001). Apple's $99/yr only applies if iOS
-ships, and there is no Mac. At €4.99 net of Play's 15%, **six sales cover it, ever.** So pricing is
-a positioning decision, not a revenue one.
+> **Free on Google Play. The trace and the recorder are free forever. The first levada is free.
+> Ten stamps free. Then €4.99 unlocks the rest, and every stamp already earned stays earned.**
 
-⚠ **RECOMMENDATION REVISED after the project lead's pushback (Part 2 §12): ship v1 FREE on Google
-Play with no IAP at all**, and make the first paid thing the souvenir *video*, which does not exist
-yet and so takes nothing away.
+**Break-even is $25** — Play charges that once and nothing annually, the Maps SDK is free, there are
+no servers, and Apple's $99/yr only applies once iOS ships. Six sales cover it.
 
-**The store's own rule decides the reversibility question**, and it runs opposite to the intuition:
-*"Once your app has been offered for free, the app can't be changed to paid"* — while paid→free is
-allowed. So on Play, **paid is the reversible choice and free is the permanent one.** Apple allows
-both directions.
+⚠ **One-way on Android.** Play forbids free→paid permanently, so charging up front later would need
+a new app with a new package name. Apple allows both directions.
 
-Free still wins because **installs are the binding constraint, not money**: proof before iOS needs
-retention and Android Vitals, and a paid launch with no marketing may produce neither revenue nor
-data. v1 still ships **zero billing code**, so *"nothing leaves your phone"* stays literally true
-and testable (T-117b, T-127).
+⚠ **Gate the reward, never the recorder** — and **do not gate the geofence set or the award pass**,
+only the display. The promise "buy later, get everything" is silent-failure territory of exactly the
+T-145 kind.
 
-**The printed poster stays parked, and the research strengthened D-014**: selling an object makes us
-merchant of record — VAT registration, EU withdrawal rights, shipping and returns — all of which the
-app stores currently do for free. Ads remain ruled out permanently.
+**Deferred by the project lead, not blocked:** whether the timelapse video sits behind the same
+paywall; and making the stamps appealing enough to convert — which ⚠ **puts the passport back on the
+critical path and is in tension with D-071.**
+
+**Ads remain ruled out permanently. Print-on-demand is dropped** — the project lead's own verdict:
+it turns a software project into logistics, shipping and e-commerce.
 
 ### OD-5 — Cruise-ship day-trippers as a target segment
 **Not blocking, affects content curation.**

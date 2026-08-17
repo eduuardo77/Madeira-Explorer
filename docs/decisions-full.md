@@ -3698,3 +3698,109 @@ collecting nothing ourselves.**
 
 If the project lead would rather have €200 and 40 users than 2,000 users and €0, the original
 paid-up-front entry is the better plan. This turns on their stated ordering, not on arithmetic.
+
+### D-072 FINAL — **Accepted 2026-08-17** by the project lead, after a long debate
+
+> **Free on Google Play. The trace and the recorder are free forever. The first levada is free.
+> Ten stamps free. Then €4.99 unlocks the rest, and every stamp already earned stays earned.**
+
+The project lead's words on accepting it: *"after a lot of debate I'm happy with the decision. The
+only downside is that it may constrain revenue, but I'm okay with that. Conversion might not be the
+best."* ⚠ **Recorded because it is the trade being chosen deliberately, not overlooked.**
+
+#### The rules, precisely
+
+1. **Recording is never gated.** The recorder, the trace, the map filling in, the souvenir still
+   image — free forever, for everybody. *Gate the reward, never the recorder.*
+2. **Ten stamps free**, any ten, the user's own choice of which.
+3. **The first levada stamp is always awarded and shown, in addition to the ten**, whenever it
+   happens — even at 10/10. So the free tier is at most **eleven visible stamps, one of which is
+   guaranteed to be a levada.**
+4. **€4.99** unlocks the remaining places. One purchase, non-consumable, no subscription.
+5. **Awards never stop.** Past the paywall the app keeps evaluating and **storing** stamps silently.
+   Buying later reveals everything earned in the meantime.
+
+#### Why the first levada is guaranteed (the project lead chose this explicitly)
+
+Sixteen of the sixty places are viewpoints, many of them roadside. **A visitor could collect ten in
+a single driving day** — Pico dos Barcelos, Cabo Girão, a few villages — and hit the paywall having
+never walked a levada, never seen the trace draw under canopy, never earned a stamp that felt like
+work. They would be paying on **pressure rather than delight**, and judging a hiking app they never
+hiked with.
+
+The guarantee means **everybody who ever sees a paywall has already had the experience the money is
+for.**
+
+#### ⚠⚠ THE IMPLEMENTATION TRAP, and it is the T-145 shape
+
+**Do not gate the geofence set or the award pass. Gate only the display.**
+
+The promise in rule 5 — buy later, get everything — is only true if the app **keeps monitoring all
+sixty places and keeps writing awards** while the user is unpaid. An obvious-looking optimisation
+("why monitor 60 geofences for a free user who can only see 11?") would **silently break the
+retroactive promise**, and nothing would fail: no crash, no test, no error. The user would simply
+pay on day six and get less than they were promised, with no way to tell.
+
+That is exactly the shape of **T-145**, where `refreshGeofences` had one caller and 399 passing tests
+could not see that no stamp could ever be awarded. Anyone touching `geofenceSelection`,
+`stampAwards` or `runAwardPass` for performance reasons must read this paragraph first.
+
+#### The one design question left inside the decision
+
+A free user at the cap may have **earned more than they can see** — say 18, showing 11. Does the app
+say so?
+
+- **Saying nothing** is honest but wastes the strongest possible unlock moment.
+- **"7 more stamps are waiting"** is true, and it is the moment the sunk-progress argument was built
+  for — but repeated, it becomes the nagging the project lead explicitly did not want.
+
+**Leaning:** state it **once, quietly, on the passport**, never as a notification (D-011's cap is
+already spent) and never as a repeating banner (design brief §3 and the reference app's failure).
+Not settled.
+
+#### What was rejected at the last step, and why
+
+- **A distance cap ("x miles free").** Killed on engineering grounds, not taste: `movementPolicy.ts`
+  says *"It never distinguishes walking from driving… Madeira's gradients and Funchal's traffic
+  compress driving into walking [speeds]"* — the classification is deferred (T-034a, D-028) and is
+  unreliable *here specifically*. So a cap would meter driving too, and a user would burn it on the
+  45 km drive to Porto Moniz. Worse, it gates the **recorder**: a wall landing two hours into a
+  levada either destroys unrepeatable data or fakes a broken map.
+- **Multiple simultaneous limits.** One limit is dignified; three is a maze. A user who cannot tell
+  which cap they hit, or how close they were, is frustrated by the *rules*, not the price.
+- **The Funchal-only geographic tier.** Measured against the pack: Funchal holds **8 of 60 places
+  and zero levadas** — five landmarks, one beach, one viewpoint, one village. It would have given
+  away city forts and paywalled the entire reason people come.
+- **A time gate.** Recording-continues made it better than a normal trial, but a clock started at
+  install punishes the **pre-trip install** OD-10's whole strategy depends on; moving the clock to
+  trip start then needs a deadline notification, and **D-011 caps notifications at two per trip**,
+  both already spent.
+- **Subscriptions.** The audience is a tourist who stays one week and leaves. Near-total month-one
+  churn, and the forgot-to-cancel pattern is what earns one-star reviews — as **Komoot is being
+  publicly punished for right now**.
+- **Paid up front.** ⚠ Still the only option with **zero billing code and zero privacy cost**, and
+  the only one Play lets you reverse. Rejected because it forfeits the organic discovery this
+  project needs more than it needs early revenue (§12).
+
+#### Consequences to carry forward
+
+⚠ **This puts the stamps back on the critical path, and it is in tension with D-071.** D-071 recorded
+the project lead's instruction that *the map is the product and the stamp system is not top
+priority*. **All the revenue now rests on the passport being desirable enough to buy.** They spotted
+it themselves — *"we'll need then to make the stamps appealing enough to bring more revenue"* — and
+parked it. **D-071 should be revisited when that work starts**, because monetising the passport
+promotes it whether or not the priority list says so.
+
+⚠ **Open, and deliberately not decided today:** whether the **timelapse video** of your walk sits
+behind the same paywall or a separate one. The project lead: *"I'm still considering… I'll decide
+that in the future."* It does not exist yet (T-105b-v2), so nothing is blocked.
+
+⚠ **The numbers are guesses.** Ten stamps and €4.99 are in the same class as D-068's 45 minutes: set
+by argument, tunable against real trips (T-134), and **not to be defended as if they were measured.**
+
+#### The cost of going free, restated so it is never a surprise
+
+**Google Play forbids free→paid permanently.** *"Once your app has been offered for free, the app
+can't be changed to paid."* Charging up front on Android would require a new app with a new package
+name. **This decision is one-way on that platform.** Apple allows both directions, so paid-up-front
+remains testable on iOS if it ever appeals.

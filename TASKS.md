@@ -3,7 +3,7 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-17 — the **Sensor Logger importer** (T-021), so a real walk becomes a
+**Last updated:** 2026-08-17 — **OD-4 resolved (D-072): free on Play, 10 stamps + your first levada free, €4.99 unlocks the rest** (T-155–T-159). Also — the **Sensor Logger importer** (T-021), so a real walk becomes a
 fixture and the app's own `cleanTrace` can be run against it; plus three checkboxes that were
 stale — **T-107**, **T-108** and **T-130** all shipped on 2026-08-16 and were still unticked.
 **Previously 2026-08-16** — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
@@ -662,6 +662,58 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Circles, not markers**: `icon` needs `SharedRefType<'image'>` and therefore `expo-image`,
       a dependency this app does not carry and would have to audit (D-043). Without an icon a
       marker is Google's default red pin — louder than the trace and somebody else's app.
+- [ ] **T-155** **The free tier and the unlock (D-072)** ⇠ T-071, T-074
+      — **The rules, and they are exact.** Recording, the trace and the souvenir still are free
+      forever. **Ten stamps free**, the user's own choice of which. **The first levada stamp is
+      always awarded and shown in addition to the ten**, whenever it happens, even at 10/10 — so the
+      free tier is at most **eleven visible stamps, one guaranteed to be a levada**. €4.99
+      unlocks the rest.
+      — **Why the levada is guaranteed:** 16 of the 60 places are viewpoints, many roadside, so a
+      visitor could collect ten in one driving day and hit the paywall **having never walked a
+      levada**. They would be paying on pressure rather than delight, judging a hiking app they
+      never hiked with.
+      — ⚠⚠ **DO NOT GATE THE GEOFENCE SET OR THE AWARD PASS. GATE ONLY THE DISPLAY.** D-072 promises
+      that a user who buys later receives everything earned in the meantime, which is only true if
+      the app keeps monitoring **all sixty** places and keeps **writing** awards while unpaid. The
+      obvious optimisation — "why monitor 60 geofences for a user who can see 11?" — **breaks that
+      promise silently**: no crash, no failing test, no error, and the user simply gets less than
+      they paid for. **This is the T-145 shape.** Read T-145 before touching `geofenceSelection`,
+      `stampAwards` or `runAwardPass` for performance.
+      — **Pure/impure split as everywhere else:** the entitlement rule (how many are visible, and
+      whether the levada exemption applies) is arithmetic and belongs in its own tested module. The
+      billing wrapper sits beside it.
+      — ⚠ **Numbers are guesses.** Ten and €4.99 are the same class as D-068's 45 minutes: set by
+      argument, tunable against real trips (T-134), never to be defended as measured.
+- [ ] **T-156** **Play Billing, and the privacy claim it costs** ⇠ T-155, T-117
+      — A single non-consumable product. StoreKit 2 can validate on-device via JWS with no server of
+      ours, but **Play's `queryPurchasesAsync` makes a network call when its cache expires**.
+      — ⚠ **This is the first time the app talks to the network on its own account.** It does **not**
+      break *"we collect nothing"* — no data of ours leaves the device — but it **does** break
+      *"this app makes no network requests"*, which is the stronger claim and the one written into
+      `docs/store-privacy-answers.md`, D-044 and the Data Safety form.
+      — **Required before shipping it:** re-run D-043's network audit against the billing library,
+      and reword the privacy copy to *"nothing leaves your phone except a purchase you started"*.
+      **T-117b and T-127 must be restated**, not quietly failed.
+      — Restore-purchases must work offline after first sync, because the user is in a levada valley.
+- [ ] **T-157** **Say what is waiting, once** ⇠ T-155
+      — A free user at the cap may have **earned more than they can see** — 18 collected, 11 shown.
+      Saying nothing is honest but wastes the best unlock moment; saying it repeatedly is the nagging
+      the project lead explicitly did not want.
+      — **Leaning: state it once, quietly, on the passport.** Never a notification — **D-011's cap of
+      two per trip is already spent** — and never a repeating banner, which is the failure design
+      brief §3 watches for in the reference app. **Not settled.**
+- [ ] **T-158** *Deferred by the project lead:* **make the stamps worth buying** ⇠ T-155
+      — All the revenue now rests on the passport being desirable. Their words: *"we'll need then to
+      make the stamps appealing enough to bring more revenue. But lets leave that for the future."*
+      — ⚠ **This is in tension with D-071**, which recorded that the map is the product and the stamp
+      system is not top priority. Monetising the passport promotes it whether or not the priority
+      list says so. **Revisit D-071 when this starts.**
+- [ ] **T-159** *Undecided:* **whether the timelapse video is behind the paywall** ⇠ T-105b-v2, D-072
+      — The project lead: *"I'm still considering putting the timelapse video of where you've walked
+      behind a paywall, but I'll decide that in the future."* Nothing is blocked — it does not exist
+      yet. ⚠ The argument to weigh is D-013: the souvenir is the distribution strategy, so charging
+      for it taxes the growth engine. The **still image stays free** either way, which is what makes
+      charging for the video defensible at all.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

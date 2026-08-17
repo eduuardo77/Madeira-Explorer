@@ -36,18 +36,25 @@
  * the parks. Same for road geometry and road name labels: this app is used to
  * find out where you have been, and a map with no road names cannot answer that.
  *
- * ⚠ WHAT THIS DOES NOT COVER, AND WHY IT IS NOT PRETENDED OTHERWISE
- * -----------------------------------------------------------------
- * The **native dark map on the latest renderer** (`darkMode.ts`: Google's own,
- * `mapStyleJson === undefined`) still draws Google's POIs. Layering these rules
- * on top of `colorScheme: DARK` ought to work and **cannot be verified here** —
- * Play services hands this project's emulator the LEGACY renderer (T-147), so
- * the one combination that needs checking is the one combination unreachable
- * without a device. Applying an unverified style to that path risks the exact
- * silent failure T-147 documents: a user asks for dark and quietly gets light.
- * So it is left alone, and left written down. See `TASKS.md` T-154.
+ * ⚠ EVERY PATH GETS THE SAME RULES, ON THE PROJECT LEAD'S INSTRUCTION
+ * -------------------------------------------------------------------
+ * *"Just make sure light and dark mode are the same, that's really important."*
+ * (2026-08-17.) It had **not** been true: this module started as a light-map fix
+ * while the native dark map on the latest renderer kept drawing Google's POIs, so
+ * one setting changed which product you were looking at. All three style paths now
+ * compose these rules — light, the authored night style, and Google's own dark —
+ * and `darkMode.test.ts` fails the build if what they hide ever diverges again,
+ * with a single named exception for a road casing that only matters on a dark
+ * ground.
  *
- * Pure data, like every other style in this folder. Tested in `mapClutter.test.ts`.
+ * ⚠ **The native-dark path is still the one nobody here can verify** (T-154). Play
+ * services hands this project's emulator the LEGACY renderer, so "Google's dark map
+ * *plus* a style JSON" is unreachable without a device. These rules change no
+ * colour, so `colorScheme: DARK` should still decide the palette — but if a real
+ * phone ever shows a *light* map after the user chose dark, this is the first
+ * suspect and `HIDE_GOOGLE_POIS` turns it off in one line.
+ *
+ * Pure data, like every other style in this folder. Tested in `darkMode.test.ts`.
  */
 
 /** One Google Maps style rule. Same shape as `googleNightStyle.ts` uses. */
@@ -58,34 +65,81 @@ export type ClutterStyleRule = {
 };
 
 /**
- * The rules, in the order Google applies them — later rules win, so the
- * narrowing exception for parks has to follow the blanket `poi` rule.
+ * ⚠⚠ **THE ONE SWITCH. Flip this line to put Google's POI pins back.**
+ *
+ * The project lead has not settled this (2026-08-17): *"Hiding google POI's might
+ * not be definitive. I'm still considering it. I feel hiding it lowers the google
+ * OEM feel."* That is a real cost and the same argument that won D-057 and the
+ * native dark map — the value of the platform's map is partly that it looks like
+ * the platform's map, and a stripped one looks like ours.
+ *
+ * So it is **one boolean**, not a decision spread across three style paths. And
+ * because the same rules feed every path (see `POI_RULES` below), flipping it
+ * cannot leave the light map and the dark map disagreeing — which was the state
+ * this replaced, and which is the thing the project lead asked to be certain of:
+ * *"Just make sure light and dark mode are the same, that's really important."*
  */
-export const MAP_CLUTTER_RULES: readonly ClutterStyleRule[] = [
-  // Every point of interest Google knows about: no pin, no glyph, no name.
-  // `labels` covers the text and the icon together, which is what the pin is.
-  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+export const HIDE_GOOGLE_POIS = true;
 
-  // ⚠ Business POIs go entirely, geometry included. A restaurant's footprint is
-  // a coloured blob with no label on it once the rule above lands, which reads
-  // as a rendering fault rather than as a restaurant.
-  { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+/**
+ * Hiding Google's points of interest — the part that is **under the switch**.
+ *
+ * Empty when the switch is off, so every style path shows Google's POIs together
+ * or hides them together. `mapClutter.test.ts` asserts exactly that.
+ */
+export const POI_RULES: readonly ClutterStyleRule[] = HIDE_GOOGLE_POIS
+  ? [
+      // Every point of interest Google knows about: no pin, no glyph, no name.
+      // `labels` covers the text and the icon together, which is what the pin is.
+      { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
 
-  // Parks and natural features keep their shape — the green is orientation —
-  // and lose only their names. This rule follows the blanket one on purpose:
-  // it puts the geometry back that `poi` would otherwise have taken.
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
-  { featureType: 'poi.attraction', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
+      // ⚠ Business POIs go entirely, geometry included. A restaurant's footprint
+      // is a coloured blob with no label on it once the rule above lands, which
+      // reads as a rendering fault rather than as a restaurant.
+      { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
 
-  // Bus stops and station pins, which on a city map are dense and which this
-  // app has no use for at all — it is not a transit app and never navigates
-  // (D-018).
+      // Parks and natural features keep their shape — the green is orientation —
+      // and lose only their names. These follow the blanket rule on purpose: they
+      // put back the geometry `poi` would otherwise have taken.
+      { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
+      { featureType: 'poi.attraction', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
+    ]
+  : [];
+
+/**
+ * Hidden in both styles regardless of the switch, because these are **not**
+ * about the OEM feel.
+ *
+ * ⚠ Deliberately outside `HIDE_GOOGLE_POIS`. Turning Google's POIs back on
+ * should not also bring back the yellow ER/VR road shields: on the night map
+ * those measured as the brightest thing on screen after the trace, which
+ * `googleNightStyle.ts` found by looking at it. That is a palette finding, not a
+ * preference, and it must survive the switch being flipped either way.
+ */
+export const ALWAYS_HIDDEN_RULES: readonly ClutterStyleRule[] = [
+  // Bus stops and station pins, dense on a city map, and useless to an app that
+  // never navigates (D-018).
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
 
-  // ⚠ Road *names* stay; the little shields and icons on them go. Knowing you
-  // drove the ER101 is exactly the kind of thing this map is for, so the text
-  // is not touched — only the pictograms competing with the trace.
+  // ⚠ Road *names* stay; the shields and pictograms on them go. Knowing you drove
+  // the ER101 is exactly what this map is for, so the text is untouched.
   { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+
+  // ⚠ Administrative boundaries. **Moved here from `googleNightStyle.ts`**, where
+  // it had been the dark map's private opinion: they mean nothing to a visitor and
+  // they cross the island in straight lines that read as routes. That is a
+  // judgement about content, so it belongs to both styles — and it is one of the
+  // two things the parity test caught when it was first written.
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
+];
+
+/**
+ * Everything this module hides, in the order Google applies it — later rules
+ * win, so the narrowing exceptions for parks follow the blanket `poi` rule.
+ */
+export const MAP_CLUTTER_RULES: readonly ClutterStyleRule[] = [
+  ...POI_RULES,
+  ...ALWAYS_HIDDEN_RULES,
 ];
 
 /**

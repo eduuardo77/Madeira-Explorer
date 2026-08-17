@@ -3537,3 +3537,31 @@ place (D-052/D-058), and nothing in the crediting rules is relaxed.
 
 ⚠ **Marked Provisional rather than Accepted deliberately** (CONTEXT §9): a decision that quietly
 reorders three Accepted ones should be confirmed in as many words, not inferred from one remark.
+
+### D-070 amended, 2026-08-17 — the POI decision is one switch, and it is not settled
+
+The project lead, on seeing it: *"Hiding google POI's might not be definitive. I'm still
+considering it. I feel hiding it lowers the google OEM feel."* Followed by the part that **is**
+settled: *"Just make sure light and dark mode are the same, that's really important."*
+
+Both are right, and the second exposed a real defect in the first implementation. Hiding POIs
+began as a light-map fix; the authored night style had hidden them for months; and **Google's own
+dark map on the latest renderer kept drawing them.** Three paths, three answers — so the same trip
+looked like a different product depending on a setting and a device's renderer.
+
+**What changed:**
+
+- `HIDE_GOOGLE_POIS` is a **single boolean** in `mapClutter.ts`. Flipping it restores Google's POI
+  pins on every path at once. The OEM-feel question stays open at the cost of one line.
+- All three style paths compose the same rules, and `darkMode.test.ts` fails the build if what they
+  hide diverges — with **one named exception**, `road/geometry.stroke`, a casing that only matters
+  on a dark ground.
+- Two things were deliberately put *outside* the switch, because they are palette and content
+  findings rather than preferences: the **road shields** (measured as the brightest thing on the
+  night map after the trace) and **administrative boundaries** (they mean nothing to a visitor and
+  read as routes). ⚠ The boundary rule had been the dark map's private opinion; the parity test is
+  what caught that it should have applied to the light map all along.
+
+**Still unverified, and it needs the phone (T-154):** Google's native dark map now receives a style
+JSON. The rules change no colour, so `colorScheme: DARK` should still decide the palette — but the
+emulator only ever loads the LEGACY renderer, so that exact combination cannot be reached here.

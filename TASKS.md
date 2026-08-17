@@ -662,12 +662,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Circles, not markers**: `icon` needs `SharedRefType<'image'>` and therefore `expo-image`,
       a dependency this app does not carry and would have to audit (D-043). Without an icon a
       marker is Google's default red pin — louder than the trace and somebody else's app.
-- [ ] **T-154** Apply the clutter rules to the **native dark map on the latest renderer**
+- [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
-      — Google's own dark map still draws its POIs. Layering `mapClutter.ts` over
-      `colorScheme: DARK` ought to work and **cannot be verified on this emulator**, which only
-      ever loads LEGACY (T-147). Guessing risks the silent failure that trap is about: a user asks
-      for dark and quietly gets light.
+      — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are
+      the same"* — previously the light map hid Google's POIs while the native dark map drew them,
+      so one setting changed which product you were looking at. All three paths now compose
+      `mapClutter.ts` and `darkMode.test.ts` fails the build if what they hide diverges, with one
+      named exception (`road/geometry.stroke`, a casing that only matters on a dark ground).
+      — ⚠ **What remains is verification, and only a device can do it.** "Google's own dark map
+      *plus* a style JSON" is unreachable on an emulator that only loads LEGACY (T-147). The rules
+      change no colour so `colorScheme: DARK` should still decide the palette. **If a real phone
+      shows a light map after the user chose dark, that line is the suspect** and
+      `HIDE_GOOGLE_POIS` turns it off in one line.
+      — ⚠ **And the decision itself is open**: the project lead is *"still considering"* whether
+      hiding Google's POIs costs too much of the OEM feel (D-070 amended). One boolean either way.
 - [x] **T-149** ✅ **The app asks, 2026-08-16.** A levada it nearly credited raises one question
       on the passport, under the hero and above the rows: *"Did you walk the Long Canal Trail?
       Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure."*

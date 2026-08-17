@@ -89,9 +89,26 @@ export function darkMapPropsFor(
 
   return {
     dark: true,
-    // ⚠ The authored style is the *fallback*, and only that. Where Google's
-    // own dark map works it is drawn untouched — better cartography than this
-    // project will ever maintain, and it changes when theirs does.
-    mapStyleJson: nativeDarkMapWorks() ? undefined : GOOGLE_NIGHT_STYLE_JSON,
+    // ⚠ The authored style is the *fallback*, and only that. Where Google's own
+    // dark map works it keeps its cartography — better than this project will
+    // ever maintain, and it changes when theirs does.
+    //
+    // ⚠⚠ **BUT IT NO LONGER GETS `undefined`, changed 2026-08-17.** It used to,
+    // and that is exactly where light and dark came apart: the light map hid
+    // Google's POI pins while the native dark map still drew them, so the same
+    // trip looked like two different products depending on a setting. The project
+    // lead's instruction was unambiguous — *"just make sure light and dark mode
+    // are the same, that's really important"* — so this path now carries the same
+    // visibility-only rules the light map does.
+    //
+    // ⚠ **This is the one path nobody here can verify** (T-154). Play services
+    // hands this project's emulator the LEGACY renderer, so the combination
+    // "native dark map + a style JSON" cannot be reached without a device. The
+    // rules change no colour, so in principle `colorScheme: DARK` still decides
+    // the palette — but if the native dark map ever comes back *light* on a real
+    // phone, this line is the first suspect and `HIDE_GOOGLE_POIS` turns it off.
+    mapStyleJson: nativeDarkMapWorks()
+      ? MAP_CLUTTER_STYLE_JSON
+      : GOOGLE_NIGHT_STYLE_JSON,
   };
 }

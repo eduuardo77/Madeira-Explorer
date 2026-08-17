@@ -14,8 +14,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { darkMapPropsFor } from './darkMode.ts';
-import { GOOGLE_NIGHT_STYLE_JSON } from './googleNightStyle.ts';
-import { MAP_CLUTTER_RULES, MAP_CLUTTER_STYLE_JSON } from './mapClutter.ts';
+import { GOOGLE_NIGHT_STYLE_JSON, NIGHT_STYLE_RULES } from './googleNightStyle.ts';
+import {
+  ALWAYS_HIDDEN_RULES,
+  HIDE_GOOGLE_POIS,
+  MAP_CLUTTER_RULES,
+  MAP_CLUTTER_STYLE_JSON,
+} from './mapClutter.ts';
 
 const NATIVE_WORKS = () => true;
 const NATIVE_BROKEN = () => false;
@@ -57,13 +62,76 @@ test('⚠ the clutter rules change no colour, so Google keeps drawing its own ma
   }
 });
 
-test('⚠ where Google can draw its own dark map, it draws it untouched', () => {
-  // The project lead asked for this in as many words: *keep it OEM as
-  // possible*. Better cartography than this project will ever maintain, and it
-  // changes when Google's light map changes.
+test('⚠ where Google can draw its own dark map, it keeps its cartography', () => {
+  // The project lead asked for this in as many words: *keep it OEM as possible*.
+  // It still holds — the rules carried here change no colour, so Google's dark
+  // palette is untouched. What it no longer gets is `undefined`, because that is
+  // where light and dark came apart. See the note in `darkMode.ts`.
   const props = darkMapPropsFor('dark', NATIVE_WORKS);
   assert.equal(props.dark, true);
-  assert.equal(props.mapStyleJson, undefined);
+  assert.equal(props.mapStyleJson, MAP_CLUTTER_STYLE_JSON);
+});
+
+test('⚠⚠ LIGHT AND DARK HIDE THE SAME THINGS, on every renderer', () => {
+  // The project lead's instruction, 2026-08-17: "just make sure light and dark
+  // mode are the same, that's really important." It had NOT been true — the
+  // light map hid Google's POI pins while the native dark map still drew them,
+  // so one setting changed which product you were looking at.
+  //
+  // Asserted on the rules themselves rather than on the strings, because the two
+  // dark paths legitimately differ in *colour* and must not differ in what is
+  // *hidden*.
+  const hidden = (rules: readonly { featureType?: string; elementType?: string; stylers: Record<string, string | number>[] }[]) =>
+    rules
+      .filter((rule) => rule.stylers.some((styler) => 'visibility' in styler))
+      .map((rule) => `${rule.featureType ?? '*'}/${rule.elementType ?? '*'}=${rule.stylers.map((s) => s.visibility).join(',')}`)
+      .sort();
+
+  // ⚠ ONE named exception, and it must stay named. A road *casing* on a dark
+  // ground draws as a pale outline around every street, which is a night-palette
+  // problem the light map does not have. Anything else appearing in this list is
+  // the two styles drifting apart again, which is what this test exists to stop.
+  const NIGHT_PALETTE_ONLY = ['road/geometry.stroke=off'];
+
+  const darkOnly = hidden(NIGHT_STYLE_RULES).filter(
+    (rule) => !hidden(MAP_CLUTTER_RULES).includes(rule)
+  );
+  const lightOnly = hidden(MAP_CLUTTER_RULES).filter(
+    (rule) => !hidden(NIGHT_STYLE_RULES).includes(rule)
+  );
+
+  assert.deepEqual(lightOnly, [], 'the light map hides something the dark map does not');
+  assert.deepEqual(
+    darkOnly,
+    NIGHT_PALETTE_ONLY,
+    'the dark map hides something the light map does not, and it is not a palette rule'
+  );
+});
+
+test('⚠ the POI switch governs every path together, or none of them', () => {
+  // `HIDE_GOOGLE_POIS` is one boolean because the project lead has not settled
+  // whether hiding Google's POIs costs too much of the OEM feel. Whichever way it
+  // goes, all three style paths must agree — a switch that half-applies is worse
+  // than either answer.
+  const poiRulesPresent = MAP_CLUTTER_RULES.some((rule) => rule.featureType?.startsWith('poi'));
+  assert.equal(poiRulesPresent, HIDE_GOOGLE_POIS);
+
+  const nightHidesPoi = NIGHT_STYLE_RULES.some(
+    (rule) =>
+      rule.featureType?.startsWith('poi') === true &&
+      rule.stylers.some((styler) => styler.visibility === 'off')
+  );
+  assert.equal(nightHidesPoi, HIDE_GOOGLE_POIS);
+});
+
+test('⚠ the road shields stay hidden even if Google POIs come back', () => {
+  // A palette finding, not a preference: on the night map the yellow ER/VR
+  // shields measured as the brightest thing after the trace. It must survive the
+  // switch being flipped either way, which is why it lives outside it.
+  const shields = ALWAYS_HIDDEN_RULES.some(
+    (rule) => rule.featureType === 'road' && rule.elementType === 'labels.icon'
+  );
+  assert.ok(shields);
 });
 
 test('⚠ where it cannot, ours is drawn rather than a white map', () => {

@@ -37,6 +37,8 @@
  * than a JSON blob pasted into a component where nobody would ever read it.
  */
 
+import { MAP_CLUTTER_RULES } from './mapClutter.ts';
+
 type StyleRule = {
   featureType?: string;
   elementType?: string;
@@ -91,11 +93,12 @@ const NIGHT_STYLE: StyleRule[] = [
   { elementType: 'labels.text.fill', stylers: [{ color: LABEL }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: LABEL_HALO }] },
 
-  // ⚠ Google's own points of interest are turned off, and that is a decision
-  // rather than tidiness: D-052 deleted our place markers so the map would
-  // belong to the trace, and leaving forty restaurant pins on top of it would
-  // undo that with somebody else's data.
-  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  // ⚠ **POI *hiding* is no longer decided here** (2026-08-17). It used to be, and
+  // that is precisely how the light and dark maps came to disagree — this style
+  // turned Google's POIs off months before the light map did anything at all.
+  // The rules now come from `mapClutter.ts`, appended below, so one switch
+  // governs both styles. What stays here is **colour**: a POI footprint painted
+  // as terrain, which is a night-palette decision and not a preference.
   { featureType: 'poi', elementType: 'geometry', stylers: [{ color: TERRAIN }] },
   { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: TERRAIN }] },
 
@@ -108,17 +111,15 @@ const NIGHT_STYLE: StyleRule[] = [
   // ⚠ Every road label icon, not just the motorway's. Scoping this to
   // `road.highway` left the yellow ER/VR shields on screen, and on a night map
   // they were the brightest thing after the trace — measured by looking at it.
-  { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
 
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
 
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: WATER }] },
   { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#5D7A96' }] },
 
-  // Administrative boundaries: off. They are the one thing on a Madeira map
-  // that means nothing to a visitor, and they cross the island in straight
-  // lines that read as routes.
-  { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
+  // ⚠ Administrative boundaries moved to `mapClutter.ts` (2026-08-17). The
+  // reason they are hidden — they mean nothing to a visitor and read as routes —
+  // is about *content*, not about the night palette, so it applied to the light
+  // map all along and was only ever written here.
 ];
 
 /**
@@ -128,7 +129,19 @@ const NIGHT_STYLE: StyleRule[] = [
  * every render would hand the native view a new string each time and reapply
  * the style mid-pan.
  */
-export const GOOGLE_NIGHT_STYLE_JSON = JSON.stringify(NIGHT_STYLE);
+/**
+ * The night palette **plus** whatever `mapClutter.ts` hides.
+ *
+ * ⚠ Appended last so the shared rules win: Google applies later rules over
+ * earlier ones, and the point of composing them is that the dark map hides
+ * exactly what the light map hides.
+ */
+const NIGHT_STYLE_COMPOSED: StyleRule[] = [
+  ...NIGHT_STYLE,
+  ...(MAP_CLUTTER_RULES as StyleRule[]),
+];
+
+export const GOOGLE_NIGHT_STYLE_JSON = JSON.stringify(NIGHT_STYLE_COMPOSED);
 
 /** Exported for the test, which is the only other thing allowed to read it. */
-export const NIGHT_STYLE_RULES: readonly StyleRule[] = NIGHT_STYLE;
+export const NIGHT_STYLE_RULES: readonly StyleRule[] = NIGHT_STYLE_COMPOSED;

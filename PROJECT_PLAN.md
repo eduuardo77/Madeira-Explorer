@@ -535,10 +535,19 @@ annually; the Maps SDK is free; there are no servers (D-001). Apple's $99/yr onl
 ships, and there is no Mac. At €4.99 net of Play's 15%, **six sales cover it, ever.** So pricing is
 a positioning decision, not a revenue one.
 
-**Recommendation: paid up front, Android first, €4.99, no IAP in v1**, with free promo codes for
-testers and partners. The deciding argument is not money — it is that a paid app needs **no billing
-library and adds no network call**, so *"nothing leaves your phone"* stays literally true and
-testable (T-117b, T-127). Every IAP model spends some of that claim.
+⚠ **RECOMMENDATION REVISED after the project lead's pushback (Part 2 §12): ship v1 FREE on Google
+Play with no IAP at all**, and make the first paid thing the souvenir *video*, which does not exist
+yet and so takes nothing away.
+
+**The store's own rule decides the reversibility question**, and it runs opposite to the intuition:
+*"Once your app has been offered for free, the app can't be changed to paid"* — while paid→free is
+allowed. So on Play, **paid is the reversible choice and free is the permanent one.** Apple allows
+both directions.
+
+Free still wins because **installs are the binding constraint, not money**: proof before iOS needs
+retention and Android Vitals, and a paid launch with no marketing may produce neither revenue nor
+data. v1 still ships **zero billing code**, so *"nothing leaves your phone"* stays literally true
+and testable (T-117b, T-127).
 
 **The printed poster stays parked, and the research strengthened D-014**: selling an object makes us
 merchant of record — VAT registration, EU withdrawal rights, shipping and returns — all of which the

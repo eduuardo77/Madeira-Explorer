@@ -3640,3 +3640,61 @@ installs the project needs more than it needs money. Revisit after T-134's ten r
 Anything about IAP, the video souvenir's price, or the poster. All three depend on facts that do not
 exist yet — whether the souvenir drives installs (T-136), what the encoder costs (T-105c), and
 whether anybody completes a trip at all.
+
+### D-072 revised, 2026-08-17 — free on Play, and the reason is the store's own rule
+
+**The recommendation above is withdrawn before it was ever confirmed.** Replaced by: **ship v1 free
+on Google Play with no in-app purchases at all**, and make the first paid thing the souvenir *video*,
+which does not exist yet and therefore takes nothing away.
+
+#### The fact that decides it, quoted from Google
+
+> *"Once your app has been offered for free, the app can't be changed to paid."*
+> *"You can change your app from paid to free."*
+> — [Play Console Help](https://support.google.com/googleplay/android-developer/answer/6334373)
+
+⚠ **So the reversibility runs opposite to the intuition.** "Start free, charge when it is good" is the
+one path Play forbids; paid is the *reversible* choice and free is the permanent one. Apple allows
+both directions, which is why paid can be *tested* there later.
+
+#### Why free still wins, despite that foreclosure
+
+The project lead supplied two facts that outweigh it:
+
+1. **Installs are the binding constraint, not money.** They can absorb the €25 and they need *proof*
+   before spending €99 on iOS. Proof means installs, D1/D7 retention and Android Vitals — and a paid
+   launch into a 97%-free store, with no marketing, may produce **none of them**. A model that yields
+   neither revenue nor data is worse than one that yields data now and revenue later.
+2. **Marketing skill is limited, by their own account.** Paid-up-front is exactly the model that
+   *requires* marketing, because it forfeits the organic channel. Recommending it would have been
+   recommending a plan that depends on the one thing they said they do not have.
+
+⚠ **And the discovery signal is not about money at all.** Play folds **Android Vitals** and
+**uninstall rate** directly into ranking. This app has never run on real hardware. The free launch is
+how the OEM-survival and battery evidence (T-053, T-054) arrives — **from the store's own dashboards,
+collecting nothing ourselves.**
+
+#### What this costs, stated plainly
+
+- **Paid-up-front on Android is gone forever.** A real, irreversible loss, accepted because by the
+  time proof exists IAP is the flexible route anyway.
+- **No revenue in v1.** "Some online money" is deferred, which matches the project lead's own
+  ordering — proof first.
+- ⚠ **A rug-pull risk that must be designed against.** Adding a paywall to something people already
+  use free earns the worst reviews there are. So the first paid thing must be **additive**: the
+  souvenir video (T-105b-v2), which does not exist yet. The **free still image keeps doing the
+  distribution work D-013 depends on** — which is precisely what made charging for the souvenir wrong
+  in the original entry and acceptable now.
+
+#### The sequence
+
+1. **v1 — free, complete, no IAP, Android only.** $25 total. **Still zero billing code**, so
+   *"nothing leaves your phone"* stays literally true and T-117b/T-127 stay verifiable.
+2. **Read the store's free telemetry** — installs, retention, uninstalls, Vitals per device model.
+3. **First money: the souvenir video**, one-time purchase, once it exists.
+4. **iOS when Android shows retention** — €99/yr against evidence, not hope.
+
+#### What would reverse this again
+
+If the project lead would rather have €200 and 40 users than 2,000 users and €0, the original
+paid-up-front entry is the better plan. This turns on their stated ordering, not on arithmetic.

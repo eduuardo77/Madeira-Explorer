@@ -132,7 +132,11 @@ principle, and the recommendation below respects it.
 
 ## 5. The options
 
-### A. Paid up front, one price, no IAP ⭐ **recommended**
+### A. Paid up front, one price, no IAP
+
+⚠ **Recommended in Part 1 and SUPERSEDED by Part 2 §12.** Kept as written, because the
+reasoning is still sound on its own terms and the reversal turns on facts the project lead
+supplied afterwards — not on an error here.
 
 Buy it, own it. No free tier, no unlock, no upsell, no tip jar.
 
@@ -220,7 +224,9 @@ to protect — the one thing the competitor cannot copy.
 
 ---
 
-## 6. Recommendation
+## 6. Recommendation (Part 1 — see §12 for the revised one)
+
+⚠ **Superseded.** Read §9–§12 before acting on this section.
 
 **Paid up front, Android first, €4.99, no IAP of any kind in v1. Free promo codes for testers and
 partners.**
@@ -278,3 +284,180 @@ the thing the project lead actually asked for: *finally seeing some online money
    Android first, and let the €99 wait until there is evidence anybody wants it.
 4. **Whether the paid listing should wait for OD-10.** A paid app with no discovery channel sells
    to nobody; that is not a reason to make it free, it is a reason to sequence the two together.
+
+---
+
+# Part 2 — Reversibility, and every remaining option
+
+**Added 2026-08-17**, after the project lead pushed back on paid-up-front with the right objection:
+*"I'm afraid I won't get any downloads and would have to invest more in marketing and not using the
+play store organic growth potential. 25€ loss is something I definitely can live with. I just need
+some proof before jumping to iOS where the big market is."* Plus: *"my marketing skills are quite
+limited, the only bright side is that it would be good for learning."*
+
+## 9. "Is starting with one strategy and changing it later a bad move?"
+
+**It depends entirely on the direction, and Google Play makes one direction impossible.**
+
+Quoted from [Play Console Help](https://support.google.com/googleplay/android-developer/answer/6334373):
+
+> **"Once your app has been offered for free, the app can't be changed to paid."**
+>
+> **"You can change your app from paid to free."**
+
+To charge for an app that launched free, you must **create a new app with a new package name** —
+a new listing, zero reviews, no ranking history, and every existing user stranded on the free one.
+
+Apple is the opposite: prices can be scheduled and changed in either direction once the Paid Apps
+Agreement is accepted ([App Store
+Connect](https://developer.apple.com/help/app-store-connect/manage-app-pricing/set-a-price/)).
+
+### The reversibility matrix
+
+| Launch as | Can become | Cannot become | Still available later |
+|---|---|---|---|
+| **Paid (Play)** | Free, any time | — | IAP, price changes |
+| **Free (Play)** | — | **Paid, ever** | IAP, price changes |
+| **Either (Apple)** | Anything | — | Everything |
+
+⚠ **So the intuition "start free, charge once it is good" is the one path Google forbids.** And the
+instinct that paid-up-front is the risky, hard-to-undo choice is **backwards** — on Play, paid is the
+*reversible* option and free is the permanent one.
+
+⚠ **There is a second cost that is not in the store rules: the rug pull.** Adding a paywall to an app
+people already use free earns the worst reviews there are, and this project cannot afford them. So
+"free now, charge later" is only clean if the later charge is for something **additive that did not
+exist before** — never for something taken away. That single constraint shapes §12.
+
+## 10. What the discovery objection is actually worth
+
+The project lead's fear is correct in direction. The size of it:
+
+- **97% of Android apps are free** (Sept 2025), and Play's top charts are **split into free and
+  paid**. A paid app competes in the 3% pond: far less traffic, and also far less competition.
+- **~65% of installs start with a search**, which makes ASO the highest-leverage zero-budget channel
+  there is ([App Radar](https://appradar.com/academy/what-is-app-store-optimization-aso)).
+- **Ranking is behavioural, not just metadata.** Install velocity plus retention explain most Play
+  ranking movement; **uninstall rate is the most heavily weighted negative signal**; and **Android
+  Vitals is now folded directly into discovery weighting**
+  ([AppFollow](https://appfollow.io/blog/aso-ranking-factors),
+  [vmobify](https://vmobify.com/blog/google-play-algorithm-2026)).
+
+⚠ **That last point matters most here, and it is not about money at all.** Play rewards apps that are
+installed, kept, and do not crash. This app has **never run on real hardware**, has no measured
+battery figure, and has never survived a night of Doze. A paid launch with no installs produces no
+ranking, no retention data and no revenue — **the worst of the three outcomes.** A free launch at
+least produces the data everything else depends on.
+
+### The iOS assumption needs correcting
+
+*"iOS where the big market is"* is half right. By **users** in Europe iOS is the minority: **UK
+roughly 50/50**, **Germany ~39% iOS**, **Western Europe ~32% iOS**
+([Statista](https://www.statista.com/statistics/262179/market-share-held-by-mobile-operating-systems-in-the-united-kingdom/),
+[comparison](https://www.mobiloud.com/blog/android-vs-ios-market-share)). iOS is the
+**higher-spending** market, not the bigger one.
+
+Against Madeira's actual visitor mix — Portugal 20.3%, UK 14.9%, Germany 14.8% of overnight stays —
+**Android-first covers the Portuguese and the German majority; iOS mainly unlocks about half the
+British slice.** Worth $99/yr eventually, not first.
+
+## 11. Every option, with pros and cons
+
+### The four that are live
+
+**① Paid up front** — €4.99, no IAP.
+
+| Pros | Cons |
+|---|---|
+| No billing code, **no network call added** — privacy claim stays literally true | ⚠ Forfeits organic discovery in a 97%-free store |
+| Premium by construction; never asks twice | No trial possible on either store |
+| **Reversible** to free on Play | With limited marketing, plausibly **near-zero installs** |
+| Cannot be cruel (§4) | No installs → no retention, no ranking, no proof |
+| Six sales breaks even | Risks yielding **neither** money nor data |
+
+**② Free, no IAP at all in v1** — monetise later, additively. ⭐ **now recommended**
+
+| Pros | Cons |
+|---|---|
+| Full organic discovery; competes where the traffic is | ⚠ **Forecloses paid-up-front on Play permanently** |
+| **Still zero billing code**, so v1's privacy claim stays literally true and T-117b/T-127 verifiable | No revenue in v1 — "some online money" is deferred |
+| Maximises what the project needs most: installs, retention, real trips (T-134) | Later monetisation must be **additive**, or it is a rug pull |
+| €25 is the entire downside, which the project lead has accepted | Requires discipline not to paywall what was free |
+| ASO becomes the learning project, at zero cost | |
+
+**③ Free + one non-consumable unlock** — geographic, not temporal.
+
+| Pros | Cons |
+|---|---|
+| Discovery of free, revenue of paid | Billing libraries → **network calls** → privacy copy reworded (§3) |
+| Best-evidenced converter (12.1% vs 2.2%, §5B) | D-043's audit must be re-run |
+| Boundary is honest: use it on a real walk before paying | Paywall UI, restore flow, a second app state to test |
+| Prices fully changeable, addable at any time | If added after a free v1, must not remove anything |
+
+**④ Partner / B2B codes** — companion to any of the above.
+
+| Pros | Cons |
+|---|---|
+| Promo codes are **free** on both stores | Depends on outreach the project lead may not want to do |
+| Fires at *arrival*, the only moment that matters (OD-10) | Not a model on its own |
+| Turns a paid app's lack of trial into a partner's giveaway | |
+
+### The rest, briefly
+
+| Option | Verdict |
+|---|---|
+| **⑤ Free + tip jar** | Permitted by Apple and would cover the $25 — but a well-made object does not ask for change, and it drags in billing for the least revenue on the list. **No.** |
+| **⑥ Subscription** | Wrong shape entirely: this app is used for one week of one holiday. A recurring charge for a one-week product is what users punish hardest. **No.** |
+| **⑦ Ads** | Destroys the position D-001/D-031 protect. **Never.** |
+| **⑧ Printed poster / print-on-demand** | The project lead's own read — *"an idea but for the long term future, not now"* — matches the research: it makes us merchant of record (VAT, EU withdrawal rights, shipping, returns) and is the only option that can lose money. **Deferred; D-014 stands.** |
+| **⑨ Paid app plus a separate free "Lite"** | Play permits two package names. Doubles listings, builds and review surface for a solo dev, and splits ranking signals across two apps. **No.** |
+| **⑩ Google Play Pass** | Google pays from a pool for bundled apps; entry is by application and aimed at established titles. Nothing to lose by applying **much later**. **Not now.** |
+| **⑪ Sponsorship** (tourism board, a hotel group) | Real money and real strings: a sponsor eventually wants placement, data, or editorial say over the curated 60 — which is D-064's selection principle and D-001's privacy in one go. **Only under a contract forbidding all three.** |
+| **⑫ Licensing / white-label** the content pack | Plausible long-term B2B, and the pack (T-066a) is the asset. Needs a buyer, and OSM's licence constrains redistribution. **Long term.** |
+| **⑬ Regional pricing** | Cheaper in Portugal, higher in the UK and Germany. A refinement of ① or ③, not a strategy. **Later.** |
+| **⑭ Off-store donations** (Ko-fi, GitHub Sponsors) | Store rules restrict linking to outside payment for digital goods; a plain "support" link is safer but earns little. **Marginal.** |
+
+## 12. The revised recommendation, and what changed my mind
+
+**Ship v1 free on Google Play with no in-app purchases at all. Make the first paid thing the souvenir
+*video* — something that does not exist yet, so nothing is ever taken away.**
+
+⚠ **This reverses Part 1, and it should be clear why**, because the earlier reasoning was not wrong on
+its own terms. Part 1 optimised for *break-even and dignity*, which paid-up-front wins. Two things
+the project lead then supplied change the weighting:
+
+1. **Installs are the binding constraint, not money.** They can absorb the €25 and they need *proof*
+   before iOS. Proof means installs, retention and Android Vitals — all of which a paid launch may
+   produce **none of**. A model yielding neither money nor data is worse than one yielding data now
+   and money later.
+2. **Marketing skill is limited, by their own account.** Paid-up-front is precisely the model that
+   *requires* marketing, because it forfeits the organic channel. Recommending it to somebody who has
+   said they cannot yet market is recommending a plan that depends on the one thing they lack.
+
+**Why the foreclosure is acceptable.** Going free costs paid-up-front on Play **forever** — a real,
+irreversible loss. But it is an option unlikely to be exercised profitably: by the time there is
+proof, IAP is the flexible route anyway, and **iOS is where paid can be experimented with freely**,
+because Apple allows price changes in both directions.
+
+**Why v1 carries no IAP at all.** It keeps *"nothing leaves your phone"* literally true for the one
+release where that claim is made for the first time, keeps T-117b and T-127 verifiable, and means
+there is no billing code to write before a single real trip exists. **The cheapest monetisation is
+the one not yet built.**
+
+**The sequence:**
+
+1. **v1 — free, complete, no IAP, Android only.** Cost: $25. ASO is the marketing project, and the
+   one worth learning: ~65% of installs start with a search.
+2. **Measure what the store gives away.** Installs, D1/D7 retention, uninstall rate, and Android
+   Vitals per device model — which is the OEM-survival and battery evidence T-053/T-054 need,
+   arriving without collecting anything (Part 1 §3).
+3. **First money: the souvenir video** (T-105b-v2) as a one-time purchase, once it exists. Additive,
+   so no rug pull; it arrives at peak emotional value; and the **free still image keeps doing the
+   distribution work D-013 depends on** — which is what made charging for the souvenir wrong in
+   Part 1 and acceptable here.
+4. **iOS when Android shows retention** — €99/yr against evidence, not hope. Prices there are
+   reversible, so paid-up-front can even be *tested* on iOS if it ever appeals.
+
+⚠ **What would change this back.** If the project lead would rather have €200 and 40 users than 2,000
+users and €0, ① is the better plan and there is no shame in it. This recommendation follows from
+*their* stated order: proof first, money second, and a €25 loss they can live with.

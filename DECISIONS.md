@@ -100,7 +100,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
 | **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. | Provisional |
 | **D-071** | The map is the product; the stamp system is not top priority. Sequencing, not scope. | **Provisional — needs confirming** |
-| **D-072** | Paid up front, one price, no IAP. Break-even is $25, so pricing is positioning. | **Provisional — needs confirming** |
+| **D-072** | **Free on Play, no IAP in v1.** Play forbids free→paid, so the reversibility is inverted. | **Provisional — needs confirming** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

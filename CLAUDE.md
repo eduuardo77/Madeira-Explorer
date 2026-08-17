@@ -56,8 +56,10 @@ The documents cost more to read than the code does. In order of impact:
    ⚠ **The selection principle is fixed: greatest hits, no filler (D-064).** Only places worth
    going to. Thin regions stay thin — do not add a mediocre place to make a municipality
    finishable, which is the failure D-002 exists to prevent.
-   ⚠ The file holds **79 places** as of 2026-08-16, still the prominence-and-coverage starter set
-   apart from three edits the project lead asked for. It is scaffolding, not a decision taken.
+   ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method — 16 viewpoints ·
+   11 levadas · 16 villages · 7 beaches · 10 landmarks. It is no longer scaffolding. Before editing
+   it, run `node tools/validate-content.mjs`; after editing it, run that plus
+   `build-regions.mjs --assign` and `build-levadas.mjs`.
 
 ## Honesty rules, each of which cost something here
 

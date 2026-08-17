@@ -3,6 +3,12 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
+**Last updated:** 2026-08-16 — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
+**regions made real** (T-067, D-061/D-062) which found 46 places filed wrongly; **crediting
+rewritten** — two detectors per stamp, coverage and time for levadas (T-068a, T-149, D-065/D-068),
+the last from the first field walk (`docs/field-notes.md`); **the drawn trace cleaned** (T-150/T-151,
+D-066/D-067); **the souvenir still shipped and verified on a device** (T-105d/T-107/T-108, D-063);
+and **walk donation built** (D-069, answering OD-11). 500 tests.
 **Last updated:** 2026-08-11 — T-105 split into **T-105a** (the souvenir *composition*, done,
 D-042) and **T-105b** (the encoder, which needs a device); **T-117** the dependency network
 audit done statically (`docs/dependency-audit.md`, D-043), adding **T-117b** for the on-device

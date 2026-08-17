@@ -461,3 +461,148 @@ the one not yet built.**
 ⚠ **What would change this back.** If the project lead would rather have €200 and 40 users than 2,000
 users and €0, ① is the better plan and there is no shame in it. This recommendation follows from
 *their* stated order: proof first, money second, and a €25 loss they can live with.
+
+⚠ **The €4.99 in Part 1 is superseded by §15.** It was chosen to protect installs on a *paid*
+listing. Under freemium the install decision is made at €0 regardless, so price costs no downloads
+and the unlock should sit at **€5.99–€7.99**.
+
+---
+
+# Part 3 — The genre worldwide, and how to design the freemium boundary
+
+**Added 2026-08-17.** The project lead's two asks: *"We need to explore more the freemium part of
+it. I was looking to an equilibrium between profit and scaleability hence the low price."* And:
+*"WalkME in madeira is not our only competition. This type of app can be common in different parts
+of the world."* Correct on both counts — Part 1 looked at one local rival and missed the category.
+
+## 13. This app sits in three genres at once, and they price completely differently
+
+### ① Regional trail guides — *free base, paid offline maps*
+
+| App | Region | Model |
+|---|---|---|
+| **WalkMe \| Walking in Madeira** | Madeira | Free + IAP $7.99 / $8.99 wk / $14.99 / $49.99 |
+| **⚠ Walkme Portugal Trails** | **Azores** | Free + IAP |
+| Camino Maps | Camino de Santiago | Free offline guide |
+| TrailSmart | Caminos | Free, paid offline maps |
+| Bergfex | Alps, 200k+ trails | Freemium |
+| Tabacco Maps | Dolomites | Paid maps |
+
+⚠ **The most important line in this table is the second one.** The incumbent has already
+**replicated itself to another archipelago**. The genre is repeatable, the competitor knows it, and
+they got there first. See §16 — because *this project is architecturally better placed to do the
+same thing than they are.*
+
+**The dominant model in this genre is free base + paid offline maps or regions.** Nobody
+successful in it charges up front.
+
+### ② Fog-of-war exploration — *the actual mechanic, and it prices high*
+
+| App | Model | Reach |
+|---|---|---|
+| **Fog of World** | **$29.99 paid up front**, no subscription | **500k+ downloads**, Apple **App of the Day in 137 countries**, 4.8★ iOS / 3.6★ Android |
+| Wanderlust: Fog of War | $4 + free tier | Discontinued |
+| Wanderings, FOWIRL | Free | Small |
+
+⚠ **This is the finding that should move the price conversation.** The closest thing to this app's
+*core mechanic* — a map that fills in as you move — sustains **$29.99 up front** and half a million
+downloads. The ceiling for "watching a map fill in" is far above the €4.99 Part 1 proposed.
+
+⚠ **But read the difference before copying the price.** Fog of World is **global and generic**: it
+works anywhere on earth, so its addressable market is everyone who travels. This app is **regional
+and curated**: 60 hand-picked places on one island. Higher relevance per user, a far smaller pond.
+**Fog of World's price is evidence about the mechanic's value, not about this app's market.**
+
+### ③ Trip memory and artifacts — *free app, sell the object*
+
+**Polarsteps: 18 million users, profitable, free, no ads, no subscription, no data selling.** The
+revenue is almost entirely **printed travel books**, plus some booking affiliate income.
+
+⚠ **This is this project's positioning, already proven at scale by somebody else.** They rejected
+ads and data selling on the grounds that both distort the travel experience — the same argument
+D-001 and D-031 make here.
+
+⚠ **And the print idea came from their users, not from them.** Which is a direct answer to the
+project lead's instinct that print-on-demand is *"an idea but for the long term future, not now"*:
+**that instinct matches how it actually happened at the one company that made it work.** It is the
+model to grow *into*, once there are users to ask.
+
+### ④ The platforms — *and a goodwill window that is open right now*
+
+**Komoot** is the closest thing to a proof of the freemium design proposed here: **one free region**,
+then **$3.99 per region**, **$8.99 a bundle**, **$29.99 the world pack** — one-time purchases, not
+subscriptions.
+
+⚠ **And Komoot is currently damaging itself.** After Bending Spoons acquired it in March 2025 it
+pushed new users toward a **$59/yr subscription**, drawing headlines like *"Komoot confirms: we
+don't want any new customers."* **There is goodwill available in this category right now for
+anything that charges once and honestly** — which is a positioning opportunity that will not stay
+open forever.
+
+## 14. What this means for the freemium boundary
+
+Play forbids free→paid (§9), so on Android **freemium is the only way to have discovery and revenue
+at the same time.** The question is therefore not *whether* but *where the line goes*. Five candidate
+boundaries, judged against the rule in §4 — *never withhold a trip already recorded*:
+
+| Boundary | Precedent | Verdict |
+|---|---|---|
+| **Geographic** — one municipality free, island paid | **Komoot's free region**; D-024 already hides Porto Santo until you go | ✅ **Strongest.** Honest, demonstrable, you use it on a real walk before paying |
+| **Additive artifact** — app free, souvenir *video* paid | Polarsteps' books | ✅ **Best first step.** Takes nothing away, so no rug pull |
+| **Category** — viewpoints free, levadas paid | WalkMe gates trails | ⚠ Levadas are the crown jewels and the costliest to curate — but it splits the passport metaphor and reads as arbitrary |
+| **Count** — first 10 stamps free | Common elsewhere | ❌ **Violates §4.** You hit the wall *mid-trip*, having already walked |
+| **Time** — 7-day trial | Common elsewhere | ❌ **Worst possible here.** The trip *is* the time. A 7-day trial on a 7-day holiday is either a joke or a trap |
+
+## 15. The insight that resolves "profit versus scalability"
+
+The project lead reasoned: *low price → more downloads → scale.* **That is correct for a paid app
+and largely irrelevant under freemium**, because:
+
+> **Under freemium, price is invisible to everyone who does not convert.** The install decision is
+> made at €0 regardless. Price affects only the converting minority — so raising it costs
+> **nothing** in downloads, ranking, retention or Android Vitals.
+
+⚠ **So freemium decouples price from discovery, and the low price stops being necessary.** €4.99 was
+chosen in Part 1 to protect installs on a *paid* listing. Under freemium that protection is free,
+and the unlock can sit at **€5.99–€7.99** — still under WalkMe's $7.99 entry, still a fraction of
+Fog of World's $29.99 — without costing a single install.
+
+**The equilibrium the project lead is looking for is not a low price. It is a free door.**
+
+## 16. The scalability asset nobody has named yet
+
+⚠ **This project is already built to become a second app, and that is an accident of D-017 rather
+than a plan.**
+
+*"No Madeira knowledge in `app/`"* is absolute: every coordinate, name, boundary and levada course
+lives in `content/`, produced by tools from OSM. The app does not know what island it is on.
+
+**So "Azores Explorer" is a content pack, not a rewrite** — a new `pois.json`, a re-run of
+`build-regions.mjs` and `build-levadas.mjs`, and the same binary. WalkMe needed a whole second app
+to reach the Azores; this architecture needs a data file.
+
+⚠ **That is the real answer to "scalability"** — not pricing. One island proves the product; the
+second costs a curation pass. And it argues for keeping the store listing and branding **capable of
+carrying a family** rather than hard-coding "Madeira" into the identity.
+
+⚠ **Do not act on this yet.** It is worth nothing until one island has users, and D-032's warning
+applies: a second region is exactly the kind of large scope that looks cheap and is not — the
+curation of 60 places (T-066a) took a full session and a veto pass.
+
+## 17. Revised freemium recommendation
+
+**Free on Play. No IAP in v1. First unlock is the souvenir video. Geographic unlock only if more
+revenue is ever needed. €5.99–€7.99, not €4.99.**
+
+| Step | What | Why |
+|---|---|---|
+| **v1** | Free, complete, **no billing code** | Discovery + *"nothing leaves your phone"* stays literally true (§3) |
+| **v1.1** | Souvenir **video** as one-time purchase | **Additive** — nothing taken away, no rug pull. The free still image keeps doing D-013's distribution work |
+| **v2, only if needed** | Geographic unlock, Komoot-style | Proven boundary; honest; usable on a real walk before paying |
+| **Later** | Printed artifact | Polarsteps' actual model — but it needed 18M users. The project lead's *"long term"* read is right |
+| **Never** | Count gates, time trials, subscriptions, ads | §4, and D-001/D-031 |
+
+⚠ **What is still true from Part 1 and should not be lost:** the moment any IAP ships, Play Billing
+adds network calls, D-043's audit must be re-run, and the privacy copy must change from *"nothing
+leaves your phone"* to *"nothing except a purchase you started."* That cost is worth paying **once**,
+for the video — not twice, and not before there is anyone to sell to.

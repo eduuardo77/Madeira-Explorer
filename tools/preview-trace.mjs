@@ -242,7 +242,7 @@ function draw(truth, raw, clean, file) {
   const height = 900;
   const margin = 40;
 
-  const all = [...truth, ...raw, ...clean];
+  const all = [...(truth ?? []), ...raw, ...clean];
   const north = Math.max(...all.map((p) => p.lat));
   const south = Math.min(...all.map((p) => p.lat));
   const east = Math.max(...all.map((p) => p.lon));
@@ -268,72 +268,144 @@ function draw(truth, raw, clean, file) {
     }
   };
 
-  stroke(truth, COLOURS.truth, 7);
+  // ⚠ There is no truth stroke on a real walk. Nobody recorded where the
+  // person actually was — only where the phone said they were — so drawing a
+  // grey line under a field trace would invent the very thing the fixture
+  // exists to stop us inventing.
+  if (truth) {
+    stroke(truth, COLOURS.truth, 7);
+  }
   stroke(raw, COLOURS.raw, 2);
   stroke(clean, COLOURS.clean, 3);
 
   // A key, drawn as three short strokes in the corner.
   const keyY = margin;
-  canvas.line(margin, keyY, margin + 60, keyY, COLOURS.truth, 7);
+  if (truth) {
+    canvas.line(margin, keyY, margin + 60, keyY, COLOURS.truth, 7);
+  }
   canvas.line(margin, keyY + 20, margin + 60, keyY + 20, COLOURS.raw, 2);
   canvas.line(margin, keyY + 40, margin + 60, keyY + 40, COLOURS.clean, 3);
 
   writeFileSync(file, canvas.toPng());
 }
 
-function main() {
-  // Flags may come in any order, so the route is the first argument that is
-  // not one.
-  const named = process.argv.slice(2).find((arg) => !arg.startsWith('--'));
-  const routeFile = named ?? path.join(root, 'tools/routes/funchal-seafront.txt');
-  const route = readRoute(routeFile);
-  if (route.length < 2) {
-    console.error(`No usable points in ${routeFile}`);
-    process.exit(1);
-  }
+/** `--flag value` or `--flag=value`, either way. */
+function flagValue(name) {
+  const joined = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  if (joined) return joined.split('=').slice(1).join('=');
+  const index = process.argv.indexOf(`--${name}`);
+  return index >= 0 ? process.argv[index + 1] : undefined;
+}
 
-  const truth = densify(route);
-  const raw = record(truth);
+/**
+ * A fixture written by `tools/import-sensor-logger.mjs` — a walk somebody
+ * actually took.
+ */
+function readFixture(file) {
+  const parsed = JSON.parse(readFileSync(file, 'utf8'));
+  const fixes = Array.isArray(parsed) ? parsed : parsed.fixes;
+  if (!Array.isArray(fixes) || fixes.length < 2) {
+    throw new Error(`${file} has no usable fixes.`);
+  }
+  return { fixes, name: parsed.name ?? path.basename(file), source: parsed.source };
+}
+
+function main() {
+  const fixesFile = flagValue('fixes');
+
+  // Flags may come in any order, so the route is the first argument that is
+  // not one — ⚠ and not the *value* of a space-separated flag either, or
+  // `--fixes walk.json` would be read as a route file and silently modelled.
+  const consumed = new Set();
+  process.argv.forEach((arg, i) => {
+    if (arg === '--fixes' || arg === '--tolerance') consumed.add(i + 1);
+  });
+  const named = process.argv
+    .slice(2)
+    .find((arg, i) => !arg.startsWith('--') && !consumed.has(i + 2));
+
+  // ⚠ THE TWO MODES ARE NOT THE SAME KIND OF EVIDENCE, and the difference is
+  // the whole reason `--fixes` exists.
+  //
+  //   modelled — a route file is ground truth, the noise is invented here, and
+  //              deviation from the truth is therefore measurable.
+  //   measured — a real export. **There is no ground truth**: nobody recorded
+  //              where the walker really was. So deviation is not computed, not
+  //              estimated, and not printed. What can be said is what the
+  //              cleanup removed and how the drawn length changed.
+  //
+  // A route file may still be passed alongside `--fixes` if the walk followed a
+  // known course, in which case the truth comes back.
+  let truth = null;
+  let raw;
+  let label;
+
+  if (fixesFile) {
+    const fixture = readFixture(fixesFile);
+    raw = fixture.fixes;
+    label = `${path.relative(root, fixesFile).replace(/\\/g, '/')}  (measured — ${raw.length} real fixes)`;
+    if (named) {
+      truth = densify(readRoute(named));
+    }
+  } else {
+    const routeFile = named ?? path.join(root, 'tools/routes/funchal-seafront.txt');
+    const route = readRoute(routeFile);
+    if (route.length < 2) {
+      console.error(`No usable points in ${routeFile}`);
+      process.exit(1);
+    }
+    truth = densify(route);
+    raw = record(truth);
+    label = `${path.relative(root, routeFile).replace(/\\/g, '/')}  (modelled noise)`;
+  }
 
   // A sweep, because the simplification tolerance is the one number here that
   // visibly changes the drawing and there is no field data to set it from.
   const sweep = process.argv.includes('--sweep');
   if (sweep) {
-    console.log('tolerance   points   drawn km   mean off   worst off');
+    console.log(
+      truth
+        ? 'tolerance   points   drawn km   mean off   worst off'
+        : 'tolerance   points   drawn km'
+    );
     for (const tolerance of [8, 12, 16, 20, 25, 30, 40]) {
       const trial = cleanTrace(raw, tolerance);
-      const off = deviation(trial.fixes, truth);
-      console.log(
+      const row =
         `  ${String(tolerance).padStart(3)} m     ${String(trial.fixes.length).padStart(4)}` +
-          `     ${(lengthM(trial.fixes) / 1000).toFixed(2)}` +
-          `       ${off.mean.toFixed(1)} m     ${off.worst.toFixed(0)} m`
-      );
+        `     ${(lengthM(trial.fixes) / 1000).toFixed(2)}`;
+      if (truth) {
+        const off = deviation(trial.fixes, truth);
+        console.log(`${row}       ${off.mean.toFixed(1)} m     ${off.worst.toFixed(0)} m`);
+      } else {
+        console.log(row);
+      }
     }
     console.log();
   }
 
-  const tolerance = Number(
-    (process.argv.find((arg) => arg.startsWith('--tolerance=')) ?? '').split('=')[1]
-  );
+  const tolerance = Number(flagValue('tolerance'));
   const { fixes: clean, stats } = cleanTrace(
     raw,
     Number.isFinite(tolerance) && tolerance > 0 ? tolerance : undefined
   );
 
-  const before = deviation(raw, truth);
-  const after = deviation(clean, truth);
+  const before = truth ? deviation(raw, truth) : null;
+  const after = truth ? deviation(clean, truth) : null;
+  const off = (d) => (d ? `   mean ${d.mean.toFixed(1)} m off, worst ${d.worst.toFixed(0)} m` : '');
 
-  console.log(path.relative(root, routeFile).replace(/\\/g, '/'));
-  console.log(
-    `  truth        ${truth.length} points, ${(lengthM(truth) / 1000).toFixed(2)} km`
-  );
+  console.log(label);
+  if (truth) {
+    console.log(
+      `  truth        ${truth.length} points, ${(lengthM(truth) / 1000).toFixed(2)} km`
+    );
+  }
   console.log(
     `  recorded     ${raw.length} fixes, ${(lengthM(raw) / 1000).toFixed(2)} km drawn` +
-      `   mean ${before.mean.toFixed(1)} m off, worst ${before.worst.toFixed(0)} m`
+      off(before)
   );
   console.log(
     `  cleaned      ${clean.length} fixes, ${(lengthM(clean) / 1000).toFixed(2)} km drawn` +
-      `   mean ${after.mean.toFixed(1)} m off, worst ${after.worst.toFixed(0)} m`
+      off(after)
   );
   console.log(
     `  removed      ${stats.spikesRemoved} outliers, ` +
@@ -345,8 +417,23 @@ function main() {
   const out = path.join(outDir, 'trace-preview.png');
   draw(truth, raw, clean, out);
   console.log();
-  console.log('Wrote tools/out/trace-preview.png — grey is the truth, red recorded, blue cleaned.');
-  console.log('⚠ The noise is modelled, not measured (T-018). Judge the shape, not the numbers.');
+  console.log(
+    truth
+      ? 'Wrote tools/out/trace-preview.png — grey is the truth, red recorded, blue cleaned.'
+      : 'Wrote tools/out/trace-preview.png — red is what the phone recorded, blue what would draw.'
+  );
+  if (!fixesFile) {
+    console.log('⚠ The noise is modelled, not measured (T-018). Judge the shape, not the numbers.');
+  } else if (truth) {
+    console.log(
+      '✅ Measured fixes. ⚠ The deviation is against the route file you passed as the course ' +
+        'walked — it is only as true as that assumption.'
+    );
+  } else {
+    console.log(
+      '✅ These fixes were measured outdoors. No ground truth exists, so no deviation is claimed.'
+    );
+  }
 }
 
 main();

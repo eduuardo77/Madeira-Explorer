@@ -3,7 +3,10 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-16 — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
+**Last updated:** 2026-08-17 — the **Sensor Logger importer** (T-021), so a real walk becomes a
+fixture and the app's own `cleanTrace` can be run against it; plus three checkboxes that were
+stale — **T-107**, **T-108** and **T-130** all shipped on 2026-08-16 and were still unticked.
+**Previously 2026-08-16** — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
 **regions made real** (T-067, D-061/D-062) which found 46 places filed wrongly; **crediting
 rewritten** — two detectors per stamp, coverage and time for levadas (T-068a, T-149, D-065/D-068),
 the last from the first field walk (`docs/field-notes.md`); **the drawn trace cleaned** (T-150/T-151,
@@ -123,6 +126,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `docs/field-notes.md`. ⇠ T-018, T-019
 - [ ] **T-021** Commit the traces to `tools/fixtures/` as the permanent matching regression
       suite ⇠ T-018, T-019
+      — ✅ **The importer is built, 2026-08-17.** `tools/import-sensor-logger.mjs` reads an
+      unzipped Sensor Logger export into `tools/fixtures/<name>.json` and prints the T-020
+      numbers on the way past — blackout durations, fix interval, accuracy percentiles, and what
+      share of fixes the 120 m cut would refuse. `tools/preview-trace.mjs --fixes <file>` then
+      runs **the app's own `cleanTrace`** over them. `tools/fixtures/README.md` says what may
+      live there; the walk itself is `docs/field-testing.md`.
+      — ⚠ **The parser has never seen a real export.** Columns are matched from a list of
+      plausible names and the error names the headers it actually saw, so a wrong guess costs a
+      one-line edit to `COLUMNS` in `tools/lib/sensorLogger.mjs`. Verified against a synthetic
+      Location.csv only — a deliberately injected 90 s dropout and 140 m fixes both came back.
+      — ⚠ **`--fixes` prints no deviation figure**, because a real walk has no ground truth: the
+      grey "truth" line and the mean/worst columns are only meaningful against a modelled route.
+      Claiming them on field data would be exactly the measured-sounding number CLAUDE.md forbids.
 - [ ] **T-021a** **Repeat at least one run on a mid-range Android device.** The project lead's
       iPhone 15 has better GNSS than much of what tourists actually carry, so iPhone-only
       fixtures are best-case. Tuning corridor widths and gap thresholds against them risks an
@@ -863,8 +879,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Also where the *look* is decided: whether the finale shows a denominator (D-042 carries
       both numbers deliberately), and whether the guessed durations survive being watched.
 - [ ] **T-106** Watermark ⇠ T-105b
-- [ ] **T-107** Still-image export ⇠ T-105b
-- [ ] **T-108** Share sheet integration ⇠ T-105b, T-107
+- [x] **T-107** Still-image export ⇠ T-105b
+      — Done 2026-08-16 as part of T-105d, and **verified on the emulator**: the card is drawn
+      by `react-native-svg` and photographed by `react-native-view-shot` into a PNG. Checkbox
+      corrected 2026-08-17; the work shipped in `53a67e1`.
+- [x] **T-108** Share sheet integration ⇠ T-105b, T-107
+      — Done 2026-08-16 as part of T-105d. `expo-sharing` hands the PNG to the OS share sheet;
+      the Android sheet opened with the real card in its preview. Checkbox corrected 2026-08-17.
 - [ ] **T-109** Verify render completes on-device in under ~30 seconds ⇠ T-105b
 - [ ] **T-110** Verify the accommodation is not identifiable in a default export ⇠ T-104
 - [ ] **T-111** Verify the reveal works when the app has not been opened since install day
@@ -985,8 +1006,16 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 ## Phase 7 — Beta and launch
 
 - [ ] **T-129** Recruit closed beta testers taking real Madeira trips ⇠ M6
-- [ ] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
+- [x] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
       upload ⇠ T-125
+      — Done 2026-08-16 as **D-069**, Settings → *Send a walk*: the masked trace, every stamp
+      decision with the numbers that drove it, and the thresholds in force, handed to the same
+      share sheet the souvenir uses. **No endpoint, no account, no identifier** — a test asserts
+      the payload's exact key list, so a helpful new field fails the suite rather than a promise.
+      Checkbox corrected 2026-08-17; the work shipped in `3257592`.
+      — ⚠ It answers this task and OD-11, but it is **not** the beta-tuning input T-131 assumes:
+      that wants traces from testers who do not yet exist, and the walks arrive unlinkable, so
+      ten walks from one walker cannot be told from ten walkers.
 - [ ] **T-131** Tune matching thresholds and geofence radii against real trip data ⇠ T-130,
       T-094
 - [ ] **T-132** Collect and act on beta feedback ⇠ T-129

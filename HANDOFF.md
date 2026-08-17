@@ -1,6 +1,6 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-08-16.
+**For:** a session picking this project up cold. **Updated:** 2026-08-17.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
@@ -33,10 +33,21 @@ of what is blocked — how far GPS wanders under laurel canopy, how often it dro
 claims (T-018/T-019/T-020) — **which is what every threshold written on 2026-08-16 is guessing at**:
 the 60 m corridor, the 45 minutes, the 16 m simplification tolerance, the accuracy cut.
 
-**The agreed next step, not yet built:** an importer so a Sensor Logger export lands in
-`tools/fixtures/` and `node tools/preview-trace.mjs --fixes <file>` runs the app's own cleanup
-against **real** fixes instead of modelled noise. Roughly an hour of work, and it turns the whole
-trace chapter from *plausible* into *measured*.
+✅ **The importer is built (2026-08-17, T-021).** Nothing now stands between a walk and the
+numbers except the walk:
+
+```bash
+node tools/import-sensor-logger.mjs <unzipped-export-dir> --name levada-do-rei
+node tools/preview-trace.mjs --fixes tools/fixtures/levada-do-rei.json --sweep
+```
+
+The first prints blackout durations, fix interval, accuracy percentiles and what share of fixes
+the 120 m cut would refuse — T-020's questions. The second runs the app's own `cleanTrace` over
+them. ⚠ **The parser has never seen a real export**: columns are matched from a list of plausible
+names, and if the first real file fails, the error names the headers it saw and the fix is one
+line in `COLUMNS` in `tools/lib/sensorLogger.mjs`. ⚠ **`--fixes` prints no deviation number** —
+a real walk has no ground truth, and the mean/worst columns only mean something against a
+modelled route.
 
 An Android is still needed for what the app itself does in the background — Sensor Logger surviving
 Doze says nothing about whether our recorder does.
@@ -120,6 +131,7 @@ node tools/check-names.mjs             # every curated name against OSM
 node tools/preview-trace.mjs --sweep   # draws trace cleanup to a PNG, and sweeps its tolerance
 node tools/preview-souvenir.mjs        # the share card to an SVG
 node tools/curation-evidence.mjs       # wiki/PR/elevation evidence per place
+node tools/import-sensor-logger.mjs <dir>  # a real walk → tools/fixtures/, with the T-020 numbers
 ```
 
 `tools/lib/` holds the shared geometry, the Overpass client with its backoff, and a **hand-written

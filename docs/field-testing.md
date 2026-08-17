@@ -54,7 +54,19 @@ entire exercise is comparing what the sensors *recorded* against what actually *
 
 #### Afterwards
 
-- Document blackout durations and error magnitudes in `docs/field-notes.md` (T-020).
+**The import is one command, and it does the T-020 arithmetic for you** (built 2026-08-17):
+
+```bash
+node tools/import-sensor-logger.mjs <unzipped-export-dir> --name levada-do-rei
+node tools/preview-trace.mjs --fixes tools/fixtures/levada-do-rei.json --sweep
+```
+
+The first prints blackout durations, fix interval and accuracy percentiles, and writes the
+fixture. The second runs **the app's own `cleanTrace`** over the real fixes and draws the
+before and after, which is the whole point: until this exists, every threshold in the trace
+chapter was tuned against noise this repository invented for itself.
+
+- Paste the printed numbers, and what they mean, into `docs/field-notes.md` (T-020).
 - Commit exports and photos to `tools/fixtures/` — **these become the permanent matching
   regression suite** (T-021). Every future matching change is tested against them.
 - **Repeat at least one run on a mid-range Android** before finalising any Phase 4 threshold

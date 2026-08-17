@@ -78,6 +78,13 @@ than doing the levada and not earning it."*
   passing tests could not see it. **If you are about to trust a subsystem because its tests pass,
   read this one first.**
 - ⚠ **T-146 — nothing auto-started recording for an Always user either.** Same shape, one screen on.
+- ⚠⚠ **`-gpu host` renders the Google map as PURE BLACK — found 2026-08-17, and it had been
+  hiding the map from every session.** The chrome draws, the map's GL surface does not: no error,
+  no authorization failure, no Google wordmark, black in both styles. It reads as a broken app.
+  `tools/run-emulator.sh` now defaults to `swiftshader_indirect`. ⚠ The flag's justification —
+  *"MapLibre computes hillshading on it"* — **died with D-057**, which moved the app to the
+  platform's map; nothing in the app rasterises tiles any more. **A stale reason outlived the
+  thing it justified.**
 - ⚠ **T-147 — the dark map is Google's own only on the *latest* Maps renderer.** The emulator is
   handed LEGACY, so it can never show what most users see. `adb logcat -s MadeiraExplorer` says which.
 - ⚠ **Anything floating over the map must be checked on both styles.** The settings control measures

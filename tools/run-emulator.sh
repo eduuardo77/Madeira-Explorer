@@ -15,7 +15,28 @@ if [ ! -d "$ANDROID_HOME/emulator" ]; then
   exit 1
 fi
 
-# -no-boot-anim shaves a few seconds; -gpu host uses the real GPU, which the
-# map genuinely needs — MapLibre draws vector tiles and computes hillshading
-# on it, and a software rasteriser makes the map look far worse than it is.
-exec "$ANDROID_HOME/emulator/emulator" -avd madeira -no-boot-anim -gpu host
+# ⚠⚠ `-gpu host` RENDERS THE GOOGLE MAP AS PURE BLACK. Found 2026-08-17.
+#
+# The app's own UI composites through Skia and draws perfectly; the map's
+# separate GL surface comes back blank. No error, no authorization failure, no
+# Google wordmark — the primary screen is simply black, in both styles, before
+# and after panning. It looks exactly like a broken app rather than a broken
+# emulator flag, which is why it cost a session to find.
+#
+# ⚠ **AND THE REASON `-gpu host` WAS HERE HAS BEEN OBSOLETE SINCE D-057.** The
+# comment this replaces said the real GPU was needed because *"MapLibre draws
+# vector tiles and computes hillshading on it"*. D-057 replaced MapLibre with
+# **the platform's own map** — Google's, rendered by Play services — so nothing
+# in the app rasterises tiles any more. The flag kept its justification after
+# the thing it justified was removed, and then hid the map from every session
+# that tried to look at it.
+#
+# `swiftshader_indirect` is slower to boot and the map is unmistakably there.
+# Override if a future host handles `host` correctly: MADEIRA_GPU=host bash …
+GPU="${MADEIRA_GPU:-swiftshader_indirect}"
+
+# ⚠ Independent of the GPU: Play services hands this emulator the **LEGACY**
+# Maps renderer (T-147), and Google's own dark map is a latest-renderer
+# feature. So the dark style cannot be judged here at any GPU setting.
+# `adb logcat -d | grep "renderer version"` says which one you got.
+exec "$ANDROID_HOME/emulator/emulator" -avd madeira -no-boot-anim -gpu "$GPU"

@@ -70,6 +70,57 @@ An API that was never enabled cannot bill you, whatever happens to the key. So:
 
 A leaked key can then only draw a map, only from an app signed by you, and that draw is free.
 
+### ⚠ Two ways the key silently stops working, and how to tell them apart
+
+**The restriction is bound to the package name AND the SHA-1. Change either and the map dies with
+no error, no crash and nothing in the log.** Both happened on 2026-08-17.
+
+**1. The package name changed.** D-074 renamed the app to `com.proa.madeira`, and a key restricted
+to the old package keeps returning tiles to nobody. The fix is an **edit, not a new key** — Cloud
+console → *APIs & Services → Credentials* → the existing key → *Application restrictions → Android
+apps* → change the package. Leave the SHA-1 alone. ⚠ Google says changes take **up to 5 minutes**
+to propagate, so a grey map immediately afterwards is not yet a failure.
+
+**2. The SHA-1 changed.** `npx expo prebuild --clean` regenerates `android/`, and that includes
+`app/android/app/debug.keystore`. It has been stable so far because it is React Native's template
+keystore — its certificate is valid from **31 December 2013**, which is how you can tell it is the
+shared one rather than yours:
+
+```bash
+export JAVA_HOME="$(pwd)/tools/jdk/jdk-21.0.12+8"
+"$JAVA_HOME/bin/keytool" -list -v -keystore app/android/app/debug.keystore \
+  -alias androiddebugkey -storepass android -keypass android | grep SHA1
+```
+
+⚠ **That fingerprint is not really yours, and the restriction is weaker than it looks.** Thousands
+of projects ship the same template keystore, so "package + this SHA-1" is guessable. Acceptable for
+a **debug** key on a free SKU; not a security control. The release fingerprint below is the one that
+matters.
+
+### ⚠ Grey map or black map — they are different faults
+
+| What you see | Cause | Fix |
+|---|---|---|
+| **Grey grid, Google logo, no tiles** | The **API key** is missing, wrong, or restricted to the wrong package/SHA-1 | This section |
+| **Pure black, no logo, no error** | The **emulator GPU** — `-gpu host` never draws the map surface | `tools/run-emulator.sh` (defaults to swiftshader); cold-boot with `MADEIRA_COLD=1` |
+
+Telling these apart first saves debugging the wrong half of the stack. **The Google wordmark is the
+tell:** the SDK drew *something*, so the surface works and the problem is the key.
+
+### ⚠ Before publishing: a second entry, or the map is grey for every real user
+
+**Google re-signs uploaded apps with their own key** (Play App Signing), so the SHA-1 in the
+installed app is **not** the debug one above and **not** your upload key.
+
+- **Play Console → Test and release → Setup → App integrity → App signing key certificate** → copy
+  its SHA-1.
+- Add it as a **second Android entry on the same key**. One key carries several package + SHA-1
+  pairs, so debug and release coexist.
+
+⚠ **Skip this and the map works perfectly in every build you make and is grey for everybody who
+installs from the store** — invisible until a stranger opens it. This is the worst version of the
+failure and it belongs on the pre-launch checklist (T-137).
+
 ### ⚠ A budget does NOT cap spending
 
 Google's own words: *"Setting a budget does not automatically cap Google Cloud or Google Maps

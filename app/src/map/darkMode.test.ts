@@ -14,15 +14,46 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { darkMapPropsFor } from './darkMode.ts';
+import { GOOGLE_NIGHT_STYLE_JSON } from './googleNightStyle.ts';
+import { MAP_CLUTTER_RULES, MAP_CLUTTER_STYLE_JSON } from './mapClutter.ts';
 
 const NATIVE_WORKS = () => true;
 const NATIVE_BROKEN = () => false;
 
-test('light leaves Google to draw its own map', () => {
+test('light asks for the light map, whatever the renderer does', () => {
+  for (const check of [NATIVE_WORKS, NATIVE_BROKEN]) {
+    assert.equal(darkMapPropsFor('light', check).dark, false);
+  }
+});
+
+test('⚠ the light map carries the clutter rules and NOT the night palette', () => {
+  // This test used to assert the light path carried no style at all, and that
+  // was the right guard for the wrong reason. The danger it was written for is
+  // real and unchanged: the *night palette* on the light map looks like a
+  // rendering bug rather than a wiring one, and nobody would think to look here.
+  // What changed (2026-08-17) is that the light map now carries
+  // visibility-only rules to take Google's POI pins off it — see
+  // `mapClutter.ts`. So the assertion narrows from "no style" to "not that
+  // style", which is what was actually meant.
   for (const check of [NATIVE_WORKS, NATIVE_BROKEN]) {
     const props = darkMapPropsFor('light', check);
-    assert.equal(props.dark, false);
-    assert.equal(props.mapStyleJson, undefined);
+    assert.equal(props.mapStyleJson, MAP_CLUTTER_STYLE_JSON);
+    assert.notEqual(props.mapStyleJson, GOOGLE_NIGHT_STYLE_JSON);
+  }
+});
+
+test('⚠ the clutter rules change no colour, so Google keeps drawing its own map', () => {
+  // D-057 chose the platform's map to avoid owning cartography. A `color` or
+  // `hue` styler here would quietly take that obligation back on, one rule at a
+  // time, and the light map would drift away from the phone's other maps.
+  for (const rule of MAP_CLUTTER_RULES) {
+    for (const styler of rule.stylers) {
+      assert.deepEqual(
+        Object.keys(styler),
+        ['visibility'],
+        `${rule.featureType ?? 'all'} styles something other than visibility`
+      );
+    }
   }
 });
 

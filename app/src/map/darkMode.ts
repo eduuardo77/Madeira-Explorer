@@ -39,6 +39,7 @@
  */
 
 import { GOOGLE_NIGHT_STYLE_JSON } from './googleNightStyle.ts';
+import { MAP_CLUTTER_STYLE_JSON } from './mapClutter.ts';
 import type { MapStyleName } from './mapStyle.ts';
 
 /**
@@ -62,9 +63,18 @@ export type DarkMapProps = {
 /**
  * What the map should be handed for the chosen style.
  *
- * ⚠ The style JSON is undefined for light in every case. Passing a style at all
- * replaces Google's default cartography, and there is no "empty" style that
- * means "yours please" — an empty array is a blank map.
+ * ⚠ **The light map is no longer unstyled, changed 2026-08-17.** It used to be
+ * handed `undefined` so Google's cartography arrived exactly as drawn. Looked at
+ * on a device, that included Google's POI layer — six saturated pins on one
+ * screen of Funchal, one of which was a place the user had *collected*, drawn
+ * identically to five they had not. `mapClutter.ts` has the full argument. The
+ * rules are **visibility only and change no colour**, so Google's cartography is
+ * still Google's; it is only their pins that go.
+ *
+ * ⚠ The dark path on the *latest* renderer is deliberately still untouched —
+ * layering a style over `colorScheme: DARK` cannot be verified on an emulator
+ * that only ever loads LEGACY (T-147), and guessing there risks the silent
+ * white-map failure that whole trap is about. T-154.
  *
  * Returns a boolean rather than the SDK's enum so that this decision stays
  * testable without Expo. The caller does the one-line mapping.
@@ -74,7 +84,7 @@ export function darkMapPropsFor(
   nativeDarkMapWorks: NativeDarkMapCheck
 ): DarkMapProps {
   if (style !== 'dark') {
-    return { dark: false, mapStyleJson: undefined };
+    return { dark: false, mapStyleJson: MAP_CLUTTER_STYLE_JSON };
   }
 
   return {

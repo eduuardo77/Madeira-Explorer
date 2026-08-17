@@ -525,9 +525,24 @@ batch.
 *Raised by Claude. No code has been changed — this reverses nothing and proposes nothing yet.*
 
 ### OD-4 — Monetisation
-**Deferred, not blocking.**
-The printed poster/map idea is explicitly parked. For now: free, no IAP, no ads (ads would
-also destroy the privacy position). Revisit after launch data.
+⚠ **RESEARCHED 2026-08-17: [`docs/monetization-options.md`](docs/monetization-options.md).**
+Seven models costed, with store fees, the competitor's actual prices and the market's size.
+**Awaiting the project lead**, who set the goal as *break even and finally see some online money*,
+and asked it be treated as a premium app.
+
+**The finding that reframes it: break-even is $25.** Google Play charges $25 once and nothing
+annually; the Maps SDK is free; there are no servers (D-001). Apple's $99/yr only applies if iOS
+ships, and there is no Mac. At €4.99 net of Play's 15%, **six sales cover it, ever.** So pricing is
+a positioning decision, not a revenue one.
+
+**Recommendation: paid up front, Android first, €4.99, no IAP in v1**, with free promo codes for
+testers and partners. The deciding argument is not money — it is that a paid app needs **no billing
+library and adds no network call**, so *"nothing leaves your phone"* stays literally true and
+testable (T-117b, T-127). Every IAP model spends some of that claim.
+
+**The printed poster stays parked, and the research strengthened D-014**: selling an object makes us
+merchant of record — VAT registration, EU withdrawal rights, shipping and returns — all of which the
+app stores currently do for free. Ads remain ruled out permanently.
 
 ### OD-5 — Cruise-ship day-trippers as a target segment
 **Not blocking, affects content curation.**

@@ -3565,3 +3565,78 @@ looked like a different product depending on a setting and a device's renderer.
 **Still unverified, and it needs the phone (T-154):** Google's native dark map now receives a style
 JSON. The rules change no colour, so `colorScheme: DARK` should still decide the palette — but the
 emulator only ever loads the LEGACY renderer, so that exact combination cannot be reached here.
+
+---
+
+## D-072 — Paid up front, one price, no in-app purchases. Android first.
+
+**Status:** Provisional — needs the project lead's confirmation · **Date:** 2026-08-17 ·
+**Resolves:** OD-4 · **Full research:** [`docs/monetization-options.md`](monetization-options.md)
+
+### The goal it is answering
+
+The project lead, in their words: *"I don't expect to bring huge revenue from this. I'm just looking
+forward to break even and finally see some online money."* And: *"think like a premium app."*
+
+### The finding that decides it
+
+**Break-even is $25.** Google Play charges $25 once and nothing annually; the Maps SDK's mobile
+display tier is free and unlimited; there are no servers (D-001). Apple's $99/yr applies only if
+iOS ships, and this project has no Mac. At €4.99 net of Play's 15% (10% service + 5% billing in the
+EEA since 30 June 2026), that is **six sales — ever.**
+
+⚠ **So no model on the list is meaningfully better at the stated goal.** Pricing is therefore a
+decision about *what the app is*, not about revenue, and the tie-breakers become dignity and risk.
+
+### The decision
+
+**Paid up front, €4.99, Android first, no IAP of any kind in v1.** Free promo codes for testers and
+partners.
+
+### Why, in order of weight
+
+1. **It is the only option that keeps the central claim literally true.** A paid app is bought in
+   the store, outside our binary: no billing library, no receipt validation, **no network call
+   added**. T-117b and T-127 — *verify zero outbound requests* — stay verifiable. Every IAP model
+   spends some of the one asset the competitor cannot copy.
+2. **It cannot be cruel.** The rule that follows from D-009 is *never withhold a trip the user has
+   already recorded*. Paid-up-front satisfies it by construction rather than by careful design.
+3. **It attacks the incumbent where it is weakest.** WalkMe is free with a $7.99 / $14.99 / $49.99
+   ladder. "One price, everything included, nothing collected" sells itself against that.
+4. **It is the least code**, and this project has not completed a single real trip yet.
+
+### What was rejected, and why
+
+- **Free + one unlock (the credible alternative).** Best-evidenced converter — hard paywalls median
+  12.1% download-to-paid vs 2.2% freemium, with near-identical one-year retention. ⚠ But that
+  evidence compares *in-app paywall styles*, not paid-vs-free listings, so it is weaker for this
+  choice than it first looks. Cost: billing libraries, their network calls, the privacy rewording,
+  paywall UI and a restore flow. If it is ever chosen, the boundary must be **geographic** (one
+  municipality free), never temporal — you must be able to use it on a real walk before paying.
+- **Free app, paid souvenir.** Charges at the moment of maximum value, and taxes the only growth
+  mechanism the project has: D-013 makes the souvenir *the distribution strategy*. Throttling the
+  engine to sell fuel. Revisit only if T-136 shows the souvenir does not drive installs.
+- **Tip jar.** Explicitly allowed by Apple, and would plausibly cover the $25 — but a well-made
+  object does not ask for change, and it drags in the billing library for the least revenue here.
+- **Printed poster (the original OD-4 idea).** ⚠ The research strengthened D-014 rather than
+  softening it: print-on-demand base cost is ~$11–16 for a large print before shipping, and selling
+  an object makes **us** merchant of record — VAT registration, EU 14-day withdrawal rights,
+  shipping, damage, returns — all of which the app stores currently do for free. It is a business,
+  not a feature, and the only option here that can lose money.
+- **Ads.** Permanently ruled out; they would destroy the position D-001 and D-031 protect.
+
+### The known cost of this decision
+
+⚠ **Neither store offers a trial for a paid app.** OD-10 already names discovery as the largest open
+problem, and a price makes a hard problem harder. The mitigation is **promo codes**, which both
+stores issue free — turning the weakness into a partner's giveaway (OD-10 option B).
+
+⚠ **The price is the soft part.** A premium instinct says €6.99–€7.99. The argument against is not
+revenue: this app's scarcest resource is **real trips recorded**, and every euro of price costs
+installs the project needs more than it needs money. Revisit after T-134's ten real trips.
+
+### What is deliberately not decided
+
+Anything about IAP, the video souvenir's price, or the poster. All three depend on facts that do not
+exist yet — whether the souvenir drives installs (T-136), what the encoder costs (T-105c), and
+whether anybody completes a trip at all.

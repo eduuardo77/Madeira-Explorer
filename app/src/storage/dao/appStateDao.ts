@@ -96,6 +96,18 @@ export const AppStateKey = {
    * which reads as the app not believing the answer.
    */
   ConfirmationsDeclined: 'confirmations_declined',
+  /**
+   * Whether the passport has been unlocked — the single non-consumable purchase
+   * (T-155, D-072). `true` / `false`, absent meaning free.
+   *
+   * ⚠ **A cache of the store's answer, not the answer.** T-156 makes Play
+   * Billing the authority and writes it here so the passport can render at
+   * launch, offline, in a levada valley, without waiting on a network call.
+   *
+   * ⚠ **It gates a display and nothing else.** Never read it in the recorder or
+   * the award pass — `freeTier.ts` explains why, and a test enforces it.
+   */
+  StampsUnlocked: 'stamps_unlocked',
 } as const;
 
 export type AppStateKeyName =

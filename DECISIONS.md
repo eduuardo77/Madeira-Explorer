@@ -103,6 +103,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-072** | **Free on Play. Trace always free; 10 stamps + your first levada free; €4.99 unlocks the rest.** | **Accepted** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 | **D-074** | The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`. | **Accepted** |
+| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Provisional** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

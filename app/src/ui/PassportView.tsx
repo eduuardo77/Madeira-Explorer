@@ -50,6 +50,7 @@
 
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path, Rect } from 'react-native-svg';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
@@ -79,6 +80,16 @@ const STAMP_SIZE = 96;
 
 /** The drawing, shrunk so its tilted corners stay inside the cell. */
 const STAMP_DRAW_SIZE = Math.floor(STAMP_SIZE * TILT_FIT);
+
+/**
+ * The padlock, in dp.
+ *
+ * Small on purpose. It has to be readable at arm's length and it must not
+ * compete with the sticker underneath — the stamp is what the user is being
+ * invited to want, and a badge that shouts turns an invitation into a nag
+ * (design brief §3).
+ */
+const LOCK_GLYPH = 12;
 
 /**
  * What each row is called, in the user's words.
@@ -161,6 +172,17 @@ export type PassportStamp = {
   category: Category;
   /** False draws the muted design (`stampArt.ts`) and reads "not collected yet". */
   collected: boolean;
+  /**
+   * Earned, kept forever, and behind the €4.99 unlock (T-155, D-072).
+   *
+   * ⚠ **A third state, and it had to be.** The cheap implementation of a free
+   * tier is to draw an earned-but-unpaid stamp as *not collected*, and that is
+   * the app telling the user they did not go somewhere they went. This project
+   * does not do that anywhere else — T-149 refuses to ask twice about a walk
+   * for the same reason — so a locked stamp keeps the muted drawing but says
+   * what it is: yours, and not shown yet.
+   */
+  locked?: boolean;
 };
 
 export type PassportViewProps = {
@@ -192,6 +214,41 @@ export type PassportViewProps = {
   onConfirm?: (placeId: string) => void;
   onDecline?: (placeId: string) => void;
 };
+
+/**
+ * The mark on an earned stamp the user has not paid to see (T-155, D-072).
+ *
+ * ⚠ **Drawn here rather than in `stampArt.ts`, deliberately.** That module owns
+ * the stamp *design* and has a second renderer (`tools/preview-stamps.mjs`)
+ * precisely so the artwork that gets approved is the artwork that ships. A
+ * paywall marker is not artwork the user earned — it is chrome the app puts on
+ * top, and it should disappear from the design the moment T-156 takes the money.
+ * Keeping it out of `stampArt.ts` is what makes that a deletion of six lines.
+ *
+ * A drawn padlock rather than a glyph: the emoji renders differently on every
+ * OEM skin, and a font that lacks it draws a box.
+ */
+function LockBadge() {
+  return (
+    <View
+      style={styles.lockBadge}
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+    >
+      <Svg width={LOCK_GLYPH} height={LOCK_GLYPH} viewBox="0 0 12 12">
+        {/* The shackle: an open arc, stroked, sitting on the body. */}
+        <Path
+          d="M3.6 5.2V3.9a2.4 2.4 0 0 1 4.8 0v1.3"
+          stroke={colors.text}
+          strokeWidth={1.4}
+          strokeLinecap="round"
+          fill="none"
+        />
+        <Rect x={2.3} y={5.2} width={7.4} height={5.3} rx={1.2} fill={colors.text} />
+      </Svg>
+    </View>
+  );
+}
 
 function CategoryRow({
   category,
@@ -232,34 +289,47 @@ function CategoryRow({
         ...stamps.filter((stamp) => !stamp.collected),
       ];
 
-  const cells = ordered.map((stamp) => (
-    // The cell is 96 dp, well over D-015's 60 — which is why the sticker
-    // itself is the tap target rather than a button beside it.
-    <Pressable
-      key={stamp.placeId}
-      accessibilityRole="button"
-      accessibilityLabel={
-        stamp.collected
-          ? `${stamp.name}, collected. Open to show it on the map.`
-          : `${stamp.name}, not collected yet. Open to show it on the map.`
-      }
-      onPress={
-        onSelectStamp === undefined ? undefined : () => onSelectStamp(stamp)
-      }
-      style={({ pressed }) => [
-        styles.stampCell,
-        pressed && styles.stampCellPressed,
-      ]}
-    >
-      <StampArt
-        placeId={stamp.placeId}
-        design={designFor(stamp.placeId, stamp.category)}
-        name={stamp.name}
-        collected={stamp.collected}
-        size={STAMP_DRAW_SIZE}
-      />
-    </Pressable>
-  ));
+  const cells = ordered.map((stamp) => {
+    // ⚠ Locked draws the muted artwork — the same drawing as an uncollected
+    // place — because the artwork *is* the thing being sold (D-046), and the
+    // badge is what stops that drawing being read as "you never went".
+    const locked = stamp.locked === true;
+
+    return (
+      // The cell is 96 dp, well over D-015's 60 — which is why the sticker
+      // itself is the tap target rather than a button beside it.
+      <Pressable
+        key={stamp.placeId}
+        accessibilityRole="button"
+        accessibilityLabel={
+          locked
+            ? t('passport.locked.a11y', { name: stamp.name })
+            : stamp.collected
+              ? `${stamp.name}, collected. Open to show it on the map.`
+              : `${stamp.name}, not collected yet. Open to show it on the map.`
+        }
+        onPress={
+          onSelectStamp === undefined ? undefined : () => onSelectStamp(stamp)
+        }
+        style={({ pressed }) => [
+          styles.stampCell,
+          pressed && styles.stampCellPressed,
+        ]}
+      >
+        <StampArt
+          placeId={stamp.placeId}
+          design={designFor(stamp.placeId, stamp.category)}
+          name={stamp.name}
+          collected={locked ? false : stamp.collected}
+          // The sticker's own label would append "not collected yet", which is
+          // exactly the sentence a locked stamp must never say.
+          label={locked ? t('passport.locked.a11y', { name: stamp.name }) : undefined}
+          size={STAMP_DRAW_SIZE}
+        />
+        {locked ? <LockBadge /> : null}
+      </Pressable>
+    );
+  });
 
   return (
     // iOS grouped-inset list (D-054): the section's name sits **above** the
@@ -590,6 +660,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stampCellPressed: { opacity: 0.6 },
+  // Top-trailing corner of the cell, clear of the tilted sticker's name band,
+  // which sits along the bottom.
+  lockBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: LOCK_GLYPH + spacing.xs,
+    height: LOCK_GLYPH + spacing.xs,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // A disc behind it, so the mark reads against whatever colourway the muted
+    // sticker happens to be showing through.
+    backgroundColor: colors.background,
+  },
   footnote: {
     color: colors.textMuted,
     fontSize: fontSize.small,

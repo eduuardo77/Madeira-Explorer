@@ -662,7 +662,25 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Circles, not markers**: `icon` needs `SharedRefType<'image'>` and therefore `expo-image`,
       a dependency this app does not carry and would have to audit (D-043). Without an icon a
       marker is Google's default red pin — louder than the trace and somebody else's app.
-- [ ] **T-155** **The free tier and the unlock (D-072)** ⇠ T-071, T-074
+- [x] **T-155** ✅ **The free tier, 2026-08-18.** ⇠ T-071, T-074 → T-156 owns the *unlock*
+      — `entitlement/freeTier.ts` is the arithmetic (pure, 12 tests): first ten earned, plus the
+      first levada whenever it arrives, at most eleven. `entitlement/entitlementStore.ts` is the
+      one flag it reads, and **nothing sets it yet** — T-156 puts Play Billing behind it. The
+      passport applies the result in exactly one place, after the award pass has already run.
+      — **"The user's own choice of which ten" resolved as: the first ten they earn.** The other
+      reading — the app asks them to nominate ten out of their own holiday — is a worse screen
+      than any paywall, and the app picking ten favoured *places* would be worse still.
+      — ⚠ **The gate is a display and the build now enforces it.** `freeTier.test.ts` fails if
+      `geofenceSelection`, `geofenceManager`, `stampAwards`, `stampRules` or `stampConfirmation`
+      so much as imports `entitlement/`. That is the cheapest defence against the T-145 shape the
+      task warned about: gating the award side would break D-072's "buy later, get everything"
+      promise with no crash and no failing assertion.
+      — **D-075 (Provisional) is the judgement call this raised**: a locked stamp keeps the muted
+      drawing but carries a padlock and says *"collected — unlock to see this stamp"*, rather than
+      rendering as never-visited. The hero and the row counts still count what was **earned**.
+      One boolean overrules it; the arithmetic does not change either way.
+      — ⚠ **Nobody has looked at the padlock.** Geometry and colours are measured; appearance is
+      not. Workbench scenario **"23 stamps — free tier (T-155)"**.
       — **The rules, and they are exact.** Recording, the trace and the souvenir still are free
       forever. **Ten stamps free**, the user's own choice of which. **The first levada stamp is
       always awarded and shown in addition to the ten**, whenever it happens, even at 10/10 — so the
@@ -702,6 +720,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Leaning: state it once, quietly, on the passport.** Never a notification — **D-011's cap of
       two per trip is already spent** — and never a repeating banner, which is the failure design
       brief §3 watches for in the reference app. **Not settled.**
+      — **⚠ Mostly answered by D-075 (2026-08-18), not by a sentence.** The locked stamps *are*
+      the statement: eighteen collected shows as eleven drawings and seven padlocks, continuously,
+      with no banner, no notification and no counter. What is left of this task is the small
+      question — should a **line of prose** say it as well — and the answer is probably no, since
+      the padlocks already say it and prose would be the nagging the project lead ruled out.
 - [ ] **T-158** *Deferred by the project lead:* **make the stamps worth buying** ⇠ T-155
       — All the revenue now rests on the passport being desirable. Their words: *"we'll need then to
       make the stamps appealing enough to bring more revenue. But lets leave that for the future."*

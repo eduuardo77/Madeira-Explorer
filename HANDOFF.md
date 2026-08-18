@@ -1,6 +1,6 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-08-17.
+**For:** a session picking this project up cold. **Updated:** 2026-08-18.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
@@ -8,7 +8,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **539 tests**, `tsc` strict clean. `content/pois.json` holds **60 curated places**
+still image. **551 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
+unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
 Portuguese and German**. ⚠ **Nothing has ever run on real hardware**, and no threshold in the app
 has met real GPS.
@@ -22,6 +24,7 @@ has met real GPS.
 | **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** |
 | **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |
 | **D-074** | The app is **Proa**, the listing is **Proa - Madeira**, the package is **permanent**. |
+| **D-075** | ⚠ **Provisional, 2026-08-18.** A stamp you earned but have not paid to see is **locked** — padlock, muted drawing, *"collected — unlock to see this stamp"* — and **never** "not collected". The hero and the row counts keep counting what was earned. One boolean overrules it. |
 
 **Research written today:** [`docs/monetization-options.md`](docs/monetization-options.md) (three
 parts, 14 options costed) and [`docs/marketing-plan.md`](docs/marketing-plan.md) (the store listing
@@ -61,19 +64,31 @@ ground truth.
 - **D-074** needs a **TMview / INPI** conflict search on "Proa". The store-and-web screen was done;
   the trademark registers were not.
 - **T-159** whether the timelapse video sits behind the paywall.
+- **D-075** ⚠ **Somebody has to look at the padlock.** Its geometry and colours are measured; its
+  *appearance* is not, and the question a test cannot answer is whether a **locked** sticker is
+  obviously different from one that was **never collected**. If they read the same at arm's
+  length, the app is quietly denying visits. Workbench scenario **"23 stamps — free tier
+  (T-155)"** — `npm --prefix app run web`.
 
 ## Next tasks, in the order that makes sense
 
-1. **T-158** — make the stamps worth buying. All the revenue rests on them now (D-072).
-2. **T-155/T-156** — the free tier and Play Billing. ⚠ Read the trap in T-155 first.
+1. **T-156** — Play Billing. `entitlementStore.setUnlocked` is the seam and nothing calls it, so
+   **today no user can pay.** ⚠ It is also the first network call the app makes on its own
+   account: T-156's own notes list the privacy copy that has to be reworded before it ships.
+2. **T-158** — make the stamps worth buying. All the revenue rests on them now (D-072). ⚠ It is
+   *deferred by the project lead* — **do not start it without asking**, whatever this list said
+   before.
 3. **T-161/T-162** — ship the listing; screenshots from a **real** trip.
 
 ## Traps. Each cost a session, and none was visible from the tests
 
 - ⚠⚠ **T-145 — nothing started geofence monitoring, so no stamp could ever be awarded.** 399
   passing tests could not see it. **If you are about to trust a subsystem because its tests pass,
-  read this one first.** ⚠ **T-155 warns of the same shape**: gating the award pass for unpaid
-  users would silently break D-072's "buy later, get everything" promise.
+  read this one first.** ⚠ **T-155 was the same shape**, and is now guarded: `freeTier.test.ts`
+  fails the build if the recorder or the award pass so much as imports `entitlement/`. **The free
+  tier gates a display and nothing else** — the app monitors all sixty geofences and writes every
+  award while unpaid, because that is the only thing that makes D-072's "buy later, get
+  everything" true.
 - ⚠⚠ **`-gpu host` renders the Google map as PURE BLACK.** No error, no wordmark. It reads as a
   broken app. `tools/run-emulator.sh` defaults to swiftshader; `MADEIRA_COLD=1` forces a cold boot.
   ⚠ **If the map is black, cold-boot before debugging the app.**
@@ -99,7 +114,7 @@ ground truth.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 539 tests
+cd app && npm test          # 551 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

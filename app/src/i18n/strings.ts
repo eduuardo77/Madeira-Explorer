@@ -196,6 +196,16 @@ export const STRINGS = {
   'passport.category.beach': s('Beaches', 'Praias', 'Strände'),
   'passport.category.landmark': s('Landmarks', 'Monumentos', 'Sehenswürdigkeiten'),
 
+  // The free tier (T-155, D-072). ⚠ The tone is the point: a locked stamp is
+  // one the user *earned* and has not seen yet, never one they failed to get.
+  // Nothing here may read as a scolding or as a countdown.
+  'passport.locked.a11y': s(
+    '{name}, collected. Unlock your passport to see this stamp.',
+    '{name}, visitado. Desbloqueie o seu passaporte para ver este selo.',
+    '{name}, gesammelt. Schalten Sie Ihren Reisepass frei, um diesen Stempel zu sehen.'
+  ),
+  'passport.locked.badge.a11y': s('Locked', 'Bloqueado', 'Gesperrt'),
+
   // ── Settings (design brief §5) ──────────────────────────────────────────
   'settings.title': s('Settings', 'Definições', 'Einstellungen'),
   'settings.done': s('Done', 'Concluído', 'Fertig'),

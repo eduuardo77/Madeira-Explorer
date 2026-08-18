@@ -3977,3 +3977,59 @@ that did not exist — a longer cut, higher resolution, no watermark, more style
 **Not acceptable:** degrading what shipped free. And existing users keep what they had regardless;
 grandfathering here is not a courtesy, it is the difference between a new product and a broken
 promise.
+
+## D-075 — A stamp you earned but have not paid to see is **locked**, never "not collected"
+
+**Status: Provisional.** Raised and implemented 2026-08-18 (T-155). It is the one judgement call
+D-072 left open, it changes what the free user's passport *says*, and the project lead should
+either confirm it or overrule it with one boolean.
+
+**The decision.** D-072 gives a free user ten stamps plus their first levada. When they have
+earned more than that, the passport shows the surplus as a **third state**: the muted drawing —
+the same drawing an uncollected place gets — with a small padlock in the corner and a screen
+reader label of *"Sé, collected. Unlock your passport to see this stamp."* The row counts and the
+hero number keep counting **everything earned**, paid or not.
+
+**What was rejected, and why it was tempting.** The cheap implementation is to render an
+earned-but-unpaid stamp exactly as if the place had never been visited. It is fewer lines, it
+needs no new artwork state, and the paywall reads as cleaner. It is also **the app telling the
+user they did not go somewhere they went**, on the one screen whose entire job is to say where
+they went.
+
+This project has refused that trade everywhere else it came up. T-149 will not ask the same
+question twice because *being asked twice about a walk you did not do is the app politely calling
+you a liar*. D-041 keeps the battery figure `null` rather than print a plausible guess. A passport
+that quietly denies eight visits to sell a €4.99 unlock is the same failure with money attached,
+and it is the failure that produces the review this product cannot survive: *"it deleted my
+stamps"*. What is being sold is the **artwork** (D-046), not the fact of the visit, and the
+locked state is what makes that distinction visible instead of merely intended.
+
+**What it costs.** The paywall is softer. A user can see they collected eighteen places while
+seeing eleven drawings, so the unlock is an invitation rather than a wall — which is the right
+shape for a €4.99 one-off in an app whose recorder, trace and souvenir are free forever anyway
+(D-072), and the wrong shape if the passport ever has to carry a harder sell.
+
+**What it largely answers.** T-157 asked whether to say *once* that something is waiting. The
+locked stamps say it continuously and without a sentence — no banner, no notification, no
+counter. T-157 is now a smaller question: whether a **line of prose** should also appear, and the
+answer is probably no.
+
+**Where it lives.** `app/src/ui/PassportView.tsx` — `PassportStamp.locked` and `LockBadge`.
+⚠ **Deliberately not in `stampArt.ts`.** That module owns the stamp *design* and has a second
+renderer (`tools/preview-stamps.mjs`) so that the artwork approved by eye is the artwork that
+ships. A paywall marker is not artwork the user earned; it is chrome the app puts on top, and it
+should vanish the moment T-156 takes the money. Keeping it out of `stampArt.ts` makes that a
+deletion of six lines rather than a change to the drawing.
+
+**How to overrule it.** Delete `locked` from `PassportStamp` and drop the `locked` set in
+`PassportScreen`; the surplus stamps then render as uncollected and nothing else changes. The
+arithmetic in `freeTier.ts` is untouched either way — it already reports `visible` and `locked`
+separately, and it does not care what a screen does with them.
+
+⚠ **What has NOT been looked at.** The padlock's geometry and colours were measured in the
+workbench — a 12 dp white glyph on a 16 dp disc of `colors.background`, in the top-trailing corner
+of the 96 dp cell, clear of the name band. **Nobody has looked at it.** The scenario is
+*"23 stamps — free tier (T-155)"* in the design workbench (`npm --prefix app run web`), and the
+question it is there to answer is the one a test cannot: **is a locked sticker obviously
+different from one that was never collected?** If those two read the same at arm's length, this
+decision has failed at the only thing it was for.

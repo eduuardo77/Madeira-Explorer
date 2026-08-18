@@ -36,6 +36,7 @@ export default function StampArt({
   design,
   name,
   collected,
+  label,
   size,
 }: {
   /**
@@ -47,6 +48,15 @@ export default function StampArt({
   design: StampDesign;
   name: string;
   collected: boolean;
+  /**
+   * What a screen reader should say, when the derived label would be wrong.
+   *
+   * ⚠ Exists for exactly one caller: a stamp that is **earned but locked**
+   * (T-155) is drawn with `collected={false}` so it gets the muted palette, and
+   * the derived label would then announce *"not collected yet"* about a place
+   * the user stood at. The passport passes the true sentence in.
+   */
+  label?: string;
   /** Drawn square, in dp. */
   size: number;
 }) {
@@ -61,7 +71,7 @@ export default function StampArt({
       // The tilt is applied here rather than inside the drawing, so the cut
       // edge is never clipped by its own viewBox.
       style={{ transform: [{ rotate: `${design.tiltDeg}deg` }] }}
-      accessibilityLabel={`${name}${collected ? '' : ', not collected yet'}`}
+      accessibilityLabel={label ?? `${name}${collected ? '' : ', not collected yet'}`}
     >
       <Defs>
         <ClipPath id={clipId}>

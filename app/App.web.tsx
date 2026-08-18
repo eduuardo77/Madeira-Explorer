@@ -34,6 +34,7 @@ import OnboardingView, {
   type OnboardingScreen,
 } from './src/onboarding/OnboardingView';
 import PassportView, { type PassportStamp } from './src/ui/PassportView';
+import { visibleStamps } from './src/entitlement/freeTier';
 import PlaceCardView from './src/ui/PlaceCardView';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
@@ -104,7 +105,11 @@ function makeAwards(count: number): StampAward[] {
  * collected: they are the majority of the screen for most of a trip, and they
  * are drawn in a different palette.
  */
-function makeStamps(count: number, byCategory: TripProgress['byCategory']): PassportStamp[] {
+function makeStamps(
+  count: number,
+  byCategory: TripProgress['byCategory'],
+  freeTier = false
+): PassportStamp[] {
   const names = [
     'High Rock', 'Miradouro Grande', 'Water Walk', 'Long Canal Trail',
     'Machico', 'Ribeira Brava', 'Black Sands', 'Calheta Bay',
@@ -125,7 +130,42 @@ function makeStamps(count: number, byCategory: TripProgress['byCategory']): Pass
       index += 1;
     }
   }
-  return stamps;
+
+  if (!freeTier) {
+    return stamps;
+  }
+
+  // The free tier, drawn (T-155). ⚠ Composed from the shipping module rather
+  // than approximated here — a workbench that invents its own version of the
+  // rule shows a screen that does not exist.
+  //
+  // ⚠ The fixture is bent to produce D-072's *interesting* case, because the
+  // default one hides it: `makeProgress` fills the first category first, so all
+  // 23 stamps land in Viewpoints, no levada is ever earned and the guarantee
+  // never fires. So one levada is collected here and stamped **late** — the
+  // driving day, then a walk on day four, which is the exact shape the
+  // exemption exists to rescue. Expect **eleven** visible, one of them a levada.
+  const firstUncollectedLevada = stamps.some(
+    (stamp) => stamp.category === 'levada' && stamp.collected
+  )
+    ? undefined
+    : stamps.find((stamp) => stamp.category === 'levada')?.placeId;
+
+  const withLevada = stamps.map((stamp) =>
+    stamp.placeId === firstUncollectedLevada ? { ...stamp, collected: true } : stamp
+  );
+
+  const earned = withLevada
+    .filter((stamp) => stamp.collected)
+    .map((stamp, i) => ({
+      placeId: stamp.placeId,
+      category: stamp.category,
+      // Levadas last, so the walk is the twelfth stamp rather than the second.
+      awardedTs: (stamp.category === 'levada' ? 1_000 + i : i) * 3_600_000,
+    }));
+  const locked = new Set(visibleStamps(earned, false).locked);
+
+  return withLevada.map((stamp) => ({ ...stamp, locked: locked.has(stamp.placeId) }));
 }
 
 /**
@@ -136,6 +176,11 @@ const SCENARIOS = [
   { label: '0 stamps — day one', collected: 0 },
   { label: '3 stamps — T-081 low', collected: 3 },
   { label: '23 stamps — mid-trip', collected: 23 },
+  // ⚠ The screen a non-paying user actually sees once they pass ten (D-072).
+  // Look at whether the padlock reads at 96 dp, and whether a locked sticker
+  // is still clearly *different* from one that was never collected — if those
+  // two states look the same, the app is telling people they did not go.
+  { label: '23 stamps — free tier (T-155)', collected: 23, freeTier: true },
   { label: '180 stamps — T-081 high', collected: 180 },
 ] as const;
 
@@ -201,7 +246,11 @@ export default function DesignWorkbench() {
   const collected = SCENARIOS[scenario].collected;
   const progress = makeProgress(collected);
   const awards = makeAwards(collected);
-  const stamps = makeStamps(collected, progress.byCategory);
+  const stamps = makeStamps(
+    collected,
+    progress.byCategory,
+    'freeTier' in SCENARIOS[scenario]
+  );
 
   return (
     <View style={styles.root}>

@@ -15,6 +15,8 @@ import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
+import { isUnlocked } from '../entitlement/entitlementStore';
+import { visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import {
@@ -95,10 +97,20 @@ export default function PassportScreen({
 
         const prompt = await resolvePrompt(pass.awaitingConfirmation, awardedIds);
 
+        // ⚠ The free tier is applied **here and only here** (T-155, D-072).
+        // Everything above this line ran for a paying and a non-paying user
+        // alike — the award pass, the geofence set, the writes. That is what
+        // makes "buy in month three, receive months one and two" true, and
+        // `freeTier.test.ts` fails the build if the recorder ever learns
+        // otherwise.
+        const locked = new Set(
+          visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
+        );
+
         if (!cancelled) {
           setProgress(nextProgress);
           setAwards(nextAwards);
-          setStamps(resolveStamps(awardedIds));
+          setStamps(resolveStamps(awardedIds, locked));
           setConfirmation(prompt?.prompt ?? null);
           setConfirmationEvidence(prompt?.evidence ?? '');
         }
@@ -222,9 +234,16 @@ export default function PassportScreen({
           reason: confirmationReason(confirmationEvidence),
         });
         const awardedIds = await stampAwardDao.getAwardedPlaceIds(trip.id);
+        const nextAwards = await stampAwardDao.getAwards(trip.id);
+        // Recomputed rather than patched: a confirmed walk is a levada, so it
+        // can be the stamp that claims D-072's guaranteed exemption and
+        // un-locks nothing else. Patching the previous set would miss that.
+        const locked = new Set(
+          visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
+        );
         setConfirmation(null);
-        setAwards(await stampAwardDao.getAwards(trip.id));
-        setStamps(resolveStamps(awardedIds));
+        setAwards(nextAwards);
+        setStamps(resolveStamps(awardedIds, locked));
         setProgress(await getCurrentProgress());
       } catch (error) {
         await recordingEventDao.logError('confirm walk', error);
@@ -382,13 +401,42 @@ async function resolvePrompt(
   };
 }
 
-function resolveStamps(awarded: Set<string>): PassportStamp[] {
+function resolveStamps(
+  awarded: Set<string>,
+  locked: Set<string>
+): PassportStamp[] {
   return getContentPack().places.map((place) => ({
     placeId: place.id,
     name: place.name,
     category: place.category,
+    // ⚠ Still `true` for a locked stamp. It was collected; only the drawing is
+    // withheld. This is also what keeps the row counts and the hero number
+    // honest — they count what the user earned, not what they paid for.
     collected: awarded.has(place.id),
+    locked: locked.has(place.id),
   }));
+}
+
+/**
+ * The awards, in the shape the free-tier arithmetic needs.
+ *
+ * The category comes from the content pack rather than the award row, because
+ * `stamp_award` deliberately stores no copy of it — the pack is the one place a
+ * place's category is written (D-017), and a stamp for a place that has since
+ * left the pack is a stamp the app cannot categorise, so it is dropped from the
+ * ordering rather than guessed at.
+ */
+function earnedStamps(awards: StampAward[]): EarnedStamp[] {
+  const categories = new Map(
+    getContentPack().places.map((place) => [place.id, place.category])
+  );
+
+  return awards.flatMap((entry) => {
+    const category = categories.get(entry.place_id);
+    return category === undefined
+      ? []
+      : [{ placeId: entry.place_id, category, awardedTs: entry.awarded_ts }];
+  });
 }
 
 const styles = StyleSheet.create({

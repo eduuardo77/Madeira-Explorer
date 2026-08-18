@@ -812,6 +812,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `tools/lib/svg-render.mjs`. Output verified unchanged.
       — ⚠ **The screenshots are honestly captioned as stale where they are**: the passport shot
       predates the 60-place curation and the share shot still carries the old app name.
+- [x] **T-166** ✅ **The screen reader learns Portuguese and German, 2026-08-18.** ⇠ T-160
+      — ⚠⚠ **T-160 LOOKED FINISHED AND WAS NOT.** The app was translated, every screen checked, the
+      work written up as done. A sweep found **ten accessibility labels still in hardcoded
+      English** — so the screens spoke three languages and the *screen reader* spoke one, and a
+      blind Portuguese user got an English app. That is the one class of user who cannot work
+      around it.
+      — **And three visible strings were never switched over**: the passport's own heading, its
+      back control, its hero label and invitation, the place card's *Show on map* and *Close*, the
+      privacy policy's title, and both map failure messages. ⚠ **`SettingsView` wrote *"Use the
+      light map"* out longhand next to `settings.a11y.useLightMap`, `useDarkMap` and `backToMap` —
+      three keys that had existed since T-160 and were simply never called.** Same shape as the
+      five hardcoded copies of the app's name: **a catalogue most callers ignore is not a
+      catalogue, it is a suggestion.**
+      — **`i18nCoverage.test.ts` is the rule the build now enforces**, as `brand.test.ts` is for
+      the name. It fails on any `accessibilityLabel` string or template carrying prose, and on any
+      `<Text>` with literal words in it. **Verified by reintroducing a defect and watching it
+      fail** — a guard nobody has seen fail is a guard nobody should trust.
+      — One exemption, `DebugScreen.tsx`, with its reason recorded and a test that fails if the
+      file it names ever stops existing.
+      — ⚠ **Its blind spot is stated rather than hidden**: text inside a `{}` expression is not
+      parsed. That is how the hero label — *"places collected"*, the biggest words on the passport
+      — hid in plain sight; it was found by reading, not by the test, and now uses
+      `n('passport.collected')` with **zero as its own string**, because before you have been
+      anywhere the number is a target and afterwards it is a record.
+      — ⚠ **The German is still unreviewed (T-160a).** There is now more of it.
 - [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
       — **The project lead:** *"One thing we should add is the ability to import data from Health,
       Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature

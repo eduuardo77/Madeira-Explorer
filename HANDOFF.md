@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **592 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **595 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
@@ -119,6 +119,10 @@ ground truth.
 - ⚠ **A constant most callers ignore is not a constant.** Renaming the app found **five** hardcoded
   copies of the name, and the first version of `brand.test.ts` missed the **permission dialogs in
   `app.json`** — the most user-visible text in the app. `brand.test.ts` now covers both.
+- ⚠ **A catalogue most callers ignore is not a catalogue.** T-160 was written up as done with
+  **ten accessibility labels still in English** and `SettingsView` spelling out *"Use the light
+  map"* beside three keys that already existed. `i18nCoverage.test.ts` now fails the build for
+  both. ⚠ Its blind spot is text inside `{}` — that is where the passport's hero label hid.
 - ⚠ **Pure modules may not import `i18n/index.ts`** — it reaches `expo-localization` and would
   break every Node test. They take a `Language` parameter, like they take `nowMs`.
 - ⚠ **The workbench cannot see `hitSlop`.** A measured tap target may be a lie.
@@ -132,7 +136,7 @@ ground truth.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 592 tests
+cd app && npm test          # 595 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

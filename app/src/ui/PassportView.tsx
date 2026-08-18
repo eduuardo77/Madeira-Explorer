@@ -57,7 +57,7 @@ import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
-import { t } from '../i18n';
+import { n, t } from '../i18n';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
@@ -315,8 +315,8 @@ function CategoryRow({
           locked
             ? t('passport.locked.a11y', { name: stamp.name })
             : stamp.collected
-              ? `${stamp.name}, collected. Open to show it on the map.`
-              : `${stamp.name}, not collected yet. Open to show it on the map.`
+              ? t('passport.a11y.stampCollected', { name: stamp.name })
+              : t('passport.a11y.stampUncollected', { name: stamp.name })
         }
         onPress={
           onSelectStamp === undefined ? undefined : () => onSelectStamp(stamp)
@@ -364,8 +364,11 @@ function CategoryRow({
               accessibilityRole="button"
               accessibilityLabel={
                 expanded
-                  ? `Collapse ${categoryLabel(category)} back to one row`
-                  : `See all ${total} ${categoryLabel(category)}`
+                  ? t('passport.a11y.collapseRow', { category: categoryLabel(category) })
+                  : t('passport.a11y.seeAllRow', {
+                      total,
+                      category: categoryLabel(category),
+                    })
               }
               onPress={() => setExpanded((open) => !open)}
               // The word is small, so the tap target is grown around it
@@ -427,7 +430,7 @@ export default function PassportView({
       // The header is the hero; let it scroll away rather than pin it. There
       // is only one number and the user has already read it.
     >
-      <Text style={styles.heading}>Passport</Text>
+      <Text style={styles.heading}>{t('passport.title')}</Text>
 
       {hasContent ? (
         <View style={styles.hero}>
@@ -436,16 +439,17 @@ export default function PassportView({
             <Text style={styles.heroTotal}> / {progress.total}</Text>
           </Text>
           <Text style={styles.heroLabel}>
+            {/* ⚠ Zero is not the plural of anything here — it is a different
+                sentence. Before you have been anywhere the number is a target
+                ("places to collect"), and afterwards it is a record ("places
+                collected"). `n()` handles one-versus-many; the zero case is its
+                own string. */}
             {progress.collected === 0
-              ? 'places to collect'
-              : progress.collected === 1
-                ? 'place collected'
-                : 'places collected'}
+              ? t('passport.toCollect')
+              : n('passport.collected', progress.collected)}
           </Text>
           {progress.collected === 0 ? (
-            <Text style={styles.heroInvitation}>
-              These are the places. Go to one and it fills in by itself.
-            </Text>
+            <Text style={styles.heroInvitation}>{t('passport.invitation')}</Text>
           ) : onWatch === undefined ? null : (
             <Pressable
               accessibilityRole="button"
@@ -461,9 +465,7 @@ export default function PassportView({
           )}
         </View>
       ) : (
-        <Text style={styles.rowEmpty}>
-          No places are curated yet, so there is nothing to collect. (T-066)
-        </Text>
+        <Text style={styles.rowEmpty}>{t('passport.nothingCurated')}</Text>
       )}
 
       {confirmation === undefined ? null : (

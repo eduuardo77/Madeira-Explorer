@@ -319,7 +319,7 @@ export default function PassportScreen({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Share your trip as an image"
+        accessibilityLabel={t('passport.a11y.share')}
         onPress={shareTrip}
         style={({ pressed }) => [styles.share, pressed && styles.pressed]}
       >
@@ -333,11 +333,11 @@ export default function PassportScreen({
           iOS puts it above the large title, and so does this. */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Back to the map"
+        accessibilityLabel={t('passport.a11y.backToMap')}
         onPress={onClose}
         style={({ pressed }) => [styles.back, pressed && styles.pressed]}
       >
-        <Text style={styles.backText}>‹ Map</Text>
+        <Text style={styles.backText}>{`‹ ${t('passport.back')}`}</Text>
       </Pressable>
     </View>
   );

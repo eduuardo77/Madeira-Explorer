@@ -82,6 +82,7 @@ import { splitIntoSegments, traceBounds } from './traceGeoJson';
 import { TRACE_PAINT } from './traceStyle';
 
 import lightTemplate from '../../assets/map/light.json';
+import { t } from '../i18n';
 
 /**
  * The island, for a user who has recorded nothing yet.
@@ -479,7 +480,7 @@ export default function NativeMapScreen({
   if (failure !== null) {
     return (
       <View style={styles.centred}>
-        <Text style={styles.failureTitle}>The map could not start</Text>
+        <Text style={styles.failureTitle}>{t('map.couldNotStart')}</Text>
         <Text style={styles.failureDetail}>{failure}</Text>
       </View>
     );

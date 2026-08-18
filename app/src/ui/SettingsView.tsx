@@ -356,7 +356,11 @@ export default function SettingsView({
               <Pressable
                 key={option}
                 accessibilityRole="button"
-                accessibilityLabel={`Use the ${option} map`}
+                accessibilityLabel={
+                  option === 'dark'
+                    ? t('settings.a11y.useDarkMap')
+                    : t('settings.a11y.useLightMap')
+                }
                 onPress={() => onChangeMapStyle(option)}
                 style={({ pressed }) => [
                   styles.choice,
@@ -439,11 +443,11 @@ export default function SettingsView({
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to the map"
+          accessibilityLabel={t('settings.a11y.backToMap')}
           onPress={onClose}
           style={({ pressed }) => [styles.done, pressed && styles.pressed]}
         >
-          <Text style={styles.doneText}>Done</Text>
+          <Text style={styles.doneText}>{t('settings.done')}</Text>
         </Pressable>
       </View>
     </View>

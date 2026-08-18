@@ -21,7 +21,7 @@
  */
 
 import { APP_NAME } from '../brand';
-import { deviceLanguage } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   POLICY_VERSION,
@@ -37,7 +37,7 @@ export default function PrivacyPolicyView({
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>Your privacy</Text>
+        <Text style={styles.heading}>{t('privacy.title')}</Text>
         <Text style={styles.dateline}>
           {APP_NAME} · last changed {POLICY_VERSION}
         </Text>
@@ -57,11 +57,11 @@ export default function PrivacyPolicyView({
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to settings"
+          accessibilityLabel={t('privacy.a11y.back')}
           onPress={onClose}
           style={({ pressed }) => [styles.done, pressed && styles.pressed]}
         >
-          <Text style={styles.doneText}>Done</Text>
+          <Text style={styles.doneText}>{t('common.done')}</Text>
         </Pressable>
       </View>
     </View>

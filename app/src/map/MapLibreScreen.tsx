@@ -75,6 +75,7 @@ import type { TraceCollection } from './traceGeoJson';
 import { buildTrace, traceBounds } from './traceGeoJson';
 
 import lightTemplate from '../../assets/map/light.json';
+import { t } from '../i18n';
 
 /**
  * The camera's home view, read from the style the app shipped with rather
@@ -424,7 +425,7 @@ export default function MapLibreScreen({
   if (failure !== null) {
     return (
       <View style={styles.centre}>
-        <Text style={styles.failureTitle}>The map could not load</Text>
+        <Text style={styles.failureTitle}>{t('map.couldNotLoad')}</Text>
         <Text style={styles.failureDetail}>{failure}</Text>
       </View>
     );
@@ -434,7 +435,7 @@ export default function MapLibreScreen({
     return (
       <View style={styles.centre}>
         <ActivityIndicator size="large" color={colors.action} />
-        <Text style={styles.loadingNote}>Preparing the map…</Text>
+        <Text style={styles.loadingNote}>{t('map.preparing')}</Text>
       </View>
     );
   }

@@ -32,6 +32,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { PlaceCard } from '../places/placeCard';
 import { STRAIGHT_LINE_NOTE } from '../places/placeCard';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { t } from '../i18n';
 
 export type PlaceCardViewProps = {
   card: PlaceCard;
@@ -102,23 +103,23 @@ export default function PlaceCardView({
           accessibilityRole="button"
           accessibilityLabel={
             card.hasCourse
-              ? `Show ${card.name} and the course of the walk on the map`
-              : `Show ${card.name} on the map`
+              ? t('placeCard.a11y.showWithCourse', { name: card.name })
+              : t('placeCard.a11y.show', { name: card.name })
           }
           onPress={onShowOnMap}
           style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
         >
-          <Text style={styles.directionsText}>Show on map</Text>
+          <Text style={styles.directionsText}>{t('placeCard.showOnMap')}</Text>
         </Pressable>
       )}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close"
+        accessibilityLabel={t('common.close')}
         onPress={onClose}
         style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
       >
-        <Text style={styles.plainButtonText}>Close</Text>
+        <Text style={styles.plainButtonText}>{t('common.close')}</Text>
       </Pressable>
     </View>
   );

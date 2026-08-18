@@ -222,6 +222,93 @@ export const STRINGS = {
   'replay.a11y.watchAgain': s('Watch again', 'Ver outra vez', 'Noch einmal ansehen'),
   'replay.a11y.close': s('Close and go back', 'Fechar e voltar', 'Schließen und zurück'),
 
+  // ⚠ Added 2026-08-18, and they should have been here since T-160. The screens
+  // spoke three languages; the **screen reader** spoke one, and three visible
+  // headings were never switched over even though their keys already existed.
+  // `i18nCoverage.test.ts` now fails the build rather than trusting anybody to
+  // remember — the same rule `brand.test.ts` enforces for the app's name.
+  'common.done': s('Done', 'Concluído', 'Fertig'),
+  'common.close': s('Close', 'Fechar', 'Schließen'),
+  'passport.toCollect': s('places to collect', 'lugares por visitar', 'Orte zu sammeln'),
+  'passport.invitation': s(
+    'These are the places. Go to one and it fills in by itself.',
+    'Estes são os lugares. Vá a um e ele preenche-se sozinho.',
+    'Das sind die Orte. Gehen Sie zu einem, und er trägt sich von selbst ein.'
+  ),
+  'passport.nothingCurated': s(
+    'No places are curated yet, so there is nothing to collect.',
+    'Ainda não há lugares selecionados, por isso não há nada para visitar.',
+    'Es sind noch keine Orte ausgewählt, also gibt es nichts zu sammeln.'
+  ),
+
+  'passport.a11y.share': s(
+    'Share your trip as an image',
+    'Partilhar a sua viagem como imagem',
+    'Ihre Reise als Bild teilen'
+  ),
+  'passport.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
+  'passport.a11y.stampCollected': s(
+    '{name}, collected. Open to show it on the map.',
+    '{name}, visitado. Abrir para ver no mapa.',
+    '{name}, gesammelt. Öffnen, um es auf der Karte zu zeigen.'
+  ),
+  'passport.a11y.stampUncollected': s(
+    '{name}, not collected yet. Open to show it on the map.',
+    '{name}, ainda não visitado. Abrir para ver no mapa.',
+    '{name}, noch nicht gesammelt. Öffnen, um es auf der Karte zu zeigen.'
+  ),
+  'passport.a11y.seeAllRow': s(
+    'See all {total} {category}',
+    'Ver todos os {total} {category}',
+    'Alle {total} {category} ansehen'
+  ),
+  'passport.a11y.collapseRow': s(
+    'Collapse {category} back to one row',
+    'Recolher {category} para uma linha',
+    '{category} wieder auf eine Zeile reduzieren'
+  ),
+  'stamp.a11y.notCollected': s(
+    '{name}, not collected yet',
+    '{name}, ainda não visitado',
+    '{name}, noch nicht gesammelt'
+  ),
+
+  'placeCard.showOnMap': s('Show on map', 'Ver no mapa', 'Auf der Karte zeigen'),
+  'placeCard.a11y.show': s(
+    'Show {name} on the map',
+    'Ver {name} no mapa',
+    '{name} auf der Karte zeigen'
+  ),
+  'placeCard.a11y.showWithCourse': s(
+    'Show {name} and the course of the walk on the map',
+    'Ver {name} e o percurso da caminhada no mapa',
+    '{name} und den Verlauf der Wanderung auf der Karte zeigen'
+  ),
+
+  'privacy.title': s('Your privacy', 'A sua privacidade', 'Ihre Privatsphäre'),
+  'privacy.a11y.back': s(
+    'Back to settings',
+    'Voltar às definições',
+    'Zurück zu den Einstellungen'
+  ),
+
+  // ⚠ No settings keys here: `settings.a11y.backToMap`, `useLightMap` and
+  // `useDarkMap` have existed since T-160 and `SettingsView` was ignoring all
+  // three, writing the English out longhand instead. That is the same shape as
+  // the five hardcoded copies of the app's name that `brand.test.ts` exists for.
+
+  'map.couldNotStart': s(
+    'The map could not start',
+    'Não foi possível iniciar o mapa',
+    'Die Karte konnte nicht gestartet werden'
+  ),
+  'map.couldNotLoad': s(
+    'The map could not load',
+    'Não foi possível carregar o mapa',
+    'Die Karte konnte nicht geladen werden'
+  ),
+  'map.preparing': s('Preparing the map…', 'A preparar o mapa…', 'Karte wird vorbereitet…'),
+
   // ── Settings (design brief §5) ──────────────────────────────────────────
   'settings.title': s('Settings', 'Definições', 'Einstellungen'),
   'settings.done': s('Done', 'Concluído', 'Fertig'),

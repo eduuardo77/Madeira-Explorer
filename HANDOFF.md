@@ -158,6 +158,7 @@ node tools/levada-routes.mjs           # PR numbers and derived durations
 node tools/preview-trace.mjs --sweep   # trace cleanup, drawn to a PNG
 node tools/preview-souvenir.mjs        # the share card to an SVG
 node tools/preview-film.mjs            # the film, as a contact sheet of frames
+node tools/preview-tour.mjs            # ⭐ THE WHOLE PRODUCT ON ONE PAGE — start here
 ```
 
 ## Where things are written down

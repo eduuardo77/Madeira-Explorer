@@ -775,6 +775,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       whether a 400 ms stamp pop is right, and whether 10 seconds is too long are **unanswered**.
       — ⚠ **And T-105b's framing problem is now visible in the shipping renderer**, not just the
       preview tool: at the finale the trace spans **390 px of 390 across and 76 of 693 down**.
+- [x] **T-165** ✅ **The visual reference, 2026-08-18 — `tools/preview-tour.mjs`.**
+      — **The project lead, and it was the most useful thing said all day:** *"It's hard to imagine
+      it without a visual reference of what is becoming."* Everything in this repository that can be
+      *seen* was scattered across three preview tools, a workbench needing a dev server, and 33
+      emulator screenshots with no index. `node tools/preview-tour.mjs` → `tools/out/tour.html`.
+      — **Every artefact is the real output, never a mock-up:** stamps through `stampArt.ts`, the
+      souvenir through `renderShareCardSvg`, the film through `composeSouvenir` → `frameAt` →
+      `projector`, and the screenshots unretouched. **Each exhibit is labelled built / built but
+      unverified / not built**, and the last section is *What is not built* — a tour of the good
+      half would be exactly what this project's honesty rules exist to prevent.
+      — ⚠ **It wears the app's own palette** (`ui/theme.ts`), not a scheme invented for the page.
+      — **Refactor it forced, and the codebase is better for it:** `preview-stamps.mjs` and
+      `preview-film.mjs` each held their own SVG drawing, and the tour needed both. Copying would
+      have made a **third** renderer free to disagree with the two already approved by eye — the
+      exact failure the one-renderer rule exists to prevent. Both now share
+      `tools/lib/svg-render.mjs`. Output verified unchanged.
+      — ⚠ **The screenshots are honestly captioned as stale where they are**: the passport shot
+      predates the 60-place curation and the share shot still carries the old app name.
 - [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
       — **The project lead:** *"One thing we should add is the ability to import data from Health,
       Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature

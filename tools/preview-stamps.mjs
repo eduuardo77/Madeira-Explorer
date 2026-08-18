@@ -26,12 +26,12 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import { CATEGORIES } from '../app/src/content/contentPack.ts';
-import {
-  CANVAS,
-  designFor,
-  stampElements,
-  toPolygon,
-} from '../app/src/passport/stampArt.ts';
+// ⚠ The drawing itself moved to `lib/svg-render.mjs` when `preview-tour.mjs`
+// needed the same stamps. One second renderer, shared — not a third copy.
+import { escapeXml, stampSvg } from './lib/svg-render.mjs';
+// Still needed here: the app's mark is drawn by this page's header, not by a
+// stamp.
+import { CANVAS } from '../app/src/passport/stampArt.ts';
 import { stampMarkPath, TILT_DEG } from '../app/src/passport/stampMark.ts';
 // The real palette, not hexes retyped by eye. `theme.ts` has no imports of its
 // own, so Node can load it directly — and a preview whose colours differ from
@@ -54,59 +54,12 @@ const SAMPLES = {
   landmark: ['The Cathedral', 'Old Fort', 'Market Hall', 'Cable Car Station', 'Sé'],
 };
 
-function attrs(element) {
-  const out = [];
-  for (const [key, value] of Object.entries(element)) {
-    if (key === 'kind' || key === 'text' || key === 'clip' || value === undefined) continue;
-    // camelCase → kebab-case: strokeWidth becomes stroke-width. Both SVG in a
-    // browser and react-native-svg accept their own spelling; only this side
-    // needs the conversion.
-    out.push(`${key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}="${value}"`);
-  }
-  return out.join(' ');
-}
-
 function renderStamp(id, name, category, collected) {
-  const design = designFor(id, category);
-  const elements = stampElements(design, name, collected);
-
-  const body = elements
-    .map((element) => {
-      if (element.kind === 'text') {
-        const { text, textLength, ...rest } = element;
-        // `textLength` and `lengthAdjust` are camelCase in SVG itself, so they
-        // bypass the kebab-case conversion below.
-        const fit =
-          textLength === null || textLength === undefined
-            ? ''
-            : ` textLength="${textLength}" lengthAdjust="spacingAndGlyphs"`;
-        return `<text ${attrs(rest)}${fit} text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="0.6">${escapeXml(text)}</text>`;
-      }
-      // Which elements clip is `stampArt.ts`'s decision, not this file's: the
-      // band and the sunburst both need it, and guessing from the kind would
-      // have let the sunburst paint over the borders.
-      const clip = element.clip === true ? ` clip-path="url(#panel-${id})"` : '';
-      return `<${element.kind} ${attrs(element)}${clip} />`;
-    })
-    .join('\n      ');
-
-  // Taken from the design rather than by indexing the element list — the
-  // list gained two layers when the artwork was made more detailed, and an
-  // index would have silently clipped the band to the wrong outline.
-  const panelPoints = toPolygon(design.panel);
-
   return `
   <figure class="stamp ${collected ? 'on' : 'off'}">
-    <svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="transform: rotate(${design.tiltDeg}deg)">
-      <defs><clipPath id="panel-${id}"><polygon points="${panelPoints}" /></clipPath></defs>
-      ${body}
-    </svg>
+    ${stampSvg(id, name, category, collected)}
     <figcaption>${escapeXml(name)}</figcaption>
   </figure>`;
-}
-
-function escapeXml(value) {
-  return value.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 const sections = CATEGORIES.map((category) => {

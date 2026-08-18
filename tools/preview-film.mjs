@@ -22,9 +22,10 @@
  * real player needs a device.
  *
  * It composes **nothing of its own**: the times come from `frameTimes`, the
- * contents from `frameAt`, and the pixels from `projector`. If it drew its own
- * version of any of that, the sheet that gets approved would not be the film
- * that ships.
+ * contents from `frameAt`, and the pixels from `lib/svg-render.mjs`, which is
+ * the one second renderer the tour and the stamps page share too. If it drew
+ * its own version of any of that, the sheet that gets approved would not be
+ * the film that ships.
  *
  * ⚠ The trip is invented; only the *route* is real, read from `tools/routes/`
  * and cleaned by the app's own `traceCleanup` so the line is exactly what the
@@ -38,10 +39,13 @@ import { fileURLToPath } from 'node:url';
 process.removeAllListeners('warning');
 
 const { composeSouvenir } = await import('../app/src/souvenir/composition.ts');
-const { frameAt, frameCount, frameTimes, projector } = await import(
+const { frameAt, frameCount, frameTimes } = await import(
   '../app/src/souvenir/frame.ts'
 );
 const { cleanTrace } = await import('../app/src/map/traceCleanup.ts');
+// ⚠ The frame drawing lives in `lib/svg-render.mjs`, shared with
+// `preview-tour.mjs`. One second renderer, not one per tool.
+const { filmFrameSvg } = await import('./lib/svg-render.mjs');
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -113,54 +117,9 @@ if (!composition.renderable) {
 
 // --- drawing ----------------------------------------------------------------
 
-const CATEGORY_COLOUR = {
-  viewpoint: '#5AA9FF',
-  levada: '#30D158',
-  village: '#FFD60A',
-  beach: '#4CC9F0',
-  landmark: '#B5179E',
-};
-
 /** One frame, at a tenth of the real size — a contact sheet, not a poster. */
 const CELL_W = 108;
 const CELL_H = 192;
-
-function drawFrame(frame) {
-  const toPixel = projector(frame.bounds, CELL_W, CELL_H);
-
-  const paths = frame.strokes
-    .map((stroke) => {
-      const d = stroke
-        .map(([lon, lat], i) => {
-          const [x, y] = toPixel(lon, lat);
-          return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
-        })
-        .join(' ');
-      return `<path d="${d}" fill="none" stroke="#F1F7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-    })
-    .join('');
-
-  const marks = frame.stamps
-    .map((stamp) => {
-      const [x, y] = toPixel(stamp.lon, stamp.lat);
-      // A stamp that just landed is drawn larger, so the contact sheet shows
-      // the pop the renderer is expected to animate.
-      const grow = Math.max(0, 1 - stamp.ageMs / 400);
-      const r = 3 + grow * 4;
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${CATEGORY_COLOUR[stamp.category] ?? '#FFFFFF'}"/>`;
-    })
-    .join('');
-
-  const hero =
-    frame.hero === null
-      ? ''
-      : `<text x="${CELL_W / 2}" y="${CELL_H - 24}" text-anchor="middle" fill="#FFFFFF" font-size="22" font-weight="700">${frame.hero.collected}<tspan font-size="13" fill="#A0A0A8"> / ${frame.hero.total}</tspan></text>`;
-
-  return `<svg width="${CELL_W}" height="${CELL_H}" viewBox="0 0 ${CELL_W} ${CELL_H}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${CELL_W}" height="${CELL_H}" fill="#0E0E10"/>
-  ${paths}${marks}${hero}
-</svg>`;
-}
 
 // Evenly spaced across the film, taken from the real schedule so a cell is
 // always an actual frame the encoder would produce.
@@ -174,7 +133,7 @@ const figures = chosen
   .map((at) => {
     const frame = frameAt(composition, at);
     const label = `${(at / 1000).toFixed(2)}s · ${frame.kind} · ${frame.strokes.length} stroke${frame.strokes.length === 1 ? '' : 's'} · ${frame.stamps.length} stamp${frame.stamps.length === 1 ? '' : 's'}`;
-    return `<figure>${drawFrame(frame)}<figcaption>${label}</figcaption></figure>`;
+    return `<figure>${filmFrameSvg(frame, CELL_W, CELL_H)}<figcaption>${label}</figcaption></figure>`;
   })
   .join('\n');
 

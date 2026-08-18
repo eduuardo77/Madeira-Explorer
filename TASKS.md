@@ -745,6 +745,38 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ And whichever way it goes, **existing users keep what they had**. Grandfathering is not a
       courtesy here, it is the difference between a new product and a broken promise.
 
+- [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
+      — **The project lead:** *"One thing we should add is the ability to import data from Health,
+      Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature
+      is import, not export. It is a good fit for Madeira specifically: a visitor who walked three
+      levadas before installing has a passport that says 0.
+      — ⚠⚠ **THESE ARE NOT ONE FEATURE. THEY ARE FOUR, AND THREE OF THEM COST THE PRIVACY CLAIM.**
+      **GPX is a file the user picks.** No account, no network, no permission, nothing new to
+      declare — and Strava, Garmin, Komoot and Google Timeline all *export* GPX or JSON, so the
+      file path covers most of the want at a fraction of the cost. **Strava is OAuth and an API**:
+      accounts, tokens, a network call on our own account, and a third party who then knows the
+      user walks in Madeira. **Apple Health is iOS**, and there is no iOS build (D-032). **Google
+      Timeline** is an export file today, so it lands in the GPX/JSON bucket.
+      — ⭐ **Recommended v1 subset: import a file the user hands us. Nothing else.** Everything
+      above the file is a different decision and should be raised as one.
+      — ⚠⚠ **THE REAL TRAP IS NOT THE PARSING. IT IS WHETHER AN IMPORT CAN EARN A STAMP.**
+      An imported track is a file anyone can write. If it feeds `runAwardPass`, **the passport
+      stops being a record of where you went and becomes a record of what you uploaded** — and the
+      app has spent four decisions insisting it never claims a visit it cannot stand behind (D-002,
+      D-009, T-149's "the app is politely calling you a liar", D-065's confidence values). A
+      stamp earned from a stranger's GPX is the same failure as a false geofence award, except
+      deliberate. **Decide this before writing a parser**, not after.
+      — Three shapes, none chosen: **(a) drawn but never credited** — the trace appears on the map
+      and in the souvenir, no stamps, which keeps the passport honest and is the smallest thing
+      that answers the request; **(b) credited with a visibly lower confidence**, which D-065's
+      column already supports and T-149's UI already knows how to talk about; **(c) credited
+      normally**, which is the one to argue *for* explicitly rather than fall into.
+      — **What already exists:** `tools/import-sensor-logger.mjs` parses a third-party export into
+      the app's own fixture shape, so the reader/normalise half has a working precedent. ⚠ It has
+      **never seen a real export** either.
+      — ⚠ **`exportTrace.ts` and D-040 are the other end of this.** The masking rule exists so a
+      trace cannot publish where the user sleeps; an *imported* trace has never been masked by us
+      and must go through the same door before it reaches a souvenir.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are
@@ -941,6 +973,27 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **Not a commitment yet — a spike.** The deliverable that turns this into a promise is
       **one five-second MP4 written on the project lead's own Android**, not a plan. Until that
       exists, treat the video as unproven.
+      — ✅ **The sampler landed 2026-08-18: `souvenir/frame.ts`** (pure, 15 tests). `frameAt(film,
+      t)` turns the storyboard into what is on screen — eased camera, the trace drawn so far, the
+      stamps landed and how long ago, the finale's numbers — plus `frameTimes` for the encoder's
+      schedule and `projector` for lat/lon → pixels. **The remaining half of T-105b is the encoder
+      itself**, which needs Kotlin and a device (`docs/video-encoder-research.md`).
+      — ⚠ **It is deliberately not a bet on the video.** The same `frameAt` drives an in-app
+      **replay** from a wall clock — see **OD-12**, which the project lead opened the same day.
+      — ✅ **`tools/preview-film.mjs` draws a contact sheet**, because nobody had ever seen a frame.
+      — ⚠⚠ **AND IT IMMEDIATELY FOUND SOMETHING NO TEST COULD: the 9:16 frame is mostly empty.**
+      Measured on all three routes: the trace fills **108 px of 108 across** and **10–35 px of 192
+      down**. An east–west walk in a portrait frame is a thin horizontal line floating in a tall
+      black rectangle — and most of Madeira's coastal and levada routes run east–west. The
+      arithmetic is right and the picture is poor, which is exactly the failure the second-renderer
+      rule exists to catch (the stamp mark that passed every geometry test and rendered as a
+      crosshair).
+      — **Three ways out, none chosen — this wants the project lead's eye:** (a) **rotate the
+      camera** to the route's principal axis so the walk runs down the frame, which is what Relive
+      does and is the only option that actually fills it; (b) **use the empty space** — the walk is
+      a band and the rest is the card's words, stamps and hero, which is closest to the still
+      souvenir already approved (T-105d); (c) **accept it**. ⚠ Option (a) is a real change to
+      `composition.ts` and would need its own tests.
       — Notes: `docs/task-notes.md` (T-105b)
 - [x] **T-105c** ✅ **Answered 2026-08-18 — `docs/video-encoder-research.md`.** ⇠ D-051, D-063
       — **Recommendation: a small Expo local module over Android's own `MediaCodec` + `MediaMuxer`,

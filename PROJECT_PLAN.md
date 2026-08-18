@@ -442,6 +442,40 @@ together.*
 and step data; that was weighed against D-010 and accepted. Capturing only on the `driving`
 profile is the compromise to reach for if this is revisited. *Original framing below.*
 
+### OD-12 — a timelapse to post, or a replay to watch? ⚠ **raised 2026-08-18**
+
+**The project lead, after being told the reference app has neither:** *"you made me unsure of one
+thing, if I want a timelapse video or a replay like WalkNYC."*
+
+**They are not the same product and they are not alternatives.** They serve different jobs and
+have wildly different costs:
+
+| | **Replay** — watch it in the app | **Timelapse** — a file you post |
+|---|---|---|
+| The job | **Retention.** A reason to reopen the app | **Distribution.** D-013's growth engine |
+| Costs | A screen and an animation clock | Kotlin, `MediaCodec`, and a device to prove it |
+| Buildable today? | **Yes** — no device, no native code | **No.** Blocked on hardware |
+| Reference app | **Has it** (*"Open one to replay it on the map"*) | **Does not have it** |
+
+**What is already true, and it is more than it looks.** `souvenir/frame.ts` (T-105b, 2026-08-18)
+samples the film at any instant. A **replay** drives it from a wall clock into the on-screen view;
+a **video** drives the same function from `frameTimes` into an encoder. **The hard, thoughtful half
+is built and is shared**, so this question does not have to be answered to keep moving — but it
+does decide what gets finished first.
+
+**The recommendation, offered rather than taken:** ⭐ **build the replay first, keep the video.**
+Not because the video is wrong — D-013's argument for it never rested on WalkNYC and still stands —
+but because the replay is **reachable now**, it makes the sampler pay for itself before any phone
+arrives, and it is the natural way to *watch* the film while judging whether the composition is any
+good (T-105b's framing problem is open and needs eyes). The video then lands when the hardware
+does, on a sampler already proven by a shipped feature.
+
+⚠ **The one thing that would be a mistake is treating them as either/or and dropping the video on
+the strength of what WalkNYC does.** They are also successful without a badge system, without
+monetisation, and with servers this app refuses to have.
+
+---
+
 ### OD-11 — how does anything get measured, if nothing is collected? ⚠ **raised 2026-08-16**
 
 **The project lead, after walking PR18:** *"we'll need to find a way to collect some data from

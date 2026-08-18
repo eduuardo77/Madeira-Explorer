@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **551 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **566 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
@@ -64,6 +64,18 @@ ground truth.
 - **D-074** needs a **TMview / INPI** conflict search on "Proa". The store-and-web screen was done;
   the trademark registers were not.
 - **T-159** whether the timelapse video sits behind the paywall.
+- **OD-12** ⚠ **a timelapse to post, or a replay to watch?** Raised 2026-08-18 on learning the
+  reference app has the replay and no video. They are different jobs — retention vs D-013's
+  distribution — and **`souvenir/frame.ts` is the half both need, so nothing is blocked on the
+  answer.** Leaning: build the replay first, because it needs no device; keep the video.
+- **T-105b** ⚠ **the 9:16 frame is mostly empty and somebody has to look at it.** Measured on all
+  three routes: the trace fills the full width and **10–35 px of 192 down**. An east–west walk —
+  most of Madeira's coast and levadas — is a thin line in a tall black rectangle. Three ways out
+  are written in the task; one of them changes `composition.ts`.
+  `node tools/preview-film.mjs` → `tools/out/film-contact-sheet.html`
+- **T-164** the **import** request (Health / Strava / Timeline / GPX). ⚠ Recommended v1 subset is
+  **a file the user hands us and nothing else** — Strava is OAuth, an API and a third party.
+  ⚠⚠ And the decision that comes first is **whether an imported track may earn a stamp at all**.
 - **D-075** ⚠ **Somebody has to look at the padlock.** Its geometry and colours are measured; its
   *appearance* is not, and the question a test cannot answer is whether a **locked** sticker is
   obviously different from one that was **never collected**. If they read the same at arm's
@@ -114,7 +126,7 @@ ground truth.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 551 tests
+cd app && npm test          # 566 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk
@@ -143,6 +155,7 @@ node tools/build-levadas.mjs           # levada courses
 node tools/levada-routes.mjs           # PR numbers and derived durations
 node tools/preview-trace.mjs --sweep   # trace cleanup, drawn to a PNG
 node tools/preview-souvenir.mjs        # the share card to an SVG
+node tools/preview-film.mjs            # the film, as a contact sheet of frames
 ```
 
 ## Where things are written down

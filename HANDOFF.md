@@ -24,6 +24,8 @@ has met real GPS.
 | **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** |
 | **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |
 | **D-074** | The app is **Proa**, the listing is **Proa - Madeira**, the package is **permanent**. |
+| **D-077** | ⚠ **Provisional, 2026-08-18.** Real-device verification is **Play's pre-launch report + Firebase Test Lab**, not owning a phone. Free, real hardware, **nothing added to the app**. The *"buy an Android"* line in this file was never checked. |
+| **D-076** | **The souvenir film IS the map, played back** — Google's own basemap, camera following the walk, trace growing behind it. ⚠ Recording it means recording Google's map: allowed for a user's own holiday, attribution must stay visible. |
 | **D-075** | ⚠ **Provisional, 2026-08-18.** A stamp you earned but have not paid to see is **locked** — padlock, muted drawing, *"collected — unlock to see this stamp"* — and **never** "not collected". The hero and the row counts keep counting what was earned. One boolean overrules it. |
 
 **Research written today:** [`docs/monetization-options.md`](docs/monetization-options.md) (three
@@ -32,8 +34,18 @@ is drafted and ready to paste).
 
 ## What blocks v1
 
-1. **A physical Android.** ~€50–100 used. The only source of battery (T-054), background survival
-   (T-051), OEM-killer behaviour (T-053) and whether OS geofences fire in the field (T-076–T-080).
+1. ⚠⚠ **A $25 Play registration — NOT a phone (D-077, 2026-08-18).** This list said *"a physical
+   Android, ~€50–100"* for weeks and **nobody had checked.** Uploading to a Play test track makes
+   Google run the app **on real devices, free**, returning crashes, screenshots **per language**,
+   **accessibility findings including touch targets**, and **frame rates**. Firebase Test Lab adds
+   five free physical-device runs a day and **puts nothing in the app** — you upload an APK, there
+   is no SDK. Working: `docs/testing-without-a-device.md`.
+   ⚠ **Point it first at: does the Google map render on a real GPU?** It has only ever been seen on
+   a swiftshader emulator with a surface known to be fragile, and `-gpu host` paints it black here.
+   It is the most fragile unknown in the product.
+   — Still needs a phone *in a pocket*: battery (T-054), overnight survival and OEM killers
+   (T-051/T-053), GPS under canopy (T-076–T-080), one real trip (OD-10). **That is a closed beta
+   (T-129), not a purchase** — and a purchase answers them for one handset.
 2. **Nobody has completed a single trip with this app.** OD-10 says use it yourself for one real
    trip before launching, and it is also how the store screenshots stop being a replayed route.
 3. **The curated 60 are one person's judgement.** *Achada do Marques* and *Chão da Ribeira* are

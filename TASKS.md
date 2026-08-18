@@ -1247,6 +1247,44 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-117b** **Confirm zero outbound connections on a real device** — packet capture during
       the T-051 soak, where it costs nothing extra to watch. Specifically: no FCM registration
       (D-043), no `exp.host`, no asset CDN, no tile requests. ⇠ T-117, T-051
+- [x] **T-117a** ✅ **ANSWERED 2026-08-18 by building the first release APK this project has ever
+      produced — and it was half good news.** ⇠ T-029
+      — ✅ **The scaffolding's code is gone.** No `expo-dev-launcher`, no dev menu, and **no ML Kit
+      barcode library** — the 5.9 MB `libbarhopper_v3.so` measured in the debug APK is absent.
+      — ⚠⚠ **THREE OF ITS PERMISSIONS WERE NOT, and they were ours.** `SYSTEM_ALERT_WINDOW`,
+      `READ_EXTERNAL_STORAGE` and `WRITE_EXTERNAL_STORAGE` sat in the app's **own**
+      `AndroidManifest.xml` (lines 12, 10, 15), not in a library's — which is why every static
+      check missed them and why they were trivially removable once seen.
+      **`SYSTEM_ALERT_WINDOW` is the one that matters**: it is what screen-overlay malware needs,
+      Play treats it as sensitive, and a user reading the permissions of a privacy-first walking
+      app would have found *"display over other apps"* next to *"background location"*. The whole
+      positioning is that this app asks for what it needs and nothing else (D-044, CONTEXT §4.8).
+      — **Fixed by `plugins/withoutDevPermissions.js`**, which writes a release-only manifest with
+      `tools:node="remove"`. Debug keeps the dev menu; release ships without them. ⚠ A config
+      plugin rather than a hand edit, because `android/` is generated and `npx expo prebuild` would
+      silently put the permission back. **Verified by rebuilding and dumping the APK: all three
+      gone.**
+- [ ] **T-117c** ⚠⚠ **The release APK carries FCM and the Play install referrer, and neither is
+      ours** — found the same day, and this is the sharper half of what T-117a went looking for.
+      — `com.google.android.c2dm.permission.RECEIVE` comes from
+      **`com.google.firebase:firebase-messaging:25.0.1`**, pulled in by **`expo-notifications`** —
+      which this app uses for **local notifications only** (D-011, two per trip).
+      `BIND_GET_INSTALL_REFERRER_SERVICE` comes from `com.android.installreferrer:2.2`.
+      — ⚠ **A permission is not a network call**, and `docs/dependency-audit.md` still stands: no
+      code path in this app registers for push. But the audit was **static and never looked at a
+      release manifest**, because none existed until today. **What ships now requests the right to
+      receive push messages**, and that is what a reviewer and a careful user actually see.
+      — **What to decide:** whether local notifications are worth carrying FCM for, or whether they
+      should move to a smaller library. ⚠ Feeds T-117b, T-127, and the Data Safety answers.
+- [ ] **T-117d** ⚠ **The release APK is 128 MB, and ~40 MB of it is a map the app does not use.**
+      — `libmaplibre.so` ships for **four ABIs** (10.8 + 10.6 + 10.5 + 7.6 MB). D-057 replaced
+      MapLibre with the platform's map; the project lead asked to **keep the code**, and keeping
+      the *source* is not the same as shipping the *native library* in every install.
+      — The other half is **four ABIs in one APK** — `x86` and `x86_64` are emulator-only. An AAB
+      splits these per device automatically and is what Play requires anyway.
+      — ⚠ Neither is urgent for **Test Lab**, which does not care about size. Both matter before
+      the store: 128 MB is above Play's 150 MB APK ceiling's comfortable range and is a download
+      a visitor makes on holiday data.
 - [ ] **T-117a** **Confirm the development scaffolding is inert in a release build.** Distinct
       from T-117, which is about network behaviour and would not look at this. Two things to
       check: the `expo-dev-client` permissions (`SYSTEM_ALERT_WINDOW`,

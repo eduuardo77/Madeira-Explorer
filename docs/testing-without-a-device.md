@@ -87,3 +87,60 @@ it for weeks without checking. What actually blocks v1 is **a $25 Play registrat
 real devices report back automatically on every upload. What is left after that is a small set of
 questions about a phone in somebody's pocket for a week, which is what a closed beta is for and
 what buying one phone would answer only for one phone anyway.
+
+---
+
+## The first release APK, 2026-08-18 — what it cost to find out
+
+**The project lead asked for the APK prepared. Building it answered T-117a and opened two new
+tasks.** Recorded here because the whole point of D-077 is that real artefacts tell you things
+static analysis does not.
+
+**It built first time**, which was not a given: JS bundling, ProGuard, and the Maps key manifest
+placeholder had never met a release build before.
+
+| | |
+|---|---|
+| ✅ **Dev scaffolding is gone** | No `expo-dev-launcher`, no dev menu, **no ML Kit barcode library** — the 5.9 MB measured in debug is absent |
+| ⚠⚠ **Three dev permissions were not** | `SYSTEM_ALERT_WINDOW` + both storage permissions, in **our own** manifest. Fixed — `plugins/withoutDevPermissions.js`, verified gone by re-dumping the APK |
+| ⚠⚠ **FCM ships** | `firebase-messaging` via `expo-notifications`, for an app that sends **local** notifications only → **T-117c** |
+| ⚠ **128 MB** | ~40 MB is `libmaplibre.so` across four ABIs, for a map D-057 replaced → **T-117d** |
+
+⚠ **The release is signed with the debug keystore** — the template's default, with its *"Caution!"*
+comment still in place. Fine for Test Lab, **not** for Play. And when a real key exists, remember
+HANDOFF's trap: Google re-signs uploads, so a **second SHA-1** must go on the Maps API key or the
+map is grey for every real user while working perfectly in these builds.
+
+### The APK
+
+```
+app/android/app/build/outputs/apk/release/app-release.apk
+```
+
+Rebuild it with:
+
+```bash
+cd app/android && ./gradlew assembleRelease
+```
+
+⚠ `ANDROID_HOME` and `JAVA_HOME` must be set — see the top of this file's sibling,
+`docs/dev-build.md`.
+
+### Uploading it to Firebase Test Lab — the project lead's Google account, not this session's
+
+1. **console.firebase.google.com** → add a project (no billing; the Spark plan is the free tier).
+2. **Test Lab** → **Run a test** → **Robo test** → upload `app-release.apk`.
+3. Choose devices. ⚠ **Pick real ones, not virtual** — the whole question is what a real GPU does.
+   Five physical runs a day are free.
+4. Robo explores the app by itself. No test code.
+
+**What to look at first, in order:**
+
+1. ⚠⚠ **Does the Google map render?** It has only ever been seen on a swiftshader emulator with a
+   surface known to be fragile, and `-gpu host` paints it pure black on the dev machine. **This is
+   the single most fragile unknown in the product.** The video and screenshots answer it.
+2. Does onboarding survive a real permission dialog?
+3. Does it crash, and do the screens lay out on hardware that is not one AVD?
+
+⚠ **What a robot cannot do:** record a walk, earn a stamp, or produce a trace. It will not
+exercise the recorder, the geofences or the replay.

@@ -4137,3 +4137,53 @@ A test now fails if the camera travels less than 500 m on a five-vertex trace.
 actually think it gives a bit of credibility."* It stays visible, which is what Google's Geo
 Guidelines require anyway. The constraint on T-105b is unchanged in substance and is no longer an
 open question of taste.
+
+## D-077 — Real hardware comes from Play's pre-launch report and Test Lab, not from owning a phone
+
+**Status: Provisional.** Raised 2026-08-18, in answer to the project lead: *"Eu quero é criar uma
+app decente para Android sem ter que comprar um telemóvel."*
+
+**Full working:** [`docs/testing-without-a-device.md`](testing-without-a-device.md).
+
+**The decision.** This project stops treating *"buy a used Android"* as a prerequisite. Real-device
+verification comes from two services it had never examined:
+
+1. **Google Play's pre-launch report** — free and automatic on upload to any test track. Runs the
+   app on real devices and returns crashes, ANRs, **screenshots across devices and languages**,
+   **accessibility findings including touch-target sizes**, and **frame rates**.
+2. **Firebase Test Lab** — five free physical-device runs a day, Robo tests requiring no test
+   code, returning video, screenshots and logs. ⚠ **It adds nothing to the app**: you upload an
+   APK. No SDK, no dependency, no change to D-001, D-043 or the store declarations.
+
+**Why this was not obvious, and why that is the interesting part.** Every session repeated *"only a
+device can answer that"* as though it were established. **It was never checked.** A sentence that
+appears in a handover often enough stops being read as a claim and starts being read as a
+constraint — which is the same failure as T-145 (399 tests hiding a subsystem that never ran) and
+as `-gpu host` (a flag that kept its justification after the thing it justified was deleted).
+
+**What it changes immediately.**
+
+- ⚠⚠ **The map has never been seen on a real GPU.** It has only ever rendered on a
+  **swiftshader** emulator whose surface is known to be fragile across restarts, and `-gpu host`
+  paints it pure black on this machine. That is the most fragile unknown in the product and a Robo
+  test answers it in minutes, today, for nothing.
+- **The store screenshots stop being blocked** on owning a phone (T-161/T-162).
+- **The German gets seen on a real screen** — the pre-launch report screenshots by language, and
+  T-160a's translations have never been looked at anywhere but a file.
+- **"Nobody has seen the replay move" becomes partly answerable**, because frame rates are
+  reported.
+- ⚠ **`hitSlop` stops being invisible.** HANDOFF lists *"the workbench cannot see hitSlop"* as a
+  trap; the pre-launch report measures touch targets on the real thing.
+
+**What it does not change.** Battery over a day, surviving in a pocket overnight, OEM battery
+killers, GPS under canopy, and one real trip end to end. Those need a phone **in somebody's
+pocket** — which is a closed beta (T-129), not a purchase, and a purchase would answer them for
+exactly one handset anyway.
+
+**The cost is $25 and it was already being spent.** The Play registration is the same one T-156
+needs for license testers and the same one D-072's break-even is calculated against. **One
+registration buys billing testing and continuous real-device verification together.**
+
+⚠ **Provisional because none of it has been run.** The quotas, the free tier and the report's
+contents are from Google's own documentation, read on 2026-08-18 — not from having used them. The
+first person to actually upload a build should correct whatever this gets wrong.

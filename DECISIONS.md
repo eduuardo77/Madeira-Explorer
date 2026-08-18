@@ -105,6 +105,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-074** | The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`. | **Accepted** |
 | **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Provisional** |
 | **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
+| **D-077** | Real-device verification comes from **Play's pre-launch report and Firebase Test Lab**, not from owning a phone. | **Provisional** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

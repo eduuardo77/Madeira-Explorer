@@ -36,7 +36,8 @@ import { metresPerPoint } from '../map/collectedMarks.ts';
 import type { MapStyleName } from '../map/mapStyle.ts';
 import { TRACE_PAINT } from '../map/traceStyle.ts';
 import { CATEGORY_COLOUR, stampMarkPoints } from './filmPaint.ts';
-import type { Frame } from './frame.ts';
+import type { Bounds } from './composition.ts';
+import type { Film, Frame } from './frame.ts';
 
 /** Mirrors `GoogleMapsPolyline`, without importing the native module. */
 export type ReplayPolyline = {
@@ -124,44 +125,114 @@ export function replayMapFrame(
 }
 
 /**
- * Has the camera moved enough to be worth telling the map about?
+ * One instruction for the map's camera: *be here, taking this long to arrive*.
  *
- * ⚠ **This exists because the film runs at 30 fps and a native map camera does
- * not want to be reset thirty times a second.** Each assignment starts the
- * map's own animation, and restarting an animation every 33 ms is how a smooth
- * pan becomes a stutter. The trace and the marks still update every frame —
- * they are cheap and they are what the eye is following.
- *
- * ⚠⚠ **The threshold is a guess and it is the single most likely thing on this
- * screen to be wrong.** It cannot be judged without a device: too large and the
- * camera lags behind the pen, too small and the map fights itself. Whoever runs
- * this on real hardware first should tune it, and should not trust it because a
- * test passes.
+ * The `durationMs` is handed straight to `setCameraPosition`, which is what
+ * makes this work — **the map animates itself**, on the platform's own timing
+ * and with the platform's own curve.
  */
-export const CAMERA_STEP_ZOOM = 0.02;
+export type CameraMove = {
+  /** When the instruction should be issued, ms from the start of the film. */
+  atMs: number;
+  camera: CameraFit;
+  /** How long the map should take to get there. 0 snaps. */
+  durationMs: number;
+};
 
-export function cameraMovedEnough(
-  previous: CameraFit | null,
-  next: CameraFit | null
-): boolean {
-  if (next === null) {
-    return false;
+/**
+ * The camera, as a handful of instructions rather than a value per frame.
+ *
+ * ⚠⚠ **THIS REPLACED A THRESHOLD, AND THE THRESHOLD WAS THE WRONG IDEA.**
+ * The first version recomputed the camera every frame, discovered that
+ * reassigning a native map camera 30 times a second restarts its animation and
+ * stutters, and then throttled its own interpolation with a tuned constant —
+ * `CAMERA_STEP_ZOOM`, a guess that could only be judged on hardware nobody has.
+ *
+ * The mistake was interpolating at all. `expo-maps` exposes
+ * `setCameraPosition({ ..., duration })`: the map will ease from where it is to
+ * where you say, over as long as you say. And `composition.ts` has emitted
+ * **camera keyframes** since T-105a, described in its own words as *"a camera
+ * target — the renderer eases from one to the next"*.
+ *
+ * So the renderer stops easing. It hands the map each keyframe as a target and
+ * the gap to the next one as a duration, and the platform does the work it is
+ * good at. **Six instructions for a ten-second film instead of three hundred,
+ * and not one tunable number anywhere.**
+ *
+ * ⚠ The easing curve is now the platform's, not `frame.ts`'s smoothstep. The
+ * preview tools still project through `frame.bounds`, so a preview frame and
+ * the real map can differ slightly *in the middle of a pan*. They agree at
+ * every keyframe, which is what those previews are for.
+ */
+export function cameraPlan(film: Film, viewport: Viewport): CameraMove[] {
+  const moves: CameraMove[] = [];
+
+  const fit = (bounds: Bounds): CameraFit | null =>
+    fitBounds([bounds.west, bounds.south, bounds.east, bounds.north], viewport);
+
+  for (const scene of film.scenes) {
+    if (scene.kind !== 'draw') {
+      // The establish and finale shots hold one box. Arriving at the finale is
+      // worth animating — it is the pull-back to the whole trip — but the
+      // opening shot must be *there* when the film starts, not gliding into
+      // place from wherever the map happened to be.
+      const camera = fit(scene.bounds);
+      if (camera !== null) {
+        moves.push({
+          atMs: scene.startMs,
+          camera,
+          durationMs: scene.kind === 'establish' ? 0 : scene.durationMs,
+        });
+      }
+      continue;
+    }
+
+    scene.camera.forEach((keyframe, index) => {
+      const camera = fit(keyframe.bounds);
+      if (camera === null) {
+        return;
+      }
+      const next = scene.camera[index + 1];
+      // The last keyframe of the draw runs until the scene ends; the finale
+      // issues its own instruction immediately afterwards.
+      const until = next?.atMs ?? scene.startMs + scene.durationMs;
+      moves.push({
+        atMs: keyframe.atMs,
+        camera,
+        // ⚠ The first keyframe snaps. The establish shot has just placed the
+        // camera on the whole walk, and a keyframe that eased in from there
+        // would spend its whole duration travelling instead of following.
+        durationMs: index === 0 ? 0 : Math.max(0, until - keyframe.atMs),
+      });
+    });
   }
-  if (previous === null) {
-    return true;
-  }
 
-  if (Math.abs(previous.zoom - next.zoom) >= CAMERA_STEP_ZOOM) {
-    return true;
-  }
+  const ordered = moves.sort((a, b) => a.atMs - b.atMs);
 
-  // A degree of latitude is ~111 km, so this is a distance test in disguise.
-  // The tolerance shrinks as the map zooms in, which is what keeps a close pan
-  // responsive without making an island-wide shot twitch.
-  const degreeStep = CAMERA_STEP_ZOOM / Math.pow(2, Math.max(0, next.zoom - 8));
-
-  return (
-    Math.abs(previous.coordinates.latitude - next.coordinates.latitude) >= degreeStep ||
-    Math.abs(previous.coordinates.longitude - next.coordinates.longitude) >= degreeStep
+  // ⚠ Two instructions at the same instant, and only the last one is ever seen.
+  // Found by a test: the draw's final keyframe lands exactly when the finale
+  // starts, so the camera snapped to a close-up and then eased out to the whole
+  // trip — a jump, immediately undone, on the last second of the film. The
+  // earlier one is not merely redundant, it is visible as a flinch.
+  return ordered.filter(
+    (move, index) => ordered[index + 1]?.atMs !== move.atMs
   );
+}
+
+/**
+ * Which instruction should have been issued by now.
+ *
+ * Returns an index into `cameraPlan`'s result, or -1 before the first. The
+ * caller keeps track of what it has already sent — sending the same instruction
+ * twice would restart an animation that is halfway through, which is the
+ * stutter this whole approach exists to avoid.
+ */
+export function cameraMoveDue(moves: readonly CameraMove[], atMs: number): number {
+  let due = -1;
+  for (let i = 0; i < moves.length; i += 1) {
+    if (moves[i].atMs <= atMs) {
+      due = i;
+    }
+  }
+  return due;
 }

@@ -64,11 +64,14 @@ ground truth.
 - **D-074** needs a **TMview / INPI** conflict search on "Proa". The store-and-web screen was done;
   the trademark registers were not.
 - **T-159** whether the timelapse video sits behind the paywall.
-- **OD-12** ✅ **Decided 2026-08-18 by the project lead: build the replay first, keep the video.**
-  **The replay ships (T-105e)** — passport → *Watch your trip*. The video (T-105b) still needs
-  Kotlin and a phone. ⚠⚠ **Nobody has seen the replay move**: the workbench pane does not
-  composite, so `requestAnimationFrame` never fires there. Every frame has been checked standing
-  still; **smoothness, the 400 ms stamp pop and the 10-second length are all unjudged.**
+- **OD-12** ✅ **Decided: build the replay first, keep the video.** **The replay ships (T-105e)**
+  — passport → *Watch your trip* — and since **D-076 it is the real Google map**, not a drawing.
+  ⚠⚠ **Nobody has seen it move, and now nobody can without a device**: the workbench has no map,
+  so its replay stage was deleted rather than left showing a picture the app does not draw.
+  **Smoothness, the stamp pop and the 10-second length are all unjudged.** *(The camera is no
+  longer among them: there is no threshold any more — the map eases itself between the
+  storyboard's keyframes — and the camera used to travel **zero metres**, measured, because its
+  window was counted in vertices on an already-simplified trace. Both fixed 2026-08-18.)*
 - **T-105b** ⚠ **the exported video got harder, not easier (D-076).** Encoding the film now means
   encoding **Google's map**, which renders on its own surface — `captureRef` over it is unreliable
   and `expo-maps` may not expose `snapshot()` at all. **Treat it as an open spike.** ⚠ And the

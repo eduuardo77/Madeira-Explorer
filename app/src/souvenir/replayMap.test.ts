@@ -30,7 +30,7 @@ import {
 } from './composition.ts';
 import { CATEGORY_COLOUR, STAMP_MARK_POINTS, stampMarkPoints } from './filmPaint.ts';
 import { frameAt, frameTimes, type Film } from './frame.ts';
-import { cameraMovedEnough, replayMapFrame } from './replayMap.ts';
+import { cameraMoveDue, cameraPlan, replayMapFrame } from './replayMap.ts';
 
 const T0 = 1_800_000_000_000;
 
@@ -166,34 +166,119 @@ test('no stamps are drawn before their cue', () => {
   assert.equal(replayMapFrame(frameAt(f, f.durationMs), OPTIONS).circles.length, 2);
 });
 
-test('the camera is throttled, but the walk still moves it', () => {
+test('the camera is a handful of instructions, not one per frame', () => {
+  // The whole point of D-076's second pass: the map animates itself, so the app
+  // issues targets rather than interpolating and then throttling itself.
   const f = film(composeSouvenir(input()));
-  const schedule = frameTimes(f);
+  const plan = cameraPlan(f, VIEWPORT);
 
-  let previous = null as ReturnType<typeof replayMapFrame>['camera'];
-  let moves = 0;
-  let frames = 0;
+  assert.ok(plan.length >= 3, `${plan.length} instructions is not a film`);
+  assert.ok(
+    plan.length < frameTimes(f).length / 10,
+    `${plan.length} instructions is per-frame interpolation by another name`
+  );
 
-  for (const at of schedule) {
-    const { camera } = replayMapFrame(frameAt(f, at), OPTIONS);
-    frames += 1;
-    if (cameraMovedEnough(previous, camera)) {
-      moves += 1;
-      previous = camera;
-    }
+  for (let i = 1; i < plan.length; i += 1) {
+    assert.ok(plan[i].atMs >= plan[i - 1].atMs, 'instructions must be in order');
   }
-
-  // The point of the throttle: far fewer camera assignments than frames.
-  assert.ok(moves < frames / 2, `${moves} moves in ${frames} frames is not throttled`);
-  // And the point of the film: it does follow the walk.
-  assert.ok(moves > 5, `${moves} camera moves is stuck, not throttled`);
 });
 
-test('the first camera always wins, and a missing one never does', () => {
-  const somewhere = { coordinates: { latitude: 32.65, longitude: -16.9 }, zoom: 14 };
+test('the film opens where it means to, rather than gliding into place', () => {
+  const f = film(composeSouvenir(input()));
+  const plan = cameraPlan(f, VIEWPORT);
 
-  assert.equal(cameraMovedEnough(null, somewhere), true);
-  assert.equal(cameraMovedEnough(somewhere, null), false);
-  assert.equal(cameraMovedEnough(null, null), false);
-  assert.equal(cameraMovedEnough(somewhere, somewhere), false);
+  assert.equal(plan[0].atMs, 0);
+  assert.equal(plan[0].durationMs, 0, 'the opening shot must snap, not travel');
+});
+
+test('every instruction has a real camera and a duration that is not negative', () => {
+  const f = film(composeSouvenir(input()));
+
+  for (const move of cameraPlan(f, VIEWPORT)) {
+    assert.ok(Number.isFinite(move.camera.zoom));
+    assert.ok(Number.isFinite(move.camera.coordinates.latitude));
+    assert.ok(Number.isFinite(move.camera.coordinates.longitude));
+    assert.ok(move.durationMs >= 0, `duration ${move.durationMs}`);
+  }
+});
+
+test('a pan lasts until the next instruction, so the camera is never idle mid-draw', () => {
+  const f = film(composeSouvenir(input()));
+  const plan = cameraPlan(f, VIEWPORT);
+
+  // Every move except the last should arrive exactly as the next is issued.
+  // A shorter duration would leave the camera parked; a longer one would be cut
+  // off by the next instruction.
+  for (let i = 1; i < plan.length - 1; i += 1) {
+    if (plan[i].durationMs === 0) {
+      continue;
+    }
+    assert.equal(
+      plan[i].atMs + plan[i].durationMs,
+      plan[i + 1].atMs,
+      `instruction ${i} does not hand over cleanly`
+    );
+  }
+});
+
+test('the finale is animated — it is the pull-back to the whole trip', () => {
+  const f = film(composeSouvenir(input()));
+  const plan = cameraPlan(f, VIEWPORT);
+  const finale = f.scenes.find((scene) => scene.kind === 'finale');
+  assert.ok(finale !== undefined);
+
+  const move = plan.find((m) => m.atMs === finale.startMs);
+  assert.ok(move !== undefined, 'the finale must move the camera');
+  assert.ok(move.durationMs > 0, 'the finale must ease, not cut');
+});
+
+test('the camera actually travels — including on a trace of five vertices', () => {
+  // ⚠⚠ THE REGRESSION THIS EXISTS FOR. The camera window used to be counted in
+  // *fixes*, and the trace reaching this module is the **cleaned** one: a
+  // straight 2.2 km seafront walk arrives as five vertices with its full length
+  // intact. "15% of the fixes, at least 8" then covered the whole walk at every
+  // keyframe, so all six framed the same box and the film was a static shot.
+  //
+  // Every test passed. Nothing looked wrong. It was only found by measuring how
+  // far the camera moved and getting **zero metres** — which is the project's
+  // own rule about suspecting a result that does not move.
+  const sparse: TraceFix[] = [
+    { ts: T0, lat: 32.6400, lon: -16.9400, accuracy_m: 10 },
+    { ts: T0 + 600_000, lat: 32.6430, lon: -16.9300, accuracy_m: 10 },
+    { ts: T0 + 1_200_000, lat: 32.6455, lon: -16.9180, accuracy_m: 10 },
+    { ts: T0 + 1_800_000, lat: 32.6470, lon: -16.9050, accuracy_m: 10 },
+    { ts: T0 + 2_400_000, lat: 32.6490, lon: -16.8900, accuracy_m: 10 },
+  ];
+
+  const f = film(composeSouvenir(input({ trace: { fixes: sparse, safeToShare: true, reason: 'ok' } })));
+  const plan = cameraPlan(f, VIEWPORT);
+
+  let travelled = 0;
+  for (let i = 1; i < plan.length; i += 1) {
+    const a = plan[i - 1].camera.coordinates;
+    const b = plan[i].camera.coordinates;
+    travelled += Math.hypot((a.latitude - b.latitude) * 111_000, (a.longitude - b.longitude) * 93_500);
+  }
+
+  assert.ok(
+    travelled > 500,
+    `the camera travelled ${Math.round(travelled)} m — it is not following the walk`
+  );
+});
+
+test('which instruction is due, and nothing before the first', () => {
+  const f = film(composeSouvenir(input()));
+  const plan = cameraPlan(f, VIEWPORT);
+
+  assert.equal(cameraMoveDue(plan, -1), -1);
+  assert.equal(cameraMoveDue(plan, 0), 0);
+  assert.equal(cameraMoveDue(plan, f.durationMs), plan.length - 1);
+
+  // And it only ever goes forwards as the film does.
+  let previous = -1;
+  for (const at of frameTimes(f)) {
+    const due = cameraMoveDue(plan, at);
+    assert.ok(due >= previous, 'the due instruction went backwards');
+    previous = due;
+  }
 });

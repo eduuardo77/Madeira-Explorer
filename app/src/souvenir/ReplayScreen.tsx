@@ -22,11 +22,18 @@
  * some circles. That is the dividend for having split the film into *what
  * happens* and *how it is drawn*.
  *
- * ⚠ **The camera is throttled and the trace is not.** A native map camera does
- * not want to be reset thirty times a second — every assignment restarts its
- * own animation, and restarting an animation every 33 ms turns a pan into a
- * stutter. `cameraMovedEnough` decides; its threshold is a guess and is the
- * most likely thing on this screen to need tuning on real hardware.
+ * ⚠ **THE APP DOES NOT MOVE THE CAMERA. IT TELLS THE MAP WHERE TO GO.**
+ * A native map camera cannot be reset thirty times a second — every assignment
+ * restarts its own animation, so per-frame interpolation stutters. The first
+ * version answered that with a tuned throttle, which was a guess nobody could
+ * judge without hardware. It is gone: `setCameraPosition` takes a **duration**,
+ * `composition.ts` has emitted camera **keyframes** since T-105a, and handing
+ * each keyframe over with the gap to the next as its duration lets the platform
+ * do the easing. Six instructions for a ten-second film, no tunable numbers.
+ *
+ * ⚠ The trace and the marks still update every frame. They are cheap, they are
+ * what the eye is following, and they are ordinary props rather than an
+ * animation somebody else owns.
  *
  * ⚠ **The whole screen is one tap.** Tapping plays or pauses. There is no
  * scrubber and no chrome over the picture — and the map's own gestures are off,
@@ -46,7 +53,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { t } from '../i18n';
-import type { CameraFit } from '../map/cameraFit';
 import { darkMapPropsFor } from '../map/darkMode';
 import type { MapStyleName } from '../map/mapStyle';
 import { parseMapStyle } from '../map/mapStylePreference';
@@ -67,7 +73,7 @@ import {
   restart,
   type Playback,
 } from './playback';
-import { cameraMovedEnough, replayMapFrame } from './replayMap';
+import { cameraMoveDue, cameraPlan, replayMapFrame } from './replayMap';
 import { formatDateRange } from './shareCard';
 import { getSouvenirComposition } from './souvenirPlan';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
@@ -162,34 +168,87 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
     return frameAt(composition, positionMs(clock, now, durationMs));
   }, [composition, clock, now, durationMs]);
 
+  const viewport = useMemo(
+    () => ({
+      width,
+      height,
+      // The finale's number sits over the bottom of the map, so the walk is
+      // framed into what is left — the same reasoning as the map screen's own
+      // padding for its controls.
+      padding: {
+        top: spacing.xl * 2,
+        bottom: spacing.xl * 4,
+        left: spacing.lg,
+        right: spacing.lg,
+      },
+    }),
+    [width, height]
+  );
+
   const painted = useMemo(() => {
     if (frame === null) {
       return null;
     }
     return replayMapFrame(frame, {
       style: styleName,
-      viewport: {
-        width,
-        height,
-        // The finale's number sits over the bottom of the map, so the walk is
-        // framed into what is left — the same reasoning as the map screen's own
-        // padding for its controls.
-        padding: { top: spacing.xl * 2, bottom: spacing.xl * 4, left: spacing.lg, right: spacing.lg },
-      },
+      viewport,
       pixelRatio: PixelRatio.get(),
     });
-  }, [frame, styleName, width, height]);
+  }, [frame, styleName, viewport]);
+
+  const mapRef = useRef<GoogleMaps.MapView>(null);
+
+  /** The film's camera, as a handful of instructions. Six, not three hundred. */
+  const plan = useMemo(
+    () =>
+      composition !== null && composition.renderable
+        ? cameraPlan(composition, viewport)
+        : [],
+    [composition, viewport]
+  );
 
   /**
-   * The camera the map was last told about.
+   * Which instruction the map has already been given.
    *
-   * ⚠ A ref, not state, on purpose: it must not itself cause a render, or the
-   * throttle becomes a render loop rather than a way out of one.
+   * ⚠ A ref, not state: issuing one is a side effect on the native view, not
+   * something the React tree renders, and making it state would re-render the
+   * whole screen to record that a camera was told to move.
    */
-  const cameraRef = useRef<CameraFit | null>(null);
-  if (painted !== null && cameraMovedEnough(cameraRef.current, painted.camera)) {
-    cameraRef.current = painted.camera;
-  }
+  const issuedRef = useRef(-1);
+
+  const atMs = positionMs(clock, now, durationMs);
+
+  useEffect(() => {
+    if (mapRef.current === null || plan.length === 0) {
+      return;
+    }
+
+    const due = cameraMoveDue(plan, atMs);
+
+    // Scrubbed backwards, or restarted. Re-issue from wherever we now are —
+    // and snap, because the film is not where the map thinks it is.
+    if (due < issuedRef.current) {
+      issuedRef.current = due;
+      if (due >= 0) {
+        mapRef.current.setCameraPosition({ ...plan[due].camera, duration: 0 });
+      }
+      return;
+    }
+
+    // ⚠ Only ever the newest one, and only once. Re-sending an instruction
+    // restarts an animation that is halfway through, which is the stutter this
+    // whole approach exists to avoid.
+    if (due > issuedRef.current) {
+      issuedRef.current = due;
+      const move = plan[due];
+      mapRef.current.setCameraPosition({
+        ...move.camera,
+        // ⚠ Paused, the film is a still picture, so a camera still gliding to
+        // its target would be the one thing on screen that had not stopped.
+        duration: playing ? move.durationMs : 0,
+      });
+    }
+  }, [plan, atMs, playing]);
 
   const toggle = () => {
     const at = Date.now();
@@ -231,8 +290,11 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
   return (
     <View style={styles.root}>
       <GoogleMaps.View
+        ref={mapRef}
         style={StyleSheet.absoluteFill}
-        cameraPosition={cameraRef.current ?? undefined}
+        // ⚠ No `cameraPosition` prop. The camera is driven imperatively through
+        // `setCameraPosition` so the map can animate itself; a prop would fight
+        // that by snapping the camera back on every render.
         polylines={painted.polylines}
         circles={painted.circles}
         colorScheme={

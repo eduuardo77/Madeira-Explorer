@@ -759,11 +759,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **It composes the map's own modules** — `cameraFit`, `traceStyle`, `collectedMarks`,
       `darkMode`, the style preference — so the replay's trace is the same blue at the same width
       as the everyday map's, and follows it if either changes. A test fails if it stops being.
-      — ⚠ **The camera is throttled and the trace is not.** Every assignment to a native map camera
-      restarts its own animation, so 30 fps of camera resets is a stutter, not a pan.
-      `cameraMovedEnough` decides. **Its threshold is a guess and is the first thing to tune on a
-      real phone** — a test proves it throttles *and* that it does not get stuck, which is all a
-      test can prove here.
+      — ✅ **THE CAMERA THRESHOLD IS GONE, not tuned — the project lead asked for it solved.**
+      The first version interpolated the camera every frame, found that reassigning a native map
+      camera 30 times a second restarts its animation and stutters, and then throttled its own
+      interpolation with a constant nobody could judge without hardware. **Interpolating was the
+      mistake.** `expo-maps` exposes `setCameraPosition({ …, duration })` — the map eases itself —
+      and `composition.ts` has emitted camera **keyframes** since T-105a, described in its own
+      words as *"a camera target; the renderer eases from one to the next"*. So the renderer stops
+      easing: `cameraPlan` hands each keyframe over with the gap to the next as its duration.
+      **Seven instructions for a ten-second film instead of 309, and not one tunable number left.**
+      — **Two bugs the rewrite exposed, neither visible to any test that existed:**
+      **(1) A flinch on the last second.** The draw's final keyframe lands at the exact instant the
+      finale starts, so the camera snapped to a close-up and then eased out to the whole trip.
+      Same-instant instructions are now collapsed to the last one.
+      **(2) ⚠⚠ THE CAMERA NEVER MOVED AT ALL.** Measured, not guessed: **zero metres** across every
+      keyframe on both fixture routes. The window was counted in *fixes*, and the trace reaching
+      `composition.ts` is the **cleaned** one (D-066) — a straight 2.2 km seafront walk arrives as
+      **five vertices** with its full 2226 m intact, so *"15% of the fixes, at least 8"* covered the
+      whole walk six times over and the film was a static shot. **A vertex count is a property of
+      the drawing, not of the walk.** The window is now a fraction of **ground length**
+      (`CAMERA_WINDOW_FRACTION`, `MIN_CAMERA_WINDOW_M`). Same route now: **3.2 km of camera
+      travel**; the VR1 route 17.6 km; a 300-fix walk 41 km, with the zoom pulling wide for the
+      establish and finale shots and pushing in to follow. A test asserts the camera travels more
+      than 500 m on a five-vertex trace, because this failure was completely silent.
       — **Map gestures are all off during the replay.** For those ten seconds the film owns the
       camera; a stray thumb would leave the walk drawing itself off screen.
       — ⚠ **The 9:16 framing problem is gone with the black ground.** There is no empty frame to

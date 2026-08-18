@@ -113,16 +113,33 @@ export const CUE_TAIL_MS = 600;
 export const CAMERA_KEYFRAMES = 6;
 
 /**
- * How much of the trace the camera holds in frame, as a fraction of all drawn
- * fixes either side of the drawing head.
+ * How much of the walk the camera holds in frame, as a fraction of its **ground
+ * length**, either side of the drawing head.
  *
- * ⚠ NOT TUNED. Large enough that the viewer can see where the line is heading;
- * small enough that the island is not permanently in wide shot.
+ * ⚠⚠ **A FRACTION OF LENGTH SINCE 2026-08-18, AND IT WAS A FRACTION OF FIXES.**
+ * That was wrong in a way no test caught and only a measurement found: the
+ * camera never moved. The trace handed to this module is the **cleaned** one
+ * (D-066), and cleaning simplifies — a straight 2.2 km seafront walk arrives
+ * here as **five vertices**, its full length intact. A window of "15% of the
+ * fixes, at least 8" then covered the entire walk at every keyframe, so all six
+ * keyframes framed the same box and the film was a static shot.
+ *
+ * A vertex count is a property of the *drawing*, not of the walk. Ground
+ * distance is a property of the walk, and it behaves the same whether the path
+ * simplified to five points or five hundred.
+ *
+ * ⚠ Still NOT TUNED. Large enough that the viewer sees where the line is
+ * heading; small enough that the island is not permanently in wide shot.
  */
 export const CAMERA_WINDOW_FRACTION = 0.15;
 
-/** A window narrower than this many fixes frames nothing useful. */
-export const MIN_CAMERA_WINDOW_FIXES = 8;
+/**
+ * The narrowest the travelling window ever gets, in metres.
+ *
+ * ⚠ NOT TUNED. Below a few hundred metres the camera is following GPS noise
+ * rather than a walk, and `MIN_SPAN_DEG` would override it anyway.
+ */
+export const MIN_CAMERA_WINDOW_M = 300;
 
 /**
  * The smallest span the camera will ever frame, in degrees.
@@ -404,6 +421,10 @@ function timeSegments(
  * The window looks slightly ahead as well as behind, which is what makes a pan
  * feel deliberate rather than reactive — the viewer sees where the line is
  * going before it gets there.
+ *
+ * ⚠ **Measured along the ground, not counted in vertices** — see
+ * `CAMERA_WINDOW_FRACTION` for the bug that caused, which was a camera that
+ * never moved at all on any walk short or straight enough to simplify well.
  */
 function cameraPath(
   drawn: TraceFix[],
@@ -411,20 +432,43 @@ function cameraPath(
   durationMs: number
 ): CameraKeyframe[] {
   const lastIndex = drawn.length - 1;
-  const halfWindow = Math.max(
-    MIN_CAMERA_WINDOW_FIXES,
-    Math.round(drawn.length * CAMERA_WINDOW_FRACTION)
+
+  // Cumulative ground distance to each fix, so the head and the window can both
+  // be expressed in metres.
+  const along: number[] = [0];
+  for (let i = 1; i <= lastIndex; i += 1) {
+    along.push(along[i - 1] + distanceM(drawn[i - 1], drawn[i]));
+  }
+  const totalM = along[lastIndex];
+
+  const halfWindowM = Math.max(
+    MIN_CAMERA_WINDOW_M,
+    totalM * CAMERA_WINDOW_FRACTION
   );
+
+  /** The first index at or past `metres` along the walk. */
+  const indexAt = (metres: number): number => {
+    for (let i = 0; i <= lastIndex; i += 1) {
+      if (along[i] >= metres) {
+        return i;
+      }
+    }
+    return lastIndex;
+  };
 
   const keyframes: CameraKeyframe[] = [];
   for (let k = 0; k < CAMERA_KEYFRAMES; k += 1) {
     const fraction = k / (CAMERA_KEYFRAMES - 1);
-    const head = Math.round(fraction * lastIndex);
-    const from = Math.max(0, head - halfWindow);
-    const to = Math.min(lastIndex, head + halfWindow);
+    const headM = totalM * fraction;
+
+    const from = indexAt(headM - halfWindowM);
+    // One vertex beyond the far edge, so the window's box actually reaches the
+    // distance asked for rather than stopping at the last vertex inside it.
+    const to = Math.min(lastIndex, indexAt(headM + halfWindowM));
+
     keyframes.push({
       atMs: startMs + durationMs * fraction,
-      bounds: expandToMinimumSpan(boundsOf(drawn.slice(from, to + 1))),
+      bounds: expandToMinimumSpan(boundsOf(drawn.slice(from, Math.max(to, from) + 1))),
     });
   }
 

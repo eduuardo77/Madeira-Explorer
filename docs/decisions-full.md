@@ -4102,3 +4102,38 @@ the app cannot simply photograph frame by frame — `captureRef` over a map view
 and the Maps SDK's own `snapshot()` is slow and may not be exposed by `expo-maps`. **The encoder
 half of T-105b is therefore less certain than it was**, and the honest ranking of options changed:
 the replay ships now, and the exported video is a spike whose feasibility is genuinely open.
+
+### D-076 amended 2026-08-18 — the camera threshold is gone, and it was hiding a worse bug
+
+**The project lead:** *"Solve the camera threshold problem."* Solved by deleting it, not by tuning
+it — and solving it exposed something considerably worse.
+
+**The threshold was the wrong shape.** The renderer was interpolating the camera every frame,
+discovering it could not hand a native map thirty positions a second, and then throttling *its
+own* interpolation with a tuned constant. `expo-maps` exposes
+`setCameraPosition({ …, duration })`: the map animates itself. And `composition.ts` had emitted
+camera **keyframes** since T-105a — *"a camera target; the renderer eases from one to the next"*.
+So the renderer stops easing and hands the platform each keyframe with the gap to the next as its
+duration. **Seven instructions for a ten-second film instead of 309, and no tunable number.**
+
+⚠ **Then a measurement found the camera had never moved.** Zero metres of travel across every
+keyframe, on both fixture routes. The cause: the window was counted in **fixes**, and the trace
+reaching `composition.ts` is the **cleaned** one (D-066). A straight 2.2 km walk arrives as *five
+vertices* with its full length intact, so a window of *"15% of the fixes, at least 8"* covered the
+entire walk at every keyframe. Six identical boxes. A static film.
+
+**Every test passed and nothing looked wrong**, which is the same shape as T-145 and as the stamp
+mark that rendered as a crosshair. It was found only by asking *how far does the camera actually
+travel* and getting zero — the project's own rule about distrusting a result that does not move.
+
+**The fix is a change of unit, not of number.** A vertex count describes the *drawing*; ground
+distance describes the *walk*, and behaves the same whether the path simplified to five points or
+five hundred. `CAMERA_WINDOW_FRACTION` is now a fraction of length and `MIN_CAMERA_WINDOW_FIXES`
+became `MIN_CAMERA_WINDOW_M`. Same seafront route: **3.2 km of camera travel**; the VR1 route
+17.6 km; a 300-fix walk 41 km — wide for the establish and finale shots, close to follow the pen.
+A test now fails if the camera travels less than 500 m on a five-vertex trace.
+
+**Also settled:** the project lead on Google's watermark in an exported video — *"not a problem, I
+actually think it gives a bit of credibility."* It stays visible, which is what Google's Geo
+Guidelines require anyway. The constraint on T-105b is unchanged in substance and is no longer an
+open question of taste.

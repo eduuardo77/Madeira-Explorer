@@ -43,8 +43,11 @@ import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 export default function PassportScreen({
   onClose,
   onShowOnMap,
+  onWatch,
 }: {
   onClose: () => void;
+  /** Watch the trip back (T-105e). */
+  onWatch: () => void;
   /**
    * The user asked to see a stamp's place on the map (T-115, D-052 revised).
    * The whole `Place` travels, because the map needs its representative
@@ -287,6 +290,7 @@ export default function PassportScreen({
           confirmation={confirmation ?? undefined}
           onConfirm={confirmWalk}
           onDecline={declineWalk}
+          onWatch={onWatch}
         />
       )}
 

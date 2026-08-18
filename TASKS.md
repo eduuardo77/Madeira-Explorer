@@ -745,6 +745,36 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ And whichever way it goes, **existing users keep what they had**. Grandfathering is not a
       courtesy here, it is the difference between a new product and a broken promise.
 
+- [x] **T-105e** ✅ **The replay, 2026-08-18 — you can watch your trip back.** ⇠ T-105a, OD-12
+      — **The project lead chose it:** *"I like this — build the replay first, keep the video."*
+      Reached from the passport, **under the hero**, where the app already puts its one invitation
+      — and the two are mutually exclusive by construction: before the first stamp there is no film
+      and the invitation shows; after it, *Watch your trip* does. Verified both ways in the
+      workbench.
+      — **Four pieces, split the way everything here is split.** `playback.ts` is the clock, pure,
+      11 tests — because pausing is arithmetic and arithmetic inside a component is arithmetic
+      nobody tests. `frame.ts` says what is on screen. `ReplayView.tsx` draws it and decides
+      nothing. `ReplayScreen.tsx` is the plumbing: read the trip, run the clock, get out of the way.
+      — ⚠ **It shares `frameAt` with the video by design.** When T-105b's encoder lands it samples
+      the same function, so the film people watch and the film they post cannot drift apart.
+      — **The whole screen is one tap** — no scrubber, no timeline, no chrome over the picture. It
+      autoplays, because the user pressed *Watch* and a second press is a step that exists only
+      because it was easier to build. It pauses itself at the end rather than holding a frame loop
+      awake over a still picture.
+      — ⚠ **Never called "video" in any string.** The video does not exist yet; a button promising
+      one is the store-copy mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
+      — **Found by looking:** the hero was drawn as a big number with a smaller denominator nested
+      inside it, the way the passport does it. React Native turns nested `Text` into a `tspan`;
+      **the web workbench emitted a `<text>` inside a `<text>`, which is not valid SVG** — and the
+      workbench is the only place this design is ever looked at. Now one flat string, which is what
+      `shareCard.ts` settled on for the still and what has already been approved by eye.
+      — ⚠⚠ **THE ANIMATION HAS NEVER BEEN SEEN MOVING.** The workbench pane does not composite, so
+      `requestAnimationFrame` never fires there — the play button toggles and the clock is correct,
+      and the picture does not advance. **Every frame has been inspected standing still**, through
+      the workbench's frame stepper and `tools/preview-film.mjs`. Whether the pan reads as smooth,
+      whether a 400 ms stamp pop is right, and whether 10 seconds is too long are **unanswered**.
+      — ⚠ **And T-105b's framing problem is now visible in the shipping renderer**, not just the
+      preview tool: at the finale the trace spans **390 px of 390 across and 76 of 693 down**.
 - [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
       — **The project lead:** *"One thing we should add is the ability to import data from Health,
       Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature

@@ -442,7 +442,13 @@ together.*
 and step data; that was weighed against D-010 and accepted. Capturing only on the `driving`
 profile is the compromise to reach for if this is revisited. *Original framing below.*
 
-### OD-12 — a timelapse to post, or a replay to watch? ⚠ **raised 2026-08-18**
+### ~~OD-12 — a timelapse to post, or a replay to watch?~~ → **Resolved 2026-08-18**
+
+**The project lead:** *"I like this — build the replay first, keep the video."* Both, in that
+order. **The replay shipped the same day (T-105e)**; the video (T-105b) waits on hardware. The
+original framing is kept below because the reasoning is what makes the order defensible.
+
+### OD-12 (original framing) ⚠ **raised 2026-08-18**
 
 **The project lead, after being told the reference app has neither:** *"you made me unsure of one
 thing, if I want a timelapse video or a replay like WalkNYC."*

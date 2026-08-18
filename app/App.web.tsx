@@ -25,9 +25,10 @@
  * has no web build). Those still need hardware.
  */
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { CATEGORIES } from './src/content/contentPack';
+import { CATEGORIES, type Category } from './src/content/contentPack';
+import type { TraceFix } from './src/map/traceGeoJson';
 import type { StampAward } from './src/storage/types';
 import type { TripProgress } from './src/progress/tripProgress';
 import OnboardingView, {
@@ -35,6 +36,17 @@ import OnboardingView, {
 } from './src/onboarding/OnboardingView';
 import PassportView, { type PassportStamp } from './src/ui/PassportView';
 import { visibleStamps } from './src/entitlement/freeTier';
+import { composeSouvenir } from './src/souvenir/composition';
+import { frameAt, frameTimes } from './src/souvenir/frame';
+import ReplayView from './src/souvenir/ReplayView';
+import {
+  STOPPED,
+  isPlaying,
+  pause,
+  play,
+  positionMs,
+  type Playback,
+} from './src/souvenir/playback';
 import PlaceCardView from './src/ui/PlaceCardView';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
@@ -184,6 +196,194 @@ const SCENARIOS = [
   { label: '180 stamps — T-081 high', collected: 180 },
 ] as const;
 
+/**
+ * A synthetic walk for the replay stage.
+ *
+ * ⚠ **East–west on purpose.** That is the shape of most of Madeira's coastal
+ * roads and levadas, and it is the shape that exposes T-105b's open problem: a
+ * portrait frame holds an east–west walk as a thin band with the rest empty.
+ * A diagonal fixture would hide the very thing this scenario exists to show.
+ */
+function replayWalk(): TraceFix[] {
+  const T0 = 1_800_000_000_000;
+  const fixes: TraceFix[] = [];
+  for (let i = 0; i < 90; i += 1) {
+    fixes.push({
+      ts: T0 + i * 60_000,
+      // 0.05° of longitude — about 4.7 km at this latitude — against 0.004° of
+      // latitude, which is the wander of a coast road rather than a climb.
+      lat: 32.65 + Math.sin(i / 14) * 0.004,
+      lon: -16.95 + i * 0.00055,
+      accuracy_m: 10,
+    });
+  }
+  return fixes;
+}
+
+/**
+ * The film, playable (T-105e).
+ *
+ * ⚠ It drives the **shipping** modules — `composeSouvenir`, `frameAt` and the
+ * `playback` clock — rather than a workbench imitation of them. A stage that
+ * animated its own version would be judging a film that does not exist.
+ */
+function ReplayStage() {
+  const film = useMemo(() => {
+    const fixes = replayWalk();
+    const stampAt = (
+      fraction: number,
+      id: string,
+      name: string,
+      category: Category
+    ) => {
+      const fix = fixes[Math.floor(fixes.length * fraction)];
+      return {
+        placeId: id,
+        name,
+        category,
+        awardedTs: fix.ts,
+        lat: fix.lat,
+        lon: fix.lon,
+      };
+    };
+
+    return composeSouvenir({
+      trace: { fixes, safeToShare: true, reason: 'workbench fixture' },
+      stamps: [
+        stampAt(0.12, 'a', 'First Lookout', 'viewpoint'),
+        stampAt(0.38, 'b', 'The Water Walk', 'levada'),
+        stampAt(0.61, 'c', 'Old Harbour', 'landmark'),
+        stampAt(0.86, 'd', 'Black Beach', 'beach'),
+      ],
+      totalPlaces: 60,
+      gapThresholdMs: 30 * 60 * 1000,
+    });
+  }, []);
+
+  const [clock, setClock] = useState<Playback>(STOPPED);
+  const [now, setNow] = useState(() => Date.now());
+
+  const durationMs = film.renderable ? film.durationMs : 0;
+
+  // A frame loop while playing, and nothing at all while paused.
+  useEffect(() => {
+    if (!isPlaying(clock)) {
+      return;
+    }
+    let raf = 0;
+    const tick = () => {
+      setNow(Date.now());
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [clock]);
+
+  if (!film.renderable) {
+    return <Text style={styles.chipText}>No film: {film.reason}</Text>;
+  }
+
+  const atMs = positionMs(clock, now, durationMs);
+  const frame = frameAt(film, atMs);
+  const schedule = frameTimes(film);
+
+  // 9:16 at the phone's width, which is how it will actually be watched.
+  const width = 390;
+  const height = Math.round((width * 16) / 9);
+
+  /**
+   * Move by whole frames, and pause.
+   *
+   * ⚠ It lands on a time from the **real schedule**, never on an arbitrary
+   * millisecond. A stepper that moved by 100 ms would show frames the encoder
+   * will never emit, and the whole point of this stage is to judge the film
+   * that ships.
+   */
+  const step = (frames: number) => {
+    const index = Math.max(0, schedule.findIndex((t) => t >= atMs));
+    const next = schedule[Math.min(schedule.length - 1, Math.max(0, index + frames))];
+    setClock({ playedMs: next, runningSinceMs: null });
+  };
+
+  // A second at a time, because a 10-second film is ~300 frames and nobody
+  // judges a composition by clicking 300 times. Single frames stay available:
+  // a stamp's arrival lasts 400 ms, which is about twelve of them.
+  const perSecond = Math.round(film.frameRate);
+
+  return (
+    <View>
+      <ReplayView
+        frame={frame}
+        width={width}
+        height={height}
+        heroCaption="12–19 August 2026"
+      />
+      <View style={styles.replayBar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to the start"
+          onPress={() => setClock(STOPPED)}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipText}>⏮</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back one second"
+          onPress={() => step(-perSecond)}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipText}>◀◀</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back one frame"
+          onPress={() => step(-1)}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipText}>◀</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isPlaying(clock) ? 'Pause the film' : 'Play the film'}
+          onPress={() => {
+            const t = Date.now();
+            setNow(t);
+            setClock(
+              isPlaying(clock) ? pause(clock, t, durationMs) : play(clock, t, durationMs)
+            );
+          }}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipTextActive}>
+            {isPlaying(clock) ? 'Pause' : 'Play'}
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Forward one frame"
+          onPress={() => step(1)}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipText}>▶</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Forward one second"
+          onPress={() => step(perSecond)}
+          style={styles.replayButton}
+        >
+          <Text style={styles.chipText}>▶▶</Text>
+        </Pressable>
+        <Text style={styles.chipText}>
+          {(atMs / 1000).toFixed(2)}s / {(durationMs / 1000).toFixed(1)}s · {frame.kind} ·{' '}
+          {frame.stamps.length} stamp{frame.stamps.length === 1 ? '' : 's'}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 type Screen =
   | 'passport'
   | 'primary'
@@ -193,6 +393,7 @@ type Screen =
   | 'settings'
   | 'privacy'
   | 'passport-confirm'
+  | 'replay'
   | `onboarding:${OnboardingScreen}`;
 
 const SCREENS: { id: Screen; label: string }[] = [
@@ -200,6 +401,7 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport-confirm', label: 'Passport — "did you walk it?" (T-149)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using' },
+  { id: 'replay', label: 'Replay — the film (T-105e)' },
   { id: 'place-card', label: 'Place card (T-115)' },
   { id: 'place-card-collected', label: 'Place card — collected, no fix' },
   { id: 'settings', label: 'Settings (T-141/T-125)' },
@@ -305,12 +507,17 @@ export default function DesignWorkbench() {
               onContinue={() => undefined}
               onSkip={() => undefined}
             />
+          ) : screen === 'replay' ? (
+            <ReplayStage />
           ) : screen === 'passport' || screen === 'passport-confirm' ? (
             <PassportView
               progress={progress}
               awards={awards}
               stamps={stamps}
               onSelectStamp={() => setScreen('place-card-collected')}
+              // So the control is visible where it actually sits — under the
+              // hero, opposite the invitation it replaces (T-105e).
+              onWatch={() => setScreen('replay')}
               // The question D-065 leaves the app holding, at the length it
               // actually renders — a real levada name and a real evidence
               // string, invented rather than imported (D-017, D-038).
@@ -429,6 +636,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#eeebe4',
   },
   mapStandInText: { color: '#9a948a', fontSize: fontSize.small },
+  replayBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+  },
+  replayButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: colors.surfaceRaised,
+  },
   phone: {
     width: 390,
     height: 844,

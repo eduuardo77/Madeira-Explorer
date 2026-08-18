@@ -206,6 +206,22 @@ export const STRINGS = {
   ),
   'passport.locked.badge.a11y': s('Locked', 'Bloqueado', 'Gesperrt'),
 
+  // Watching the trip back (T-105e, OD-12). ⚠ Never the word "video": this is
+  // the replay, and the video (T-105b) is a separate thing that does not exist
+  // yet. Promising one in a button and delivering the other is the store-copy
+  // mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
+  'replay.watch': s('Watch your trip', 'Ver a sua viagem', 'Ihre Reise ansehen'),
+  'replay.close': s('Done', 'Concluído', 'Fertig'),
+  'replay.nothingToWatch': s(
+    'There is nothing to watch yet. Record a walk and it will appear here.',
+    'Ainda não há nada para ver. Grave uma caminhada e aparecerá aqui.',
+    'Es gibt noch nichts zu sehen. Zeichnen Sie eine Wanderung auf, dann erscheint sie hier.'
+  ),
+  'replay.a11y.play': s('Play your trip', 'Reproduzir a sua viagem', 'Ihre Reise abspielen'),
+  'replay.a11y.pause': s('Pause', 'Pausa', 'Pause'),
+  'replay.a11y.watchAgain': s('Watch again', 'Ver outra vez', 'Noch einmal ansehen'),
+  'replay.a11y.close': s('Close and go back', 'Fechar e voltar', 'Schließen und zurück'),
+
   // ── Settings (design brief §5) ──────────────────────────────────────────
   'settings.title': s('Settings', 'Definições', 'Einstellungen'),
   'settings.done': s('Done', 'Concluído', 'Fertig'),

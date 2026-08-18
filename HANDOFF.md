@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **566 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **577 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
@@ -64,12 +64,14 @@ ground truth.
 - **D-074** needs a **TMview / INPI** conflict search on "Proa". The store-and-web screen was done;
   the trademark registers were not.
 - **T-159** whether the timelapse video sits behind the paywall.
-- **OD-12** ⚠ **a timelapse to post, or a replay to watch?** Raised 2026-08-18 on learning the
-  reference app has the replay and no video. They are different jobs — retention vs D-013's
-  distribution — and **`souvenir/frame.ts` is the half both need, so nothing is blocked on the
-  answer.** Leaning: build the replay first, because it needs no device; keep the video.
+- **OD-12** ✅ **Decided 2026-08-18 by the project lead: build the replay first, keep the video.**
+  **The replay ships (T-105e)** — passport → *Watch your trip*. The video (T-105b) still needs
+  Kotlin and a phone. ⚠⚠ **Nobody has seen the replay move**: the workbench pane does not
+  composite, so `requestAnimationFrame` never fires there. Every frame has been checked standing
+  still; **smoothness, the 400 ms stamp pop and the 10-second length are all unjudged.**
 - **T-105b** ⚠ **the 9:16 frame is mostly empty and somebody has to look at it.** Measured on all
-  three routes: the trace fills the full width and **10–35 px of 192 down**. An east–west walk —
+  three routes, and confirmed in the **shipping** renderer at the finale — **390 px of 390 across,
+  76 of 693 down**. An east–west walk —
   most of Madeira's coast and levadas — is a thin line in a tall black rectangle. Three ways out
   are written in the task; one of them changes `composition.ts`.
   `node tools/preview-film.mjs` → `tools/out/film-contact-sheet.html`
@@ -126,7 +128,7 @@ ground truth.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 566 tests
+cd app && npm test          # 577 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

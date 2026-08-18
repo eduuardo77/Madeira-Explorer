@@ -213,6 +213,16 @@ export type PassportViewProps = {
   confirmation?: ConfirmationPrompt;
   onConfirm?: (placeId: string) => void;
   onDecline?: (placeId: string) => void;
+  /**
+   * Watch the trip back (T-105e, OD-12). Absent in the workbench.
+   *
+   * ⚠ **Under the hero, and only once there is something to watch.** That slot
+   * already holds the app's one invitation — *"go to one and it fills in by
+   * itself"* — which shows at zero collected and nothing else does. The two are
+   * mutually exclusive by construction: before the first stamp there is no film,
+   * and after it the invitation has done its job.
+   */
+  onWatch?: () => void;
 };
 
 /**
@@ -406,6 +416,7 @@ export default function PassportView({
   confirmation,
   onConfirm,
   onDecline,
+  onWatch,
 }: PassportViewProps) {
   const hasContent = progress.total > 0;
 
@@ -435,7 +446,19 @@ export default function PassportView({
             <Text style={styles.heroInvitation}>
               These are the places. Go to one and it fills in by itself.
             </Text>
-          ) : null}
+          ) : onWatch === undefined ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('replay.a11y.play')}
+              onPress={onWatch}
+              // Two words, so the target is grown around them rather than left
+              // at the size of the text (D-015).
+              hitSlop={SEE_ALL_HIT_SLOP}
+              style={({ pressed }) => [pressed && styles.seeAllPressed]}
+            >
+              <Text style={styles.heroAction}>{t('replay.watch')}</Text>
+            </Pressable>
+          )}
         </View>
       ) : (
         <Text style={styles.rowEmpty}>
@@ -531,6 +554,15 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: fontSize.body,
     marginTop: spacing.xs,
+  },
+  // The same slot as `heroInvitation`, in the tinted-word register iOS uses for
+  // a section action — not a filled button, which would make the passport's
+  // quietest area its loudest.
+  heroAction: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '600',
+    marginTop: spacing.sm,
   },
   heroInvitation: {
     color: colors.textMuted,

@@ -17,6 +17,7 @@ import { runHealthCheck } from './src/recording/healthCheck';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
+import ReplayScreen from './src/souvenir/ReplayScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
@@ -53,7 +54,7 @@ LogBox.ignoreLogs([/Failed to load glyph range/]);
  */
 export default function App() {
   const [screen, setScreen] = useState<
-    'map' | 'passport' | 'settings' | 'debug'
+    'map' | 'passport' | 'replay' | 'settings' | 'debug'
   >('map');
   /** null until checked; false once onboarding is behind us. */
   const [onboarding, setOnboarding] = useState<boolean | null>(null);
@@ -150,12 +151,17 @@ export default function App() {
         />
       ) : screen === 'passport' ? (
         <PassportScreen
+          onWatch={() => setScreen('replay')}
           onClose={() => setScreen('map')}
           onShowOnMap={(place: Place, collected: boolean) => {
             setFocusPlace({ place, collected });
             setScreen('map');
           }}
         />
+      ) : screen === 'replay' ? (
+        // Back to the passport, not to the map: the film was reached from the
+        // passport and that is where the user was looking.
+        <ReplayScreen onClose={() => setScreen('passport')} />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

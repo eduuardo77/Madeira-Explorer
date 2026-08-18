@@ -105,7 +105,8 @@
       "expo-dev-client",
       "@maplibre/maplibre-react-native",
       "expo-asset",
-      "expo-maps"
+      "expo-maps",
+      "expo-localization"
     ]
   }
 }

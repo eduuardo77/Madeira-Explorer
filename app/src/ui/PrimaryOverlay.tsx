@@ -43,6 +43,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
+import { n, t } from '../i18n';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
@@ -111,7 +112,7 @@ export default function PrimaryOverlay({
     <View style={styles.root} pointerEvents="box-none">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Settings"
+        accessibilityLabel={t('map.a11y.settings')}
         onPress={onOpenSettings}
         style={({ pressed }) => [
           styles.gear,
@@ -162,8 +163,8 @@ export default function PrimaryOverlay({
             accessibilityRole="button"
             accessibilityLabel={
               isRecording
-                ? 'Stop recording this walk'
-                : 'Start recording this walk'
+                ? t('map.a11y.stopRecording')
+                : t('map.a11y.startRecording')
             }
             onPress={onToggleRecording}
             style={({ pressed }) => [
@@ -190,7 +191,7 @@ export default function PrimaryOverlay({
                 background tracking off (T-146). Labelled with words, never an
                 icon alone (D-015). */}
             <Text style={[styles.recordingText, { color: chrome.content }]}>
-              {isRecording ? 'Stop walk' : 'Start walk'}
+              {isRecording ? t('map.stopWalk') : t('map.startWalk')}
             </Text>
           </Pressable>
         ) : null}
@@ -199,8 +200,11 @@ export default function PrimaryOverlay({
           accessibilityRole="button"
           accessibilityLabel={
             progress.total === 0
-              ? 'Open your passport'
-              : `Open your passport, ${progress.collected} of ${progress.total} places collected`
+              ? t('map.a11y.openPassport')
+              : n('passport.a11y.openWithCount', progress.collected, {
+                  collected: progress.collected,
+                  total: progress.total,
+                })
           }
           onPress={onOpenPassport}
           style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}

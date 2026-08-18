@@ -27,6 +27,7 @@ import * as tripDao from '../storage/dao/tripDao';
 import { locationProvider } from './ExpoLocationProvider';
 import type { HealthCheckDecision } from './healthCheckPolicy';
 import { decideHealthCheck } from './healthCheckPolicy';
+import { deviceLanguage } from '../i18n/deviceLocale';
 
 /**
  * When the app first ran, which is as close to "installed" as the app can
@@ -78,6 +79,8 @@ export async function runHealthCheck(
           ]);
 
     const decision = decideHealthCheck({
+      // The impure half is where the device is allowed to be asked (T-160).
+      language: deviceLanguage(),
       installedTs,
       now,
       alreadySent,

@@ -714,7 +714,42 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       yet. ⚠ The argument to weigh is D-013: the souvenir is the distribution strategy, so charging
       for it taxes the growth engine. The **still image stays free** either way, which is what makes
       charging for the video defensible at all.
-- [ ] **T-160** ⚠ **Localise the app — Portuguese and German** ⇠ T-114
+- [~] **T-160** ⚠ **Localise the app — Portuguese and German** ⇠ T-114
+      — ✅ **The app UI is localised, 2026-08-17.** `src/i18n/`: onboarding (including the T-121
+      Android prominent disclosure), settings, the passport, the map chrome, the erase flow, the
+      walk-donation flow and every notification body. **English, Portuguese, German.**
+      — **The catalogue is keyed by string, not by language** — `s('Passport', 'Passaporte',
+      'Reisepass')` — so a new string cannot be added without looking at the empty slots. Three
+      tests make it a build rule: presence in all three, both plural forms, and ⚠ **placeholder
+      parity**, which catches a translator quietly losing `{app}` and leaving a notification with
+      no subject.
+      — ⚠ **Pure modules take a `Language` parameter; they may not import `i18n/index.ts`**, which
+      reaches the device through `expo-localization`. `decideHealthCheck` does it the same way it
+      already takes `now` rather than calling the clock.
+      — **Not translated, deliberately:** `DebugScreen` (a developer tool), and **place names**,
+      which are proper nouns from `content/` (D-017).
+      — ⚠ **`batterySentence()` is not localised and that is safe only while D-041 keeps the figure
+      `null`.** The day it is measured, it needs the `Language` parameter too.
+      — ⚠ **iOS permission dialogs are still English.** `app.json`'s `NSLocation*` strings are
+      baked into the native build and need a config plugin to localise. **Android does not use
+      them** — its permission dialog text is the system's — so this is an iOS-launch concern, not
+      a blocker now.
+- [ ] **T-160a** ⚠⚠ **A German speaker must read `src/i18n/strings.ts` before the German listing**
+      ⇠ T-160
+      — The Portuguese and German were **drafted by the assistant, not a native speaker**. The
+      project lead can check Portuguese; **nobody on this project speaks German**.
+      — **Clumsy German is worse than English.** An English app read by a German speaker is merely
+      foreign; a German app that reads as machine-translated is careless, and careless is the one
+      thing this product cannot look like. It also buys the uninstall that D-073 says costs ranking.
+      — **English and Portuguese listings can go first.** The German listing waits for this.
+- [ ] **T-160b** **The privacy policy in Portuguese** ⇠ T-160, T-124
+      — Decided with the project lead 2026-08-17: **Portuguese and English only.** A German reader
+      gets the English policy with a line saying so — an honest English policy beats an
+      unverifiable translated one, on the one document that is a compliance artefact and already
+      says it needs a qualified reader before submission (T-123).
+- [ ] **T-160c** **Localise the store listing** ⇠ T-160, T-161
+      — Only after T-160a for German. Play localises a listing per language free and runs five
+      localised experiments at once.
       — **The biggest free marketing lever, and it is blocked by a missing feature.** Madeira's
       visitors are **Portuguese 20.3%, British 14.9%, German 14.8%** of overnight stays. Play
       localises a listing per language for nothing and runs five localised experiments at once.

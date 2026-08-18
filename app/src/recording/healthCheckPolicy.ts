@@ -32,6 +32,9 @@
  */
 
 import { APP_NAME } from '../brand.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/languages.ts';
 import type { PermissionLevel } from './LocationProvider';
 
 /**
@@ -63,6 +66,15 @@ export type HealthCheckInput = {
   fixCount: number;
   /** Null when nothing has ever been recorded. */
   lastFixTs: number | null;
+  /**
+   * Which language to write the notification in (T-160).
+   *
+   * ⚠ **Passed in rather than read from the device**, because this module is
+   * pure and runs under Node's test runner. Importing `i18n/index.ts` would drag
+   * in `expo-localization` and break every test here — the same reason `now` is a
+   * parameter instead of a call to the clock.
+   */
+  language: Language;
 };
 
 /**
@@ -77,6 +89,12 @@ export type HealthCheckDecision = {
   title: string | null;
   body: string | null;
 };
+
+/** Bound per call, so every string in one decision speaks the same language. */
+const sayIn =
+  (language: Language) =>
+  (key: keyof typeof STRINGS): string =>
+    translate(STRINGS[key], language, { app: APP_NAME });
 
 const SILENT = (reason: string): HealthCheckDecision => ({
   notify: false,
@@ -95,6 +113,7 @@ const SILENT = (reason: string): HealthCheckDecision => ({
 export function decideHealthCheck(
   input: HealthCheckInput
 ): HealthCheckDecision {
+  const say = sayIn(input.language);
   if (input.alreadySent) {
     return SILENT('already sent');
   }
@@ -114,8 +133,8 @@ export function decideHealthCheck(
     return {
       notify: true,
       reason: 'permission denied',
-      title: 'Your trip is not being recorded',
-      body: `${APP_NAME} cannot see where you go, so your map will stay empty. Open the app to turn location back on — there is still plenty of your trip left.`,
+      title: say('notify.title.notRecorded'),
+      body: say('notify.locationOff.body'),
     };
   }
 
@@ -123,8 +142,8 @@ export function decideHealthCheck(
     return {
       notify: true,
       reason: 'permission never granted',
-      title: 'One tap to start your map',
-      body: `${APP_NAME} has not started recording yet. Open the app and allow location, and it will fill in the rest of your trip by itself.`,
+      title: say('notify.title.oneTap'),
+      body: say('notify.notStarted.body'),
     };
   }
 
@@ -132,8 +151,8 @@ export function decideHealthCheck(
     return {
       notify: true,
       reason: 'not recording',
-      title: 'Your trip is not being recorded',
-      body: 'Recording has stopped. Open the app to start it again — the rest of your trip can still be saved.',
+      title: say('notify.title.notRecorded'),
+      body: say('notify.stopped.body'),
     };
   }
 
@@ -144,8 +163,8 @@ export function decideHealthCheck(
     return {
       notify: true,
       reason: `only ${input.fixCount} fixes since install`,
-      title: 'Your map is not filling in',
-      body: `${APP_NAME} is running, but your phone is not letting it record. Open the app — it will show you the one setting to change.`,
+      title: say('notify.title.notFilling'),
+      body: say('notify.blocked.body'),
     };
   }
 
@@ -157,8 +176,8 @@ export function decideHealthCheck(
     return {
       notify: true,
       reason: `last fix ${Math.round(silence / 3600000)}h ago`,
-      title: 'Your map is not filling in',
-      body: `${APP_NAME} has not recorded anything for several hours. Open the app to check it — the rest of your trip can still be saved.`,
+      title: say('notify.title.notFilling'),
+      body: say('notify.silent.body'),
     };
   }
 
@@ -168,7 +187,7 @@ export function decideHealthCheck(
   return {
     notify: true,
     reason: `healthy — ${input.fixCount} fixes`,
-    title: 'Your map is filling in nicely',
-    body: `${APP_NAME} is recording your trip in the background. You will not hear from it again until you are heading home.`,
+    title: say('notify.title.fillingNicely'),
+    body: say('notify.background.body'),
   };
 }

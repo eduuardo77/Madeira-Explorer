@@ -56,6 +56,7 @@ import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
+import { t } from '../i18n';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
@@ -86,13 +87,19 @@ const STAMP_DRAW_SIZE = Math.floor(STAMP_SIZE * TILT_FIT);
  * they are **UI**, and the app is English-only (CONTEXT §1). Place names are
  * the opposite case — those are content, and render in Portuguese.
  */
-const CATEGORY_LABELS: Record<Category, string> = {
-  viewpoint: 'Viewpoints',
-  levada: 'Levadas',
-  village: 'Villages',
-  beach: 'Beaches',
-  landmark: 'Landmarks',
-};
+/**
+ * ⚠ A function, not a constant (T-160). A module-level object would be built
+ * once at import, before the device language is known, and every user would get
+ * whichever language happened to load first.
+ */
+const categoryLabel = (category: Category): string =>
+  ({
+    viewpoint: t('passport.category.viewpoint'),
+    levada: t('passport.category.levada'),
+    village: t('passport.category.village'),
+    beach: t('passport.category.beach'),
+    landmark: t('passport.category.landmark'),
+  })[category];
 
 /**
  * How many stickers a row may hold before *See all* is worth offering.
@@ -262,7 +269,7 @@ function CategoryRow({
     // it, instead of a full-height slab saying "0 of 1".
     <View style={styles.section}>
       <View style={styles.rowHeader}>
-        <Text style={styles.rowTitle}>{CATEGORY_LABELS[category]}</Text>
+        <Text style={styles.rowTitle}>{categoryLabel(category)}</Text>
         {/* The count is text, not a bar. A progress bar at 3/40 reads as
             failure; "3 of 40" reads as a start (CONTEXT §4.1). */}
         <View style={styles.rowHeaderRight}>
@@ -277,8 +284,8 @@ function CategoryRow({
               accessibilityRole="button"
               accessibilityLabel={
                 expanded
-                  ? `Collapse ${CATEGORY_LABELS[category]} back to one row`
-                  : `See all ${total} ${CATEGORY_LABELS[category]}`
+                  ? `Collapse ${categoryLabel(category)} back to one row`
+                  : `See all ${total} ${categoryLabel(category)}`
               }
               onPress={() => setExpanded((open) => !open)}
               // The word is small, so the tap target is grown around it
@@ -287,7 +294,7 @@ function CategoryRow({
               style={({ pressed }) => [pressed && styles.seeAllPressed]}
             >
               <Text style={styles.seeAll}>
-                {expanded ? 'Show less' : 'See all'}
+                {expanded ? t('passport.showLess') : t('passport.seeAll')}
               </Text>
             </Pressable>
           ) : null}

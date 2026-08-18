@@ -26,6 +26,9 @@ const AFTER = INSTALLED + HEALTH_CHECK_DELAY_MS + 60_000;
 /** A healthy recorder, fourteen hours in. Each test bends one thing. */
 function healthy(overrides: Partial<HealthCheckInput> = {}): HealthCheckInput {
   return {
+    // English by default so the existing copy assertions still read naturally;
+    // the language-specific behaviour is covered in `i18n.test.ts`.
+    language: 'en',
     installedTs: INSTALLED,
     now: AFTER,
     alreadySent: false,

@@ -35,6 +35,7 @@ import {
   View,
 } from 'react-native';
 import { APP_NAME } from '../brand';
+import { t } from '../i18n';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import type { TrackingQuality } from '../recording/trackingPreference';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
@@ -232,13 +233,13 @@ function Choice({
 function describePermission(permission: PermissionLevel): string {
   switch (permission) {
     case 'always':
-      return 'Fills in by itself';
+      return t('settings.permission.always');
     case 'while_using':
-      return 'Only while the app is open';
+      return t('settings.permission.whenInUse');
     case 'denied':
       return 'Off';
     case 'undetermined':
-      return 'Not set up yet';
+      return t('settings.permission.none');
   }
 }
 
@@ -262,18 +263,18 @@ export default function SettingsView({
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>Settings</Text>
+        <Text style={styles.heading}>{t('settings.title')}</Text>
 
         <Section
-          title="Recording"
+          title={t('settings.section.recording')}
           footnote={
             permission === 'always'
-              ? 'Your map fills in on its own, even when the app is closed.'
-              : 'Your map only fills in while the app is open. You can change this on your phone’s settings screen.'
+              ? t('settings.recording.footnote')
+              : t('settings.recording.footnoteLimited')
           }
         >
-          <Row label="Recording your trip" value={describePermission(permission)} />
-          <Action label="Open phone settings" onPress={onOpenSystemSettings} />
+          <Row label={t('settings.recording.title')} value={describePermission(permission)} />
+          <Action label={t('settings.openPhoneSettings')} onPress={onOpenSystemSettings} />
         </Section>
 
         {/* Android only. The label says what it achieves, not what Android
@@ -282,11 +283,11 @@ export default function SettingsView({
             when the user gets there. */}
         {onOpenBatterySettings !== null ? (
           <Section
-            title="If recording keeps stopping"
-            footnote={`Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let this app keep running. Look for ${APP_NAME} in the list.`}
+            title={t('settings.section.stopping')}
+            footnote={t('settings.keepRunning.footnote', { app: APP_NAME })}
           >
             <Action
-              label="Let this app keep running"
+              label={t('settings.keepRunning')}
               onPress={onOpenBatterySettings}
             />
           </Section>
@@ -296,17 +297,17 @@ export default function SettingsView({
             this is the user's own answer, and it only means anything once they
             have read what the phone has granted. */}
         <Section
-          title="Background tracking"
+          title={t('settings.section.background')}
           footnote={
             permission !== 'always'
-              ? 'Your phone has not given this app permission to record in the background, so this is off. You can still record a walk from the map screen whenever you like.'
+              ? t('settings.background.blocked')
               : backgroundTracking
-                ? 'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start a walk yourself.'
-                : 'Nothing is recorded while the app is closed. Use Start walk on the map to record one.'
+                ? t('settings.background.on')
+                : t('settings.background.off')
           }
         >
           <Toggle
-            label="Record while the app is closed"
+            label={t('settings.background.toggle')}
             value={backgroundTracking && permission === 'always'}
             onChange={onChangeBackgroundTracking}
             // ⚠ Disabled rather than hidden when the permission is missing. A
@@ -319,23 +320,23 @@ export default function SettingsView({
 
         {backgroundTracking && permission === 'always' ? (
           <Section
-            title="How closely"
-            footnote="Each one changes how often the app asks your phone where you are, which is what uses the battery. We would rather show you a measured number than a guess, and measuring it needs a real phone — so for now the difference is described instead."
+            title={t('settings.section.quality')}
+            footnote={t('settings.quality.footnote')}
           >
             <Choice
-              label="Battery saver"
+              label={t('settings.quality.saver')}
               description="Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher."
               selected={trackingQuality === 'saver'}
               onPress={() => onChangeTrackingQuality('saver')}
             />
             <Choice
-              label="Balanced"
+              label={t('settings.quality.balanced')}
               description="The usual choice. Enough detail to recognise the walk you did, without following every step."
               selected={trackingQuality === 'balanced'}
               onPress={() => onChangeTrackingQuality('balanced')}
             />
             <Choice
-              label="Best detail"
+              label={t('settings.quality.best')}
               description="Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way."
               selected={trackingQuality === 'precise'}
               onPress={() => onChangeTrackingQuality('precise')}
@@ -344,8 +345,8 @@ export default function SettingsView({
         ) : null}
 
         <Section
-          title="Appearance"
-          footnote="Light is easier to read outdoors. Dark dims the whole map, Google's own included, and is what your end-of-trip souvenir uses whichever you pick here."
+          title={t('settings.section.appearance')}
+          footnote={t('settings.appearance.footnote')}
         >
           {/* Two labelled buttons rather than a switch: a switch needs the
               user to know which state is which, and D-015 forbids meaning
@@ -369,7 +370,7 @@ export default function SettingsView({
                     mapStyle === option && styles.choiceTextActive,
                   ]}
                 >
-                  {option === 'light' ? 'Light' : 'Dark'}
+                  {option === 'light' ? t('settings.appearance.light') : t('settings.appearance.dark')}
                   {mapStyle === option ? '  ✓' : ''}
                 </Text>
               </Pressable>
@@ -393,29 +394,29 @@ export default function SettingsView({
             path ever ships again (`map/MapLibreScreen.tsx` is kept), this is
             one of the places that has to change back. */}
         <Section
-          title="Map"
-          footnote="The map is Google's and needs a connection to draw. Your trip is recorded either way — losing signal on a levada costs you the map, never the walk."
+          title={t('settings.section.map')}
+          footnote={t('settings.map.footnote')}
         />
 
         <Section
-          title="About"
-          footnote="Nothing you record leaves this phone. There is no account and no server."
+          title={t('settings.section.about')}
+          footnote={t('settings.about.footnote')}
         >
-          <Action label="Privacy" onPress={onOpenPrivacyPolicy} />
-          <Action label="Technical details" onPress={onOpenDebug} />
+          <Action label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
+          <Action label={t('settings.about.technical')} onPress={onOpenDebug} />
         </Section>
 
         {/* A rare action, so it lives where rare lives (design brief §3.2) —
             not on the passport beside the reward (OD-11, D-069). */}
         {onDonateWalk === undefined ? null : (
           <Section
-            title="Help improve the app"
+            title={t('settings.section.help')}
             footnote={
-              'Sends one walk and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. Nothing leaves this phone unless you send it — and you choose where it goes.'
+              t('settings.help.footnote')
             }
           >
             <Action
-              label={donating === true ? 'Preparing…' : 'Send a walk'}
+              label={donating === true ? t('settings.help.preparing') : t('settings.help.send')}
               onPress={onDonateWalk}
             />
           </Section>
@@ -423,12 +424,12 @@ export default function SettingsView({
 
         {/* Last, its own section, red, with an icon. §5, T-125. */}
         <Section
-          title="Erase"
+          title={t('settings.section.erase')}
           destructive
-          footnote="This cannot be undone. There is no backup and no account to restore from — everything you recorded is only on this phone."
+          footnote={t('settings.erase.footnote')}
         >
           <Action
-            label="Erase everything I have recorded"
+            label={t('settings.erase.action')}
             onPress={onEraseRequested}
             danger
           />

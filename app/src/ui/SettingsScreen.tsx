@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { t } from '../i18n';
 import {
   Alert,
   Linking,
@@ -162,18 +163,15 @@ export default function SettingsScreen({
   if (erased) {
     return (
       <View style={styles.centre}>
-        <Text style={styles.title}>Everything has been erased</Text>
-        <Text style={styles.body}>
-          Nothing you recorded is left on this phone. If you keep the app, it
-          will start a new map from here.
-        </Text>
+        <Text style={styles.title}>{t('erase.done.title')}</Text>
+        <Text style={styles.body}>{t('erase.done.body')}</Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Done"
+          accessibilityLabel={t('erase.done.done')}
           onPress={onClose}
           style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
         >
-          <Text style={styles.primaryText}>Done</Text>
+          <Text style={styles.primaryText}>{t('erase.done.done')}</Text>
         </Pressable>
       </View>
     );
@@ -187,33 +185,27 @@ export default function SettingsScreen({
     return (
       <View style={styles.root}>
         <ScrollView contentContainerStyle={styles.confirmContent}>
-          <Text style={styles.title}>Erase everything?</Text>
-          <Text style={styles.body}>
-            This deletes every place you have visited, the whole map of your
-            trip, and every stamp you have collected.
-          </Text>
-          <Text style={styles.body}>
-            There is no backup. This app has no account and no server — what is
-            on this phone is the only copy — so this cannot be undone.
-          </Text>
+          <Text style={styles.title}>{t('erase.confirm.title')}</Text>
+          <Text style={styles.body}>{t('erase.confirm.body1')}</Text>
+          <Text style={styles.body}>{t('erase.confirm.body2')}</Text>
         </ScrollView>
 
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Keep my trip"
+            accessibilityLabel={t('erase.confirm.keep')}
             onPress={() => setConfirmingErase(false)}
             style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
           >
-            <Text style={styles.primaryText}>Keep my trip</Text>
+            <Text style={styles.primaryText}>{t('erase.confirm.keep')}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Yes, erase everything"
+            accessibilityLabel={t('erase.confirm.erase')}
             onPress={erase}
             style={({ pressed }) => [styles.danger, pressed && styles.pressed]}
           >
-            <Text style={styles.dangerText}>Yes, erase everything</Text>
+            <Text style={styles.dangerText}>{t('erase.confirm.erase')}</Text>
           </Pressable>
         </View>
       </View>
@@ -242,20 +234,20 @@ export default function SettingsScreen({
       );
       if (!built.ok) {
         setDonating(false);
-        Alert.alert('Nothing to send yet', built.reason);
+        Alert.alert(t('donate.nothingTitle'), built.reason);
         return;
       }
 
-      Alert.alert('Send this walk?', built.description, [
-        { text: 'Not now', style: 'cancel', onPress: () => setDonating(false) },
+      Alert.alert(t('donate.confirmTitle'), built.description, [
+        { text: t('donate.notNow'), style: 'cancel', onPress: () => setDonating(false) },
         {
-          text: 'Send',
+          text: t('donate.send'),
           onPress: () => {
             void (async () => {
               const sent = await sendDonation(built.report);
               setDonating(false);
               if (!sent.ok && sent.reason !== undefined) {
-                Alert.alert('Could not send', sent.reason);
+                Alert.alert(t('donate.failedTitle'), sent.reason);
               }
             })();
           },

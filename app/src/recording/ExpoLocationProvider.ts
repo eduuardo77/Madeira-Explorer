@@ -10,6 +10,7 @@ import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { APP_NAME } from '../brand';
+import { t } from '../i18n';
 import type {
   CoarsePosition,
   GeofenceRegion,
@@ -102,8 +103,8 @@ async function buildOptions(
     // the honest trade — OEM battery managers kill everything else
     // (ARCHITECTURE §6.2).
     foregroundService: {
-      notificationTitle: 'Recording your trip',
-      notificationBody: `${APP_NAME} is noting where you have been.`,
+      notificationTitle: t('notify.recording.title'),
+      notificationBody: t('notify.recording.body', { app: APP_NAME }),
       notificationColor: '#1B2A33',
       killServiceOnDestroy: false,
     },

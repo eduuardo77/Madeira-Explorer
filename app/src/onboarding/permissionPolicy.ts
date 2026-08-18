@@ -72,6 +72,15 @@ export const MEASURED_BATTERY_PERCENT_PER_DAY: number | null = null;
  * Returning null is a supported, expected outcome — see above. Callers must
  * render nothing rather than substitute their own wording.
  */
+/**
+ * ⚠ **NOT LOCALISED, and that is safe only while it returns null** (T-160).
+ *
+ * D-041 keeps `MEASURED_BATTERY_PERCENT_PER_DAY` at `null` until somebody
+ * measures it on real hardware, so this sentence cannot currently render in any
+ * language. **The day that figure is measured, this needs the same `Language`
+ * parameter as `decideHealthCheck`** — it is a pure module under Node's test
+ * runner, so it cannot import `i18n/index.ts`.
+ */
 export function batterySentence(): string | null {
   if (MEASURED_BATTERY_PERCENT_PER_DAY === null) {
     return null;

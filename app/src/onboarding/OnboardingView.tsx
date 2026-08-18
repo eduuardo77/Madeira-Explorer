@@ -28,6 +28,7 @@
  */
 
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
 
@@ -60,77 +61,64 @@ function copyFor(screen: OnboardingScreen): Copy {
   switch (screen) {
     case 'welcome':
       return {
-        title: 'Welcome',
-        body: [
-          'This app quietly notes the places you visit around Madeira, and turns them into a map of your trip.',
-          'You do not need to open it again. On your way home it will show you everywhere you went.',
-        ],
-        continueLabel: 'Get started',
-        skipLabel: 'Not now',
+        title: t('onboarding.welcome.title'),
+        body: [t('onboarding.welcome.body1'), t('onboarding.welcome.body2')],
+        continueLabel: t('onboarding.action.start'),
+        skipLabel: t('onboarding.action.notNow'),
       };
 
     case 'location':
       return {
-        title: 'It needs to know where you go',
-        body: [
-          'That is the whole app: it notices the places you reach, and draws where you travelled.',
-          'Everything stays on this phone. There is no account, nothing is uploaded, and nobody else can see it.',
-        ],
-        // Only when somebody has actually measured it (T-042/T-054).
+        title: t('onboarding.location.title'),
+        body: [t('onboarding.location.body1'), t('onboarding.location.body2')],
         note: batterySentence() ?? undefined,
-        continueLabel: 'Allow location',
-        skipLabel: 'Skip for now',
+        continueLabel: t('onboarding.action.allow'),
+        skipLabel: t('onboarding.action.skip'),
       };
 
     case 'notifications':
       return {
-        title: 'Two messages. That is all.',
-        body: [
-          'Tomorrow, one message to confirm it is working — so a problem cannot go unnoticed for your whole trip.',
-          'And one at the end, when your map is ready.',
-        ],
-        note: 'Nothing else, ever. No offers, no reminders.',
-        continueLabel: 'Allow messages',
-        skipLabel: 'No messages',
+        title: t('onboarding.messages.title'),
+        body: [t('onboarding.messages.body1'), t('onboarding.messages.body2')],
+        note: t('onboarding.messages.note'),
+        continueLabel: t('onboarding.messages.allow'),
+        skipLabel: t('onboarding.messages.deny'),
       };
 
     case 'android-disclosure':
-      // T-121. Google Play requires this before background location is
-      // requested, and reviews it by hand (T-123). It is also just honest.
+      // ⚠ COMPLIANCE TEXT (T-121). Google Play requires this before asking for
+      // background location, and it must keep saying three things in every
+      // language: what is collected, that it happens when the app is closed, and
+      // what it is used for. `strings.ts` repeats that warning where the
+      // translations live.
       return {
-        title: 'Recording while the app is closed',
+        title: t('onboarding.background.title'),
         body: [
-          'To fill in your map without you having to remember anything, this app collects location data even when it is closed or not in use.',
-          'It is used only to draw your own map on this phone. It is never uploaded, never shared, and never used for advertising.',
-          'You can say no and keep using the app — you will just start and stop recording yourself.',
+          t('onboarding.background.body1'),
+          t('onboarding.background.body2'),
+          t('onboarding.background.body3'),
         ],
-        continueLabel: 'Continue',
-        skipLabel: 'No thanks',
+        continueLabel: t('onboarding.background.continue'),
+        skipLabel: t('onboarding.background.deny'),
       };
 
     case 'always-upgrade':
       return {
-        title: 'Want it to fill in by itself?',
-        body: [
-          'Right now your map only fills in while the app is open.',
-          'If you let it record in the background, you can put your phone away and it will keep going on its own.',
-        ],
+        title: t('onboarding.upgrade.title'),
+        body: [t('onboarding.upgrade.body1'), t('onboarding.upgrade.body2')],
         note: batterySentence() ?? undefined,
-        continueLabel: 'Turn it on',
-        skipLabel: 'Leave it as it is',
+        continueLabel: t('onboarding.upgrade.continue'),
+        skipLabel: t('onboarding.upgrade.skip'),
       };
 
     case 'downgrade':
       // T-044. The user almost certainly did not realise they changed
       // anything — iOS asked, they tapped the safe-looking option.
       return {
-        title: 'Your map has stopped filling in',
-        body: [
-          'Your phone recently switched this app back to recording only while it is open.',
-          'That is fine — but you will need to start it yourself each time, or turn background recording back on.',
-        ],
-        continueLabel: 'Turn it back on',
-        skipLabel: 'Leave it',
+        title: t('onboarding.downgrade.title'),
+        body: [t('onboarding.downgrade.body1'), t('onboarding.downgrade.body2')],
+        continueLabel: t('onboarding.downgrade.continue'),
+        skipLabel: t('onboarding.downgrade.skip'),
       };
   }
 }

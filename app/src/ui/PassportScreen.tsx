@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { t } from '../i18n';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
@@ -174,7 +175,7 @@ export default function PassportScreen({
         setSharing(false);
         // The honest sentence from the export door, shown rather than swallowed
         // (ARCHITECTURE §10) — most often "the trace could not be masked".
-        Alert.alert('Nothing to share yet', built.reason);
+        Alert.alert(t('passport.share.nothingTitle'), built.reason);
         return;
       }
 
@@ -185,7 +186,7 @@ export default function PassportScreen({
       setShareCard(null);
       setSharing(false);
       if (!shared.ok && shared.reason !== undefined) {
-        Alert.alert('Could not share', shared.reason);
+        Alert.alert(t('passport.share.failedTitle'), shared.reason);
       }
     })();
   };
@@ -299,7 +300,7 @@ export default function PassportScreen({
         onPress={shareTrip}
         style={({ pressed }) => [styles.share, pressed && styles.pressed]}
       >
-        <Text style={styles.shareText}>{sharing ? 'Preparing…' : 'Share'}</Text>
+        <Text style={styles.shareText}>{sharing ? t('passport.sharing') : t('passport.share')}</Text>
       </Pressable>
 
       {/* ⚠ **Top-left, in a navigation bar, not floating bottom-right.**

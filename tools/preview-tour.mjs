@@ -420,45 +420,48 @@ ${stamps}
       </p>
     </div>
   </div>
-  <div class="exhibit" style="margin-top:40px">
-    <div class="phone"><img src="${shot('share2.png')}" alt="The Android share sheet holding the generated souvenir card"></div>
-    <div>
-      <p>
-        Handed to the ordinary share sheet. Nothing is uploaded — the app has no
-        account, no server and no analytics, and the picture goes wherever you
-        send it.
-      </p>
-      <p class="muted">This shot still carries the app's old name.</p>
-    </div>
-  </div>
+  <p style="margin-top:28px">
+    It is handed to the ordinary share sheet. Nothing is uploaded — the app has
+    no account, no server and no analytics, and the picture goes wherever you
+    send it.
+  </p>
 </section>
 
 <section>
-  <div class="head"><h2>The film</h2>${state('unverified', 'built · never seen moving')}</div>
+  <div class="head"><h2>The film is the map, played back</h2>${state('unverified', 'built · never seen moving')}</div>
   <p class="lede">
-    The walk draws itself on, the camera follows, and stamps land where you
-    earned them. ${(film.durationMs / 1000).toFixed(1)} seconds, ${film.frameRate} frames a second.
+    Google's own map, the camera following your walk, the trace growing behind
+    it and a stamp landing where you earned it. Not a diagram of the route — the
+    map itself, as if somebody had screen-recorded it while you walked.
+    ${(film.durationMs / 1000).toFixed(1)} seconds, ${film.frameRate} frames a second.
   </p>
   <p>
-    Nine of ${schedule.length} frames, from the same function the app plays and the
-    encoder will one day record. It advances one recorded position at a time
-    rather than one minute at a time, so the film spends its length on movement
-    instead of on an hour parked outside a restaurant.
+    It advances one recorded position at a time rather than one minute at a
+    time, so the film spends its length on movement instead of on an hour parked
+    outside a restaurant. Where the recording dropped, the pen lifts.
   </p>
+
+  <div class="note">
+    <p><b>The frames below are missing their basemap, and the app is not.</b>
+    These are drawn by a Node script that has no map tiles, so it can only show
+    the <em>geometry</em> — where the camera points, what has been drawn by now,
+    when each stamp lands. In the app every one of these sits on Google's map.
+    An earlier version of this page showed the same shapes on black, which
+    fairly read as "lines on a black screen", and that is what this caption
+    exists to prevent.</p>
+  </div>
+
   <div class="strip">
 ${strip}
   </div>
+
   <div class="note">
-    <p><b>Two honest problems, both visible above.</b></p>
-    <p><b>1 — Nobody has seen it move.</b> Every frame here is correct standing
-    still. Whether the pan reads as smooth, whether a stamp pops too fast, and
-    whether ten seconds is too long are all unanswered, and only a running app
-    answers them.</p>
-    <p><b>2 — A portrait frame is the wrong shape for this island.</b> Look at
-    the last frames: the walk is a thin band across the middle with the rest
-    empty. Most of Madeira's coast roads and levadas run east–west. Either the
-    camera turns to follow the route's own axis, or the empty space earns its
-    keep, or it stays as it is.</p>
+    <p><b>Nobody has seen it move.</b> Every frame is correct standing still.
+    Whether the camera pan reads as smooth, whether a stamp pops too fast, and
+    whether ten seconds is too long are unanswered — and the camera is
+    deliberately updated less often than 30 times a second, because a native map
+    restarts its own animation on every assignment. That throttle is a guess and
+    it is the first thing to tune on a real phone.</p>
   </div>
 </section>
 
@@ -469,7 +472,9 @@ ${strip}
     <li><b>Nobody can pay.</b> The free tier works — ten stamps, plus your first
       levada whenever you walk it — and there is no purchase behind it yet.</li>
     <li><b>The film is not a file.</b> It plays in the app; it cannot be
-      exported. That needs a native encoder and an Android phone.</li>
+      exported. That needs a native encoder and an Android phone — and now that
+      the film <em>is</em> the map, recording it also means recording Google's
+      map, which is a licensing question nobody has answered yet.</li>
     <li><b>Nothing has run on real hardware.</b> Battery, surviving in your
       pocket overnight, and whether the geofences fire on a real walk are all
       unknown. An emulator cannot answer any of them.</li>

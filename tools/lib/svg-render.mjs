@@ -21,6 +21,7 @@ import {
   toPolygon,
 } from '../../app/src/passport/stampArt.ts';
 import { projector } from '../../app/src/souvenir/frame.ts';
+import { CATEGORY_COLOUR, stampMarkPoints } from '../../app/src/souvenir/filmPaint.ts';
 
 export function escapeXml(text) {
   return String(text)
@@ -84,24 +85,27 @@ export function stampSvg(id, name, category, collected, extraStyle = '') {
     </svg>`;
 }
 
-/** Category colours for the film's stamp dots. Mirrors `ReplayView.tsx`. */
-export const CATEGORY_COLOUR = {
-  viewpoint: '#5AA9FF',
-  levada: '#30D158',
-  village: '#FFD60A',
-  beach: '#4CC9F0',
-  landmark: '#B5179E',
-};
-
 /**
- * One frame of the souvenir film, as a standalone `<svg>`.
+ * One frame of the souvenir film's **geometry**, as a standalone `<svg>`.
  *
- * ⚠ It takes a `Frame` from `frame.ts` and projects it with `frame.ts`'s own
- * `projector`. Nothing about *what* is on screen is decided here — that is the
- * app's arithmetic, and this only turns it into elements.
+ * ⚠⚠ **THERE IS NO BASEMAP HERE, AND THE APP HAS ONE.** Since D-076 the replay
+ * is Google's own map with the camera following the walk; this preview cannot
+ * draw that — there are no tiles in a Node script — so it draws the *shapes*
+ * against a plain ground and nothing else. That distinction cost a
+ * misunderstanding once: the project lead saw a black rectangle with white
+ * lines on it and reasonably asked whether that was the product.
+ *
+ * ⚠ So the ground is a **map-ish slate, deliberately not black**, and every
+ * caller must say in words that the basemap is missing from the preview rather
+ * than from the app. What this still answers is worth having: does the walk
+ * draw in the right order, does the camera point at the right thing, does a
+ * stamp land off the edge.
+ *
+ * It takes a `Frame` from `frame.ts` and projects it with `frame.ts`'s own
+ * `projector`. Nothing about *what* is on screen is decided here.
  */
 export function filmFrameSvg(frame, width, height, options = {}) {
-  const { ground = '#0E0E10', trace = '#F1F7FF', popMs = 400 } = options;
+  const { ground = '#2A2E35', trace = '#5AA9FF' } = options;
   const toPixel = projector(frame.bounds, width, height);
   const strokeWidth = Math.max(1.5, width / 180);
 
@@ -120,9 +124,10 @@ export function filmFrameSvg(frame, width, height, options = {}) {
   const marks = frame.stamps
     .map((stamp) => {
       const [x, y] = toPixel(stamp.lon, stamp.lat);
-      // Grows from nothing and settles, exactly as `ReplayView` animates it.
-      const grow = Math.max(0, 1 - stamp.ageMs / popMs);
-      const r = strokeWidth * 1.5 + grow * strokeWidth * 2;
+      // The app's own pop curve (`filmPaint.ts`), scaled to this preview's
+      // size rather than re-invented — otherwise the marks here would settle at
+      // a different size from the ones on the map.
+      const r = (stampMarkPoints(stamp.ageMs) / 9) * strokeWidth * 1.6;
       return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${CATEGORY_COLOUR[stamp.category] ?? '#FFFFFF'}"/>`;
     })
     .join('');

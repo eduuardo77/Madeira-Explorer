@@ -128,3 +128,43 @@ worth writing.
 making and the reference app is not. It may well be the right bet — D-013's argument for it never
 rested on WalkNYC — but it should be made knowingly, because this is the largest remaining piece
 of v1 and the one that most needs hardware.
+
+---
+
+## ⚠ Amended 2026-08-18 — the thing being encoded changed
+
+**D-076 moved the film onto Google's own map.** Everything above was written when the app drew
+every pixel of the film itself, and section 3's recommendation — *sample the storyboard in JS,
+draw with `react-native-svg`, photograph with `captureRef`* — **assumed that**. It no longer
+holds, and the honest position is that the encoder is a more open question than this document
+originally made it sound.
+
+**What is unchanged.** `MediaCodec` + `MediaMuxer` in a small Expo local module is still the right
+encoder, still adds no third party, and still owes the shortest network audit this project will
+write. `ffmpeg-kit` is still dead.
+
+**What changed, and it is the hard half.** A native map renders onto **its own surface**. The app
+cannot simply photograph it frame by frame:
+
+- `captureRef` over a map view is unreliable across devices — a map is not a normal React Native
+  view, and this is a well-known sharp edge rather than a theory.
+- The Maps SDK's own `snapshot()` exists on Android, is **slow**, and **`expo-maps` may not expose
+  it at all**. Confirming that is the first thing this spike should do.
+- The remaining route is a native screen-capture path over the map's surface, which is a
+  substantially larger piece of work than feeding bitmaps to an encoder.
+
+**And there is now a licence in the loop.** Google's Geo Guidelines (checked 2026-08-18):
+
+- Maps imagery **may** appear in online video for *"educational, instructional, recreational, or
+  entertainment purposes"* without requesting permission. **A user posting their own holiday is
+  squarely inside that.**
+- ⚠⚠ **Attribution must survive the recording.** *"Don't remove, obscure, or crop out the
+  attribution information"*, and it must stay beside the imagery rather than move to a credit.
+  **The encoder may not crop the Google wordmark, and no overlay of ours may cover it.**
+- ⚠ **Promotional use is excluded** and needs Google's approval — so the *store listing's* preview
+  video is a separate question from the user's souvenir, and it belongs to T-133/T-161.
+
+**The revised ranking.** The replay ships now and needs none of this. The exported video is a
+**spike with genuinely open feasibility**, and the first honest deliverable is no longer "one
+five-second MP4" but "can a frame of the running map be got into a buffer at all, on a real
+phone".

@@ -69,12 +69,13 @@ ground truth.
   Kotlin and a phone. ⚠⚠ **Nobody has seen the replay move**: the workbench pane does not
   composite, so `requestAnimationFrame` never fires there. Every frame has been checked standing
   still; **smoothness, the 400 ms stamp pop and the 10-second length are all unjudged.**
-- **T-105b** ⚠ **the 9:16 frame is mostly empty and somebody has to look at it.** Measured on all
-  three routes, and confirmed in the **shipping** renderer at the finale — **390 px of 390 across,
-  76 of 693 down**. An east–west walk —
-  most of Madeira's coast and levadas — is a thin line in a tall black rectangle. Three ways out
-  are written in the task; one of them changes `composition.ts`.
-  `node tools/preview-film.mjs` → `tools/out/film-contact-sheet.html`
+- **T-105b** ⚠ **the exported video got harder, not easier (D-076).** Encoding the film now means
+  encoding **Google's map**, which renders on its own surface — `captureRef` over it is unreliable
+  and `expo-maps` may not expose `snapshot()` at all. **Treat it as an open spike.** ⚠ And the
+  attribution must survive: the wordmark may not be cropped or covered, and **nobody has checked
+  whether the replay's hero number collides with it.** *(The old 9:16 empty-frame problem is gone
+  — with a map under the trace there is no empty ground to fill.)*
+  `node tools/preview-film.mjs` → geometry only, **no basemap** — that is the preview, not the app
 - **T-164** the **import** request (Health / Strava / Timeline / GPX). ⚠ Recommended v1 subset is
   **a file the user hands us and nothing else** — Strava is OAuth, an API and a third party.
   ⚠⚠ And the decision that comes first is **whether an imported track may earn a stamp at all**.

@@ -745,36 +745,37 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ And whichever way it goes, **existing users keep what they had**. Grandfathering is not a
       courtesy here, it is the difference between a new product and a broken promise.
 
-- [x] **T-105e** ✅ **The replay, 2026-08-18 — you can watch your trip back.** ⇠ T-105a, OD-12
-      — **The project lead chose it:** *"I like this — build the replay first, keep the video."*
-      Reached from the passport, **under the hero**, where the app already puts its one invitation
-      — and the two are mutually exclusive by construction: before the first stamp there is no film
-      and the invitation shows; after it, *Watch your trip* does. Verified both ways in the
-      workbench.
-      — **Four pieces, split the way everything here is split.** `playback.ts` is the clock, pure,
-      11 tests — because pausing is arithmetic and arithmetic inside a component is arithmetic
-      nobody tests. `frame.ts` says what is on screen. `ReplayView.tsx` draws it and decides
-      nothing. `ReplayScreen.tsx` is the plumbing: read the trip, run the clock, get out of the way.
-      — ⚠ **It shares `frameAt` with the video by design.** When T-105b's encoder lands it samples
-      the same function, so the film people watch and the film they post cannot drift apart.
-      — **The whole screen is one tap** — no scrubber, no timeline, no chrome over the picture. It
-      autoplays, because the user pressed *Watch* and a second press is a step that exists only
-      because it was easier to build. It pauses itself at the end rather than holding a frame loop
-      awake over a still picture.
-      — ⚠ **Never called "video" in any string.** The video does not exist yet; a button promising
-      one is the store-copy mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
-      — **Found by looking:** the hero was drawn as a big number with a smaller denominator nested
-      inside it, the way the passport does it. React Native turns nested `Text` into a `tspan`;
-      **the web workbench emitted a `<text>` inside a `<text>`, which is not valid SVG** — and the
-      workbench is the only place this design is ever looked at. Now one flat string, which is what
-      `shareCard.ts` settled on for the still and what has already been approved by eye.
-      — ⚠⚠ **THE ANIMATION HAS NEVER BEEN SEEN MOVING.** The workbench pane does not composite, so
-      `requestAnimationFrame` never fires there — the play button toggles and the clock is correct,
-      and the picture does not advance. **Every frame has been inspected standing still**, through
-      the workbench's frame stepper and `tools/preview-film.mjs`. Whether the pan reads as smooth,
-      whether a 400 ms stamp pop is right, and whether 10 seconds is too long are **unanswered**.
-      — ⚠ **And T-105b's framing problem is now visible in the shipping renderer**, not just the
-      preview tool: at the finale the trace spans **390 px of 390 across and 76 of 693 down**.
+- [x] **T-105e** ✅ **The replay — and it is the map, played back (D-076).** ⇠ T-105a, OD-12
+      — ⚠⚠ **REBUILT THE SAME DAY, on the project lead's instruction.** The first version drew the
+      trace as white lines on a black rectangle; they looked at it and said *"it is supposed to
+      have a map behind it to know where you've been… as if someone was screen-recording while you
+      were walking."* They were right: a line with no coastline under it is any walk anywhere, and
+      Madeira is the whole subject. **D-076** holds the reasoning.
+      — **What survived the rewrite: everything except the drawing.** `composition.ts` plans,
+      `frame.ts` says what is on screen at time *t*, `playback.ts` says what *t* is. `ReplayView`
+      (SVG) was **deleted**; `replayMap.ts` (pure, 10 tests) turns the same frame into a camera,
+      polylines and circles for `GoogleMaps.View`. That is the payoff for having made `frame.ts`
+      about the film rather than about the picture.
+      — **It composes the map's own modules** — `cameraFit`, `traceStyle`, `collectedMarks`,
+      `darkMode`, the style preference — so the replay's trace is the same blue at the same width
+      as the everyday map's, and follows it if either changes. A test fails if it stops being.
+      — ⚠ **The camera is throttled and the trace is not.** Every assignment to a native map camera
+      restarts its own animation, so 30 fps of camera resets is a stutter, not a pan.
+      `cameraMovedEnough` decides. **Its threshold is a guess and is the first thing to tune on a
+      real phone** — a test proves it throttles *and* that it does not get stuck, which is all a
+      test can prove here.
+      — **Map gestures are all off during the replay.** For those ten seconds the film owns the
+      camera; a stray thumb would leave the walk drawing itself off screen.
+      — ⚠ **The 9:16 framing problem is gone with the black ground.** There is no empty frame to
+      fill any more, so the three options that were waiting on a decision are moot.
+      — ⚠⚠ **NOBODY HAS SEEN IT MOVE, AND NOW NOBODY CAN WITHOUT A DEVICE.** The workbench has no
+      Google map, so the replay stage was deleted rather than left showing a picture the app does
+      not draw. `tools/preview-film.mjs` remains as a **geometry** check and now says so in words,
+      on a slate ground rather than black.
+      — Reached from the passport, **under the hero**, where the app already puts its one
+      invitation — mutually exclusive with it by construction, verified both ways.
+      — ⚠ **Never called "video" in any string.** The video does not exist; a button promising one
+      is the store-copy mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
 - [x] **T-165** ✅ **The visual reference, 2026-08-18 — `tools/preview-tour.mjs`.**
       — **The project lead, and it was the most useful thing said all day:** *"It's hard to imagine
       it without a visual reference of what is becoming."* Everything in this repository that can be
@@ -1029,7 +1030,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **It is deliberately not a bet on the video.** The same `frameAt` drives an in-app
       **replay** from a wall clock — see **OD-12**, which the project lead opened the same day.
       — ✅ **`tools/preview-film.mjs` draws a contact sheet**, because nobody had ever seen a frame.
-      — ⚠⚠ **AND IT IMMEDIATELY FOUND SOMETHING NO TEST COULD: the 9:16 frame is mostly empty.**
+      — ⚠⚠ **THE TARGET CHANGED 2026-08-18 (D-076): the film is the map now**, so encoding it means
+      encoding **Google's map**, not frames this app draws. That makes the encoder half *less*
+      certain than `docs/video-encoder-research.md` assumed — a native map renders on its own
+      surface, `captureRef` over it is not reliable, and the Maps SDK's `snapshot()` is slow and
+      may not be exposed by `expo-maps`. **Treat the exported video as an open spike again.**
+      — ⚠⚠ **AND THERE IS NOW A LICENCE TO OBEY.** Google's Geo Guidelines permit Maps imagery in
+      online video for *"educational, instructional, recreational, or entertainment purposes"*
+      without asking — a user posting their own holiday is squarely that. But **the attribution
+      must survive**: *"Don't remove, obscure, or crop out the attribution information"*, and it
+      must stay beside the imagery. **The encoder may not crop the Google wordmark and no overlay
+      of ours may cover it.** ⚠ The replay's hero number is centred low and the wordmark sits
+      bottom-left; **nobody has checked whether they collide** — that check belongs to this task.
+      ⚠ **Our own marketing video is a different case and needs Google's approval** (T-133/T-161).
+      — ⚠ **The old framing worry below is obsolete.** With a map under the trace there is no empty
+      frame to fill, and the three options are moot (D-076).
+      — ⚠⚠ **What it found before the rewrite, kept because it is why the rewrite happened:**
       Measured on all three routes: the trace fills **108 px of 108 across** and **10–35 px of 192
       down**. An east–west walk in a portrait frame is a thin horizontal line floating in a tall
       black rectangle — and most of Madeira's coastal and levada routes run east–west. The

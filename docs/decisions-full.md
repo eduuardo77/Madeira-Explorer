@@ -4033,3 +4033,72 @@ of the 96 dp cell, clear of the name band. **Nobody has looked at it.** The scen
 question it is there to answer is the one a test cannot: **is a locked sticker obviously
 different from one that was never collected?** If those two read the same at arm's length, this
 decision has failed at the only thing it was for.
+
+## D-076 — The souvenir film **is the map, played back**
+
+**Status: Accepted** — the project lead's instruction, 2026-08-18, given while looking at the
+first version and entirely correct.
+
+**What they said.** *"What's happening with the film? Some lines on a black screen? It is
+supposed to have a map behind it to know where you've been. The video / replay / timelapse should
+be a video of the already existing map, as if someone was screen-recording while you were walking
+but just adding some motion to the video."*
+
+**The decision.** The replay renders **Google's own map** — the same basemap, style preference and
+clutter rules as the everyday map screen — with the camera following the walk, the trace growing
+behind it, and a stamp landing where each one was earned. There is no second cartography and no
+bespoke ground. The film is the map screen, played back with motion added.
+
+**Why the first version was wrong, and it is not a matter of taste.** It drew the trace as white
+strokes on a black rectangle. Every geometry test passed. What it could not do was say **where** —
+a line with no coastline under it is any walk anywhere, and *Madeira* is the entire subject of
+this product. D-057 chose the platform's map because its cartography is better than this project
+will ever maintain; D-032 cut everything that competes with the trace. A souvenir that discards
+the basemap discards the half those two decisions were protecting.
+
+**What survived, and why the split paid for itself.** All of it except the drawing.
+`composition.ts` still plans the film, `frame.ts` still answers *what is on screen at time t*, and
+`playback.ts` still answers *what t is*. Only the renderer changed: `ReplayView.tsx` (SVG) was
+deleted and `replayMap.ts` took its place, turning the same frame into a camera, some polylines
+and some circles. **That is the return on having made `frame.ts` about the film rather than about
+the picture** — a rewrite that would otherwise have reached back into the arithmetic touched none
+of it.
+
+**What it costs.**
+
+- ⚠ **The camera cannot be driven at 30 fps.** Every assignment to a native map camera restarts
+  its own animation, so resetting it every 33 ms turns a pan into a stutter. `cameraMovedEnough`
+  throttles it while the trace and marks still update every frame. **The threshold is a guess and
+  is the first thing to tune on real hardware.**
+- ⚠ **The 9:16 framing problem is gone, and so is the choice that was open about it.** A portrait
+  frame was a bad container for an east–west walk when the ground was empty; with a map under it
+  there is no empty ground, and the camera follows the route rather than trying to fit all of it.
+- ⚠ **The workbench can no longer show the film.** It has no map. `ReplayView` and the workbench's
+  replay stage were **deleted rather than kept**, because a preview that draws a picture the app
+  does not draw is worse than no preview — that is precisely the misunderstanding this decision
+  came out of. `tools/preview-film.mjs` survives as a **geometry** check and now says so, on a
+  slate ground rather than black.
+
+### What it does to the exported video (T-105b) — and this is new work, not a detail
+
+**Recording the film now means recording Google's map**, and that is a different problem in two
+ways, both researched 2026-08-18.
+
+**Legally, it is allowed, with conditions.** Google's Geo Guidelines permit Maps imagery in online
+video for *"educational, instructional, recreational, or entertainment purposes"* without asking
+permission — a user posting their own holiday is squarely that. But:
+
+- ⚠⚠ **The attribution must survive the recording.** *"Don't remove, obscure, or crop out the
+  attribution information"*, and it must stay next to the imagery rather than be moved to a
+  credit. **The encoder may not crop the Google wordmark, and no overlay of ours may sit on top of
+  it.** The replay's hero number is centred low on the screen and the wordmark sits bottom-left;
+  **nobody has checked whether they collide**, and that check is now part of T-105b.
+- ⚠ **Our own marketing video is a different case and needs Google's approval.** Promotional use
+  is explicitly not covered by the free-use clause. That lands on T-133/T-161, not on the app.
+
+**Technically it is harder than the old plan.** `docs/video-encoder-research.md` assumed frames
+could be drawn by the app and fed to `MediaCodec`. A native map renders on its own surface, which
+the app cannot simply photograph frame by frame — `captureRef` over a map view is not reliable,
+and the Maps SDK's own `snapshot()` is slow and may not be exposed by `expo-maps`. **The encoder
+half of T-105b is therefore less certain than it was**, and the honest ranking of options changed:
+the replay ships now, and the exported video is a spike whose feasibility is genuinely open.

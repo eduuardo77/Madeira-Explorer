@@ -104,6 +104,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 | **D-074** | The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`. | **Accepted** |
 | **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Provisional** |
+| **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

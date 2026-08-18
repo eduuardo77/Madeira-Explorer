@@ -382,3 +382,36 @@ Each is cheap and each can invalidate the next.
   after store publication (T-137).
 - **The emulator's map may look slightly soft.** It renders through a translated GPU. Judge
   cartography on real hardware, and the final verdict outdoors (T-065).
+
+---
+
+## ⚠ The emulator was configured to be slow, 2026-08-18
+
+**The project lead:** *"The emulator feels laggy, not responsive."* They were right and it was not
+Android's fault. `~/.android/avd/madeira.avd/config.ini` held:
+
+| | Was | Now |
+|---|---|---|
+| `hw.ramSize` | **1536M** | 4096M |
+| `vm.heapSize` | **228M** | 512M |
+| `hw.keyboard` | **no** | yes |
+| `hw.gpu.enabled` | **no** | yes |
+
+**1.5 GB is not enough to run Android 14, Play services, a Google map and a dev client**, and the
+228 MB Dalvik heap is the default for a *phone from 2013*. It was thrashing. `hw.keyboard = no`
+is the one that makes it feel broken rather than slow: **the physical keyboard does nothing**, so
+every text field has to be poked at through the on-screen keyboard.
+
+⚠ **The GPU story is unchanged and is separate.** `run-emulator.sh` still passes
+`-gpu swiftshader_indirect` on the command line, because `-gpu host` renders the Google map as
+pure black on this machine. Software rendering is a real cost and this does not remove it —
+`hw.gpu.enabled = yes` only stops the AVD *also* disabling it a second way. If a future session
+wants to try harder: **`MADEIRA_GPU=angle_indirect`** is the option not yet tried, and it is the
+one that most often fixes GL surfaces on Windows.
+
+⚠ **CPU acceleration was never the problem** — `emulator -accel-check` reports WHPX installed and
+usable.
+
+⚠⚠ **None of this has been measured.** The old numbers were objectively too low and the new ones
+are ordinary; whether the emulator now *feels* fine is something only the project lead can say.
+A backup of the original sits beside it as `config.ini.bak-<epoch>`.

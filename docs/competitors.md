@@ -165,6 +165,43 @@ recommendation has been made.
 
 ---
 
+## ⚠ WalkNYC has no timelapse video — checked 2026-08-18
+
+**Checked because the project lead asked for "the timelapse feature, like WalkNYC has".** It
+does not have one, and the difference matters to D-013.
+
+What WalkNYC actually ships, from its own site and both store listings:
+
+- **A replay of a walk on the map, inside the app.** *"Open one to replay it on the map."* For
+  looking at, not for exporting.
+- **A share, added in v1.0.2 (30 May 2026)**, described only as *"Now you can share your completed
+  walks"* — and a later release note records a fix for the share *"giving the wrong link"*, so it
+  is a link to a page, not a rendered file.
+- **Import, not export, is the feature they built**: Apple Health, Strava, Google Timeline, GPX.
+
+**Nothing animated leaves that app.** There is no reel, no story export, no video.
+
+**What this changes.** D-013 calls the end-of-trip video the entire distribution strategy, and the
+reference app **is successful without one** — the same argument that D-071/D-072 already accepted
+about its badge system, which it also does not have. That is not a reason to drop the video; it is
+a reason to stop describing it as table stakes. It is a **bet this project is making and the
+reference app is not**, and T-105b — a native encoder, the largest remaining piece of v1 and the
+one that cannot be verified without hardware — is the price of that bet.
+
+⚠ **The nearest real reference is not WalkNYC.** Animated route recaps are Relive's and Strava's
+territory. If the video is being designed against something, it should be designed against those.
+
+**Two other facts from the same reading, both awkward:**
+
+- **WalkNYC has servers.** *"Your walks stay on your device. Servers only ever see aggregate
+  stats"* — plus a public leaderboard, which cannot work any other way. Our claim is stronger than
+  theirs, and after T-156 it will be *"nothing leaves your phone except a purchase you started"*.
+- **WalkNYC takes no money at all**: *"No accounts, no subscriptions, no ads, no in-app
+  purchases."* The reference app is not a monetisation reference. D-072 stands on its own
+  reasoning and has nothing to copy here.
+
+---
+
 ## The wider field
 
 | App | Map stack | Backend | Evidence |

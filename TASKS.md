@@ -942,15 +942,27 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **one five-second MP4 written on the project lead's own Android**, not a plan. Until that
       exists, treat the video as unproven.
       — Notes: `docs/task-notes.md` (T-105b)
-- [ ] **T-105c** Research an on-device video encoder, and what it talks to ⇠ D-051, D-063
-      — The project lead asked for this explicitly: *"definitely something we should research in
-      the future"*. Deliverable is a recommendation with a **network-behaviour audit** per D-043 —
-      the thing that turns "no data leaves the device" quietly false (CONTEXT §4.8).
-      — ⚠ **The obvious dependency may not exist any more.** `ffmpeg-kit`, the usual React Native
-      answer, was retired by its maintainer and its binaries pulled. **Confirm that before
-      anything depends on it**; if it holds, the likely path is a small native module over
-      Android's own `MediaCodec`, which adds no third party at all and so has no network to
-      audit — which is the better outcome for D-001 anyway.
+- [x] **T-105c** ✅ **Answered 2026-08-18 — `docs/video-encoder-research.md`.** ⇠ D-051, D-063
+      — **Recommendation: a small Expo local module over Android's own `MediaCodec` + `MediaMuxer`,
+      adding no third party.** The D-043 network audit it owes is the shortest this project will
+      write: system APIs only, no package added, **nothing to audit and T-117's verdict unchanged**.
+      — **`ffmpeg-kit` is confirmed dead**, as suspected: retired January 2025, **binaries removed
+      from Maven Central, CocoaPods and npm on 1 April 2025**, repository archived. Forks exist
+      (`FFmpegKitNext` and others) and none is a successor — rejected as the largest dependency the
+      app would carry, with a network-capable protocol layer compiled in, and no owner to make the
+      audit ever end.
+      — ⚠ **The blocker is not the encoder, it is the frames.** `composition.ts` says what the film
+      is; nothing turns time *t* into a bitmap. Three options are costed in the doc. Recommended:
+      sample in JS and photograph the existing view with `captureRef` — one renderer, reuses
+      T-105d — **gated on measuring capture time on the first real device**, because 150 readbacks
+      of a 1080 × 1920 view against T-109's ~30 s budget is unmeasured and could fail on its own.
+      — ⚠ **Three pitfalls recorded before the device finds them:** the configured frame rate is
+      ignored (`presentationTimeUs` is the real clock); the output must be drained or the encoder
+      hangs rather than errors; **1080 × 1920 is not guaranteed** — `VideoCapabilities` must be
+      asked, and a cheap Android is exactly where T-105b will be tested.
+      — ⚠ **The premise was checked and does not hold: WalkNYC has no video** — see
+      `docs/competitors.md`. It replays a walk in-app and shares a *link*. The video is a bet this
+      project is making and the reference app is not.
 - [~] **T-105d** ✅ **STARTED 2026-08-16 — the card is composed and can be looked at.**
       `app/src/souvenir/shareCard.ts`: a 9:16 layout — destination, dates, the hero `23 / 60`, the
       trace, the places named, the app's mark — plus an SVG renderer, which is what

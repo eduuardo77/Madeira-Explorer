@@ -21,6 +21,7 @@
  */
 
 import { APP_NAME } from '../brand';
+import { deviceLanguage } from '../i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   POLICY_VERSION,
@@ -41,7 +42,7 @@ export default function PrivacyPolicyView({
           {APP_NAME} · last changed {POLICY_VERSION}
         </Text>
 
-        {policySections().map((section) => (
+        {policySections(deviceLanguage()).map((section) => (
           <View key={section.heading} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.heading}</Text>
             {section.paragraphs.map((paragraph) => (

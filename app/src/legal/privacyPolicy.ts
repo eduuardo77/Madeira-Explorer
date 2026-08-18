@@ -77,6 +77,8 @@ export const POLICY_VERSION = '2026-08-14';
  * one-line edit here plus `app.json`.
  */
 import { APP_NAME } from '../brand.ts';
+import type { Language } from '../i18n/languages.ts';
+import { CONTACT_SECTION_PT, SECTIONS_PT } from './privacyPolicy.pt.ts';
 
 /**
  * Where a user can write to about their data.
@@ -106,7 +108,7 @@ export type PolicySection = {
  * read is decoration. `privacyPolicy.test.ts` enforces the vocabulary rather
  * than trusting anyone's eye, the same way T-114 did for onboarding.
  */
-const SECTIONS: PolicySection[] = [
+const SECTIONS_EN: PolicySection[] = [
   {
     heading: 'The short version',
     paragraphs: [
@@ -191,26 +193,66 @@ const SECTIONS: PolicySection[] = [
  * The contact section is appended only when there is an address to give, which
  * is why this is a function rather than a constant.
  */
-export function policySections(): PolicySection[] {
+/**
+ * A line shown to readers whose language the policy does not exist in.
+ *
+ * ⚠ **Shown rather than hidden, on purpose (T-160b).** The alternative is
+ * silently rendering English to somebody who set their phone to German, which
+ * looks like the app failed to translate rather than like a decision. Saying
+ * which languages it exists in is the honest version, and it is one sentence.
+ *
+ * The policy is Portuguese and English only because it is the one document where
+ * a rough translation is a **compliance** problem rather than a rough edge: it is
+ * already marked as needing a qualified reader before store submission (T-123),
+ * and nobody on this project speaks German (T-160a).
+ */
+const LANGUAGE_NOTE: Record<Language, string | null> = {
+  en: null,
+  pt: null,
+  de: 'Diese Datenschutzerklärung liegt auf Englisch und Portugiesisch vor. Sie lesen die englische Fassung.',
+};
+
+/**
+ * The policy as it should be shown or published.
+ *
+ * The contact section is appended only when there is an address to give, which
+ * is why this is a function rather than a constant.
+ *
+ * ⚠ **`language` defaults to English** so every existing caller — the generator
+ * in `tools/`, the tests, anything published — keeps meaning exactly what it did
+ * before this became translatable.
+ */
+export function policySections(language: Language = 'en'): PolicySection[] {
+  const translated = language === 'pt';
+  const base = translated ? SECTIONS_PT : SECTIONS_EN;
+
+  const note = LANGUAGE_NOTE[language];
+  const sections: PolicySection[] =
+    note === null
+      ? [...base]
+      : [{ heading: 'Sprache', paragraphs: [note] }, ...base];
+
   if (CONTACT_EMAIL === null) {
-    return SECTIONS;
+    return sections;
   }
 
   return [
-    ...SECTIONS,
-    {
-      heading: 'Getting in touch',
-      paragraphs: [
-        `If you have a question about any of this, write to ${CONTACT_EMAIL}.`,
-        'We will not be able to look anything up about your trip, because we do not have it.',
-      ],
-    },
+    ...sections,
+    translated
+      ? CONTACT_SECTION_PT(CONTACT_EMAIL)
+      : {
+          heading: 'Getting in touch',
+          paragraphs: [
+            `If you have a question about any of this, write to ${CONTACT_EMAIL}.`,
+            'We will not be able to look anything up about your trip, because we do not have it.',
+          ],
+        },
   ];
 }
 
 /** Every word of the policy, for checks that care about the whole text. */
-export function policyText(): string {
-  return policySections()
+export function policyText(language: Language = 'en'): string {
+  return policySections(language)
     .map((section) => [section.heading, ...section.paragraphs].join('\n'))
     .join('\n\n');
 }

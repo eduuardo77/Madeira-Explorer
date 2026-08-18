@@ -174,3 +174,65 @@ test('there is no invented contact address, and no empty section either', () => 
     );
   }
 });
+
+/**
+ * The Portuguese policy (T-160b).
+ *
+ * ⚠ **The risk here is not a clumsy sentence, it is a missing promise.** This is
+ * a compliance document: if the Portuguese quietly drops "no account" or "never
+ * uploaded", the app is making different commitments to different users, and the
+ * one who was told less is the one who cannot read the original.
+ */
+
+test('⚠ the Portuguese policy makes the same promises as the English one', () => {
+  const pt = policyText('pt').toLowerCase();
+
+  // Each pair is one commitment, in both languages. The English is already
+  // asserted above; this checks the Portuguese did not lose it in translation.
+  const promises: [string, string][] = [
+    ['no account', 'não há conta'],
+    ['no server', 'não há servidor'],
+    ['never sent to us', 'nunca nos é enviada'],
+    ['no adverts', 'não há publicidade'],
+    ['never leaves the phone', 'nunca sai do telemóvel'],
+  ];
+
+  const lost = promises.filter(([, portuguese]) => !pt.includes(portuguese));
+  assert.deepEqual(
+    lost.map(([english]) => english),
+    [],
+    'the Portuguese policy is missing a promise the English one makes'
+  );
+});
+
+test('⚠ the Portuguese policy has every section the English one has', () => {
+  // A dropped section is the quietest possible failure: nothing looks wrong,
+  // there is simply less policy in one language.
+  assert.equal(
+    policySections('pt').length,
+    policySections('en').length,
+    'the two policies have a different number of sections'
+  );
+});
+
+test('⚠ a German reader is told which languages the policy exists in', () => {
+  // Not silently served English, which reads as a failed translation rather
+  // than a decision. See LANGUAGE_NOTE in privacyPolicy.ts.
+  const de = policySections('de');
+  assert.equal(de.length, policySections('en').length + 1);
+  assert.match(de[0].paragraphs[0], /Englisch und Portugiesisch/);
+});
+
+test('the Portuguese policy still names the app', () => {
+  assert.ok(policyText('pt').includes(APP_NAME));
+});
+
+test('⚠ Portuguese sentences stay as short as the English ones', () => {
+  // D-015 and CONTEXT §6.5 apply in every language: a policy an eighty-year-old
+  // will not read is decoration. Portuguese runs longer than English by nature,
+  // so the bar is a little higher rather than absent.
+  const longest = policyText('pt')
+    .split(/(?<=[.!?])\s+/)
+    .reduce((worst, sentence) => Math.max(worst, sentence.split(/\s+/).length), 0);
+  assert.ok(longest <= 60, `longest Portuguese sentence is ${longest} words`);
+});

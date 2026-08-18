@@ -742,11 +742,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       foreign; a German app that reads as machine-translated is careless, and careless is the one
       thing this product cannot look like. It also buys the uninstall that D-073 says costs ranking.
       — **English and Portuguese listings can go first.** The German listing waits for this.
-- [ ] **T-160b** **The privacy policy in Portuguese** ⇠ T-160, T-124
-      — Decided with the project lead 2026-08-17: **Portuguese and English only.** A German reader
-      gets the English policy with a line saying so — an honest English policy beats an
-      unverifiable translated one, on the one document that is a compliance artefact and already
-      says it needs a qualified reader before submission (T-123).
+- [x] **T-160b** ✅ **The privacy policy in Portuguese, 2026-08-17** ⇠ T-160, T-124
+      — **Portuguese and English only**, the project lead's choice. A German reader gets the
+      English policy **with a line saying which languages it exists in** — shown rather than
+      hidden, because silently rendering English to somebody who set their phone to German reads
+      as a failed translation rather than a decision.
+      — ⚠ **Its own file** (`privacyPolicy.pt.ts`), not a row in `strings.ts`. Every other string
+      is a label; this is a compliance artefact that already says it needs a qualified reader
+      before submission (T-123), and burying it in the UI catalogue invites somebody to edit a
+      legal sentence the way they would edit a button.
+      — ⚠ **The risk is a missing promise, not a clumsy sentence.** Tests now check that the
+      Portuguese makes the *same commitments* as the English — no account, no server, never sent
+      to us, no adverts, never leaves the phone — and that it has the same number of sections. A
+      dropped section is the quietest possible failure: nothing looks wrong, there is simply less
+      policy in one language.
+      — ⚠ **Still wants the project lead's eye.** It is European Portuguese written to match the
+      English in meaning rather than word order.
 - [ ] **T-160c** **Localise the store listing** ⇠ T-160, T-161
       — Only after T-160a for German. Play localises a listing per language free and runs five
       localised experiments at once.

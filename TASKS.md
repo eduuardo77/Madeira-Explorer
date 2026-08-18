@@ -708,89 +708,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **This is in tension with D-071**, which recorded that the map is the product and the stamp
       system is not top priority. Monetising the passport promotes it whether or not the priority
       list says so. **Revisit D-071 when this starts.**
-- [ ] **T-159** *Undecided:* **whether the timelapse video is behind the paywall** ⇠ T-105b-v2, D-072
-      — The project lead: *"I'm still considering putting the timelapse video of where you've walked
-      behind a paywall, but I'll decide that in the future."* Nothing is blocked — it does not exist
-      yet. ⚠ The argument to weigh is D-013: the souvenir is the distribution strategy, so charging
-      for it taxes the growth engine. The **still image stays free** either way, which is what makes
-      charging for the video defensible at all.
-- [~] **T-160** ⚠ **Localise the app — Portuguese and German** ⇠ T-114
-      — ✅ **The app UI is localised, 2026-08-17.** `src/i18n/`: onboarding (including the T-121
-      Android prominent disclosure), settings, the passport, the map chrome, the erase flow, the
-      walk-donation flow and every notification body. **English, Portuguese, German.**
-      — **The catalogue is keyed by string, not by language** — `s('Passport', 'Passaporte',
-      'Reisepass')` — so a new string cannot be added without looking at the empty slots. Three
-      tests make it a build rule: presence in all three, both plural forms, and ⚠ **placeholder
-      parity**, which catches a translator quietly losing `{app}` and leaving a notification with
-      no subject.
-      — ⚠ **Pure modules take a `Language` parameter; they may not import `i18n/index.ts`**, which
-      reaches the device through `expo-localization`. `decideHealthCheck` does it the same way it
-      already takes `now` rather than calling the clock.
-      — **Not translated, deliberately:** `DebugScreen` (a developer tool), and **place names**,
-      which are proper nouns from `content/` (D-017).
-      — ⚠ **`batterySentence()` is not localised and that is safe only while D-041 keeps the figure
-      `null`.** The day it is measured, it needs the `Language` parameter too.
-      — ⚠ **iOS permission dialogs are still English.** `app.json`'s `NSLocation*` strings are
-      baked into the native build and need a config plugin to localise. **Android does not use
-      them** — its permission dialog text is the system's — so this is an iOS-launch concern, not
-      a blocker now.
-- [ ] **T-160a** ⚠⚠ **A German speaker must read `src/i18n/strings.ts` before the German listing**
-      ⇠ T-160
-      — The Portuguese and German were **drafted by the assistant, not a native speaker**. The
-      project lead can check Portuguese; **nobody on this project speaks German**.
-      — **Clumsy German is worse than English.** An English app read by a German speaker is merely
-      foreign; a German app that reads as machine-translated is careless, and careless is the one
-      thing this product cannot look like. It also buys the uninstall that D-073 says costs ranking.
-      — **English and Portuguese listings can go first.** The German listing waits for this.
-- [x] **T-160b** ✅ **The privacy policy in Portuguese, 2026-08-17** ⇠ T-160, T-124
-      — **Portuguese and English only**, the project lead's choice. A German reader gets the
-      English policy **with a line saying which languages it exists in** — shown rather than
-      hidden, because silently rendering English to somebody who set their phone to German reads
-      as a failed translation rather than a decision.
-      — ⚠ **Its own file** (`privacyPolicy.pt.ts`), not a row in `strings.ts`. Every other string
-      is a label; this is a compliance artefact that already says it needs a qualified reader
-      before submission (T-123), and burying it in the UI catalogue invites somebody to edit a
-      legal sentence the way they would edit a button.
-      — ⚠ **The risk is a missing promise, not a clumsy sentence.** Tests now check that the
-      Portuguese makes the *same commitments* as the English — no account, no server, never sent
-      to us, no adverts, never leaves the phone — and that it has the same number of sections. A
-      dropped section is the quietest possible failure: nothing looks wrong, there is simply less
-      policy in one language.
-      — ⚠ **Still wants the project lead's eye.** It is European Portuguese written to match the
-      English in meaning rather than word order.
-- [ ] **T-160c** **Localise the store listing** ⇠ T-160, T-161
-      — Only after T-160a for German. Play localises a listing per language free and runs five
-      localised experiments at once.
-      — **The biggest free marketing lever, and it is blocked by a missing feature.** Madeira's
-      visitors are **Portuguese 20.3%, British 14.9%, German 14.8%** of overnight stays. Play
-      localises a listing per language for nothing and runs five localised experiments at once.
-      — ⚠ **But the app has no i18n at all** — no `expo-localization`, every string English. A German
-      listing pointing at an English-only app is the mismatch that causes an **uninstall**, which is
-      Play's most heavily weighted negative signal. **So the app comes first, the listing second.**
-      — Portuguese especially: an app made in Madeira that cannot speak Portuguese is a strange thing
-      to hand a Portuguese visitor.
-      — ⚠ Watch `formatDateRange` and anything else already feature-detecting `Intl` on Hermes
-      (T-105d found `formatRange` missing). Localisation multiplies those paths.
-- [ ] **T-161** **Write and ship the Play listing** ⇠ T-160 *(English first, does not wait for T-160)*
-      — Copy drafted in `docs/marketing-plan.md` §4: title **"Proa"** (16 of 30), a
-      76-character short description, and a full description whose first 167 characters carry the
-      hook before "Read more".
-      — ⚠ **The listing is a compliance surface.** It must agree with `privacyPolicy.ts`, the Data
-      Safety form and D-044 — and **it may never say "works offline" or "nothing leaves your phone"**,
-      both false since D-057 (D-073). It must also state the free/paid boundary exactly as T-155
-      builds it.
-- [ ] **T-162** **Screenshots from a real trip, not a replayed route** ⇠ T-161, T-134
-      — Five shots, and the first two are what appear in search results: **the trace on the map**,
-      then **the passport part-filled**. Then a place card, the souvenir, and the privacy line.
-      — ⚠ **Take them from a real recorded trip.** The emulator shots in `tools/out/shots/` are close
-      enough to judge layout but they are a replayed seafront route, and a screenshot of a fake trip
-      is the kind of thing that reads as fake.
-- [ ] **T-163** **Store listing experiments, once traffic can carry them** ⇠ T-161
-      — Free A/B testing on real store traffic, three variants against the current listing. Run **one
-      at a time**: short description first (cheapest, high weight), then the first screenshot — *does
-      the map or the collection sell it?*, which nobody knows — then the icon.
-      — ⚠ **Wait for enough installs to make a result mean anything.** At tens of installs a week an
-      experiment is noise, and acting on noise is worse than not testing.
+- [x] **T-159** ✅ **DECIDED 2026-08-17: the timelapse video is FREE** ⇠ T-105b-v2, D-072
+      — The project lead: *"The timelapse video is free, but in the future I might impose some
+      limitation on it to make people buy."*
+      — **This keeps D-013 intact.** The souvenir is the distribution strategy; charging for it
+      would have throttled the growth engine to sell fuel, which is why Part 1 of the monetisation
+      research rejected it.
+      — ⚠⚠ **IF A LIMITATION IS ADDED LATER IT MUST BE ADDITIVE, NEVER SUBTRACTIVE.** Taking away
+      something people already had is the rug pull D-072 is built to avoid, and it earns the worst
+      reviews there are. Acceptable shapes: the free video keeps everything it has today and the
+      paid tier adds something new — longer, higher resolution, no watermark, more styles.
+      **Unacceptable:** shortening, watermarking or degrading the video people were already given.
+      — ⚠ And whichever way it goes, **existing users keep what they had**. Grandfathering is not a
+      courtesy here, it is the difference between a new product and a broken promise.
+
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

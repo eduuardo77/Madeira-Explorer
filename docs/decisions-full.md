@@ -3956,3 +3956,24 @@ notifications that only appear once recording has already gone wrong.
 
 The name now lives in `src/brand.ts`, above both `legal/` and `souvenir/`, and **`brand.test.ts`
 fails the build if any source file hardcodes it again.**
+
+### D-072 addendum, 2026-08-17 — the timelapse video is free
+
+**The project lead:** *"The timelapse video is free, but in the future I might impose some
+limitation on it to make people buy."*
+
+So v1's paid boundary is exactly the one already recorded — ten stamps plus your first levada — and
+**the souvenir stays free in both its forms**, still image and video. This keeps **D-013** intact:
+the souvenir is the distribution strategy, and charging for it would throttle the growth engine to
+sell fuel.
+
+⚠⚠ **The stated future option has one hard constraint: any limitation must be ADDITIVE.** D-072's
+governing rule is that nothing already given is taken away, and a video that gets shorter,
+watermarked or lower-resolution in an update is the rug pull that earns the worst reviews available
+— on the exact artefact users share with other people, which is also the growth mechanism.
+
+**Acceptable later:** the free video keeps everything it has today and a paid tier *adds* something
+that did not exist — a longer cut, higher resolution, no watermark, more styles.
+**Not acceptable:** degrading what shipped free. And existing users keep what they had regardless;
+grandfathering here is not a courtesy, it is the difference between a new product and a broken
+promise.

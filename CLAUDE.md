@@ -91,6 +91,10 @@ multi-line `-m` arguments containing double quotes. Use the scratchpad directory
 - **Pure logic in its own module, impure wrapper beside it** — `stampRules`/`stampAwards`,
   `geofenceSelection`/`geofenceManager`, `movementPolicy`/`samplingGate`. Only the pure half is
   testable without a device, which is why the split exists.
+- **User-facing strings live in `app/src/i18n/strings.ts`, in all three languages.** ⚠ **Pure
+  modules may not import `i18n/index.ts`** — it reaches `expo-localization` and breaks every Node
+  test. They take a `Language` parameter, the way they already take `nowMs`. The app's own name
+  lives in `src/brand.ts`; `brand.test.ts` and `i18n.test.ts` fail the build if either rule slips.
 - **A module under unit test imports with an explicit `.ts` extension.** Node's resolver will not
   guess it; Metro does not mind. Everything else stays extensionless.
 - **No Madeira knowledge in `app/`** (D-017, absolute). Coordinates, names and bounds come from

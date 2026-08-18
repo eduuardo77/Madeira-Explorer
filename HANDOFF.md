@@ -6,170 +6,143 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## State, in one paragraph
 
-The whole v1 chain is written and **runs on an Android emulator**: record → stamps → trace on
-Google Maps → passport → place card → trip end. **522 tests**, `tsc` strict clean. `content/pois.json`
-holds **60 curated places** (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks),
-all names verified against OSM, all inside the region they claim, none offshore, no duplicates.
-The souvenir **still image works end to end on a device** — Share on the passport produces a PNG
-through the OS share sheet. ⚠ **Nothing has ever run on real hardware**, and no threshold in the app
+The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
+emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
+still image. **539 tests**, `tsc` strict clean. `content/pois.json` holds **60 curated places**
+(16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
+Portuguese and German**. ⚠ **Nothing has ever run on real hardware**, and no threshold in the app
 has met real GPS.
 
-## Settled 2026-08-17 — name, money, marketing
+## What was settled 2026-08-17 — read these before touching related code
 
 | | |
 |---|---|
-| **D-074** | The app is **Proa**; the store listing is **Proa - Madeira**. ⚠ Package **`com.proa.madeira`, permanent once published**. The Maps API key must be re-restricted to it or the map goes grey. |
-| **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ One-way: Play forbids free→paid. |
+| **D-070** | The map shows **only collected places**, tappable. Google's POI pins are off. Map chrome inverts with the map style. |
+| **D-071** | ⚠ **Reversed twice in one day.** The map is the product — but **stamps are a priority again**, because D-072 makes them the revenue. |
+| **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** |
 | **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |
-| **D-071** | ⚠ **Partly reversed**: stamps are a priority again, because D-072 makes them the revenue. |
+| **D-074** | The app is **Proa**, the listing is **Proa - Madeira**, the package is **permanent**. |
 
-## What blocks v1 — three things, none of them code
+**Research written today:** [`docs/monetization-options.md`](docs/monetization-options.md) (three
+parts, 14 options costed) and [`docs/marketing-plan.md`](docs/marketing-plan.md) (the store listing
+is drafted and ready to paste).
+
+## What blocks v1
 
 1. **A physical Android.** ~€50–100 used. The only source of battery (T-054), background survival
    (T-051), OEM-killer behaviour (T-053) and whether OS geofences fire in the field (T-076–T-080).
-   ⚠ **Read the Sensor Logger note below before assuming this is the whole blocker** — it is not.
-2. **OD-10, discovery.** Options and a recommendation are in
-   [`docs/distribution-options.md`](docs/distribution-options.md), awaiting the project lead. The
-   recommendation is *not to launch yet*: nobody has completed a single trip with this app.
-3. **The curated 60 are one person's judgement.** Three entries are flagged as most likely wrong:
-   *Achada do Marques* and *Chão da Ribeira* (kept on no evidence at all) and *Parque Ecológico do
-   Funchal* (cut because it is believed to have burned).
+2. **Nobody has completed a single trip with this app.** OD-10 says use it yourself for one real
+   trip before launching, and it is also how the store screenshots stop being a replayed route.
+3. **The curated 60 are one person's judgement.** *Achada do Marques* and *Chão da Ribeira* are
+   flagged as most likely wrong.
 
-## The one thing that would change the most, cheaply
+## The cheapest thing that would change the most
 
 ⚠ **The project lead has an iPhone 15 and can run Sensor Logger.** That answers the *physics* half
-of what is blocked — how far GPS wanders under laurel canopy, how often it drops, what accuracy it
-claims (T-018/T-019/T-020) — **which is what every threshold written on 2026-08-16 is guessing at**:
-the 60 m corridor, the 45 minutes, the 16 m simplification tolerance, the accuracy cut.
-
-✅ **The importer is built (2026-08-17, T-021).** Nothing now stands between a walk and the
-numbers except the walk:
+— how far GPS wanders under canopy, how often it drops (T-018/T-019/T-020) — **which is what every
+threshold in the trace chapter is guessing at.** The importer is built:
 
 ```bash
 node tools/import-sensor-logger.mjs <unzipped-export-dir> --name levada-do-rei
 node tools/preview-trace.mjs --fixes tools/fixtures/levada-do-rei.json --sweep
 ```
 
-The first prints blackout durations, fix interval, accuracy percentiles and what share of fixes
-the 120 m cut would refuse — T-020's questions. The second runs the app's own `cleanTrace` over
-them. ⚠ **The parser has never seen a real export**: columns are matched from a list of plausible
-names, and if the first real file fails, the error names the headers it saw and the fix is one
-line in `COLUMNS` in `tools/lib/sensorLogger.mjs`. ⚠ **`--fixes` prints no deviation number** —
-a real walk has no ground truth, and the mean/worst columns only mean something against a
-modelled route.
+⚠ The parser has **never seen a real export** — columns are matched from plausible names, and a
+failure prints the headers it saw. ⚠ `--fixes` prints **no deviation number**: a real walk has no
+ground truth.
 
-An Android is still needed for what the app itself does in the background — Sensor Logger surviving
-Doze says nothing about whether our recorder does.
+## Open, and waiting on the project lead
 
-## What changed on 2026-08-16 (nine decisions — read these before touching related code)
+- **T-160a** ⚠⚠ **A German speaker must read `app/src/i18n/strings.ts`** before the German store
+  listing. The translations were drafted by the assistant; nobody here speaks German. **English and
+  Portuguese can ship first.**
+- **T-160b** the Portuguese privacy policy wants the project lead's eye — they are the only person
+  here who can judge it.
+- **D-074** needs a **TMview / INPI** conflict search on "Proa". The store-and-web screen was done;
+  the trademark registers were not.
+- **T-159** whether the timelapse video sits behind the paywall.
 
-| | |
-|---|---|
-| **D-061** | A region is a **municipality**, from OSM boundaries. Found **46 of 80 places filed wrongly**, 27 under the island itself. `regionId` is now derived by tool, never typed. |
-| **D-062** | `byRegion` is computed and **shown nowhere** in v1, deliberately. Do not "finish" it without reopening this. |
-| **D-063** | The souvenir is back in v1. Still image first (**done**), video as a spike (needs the phone). |
-| **D-064** | The canvas is **greatest hits, not coverage**; thin regions stay thin. And the assistant **drafts** the place list, the project lead **vetoes**. |
-| **D-065** | **Two independent detectors for every stamp** — the OS geofence, and a sweep of the raw trace for when it never fired. A levada is credited by **how much of its course you walked**. |
-| **D-066** | The drawn trace is **cleaned before drawing** — outliers, standing-still scribble, redundant vertices — and **cleaning never moves a point**. |
-| **D-067** | The 120 m accuracy cut is a **preference, not a veto**: a canopy stretch where every fix is poor still draws. |
-| **D-068** | A levada is credited by **time** too — 45 min at walking pace, 800 m covered. From the first field walk (PR18). |
-| **D-069** | **A walk the user sends, never a walk the app collects.** Settings → *Send a walk*. No endpoint, no identifier. |
+## Next tasks, in the order that makes sense
 
-⚠ **D-068 came from the project lead walking PR18 Levada do Rei** — the only field data this
-project has. `docs/field-notes.md` has it in their words. The lesson that matters: **a levada has no
-finish line**, most are walked there-and-back, and *"I prefer to mistakenly give the levada stamp
-than doing the levada and not earning it."*
+1. **T-158** — make the stamps worth buying. All the revenue rests on them now (D-072).
+2. **T-155/T-156** — the free tier and Play Billing. ⚠ Read the trap in T-155 first.
+3. **T-161/T-162** — ship the listing; screenshots from a **real** trip.
 
 ## Traps. Each cost a session, and none was visible from the tests
 
-- ⚠⚠ **T-145 — nothing started geofence monitoring, so no stamp could ever be awarded.**
-  `refreshGeofences` had one caller: the debug screen, which registers a **synthetic fixture**. 399
+- ⚠⚠ **T-145 — nothing started geofence monitoring, so no stamp could ever be awarded.** 399
   passing tests could not see it. **If you are about to trust a subsystem because its tests pass,
-  read this one first.**
-- ⚠ **T-146 — nothing auto-started recording for an Always user either.** Same shape, one screen on.
-- ⚠⚠ **`-gpu host` renders the Google map as PURE BLACK — found 2026-08-17, and it had been
-  hiding the map from every session.** The chrome draws, the map's GL surface does not: no error,
-  no authorization failure, no Google wordmark, black in both styles. It reads as a broken app.
-  `tools/run-emulator.sh` now defaults to `swiftshader_indirect`. ⚠ The flag's justification —
-  *"MapLibre computes hillshading on it"* — **died with D-057**, which moved the app to the
-  platform's map; nothing in the app rasterises tiles any more. **A stale reason outlived the
-  thing it justified.**
-- ⚠ **T-147 — the dark map is Google's own only on the *latest* Maps renderer.** The emulator is
-  handed LEGACY, so it can never show what most users see. `adb logcat -s Proa` says which.
-- ⚠ **Anything floating over the map must be checked on both styles.** The settings control measures
-  15.36:1 on the light map and **1.13:1** on the night one.
-- ⚠ **The workbench cannot see `hitSlop`.** react-native-web does not render it, so a measured tap
-  target may be a lie — T-144's *See all* shipped at 57 × 35 against the 60 dp floor. Measure with
-  `tools/ui-audit.js`, then read the code. A test now refuses a `hitSlop` written as one number.
-- ⚠ **Grepping the Android bundle for a Portuguese name says it is missing.** Hermes stores accented
-  strings as **UTF-16**; search both encodings before concluding content did not ship.
-- ⚠ **Hermes has no `Intl.DateTimeFormat.formatRange`.** Measured on the device: the share card takes
-  the spelled-out fallback. Feature detection there is the live path, not a precaution.
-- **On the emulator, record on the `driving` profile.** `walking`/`stationary` ask for `balanced`
-  accuracy, which an emulator cannot serve — a perfect impersonation of a dead recorder (D-047).
-- **`adb root` drops `adb reverse`.** Re-run `adb reverse tcp:8081 tcp:8081`.
+  read this one first.** ⚠ **T-155 warns of the same shape**: gating the award pass for unpaid
+  users would silently break D-072's "buy later, get everything" promise.
+- ⚠⚠ **`-gpu host` renders the Google map as PURE BLACK.** No error, no wordmark. It reads as a
+  broken app. `tools/run-emulator.sh` defaults to swiftshader; `MADEIRA_COLD=1` forces a cold boot.
+  ⚠ **If the map is black, cold-boot before debugging the app.**
+- ⚠ **Grey map ≠ black map.** Grey grid **with** the Google wordmark = the **API key** (restricted
+  by package name **and** SHA-1 — see `docs/dev-build.md`). Pure black = the GPU.
+- ⚠ **Before publishing:** Google re-signs uploads, so a second SHA-1 entry is needed on the Maps
+  key or **the map is grey for every real user** while working perfectly in your builds.
+- ⚠ **T-147 — Google's own dark map needs the *latest* renderer.** The emulator only ever loads
+  LEGACY. `adb logcat -s Proa` says which.
+- ⚠ **A constant most callers ignore is not a constant.** Renaming the app found **five** hardcoded
+  copies of the name, and the first version of `brand.test.ts` missed the **permission dialogs in
+  `app.json`** — the most user-visible text in the app. `brand.test.ts` now covers both.
+- ⚠ **Pure modules may not import `i18n/index.ts`** — it reaches `expo-localization` and would
+  break every Node test. They take a `Language` parameter, like they take `nowMs`.
+- ⚠ **The workbench cannot see `hitSlop`.** A measured tap target may be a lie.
+- ⚠ **Hermes lacks `Intl.DateTimeFormat.formatRange`**, and stores accented strings as UTF-16 —
+  grepping the bundle for a Portuguese name says it is missing when it is not.
+- **On the emulator, record on the `driving` profile** (D-047). **`adb root` drops `adb reverse`.**
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null` on
   purpose and a test keeps it that way (D-041).
 - **Check the measurement ran.** If a result does not move when the input changes, suspect the probe.
-- **Judge anything drawn by eye, not only by test.** `bash tools/screenshot.sh <name>` writes a PNG a
-  session can open. That loop once found a dev-build toast sitting on top of the passport button.
-  ⚠ Screenshots are expensive — take the one that answers the question.
 
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 500 tests, Node's own runner
+cd app && npm test          # 539 tests
 cd app && npx tsc --noEmit  # strict
 
-# ⚠ The emulator build needs both paths exported; npm run android alone fails.
 export ANDROID_HOME=$(pwd)/tools/android-sdk
 export JAVA_HOME=$(pwd)/tools/jdk/jdk-21.0.12+8
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
 bash tools/run-emulator.sh          # then, in another shell:
-cd app && npm run android           # ~4 min cold; rebuild needed after any native dep
+cd app && npm run android           # ~4 min cold; rebuild after any native dep
 bash tools/screenshot.sh <name>
 bash tools/replay-route.sh tools/routes/funchal-seafront.txt
 ```
 
-⚠ **A Google Maps API key is needed to see a map at all** — `app/.env.example` → `app/.env`.
-`docs/dev-build.md` has the click path and why it costs nothing.
+⚠ **A Google Maps API key is needed to see a map at all** — `app/.env.example` → `app/.env`, and
+it must be restricted to `com.proa.madeira`. `docs/dev-build.md` has the click path.
 
-Reading `/data/data/com.proa.madeira/files/SQLite/madeira.db` with `adb root` + `sqlite3` is
-usually faster than tapping through the UI.
+⚠ **`expo-localization` is a config plugin**, so the i18n work needs `npx expo prebuild` and a
+rebuild before any of it exists on the device. **That build was still running when this session
+ended — Portuguese has NOT been seen on a device.** The emulator's locale is already set to
+`pt-PT`, so launching the new build should show it.
 
 ## Content and preview tools
 
 ```bash
-node tools/validate-content.mjs        # names, regions, offshore, duplicates. Run after any edit
-node tools/build-regions.mjs --assign  # boundaries → regions.json, and each place's region
-node tools/build-levadas.mjs           # levada courses → levadas.json. Re-run after any rename
-node tools/check-names.mjs             # every curated name against OSM
-node tools/preview-trace.mjs --sweep   # draws trace cleanup to a PNG, and sweeps its tolerance
+node tools/validate-content.mjs        # run after any content edit
+node tools/build-regions.mjs --assign  # boundaries → regions.json
+node tools/build-levadas.mjs           # levada courses
+node tools/levada-routes.mjs           # PR numbers and derived durations
+node tools/preview-trace.mjs --sweep   # trace cleanup, drawn to a PNG
 node tools/preview-souvenir.mjs        # the share card to an SVG
-node tools/curation-evidence.mjs       # wiki/PR/elevation evidence per place
-node tools/import-sensor-logger.mjs <dir>  # a real walk → tools/fixtures/, with the T-020 numbers
 ```
-
-`tools/lib/` holds the shared geometry, the Overpass client with its backoff, and a **hand-written
-PNG writer** — there is no image library here, and geometry has to be looked at.
 
 ## Where things are written down
 
-**The documents are the source of truth, not this file and not chat history.** If this disagrees
-with a decision, the decision wins.
+**The documents are the source of truth, not this file and not chat history.**
 
 | | |
 |---|---|
 | `CONTEXT.md` | The *why*. §6 conventions, **§9 the doc protocol you must follow** |
-| `DECISIONS.md` | Index of 69 decisions. Full text in `docs/decisions-full.md` |
-| `TASKS.md` | The checklist. Post-mortems on finished tasks in `docs/task-notes.md` |
-| `PROJECT_PLAN.md` | Phases, and the open questions **OD-4/5/8/9/10/11** |
+| `DECISIONS.md` | Index of 74 decisions. Full text in `docs/decisions-full.md` |
+| `TASKS.md` | The checklist. Post-mortems in `docs/task-notes.md` |
+| `PROJECT_PLAN.md` | Phases, and the open questions **OD-5/8/9/10/11** (OD-4 is resolved) |
 | `docs/field-notes.md` | ⚠ What real walks taught. The only measured facts in the project |
-| `docs/design-brief.md` | Read before touching anything that renders |
+| `docs/design-brief.md` | Read before touching anything that renders. §7 is the name |
+| `docs/monetization-options.md` | OD-4's research, three parts |
+| `docs/marketing-plan.md` | ASO, and the drafted store listing |
 
-**Read D-032 before starting anything large** — it cuts map matching from v1:
-`grep -A40 "^## D-032" docs/decisions-full.md`.
-
-Reference: `docs/dev-build.md`, `docs/distribution-options.md`, `docs/curation-draft.md`,
-`docs/dependency-audit.md`, `docs/map-style.md`, `content/README.md`, `docs/osm-coverage.md`,
-`docs/store-privacy-answers.md` (⚠ a compliance artefact, still needs the project lead to read it).
+**Read D-032 before starting anything large** — it cuts map matching from v1.

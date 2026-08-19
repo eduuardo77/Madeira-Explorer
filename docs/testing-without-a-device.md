@@ -106,10 +106,10 @@ placeholder had never met a release build before.
 | ⚠⚠ **FCM ships** | `firebase-messaging` via `expo-notifications`, for an app that sends **local** notifications only → **T-117c** |
 | ⚠ **128 MB** | ~40 MB is `libmaplibre.so` across four ABIs, for a map D-057 replaced → **T-117d** |
 
-⚠ **The release is signed with the debug keystore** — the template's default, with its *"Caution!"*
-comment still in place. Fine for Test Lab, **not** for Play. And when a real key exists, remember
-HANDOFF's trap: Google re-signs uploads, so a **second SHA-1** must go on the Maps API key or the
-map is grey for every real user while working perfectly in these builds.
+⚠ **The release is signed with the *public* Android debug key** — not a weak key, a **universally
+known** one. Fine for Test Lab, which is why the fallback was kept deliberately; **Play rejects
+it**. `app/plugins/withUploadSigning.js` takes a real upload key the moment one is configured, and
+prints which key signed every release build. See T-117e.
 
 ### The APK
 

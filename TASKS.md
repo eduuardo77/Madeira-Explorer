@@ -1264,6 +1264,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       plugin rather than a hand edit, because `android/` is generated and `npx expo prebuild` would
       silently put the permission back. **Verified by rebuilding and dumping the APK: all three
       gone.**
+- [~] **T-117e** **Release signing — the wiring is done, the key is the project lead's to make.**
+      — ⚠⚠ **The template signed release with the PUBLIC Android debug key**, its own *"Caution!"*
+      comment still attached. **That key is not weak, it is public**: `CN=Android Debug`, alias
+      `androiddebugkey`, password `android`, issued 2013, identical on every machine with an
+      Android SDK. A release signed with it means **anybody can sign an update Android accepts as
+      ours**.
+      — ⚠ **CORRECTION to what was written this morning:** `debug.keystore` is **not** committed —
+      `android/` is gitignored. Nothing was exposed. The danger was never the file, it is what it
+      signs, and that is worse rather than better.
+      — ✅ **`plugins/withUploadSigning.js`**: release uses an upload keystore when one is
+      configured, falls back to debug when not, and **prints which key signed it on every release
+      build**. ⚠ The fallback is deliberate — Firebase Test Lab (D-077) installs debug-signed
+      release APKs happily, and making the build fail would cost the only route to real hardware
+      for no gain, because Play rejects the debug key outright anyway.
+      — ⚠ **What is left is not code.** The project lead generates the key, chooses the password,
+      and puts four properties in `~/.gradle/gradle.properties` — **their home directory, never
+      this repository**. The `keytool` command and the exact property names are in the plugin's
+      header. ⚠⚠ **Losing that password means never being able to update the app.**
+      — ⚠⚠ **AND THEN THE MAPS KEY.** Google re-signs uploads, so the SHA-1 a released build
+      presents is **Google's**, not ours. It has to be added as a second entry on the Maps API key
+      restriction or **the map is grey for every real user** while working perfectly in our builds.
+      Play Console shows it under *Setup → App integrity → App signing key certificate*.
+      — ✅ **Verified by regenerating `android/` from scratch** (`expo prebuild --clean`): both this
+      plugin and `withoutDevPermissions` reapplied, the build succeeded, the warning fired, and the
+      APK still measures 35.9 MB with no MapLibre and no dev permissions.
 - [ ] **T-117c** ⚠⚠ **The release APK carries FCM and the Play install referrer, and neither is
       ours** — found the same day, and this is the sharper half of what T-117a went looking for.
       — `com.google.android.c2dm.permission.RECEIVE` comes from

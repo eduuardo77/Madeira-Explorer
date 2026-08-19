@@ -101,6 +101,7 @@
       ],
       "./plugins/withAndroidBackupRules",
       "./plugins/withoutDevPermissions",
+      "./plugins/withUploadSigning",
       "./plugins/withGoogleMapsApiKey",
       "./plugins/withLatestMapsRenderer",
       "expo-dev-client",

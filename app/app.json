@@ -104,7 +104,6 @@
       "./plugins/withGoogleMapsApiKey",
       "./plugins/withLatestMapsRenderer",
       "expo-dev-client",
-      "@maplibre/maplibre-react-native",
       "expo-asset",
       "expo-maps",
       "expo-localization"

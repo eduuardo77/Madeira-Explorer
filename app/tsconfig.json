@@ -14,5 +14,11 @@
     // inclusion of everything else under `node_modules/@types`, and JSX would
     // stop type-checking without it.
     "types": ["node", "react"]
-  }
+  },
+  // ⚠ `attic/` is kept, not compiled (T-117d, D-057 amended). The MapLibre map
+  // was replaced by the platform's and the project lead asked that it not be
+  // deleted — so it lives there, in the repository, out of the build. Keeping
+  // the *source* and shipping the *native library* are different things, and
+  // only the second cost 10 MB of every install.
+  "exclude": ["attic"]
 }

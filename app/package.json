@@ -4,7 +4,6 @@
   "main": "index.ts",
   "dependencies": {
     "@expo/metro-runtime": "~57.0.9",
-    "@maplibre/maplibre-react-native": "^11.3.6",
     "expo": "~57.0.12",
     "expo-asset": "~57.0.9",
     "expo-build-properties": "~57.0.10",

@@ -117,7 +117,7 @@ map is grey for every real user while working perfectly in these builds.
 app/android/app/build/outputs/apk/release/proa-arm64-release.apk
 ```
 
-**48 MB, arm64 only** — which is what every real phone is. Build it with:
+**36 MB, arm64 only** — which is what every real phone is. Build it with:
 
 ```bash
 cd app/android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a

@@ -4187,3 +4187,29 @@ registration buys billing testing and continuous real-device verification togeth
 ⚠ **Provisional because none of it has been run.** The quotas, the free tier and the report's
 contents are from Google's own documentation, read on 2026-08-18 — not from having used them. The
 first person to actually upload a build should correct whatever this gets wrong.
+
+### D-057 amended 2026-08-18 — the MapLibre map moved to the attic
+
+**The project lead, 2026-08-13:** *"Don't delete the map we've created as it might come useful in
+the future."* **That instruction stands and nothing was deleted.** What changed is narrower, and
+it came out of building the first release APK (T-117a/T-117d):
+
+**Keeping the source and shipping the native library are different things, and only the second
+cost anything.** `libmaplibre.so` was a fifth of what a real user downloads, for a screen no code
+path could reach — `App.tsx` mentions `MapLibreScreen` only in a comment.
+
+`app/attic/MapLibreScreen.tsx`, excluded from `tsconfig`, dependency out of `package.json` and out
+of `app.json`'s plugin list. **48 MB → 35.9 MB** — more than the 10 MB predicted, because the
+package's Java classes left the dex along with the `.so`.
+
+⚠ **What did not move, because it was never MapLibre's:** the `tiles/` pipeline (build tooling,
+never in the APK), `assets/map/light.json` (the **Google** path reads it for the clutter rules and
+the dark fallback), and all of `src/map/`, which the shipping map and the souvenir film share.
+**The valuable part of that work was the schema, the styles and the hillshading — data and
+decisions, not wiring.**
+
+⚠ **The attic is not type-checked and will rot.** Accepted knowingly: the file had no tests, was
+never rendered, and *"still compiles"* was always a weak guarantee that it still works.
+`app/attic/README.md` records what reviving it would actually involve — and that the one thing
+that would genuinely bring it back is **offline maps**, the single capability Google's map cannot
+give this app.

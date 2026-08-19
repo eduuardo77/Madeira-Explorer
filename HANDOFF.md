@@ -131,6 +131,10 @@ ground truth.
 - ⚠ **A constant most callers ignore is not a constant.** Renaming the app found **five** hardcoded
   copies of the name, and the first version of `brand.test.ts` missed the **permission dialogs in
   `app.json`** — the most user-visible text in the app. `brand.test.ts` now covers both.
+- ⚠ **`app/attic/` is kept, not compiled.** The MapLibre map lives there since 2026-08-18
+  (D-057 amended): nothing deleted, excluded from `tsconfig`, dependency gone. It was **a fifth of
+  the download for a screen no code path could reach**. ⚠ It is **not type-checked** and will rot —
+  `app/attic/README.md` says what reviving it would take.
 - ⚠ **A catalogue most callers ignore is not a catalogue.** T-160 was written up as done with
   **ten accessibility labels still in English** and `SettingsView` spelling out *"Use the light
   map"* beside three keys that already existed. `i18nCoverage.test.ts` now fails the build for

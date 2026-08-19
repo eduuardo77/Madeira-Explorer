@@ -1276,7 +1276,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       receive push messages**, and that is what a reviewer and a careful user actually see.
       — **What to decide:** whether local notifications are worth carrying FCM for, or whether they
       should move to a smaller library. ⚠ Feeds T-117b, T-127, and the Data Safety answers.
-- [~] **T-117d** **The release APK's size — measured, and half of the alarm was mine.**
+- [x] **T-117d** ✅ **The release APK is 36 MB. Was 128.**
       — ⚠ **CORRECTION, same day.** The first note here called *"128 MB"* the problem. **It is not,
       or not mostly.** That was a **universal** APK carrying four ABIs, two of them (`x86`,
       `x86_64`) emulator-only. Play never ships a universal APK — an AAB sends each device only
@@ -1291,13 +1291,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       48 MB a real user downloads — 21% of the app — for a map the app never opens.** D-057
       replaced MapLibre with the platform's map, and `MapLibreScreen.tsx` is imported by nothing:
       `App.tsx` mentions it only in a comment.
-      — ⚠ **The instruction was *"don't delete the map we've created as it might come useful"*, and
-      that is not in question.** Keeping the *source* and shipping the *native library* are
-      different things, and only the second costs anything. Three ways, none chosen:
-      **(a)** move `MapLibreScreen.tsx` and the tiles pipeline out of the compiled app — kept in the
-      repository, excluded from `tsconfig`, dependency dropped — **10 MB back, nothing deleted**;
-      **(b)** keep it exactly as it is and accept a fifth of the download; **(c)** delete it, which
-      nobody has asked for.
+      — ✅ **RESOLVED 2026-08-18 — the project lead took option (a).** `MapLibreScreen.tsx` moved to
+      **`app/attic/`**, tracked in git and excluded from `tsconfig`; `@maplibre/maplibre-react-native`
+      removed from `package.json` **and from `app.json`'s plugin list**. ⚠ **Nothing was deleted**,
+      which was the whole of the original instruction.
+      — **48 MB → 35.9 MB.** Better than the 10 MB predicted, because dropping the package also
+      took its Java classes out of the dex, not just `libmaplibre.so`.
+      — ⚠ **`tiles/` did not move and should not.** It is build tooling — 11 tracked files, the
+      generated output is gitignored — and it has never been inside the APK. Neither did
+      `assets/map/light.json`, which the **Google** path still reads for the clutter rules and the
+      dark fallback, nor anything in `src/map/`, which is shared with the shipping map and the
+      souvenir film. **The cartography was never MapLibre's to take with it.**
+      — ⚠ **The attic is not type-checked and will rot**, accepted knowingly: the file has no
+      tests, is never rendered, and *"still compiles"* was always a weak guarantee that it still
+      works. `app/attic/README.md` says what would be needed to revive it.
       — ✅ **The AAB builds too, first time: 74.6 MB**, carrying all four ABIs — which is correct,
       because an AAB is a *container* Play generates per-device APKs from. **An arm64 user
       downloads the arm64 slice, ~48 MB or less** once density and language splits are applied. So

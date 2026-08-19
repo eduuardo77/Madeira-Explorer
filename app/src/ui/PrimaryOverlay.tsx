@@ -43,6 +43,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
+import { TIER_METAL, tierFor } from '../passport/stampTier';
 import { n, t } from '../i18n';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from './theme';
 
@@ -102,6 +103,10 @@ export default function PrimaryOverlay({
   onOpenSettings,
   onToggleRecording,
 }: PrimaryOverlayProps) {
+  // How far into the collection this is (D-078). The passport button has always
+  // been drawn as a stamp; the rank is what kind of stamp it is.
+  const tier = tierFor(progress.collected, progress.total);
+
   // The floating controls take their colours from the map underneath, not from
   // the app's (dark-only) palette. See `mapChrome` in `theme.ts`.
   const chrome = mapChrome[mapStyle];
@@ -207,7 +212,16 @@ export default function PrimaryOverlay({
                 })
           }
           onPress={onOpenPassport}
-          style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.stampButton,
+            // ⚠ The rank, and it is the *fill* rather than the mark (D-078).
+            // The button has always been drawn as a stamp; now it is drawn as
+            // the stamp you have earned. Metals are pale by nature and none of
+            // them survives on the action blue — a test proved that before this
+            // line existed.
+            { backgroundColor: TIER_METAL[tier].fill },
+            pressed && styles.pressed,
+          ]}
         >
           <StampMark size={STAMP_MARK_SIZE} color={colors.actionText} />
           <Text style={styles.stampCount}>

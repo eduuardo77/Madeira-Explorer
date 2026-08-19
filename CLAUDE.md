@@ -53,9 +53,11 @@ The documents cost more to read than the code does. In order of impact:
    defended draft — one line per place saying why it earns a stamp, unsure ones flagged — and
    they veto down it.** The final say is still theirs and the judgement calls are still to be
    surfaced, not buried.
-   ⚠ **The selection principle is fixed: greatest hits, no filler (D-064).** Only places worth
-   going to. Thin regions stay thin — do not add a mediocre place to make a municipality
-   finishable, which is the failure D-002 exists to prevent.
+   ⚠ **The selection principle, LOOSENED 2026-08-19 (D-078).** It read *"greatest hits, no
+   filler — fixed"*. The project lead: *"podes mudar o D-002, eu estava a jogar demasiado seguro
+   para ter um MVP."* **The canvas may grow, and levadas especially** — eleven of sixty is thin
+   for what the island is. What has **not** changed: a place still has to be worth going to.
+   Adding a mediocre one to round a number out is still the failure D-002 exists to prevent.
    ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method — 16 viewpoints ·
    11 levadas · 16 villages · 7 beaches · 10 landmarks. It is no longer scaffolding. Before editing
    it, run `node tools/validate-content.mjs`; after editing it, run that plus

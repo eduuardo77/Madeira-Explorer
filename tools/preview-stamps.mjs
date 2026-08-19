@@ -33,6 +33,7 @@ import { escapeXml, stampSvg } from './lib/svg-render.mjs';
 // stamp.
 import { CANVAS } from '../app/src/passport/stampArt.ts';
 import { stampMarkPath, TILT_DEG } from '../app/src/passport/stampMark.ts';
+import { TIERS, TIER_METAL, TIER_THRESHOLDS } from '../app/src/passport/stampTier.ts';
 // The real palette, not hexes retyped by eye. `theme.ts` has no imports of its
 // own, so Node can load it directly — and a preview whose colours differ from
 // the app's is exactly the thing this file's header warns against.
@@ -113,6 +114,36 @@ function markRow(ink) {
   ).join('');
 }
 
+/**
+ * The passport button at each rank (T-158, D-078).
+ *
+ * ⚠ **This is the whole reason the ranks can be looked at at all.** The button
+ * lives on the map screen, which needs a device; the ranks are a fill and a
+ * mark, which do not. Drawn at the real 36 dp mark size inside the real pill.
+ *
+ * The question it exists to answer is the one no test can: **does bronze read
+ * as bronze, or as brown?** And does platinum read as *colder* than silver
+ * rather than just paler.
+ */
+function tierRow() {
+  const label = { none: 'no stamps yet', bronze: `${TIER_THRESHOLDS.bronze}+`,
+                  silver: `${TIER_THRESHOLDS.silver}+`, gold: `${TIER_THRESHOLDS.gold}+`,
+                  platinum: 'all of them' };
+  return TIERS.map((tier) => {
+    const metal = TIER_METAL[tier];
+    return `
+  <figure class="tier">
+    <div class="pill" style="background:${metal.fill}">
+      <svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="width:36px;height:36px">
+        <path d="${stampMarkPath()}" fill="${colors.actionText}" fill-rule="evenodd" transform="rotate(${TILT_DEG} ${CANVAS/2} ${CANVAS/2})" />
+      </svg>
+      <span style="color:${colors.actionText}">23 / 60</span>
+    </div>
+    <figcaption>${tier} · ${label[tier]}</figcaption>
+  </figure>`;
+  }).join('');
+}
+
 const html = `<!doctype html>
 <meta charset="utf-8">
 <title>Stamp artwork — T-070</title>
@@ -123,6 +154,10 @@ const html = `<!doctype html>
   h1 { font-size: 22px; margin: 0 0 4px; }
   h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
        color: #A7B8C4; margin: 28px 0 4px; }
+  .tiers { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .tier { margin: 0; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 56px;
+          padding: 0 20px; border-radius: 999px; font: 600 17px/1 -apple-system, Segoe UI, Roboto, sans-serif; }
   .note { color: #A7B8C4; font-size: 13px; margin: 0 0 12px; max-width: 62ch; }
   .row, .grid { display: flex; flex-wrap: wrap; gap: 16px; }
   .grid { gap: 14px; }
@@ -157,6 +192,21 @@ const html = `<!doctype html>
 <div class="panel" style="background:${colors.action}">
   <div class="row" style="align-items: flex-end">${markRow(colors.actionText)}</div>
 </div>
+
+<h2>The rank, on the button itself (T-158, D-078)</h2>
+<p class="note">
+  The passport button <b>is</b> a stamp, and since D-078 it is the stamp you have
+  earned: the rank comes from <b>how many places you have collected</b>, never from
+  which ones — ranking places is what killed the "stars" proposal that stamps
+  replaced. Silver lands exactly where the free tier ends (D-072), so a visitor who
+  never pays reaches it and can see gold above them.
+  <br><br>
+  ⚠ <b>The question no test can answer, and the reason this row exists:</b> does
+  bronze read as <i>bronze</i> or as brown? Is platinum <i>colder</i> than silver
+  rather than merely paler? Contrast is asserted in <code>stampTier.test.ts</code>;
+  whether these look like metal is for a pair of eyes.
+</p>
+<div class="tiers">${tierRow()}</div>
 
 ${sections}
 

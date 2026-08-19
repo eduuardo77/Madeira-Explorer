@@ -4246,3 +4246,74 @@ than the switch — **pinned the answer** with a hardcoded `deepEqual` instead o
 boolean flip failed a test that was asserting the decision rather than the consistency. That test
 now checks the same thing `darkMode.test.ts` does: **all paths agree, whichever way the switch
 goes.**
+
+## D-078 — Stamps are collectibles, and the rank comes from how many you have
+
+**Status: Accepted** — the project lead, 2026-08-19. **Resolves T-158.**
+
+**Their words:** *"Os carimbos têm que ser vistos como colectáveis. Algo como os pinos no CS2 ou
+items raros noutros jogos. O estilo PlayStation de ter troféus platina e gold também me agradam."*
+And: *"O rating de bronze a platina não deve ser por cada lugar mas pela quantidade de lugares e de
+carimbos colectados."*
+
+### Two things I had wrong, and they matter
+
+⚠ **I claimed the design brief was against gamification. It is not.** The brief mentions the
+reference app's badge system only to note it is vaporware. I invented the prohibition and cited it
+as a rule.
+
+⚠ **And the decision that rejected "badges" rejected them *in favour of* collectibility.** Its own
+words: *"Passport stamps… is **inherently collectible**, and is complete in itself — a stamp does
+not have to be spent to have value."* What that decision actually rejected was **stars**, and for a
+reason that still holds: a points currency invites *"what do I spend these on?"*, and the answer is
+nothing. **A rank is not a currency.** A platinum trophy is not spent either.
+
+### The decision
+
+Four ranks — **bronze, silver, gold, platinum** — earned by **how many places you have collected**,
+never by which ones. Thresholds: 1, 10, 25, and *all of them* for platinum.
+
+⚠ **The project lead's version replaced mine, and theirs is better for a concrete reason.** I
+proposed rarity **per place** — Cabo Girão bronze because there is a lift, Pico Ruivo gold because
+it is hours of legs. That **ranks places**, which is precisely what killed the stars proposal:
+*"stars imply a rating scale, which implies places are ranked."* A rank earned by quantity ranks
+the collector's journey and leaves every place worth the same. It also cannot go stale as the pack
+grows.
+
+**Ten for silver is not arbitrary.** It is exactly where the free tier ends (D-072). A visitor who
+never pays reaches **silver** and can see gold above them — honest about what buying gets you,
+rather than a rank invented to sit just out of reach. ⚠ If the free allowance moves, this moves
+with it.
+
+**Platinum is everything and only everything**, which means it is rare and may never be earned.
+That is the point of it.
+
+### Where it is seen
+
+**On the passport button, which has always been drawn as a stamp** (`StampMark`). The project lead:
+*"eu sempre quis que o botão para abrir o passaporte com os carimbos fosse um carimbo também."* The
+one control on the map screen now says what rank you are.
+
+⚠ **A failing test moved the metal from the mark to the button, and improved the design.** The
+first attempt painted the *mark* in metal on the blue button. Every metal failed contrast — silver
+**1.29:1**, platinum **1.15:1**. Metals are pale by nature and none of them survives on `#5AA9FF`.
+Since the button *is* the stamp, the metal became the **fill**, with the mark and count staying
+near-black. **A test that could only be satisfied by changing the design was the design review.**
+
+⚠ **Nobody has looked at the metals.** `node tools/preview-stamps.mjs` now draws all five ranks at
+real size. The questions no test can settle: **does bronze read as bronze or as brown, and is
+platinum *colder* than silver rather than merely paler?**
+
+### Still open, and deliberately not decided here
+
+- **Per-place motifs.** The artwork knows the *category* and not the *place*: Pico do Areeiro, Cabo
+  Girão and Fanal all carry the same mountain glyph. Agreed with the project lead, not yet built.
+- **The date on the stamp.** Agreed, not yet built.
+- **3D.** *"No futuro algo 3D agrada-me."* `TIER_METAL` carries an unused `sheen` for exactly that
+  reason — a flat fill is the one thing that cannot be lifted later.
+- ⚠ **More levadas, and D-002 is loosened to allow it.** *"Podes mudar o D-002, eu estava a jogar
+  demasiado seguro para ter um MVP."* Eleven of sixty is thin for what the island is. Madeira's
+  walking routes are officially signed and numbered (**PR 1**…**PR 22**) and `levada-routes.mjs`
+  already reads those refs from OSM, so the numbering is a ready-made spine — and a levada stamp
+  could carry its PR number, which is design and useful information at once. ⚠ Still **draft and
+  veto** (D-064): proposed one line at a time, cut by the project lead.

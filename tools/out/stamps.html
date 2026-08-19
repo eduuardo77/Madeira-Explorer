@@ -8,6 +8,10 @@
   h1 { font-size: 22px; margin: 0 0 4px; }
   h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px;
        color: #A7B8C4; margin: 28px 0 4px; }
+  .tiers { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .tier { margin: 0; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 56px;
+          padding: 0 20px; border-radius: 999px; font: 600 17px/1 -apple-system, Segoe UI, Roboto, sans-serif; }
   .note { color: #A7B8C4; font-size: 13px; margin: 0 0 12px; max-width: 62ch; }
   .row, .grid { display: flex; flex-wrap: wrap; gap: 16px; }
   .grid { gap: 14px; }
@@ -90,6 +94,66 @@
     <figcaption>96 dp</figcaption>
   </figure></div>
 </div>
+
+<h2>The rank, on the button itself (T-158, D-078)</h2>
+<p class="note">
+  The passport button <b>is</b> a stamp, and since D-078 it is the stamp you have
+  earned: the rank comes from <b>how many places you have collected</b>, never from
+  which ones — ranking places is what killed the "stars" proposal that stamps
+  replaced. Silver lands exactly where the free tier ends (D-072), so a visitor who
+  never pays reaches it and can see gold above them.
+  <br><br>
+  ⚠ <b>The question no test can answer, and the reason this row exists:</b> does
+  bronze read as <i>bronze</i> or as brown? Is platinum <i>colder</i> than silver
+  rather than merely paler? Contrast is asserted in <code>stampTier.test.ts</code>;
+  whether these look like metal is for a pair of eyes.
+</p>
+<div class="tiers">
+  <figure class="tier">
+    <div class="pill" style="background:#5AA9FF">
+      <svg viewBox="0 0 100 100" style="width:36px;height:36px">
+        <path d="M66.84 9.35 L72.79 15.3 L78.74 21.26 L84.7 27.21 L90.65 33.16 L90.65 41.58 L90.65 50 L90.65 58.42 L90.65 66.84 L84.7 72.79 L78.74 78.74 L72.79 84.7 L66.84 90.65 L58.42 90.65 L50 90.65 L41.58 90.65 L33.16 90.65 L27.21 84.7 L21.26 78.74 L15.3 72.79 L9.35 66.84 L9.35 58.42 L9.35 50 L9.35 41.58 L9.35 33.16 L15.3 27.21 L21.26 21.26 L27.21 15.3 L33.16 9.35 L41.58 9.35 L50 9.35 L58.42 9.35 Z M63.39 17.66 L68.13 22.4 L72.86 27.14 L77.6 31.87 L82.34 36.61 L82.34 43.3 L82.34 50 L82.34 56.7 L82.34 63.39 L77.6 68.13 L72.86 72.86 L68.13 77.6 L63.39 82.34 L56.7 82.34 L50 82.34 L43.3 82.34 L36.61 82.34 L31.87 77.6 L27.14 72.86 L22.4 68.13 L17.66 63.39 L17.66 56.7 L17.66 50 L17.66 43.3 L17.66 36.61 L22.4 31.87 L27.14 27.14 L31.87 22.4 L36.61 17.66 L43.3 17.66 L50 17.66 L56.7 17.66 Z M50 31 L69 50 L50 69 L31 50 Z" fill="#0A0A0C" fill-rule="evenodd" transform="rotate(-10 50 50)" />
+      </svg>
+      <span style="color:#0A0A0C">23 / 60</span>
+    </div>
+    <figcaption>none · no stamps yet</figcaption>
+  </figure>
+  <figure class="tier">
+    <div class="pill" style="background:#C8874A">
+      <svg viewBox="0 0 100 100" style="width:36px;height:36px">
+        <path d="M66.84 9.35 L72.79 15.3 L78.74 21.26 L84.7 27.21 L90.65 33.16 L90.65 41.58 L90.65 50 L90.65 58.42 L90.65 66.84 L84.7 72.79 L78.74 78.74 L72.79 84.7 L66.84 90.65 L58.42 90.65 L50 90.65 L41.58 90.65 L33.16 90.65 L27.21 84.7 L21.26 78.74 L15.3 72.79 L9.35 66.84 L9.35 58.42 L9.35 50 L9.35 41.58 L9.35 33.16 L15.3 27.21 L21.26 21.26 L27.21 15.3 L33.16 9.35 L41.58 9.35 L50 9.35 L58.42 9.35 Z M63.39 17.66 L68.13 22.4 L72.86 27.14 L77.6 31.87 L82.34 36.61 L82.34 43.3 L82.34 50 L82.34 56.7 L82.34 63.39 L77.6 68.13 L72.86 72.86 L68.13 77.6 L63.39 82.34 L56.7 82.34 L50 82.34 L43.3 82.34 L36.61 82.34 L31.87 77.6 L27.14 72.86 L22.4 68.13 L17.66 63.39 L17.66 56.7 L17.66 50 L17.66 43.3 L17.66 36.61 L22.4 31.87 L27.14 27.14 L31.87 22.4 L36.61 17.66 L43.3 17.66 L50 17.66 L56.7 17.66 Z M50 31 L69 50 L50 69 L31 50 Z" fill="#0A0A0C" fill-rule="evenodd" transform="rotate(-10 50 50)" />
+      </svg>
+      <span style="color:#0A0A0C">23 / 60</span>
+    </div>
+    <figcaption>bronze · 1+</figcaption>
+  </figure>
+  <figure class="tier">
+    <div class="pill" style="background:#C6CBD2">
+      <svg viewBox="0 0 100 100" style="width:36px;height:36px">
+        <path d="M66.84 9.35 L72.79 15.3 L78.74 21.26 L84.7 27.21 L90.65 33.16 L90.65 41.58 L90.65 50 L90.65 58.42 L90.65 66.84 L84.7 72.79 L78.74 78.74 L72.79 84.7 L66.84 90.65 L58.42 90.65 L50 90.65 L41.58 90.65 L33.16 90.65 L27.21 84.7 L21.26 78.74 L15.3 72.79 L9.35 66.84 L9.35 58.42 L9.35 50 L9.35 41.58 L9.35 33.16 L15.3 27.21 L21.26 21.26 L27.21 15.3 L33.16 9.35 L41.58 9.35 L50 9.35 L58.42 9.35 Z M63.39 17.66 L68.13 22.4 L72.86 27.14 L77.6 31.87 L82.34 36.61 L82.34 43.3 L82.34 50 L82.34 56.7 L82.34 63.39 L77.6 68.13 L72.86 72.86 L68.13 77.6 L63.39 82.34 L56.7 82.34 L50 82.34 L43.3 82.34 L36.61 82.34 L31.87 77.6 L27.14 72.86 L22.4 68.13 L17.66 63.39 L17.66 56.7 L17.66 50 L17.66 43.3 L17.66 36.61 L22.4 31.87 L27.14 27.14 L31.87 22.4 L36.61 17.66 L43.3 17.66 L50 17.66 L56.7 17.66 Z M50 31 L69 50 L50 69 L31 50 Z" fill="#0A0A0C" fill-rule="evenodd" transform="rotate(-10 50 50)" />
+      </svg>
+      <span style="color:#0A0A0C">23 / 60</span>
+    </div>
+    <figcaption>silver · 10+</figcaption>
+  </figure>
+  <figure class="tier">
+    <div class="pill" style="background:#E3B84A">
+      <svg viewBox="0 0 100 100" style="width:36px;height:36px">
+        <path d="M66.84 9.35 L72.79 15.3 L78.74 21.26 L84.7 27.21 L90.65 33.16 L90.65 41.58 L90.65 50 L90.65 58.42 L90.65 66.84 L84.7 72.79 L78.74 78.74 L72.79 84.7 L66.84 90.65 L58.42 90.65 L50 90.65 L41.58 90.65 L33.16 90.65 L27.21 84.7 L21.26 78.74 L15.3 72.79 L9.35 66.84 L9.35 58.42 L9.35 50 L9.35 41.58 L9.35 33.16 L15.3 27.21 L21.26 21.26 L27.21 15.3 L33.16 9.35 L41.58 9.35 L50 9.35 L58.42 9.35 Z M63.39 17.66 L68.13 22.4 L72.86 27.14 L77.6 31.87 L82.34 36.61 L82.34 43.3 L82.34 50 L82.34 56.7 L82.34 63.39 L77.6 68.13 L72.86 72.86 L68.13 77.6 L63.39 82.34 L56.7 82.34 L50 82.34 L43.3 82.34 L36.61 82.34 L31.87 77.6 L27.14 72.86 L22.4 68.13 L17.66 63.39 L17.66 56.7 L17.66 50 L17.66 43.3 L17.66 36.61 L22.4 31.87 L27.14 27.14 L31.87 22.4 L36.61 17.66 L43.3 17.66 L50 17.66 L56.7 17.66 Z M50 31 L69 50 L50 69 L31 50 Z" fill="#0A0A0C" fill-rule="evenodd" transform="rotate(-10 50 50)" />
+      </svg>
+      <span style="color:#0A0A0C">23 / 60</span>
+    </div>
+    <figcaption>gold · 25+</figcaption>
+  </figure>
+  <figure class="tier">
+    <div class="pill" style="background:#DCE8F2">
+      <svg viewBox="0 0 100 100" style="width:36px;height:36px">
+        <path d="M66.84 9.35 L72.79 15.3 L78.74 21.26 L84.7 27.21 L90.65 33.16 L90.65 41.58 L90.65 50 L90.65 58.42 L90.65 66.84 L84.7 72.79 L78.74 78.74 L72.79 84.7 L66.84 90.65 L58.42 90.65 L50 90.65 L41.58 90.65 L33.16 90.65 L27.21 84.7 L21.26 78.74 L15.3 72.79 L9.35 66.84 L9.35 58.42 L9.35 50 L9.35 41.58 L9.35 33.16 L15.3 27.21 L21.26 21.26 L27.21 15.3 L33.16 9.35 L41.58 9.35 L50 9.35 L58.42 9.35 Z M63.39 17.66 L68.13 22.4 L72.86 27.14 L77.6 31.87 L82.34 36.61 L82.34 43.3 L82.34 50 L82.34 56.7 L82.34 63.39 L77.6 68.13 L72.86 72.86 L68.13 77.6 L63.39 82.34 L56.7 82.34 L50 82.34 L43.3 82.34 L36.61 82.34 L31.87 77.6 L27.14 72.86 L22.4 68.13 L17.66 63.39 L17.66 56.7 L17.66 50 L17.66 43.3 L17.66 36.61 L22.4 31.87 L27.14 27.14 L31.87 22.4 L36.61 17.66 L43.3 17.66 L50 17.66 L56.7 17.66 Z M50 31 L69 50 L50 69 L31 50 Z" fill="#0A0A0C" fill-rule="evenodd" transform="rotate(-10 50 50)" />
+      </svg>
+      <span style="color:#0A0A0C">23 / 60</span>
+    </div>
+    <figcaption>platinum · all of them</figcaption>
+  </figure></div>
 
 
   <section>

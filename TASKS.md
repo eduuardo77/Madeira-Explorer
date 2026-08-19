@@ -725,7 +725,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       with no banner, no notification and no counter. What is left of this task is the small
       question — should a **line of prose** say it as well — and the answer is probably no, since
       the padlocks already say it and prose would be the nagging the project lead ruled out.
-- [ ] **T-158** *Deferred by the project lead:* **make the stamps worth buying** ⇠ T-155
+- [~] **T-158** **Make the stamps worth buying — the rank is in (D-078), the artwork is next.**
+      — ✅ **`passport/stampTier.ts`** (pure, 13 tests): bronze/silver/gold/platinum by **how many**
+      places you have, never by which ones. Thresholds 1 / 10 / 25 / all. **The passport button now
+      wears the rank** — it was always drawn as a stamp, and now it is the stamp you earned.
+      — ⚠ **The project lead replaced my design and theirs is better.** I proposed rarity *per
+      place*, which **ranks places** — precisely what killed the "stars" proposal that stamps
+      replaced. A rank by quantity ranks the journey and leaves every place worth the same.
+      — ⚠ **I also cited a rule that does not exist**: the design brief says nothing against
+      gamification, and the decision that rejected "badges" did so *because stamps are inherently
+      collectible*. Corrected in D-078.
+      — ⚠ **A failing test moved the metal from the mark to the button and improved the design.**
+      Metals are pale; none survives on the action blue (silver 1.29:1, platinum 1.15:1). The
+      button *is* the stamp, so the metal is the fill.
+      — ⚠ **Nobody has looked at the metals.** `node tools/preview-stamps.mjs` draws all five ranks
+      at real size. Does bronze read as bronze or as brown? Is platinum *colder* than silver?
+      — **Still to build, all agreed:** per-place **motifs** (the art knows the category, not the
+      place — Pico do Areeiro, Cabo Girão and Fanal share one mountain glyph); the **date** on the
+      stamp; **more levadas** now D-002 is loosened, with **PR numbers** as the spine; and **3D**
+      later (`TIER_METAL.sheen` exists unused for exactly that).
+- [x] **T-158-orig** *(superseded by the above)* Deferred by the project lead ⇠ T-155
       — All the revenue now rests on the passport being desirable. Their words: *"we'll need then to
       make the stamps appealing enough to bring more revenue. But lets leave that for the future."*
       — ⚠ **This is in tension with D-071**, which recorded that the map is the product and the stamp

@@ -114,14 +114,19 @@ map is grey for every real user while working perfectly in these builds.
 ### The APK
 
 ```
-app/android/app/build/outputs/apk/release/app-release.apk
+app/android/app/build/outputs/apk/release/proa-arm64-release.apk
 ```
 
-Rebuild it with:
+**48 MB, arm64 only** — which is what every real phone is. Build it with:
 
 ```bash
-cd app/android && ./gradlew assembleRelease
+cd app/android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 ```
+
+⚠ **Without that flag you get a 128 MB universal APK** carrying four ABIs, two of them
+emulator-only. That is not a size problem in the store — Play's AAB sends each device only its own
+slice, so a real user downloads ~48 MB either way — but it is 80 MB of pointless upload to Test
+Lab, and it is what made the first build look alarming (T-117d).
 
 ⚠ `ANDROID_HOME` and `JAVA_HOME` must be set — see the top of this file's sibling,
 `docs/dev-build.md`.

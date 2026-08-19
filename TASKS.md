@@ -1276,15 +1276,38 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       receive push messages**, and that is what a reviewer and a careful user actually see.
       — **What to decide:** whether local notifications are worth carrying FCM for, or whether they
       should move to a smaller library. ⚠ Feeds T-117b, T-127, and the Data Safety answers.
-- [ ] **T-117d** ⚠ **The release APK is 128 MB, and ~40 MB of it is a map the app does not use.**
-      — `libmaplibre.so` ships for **four ABIs** (10.8 + 10.6 + 10.5 + 7.6 MB). D-057 replaced
-      MapLibre with the platform's map; the project lead asked to **keep the code**, and keeping
-      the *source* is not the same as shipping the *native library* in every install.
-      — The other half is **four ABIs in one APK** — `x86` and `x86_64` are emulator-only. An AAB
-      splits these per device automatically and is what Play requires anyway.
-      — ⚠ Neither is urgent for **Test Lab**, which does not care about size. Both matter before
-      the store: 128 MB is above Play's 150 MB APK ceiling's comfortable range and is a download
-      a visitor makes on holiday data.
+- [~] **T-117d** **The release APK's size — measured, and half of the alarm was mine.**
+      — ⚠ **CORRECTION, same day.** The first note here called *"128 MB"* the problem. **It is not,
+      or not mostly.** That was a **universal** APK carrying four ABIs, two of them (`x86`,
+      `x86_64`) emulator-only. Play never ships a universal APK — an AAB sends each device only
+      its own. **Rebuilt with `-PreactNativeArchitectures=arm64-v8a`: 48 MB.** So a real user was
+      always going to download ~48 MB, and the 128 MB matters only for artefacts installed
+      directly, like the one going to Test Lab.
+      — **Measured:** native libraries are **108 MB of the 128** — arm64 28.6, x86 30.0, x86_64
+      29.4, armeabi-v7a 20.2.
+      — ✅ **Done: the Test Lab artefact is the arm64 build**, `proa-arm64-release.apk`. Real
+      phones are arm64; the emulator slices are dead weight in a file being uploaded.
+      — ⚠⚠ **WHAT IS LEFT IS REAL AND NEEDS THE PROJECT LEAD.** `libmaplibre.so` is **10 MB of the
+      48 MB a real user downloads — 21% of the app — for a map the app never opens.** D-057
+      replaced MapLibre with the platform's map, and `MapLibreScreen.tsx` is imported by nothing:
+      `App.tsx` mentions it only in a comment.
+      — ⚠ **The instruction was *"don't delete the map we've created as it might come useful"*, and
+      that is not in question.** Keeping the *source* and shipping the *native library* are
+      different things, and only the second costs anything. Three ways, none chosen:
+      **(a)** move `MapLibreScreen.tsx` and the tiles pipeline out of the compiled app — kept in the
+      repository, excluded from `tsconfig`, dependency dropped — **10 MB back, nothing deleted**;
+      **(b)** keep it exactly as it is and accept a fifth of the download; **(c)** delete it, which
+      nobody has asked for.
+      — ✅ **The AAB builds too, first time: 74.6 MB**, carrying all four ABIs — which is correct,
+      because an AAB is a *container* Play generates per-device APKs from. **An arm64 user
+      downloads the arm64 slice, ~48 MB or less** once density and language splits are applied. So
+      the store number was never 128 MB.
+      — ⚠⚠ **BUT IT CANNOT BE UPLOADED.** `build.gradle`'s release block still signs with the
+      **debug keystore** — the template default, with its *"Caution! In production, you need to
+      generate your own keystore"* comment intact, and `debug.keystore` is **committed to this
+      repository**. A real upload key has to be generated and kept out of the repo before anything
+      reaches Play. ⚠ And when it is: **Google re-signs uploads**, so a second SHA-1 must be added
+      to the Maps API key or the map is grey for every real user while working perfectly here.
 - [ ] **T-117a** **Confirm the development scaffolding is inert in a release build.** Distinct
       from T-117, which is about network behaviour and would not look at this. Two things to
       check: the `expo-dev-client` permissions (`SYSTEM_ALERT_WINDOW`,

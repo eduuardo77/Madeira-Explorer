@@ -149,3 +149,30 @@ Lab, and it is what made the first build look alarming (T-117d).
 
 ⚠ **What a robot cannot do:** record a walk, earn a stamp, or produce a trace. It will not
 exercise the recorder, the geofences or the replay.
+
+
+---
+
+## ⚠ The one thing that does need a physical Android — for under a minute, and not yours
+
+**Found 2026-08-19, after the project lead paid the €25 and hit it.** Google requires new *personal*
+Play Console accounts to prove the developer has access to a real Android device.
+
+**The requirement, from Google's own page:**
+
+- *"You can use any **non-rooted physical Android mobile device** that runs at least the Android 10
+  operating system."* ⚠⚠ **Emulators are not permitted.** There is no workaround, and the emulator
+  in this project could not be made to pass by installing a Play Store system image.
+- It is done in the **Play Console mobile app**, by scanning a QR code from the Console.
+- *"Verification takes less than a minute."*
+- ⚠ **It does not have to be your device.** The page says any device, and explicitly that *"you can
+  use the same device to verify multiple accounts."*
+- ⚠ **And not the same one twice:** *"We may ask you to verify in the future, but you will not have
+  to use same device."*
+- The stated trigger is *"before they can make their app available on Google Play"* — so it gates
+  **publishing**. Whether the Console also blocks a first upload to an internal track is not stated
+  and is worth simply trying.
+
+**So this is not "buy a phone".** It is *borrow any Android for sixty seconds*, once — a friend, a
+family member, anyone. **D-077 stands**: the phone that was never needed is still never needed. The
+device is for **Google's identity check on the account**, not for testing the app.

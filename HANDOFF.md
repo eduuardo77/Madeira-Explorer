@@ -34,6 +34,15 @@ is drafted and ready to paste).
 
 ## What blocks v1
 
+0. ✅ **THE APP HAS RUN ON REAL HARDWARE — 2026-08-19.** Firebase Test Lab, Robo test, **Pixel 5,
+   Android 11: passed, zero crashes**, one device stable. First time in this project's life.
+   ⚠ **That says it did not crash. It does not yet say the map rendered** — that answer is in the
+   run's **screenshots and video**, under the device result, and somebody has to look at them.
+   ⚠ **A useful accident:** the release APK is signed with the *debug* key, whose SHA-1 is the one
+   already on the Maps API key restriction — so the map should be exercised properly in that run.
+   The moment a real upload key exists, that stops being true (T-117e).
+
+
 1. ⚠⚠ **A $25 Play registration — NOT a phone (D-077, 2026-08-18).** This list said *"a physical
    Android, ~€50–100"* for weeks and **nobody had checked.** Uploading to a Play test track makes
    Google run the app **on real devices, free**, returning crashes, screenshots **per language**,

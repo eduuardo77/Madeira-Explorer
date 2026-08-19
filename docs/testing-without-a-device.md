@@ -176,3 +176,38 @@ Play Console accounts to prove the developer has access to a real Android device
 **So this is not "buy a phone".** It is *borrow any Android for sixty seconds*, once — a friend, a
 family member, anyone. **D-077 stands**: the phone that was never needed is still never needed. The
 device is for **Google's identity check on the account**, not for testing the app.
+
+
+---
+
+## The first Robo run, 2026-08-19 — and the question it answered
+
+**Pixel 5, Android 11 (API 30), `en_US`. Passed, zero crashes, one device stable.**
+Twenty-eight app states crawled, for nothing, in about ten minutes.
+
+### ⚠⚠ The map renders on real hardware
+
+The crawl graph shows a state with **Google's terrain in colour, a marker, and a place card open on
+*Achada do Teixeira***. That is the answer to the question this project had carried for weeks. The
+map had only ever been seen on a **swiftshader** emulator whose surface was known to break across
+app restarts, and `-gpu host` paints it pure black on the dev machine.
+
+⚠ **The start-screen state looks pale in the graph.** Almost certainly tiles still loading when
+Robo took its first screenshot — because if the API key were being rejected, *every* map surface
+would be the grey grid, and the later one is in full colour. **Confirm it in the video** rather
+than trusting this inference.
+
+### What else the crawl reached
+
+Passport (many states, all `0 / 60` with grey stamps — correct, a robot cannot walk), place cards
+for real curated places (*Pico do Areeiro*, *Fanal*, *Bica da Cana*, *Encumeada*, *Ponta de São
+Lourenço*), Settings, the privacy policy, Android's own battery-optimisation screen, and the
+launcher. **It found no crash in any of it.**
+
+### What it did not do, and what to run next
+
+- ❌ **It cannot walk**, so the recorder, the geofences, the award pass and the replay were never
+  exercised. Every stamp stayed grey.
+- ⚠ **It ran in English.** Portuguese and German have still never been seen on a real screen.
+  **Test Lab takes a locale — that is the next free run**, and it is worth doing before the German
+  store listing (T-160a) even though it still needs a German speaker to judge the words.

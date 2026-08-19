@@ -36,11 +36,16 @@ is drafted and ready to paste).
 
 0. ✅ **THE APP HAS RUN ON REAL HARDWARE — 2026-08-19.** Firebase Test Lab, Robo test, **Pixel 5,
    Android 11: passed, zero crashes**, one device stable. First time in this project's life.
-   ⚠ **That says it did not crash. It does not yet say the map rendered** — that answer is in the
-   run's **screenshots and video**, under the device result, and somebody has to look at them.
-   ⚠ **A useful accident:** the release APK is signed with the *debug* key, whose SHA-1 is the one
-   already on the Maps API key restriction — so the map should be exercised properly in that run.
-   The moment a real upload key exists, that stops being true (T-117e).
+   ⚠⚠ **AND THE MAP RENDERS ON REAL HARDWARE.** The crawl graph shows a state with Google's own
+   terrain in colour, a marker, and a place card open on *Achada do Teixeira*. **The single most
+   fragile unknown in this product is answered** — it had only ever been seen on a swiftshader
+   emulator whose surface was known to break across restarts.
+   ⚠ **A useful accident made that test valid:** the release APK is signed with the *debug* key,
+   whose SHA-1 is already on the Maps API key restriction. **The moment a real upload key exists
+   that stops being true** — and then Google's own re-signing SHA-1 must be added or the map is
+   grey for every real user (T-117e).
+   ⚠ **The run was `en_US`.** Portuguese and German were never on screen. Test Lab takes a locale,
+   so seeing them on real hardware is another free run away.
 
 
 1. ⚠⚠ **A $25 Play registration — NOT a phone (D-077, 2026-08-18).** This list said *"a physical

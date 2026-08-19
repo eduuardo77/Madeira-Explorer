@@ -19,7 +19,7 @@ has met real GPS.
 
 | | |
 |---|---|
-| **D-070** | The map shows **only collected places**, tappable. Google's POI pins are off. Map chrome inverts with the map style. |
+| **D-070** | The map shows **only collected places**, tappable, drawn as the app's own ring-and-disc marks. Map chrome inverts with the map style. ⚠ **Amended 2026-08-19: Google's POI pins are back ON** — the project lead settled the question the switch was left open for. Safe now only because T-153 gave the app its own marks; **watch a collected mark against Google's pins at street zoom.** |
 | **D-071** | ⚠ **Reversed twice in one day.** The map is the product — but **stamps are a priority again**, because D-072 makes them the revenue. |
 | **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** |
 | **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |

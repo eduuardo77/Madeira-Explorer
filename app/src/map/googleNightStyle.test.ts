@@ -20,6 +20,7 @@ import {
   NIGHT_LAND,
   NIGHT_STYLE_RULES,
 } from './googleNightStyle.ts';
+import { HIDE_GOOGLE_POIS } from './mapClutter.ts';
 import { TRACE_PAINT } from './traceStyle.ts';
 
 /** Relative luminance, the WCAG definition — the same one `contrast.ts` uses. */
@@ -119,14 +120,28 @@ test('⚠ nothing in the basemap outshines the trace', () => {
   }
 });
 
-test("Google's own points of interest stay off", () => {
-  // D-052 deleted our place markers so the map would belong to the trace.
-  // Leaving Google's pins on would undo that decision with somebody else's
-  // data, which is how it would come back without anybody deciding to.
-  const poi = NIGHT_STYLE_RULES.find(
-    (rule) => rule.featureType === 'poi' && rule.elementType === 'labels'
+test("Google's own points of interest follow the switch, in this style too", () => {
+  // ⚠ **This test used to pin the answer instead of following it**, and it was
+  // the only thing in the project that did. It asserted the night style hides
+  // Google's POIs full stop — written when D-052 had just deleted our own place
+  // markers and the map belonged entirely to the trace.
+  //
+  // Two things happened after. T-153 gave the app **its own marks** for the
+  // places you earned — a ring and a disc in the app's palette, tuned for
+  // contrast against both grounds — so an earned place is no longer
+  // indistinguishable from basemap clutter, which was the actual harm D-070
+  // was written to stop. And the project lead settled the question this switch
+  // was left open for (D-070 amended, 2026-08-19): **Google's POIs go back on.**
+  //
+  // So this now checks what `darkMode.test.ts` checks — that every style path
+  // agrees with `HIDE_GOOGLE_POIS`. A switch that half-applies is worse than
+  // either answer.
+  const nightHidesPoi = NIGHT_STYLE_RULES.some(
+    (rule) =>
+      rule.featureType?.startsWith('poi') === true &&
+      rule.stylers.some((styler) => styler.visibility === 'off')
   );
-  assert.deepEqual(poi?.stylers, [{ visibility: 'off' }]);
+  assert.equal(nightHidesPoi, HIDE_GOOGLE_POIS);
 });
 
 test('⚠ the floating controls survive the night map', () => {

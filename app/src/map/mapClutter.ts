@@ -79,7 +79,7 @@ export type ClutterStyleRule = {
  * this replaced, and which is the thing the project lead asked to be certain of:
  * *"Just make sure light and dark mode are the same, that's really important."*
  */
-export const HIDE_GOOGLE_POIS = true;
+export const HIDE_GOOGLE_POIS = false;
 
 /**
  * Hiding Google's points of interest — the part that is **under the switch**.

@@ -4213,3 +4213,36 @@ never rendered, and *"still compiles"* was always a weak guarantee that it still
 `app/attic/README.md` records what reviving it would actually involve — and that the one thing
 that would genuinely bring it back is **offline maps**, the single capability Google's map cannot
 give this app.
+
+### D-070 amended 2026-08-19 — Google's points of interest go back on
+
+**The project lead settled the question D-070 was left open for.** Its own text recorded them as
+*"still considering whether hiding Google's POIs costs too much of the OEM feel"*, and
+`HIDE_GOOGLE_POIS` existed as one boolean for exactly this moment. It is now **`false`**: Google's
+restaurants, hotels and landmarks are drawn again, on all three style paths together.
+
+**Why this is cheaper than it was when D-070 was written, and it is worth being precise.** D-070
+existed because the primary screen said `1 / 60` and **marked nothing on the map**, while Google's
+POI layer drew the one earned place identically to five places the user had never been. *"The app's
+only achievement was indistinguishable from basemap clutter."*
+
+**That harm was fixed by the other half of the same decision.** T-153 gave the app **its own
+marks** — a ring and a disc in the app's palette (`collectedMarks.ts`, `placeStyle.ts`), sized to
+hold a constant screen size and tuned for contrast against both grounds. An earned place is now a
+mark this app drew, not a Google pin. **Turning Google's layer back on no longer hides the
+achievement, because the achievement is no longer drawn by Google.**
+
+⚠ **What it does cost:** the map is busier, and a visitor reading it will see restaurants next to
+the places we curated. That is the OEM feel the project lead wanted back, and it is a real trade —
+D-032's *"nothing competes with the trace"* is now a little less true than it was.
+
+⚠ **What to watch on real hardware:** whether a collected mark still reads at a glance against a
+Google POI pin **at street zoom**, where the pins are densest. Nothing in this repository can
+answer that; the pre-launch report's screenshots can.
+
+**A bug this uncovered.** `HIDE_GOOGLE_POIS` was documented as turning it off *"in one line"*, and
+`darkMode.test.ts` asserted every style path follows it. But `googleNightStyle.test.ts` — older
+than the switch — **pinned the answer** with a hardcoded `deepEqual` instead of following it. The
+boolean flip failed a test that was asserting the decision rather than the consistency. That test
+now checks the same thing `darkMode.test.ts` does: **all paths agree, whichever way the switch
+goes.**

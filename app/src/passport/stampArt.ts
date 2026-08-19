@@ -54,6 +54,7 @@
  */
 
 import type { Category } from '../content/contentPack.ts';
+import { emblemFor } from './stampMotif.ts';
 
 /** Everything is designed on a 100×100 grid and scaled at draw time. */
 export const CANVAS = 100;
@@ -424,7 +425,18 @@ export function inset(outline: Point[], amount: number): Point[] {
  * which is the only thing carrying meaning. Calling this twice with the same
  * arguments returns the same design, today and in five years.
  */
-export function designFor(placeId: string, category: Category): StampDesign {
+export function designFor(
+  placeId: string,
+  category: Category,
+  /**
+   * What this place is a picture *of* (D-079), from `content/pois.json`.
+   *
+   * ⚠ Optional and unvalidated on purpose: an unknown name falls back to the
+   * category's emblem rather than throwing. Content is edited by hand and a
+   * typo must not be able to blank a sticker.
+   */
+  motif?: string
+): StampDesign {
   const hash = hashId(placeId);
   const shapeName = SHAPE_NAMES[hash % SHAPE_NAMES.length];
   const outline = SHAPES[shapeName];
@@ -441,7 +453,7 @@ export function designFor(placeId: string, category: Category): StampDesign {
     innerOutline: cutEdge(inset(outline, 4), edge),
     panel: inset(outline, 8.5),
     colourway,
-    icon: ICONS[category],
+    icon: emblemFor(category, motif, ICONS),
     tiltDeg,
     shapeName,
   };

@@ -34,6 +34,7 @@ import { escapeXml, stampSvg } from './lib/svg-render.mjs';
 import { CANVAS } from '../app/src/passport/stampArt.ts';
 import { stampMarkPath, TILT_DEG } from '../app/src/passport/stampMark.ts';
 import { TIERS, TIER_METAL, TIER_THRESHOLDS } from '../app/src/passport/stampTier.ts';
+import { MOTIF_NAMES } from '../app/src/passport/stampMotif.ts';
 // The real palette, not hexes retyped by eye. `theme.ts` has no imports of its
 // own, so Node can load it directly — and a preview whose colours differ from
 // the app's is exactly the thing this file's header warns against.
@@ -144,6 +145,29 @@ function tierRow() {
   }).join('');
 }
 
+/**
+ * Every motif, on a real sticker (T-158, D-079).
+ *
+ * ⚠ **This is the only way to find out whether a cliff reads as a cliff.** The
+ * tests assert the paths exist, cover enough of the grid, and are all different
+ * from each other. None of that is the same as recognisable — and the stamp
+ * mark passed every geometry test this project had and still rendered as a
+ * crosshair.
+ *
+ * Drawn on one fixed place id so the silhouette and colourway are identical
+ * across the row: the only thing changing is the picture, which is the only
+ * thing being judged.
+ */
+function motifRow() {
+  return MOTIF_NAMES.map(
+    (motif) => `
+  <figure class="stamp on">
+    ${stampSvg(`motif-${motif}`, motif, 'viewpoint', true, '', motif)}
+    <figcaption>${motif}</figcaption>
+  </figure>`
+  ).join('');
+}
+
 const html = `<!doctype html>
 <meta charset="utf-8">
 <title>Stamp artwork — T-070</title>
@@ -192,6 +216,24 @@ const html = `<!doctype html>
 <div class="panel" style="background:${colors.action}">
   <div class="row" style="align-items: flex-end">${markRow(colors.actionText)}</div>
 </div>
+
+<h2>The motifs — what a stamp is a picture <i>of</i> (T-158, D-079)</h2>
+<p class="note">
+  Until now sixty places shared <b>five</b> pictures, one per category: Pico do
+  Areeiro, Cabo Girão and Fanal are all <i>viewpoint</i> and all carried the same
+  sun-over-ridges. A place may now name a motif and the stamp draws that instead.
+  <br><br>
+  ⚠ <b>The glyphs are deliberately generic and live in <code>app/</code>; which
+  place gets which lives in <code>content/</code></b> — D-017 is absolute, and a
+  motif called <code>levada-do-furado</code> would put the island in the app one
+  string at a time. A test fails the build on exactly that.
+  <br><br>
+  ⚠ <b>What no test can answer, and why this row exists:</b> does the cliff read
+  as a cliff at this size, or as a wall? Is the waterfall distinguishable from the
+  tunnel? Same place id throughout, so silhouette and colour are constant — the
+  picture is the only variable.
+</p>
+<div class="row">${motifRow()}</div>
 
 <h2>The rank, on the button itself (T-158, D-078)</h2>
 <p class="note">

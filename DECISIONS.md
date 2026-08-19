@@ -107,6 +107,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
 | **D-077** | Real-device verification comes from **Play's pre-launch report and Firebase Test Lab**, not from owning a phone. | **Provisional** |
 | **D-078** | Stamps are **collectibles with a rank** — bronze/silver/gold/platinum by *how many* you have, shown on the passport button. | **Accepted** |
+| **D-079** | A stamp is a picture **of its place**, not of its category. Glyphs in `app/`, the assignment in `content/`. | **Provisional** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

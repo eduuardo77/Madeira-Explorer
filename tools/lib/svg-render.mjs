@@ -50,8 +50,8 @@ function attrs(element) {
  * into one document here, and a shared id would make every band take the first
  * stamp's shape.
  */
-export function stampSvg(id, name, category, collected, extraStyle = '') {
-  const design = designFor(id, category);
+export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined) {
+  const design = designFor(id, category, motif);
   const elements = stampElements(design, name, collected);
 
   const body = elements

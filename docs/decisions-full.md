@@ -4317,3 +4317,62 @@ platinum *colder* than silver rather than merely paler?**
   already reads those refs from OSM, so the numbering is a ready-made spine — and a levada stamp
   could carry its PR number, which is design and useful information at once. ⚠ Still **draft and
   veto** (D-064): proposed one line at a time, cut by the project lead.
+
+## D-079 — A stamp is a picture of its place, not of its category
+
+**Status: Provisional.** Built 2026-08-19 (T-158), agreed in principle with the project lead. The
+part to argue with is named below.
+
+**The problem.** `stampArt.ts` drew one emblem per **category**, so sixty places shared **five
+pictures**. Pico do Areeiro, Cabo Girao and Fanal are all *viewpoint* and all carried the same
+sun-over-ridges. A place's silhouette, colourway and tilt already vary — what it never had was a
+picture of **what it is**. A completed passport read as a colour chart rather than as a collection,
+and that is the honest answer to *why would anybody pay for this*.
+
+**The decision.** A place may name a **motif** and the stamp draws that instead of its category's
+emblem. Eleven exist: `peak`, `cliff`, `waterfall`, `forest`, `tunnel`, `harbour`, `lighthouse`,
+`fort`, `terrace`, `cableCar`, `blackSand`.
+
+### D-017 decided the architecture, not taste
+
+No Madeira knowledge may live in `app/`, absolutely. So:
+
+- **The glyphs live in `app/src/passport/stampMotif.ts`** and are deliberately generic. A sea cliff
+  is a sea cliff in the Azores, in Norway and here.
+- **Which place gets which motif lives in `content/pois.json`**, beside the coordinates and the
+  names, where island knowledge belongs.
+
+**A test fails the build if an islandish word ever appears in a motif id** — including `levada`,
+which looks ordinary in this repository and is a Madeiran word for a Madeiran thing. The tempting
+mistake is a motif named after one specific walk, and it would put the island in the app one string
+at a time with nothing else noticing.
+
+### The part to argue with: the category signal
+
+D-015 gave the emblem the job of carrying the category, and a motif **replaces** the emblem. That
+job has to go somewhere, and it already lives somewhere better: the passport is **five fixed rows,
+one per category** (D-027), so a sticker is always read under its own heading.
+
+**That reasoning holds only while stickers appear inside the passport.** If a stamp ever has to
+stand alone — a widget, a share card, a notification — the motif should become a **second, smaller
+mark** rather than a replacement. Recorded here so that the day it happens, this is found rather
+than rediscovered.
+
+### What is safe about it
+
+- **A typo cannot blank a stamp.** An unknown motif name falls back to the category emblem rather
+  than throwing. Content is hand-edited and a rename must not be able to break a sticker.
+- **A motif changes nothing else** — not the silhouette, the colourway, the cut edge or the tilt.
+  Adding a motif to a place somebody has already collected does not restyle the sticker they have
+  already seen. A test pins that.
+- **The category emblem is the fallback, not the failure case.** Sixty places will not all deserve
+  a motif, and a place whose motif would be a shrug is better served by its category's picture.
+
+**Nobody has looked at the eleven glyphs.** `node tools/preview-stamps.mjs` draws them all on a
+real sticker, at one fixed place id so silhouette and colour are constant and the picture is the
+only variable. **Does the cliff read as a cliff or as a wall? Is the waterfall distinguishable from
+the tunnel?** No test can say, and the stamp mark once passed every geometry test this project had
+and still rendered as a crosshair.
+
+**Next, and not done here:** the per-place assignment for all sixty, one line of justification
+each, **draft and veto** (D-064).

@@ -740,10 +740,21 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       button *is* the stamp, so the metal is the fill.
       — ⚠ **Nobody has looked at the metals.** `node tools/preview-stamps.mjs` draws all five ranks
       at real size. Does bronze read as bronze or as brown? Is platinum *colder* than silver?
-      — **Still to build, all agreed:** per-place **motifs** (the art knows the category, not the
-      place — Pico do Areeiro, Cabo Girão and Fanal share one mountain glyph); the **date** on the
-      stamp; **more levadas** now D-002 is loosened, with **PR numbers** as the spine; and **3D**
-      later (`TIER_METAL.sheen` exists unused for exactly that).
+      — ✅ **Motifs built (D-079), 2026-08-19.** `passport/stampMotif.ts` — eleven generic glyphs
+      (`peak`, `cliff`, `waterfall`, `forest`, `tunnel`, `harbour`, `lighthouse`, `fort`,
+      `terrace`, `cableCar`, `blackSand`), 11 tests. A place names one in `content/pois.json` and
+      the stamp draws it instead of the category emblem.
+      — ⚠⚠ **D-017 decided the architecture:** glyphs generic and in `app/`, the *assignment* in
+      `content/`. **A test fails the build if an islandish word reaches a motif id** — including
+      `levada`, which looks ordinary here and is a Madeiran word for a Madeiran thing.
+      — ⚠ **The part to argue with:** a motif *replaces* the category emblem, so D-015's category
+      signal moves to the passport's five fixed rows (D-027). That holds only while stickers live
+      inside the passport; if one ever stands alone, the motif should become a second smaller mark.
+      — ⚠ **Nobody has looked at the eleven glyphs.** `node tools/preview-stamps.mjs` draws them
+      on a real sticker at one fixed place id. Does the cliff read as a cliff or as a wall?
+      — **Still to build:** the **per-place assignment** for all sixty (draft and veto, D-064); the
+      **date** on the stamp; **more levadas** now D-002 is loosened, with **PR numbers** as the
+      spine; and **3D** later (`TIER_METAL.sheen` exists unused for exactly that).
 - [x] **T-158-orig** *(superseded by the above)* Deferred by the project lead ⇠ T-155
       — All the revenue now rests on the passport being desirable. Their words: *"we'll need then to
       make the stamps appealing enough to bring more revenue. But lets leave that for the future."*

@@ -632,6 +632,120 @@ function centreBigMark(cx, cy, size, base, spec) {
   return debossDeep(cx, cy, size * 1.5, base, spec);
 }
 
+
+/* ------------------------------------------------ centres, third pass */
+
+/*
+ * ⚠⚠ **"ALL OF THOSE NEW ARE A BIT WEAK."** They were, and the reason is worth
+ * writing down rather than guessing at again: **the second pass was mostly
+ * line work.** Contours, a trace, a compass — thin strokes and open shapes.
+ * A medal centre is read at 64 dp on a moving map, and at that size a stroke is
+ * a smudge. **What survives is mass**: a solid silhouette with weight, high
+ * contrast, one clear outline.
+ *
+ * So everything below is drawn as **filled shapes**, not lines.
+ *
+ * ⚠ **On the houses, and D-017.** The project lead suggested Madeira's typical
+ * houses. A *Santana palheiro* is island knowledge and may not live in `app/`.
+ * **A steep-gabled cottage is a building typology, not a fact about an island**
+ * — it is drawable here for the same reason `stampArt.ts` already draws "a
+ * church tower and rooftops on a slope" for the village category. What would
+ * break D-017 is *naming* it Madeiran in this folder, or shipping a coastline.
+ *
+ * ⚠ **And it may belong somewhere better.** D-079 built per-place motifs whose
+ * assignment lives in `content/`. A gabled house is a far stronger *village
+ * motif* than it is a rank medal, because there the content gets to say which
+ * villages have earned it. Worth deciding before this is promoted.
+ */
+
+/** Three steep-gabled cottages on a slope. Solid triangles: mass, not line. */
+function centreHouses(cx, cy, size, base, spec) {
+  const s = size * 0.5;
+  const house = (x, y, w, h) =>
+    `<path d="M${x.toFixed(2)} ${(y - h).toFixed(2)} L${(x + w).toFixed(2)} ${(y + h * 0.55).toFixed(2)} L${(x - w).toFixed(2)} ${(y + h * 0.55).toFixed(2)} Z"/>` +
+    `<path d="M${(x - w * 0.26).toFixed(2)} ${(y + h * 0.55).toFixed(2)} L${(x + w * 0.26).toFixed(2)} ${(y + h * 0.55).toFixed(2)} L${(x + w * 0.26).toFixed(2)} ${(y + h * 0.06).toFixed(2)} L${(x - w * 0.26).toFixed(2)} ${(y + h * 0.06).toFixed(2)} Z" fill-opacity="0.55"/>`;
+  const inner =
+    house(cx - s * 0.62, cy + s * 0.12, s * 0.36, s * 0.62) +
+    house(cx + s * 0.6, cy + s * 0.2, s * 0.32, s * 0.54) +
+    house(cx, cy - s * 0.06, s * 0.46, s * 0.86) +
+    `<path d="M${(cx - s).toFixed(2)} ${(cy + s * 0.76).toFixed(2)} L${(cx + s).toFixed(2)} ${(cy + s * 0.76).toFixed(2)} L${(cx + s).toFixed(2)} ${(cy + s * 0.94).toFixed(2)} L${(cx - s).toFixed(2)} ${(cy + s * 0.94).toFixed(2)} Z"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** One gabled cottage, filling the well. The boldest silhouette on offer. */
+function centreHouse(cx, cy, size, base, spec) {
+  const w = size * 0.52;
+  const h = size * 0.56;
+  const inner =
+    `<path d="M${cx.toFixed(2)} ${(cy - h).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w * 0.24).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx + w * 0.24).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx + w * 0.24).toFixed(2)} ${(cy + h * 0.02).toFixed(2)} Q${cx.toFixed(2)} ${(cy - h * 0.18).toFixed(2)} ${(cx - w * 0.24).toFixed(2)} ${(cy + h * 0.02).toFixed(2)} Z" fill-opacity="0.5"/>` +
+    `<path d="M${(cx - w * 1.12).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx + w * 1.12).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx + w * 1.12).toFixed(2)} ${(cy + h * 0.82).toFixed(2)} L${(cx - w * 1.12).toFixed(2)} ${(cy + h * 0.82).toFixed(2)} Z"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** Stepped terraces — cultivated hillside as solid bands. */
+function centreTerraces(cx, cy, size, base, spec) {
+  const w = size * 0.56;
+  let inner = '';
+  for (let i = 0; i < 4; i += 1) {
+    const y = cy + size * (0.42 - i * 0.24);
+    const left = cx - w + i * w * 0.3;
+    inner += `<path d="M${left.toFixed(2)} ${y.toFixed(2)} L${(cx + w).toFixed(2)} ${y.toFixed(2)} L${(cx + w).toFixed(2)} ${(y - size * 0.13).toFixed(2)} L${(left + w * 0.22).toFixed(2)} ${(y - size * 0.13).toFixed(2)} Z"/>`;
+  }
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** A peak standing above cloud. Two masses, maximum contrast of shape. */
+function centrePeak(cx, cy, size, base, spec) {
+  const w = size * 0.56;
+  const inner =
+    `<path d="M${cx.toFixed(2)} ${(cy - size * 0.56).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy + size * 0.3).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy + size * 0.3).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w * 0.34).toFixed(2)} ${(cy - size * 0.18).toFixed(2)} L${cx.toFixed(2)} ${(cy - size * 0.56).toFixed(2)} L${(cx + w * 0.34).toFixed(2)} ${(cy - size * 0.18).toFixed(2)} L${(cx + w * 0.1).toFixed(2)} ${(cy - size * 0.3).toFixed(2)} L${(cx - w * 0.12).toFixed(2)} ${(cy - size * 0.24).toFixed(2)} Z" fill-opacity="0.45"/>` +
+    `<path d="M${(cx - w * 1.1).toFixed(2)} ${(cy + size * 0.34).toFixed(2)} Q${(cx - w * 0.5).toFixed(2)} ${(cy + size * 0.16).toFixed(2)} ${cx.toFixed(2)} ${(cy + size * 0.34).toFixed(2)} Q${(cx + w * 0.5).toFixed(2)} ${(cy + size * 0.52).toFixed(2)} ${(cx + w * 1.1).toFixed(2)} ${(cy + size * 0.34).toFixed(2)} L${(cx + w * 1.1).toFixed(2)} ${(cy + size * 0.6).toFixed(2)} L${(cx - w * 1.1).toFixed(2)} ${(cy + size * 0.6).toFixed(2)} Z"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** A boot sole, seen from below. Nothing says walking more directly. */
+function centreBoot(cx, cy, size, base, spec) {
+  const w = size * 0.32;
+  const h = size * 0.56;
+  let studs = '';
+  for (let i = 0; i < 5; i += 1) {
+    for (const sx of [-1, 1]) {
+      studs += `<circle cx="${(cx + sx * w * 0.42).toFixed(2)}" cy="${(cy - h * 0.5 + i * h * 0.26).toFixed(2)}" r="${(size * 0.055).toFixed(2)}" fill-opacity="0.5"/>`;
+    }
+  }
+  const inner =
+    `<path d="M${(cx - w).toFixed(2)} ${(cy - h * 0.5).toFixed(2)} Q${(cx - w * 1.05).toFixed(2)} ${(cy - h).toFixed(2)} ${cx.toFixed(2)} ${(cy - h).toFixed(2)} Q${(cx + w * 1.05).toFixed(2)} ${(cy - h).toFixed(2)} ${(cx + w).toFixed(2)} ${(cy - h * 0.5).toFixed(2)} L${(cx + w * 0.82).toFixed(2)} ${(cy + h * 0.1).toFixed(2)} Q${cx.toFixed(2)} ${(cy + h * 0.22).toFixed(2)} ${(cx - w * 0.82).toFixed(2)} ${(cy + h * 0.1).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w * 0.86).toFixed(2)} ${(cy + h * 0.36).toFixed(2)} Q${cx.toFixed(2)} ${(cy + h * 0.24).toFixed(2)} ${(cx + w * 0.86).toFixed(2)} ${(cy + h * 0.36).toFixed(2)} L${(cx + w * 0.74).toFixed(2)} ${(cy + h).toFixed(2)} Q${cx.toFixed(2)} ${(cy + h * 1.12).toFixed(2)} ${(cx - w * 0.74).toFixed(2)} ${(cy + h).toFixed(2)} Z"/>` +
+    studs;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** A single laurel leaf, big. The forest this island walks through, as mass. */
+function centreLeaf(cx, cy, size, base, spec) {
+  const h = size * 0.62;
+  const w = size * 0.3;
+  const inner =
+    `<path d="M${cx.toFixed(2)} ${(cy - h).toFixed(2)} Q${(cx + w * 1.5).toFixed(2)} ${(cy - h * 0.1).toFixed(2)} ${cx.toFixed(2)} ${(cy + h).toFixed(2)} Q${(cx - w * 1.5).toFixed(2)} ${(cy - h * 0.1).toFixed(2)} ${cx.toFixed(2)} ${(cy - h).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - size * 0.035).toFixed(2)} ${(cy - h * 0.86).toFixed(2)} L${(cx + size * 0.035).toFixed(2)} ${(cy - h * 0.86).toFixed(2)} L${(cx + size * 0.035).toFixed(2)} ${(cy + h).toFixed(2)} L${(cx - size * 0.035).toFixed(2)} ${(cy + h).toFixed(2)} Z" fill-opacity="0.45"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** An anchor. Nautical, and the app is named for a ship's bow. */
+function centreAnchor(cx, cy, size, base, spec) {
+  const h = size * 0.58;
+  const w = size * 0.44;
+  const t = size * 0.075;
+  const inner =
+    `<circle cx="${cx.toFixed(2)}" cy="${(cy - h * 0.86).toFixed(2)}" r="${(size * 0.15).toFixed(2)}"/>` +
+    `<circle cx="${cx.toFixed(2)}" cy="${(cy - h * 0.86).toFixed(2)}" r="${(size * 0.07).toFixed(2)}" fill="#000" fill-opacity="0.001"/>` +
+    `<path d="M${(cx - t).toFixed(2)} ${(cy - h * 0.72).toFixed(2)} L${(cx + t).toFixed(2)} ${(cy - h * 0.72).toFixed(2)} L${(cx + t).toFixed(2)} ${(cy + h).toFixed(2)} L${(cx - t).toFixed(2)} ${(cy + h).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w * 0.72).toFixed(2)} ${(cy - h * 0.42).toFixed(2)} L${(cx + w * 0.72).toFixed(2)} ${(cy - h * 0.42).toFixed(2)} L${(cx + w * 0.72).toFixed(2)} ${(cy - h * 0.24).toFixed(2)} L${(cx - w * 0.72).toFixed(2)} ${(cy - h * 0.24).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w).toFixed(2)} ${(cy + h * 0.24).toFixed(2)} Q${(cx - w * 0.9).toFixed(2)} ${(cy + h * 0.92).toFixed(2)} ${cx.toFixed(2)} ${(cy + h * 0.96).toFixed(2)} Q${(cx + w * 0.9).toFixed(2)} ${(cy + h * 0.92).toFixed(2)} ${(cx + w).toFixed(2)} ${(cy + h * 0.24).toFixed(2)} L${(cx + w * 0.72).toFixed(2)} ${(cy + h * 0.3).toFixed(2)} Q${(cx + w * 0.62).toFixed(2)} ${(cy + h * 0.7).toFixed(2)} ${cx.toFixed(2)} ${(cy + h * 0.72).toFixed(2)} Q${(cx - w * 0.62).toFixed(2)} ${(cy + h * 0.7).toFixed(2)} ${(cx - w * 0.72).toFixed(2)} ${(cy + h * 0.3).toFixed(2)} Z"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
 /* ------------------------------------------------ centres, first pass */
 
 /** The mark standing proud of the surface rather than pressed into it. */
@@ -733,6 +847,13 @@ function sealParts(id, tier, size, ring, centre) {
     numeral: () => centreNumeral(c, cy2, 46 * k, base, spec, tier),
     stars: () => centreStars(c, cy2, 46 * k, base, spec, tier),
     bigmark: () => centreBigMark(c, cy2, 46 * k, base, spec),
+    houses: () => centreHouses(c, cy2, 46 * k, base, spec),
+    house: () => centreHouse(c, cy2, 46 * k, base, spec),
+    terraces: () => centreTerraces(c, cy2, 46 * k, base, spec),
+    peak: () => centrePeak(c, cy2, 46 * k, base, spec),
+    boot: () => centreBoot(c, cy2, 46 * k, base, spec),
+    leaf: () => centreLeaf(c, cy2, 46 * k, base, spec),
+    anchor: () => centreAnchor(c, cy2, 46 * k, base, spec),
   };
 
   return `
@@ -789,14 +910,14 @@ const RING_OPTIONS = [
 ];
 
 const CENTRE_OPTIONS = [
-  ['deboss', 'The app mark (control)', 'What is there now, unchanged, so everything else has something to be judged against.'],
-  ['compass', 'Compass rose', 'Four long points and four short — a rose. Four equal points would be a cross, eight equal ones the spoke pattern this whole thread has been avoiding. Navigation, and generic to every sea there is.'],
-  ['prow', 'A prow', '⚠ The one option that is about <i>this product</i> rather than travel in general: the app is named for a ship’s bow. A name is ours; a coastline would be the island’s, and D-017 forbids that.'],
-  ['contour', 'Contour rings', 'What a walking map is actually made of. ⚠ Irregular and nested, never concentric — contours are the one repeated ring that cannot read as a token, because no two are the same shape.'],
-  ['trace', 'A walked path', 'A line with both ends marked. The only centre that is a picture of <i>what the app does</i> rather than of where it does it.'],
-  ['numeral', 'Roman numeral', 'I, II, III, IV. The oldest medal convention there is, and it says the rank outright instead of implying it.'],
-  ['stars', 'One star per rank', '⚠ The most legible rank signal of all — you can <i>count</i> it — and the most gamey. Here so the trade can be looked at rather than assumed.'],
-  ['bigmark', 'The mark, filling the well', 'Not a new drawing: the existing mark at half again the size, so it owns the space instead of sitting politely in it. ⚠ Scale is a design decision that costs nothing.'],
+  ['deboss', 'The app mark (control)', 'Unchanged, so everything else has something to be judged against.'],
+  ['houses', 'Gabled cottages', '⚠ <b>The project lead’s suggestion.</b> Three steep-gabled houses on a slope, drawn as solid triangles. A <i>Santana palheiro</i> is island knowledge and may not live in <code>app/</code>; a steep gable is a <b>building typology</b>, which is why <code>stampArt.ts</code> can already draw "rooftops on a slope" for the village category.'],
+  ['house', 'One cottage, filling the well', 'The same idea reduced to a single silhouette. ⚠ The boldest outline on offer, and the one most likely to survive 44 dp.'],
+  ['terraces', 'Terraces', 'Cultivated hillside as four solid stepped bands. Mass, and a shape that is recognisable even when it is tiny.'],
+  ['peak', 'A peak above cloud', 'Two masses playing against each other — a hard triangle and a soft bank of cloud. The most scenic, and the most likely to look like a stock icon.'],
+  ['boot', 'A boot sole', 'Nothing says <i>walking</i> more directly, and a sole is a strong closed shape with texture built into it.'],
+  ['leaf', 'A laurel leaf', 'One big leaf. Simple, calm, and the forest most of these walks pass through.'],
+  ['anchor', 'An anchor', 'Nautical, and the app is named for a ship’s bow. Heavy, symmetrical, unmistakable at any size.'],
 ];
 
 const STUDY = 132;
@@ -881,22 +1002,29 @@ ${RING_OPTIONS.map(([id, title, note]) => `
   <div style="max-width:46ch;color:#A0A0A8;font-size:14px;align-self:center">${note}</div>
 </div>`).join('')}
 
-<h2>The centre — eight options, and this time they are different <i>things</i></h2>
+<h2>The centre — mass instead of line</h2>
 <p class="note">
-  ⚠⚠ <b>The first six were one drawing with six surface treatments</b> — the app's
-  mark with the light moved around. These are different <i>things to put there</i>.
+  ⚠⚠ <b>"All of those new are a bit weak."</b> They were, and the reason is worth
+  naming: <b>the last pass was mostly line work</b> — contours, a trace, a compass.
+  Thin strokes and open shapes. A medal centre is read at <b>64 dp on a moving
+  map</b>, and at that size a stroke is a smudge. <b>What survives is mass:</b> a
+  solid silhouette with weight and one clear outline. Everything below is filled
+  shapes.
   <br><br>
-  ⚠ <b>The obvious one is forbidden.</b> The island's silhouette is what a Madeira
-  app would put in the middle of its medal, and <b>D-017 is absolute: no Madeira
-  knowledge in <code>app/</code></b>. A coastline is island knowledge of the purest
-  kind. Out by rule, not by taste — and everything below would be as correct for
-  the Azores.
+  ⚠ <b>On the houses, and D-017.</b> A <i>Santana palheiro</i> is island knowledge
+  and may not live in <code>app/</code>. <b>A steep-gabled cottage is a building
+  typology</b>, not a fact about an island — which is why <code>stampArt.ts</code>
+  can already draw "a church tower and rooftops on a slope" for the village
+  category. What would break the rule is <i>naming</i> it Madeiran here, or
+  shipping a coastline.
   <br><br>
-  Same discipline as the rings: everything else frozen, including the cord. Gold,
-  bronze, and the real 64 dp button. ⚠ Two of them — <b>numeral</b> and
-  <b>stars</b> — change with the rank, so the bronze column shows a different
-  glyph on purpose.
-</p>
+  ⚠ <b>And it may belong somewhere better than this.</b> D-079 built per-place
+  motifs whose assignment lives in <code>content/</code>. A gabled house is a far
+  stronger <b>village motif</b> than it is a rank medal — there, the content gets
+  to say which villages have earned it, and the rank medal stays about the rank.
+  <br><br>
+  Same discipline: everything else frozen, including the cord ring. Gold, bronze,
+  and the real 64 dp button.</p>
 ${CENTRE_OPTIONS.map(([id, title, note]) => `
 <div class="row">
   <figure>${sealParts(`CG-${id}`, 'gold', STUDY, 'cord', id)}<figcaption>${title}</figcaption></figure>

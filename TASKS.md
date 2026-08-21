@@ -836,6 +836,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **`numeral` and `stars` change with the rank**, so the bronze column shows a different
       glyph on purpose. Stars are the most legible rank signal there is — you can *count* them —
       and the most gamey; drawn so the trade can be looked at rather than assumed.
+      **9.** ⚠ *"All of those new are a bit weak. Try exploring Madeira typical houses silhouette."*
+      **They were weak, and the diagnosis is reusable: the second pass was mostly line work** —
+      contours, a trace, a compass, all thin strokes and open shapes. **A medal centre is read at
+      64 dp on a moving map, and at that size a stroke is a smudge.** What survives is **mass**: a
+      solid silhouette with weight and one clear outline. Seven new centres, all filled shapes —
+      gabled cottages, one cottage filling the well, terraces, a peak above cloud, a boot sole, a
+      laurel leaf, an anchor.
+      — ⚠⚠ **THE HOUSES AND D-017.** A *Santana palheiro* is island knowledge and may not live in
+      `app/`. **A steep-gabled cottage is a building typology, not a fact about an island** — which
+      is precisely why `stampArt.ts` has always been able to draw *"a church tower and rooftops on
+      a slope"* for the village category. What would break the rule is **naming** it Madeiran in
+      `app/`, or shipping a coastline. Drawn on that basis, and the reasoning is recorded so nobody
+      has to re-derive whether it was allowed.
+      — ⚠ **BUT IT PROBABLY BELONGS SOMEWHERE ELSE.** D-079 built per-place motifs whose assignment
+      lives in `content/`. **A gabled house is a far stronger village *motif* than it is a rank
+      medal**: there the content decides which villages have earned it, the island knowledge stays
+      where it belongs, and the rank medal stays about the rank. **Worth settling before anything
+      is promoted.**
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

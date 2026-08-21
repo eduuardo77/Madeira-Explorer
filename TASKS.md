@@ -820,6 +820,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **`bare` and `number` exist to test the assumption, not to be chosen.** No ring at all is
       the only way to know how much the ring contributes; the count alone is the only way to know
       whether the mark is even the most interesting thing to put in the middle.
+      **8.** ⚠ **The six centres were one drawing with six surface treatments** — pressed, proud,
+      cut through, on a cartouche, keylined — all the app's mark with the light moved around. The
+      project lead asked for *different* centres and was right that those were not. Eight now, and
+      they are different **things**: compass rose, a prow, contour rings, a walked path, Roman
+      numeral, one star per rank, the mark filling the well, and the mark as control.
+      — ⚠⚠ **THE OBVIOUS ONE IS FORBIDDEN, AND IT IS WORTH RECORDING WHY.** The island's silhouette
+      is what a Madeira app would put in the middle of its medal. **D-017 is absolute: no Madeira
+      knowledge in `app/`**, and a coastline is island knowledge of the purest kind. It would have
+      to be handed in from `content/` — which for a *rank* medal, shown before anything has been
+      collected, makes no sense anyway. **Out by rule, not by taste.** Everything drawn would be as
+      correct for the Azores.
+      — **The prow is the one exception that costs nothing:** it is the app's own *name*
+      (`brand.ts`), not its geography. A name is ours; a coastline is the island's.
+      — ⚠ **`numeral` and `stars` change with the rank**, so the bronze column shows a different
+      glyph on purpose. Stars are the most legible rank signal there is — you can *count* them —
+      and the most gamey; drawn so the trade can be looked at rather than assumed.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

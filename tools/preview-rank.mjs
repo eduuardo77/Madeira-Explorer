@@ -470,7 +470,169 @@ function ringHairline(cx, cy, r, base, k) {
     <circle cx="${cx}" cy="${cy}" r="${(r - 2.2 * k).toFixed(2)}" fill="none" stroke="${shade(base, -0.55)}" stroke-opacity="0.55" stroke-width="${(0.9 * k).toFixed(2)}"/>`;
 }
 
-/* --------------------------------------------------------------- centres */
+
+/* ------------------------------------------------- centres, second pass */
+
+/*
+ * ⚠⚠ **THE FIRST SIX WERE ONE DRAWING WITH SIX SURFACE TREATMENTS.**
+ * Pressed in, standing proud, cut through, on a cartouche, with a keyline —
+ * every one of them was the app's mark with the light moved around. The project
+ * lead asked for *different* centres, and they were right that those were not.
+ * These are different **things to put there**.
+ *
+ * ⚠⚠ **THE OBVIOUS ONE IS FORBIDDEN AND IT IS WORTH SAYING SO.** The island's
+ * silhouette is what a Madeira app would put in the middle of its medal. **D-017
+ * is absolute: no Madeira knowledge in `app/`.** A coastline is island knowledge
+ * of the purest kind, and it would have to live in `content/` and be handed in —
+ * which for a *rank* medal, shown before you have collected anything, makes no
+ * sense. So it is out by rule, not by taste.
+ *
+ * Everything below is generic: it would be as correct for the Azores.
+ */
+
+/** A raised plate to sit a device on, so it is not floating in the well. */
+function plate(cx, cy, r, base, k) {
+  return `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r.toFixed(2)}" fill="${shade(base, -0.1)}"/>
+    <circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r.toFixed(2)}" fill="none" stroke="${shade(base, 0.55)}" stroke-opacity="0.45" stroke-width="${(0.9 * k).toFixed(2)}"/>`;
+}
+
+/** Three passes: shadow below, lit lip above, body over both. */
+function pressed(inner, cx, cy, base, spec, size) {
+  const lift = Math.max(0.7, size * (0.028 + spec * 0.016));
+  return (
+    `<g transform="translate(0 ${lift.toFixed(2)})" fill="${shade(base, -0.68)}" fill-opacity="0.9">${inner}</g>` +
+    `<g transform="translate(0 ${(-lift * 0.75).toFixed(2)})" fill="${shade(base, 0.62)}" fill-opacity="0.55">${inner}</g>` +
+    `<g fill="${shade(base, -0.26)}">${inner}</g>`
+  );
+}
+
+/**
+ * A compass rose. Navigation, and generic to every sea on earth.
+ *
+ * ⚠ Four long points and four short, which is what a rose is; four equal points
+ * would be a cross and eight equal ones would be the spoke pattern this whole
+ * thread has been avoiding.
+ */
+function centreCompass(cx, cy, size, base, spec) {
+  const R = size * 0.5;
+  const pt = (r, a) => `${(cx + Math.cos(a) * r).toFixed(2)} ${(cy + Math.sin(a) * r).toFixed(2)}`;
+  let d = '';
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+    const long = i % 2 === 0;
+    const reach = long ? R : R * 0.52;
+    const w = R * (long ? 0.13 : 0.1);
+    d += `M${pt(reach, a)} L${pt(w, a + Math.PI / 8)} L${pt(w * 0.9, a - Math.PI / 8)} Z `;
+  }
+  const inner = `<path d="${d}" fill-rule="nonzero"/><circle cx="${cx.toFixed(2)}" cy="${(cy - R * 0.86).toFixed(2)}" r="${(R * 0.09).toFixed(2)}"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/**
+ * A prow, seen head on — the app's own name (`brand.ts`), not its geography.
+ *
+ * ⚠ This is the one centre that is *about the product* rather than about
+ * travel in general, and it costs nothing under D-017: a name is ours, a
+ * coastline is the island's.
+ */
+function centreProw(cx, cy, size, base, spec) {
+  const w = size * 0.46;
+  const h = size * 0.5;
+  const inner =
+    `<path d="M${cx.toFixed(2)} ${(cy - h).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} L${(cx + w * 0.52).toFixed(2)} ${(cy + h * 0.86).toFixed(2)} L${cx.toFixed(2)} ${(cy - h * 0.1).toFixed(2)} L${(cx - w * 0.52).toFixed(2)} ${(cy + h * 0.86).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} Z"/>` +
+    `<path d="M${(cx - w * 0.86).toFixed(2)} ${(cy + h * 0.2).toFixed(2)} L${(cx + w * 0.86).toFixed(2)} ${(cy + h * 0.2).toFixed(2)} L${(cx + w * 0.78).toFixed(2)} ${(cy + h * 0.36).toFixed(2)} L${(cx - w * 0.78).toFixed(2)} ${(cy + h * 0.36).toFixed(2)} Z"/>`;
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/**
+ * Contour rings — what a walking map is actually made of.
+ *
+ * ⚠ Irregular and nested, never concentric circles: contours are the one
+ * repeated ring that cannot read as a token, because no two are the same shape.
+ */
+function centreContour(cx, cy, size, base, spec) {
+  let inner = '';
+  for (let j = 0; j < 4; j += 1) {
+    const R = size * (0.5 - j * 0.11);
+    let d = '';
+    for (let i = 0; i <= 40; i += 1) {
+      const a = (i / 40) * Math.PI * 2;
+      const rr = R * (1 + Math.sin(a * 3 + j * 1.2) * 0.16 + Math.sin(a * 5 - j) * 0.07);
+      d += `${i === 0 ? 'M' : 'L'}${(cx + Math.cos(a) * rr).toFixed(2)} ${(cy + Math.sin(a) * rr * 0.86).toFixed(2)} `;
+    }
+    inner += `<path d="${d}Z" fill="none" stroke-width="${(size * 0.055).toFixed(2)}"/>`;
+  }
+  // Contours are strokes, so the three passes need stroke rather than fill.
+  const lift = Math.max(0.7, size * 0.03);
+  const layer = (dy, col, op) =>
+    `<g transform="translate(0 ${dy.toFixed(2)})" stroke="${col}" stroke-opacity="${op}" fill="none">${inner}</g>`;
+  return (
+    layer(lift, shade(base, -0.68), 0.9) +
+    layer(-lift * 0.75, shade(base, 0.62), 0.5) +
+    layer(0, shade(base, -0.26), 1)
+  );
+}
+
+/**
+ * A walked path with its two ends marked — the product's own core object.
+ *
+ * ⚠ The one centre that is a picture of *what the app does* rather than of
+ * where it does it.
+ */
+function centreTrace(cx, cy, size, base, spec) {
+  const w = size * 0.52;
+  const d = `M${(cx - w).toFixed(2)} ${(cy + size * 0.22).toFixed(2)} C${(cx - w * 0.4).toFixed(2)} ${(cy + size * 0.4).toFixed(2)} ${(cx - w * 0.5).toFixed(2)} ${(cy - size * 0.16).toFixed(2)} ${cx.toFixed(2)} ${(cy - size * 0.06).toFixed(2)} C${(cx + w * 0.5).toFixed(2)} ${(cy + size * 0.04).toFixed(2)} ${(cx + w * 0.3).toFixed(2)} ${(cy - size * 0.42).toFixed(2)} ${(cx + w).toFixed(2)} ${(cy - size * 0.3).toFixed(2)}`;
+  const inner = `<path d="${d}" fill="none" stroke-width="${(size * 0.1).toFixed(2)}" stroke-linecap="round"/>`;
+  const dots = `<circle cx="${(cx - w).toFixed(2)}" cy="${(cy + size * 0.22).toFixed(2)}" r="${(size * 0.1).toFixed(2)}"/><circle cx="${(cx + w).toFixed(2)}" cy="${(cy - size * 0.3).toFixed(2)}" r="${(size * 0.1).toFixed(2)}"/>`;
+  const lift = Math.max(0.7, size * 0.03);
+  const layer = (dy, col, op) =>
+    `<g transform="translate(0 ${dy.toFixed(2)})" stroke="${col}" stroke-opacity="${op}" fill="${col}" fill-opacity="${op}">${inner}${dots}</g>`;
+  return (
+    layer(lift, shade(base, -0.68), 0.9) +
+    layer(-lift * 0.75, shade(base, 0.62), 0.5) +
+    layer(0, shade(base, -0.26), 1)
+  );
+}
+
+/** A Roman numeral for the rank. The oldest medal convention there is. */
+function centreNumeral(cx, cy, size, base, spec, tier) {
+  const numerals = { none: '–', bronze: 'I', silver: 'II', gold: 'III', platinum: 'IV' };
+  return engraved(numerals[tier] ?? 'I', cx, cy + size * 0.34, size * 0.95, base);
+}
+
+/**
+ * One star per rank, up to four.
+ *
+ * ⚠ The most legible rank signal of all — you can count it — and the most
+ * gamey. Included so the trade can be looked at rather than assumed.
+ */
+function centreStars(cx, cy, size, base, spec, tier) {
+  const count = { none: 0, bronze: 1, silver: 2, gold: 3, platinum: 4 }[tier] ?? 1;
+  if (count === 0) {
+    return engraved('–', cx, cy + size * 0.3, size * 0.8, base);
+  }
+  const R = size * (count > 2 ? 0.2 : 0.26);
+  const gap = R * 2.3;
+  let inner = '';
+  for (let n = 0; n < count; n += 1) {
+    const sx = cx + (n - (count - 1) / 2) * gap;
+    let d = '';
+    for (let i = 0; i < 10; i += 1) {
+      const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+      const rr = i % 2 === 0 ? R : R * 0.42;
+      d += `${i === 0 ? 'M' : 'L'}${(sx + Math.cos(a) * rr).toFixed(2)} ${(cy + Math.sin(a) * rr).toFixed(2)} `;
+    }
+    inner += `<path d="${d}Z"/>`;
+  }
+  return pressed(inner, cx, cy, base, spec, size);
+}
+
+/** The app's mark, but filling the well instead of sitting politely in it. */
+function centreBigMark(cx, cy, size, base, spec) {
+  return debossDeep(cx, cy, size * 1.5, base, spec);
+}
+
+/* ------------------------------------------------ centres, first pass */
 
 /** The mark standing proud of the surface rather than pressed into it. */
 function centreEmboss(cx, cy, size, base, spec) {
@@ -556,13 +718,21 @@ function sealParts(id, tier, size, ring, centre) {
     bare: () => '',
   };
 
+  const cy2 = c - 9 * k;
   const centres = {
-    deboss: () => debossDeep(c, c - 9 * k, 46 * k, base, spec),
-    emboss: () => centreEmboss(c, c - 9 * k, 46 * k, base, spec),
-    cutout: () => centreCutout(c, c - 9 * k, 46 * k, base),
-    cartouche: () => centreCartouche(c, c - 9 * k, 46 * k, base, spec, k),
-    keyline: () => centreKeyline(c, c - 9 * k, 44 * k, base, spec, k),
-    number: () => centreNumber(c, c - 9 * k, 46 * k, base),
+    deboss: () => debossDeep(c, cy2, 46 * k, base, spec),
+    emboss: () => centreEmboss(c, cy2, 46 * k, base, spec),
+    cutout: () => centreCutout(c, cy2, 46 * k, base),
+    cartouche: () => centreCartouche(c, cy2, 46 * k, base, spec, k),
+    keyline: () => centreKeyline(c, cy2, 44 * k, base, spec, k),
+    number: () => centreNumber(c, cy2, 46 * k, base),
+    compass: () => centreCompass(c, cy2, 46 * k, base, spec),
+    prow: () => centreProw(c, cy2, 46 * k, base, spec),
+    contour: () => centreContour(c, cy2, 46 * k, base, spec),
+    trace: () => centreTrace(c, cy2, 46 * k, base, spec),
+    numeral: () => centreNumeral(c, cy2, 46 * k, base, spec, tier),
+    stars: () => centreStars(c, cy2, 46 * k, base, spec, tier),
+    bigmark: () => centreBigMark(c, cy2, 46 * k, base, spec),
   };
 
   return `
@@ -619,12 +789,14 @@ const RING_OPTIONS = [
 ];
 
 const CENTRE_OPTIONS = [
-  ['deboss', 'Pressed in', 'The current one, as the control. Shadow above, lit lip below.'],
-  ['emboss', 'Standing proud', 'The same three passes with the offsets swapped. ⚠ Emboss versus deboss is nothing but which side the shadow falls on — and the eye flips the whole surface.'],
-  ['cutout', 'Cut through', 'The mark is a hole with the dark showing behind it. The most graphic, and the only one that does not depend on the metal for contrast.'],
-  ['cartouche', 'On a cartouche', 'A raised panel behind the mark, the way arms sit on a shield.'],
-  ['keyline', 'With a keyline', 'A hairline outline around the pressed mark, like a die-struck edge.'],
-  ['number', 'The number alone', '⚠ No mark at all — the count is the centre. Included because the mark may simply not be the most interesting thing to put there.'],
+  ['deboss', 'The app mark (control)', 'What is there now, unchanged, so everything else has something to be judged against.'],
+  ['compass', 'Compass rose', 'Four long points and four short — a rose. Four equal points would be a cross, eight equal ones the spoke pattern this whole thread has been avoiding. Navigation, and generic to every sea there is.'],
+  ['prow', 'A prow', '⚠ The one option that is about <i>this product</i> rather than travel in general: the app is named for a ship’s bow. A name is ours; a coastline would be the island’s, and D-017 forbids that.'],
+  ['contour', 'Contour rings', 'What a walking map is actually made of. ⚠ Irregular and nested, never concentric — contours are the one repeated ring that cannot read as a token, because no two are the same shape.'],
+  ['trace', 'A walked path', 'A line with both ends marked. The only centre that is a picture of <i>what the app does</i> rather than of where it does it.'],
+  ['numeral', 'Roman numeral', 'I, II, III, IV. The oldest medal convention there is, and it says the rank outright instead of implying it.'],
+  ['stars', 'One star per rank', '⚠ The most legible rank signal of all — you can <i>count</i> it — and the most gamey. Here so the trade can be looked at rather than assumed.'],
+  ['bigmark', 'The mark, filling the well', 'Not a new drawing: the existing mark at half again the size, so it owns the space instead of sitting politely in it. ⚠ Scale is a design decision that costs nothing.'],
 ];
 
 const STUDY = 132;
@@ -709,10 +881,21 @@ ${RING_OPTIONS.map(([id, title, note]) => `
   <div style="max-width:46ch;color:#A0A0A8;font-size:14px;align-self:center">${note}</div>
 </div>`).join('')}
 
-<h2>The centre — six options</h2>
+<h2>The centre — eight options, and this time they are different <i>things</i></h2>
 <p class="note">
-  ⚠ Same discipline: everything else is frozen, including the cord ring. Gold,
-  bronze, and the real 64 dp button.
+  ⚠⚠ <b>The first six were one drawing with six surface treatments</b> — the app's
+  mark with the light moved around. These are different <i>things to put there</i>.
+  <br><br>
+  ⚠ <b>The obvious one is forbidden.</b> The island's silhouette is what a Madeira
+  app would put in the middle of its medal, and <b>D-017 is absolute: no Madeira
+  knowledge in <code>app/</code></b>. A coastline is island knowledge of the purest
+  kind. Out by rule, not by taste — and everything below would be as correct for
+  the Azores.
+  <br><br>
+  Same discipline as the rings: everything else frozen, including the cord. Gold,
+  bronze, and the real 64 dp button. ⚠ Two of them — <b>numeral</b> and
+  <b>stars</b> — change with the rank, so the bronze column shows a different
+  glyph on purpose.
 </p>
 ${CENTRE_OPTIONS.map(([id, title, note]) => `
 <div class="row">

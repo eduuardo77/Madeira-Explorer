@@ -854,6 +854,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       medal**: there the content decides which villages have earned it, the island knowledge stays
       where it belongs, and the rank medal stays about the rank. **Worth settling before anything
       is promoted.**
+      **10.** *"I want the center to buy the typical Madeira / Portuguese cross."* Five versions of
+      the **Cruz de Cristo** — the Order of Christ cross, painted on the sails of the caravels:
+      two-tone with the plain cross inset, solid silhouette, cut through, **on a sail**, and ringed.
+      — ⚠⚠ **IT BINDS THE PRODUCT TO PORTUGAL, AND THAT IS A REAL COST WORTH RECORDING.** It puts no
+      Madeira *fact* into `app/`, so D-017 is not literally broken — it is national iconography, not
+      island geography. **But D-017 exists so this app could ship for another island by swapping
+      `content/`**, and a Portuguese cross on the rank medal would have to be removed to do that
+      where a cottage or an anchor would not. **The project lead's call, taken knowingly**, and
+      written here so that when somebody later asks *"why is there a cross in the chrome?"* the
+      answer exists rather than being re-litigated.
+      — ⚠ The symbol is centuries old and freely used. **There is no rights question, only a
+      positioning one.**
+      — ⚠ **The inner cross is the first thing to vanish when the medal gets small**, and two tones
+      are the whole of what makes it *that* cross rather than any cross — which is why the solid
+      version is drawn beside it and why the 64 dp column is the one that decides.
+      — **`crossSail` is the most specific to this app of anything drawn in ten rounds:** a
+      caravel's sail carrying the cross, for an app named after the prow of the same ship.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

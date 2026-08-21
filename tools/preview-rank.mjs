@@ -746,6 +746,128 @@ function centreAnchor(cx, cy, size, base, spec) {
   return pressed(inner, cx, cy, base, spec, size);
 }
 
+
+/* ------------------------------------------------ centres, the cross */
+
+/*
+ * ⚠⚠ **THE CROSS OF CHRIST, AND WHAT IT COMMITS THE APP TO.**
+ * The project lead asked for *"the typical Madeira / Portuguese cross"* in the
+ * centre. This is the **Cruz de Cristo** — the cross of the Order of Christ,
+ * painted on the sails of the caravels. For an app named after a ship's **prow**
+ * that is the same world, and it is national iconography rather than island
+ * geography, so it does not put a Madeira *fact* into `app/`.
+ *
+ * ⚠ **But it does bind the product to Portugal in a way nothing else here
+ * does.** D-017 exists so the app could ship for another island by swapping
+ * `content/`; a Portuguese cross on the rank medal would have to be removed to
+ * do that, where a gabled cottage or an anchor would not. **That is a real cost,
+ * it is the project lead's to accept, and it is written here so the day somebody
+ * asks "why is there a cross in the chrome?" the answer exists.**
+ *
+ * ⚠ The symbol itself is centuries old and freely used; there is no rights
+ * question, only a positioning one.
+ */
+
+/**
+ * A cross pattée — arms that flare from a narrow waist to a wide tip.
+ *
+ * Built by walking one arm's four corners and rotating it four times, so the
+ * whole thing is a single closed path and the fill rule never has to guess.
+ */
+function crossPattee(cx, cy, R, waist, tip) {
+  const pts = [];
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    // The up arm, in local space, then rotated: (-waist,-waist) → (-tip,-R) →
+    // (tip,-R) → (waist,-waist).
+    const local = [
+      [-waist, -waist],
+      [-tip, -R],
+      [tip, -R],
+      [waist, -waist],
+    ];
+    for (const [x, y] of local) {
+      pts.push([cx + x * cos - y * sin, cy + x * sin + y * cos]);
+    }
+  }
+  return 'M' + pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L') + ' Z';
+}
+
+/** A plain Greek cross — equal arms, constant width. The inner one. */
+function crossPlain(cx, cy, R, w) {
+  return `M${(cx - w).toFixed(2)} ${(cy - R).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy - R).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy - w).toFixed(2)} L${(cx + R).toFixed(2)} ${(cy - w).toFixed(2)} L${(cx + R).toFixed(2)} ${(cy + w).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy + w).toFixed(2)} L${(cx + w).toFixed(2)} ${(cy + R).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy + R).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy + w).toFixed(2)} L${(cx - R).toFixed(2)} ${(cy + w).toFixed(2)} L${(cx - R).toFixed(2)} ${(cy - w).toFixed(2)} L${(cx - w).toFixed(2)} ${(cy - w).toFixed(2)} Z`;
+}
+
+/**
+ * The Cross of Christ: the flared cross with a plain one inset.
+ *
+ * ⚠ Two tones, which is the whole of what makes it *that* cross rather than
+ * any cross. The inner one is lighter, so it reads on metal the way the white
+ * inner cross reads on the red.
+ */
+function centreCrossChrist(cx, cy, size, base, spec) {
+  const R = size * 0.56;
+  const outer = crossPattee(cx, cy, R, size * 0.1, size * 0.32);
+  const inner = crossPlain(cx, cy, R * 0.92, size * 0.055);
+  return (
+    pressed(`<path d="${outer}"/>`, cx, cy, base, spec, size) +
+    `<path d="${inner}" fill="${shade(base, 0.62)}" fill-opacity="0.9"/>` +
+    `<path d="${inner}" fill="none" stroke="${shade(base, -0.55)}" stroke-opacity="0.35" stroke-width="${(size * 0.012).toFixed(2)}"/>`
+  );
+}
+
+/** The same cross as one solid silhouette. Simpler, and stronger when small. */
+function centreCrossSolid(cx, cy, size, base, spec) {
+  const R = size * 0.56;
+  return pressed(`<path d="${crossPattee(cx, cy, R, size * 0.1, size * 0.32)}"/>`, cx, cy, base, spec, size);
+}
+
+/** The cross cut clean through, with the dark of the well showing behind. */
+function centreCrossCut(cx, cy, size, base, spec) {
+  const R = size * 0.56;
+  const outer = crossPattee(cx, cy, R, size * 0.1, size * 0.32);
+  const inner = crossPlain(cx, cy, R * 0.92, size * 0.055);
+  return (
+    `<path d="${outer}" transform="translate(0 ${(-size * 0.028).toFixed(2)})" fill="${shade(base, 0.6)}" fill-opacity="0.5"/>` +
+    `<path d="${outer}" fill="#05070A" fill-opacity="0.9"/>` +
+    `<path d="${inner}" fill="${shade(base, 0.5)}" fill-opacity="0.85"/>`
+  );
+}
+
+/**
+ * The cross on a sail, which is where it actually lived.
+ *
+ * ⚠ The most specific to this app of any centre drawn so far: a caravel's sail
+ * carrying the cross, for an app named after the prow of the same ship.
+ */
+function centreCrossSail(cx, cy, size, base, spec) {
+  const w = size * 0.52;
+  const h = size * 0.62;
+  const sail = `M${(cx - w).toFixed(2)} ${(cy - h).toFixed(2)} Q${(cx + w * 0.5).toFixed(2)} ${(cy - h * 0.86).toFixed(2)} ${(cx + w).toFixed(2)} ${(cy + h * 0.2).toFixed(2)} Q${(cx + w * 0.2).toFixed(2)} ${(cy + h * 0.62).toFixed(2)} ${(cx - w).toFixed(2)} ${(cy + h * 0.5).toFixed(2)} Z`;
+  const R = size * 0.3;
+  const outer = crossPattee(cx - size * 0.02, cy - size * 0.06, R, size * 0.055, size * 0.17);
+  return (
+    pressed(`<path d="${sail}"/>`, cx, cy, base, spec, size) +
+    `<path d="${outer}" fill="${shade(base, -0.62)}" fill-opacity="0.85"/>` +
+    `<path d="${crossPlain(cx - size * 0.02, cy - size * 0.06, R * 0.92, size * 0.028)}" fill="${shade(base, 0.55)}" fill-opacity="0.8"/>`
+  );
+}
+
+/** The cross inside a raised ring, the way an order's badge is mounted. */
+function centreCrossRinged(cx, cy, size, base, spec, k) {
+  const R = size * 0.44;
+  const outer = crossPattee(cx, cy, R, size * 0.08, size * 0.25);
+  const inner = crossPlain(cx, cy, R * 0.92, size * 0.042);
+  return (
+    `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${(size * 0.62).toFixed(2)}" fill="none" stroke="${shade(base, -0.5)}" stroke-opacity="0.5" stroke-width="${(size * 0.055).toFixed(2)}"/>` +
+    `<circle cx="${cx.toFixed(2)}" cy="${(cy - size * 0.02).toFixed(2)}" r="${(size * 0.62).toFixed(2)}" fill="none" stroke="${shade(base, 0.6)}" stroke-opacity="0.4" stroke-width="${(size * 0.02).toFixed(2)}"/>` +
+    pressed(`<path d="${outer}"/>`, cx, cy, base, spec, size) +
+    `<path d="${inner}" fill="${shade(base, 0.62)}" fill-opacity="0.9"/>`
+  );
+}
+
 /* ------------------------------------------------ centres, first pass */
 
 /** The mark standing proud of the surface rather than pressed into it. */
@@ -854,6 +976,11 @@ function sealParts(id, tier, size, ring, centre) {
     boot: () => centreBoot(c, cy2, 46 * k, base, spec),
     leaf: () => centreLeaf(c, cy2, 46 * k, base, spec),
     anchor: () => centreAnchor(c, cy2, 46 * k, base, spec),
+    cross: () => centreCrossChrist(c, cy2, 46 * k, base, spec),
+    crossSolid: () => centreCrossSolid(c, cy2, 46 * k, base, spec),
+    crossCut: () => centreCrossCut(c, cy2, 46 * k, base, spec),
+    crossSail: () => centreCrossSail(c, cy2, 46 * k, base, spec),
+    crossRinged: () => centreCrossRinged(c, cy2, 40 * k, base, spec, k),
   };
 
   return `
@@ -910,14 +1037,14 @@ const RING_OPTIONS = [
 ];
 
 const CENTRE_OPTIONS = [
-  ['deboss', 'The app mark (control)', 'Unchanged, so everything else has something to be judged against.'],
-  ['houses', 'Gabled cottages', '⚠ <b>The project lead’s suggestion.</b> Three steep-gabled houses on a slope, drawn as solid triangles. A <i>Santana palheiro</i> is island knowledge and may not live in <code>app/</code>; a steep gable is a <b>building typology</b>, which is why <code>stampArt.ts</code> can already draw "rooftops on a slope" for the village category.'],
-  ['house', 'One cottage, filling the well', 'The same idea reduced to a single silhouette. ⚠ The boldest outline on offer, and the one most likely to survive 44 dp.'],
-  ['terraces', 'Terraces', 'Cultivated hillside as four solid stepped bands. Mass, and a shape that is recognisable even when it is tiny.'],
-  ['peak', 'A peak above cloud', 'Two masses playing against each other — a hard triangle and a soft bank of cloud. The most scenic, and the most likely to look like a stock icon.'],
-  ['boot', 'A boot sole', 'Nothing says <i>walking</i> more directly, and a sole is a strong closed shape with texture built into it.'],
-  ['leaf', 'A laurel leaf', 'One big leaf. Simple, calm, and the forest most of these walks pass through.'],
-  ['anchor', 'An anchor', 'Nautical, and the app is named for a ship’s bow. Heavy, symmetrical, unmistakable at any size.'],
+  ['cross', 'Cross of Christ', '⚠ <b>The flared cross with a plain one inset</b> — two tones, which is the whole of what makes it <i>that</i> cross rather than any cross. The inner one is lighter, so it reads on metal the way the white inner cross reads on the red.'],
+  ['crossSolid', 'The cross, solid', 'One silhouette, no inset. ⚠ Simpler, and the one most likely to still be a cross at 44 dp — the inner cross is the first thing to disappear when a medal gets small.'],
+  ['crossCut', 'The cross, cut through', 'Cut clean out of the metal with the dark of the well behind it. The most graphic, and the only version that does not need the metal for its contrast.'],
+  ['crossSail', 'The cross on a sail', '⚠ <b>The most specific to this app of anything drawn so far:</b> a caravel’s sail carrying the cross, for an app named after the prow of the same ship.'],
+  ['crossRinged', 'The cross, ringed', 'Mounted inside a raised ring, the way an order’s badge is. ⚠ Adds a second ring inside the cord — worth checking it does not fight it.'],
+  ['deboss', 'The app mark (control)', 'Unchanged, so the crosses have something to be judged against.'],
+  ['house', 'One cottage', 'Kept from the last pass as the other strong silhouette.'],
+  ['anchor', 'An anchor', 'Kept as the other nautical option, and the one that binds the app to no country at all.'],
 ];
 
 const STUDY = 132;
@@ -1002,26 +1129,25 @@ ${RING_OPTIONS.map(([id, title, note]) => `
   <div style="max-width:46ch;color:#A0A0A8;font-size:14px;align-self:center">${note}</div>
 </div>`).join('')}
 
-<h2>The centre — mass instead of line</h2>
+<h2>The centre — the cross</h2>
 <p class="note">
-  ⚠⚠ <b>"All of those new are a bit weak."</b> They were, and the reason is worth
-  naming: <b>the last pass was mostly line work</b> — contours, a trace, a compass.
-  Thin strokes and open shapes. A medal centre is read at <b>64 dp on a moving
-  map</b>, and at that size a stroke is a smudge. <b>What survives is mass:</b> a
-  solid silhouette with weight and one clear outline. Everything below is filled
-  shapes.
+  <b>The Cruz de Cristo</b> — the cross of the Order of Christ, painted on the
+  sails of the caravels. For an app named after a ship's <b>prow</b> that is the
+  same world, and it is national iconography rather than island geography, so it
+  puts no Madeira <i>fact</i> into <code>app/</code>.
   <br><br>
-  ⚠ <b>On the houses, and D-017.</b> A <i>Santana palheiro</i> is island knowledge
-  and may not live in <code>app/</code>. <b>A steep-gabled cottage is a building
-  typology</b>, not a fact about an island — which is why <code>stampArt.ts</code>
-  can already draw "a church tower and rooftops on a slope" for the village
-  category. What would break the rule is <i>naming</i> it Madeiran here, or
-  shipping a coastline.
+  ⚠⚠ <b>But it binds the product to Portugal in a way nothing else here does.</b>
+  D-017 exists so this app could ship for another island by swapping
+  <code>content/</code>. A Portuguese cross on the rank medal would have to be
+  removed to do that; a cottage or an anchor would not. <b>That is a real cost and
+  it is the project lead's to accept</b> — written down so the day somebody asks
+  <i>"why is there a cross in the chrome?"</i>, the answer exists. The symbol
+  itself is centuries old and freely used; there is no rights question, only a
+  positioning one.
   <br><br>
-  ⚠ <b>And it may belong somewhere better than this.</b> D-079 built per-place
-  motifs whose assignment lives in <code>content/</code>. A gabled house is a far
-  stronger <b>village motif</b> than it is a rank medal — there, the content gets
-  to say which villages have earned it, and the rank medal stays about the rank.
+  ⚠ <b>Watch the inner cross at 64 and 44 dp.</b> Two tones are what make it
+  <i>that</i> cross, and the inner one is the first thing to vanish when a medal
+  gets small — which is why the solid version is drawn beside it.
   <br><br>
   Same discipline: everything else frozen, including the cord ring. Gold, bronze,
   and the real 64 dp button.</p>

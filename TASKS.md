@@ -923,6 +923,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **My reading: C** — straight lines throughout with real flare — is the most likely answer
       to *"more like a + with straight lines"* without giving up being a cross at all. But it is
       one click on the page, so the guess costs nothing either way.
+      **14.** *"Sinceramente isto está a parecer uma cruz religiosa ou dos cavaleiros lendários."*
+      ⚠⚠ **Correct, and the fault was a proportion rather than the outline.** On the flag the white
+      cross is **thick** and runs **almost to the tips** of the red one. Mine was thin and stopped
+      short, which leaves the red dominating — **and a big red flared cross with a thin white line
+      through it *is* a Templar cross. The white `+` is the only thing stopping it being one.**
+      — **Two numbers changed and neither is the shape:** the inner cross roughly **doubles in
+      thickness** and reaches **90%** of the red instead of 80%.
+      — ✅ **The flag is now drawn beside the medal**, and beside the old proportion too — same
+      outline in both, only the white cross differs, and the difference is the entire reading.
+      ⚠ **Describing a proportion in prose is what produced four wrong versions.** Putting the real
+      thing next to the drawn thing makes the error obvious in a second. **Compare against the
+      source; do not argue about it** — same habit as the flat shape check, and it should survive
+      into whatever gets promoted.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

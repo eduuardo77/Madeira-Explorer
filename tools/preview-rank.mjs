@@ -750,6 +750,135 @@ function centreAnchor(cx, cy, size, base, spec) {
 
 
 
+
+/* ------------------------------------- the flag itself, for comparison */
+
+/*
+ * ⚠⚠ **"ISTO ESTÁ A PARECER UMA CRUZ RELIGIOSA OU DOS CAVALEIROS LENDÁRIOS."**
+ * Correct, and the fault is a proportion I got wrong rather than the shape being
+ * the wrong shape.
+ *
+ * On the flag, the white cross inside is **thick** and runs **almost to the tips**
+ * of the red one. What I drew had it thin and stopped short, which leaves the red
+ * dominating — and a big red flared cross with a thin white line in it *is* a
+ * Templar cross. **The white `+` is what stops it being one.**
+ *
+ * So two numbers change, and neither is the outline:
+ *
+ *   - the inner cross roughly **doubles in thickness**;
+ *   - it extends from 80% to about **90%** of the red cross's reach.
+ *
+ * ⚠ **And the flag is now drawn beside it.** Describing a proportion in prose is
+ * what produced four wrong versions; putting the real thing next to the drawn
+ * thing makes the error obvious in a second. Same habit as the flat shape check:
+ * **compare against the source, do not argue about it.**
+ */
+
+/** The flag of Madeira: blue, yellow, blue, with the cross centred. */
+function flagPanel(w, crossFn) {
+  const h = Math.round(w * 0.86);
+  const band = w * 0.235;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    <rect width="${w}" height="${h}" fill="#F8D000"/>
+    <rect width="${band.toFixed(2)}" height="${h}" fill="#1F3A78"/>
+    <rect x="${(w - band).toFixed(2)}" width="${band.toFixed(2)}" height="${h}" fill="#1F3A78"/>
+    ${crossFn(w / 2, h / 2, h * 0.42)}
+  </svg>`;
+}
+
+/**
+ * The cross as the flag draws it.
+ *
+ * ⚠ `inner` is the number that was wrong. At `0.1` the red dominates and the
+ * thing is a knight's cross; at `0.2` the white `+` holds its own and it becomes
+ * the flag's.
+ */
+function flagCrossPaths(cx, cy, R, opts = {}) {
+  const waist = R * (opts.waist ?? 0.26);
+  const flare = opts.flare ?? 1.85;
+  const curve = opts.curve ?? 0.9;
+  const inner = R * (opts.inner ?? 0.2);
+  const reach = R * (opts.reach ?? 0.9);
+  return (
+    `<path d="${crossScaled(cx, cy, R, waist, flare, curve)}" fill="${opts.red ?? '#D22630'}"/>` +
+    `<path d="${crossPlain(cx, cy, reach, inner)}" fill="${opts.white ?? '#FFFFFF'}"/>`
+  );
+}
+
+/** The same cross, struck in metal, at the flag's proportions. */
+function sealFlagTrue(id, tier, size, opts = {}) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+  const k = size / 132;
+
+  const light = shade(base, 0.46);
+  const dark = shade(base, -0.46);
+  const deep = shade(base, -0.68);
+  const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
+  const R = r - 26 * k;
+  const waist = R * (opts.waist ?? 0.26);
+  const flare = opts.flare ?? 1.85;
+  const curve = opts.curve ?? 0.9;
+  const outline = crossScaled(c, c, R, waist, flare, curve);
+  const inner = crossPlain(c, c, R * (opts.reach ?? 0.9), R * (opts.inner ?? 0.2));
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="tface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/><stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="trim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/><stop offset="0.42" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.64)}"/>
+      </linearGradient>
+      <linearGradient id="tspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="twell-${id}" cx="50%" cy="40%" r="64%">
+        <stop offset="0" stop-color="${shade(base, -0.04)}"/><stop offset="0.72" stop-color="${shade(base, -0.2)}"/><stop offset="1" stop-color="${shade(base, -0.5)}"/>
+      </radialGradient>
+    </defs>
+
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#trim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#tface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    ${beading(c, c, r - 9 * k, 34, shade(base, 0.55), 1.15 * k)}
+
+    <circle cx="${c}" cy="${c}" r="${(r - 15 * k).toFixed(2)}" fill="url(#twell-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 15.4 * k).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.5" stroke-width="${(1.6 * k).toFixed(2)}"/>
+
+    <path d="${outline}" transform="translate(${(-0.8 * k).toFixed(2)} ${(-1 * k).toFixed(2)})" fill="${shade(base, 0.74)}" fill-opacity="0.7"/>
+    <path d="${outline}" transform="translate(${(0.8 * k).toFixed(2)} ${(1.2 * k).toFixed(2)})" fill="${shade(base, -0.74)}" fill-opacity="0.8"/>
+    ${crossScaledFacets(c, c, R, waist, flare, curve, base)}
+
+    <path d="${inner}" transform="translate(0 ${(0.9 * k).toFixed(2)})" fill="${shade(base, -0.74)}" fill-opacity="0.85"/>
+    <path d="${inner}" transform="translate(0 ${(-0.7 * k).toFixed(2)})" fill="${shade(base, 0.78)}" fill-opacity="0.75"/>
+    <path d="${inner}" fill="${shade(base, 0.34)}"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#tspec-${id})"/>
+    <path d="M${arcPt(c, c, r * 0.94, 0.2)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 0.6)}"
+      fill="none" stroke="${shade(base, 0.5)}" stroke-opacity="${(0.16 + spec * 0.34).toFixed(2)}" stroke-width="${((1 + spec * 1.2) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function trueButton(id, tier, size, opts) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:${Math.round(size * 0.07)}px">
+    ${sealFlagTrue(id, tier, size, opts)}
+    <div style="font:700 ${Math.round(size * 0.15)}px/1 -apple-system,Segoe UI,Roboto,sans-serif;color:#E8EEF2">23 / 60</div>
+  </div>`;
+}
+
 /* ------------------------------------------- the cross, straightened */
 
 /*
@@ -1620,6 +1749,45 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>The flag, beside the drawing</h2>
+<p class="note">
+  ⚠⚠ <b>"Isto está a parecer uma cruz religiosa ou dos cavaleiros lendários."</b>
+  Correct — and the fault was <b>a proportion, not the outline</b>. On the flag the
+  white cross is <b>thick</b> and runs <b>almost to the tips</b> of the red one.
+  Mine was thin and stopped short, which leaves the red dominating — and a big red
+  flared cross with a thin white line through it <i>is</i> a Templar cross.
+  <b>The white <code>+</code> is what stops it being one.</b>
+  <br><br>
+  So two numbers changed and neither is the shape: the inner cross roughly
+  <b>doubles in thickness</b>, and reaches <b>90%</b> of the red cross instead of
+  80%.
+  <br><br>
+  ⚠ <b>And the flag is now drawn beside it.</b> Describing a proportion in prose is
+  what produced four wrong versions; putting the real thing next to the drawn thing
+  makes the error obvious in a second. <b>Compare against the source, do not argue
+  about it.</b>
+</p>
+
+<div class="row" style="background:#141416">
+  <figure>${flagPanel(200, (cx, cy, R) => flagCrossPaths(cx, cy, R))}<figcaption>the flag<br><span>as drawn now</span></figcaption></figure>
+  <figure>${flagPanel(200, (cx, cy, R) => flagCrossPaths(cx, cy, R, { inner: 0.1, reach: 0.8 }))}<figcaption>the old proportion<br><span>thin inner cross</span></figcaption></figure>
+  <div style="max-width:44ch;color:#A0A0A8;font-size:14px;align-self:center">
+    ⚠ Same outline in both. <b>Only the white cross changed</b> — and the right-hand
+    one is the knights' cross. That is how much of the reading a single proportion
+    was carrying.
+  </div>
+</div>
+
+<h2>Struck in metal, at the flag\'s proportions</h2>
+<div class="row">${TIERS.map((t) => `<figure>${trueButton(`TA-${t}`, t, STUDY)}<figcaption>${t}<br><span>${RANKS[t].label}</span></figcaption></figure>`).join('')}</div>
+<div class="row">
+  ${TIERS.map((t) => `<figure>${trueButton(`TB-${t}`, t, BUTTON)}<figcaption>${t} · 64</figcaption></figure>`).join('')}
+  ${TIERS.map((t) => `<figure>${trueButton(`TC-${t}`, t, 44)}<figcaption>${t} · 44</figcaption></figure>`).join('')}
+</div>
+<div class="map"><div class="row">
+  ${TIERS.map((t) => `<figure>${trueButton(`TD-${t}`, t, BUTTON)}<figcaption>${t}</figcaption></figure>`).join('')}
+</div></div>
 
 <h2>How straight? — the whole scale, A to E</h2>
 <p class="note">

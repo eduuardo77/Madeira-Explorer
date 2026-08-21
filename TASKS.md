@@ -891,6 +891,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Drawn with and without the inner cross, at study size, 64 dp and **44 dp**, plus on green.
       ⚠ The inner cross is the first thing to die when the medal shrinks, which is why the solid
       version with a centre boss is drawn beside it every time.
+      **12.** The project lead sent **the flag of Madeira** and said the cross was too big and the
+      wrong shape. Both true.
+      — ⚠⚠ **THE FLANKS ARE CONCAVE, AND THAT IS THE WHOLE SHAPE.** What had been drawn was a plain
+      **cross pattée** — straight-sided arms flaring to wide tips. The *Cruz de Cristo* has arms
+      whose flanks **curve inward**. **A straight flare is any medieval cross; a concave flare is
+      that one**, and that single difference is most of why the drawn version looked generic. Now
+      built with the flank control point pulled *inside* the waist-to-tip line.
+      — ⚠ **And it covered the rim.** Filling the whole seal threw away the bevel, the beading and
+      the bounce light — every part of the medal that took rounds to get right. It now leaves a
+      clear band of metal between the tips and the cord, and the rim reads again. **"Fills the
+      stamp" and "keeps the medal" turned out to be in direct conflict, and the medal wins.**
+      — ✅ **Added a `crossShapeCheck` in flat flag colours — red on yellow, white inner cross, no
+      metal at all.** Facets and gold make it impossible to judge an *outline*; this is the only
+      fair way to ask **"is this that cross?"** before dressing it up. ⚠ Worth keeping as a habit:
+      judge silhouette flat, judge material in metal, never both at once.
+      — The inner cross is plain, constant width, and **stops short of the tips** exactly as the
+      flag's does — stopping short is what keeps the red visible at the ends.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

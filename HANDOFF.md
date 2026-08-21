@@ -114,6 +114,30 @@ ground truth.
   length, the app is quietly denying visits. Workbench scenario **"23 stamps — free tier
   (T-155)"** — `npm --prefix app run web`.
 
+## ⚠ Mid-flight when the last session ended — read before touching stamps
+
+**T-158, the rank medal, is mid-design.** The rank *logic* is done and shipped
+(`passport/stampTier.ts`, 13 tests; the passport button wears it). **The artwork is not**, and
+`TIER_METAL`'s five flat fills in that file are the **superseded** answer.
+
+Four rounds of sketches live in `tools/preview-rank.mjs` → `node tools/preview-rank.mjs` →
+`tools/out/rank.html`. **Nothing has been promoted into `app/`.**
+
+⚠⚠ **The one insight worth not re-deriving.** The project lead rejected a dense design for looking
+like a poker chip, then rejected the sparse replacements for not feeling premium — and named why:
+*"não por parecer uma ficha de poker mas por parecer mais exclusiva e detalhada"*. **Density is
+what feels premium; only the grammar was the chip.** The two devices that spelled *casino* were
+**evenly spaced dots at the rim** and **uniform spokes crossing the whole face**. Both are gone —
+replaced by an overlapping twisted cord and a starburst confined to the well with alternating ray
+lengths — and the density is kept.
+
+⚠ **Next action is not code: somebody opens `tools/out/rank.html` and says what survives.** Then
+promote the chosen seal into a pure module with a second renderer.
+
+⚠ **No SVG filters in whatever gets promoted.** `feGaussianBlur` is unreliable in
+`react-native-svg` on Android; shadow is an offset copy, deboss is three passes, sheen is a
+gradient.
+
 ## Next tasks, in the order that makes sense
 
 1. **T-156** — Play Billing. `entitlementStore.setUnlocked` is the seam and nothing calls it, so

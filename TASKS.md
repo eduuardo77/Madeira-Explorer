@@ -752,6 +752,34 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       inside the passport; if one ever stands alone, the motif should become a second smaller mark.
       — ⚠ **Nobody has looked at the eleven glyphs.** `node tools/preview-stamps.mjs` draws them
       on a real sticker at one fixed place id. Does the cliff read as a cliff or as a wall?
+      — ⚠⚠ **THE RANK MEDAL IS MID-DESIGN AND THE ARTWORK IS NOT SETTLED.** Four rounds so far,
+      all in `tools/preview-rank.mjs` → `tools/out/rank.html`. **Nothing has been promoted into
+      `app/` yet** — `TIER_METAL` there is still five flat fills and is the *old* answer.
+      **1.** Five flat pills changing hue. Project lead: *"não passa um feeling de premium ou de
+      raridade"*. Correct — I changed hue and nothing else, when what makes metal read as metal is
+      how it handles light.
+      **2.** Four directions drawn (medallion / wax seal / enamel pin / trophy plate) with real
+      bevel, specular and an engraved number. **They chose the wax seal**, and were surprised to.
+      **3.** The seal developed with more ornament. Project lead: *"os pontos na volta e as linhas
+      do centro para fora fazem parecer uma poker coin."* ⚠ **Exactly right, and both devices were
+      mine** — borrowed from `stampArt.ts`'s own perforation and sunburst on sound reasoning. **A
+      good rule applied without looking produced a casino chip.**
+      **4.** Five sparse vocabularies with the ornament stripped out. Project lead preferred the
+      chip one — *"não por parecer uma ficha de poker mas por parecer mais exclusiva e detalhada"*.
+      ⚠⚠ **THE KEY NOTE OF THE WHOLE THREAD: I had collapsed two things into one.** Density is what
+      felt premium; only the *grammar* was the chip. **Keep the density, change the rhythm.**
+      — ✅ **Where it stands now (2026-08-19):** the dense seal is back with the two chip devices
+      replaced — rim dots became an **overlapping twisted cord**, full-face spokes became a
+      **starburst confined to the well with alternating ray lengths**. Verified: **zero rim dots,
+      648 cord links, no SVG filters**. Drawn at 132/64/44 px, on dark, light and **green** (most
+      of this island is laurel forest), plus **greyscale** — if ranks separate only by hue, a
+      colour-blind user has one rank and everybody else has five.
+      — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
+      Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
+      second renderer, and replace `TIER_METAL`'s flat fills.
+      — ⚠ **No SVG filters, ever, in whatever is promoted.** `feGaussianBlur` is unreliable in
+      `react-native-svg` on Android. Shadow is an offset copy, deboss is three passes, sheen is a
+      gradient — that constraint is why these sketches are drawable by the app at all.
       — **Still to build:** the **per-place assignment** for all sixty (draft and veto, D-064); the
       **date** on the stamp; **more levadas** now D-002 is loosened, with **PR numbers** as the
       spine; and **3D** later (`TIER_METAL.sheen` exists unused for exactly that).

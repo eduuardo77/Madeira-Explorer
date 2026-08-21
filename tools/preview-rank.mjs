@@ -180,163 +180,209 @@ function deboss(cx, cy, size, base) {
 }
 
 
-/** Point on a circle, as an SVG coordinate pair. */
-const pt2 = (cx, cy, r, a) => `${(cx + Math.cos(a) * r).toFixed(2)} ${(cy + Math.sin(a) * r).toFixed(2)}`;
+/** A point on a circle, given the angle as a multiple of PI. */
+const arcPt = (cx, cy, r, turns) =>
+  `${(cx + Math.cos(Math.PI * turns) * r).toFixed(2)} ${(cy + Math.sin(Math.PI * turns) * r).toFixed(2)}`;
+
+/**
+ * The mark, pressed harder.
+ *
+ * ⚠ The same three passes as `deboss`, with the offsets scaled by how
+ * reflective the metal is: a mirror shows a sharper lip than a matte surface,
+ * which is the difference between a mark *cut into* platinum and one *stamped
+ * into* bronze. Material, not ornament.
+ */
+function debossDeep(cx, cy, size, base, spec) {
+  const scale = size / CANVAS;
+  const lift = Math.max(0.8, size * (0.03 + spec * 0.018));
+  const at = (dy, fill, opacity) => `
+    <g transform="translate(${(cx - size / 2).toFixed(2)} ${(cy - size / 2 + dy).toFixed(2)}) scale(${scale.toFixed(4)})">
+      <path d="${stampMarkPath()}" fill="${fill}" fill-opacity="${opacity}" fill-rule="evenodd"
+            transform="rotate(${TILT_DEG} ${CANVAS / 2} ${CANVAS / 2})"/>
+    </g>`;
+  return (
+    at(lift, shade(base, -0.7), 0.95) +
+    at(-lift * 0.75, shade(base, 0.62), 0.55) +
+    at(0, shade(base, -0.24), 1)
+  );
+}
 
 /* ------------------------------------------------------------------- medal */
 
 /**
- * How ostentatious each rank is allowed to be.
+ * The edition the project lead chose, kept verbatim so the refinement can be
+ * judged against it side by side rather than described in prose.
  *
- * ⚠⚠ **THIS TABLE IS THE ANSWER TO "MORE PREMIUM AS THE RANK RISES".** The
- * project lead: *"ensure the higher the rank, more premium looking and boogie
- * looking the stamp is."* Doing that with **colour** would be five hues again,
- * which already failed once. Doing it with **structure** means the ranks
- * separate in greyscale, at 44 dp, and for a colour-blind user.
+ * WHY ROUND 5 WAS A REGRESSION, AND IT IS WORTH BEING PRECISE
+ * ----------------------------------------------------------
+ * That pass mixed two different things: better **lighting** (a contact shadow,
+ * a bounce arc, a per-rank falloff) and more **ornament** (stepped bevels, a
+ * raised dome, a halo, sparkles).
  *
- * `bevels` is how many stepped rings the rim is cut into — the single biggest
- * contributor to reading as an *object* rather than a disc. The rest either
- * exists or does not, so the escalation is legible as *more things*, not as
- * *brighter*.
+ * ⚠ **The ornament was the downgrade.** It read as loud rather than as
+ * expensive — a medal wearing everything it owns at once. The lighting was
+ * never the problem, and throwing it out with the ornament would be the same
+ * mistake in the other direction.
+ *
+ * So the refinement below takes the lighting and the material, and adds
+ * **no new shape at all**.
  */
-const ESCALATION = {
-  none: { bevels: 1, cord: false, burst: 0, laurel: 0, dome: false, facet: 0, halo: false, sparks: 0 },
-  bronze: { bevels: 2, cord: false, burst: 0, laurel: 0, dome: false, facet: 0, halo: false, sparks: 0 },
-  silver: { bevels: 3, cord: true, burst: 14, laurel: 0, dome: false, facet: 0, halo: false, sparks: 0 },
-  gold: { bevels: 4, cord: true, burst: 20, laurel: 5, dome: true, facet: 0, halo: false, sparks: 2 },
-  platinum: { bevels: 5, cord: true, burst: 28, laurel: 7, dome: true, facet: 36, halo: true, sparks: 4 },
-};
+function sealPrev(id, tier, size, withNumber = true) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, ornament, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+
+  const light = shade(base, 0.44);
+  const dark = shade(base, -0.44);
+  const deep = shade(base, -0.66);
+  const hot = warm > 0.3 ? shade(base, 0.74) : shade(base, 0.94);
+
+  const k = size / 132; // everything below was drawn at 132 and scales from it
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="face-${id}" cx="34%" cy="27%" r="80%">
+        <stop offset="0" stop-color="${light}"/>
+        <stop offset="0.5" stop-color="${base}"/>
+        <stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="rim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/>
+        <stop offset="0.42" stop-color="${deep}"/>
+        <stop offset="1" stop-color="${shade(base, 0.62)}"/>
+      </linearGradient>
+      <linearGradient id="spec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.8).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="well-${id}" cx="50%" cy="42%" r="62%">
+        <stop offset="0" stop-color="${shade(base, -0.22)}"/>
+        <stop offset="1" stop-color="${shade(base, -0.02)}"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Cast shadow: an offset copy, not a filter. It is what lifts the medal
+         off the map rather than letting it sit flat on it. -->
+    <path d="${sealPath(c, c + 2.4 * k, r, 5 * k, wax)}" fill="#000000" fill-opacity="0.34"/>
+
+    <!-- The rim, then the squeezed face inside it. -->
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#rim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#face-${id})"/>
+
+    ${ornament >= 4 ? facets(c, c, r - 1.2 * k, r - 6 * k, 28, shade(base, 0.75), deep) : ''}
+
+    <!-- The pressed well the die left. -->
+    <circle cx="${c}" cy="${c}" r="${r - 12 * k}" fill="url(#well-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${r - 12 * k}" fill="none" stroke="${deep}" stroke-opacity="0.5" stroke-width="${1 * k}"/>
+
+    ${ornament >= 2 ? rays(c, c - 3 * k, 7 * k, r - 15 * k, ornament >= 3 ? 24 : 16, shade(base, 0.6), ornament >= 4 ? 0.3 : 0.16) : ''}
+    ${ornament >= 1 ? beading(c, c, r - 9 * k, ornament >= 3 ? 32 : 22, shade(base, ornament >= 4 ? 0.85 : 0.5), 1.15 * k) : ''}
+    ${ornament >= 4 ? `<circle cx="${c}" cy="${c}" r="${r - 15.5 * k}" fill="none" stroke="${shade(base, 0.85)}" stroke-opacity="0.7" stroke-width="${1.1 * k}"/>` : ''}
+
+    ${deboss(c, c - (withNumber ? 9 * k : 0), 46 * k, base)}
+    ${withNumber ? engraved('23 / 60', c, c + 30 * k, 15 * k, base) : ''}
+
+    <!-- Specular last, over everything, and a lit arc on the top-left rim only:
+         that arc is most of what reads as *polished* rather than as coloured. -->
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#spec-${id})"/>
+    <path d="M${(c - r * 0.72).toFixed(2)} ${(c - r * 0.5).toFixed(2)} A ${r * 0.9} ${r * 0.9} 0 0 1 ${(c + r * 0.1).toFixed(2)} ${(c - r * 0.86).toFixed(2)}"
+          fill="none" stroke="${hot}" stroke-opacity="${(0.25 + spec * 0.55).toFixed(2)}" stroke-width="${(1.6 + spec * 2.2) * k}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ------------------------------------------------------------------- page */
+
 
 /**
- * A stepped bevel: concentric rings, each catching light at its own angle.
+ * The same seal, lit properly.
  *
- * ⚠ **This is where the depth actually comes from.** One rim plus one face is a
- * disc with a gradient on it. Four or five rings, alternating which side they
- * catch, is a *turned edge* — the eye reads the steps as a surface curving
- * away, which no amount of shading on a single shape can fake.
+ * ⚠⚠ **NOTHING HERE IS A NEW ORNAMENT.** Every change is light or material:
+ *
+ *   - **an occlusion ring where the well meets the face** — pressed metal is
+ *     darkest exactly at that junction, and without it the well is a flat
+ *     circle sitting on a gradient rather than a hollow;
+ *   - **a machined lip** at the rim-to-face junction, one hairline, which is
+ *     what a turned edge actually leaves behind;
+ *   - **two shadows** rather than one — a wide drop and a tight contact,
+ *     because that pair is what makes an object rest on something instead of
+ *     hovering over it;
+ *   - **a bounce arc** on the side away from the key light, since a real object
+ *     picks up light reflected off whatever it sits on;
+ *   - ⚠ **a per-rank falloff.** Platinum's face turns from light to dark almost
+ *     immediately, the way a mirror does; bronze's turns slowly, the way a
+ *     matte surface does. **That one number says which metal it is more
+ *     convincingly than the hue does**, and it costs nothing.
+ *   - **a deeper press** for the mark, scaled by the same reflectivity.
  */
-function bevelRing(id, cx, cy, rOuter, rInner, steps, wax) {
-  let out = '';
-  for (let i = 0; i < steps; i += 1) {
-    const ro = rOuter - (rOuter - rInner) * (i / steps);
-    out += `<path d="${sealPath(cx, cy, ro, (rOuter - rInner) * 0.18, wax)}" fill="url(#step${i % 2}-${id})" fill-opacity="${(0.92 - i * 0.05).toFixed(2)}"/>`;
-  }
-  out += `<path d="${sealPath(cx, cy, rInner, (rOuter - rInner) * 0.12, wax)}" fill="url(#face-${id})"/>`;
-  return out;
-}
-
-/** A raised centre rather than a recessed well. Gold and above. */
-function dome(id, cx, cy, r, base) {
-  return `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r.toFixed(2)}" fill="url(#dome-${id})"/>
-    <circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r.toFixed(2)}" fill="none" stroke="${shade(base, -0.62)}" stroke-opacity="0.5" stroke-width="${(r * 0.06).toFixed(2)}"/>`;
-}
-
-/** Laurel sprigs rising from the bottom. */
-function laurel(cx, cy, r, leaves, fill) {
-  let out = '';
-  for (const side of [-1, 1]) {
-    for (let i = 0; i < leaves; i += 1) {
-      const t = 0.1 + (i / Math.max(1, leaves - 1)) * 0.6;
-      const a = Math.PI / 2 + side * t * Math.PI;
-      const x = cx + Math.cos(a) * r;
-      const y = cy + Math.sin(a) * r;
-      const deg = (a * 180) / Math.PI + side * 60;
-      const len = r * 0.17 * (1 - i * 0.05);
-      out += `<ellipse cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" rx="${len.toFixed(2)}" ry="${(len * 0.4).toFixed(2)}" transform="rotate(${deg.toFixed(1)} ${x.toFixed(2)} ${y.toFixed(2)})" fill="${fill}" fill-opacity="0.8"/>`;
-    }
-  }
-  return out;
-}
-
-/** A four-point star — the oldest "this is shiny" signal there is. */
-function sparkle(x, y, s, fill) {
-  const q = `Q${x.toFixed(2)} ${y.toFixed(2)} `;
-  return `<path d="M${x.toFixed(2)} ${(y - s).toFixed(2)} ${q}${(x + s).toFixed(2)} ${y.toFixed(2)} ${q}${x.toFixed(2)} ${(y + s).toFixed(2)} ${q}${(x - s).toFixed(2)} ${y.toFixed(2)} ${q}${x.toFixed(2)} ${(y - s).toFixed(2)} Z" fill="${fill}"/>`;
-}
-
-/** Concentric fading strokes outside the medal. Platinum only. */
-function halo(cx, cy, r, fill, k) {
-  let out = '';
-  for (let i = 0; i < 3; i += 1) {
-    out += `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${(r + (i + 1) * 2.4 * k).toFixed(2)}" fill="none" stroke="${fill}" stroke-opacity="${(0.24 - i * 0.07).toFixed(2)}" stroke-width="${(1.6 * k).toFixed(2)}"/>`;
-  }
-  return out;
-}
-
 function seal(id, tier, size, withNumber = true) {
   const rank = RANKS[tier];
-  const { base, spec, warm, wax } = rank;
-  const e = ESCALATION[tier];
+  const { base, spec, warm, ornament, wax } = rank;
   const c = size / 2;
+  const r = size / 2 - size * 0.055;
   const k = size / 132;
-  const r = c - size * (e.halo ? 0.105 : 0.06);
 
   const light = shade(base, 0.46);
   const dark = shade(base, -0.46);
   const deep = shade(base, -0.68);
   const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
 
+  // A mirror turns over fast; a matte surface turns over slowly.
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
   return `
   <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
     <defs>
-      <radialGradient id="face-${id}" cx="34%" cy="26%" r="78%">
-        <stop offset="0" stop-color="${light}"/><stop offset="0.48" stop-color="${base}"/><stop offset="1" stop-color="${dark}"/>
+      <radialGradient id="rface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/>
+        <stop offset="1" stop-color="${dark}"/>
       </radialGradient>
-      <linearGradient id="step0-${id}" x1="0.12" y1="1" x2="0.42" y2="0">
-        <stop offset="0" stop-color="${shade(base, 0.5)}"/><stop offset="0.45" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.66)}"/>
+      <linearGradient id="rrim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/>
+        <stop offset="0.42" stop-color="${deep}"/>
+        <stop offset="1" stop-color="${shade(base, 0.64)}"/>
       </linearGradient>
-      <linearGradient id="step1-${id}" x1="0.45" y1="0" x2="0.15" y2="1">
-        <stop offset="0" stop-color="${shade(base, 0.34)}"/><stop offset="0.5" stop-color="${dark}"/><stop offset="1" stop-color="${shade(base, 0.2)}"/>
-      </linearGradient>
-      <radialGradient id="dome-${id}" cx="36%" cy="28%" r="72%">
-        <stop offset="0" stop-color="${shade(base, 0.58)}"/><stop offset="0.6" stop-color="${base}"/><stop offset="1" stop-color="${shade(base, -0.52)}"/>
-      </radialGradient>
-      <linearGradient id="spec-${id}" x1="0.05" y1="0" x2="0.72" y2="1">
+      <linearGradient id="rspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
         <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
-        <stop offset="${(0.07 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
       </linearGradient>
+      <radialGradient id="rwell-${id}" cx="50%" cy="40%" r="64%">
+        <stop offset="0" stop-color="${shade(base, -0.04)}"/>
+        <stop offset="0.72" stop-color="${shade(base, -0.2)}"/>
+        <stop offset="1" stop-color="${shade(base, -0.52)}"/>
+      </radialGradient>
     </defs>
 
-    ${e.halo ? halo(c, c, r, hot, k) : ''}
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
 
-    <!-- ⚠ Two shadows, not one. A wide soft one for the drop and a tight dark
-         one for the contact: that pair is what makes an object look like it is
-         RESTING on something rather than floating over it. Offset copies, not
-         a filter. -->
-    <path d="${sealPath(c, c + 4.5 * k, r * 1.01, 5 * k, wax)}" fill="#000" fill-opacity="0.2"/>
-    <path d="${sealPath(c, c + 1.8 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.45"/>
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#rrim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#rface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
 
-    ${bevelRing(id, c, c, r, r - (5 + e.bevels * 2.4) * k, e.bevels, wax)}
+    ${ornament >= 4 ? facets(c, c, r - 1.2 * k, r - 6 * k, 28, shade(base, 0.75), deep) : ''}
 
-    ${e.facet ? facets(c, c, r - 1.5 * k, r - 7 * k, e.facet, shade(base, 0.8), deep) : ''}
-    ${e.cord ? beading(c, c, r - (7 + e.bevels * 1.8) * k, 36, shade(base, 0.55), 1.25 * k) : ''}
-    ${e.burst ? rays(c, c - 3 * k, 8 * k, r - 18 * k, e.burst, shade(base, 0.62), e.facet ? 0.32 : 0.18) : ''}
-    ${e.laurel ? laurel(c, c - 2 * k, r - 17 * k, e.laurel, shade(base, 0.6)) : ''}
-    ${e.dome ? dome(id, c, c - 8 * k, 25 * k, base) : ''}
-    ${e.halo ? `<circle cx="${c}" cy="${c}" r="${(r - 16 * k).toFixed(2)}" fill="none" stroke="${shade(base, 0.9)}" stroke-opacity="0.75" stroke-width="${(1.2 * k).toFixed(2)}"/>` : ''}
+    <circle cx="${c}" cy="${c}" r="${(r - 12 * k).toFixed(2)}" fill="url(#rwell-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 12.4 * k).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.55" stroke-width="${(1.8 * k).toFixed(2)}"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 11.2 * k).toFixed(2)}" fill="none" stroke="${shade(base, 0.6)}" stroke-opacity="0.3" stroke-width="${(0.7 * k).toFixed(2)}"/>
 
-    ${deboss(c, c - (withNumber ? 9 * k : 0), 42 * k, base)}
-    ${withNumber ? engraved('23 / 60', c, c + 31 * k, 15 * k, base) : ''}
+    ${ornament >= 2 ? rays(c, c - 3 * k, 7 * k, r - 15 * k, ornament >= 3 ? 24 : 16, shade(base, 0.6), ornament >= 4 ? 0.3 : 0.16) : ''}
+    ${ornament >= 1 ? beading(c, c, r - 9 * k, ornament >= 3 ? 32 : 22, shade(base, ornament >= 4 ? 0.85 : 0.5), 1.15 * k) : ''}
+    ${ornament >= 4 ? `<circle cx="${c}" cy="${c}" r="${(r - 15.5 * k).toFixed(2)}" fill="none" stroke="${shade(base, 0.85)}" stroke-opacity="0.7" stroke-width="${(1.1 * k).toFixed(2)}"/>` : ''}
 
-    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#spec-${id})"/>
+    ${debossDeep(c, c - (withNumber ? 9 * k : 0), 46 * k, base, spec)}
+    ${withNumber ? engraved('23 / 60', c, c + 30 * k, 15 * k, base) : ''}
 
-    <!-- ⚠ The bounce light, and it is the biggest single 3D tell here. A real
-         object picks up light reflected off whatever it sits on, so a thin
-         bright arc appears on the side AWAY from the key light. Without it a
-         shaded circle stays a shaded circle however good the gradient is. -->
-    <path d="M${pt2(c, c, r * 0.93, Math.PI * 0.18)} A ${(r * 0.93).toFixed(2)} ${(r * 0.93).toFixed(2)} 0 0 1 ${pt2(c, c, r * 0.93, Math.PI * 0.62)}"
-      fill="none" stroke="${shade(base, 0.45)}" stroke-opacity="${(0.2 + spec * 0.4).toFixed(2)}" stroke-width="${((1.2 + spec * 1.4) * k).toFixed(2)}" stroke-linecap="round"/>
-    <path d="M${pt2(c, c, r * 0.94, Math.PI * 1.16)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${pt2(c, c, r * 0.94, Math.PI * 1.64)}"
-      fill="none" stroke="${hot}" stroke-opacity="${(0.28 + spec * 0.58).toFixed(2)}" stroke-width="${((1.8 + spec * 2.4) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#rspec-${id})"/>
 
-    ${Array.from({ length: e.sparks }, (_, i) => {
-      const a = Math.PI * (1.28 + i * 0.42);
-      return sparkle(c + Math.cos(a) * r * 0.8, c + Math.sin(a) * r * 0.8, (3.6 - i * 0.5) * k, hot);
-    }).join('')}
+    <path d="M${arcPt(c, c, r * 0.94, 0.2)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 0.6)}"
+      fill="none" stroke="${shade(base, 0.5)}" stroke-opacity="${(0.16 + spec * 0.34).toFixed(2)}" stroke-width="${((1 + spec * 1.2) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
   </svg>`;
 }
-
-/* ------------------------------------------------------------------- page */
 
 const STUDY = 132;
 const BUTTON = 64;
@@ -400,6 +446,26 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>Side by side — what changed</h2>
+<p class="note">
+  ⚠ <b>Top row is the edition you chose, untouched. Bottom row is the refinement.</b>
+  Judging a change against a description is how round 5 slipped through; judging it
+  against the thing it replaced is harder to fool.
+  <br><br>
+  Nothing was added. Every difference is <b>light or material</b>: an occlusion ring
+  where the well meets the face, a machined lip at the rim, a second tighter shadow
+  for contact, a bounce arc on the unlit side, a deeper press for the mark — and a
+  <b>per-rank falloff</b>, so platinum's face turns over like a mirror and bronze's
+  like something matte. <b>Same hues throughout.</b>
+</p>
+<div class="row">${TIERS.map((t) => `<figure>${sealPrev(`P-${t}`, t, STUDY)}<figcaption>${t}<br><span>chosen edition</span></figcaption></figure>`).join('')}</div>
+<div class="row">${TIERS.map((t) => `<figure>${seal(`R-${t}`, t, STUDY)}<figcaption>${t}<br><span>refined</span></figcaption></figure>`).join('')}</div>
+
+<h2>Side by side at the real button — 64 dp</h2>
+<p class="note">⚠ The size that decides. Chosen edition above, refined below.</p>
+<div class="row">${TIERS.map((t) => `<figure>${sealPrev(`PB-${t}`, t, BUTTON)}<figcaption>${t}</figcaption></figure>`).join('')}</div>
+<div class="row">${TIERS.map((t) => `<figure>${seal(`RB-${t}`, t, BUTTON)}<figcaption>${t}</figcaption></figure>`).join('')}</div>
 
 <h2>Study size — ${STUDY} px</h2>
 <div class="row">${row(STUDY, true, 'S')}</div>

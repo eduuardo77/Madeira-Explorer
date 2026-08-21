@@ -784,6 +784,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       cord, starburst, laurel, raised dome, cut facets, halo, sparkles. **Measured monotonic: 13 →
       14 → 65 → 86 → 141 drawn elements.** Doing it with colour would be five hues again, which
       already failed once — structure is what survives greyscale, 44 dp and colour blindness.
+      **5.** *"Make them more 3D, higher rank more premium and boogie."* Stepped bevels, a raised
+      dome, a halo, sparkles, and a structural escalation table. ⚠ **Rejected: *"I didn't like, was
+      a downgrade."*** Reverted to round 4.
+      — ⚠⚠ **WHY IT FAILED, AND IT IS THE USEFUL PART.** That pass mixed two different things:
+      better **lighting** (contact shadow, bounce arc, per-rank falloff) and more **ornament**
+      (bevel steps, dome, halo, sparkles). **The ornament was the downgrade** — it read as loud
+      rather than as expensive, a medal wearing everything it owns at once. **The lighting was
+      never the problem**, and discarding it along with the ornament would have been the same
+      mistake in the other direction.
+      **6.** The chosen edition refined with **the lighting and the material only, and no new shape
+      at all**: an occlusion ring where the well meets the face, a machined lip at the rim, a
+      second tighter shadow for contact, a bounce arc on the unlit side, a deeper press for the
+      mark, and a **per-rank falloff** — platinum's face turns over like a mirror, bronze's like
+      something matte, **same hues**. Measured: **exactly +4 elements per rank** (13→17, 35→39,
+      51→55, 69→73, 98→102), and zero of round 5's machinery.
+      — ✅ **`rank.html` now opens with a side-by-side**: chosen edition on top, refined below, at
+      study size and at the real 64 dp. ⚠ **Judging a change against a description is how round 5
+      slipped through**; judging it against the thing it replaces is harder to fool.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

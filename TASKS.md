@@ -802,6 +802,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ✅ **`rank.html` now opens with a side-by-side**: chosen edition on top, refined below, at
       study size and at the real 64 dp. ⚠ **Judging a change against a description is how round 5
       slipped through**; judging it against the thing it replaces is harder to fool.
+      **7.** ✅ **Ring and centre studies, 2026-08-19.** *"Show other designs for the ring and
+      square inside the stamps."* **Seven rings** — twisted cord (control), chain links, guilloché,
+      laurel wreath, milled edge, two hairlines, and nothing at all — and **six centres** —
+      pressed in (control), standing proud, cut through, on a cartouche, with a keyline, and the
+      number alone with no mark.
+      — ⚠⚠ **ONE VARIABLE AT A TIME, and that is the lesson from round 5 applied.** Body, lighting,
+      material and shadows are frozen across every row; only the piece under study changes. Round 5
+      moved five things at once and had to be discarded whole rather than partly, which threw away
+      the lighting along with the ornament.
+      — Each row shows **gold, bronze and the real 64 dp button**: gold carries ornament without
+      platinum's facets competing, and a ring that only works on the showy rank is not a ring.
+      — ⚠ **`milled` is in there deliberately as the closest thing to the rejected chip**, so the
+      difference can be *seen* rather than argued: reeding sits on the outer edge, is far finer,
+      and is cut across the rim rather than dotted on the face. If it still reads as a token, that
+      settles the question for good.
+      — ⚠ **`bare` and `number` exist to test the assumption, not to be chosen.** No ring at all is
+      the only way to know how much the ring contributes; the count alone is the only way to know
+      whether the mark is even the most interesting thing to put in the middle.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

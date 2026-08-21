@@ -384,6 +384,249 @@ function seal(id, tier, size, withNumber = true) {
   </svg>`;
 }
 
+
+/* ----------------------------------------------------- rings and centres */
+
+/*
+ * ⚠⚠ **ONE VARIABLE AT A TIME.** The body, the lighting and the material below
+ * are exactly the refined seal — untouched. Only the **ring** or only the
+ * **centre** changes in each row, because a study that moves two things at once
+ * cannot tell you which one you liked. Round 5 moved five at once and had to be
+ * thrown away whole.
+ *
+ * ⚠ Every ring here avoids the two devices that made a casino chip: **evenly
+ * spaced discrete dots** and **uniform spokes**. Repetition that overlaps, or
+ * that closes into a ring, does not read as a token however dense it gets.
+ */
+
+/** Chain links — interlocking ovals. Denser than cord, and unmistakably made. */
+function ringChain(cx, cy, r, count, base, k) {
+  let out = '';
+  for (let i = 0; i < count; i += 1) {
+    const a = (i / count) * Math.PI * 2;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    const deg = (a * 180) / Math.PI + (i % 2 ? 90 : 0);
+    out += `<ellipse cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" rx="${(3.1 * k).toFixed(2)}" ry="${(1.9 * k).toFixed(2)}" transform="rotate(${deg.toFixed(1)} ${x.toFixed(2)} ${y.toFixed(2)})" fill="none" stroke="${shade(base, i % 2 ? 0.6 : -0.45)}" stroke-opacity="0.85" stroke-width="${(1.1 * k).toFixed(2)}"/>`;
+  }
+  return out;
+}
+
+/** Engine-turned waves. Closed rings, so it can never read as spokes. */
+function ringGuilloche(cx, cy, rMin, rMax, rings, lobes, base, k) {
+  let out = '';
+  for (let j = 0; j < rings; j += 1) {
+    const mid = rMin + ((rMax - rMin) * j) / Math.max(1, rings - 1);
+    const amp = (rMax - rMin) * 0.2;
+    let d = '';
+    for (let i = 0; i <= 120; i += 1) {
+      const a = (i / 120) * Math.PI * 2;
+      const rr = mid + Math.sin(a * lobes + j * 0.8) * amp;
+      d += `${i === 0 ? 'M' : 'L'}${(cx + Math.cos(a) * rr).toFixed(2)} ${(cy + Math.sin(a) * rr).toFixed(2)} `;
+    }
+    out += `<path d="${d}Z" fill="none" stroke="${shade(base, j % 2 ? 0.62 : -0.5)}" stroke-opacity="0.42" stroke-width="${(0.8 * k).toFixed(2)}"/>`;
+  }
+  return out;
+}
+
+/** A laurel wreath, closing at the top. */
+function ringWreath(cx, cy, r, leaves, base, k) {
+  let out = '';
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < leaves; i += 1) {
+      const t = 0.08 + (i / Math.max(1, leaves - 1)) * 0.72;
+      const a = Math.PI / 2 + side * t * Math.PI;
+      const x = cx + Math.cos(a) * r;
+      const y = cy + Math.sin(a) * r;
+      const deg = (a * 180) / Math.PI + side * 58;
+      const len = r * 0.15 * (1 - i * 0.04);
+      out += `<ellipse cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" rx="${len.toFixed(2)}" ry="${(len * 0.38).toFixed(2)}" transform="rotate(${deg.toFixed(1)} ${x.toFixed(2)} ${y.toFixed(2)})" fill="${shade(base, i % 2 ? 0.58 : 0.3)}" fill-opacity="0.82"/>`;
+    }
+  }
+  return out;
+}
+
+/**
+ * A milled edge — the fine vertical cuts on the rim of a real coin.
+ *
+ * ⚠ The one option here closest to the rejected chip, and it is included
+ * deliberately so the difference can be *seen* rather than argued. Reeding sits
+ * **on the outer edge**, is far finer, and is cut *across* the rim rather than
+ * placed as spots on the face. If it still reads as a token, that settles it.
+ */
+function ringMilled(cx, cy, rOuter, rInner, count, base, k) {
+  let out = '';
+  for (let i = 0; i < count; i += 1) {
+    const a = (i / count) * Math.PI * 2;
+    const p = (rad) => `${(cx + Math.cos(a) * rad).toFixed(2)} ${(cy + Math.sin(a) * rad).toFixed(2)}`;
+    out += `<path d="M${p(rOuter)} L${p(rInner)}" stroke="${shade(base, i % 2 ? 0.55 : -0.5)}" stroke-opacity="0.6" stroke-width="${(0.9 * k).toFixed(2)}"/>`;
+  }
+  return out;
+}
+
+/** Two hairlines with a plain channel between them. The quietest option. */
+function ringHairline(cx, cy, r, base, k) {
+  return `<circle cx="${cx}" cy="${cy}" r="${(r + 2.2 * k).toFixed(2)}" fill="none" stroke="${shade(base, 0.66)}" stroke-opacity="0.55" stroke-width="${(0.9 * k).toFixed(2)}"/>
+    <circle cx="${cx}" cy="${cy}" r="${(r - 2.2 * k).toFixed(2)}" fill="none" stroke="${shade(base, -0.55)}" stroke-opacity="0.55" stroke-width="${(0.9 * k).toFixed(2)}"/>`;
+}
+
+/* --------------------------------------------------------------- centres */
+
+/** The mark standing proud of the surface rather than pressed into it. */
+function centreEmboss(cx, cy, size, base, spec) {
+  const scale = size / CANVAS;
+  const lift = Math.max(0.8, size * (0.03 + spec * 0.018));
+  const at = (dy, fill, opacity) => `
+    <g transform="translate(${(cx - size / 2).toFixed(2)} ${(cy - size / 2 + dy).toFixed(2)}) scale(${scale.toFixed(4)})">
+      <path d="${stampMarkPath()}" fill="${fill}" fill-opacity="${opacity}" fill-rule="evenodd"
+            transform="rotate(${TILT_DEG} ${CANVAS / 2} ${CANVAS / 2})"/>
+    </g>`;
+  // ⚠ The offsets are the deboss's, swapped. Light above becomes light below,
+  // and the eye flips the surface — the whole of emboss versus deboss is which
+  // side the shadow falls on.
+  return (
+    at(lift, shade(base, -0.6), 0.5) +
+    at(-lift * 0.8, shade(base, 0.7), 0.9) +
+    at(0, shade(base, 0.16), 1)
+  );
+}
+
+/** The mark cut clean through, showing the dark behind the medal. */
+function centreCutout(cx, cy, size, base) {
+  const scale = size / CANVAS;
+  const at = (dy, fill, opacity) => `
+    <g transform="translate(${(cx - size / 2).toFixed(2)} ${(cy - size / 2 + dy).toFixed(2)}) scale(${scale.toFixed(4)})">
+      <path d="${stampMarkPath()}" fill="${fill}" fill-opacity="${opacity}" fill-rule="evenodd"
+            transform="rotate(${TILT_DEG} ${CANVAS / 2} ${CANVAS / 2})"/>
+    </g>`;
+  return at(-0.9, shade(base, 0.6), 0.55) + at(0, '#05070A', 0.92);
+}
+
+/** The mark inside a raised cartouche, the way a coat of arms sits on a shield. */
+function centreCartouche(cx, cy, size, base, spec, k) {
+  const w = size * 0.86;
+  const h = size * 0.92;
+  const shield = `M${(cx - w / 2).toFixed(2)} ${(cy - h / 2).toFixed(2)} L${(cx + w / 2).toFixed(2)} ${(cy - h / 2).toFixed(2)} L${(cx + w / 2).toFixed(2)} ${(cy + h * 0.16).toFixed(2)} Q${(cx + w / 2).toFixed(2)} ${(cy + h / 2).toFixed(2)} ${cx.toFixed(2)} ${(cy + h / 2).toFixed(2)} Q${(cx - w / 2).toFixed(2)} ${(cy + h / 2).toFixed(2)} ${(cx - w / 2).toFixed(2)} ${(cy + h * 0.16).toFixed(2)} Z`;
+  return `<path d="${shield}" fill="${shade(base, -0.14)}"/>
+    <path d="${shield}" fill="none" stroke="${shade(base, 0.6)}" stroke-opacity="0.6" stroke-width="${(1.1 * k).toFixed(2)}"/>
+    ${debossDeep(cx, cy - size * 0.02, size * 0.66, shade(base, -0.14), spec)}`;
+}
+
+/** No mark at all: the count, large and cut in. */
+function centreNumber(cx, cy, size, base) {
+  return engraved('23', cx, cy + size * 0.3, size * 0.86, base) ;
+}
+
+/** The mark with a hairline keyline around it, like a die-struck outline. */
+function centreKeyline(cx, cy, size, base, spec, k) {
+  const scale = (size * 1.16) / CANVAS;
+  return `<g transform="translate(${(cx - (size * 1.16) / 2).toFixed(2)} ${(cy - (size * 1.16) / 2).toFixed(2)}) scale(${scale.toFixed(4)})">
+      <path d="${stampMarkPath()}" fill="none" stroke="${shade(base, 0.62)}" stroke-opacity="0.5" stroke-width="${(1.6 / scale).toFixed(2)}" fill-rule="evenodd"
+            transform="rotate(${TILT_DEG} ${CANVAS / 2} ${CANVAS / 2})"/>
+    </g>
+    ${debossDeep(cx, cy, size, base, spec)}`;
+}
+
+/**
+ * The refined seal, with the ring and the centre swappable.
+ *
+ * ⚠ Body, lighting, material and shadows are **identical to `seal`**. This
+ * exists so a row can change exactly one thing.
+ */
+function sealParts(id, tier, size, ring, centre) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+  const k = size / 132;
+
+  const light = shade(base, 0.46);
+  const dark = shade(base, -0.46);
+  const deep = shade(base, -0.68);
+  const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
+  const rings = {
+    cord: () => beading(c, c, r - 9 * k, 32, shade(base, 0.55), 1.15 * k),
+    chain: () => ringChain(c, c, r - 9 * k, 20, base, k),
+    guilloche: () => ringGuilloche(c, c, r - 13 * k, r - 7 * k, 4, 14, base, k),
+    wreath: () => ringWreath(c, c, r - 10 * k, 9, base, k),
+    milled: () => ringMilled(c, c, r - 1.5 * k, r - 6 * k, 72, base, k),
+    hairline: () => ringHairline(c, c, r - 9 * k, base, k),
+    bare: () => '',
+  };
+
+  const centres = {
+    deboss: () => debossDeep(c, c - 9 * k, 46 * k, base, spec),
+    emboss: () => centreEmboss(c, c - 9 * k, 46 * k, base, spec),
+    cutout: () => centreCutout(c, c - 9 * k, 46 * k, base),
+    cartouche: () => centreCartouche(c, c - 9 * k, 46 * k, base, spec, k),
+    keyline: () => centreKeyline(c, c - 9 * k, 44 * k, base, spec, k),
+    number: () => centreNumber(c, c - 9 * k, 46 * k, base),
+  };
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="pface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/>
+        <stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="prim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/><stop offset="0.42" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.64)}"/>
+      </linearGradient>
+      <linearGradient id="pspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="pwell-${id}" cx="50%" cy="40%" r="64%">
+        <stop offset="0" stop-color="${shade(base, -0.04)}"/><stop offset="0.72" stop-color="${shade(base, -0.2)}"/><stop offset="1" stop-color="${shade(base, -0.52)}"/>
+      </radialGradient>
+    </defs>
+
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#prim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#pface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    <circle cx="${c}" cy="${c}" r="${(r - 12 * k).toFixed(2)}" fill="url(#pwell-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 12.4 * k).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.55" stroke-width="${(1.8 * k).toFixed(2)}"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 11.2 * k).toFixed(2)}" fill="none" stroke="${shade(base, 0.6)}" stroke-opacity="0.3" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    ${(rings[ring] ?? rings.cord)()}
+    ${(centres[centre] ?? centres.deboss)()}
+    ${engraved('23 / 60', c, c + 30 * k, 15 * k, base)}
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#pspec-${id})"/>
+    <path d="M${arcPt(c, c, r * 0.94, 0.2)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 0.6)}"
+      fill="none" stroke="${shade(base, 0.5)}" stroke-opacity="${(0.16 + spec * 0.34).toFixed(2)}" stroke-width="${((1 + spec * 1.2) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+const RING_OPTIONS = [
+  ['cord', 'Twisted cord', 'The current one, as the control.'],
+  ['chain', 'Chain links', 'Interlocking ovals, alternating light and dark. Denser than cord and unmistakably <i>made</i>.'],
+  ['guilloche', 'Guilloché', 'Engine-turned waves from banknotes and watch dials. Closed rings, so it can never read as spokes.'],
+  ['wreath', 'Laurel wreath', 'Two sprigs closing at the top. The most medal-like, and the least neutral.'],
+  ['milled', 'Milled edge', '⚠ Deliberately the closest to the rejected chip, so the difference can be <i>seen</i>: reeding sits on the outer edge, is far finer, and is cut across the rim rather than dotted on the face.'],
+  ['hairline', 'Two hairlines', 'A plain channel between two lines. The quietest option, and the one that lets the metal do all the talking.'],
+  ['bare', 'Nothing', 'No ring at all. Worth seeing, because it is the only way to know how much the ring is contributing.'],
+];
+
+const CENTRE_OPTIONS = [
+  ['deboss', 'Pressed in', 'The current one, as the control. Shadow above, lit lip below.'],
+  ['emboss', 'Standing proud', 'The same three passes with the offsets swapped. ⚠ Emboss versus deboss is nothing but which side the shadow falls on — and the eye flips the whole surface.'],
+  ['cutout', 'Cut through', 'The mark is a hole with the dark showing behind it. The most graphic, and the only one that does not depend on the metal for contrast.'],
+  ['cartouche', 'On a cartouche', 'A raised panel behind the mark, the way arms sit on a shield.'],
+  ['keyline', 'With a keyline', 'A hairline outline around the pressed mark, like a die-struck edge.'],
+  ['number', 'The number alone', '⚠ No mark at all — the count is the centre. Included because the mark may simply not be the most interesting thing to put there.'],
+];
+
 const STUDY = 132;
 const BUTTON = 64;
 const FLOOR = 44;
@@ -446,6 +689,38 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>The ring — seven options</h2>
+<p class="note">
+  ⚠ <b>One variable at a time.</b> The body, the lighting, the material and the
+  centre are identical across this row — only the ring changes. A study that
+  moves two things at once cannot tell you which one you liked, which is how
+  round 5 had to be thrown away whole rather than partly.
+  <br><br>
+  Drawn on <b>gold</b>, because it carries ornament without the platinum facets
+  competing, and again on <b>bronze</b>, because a ring that only works on the
+  showy rank is not a ring.
+</p>
+${RING_OPTIONS.map(([id, title, note]) => `
+<div class="row">
+  <figure>${sealParts(`RG-${id}`, 'gold', STUDY, id, 'deboss')}<figcaption>${title}</figcaption></figure>
+  <figure>${sealParts(`RB-${id}`, 'bronze', STUDY, id, 'deboss')}<figcaption>bronze</figcaption></figure>
+  <figure>${sealParts(`RS-${id}`, 'gold', BUTTON, id, 'deboss')}<figcaption>64 dp</figcaption></figure>
+  <div style="max-width:46ch;color:#A0A0A8;font-size:14px;align-self:center">${note}</div>
+</div>`).join('')}
+
+<h2>The centre — six options</h2>
+<p class="note">
+  ⚠ Same discipline: everything else is frozen, including the cord ring. Gold,
+  bronze, and the real 64 dp button.
+</p>
+${CENTRE_OPTIONS.map(([id, title, note]) => `
+<div class="row">
+  <figure>${sealParts(`CG-${id}`, 'gold', STUDY, 'cord', id)}<figcaption>${title}</figcaption></figure>
+  <figure>${sealParts(`CB-${id}`, 'bronze', STUDY, 'cord', id)}<figcaption>bronze</figcaption></figure>
+  <figure>${sealParts(`CS-${id}`, 'gold', BUTTON, 'cord', id)}<figcaption>64 dp</figcaption></figure>
+  <div style="max-width:46ch;color:#A0A0A8;font-size:14px;align-self:center">${note}</div>
+</div>`).join('')}
 
 <h2>Side by side — what changed</h2>
 <p class="note">

@@ -774,6 +774,16 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       648 cord links, no SVG filters**. Drawn at 132/64/44 px, on dark, light and **green** (most
       of this island is laurel forest), plus **greyscale** — if ranks separate only by hue, a
       colour-blind user has one rank and everybody else has five.
+      **5.** *"Try to make them more 3D. Ensure the higher the rank, more premium looking and
+      boogie looking."* Depth came from **stepped bevels** — 1 to 5 concentric rings, each catching
+      light at its own angle, which is what reads as a *turned edge*; a single rim with a gradient
+      is a disc however good the gradient. Plus **two shadows** (wide drop + tight contact, which is
+      what makes an object rest on something rather than float) and a **bounce-light arc on the
+      side away from the key light** — the biggest single 3D tell in the drawing.
+      — ⚠ **The escalation is structural, not chromatic**, in a table (`ESCALATION`): bevel count,
+      cord, starburst, laurel, raised dome, cut facets, halo, sparkles. **Measured monotonic: 13 →
+      14 → 65 → 86 → 141 drawn elements.** Doing it with colour would be five hues again, which
+      already failed once — structure is what survives greyscale, 44 dp and colour blindness.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

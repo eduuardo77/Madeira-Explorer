@@ -749,6 +749,169 @@ function centreAnchor(cx, cy, size, base, spec) {
 
 
 
+
+/* ------------------------------------------- the cross, straightened */
+
+/*
+ * ⚠⚠ **"MAKE THE CROSS MORE LIKE A + SIGN, WITH MORE STRAIGHT LINES."**
+ * Rather than guess how much straighter, the whole scale is drawn: from a plain
+ * Greek cross to the flared concave one, five steps, with the geometry named.
+ * **Pointing at one is faster and more exact than describing one.**
+ *
+ * Two numbers do all of it:
+ *
+ *   - **flare** — how much wider the tip is than the waist. `1.0` is a true `+`
+ *     with parallel sides; `3.1` is where the last version sat.
+ *   - **curve** — how far the flank bows inward. `0` is a straight line, which
+ *     is what "more straight lines" asks for; anything above bends it.
+ *
+ * ⚠ **At `flare: 1` the shape has no flanks at all** — a `+` is two overlapping
+ * bars, so the outline is twelve right angles and nothing else. Every step after
+ * that is a departure from the sign towards the heraldic cross.
+ */
+
+/**
+ * One cross, anywhere on the scale between a `+` and the flag's cross.
+ *
+ * `curve` of zero emits straight lines rather than a curve with a collinear
+ * control point — same picture, but the path says what it means.
+ */
+function crossScaled(cx, cy, R, waist, flare, curve) {
+  const tip = waist * flare;
+  let d = '';
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const at = (x, y) => `${(cx + x * cos - y * sin).toFixed(2)} ${(cy + x * sin + y * cos).toFixed(2)}`;
+
+    d += `${k === 0 ? 'M' : 'L'}${at(-waist, -waist)} `;
+    d += curve > 0 ? `Q${at(-waist * curve, -R * 0.66)} ${at(-tip, -R)} ` : `L${at(-tip, -R)} `;
+    d += `L${at(tip, -R)} `;
+    d += curve > 0 ? `Q${at(waist * curve, -R * 0.66)} ${at(waist, -waist)} ` : `L${at(waist, -waist)} `;
+  }
+  return d + 'Z';
+}
+
+/** The same arms split along the spine, so the facets follow the new outline. */
+function crossScaledFacets(cx, cy, R, waist, flare, curve, base) {
+  const tip = waist * flare;
+  const lightAngle = -Math.PI * 0.75;
+  let out = '';
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const at = (x, y) => `${(cx + x * cos - y * sin).toFixed(2)} ${(cy + x * sin + y * cos).toFixed(2)}`;
+    const flank = (sign) =>
+      curve > 0
+        ? `Q${at(sign * waist * curve, -R * 0.66)} ${at(sign * tip, -R)} `
+        : `L${at(sign * tip, -R)} `;
+
+    const halves = [
+      { d: `M${at(-waist, -waist)} ${flank(-1)}L${at(0, -R)} L${at(0, -waist)} Z`, facing: a - Math.PI / 2 - 0.62 },
+      { d: `M${at(0, -waist)} L${at(0, -R)} L${at(tip, -R)} ${curve > 0 ? `Q${at(waist * curve, -R * 0.66)} ${at(waist, -waist)}` : `L${at(waist, -waist)}`} Z`, facing: a - Math.PI / 2 + 0.62 },
+    ];
+
+    for (const half of halves) {
+      out += `<path d="${half.d}" fill="${shade(base, Math.cos(half.facing - lightAngle) * 0.4 - 0.08)}"/>`;
+    }
+  }
+  return out;
+}
+
+/** Flat flag colours, so the outline is judged without metal in the way. */
+function crossScaledCheck(size, waistRatio, flare, curve) {
+  const c = size / 2;
+  const R = size * 0.44;
+  const waist = R * waistRatio;
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <rect width="${size}" height="${size}" fill="#F8D000"/>
+    <path d="${crossScaled(c, c, R, waist, flare, curve)}" fill="#D22630"/>
+    <path d="${crossPlain(c, c, R * 0.8, waist * 0.5)}" fill="#FFFFFF"/>
+  </svg>`;
+}
+
+/** The seal, with the cross anywhere on the scale. */
+function sealScaledCross(id, tier, size, waistRatio, flare, curve) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+  const k = size / 132;
+
+  const light = shade(base, 0.46);
+  const dark = shade(base, -0.46);
+  const deep = shade(base, -0.68);
+  const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
+  const R = r - 26 * k;
+  const waist = R * waistRatio;
+  const outline = crossScaled(c, c, R, waist, flare, curve);
+  const inner = crossPlain(c, c, R * 0.8, waist * 0.5);
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="sface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/><stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="srim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/><stop offset="0.42" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.64)}"/>
+      </linearGradient>
+      <linearGradient id="sspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="swell-${id}" cx="50%" cy="40%" r="64%">
+        <stop offset="0" stop-color="${shade(base, -0.04)}"/><stop offset="0.72" stop-color="${shade(base, -0.2)}"/><stop offset="1" stop-color="${shade(base, -0.5)}"/>
+      </radialGradient>
+    </defs>
+
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#srim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#sface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    ${beading(c, c, r - 9 * k, 34, shade(base, 0.55), 1.15 * k)}
+
+    <circle cx="${c}" cy="${c}" r="${(r - 15 * k).toFixed(2)}" fill="url(#swell-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 15.4 * k).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.5" stroke-width="${(1.6 * k).toFixed(2)}"/>
+
+    <path d="${outline}" transform="translate(${(-0.8 * k).toFixed(2)} ${(-1 * k).toFixed(2)})" fill="${shade(base, 0.74)}" fill-opacity="0.7"/>
+    <path d="${outline}" transform="translate(${(0.8 * k).toFixed(2)} ${(1.2 * k).toFixed(2)})" fill="${shade(base, -0.74)}" fill-opacity="0.8"/>
+    ${crossScaledFacets(c, c, R, waist, flare, curve, base)}
+    <path d="${inner}" transform="translate(0 ${(0.8 * k).toFixed(2)})" fill="${shade(base, -0.72)}" fill-opacity="0.85"/>
+    <path d="${inner}" transform="translate(0 ${(-0.6 * k).toFixed(2)})" fill="${shade(base, 0.72)}" fill-opacity="0.6"/>
+    <path d="${inner}" fill="${shade(base, -0.14)}"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#sspec-${id})"/>
+    <path d="M${arcPt(c, c, r * 0.94, 0.2)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 0.6)}"
+      fill="none" stroke="${shade(base, 0.5)}" stroke-opacity="${(0.16 + spec * 0.34).toFixed(2)}" stroke-width="${((1 + spec * 1.2) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/**
+ * The scale, from a plain `+` to the flag's cross.
+ *
+ * ⚠ `waist` grows as `flare` shrinks on purpose: a `+` with the waist of a
+ * heraldic cross would be a spindly thing. Holding the *tip* width roughly
+ * constant is what keeps them comparable.
+ */
+const CROSS_SCALE = [
+  ['A', 'A plain +', 0.34, 1.0, 0, 'Parallel sides, square ends. Twelve right angles and nothing else — this is the sign, not a cross.'],
+  ['B', 'Barely flared', 0.3, 1.2, 0, 'Straight sides, a hint of widening. Still reads as a +, with just enough taper to look struck rather than drawn.'],
+  ['C', 'Flared, straight', 0.26, 1.6, 0, '⚠ Straight lines throughout, real flare. The most likely answer to "more like a + with straight lines" without giving up the cross.'],
+  ['D', 'Flared, faintly concave', 0.23, 2.1, 0.55, 'Straight-ish flanks with a slight inward bend — a nod to the heraldic form without committing to it.'],
+  ['E', 'The flag’s cross', 0.2, 3.1, 1.25, 'Where it was. Strong flare, fully concave flanks. Included as the far end of the scale.'],
+];
+
 /* ------------------------------------------- the cross, from the flag */
 
 /*
@@ -1457,6 +1620,45 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>How straight? — the whole scale, A to E</h2>
+<p class="note">
+  ⚠⚠ <b>Rather than guess how much straighter, here is the scale.</b> Two numbers
+  do all of it: <b>flare</b> — how much wider the tip is than the waist, where
+  <code>1.0</code> is a true <code>+</code> with parallel sides — and <b>curve</b>,
+  how far the flank bows inward, where <code>0</code> is a straight line.
+  <b>Pointing at one is faster and more exact than describing one.</b>
+  <br><br>
+  ⚠ At flare <code>1.0</code> the shape has no flanks at all: a <code>+</code> is
+  two overlapping bars, so the outline is twelve right angles. Every step after
+  that is a departure from the sign towards the heraldic cross.
+  <br><br>
+  ⚠ The waist widens as the flare shrinks, on purpose — a <code>+</code> built with
+  a heraldic cross's waist would be a spindly thing. Holding the <i>tip</i> width
+  roughly constant is what keeps them comparable.
+</p>
+
+<p class="note">Flat first, because outline is judged without metal:</p>
+<div class="row" style="background:#141416">
+${CROSS_SCALE.map(([id, title, waist, flare, curve, note]) => `
+  <figure>${crossScaledCheck(120, waist, flare, curve)}<figcaption>${id} · ${title}<br><span>flare ${flare} · curve ${curve}</span></figcaption></figure>`).join('')}
+</div>
+
+<p class="note">Then on gold, at study size:</p>
+<div class="row">
+${CROSS_SCALE.map(([id, title, waist, flare, curve]) => `
+  <figure>${sealScaledCross(`SC-${id}`, 'gold', STUDY, waist, flare, curve)}<figcaption>${id} · ${title}</figcaption></figure>`).join('')}
+</div>
+
+<p class="note">And at the real button, where the differences either survive or do not:</p>
+<div class="row">
+${CROSS_SCALE.map(([id, title, waist, flare, curve]) => `
+  <figure>${sealScaledCross(`SB-${id}`, 'gold', BUTTON, waist, flare, curve)}<figcaption>${id}</figcaption></figure>`).join('')}
+${CROSS_SCALE.map(([id, title, waist, flare, curve]) => `
+  <figure>${sealScaledCross(`SS-${id}`, 'platinum', BUTTON, waist, flare, curve)}<figcaption>${id} · plat</figcaption></figure>`).join('')}
+</div>
+
+${CROSS_SCALE.map(([id, title, waist, flare, curve, note]) => `<p class="note"><b>${id} — ${title}.</b> ${note}</p>`).join('')}
 
 <h2>The flag\'s cross — concave flanks, and room left for the rim</h2>
 <p class="note">

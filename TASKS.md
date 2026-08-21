@@ -908,6 +908,21 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       judge silhouette flat, judge material in metal, never both at once.
       — The inner cross is plain, constant width, and **stops short of the tips** exactly as the
       flag's does — stopping short is what keeps the red visible at the ends.
+      **13.** *"Make the cross more like a + sign, with more straight lines."* ⚠ **Rather than guess
+      how much straighter, the whole scale is drawn — A to E**, from a plain `+` to the flag's
+      cross, flat in flag colours and then on gold at study and 64 dp. **Pointing at one is faster
+      and more exact than describing one**, and it turns a matter of taste into a number.
+      — **Two parameters do all of it.** `flare` — how much wider the tip is than the waist, where
+      `1.0` is a true `+` with parallel sides. `curve` — how far the flank bows inward, where `0`
+      is a straight line. ⚠ At `flare: 1.0` the shape has **no flanks at all**: a `+` is two
+      overlapping bars, twelve right angles and nothing else. Every step after that is a departure
+      from the sign towards the heraldic cross.
+      — ⚠ **The waist widens as the flare shrinks, deliberately.** A `+` built with a heraldic
+      cross's waist is a spindly thing; holding the *tip* width roughly constant is what makes the
+      five comparable rather than just five different sizes.
+      — **My reading: C** — straight lines throughout with real flare — is the most likely answer
+      to *"more like a + with straight lines"* without giving up being a cross at all. But it is
+      one click on the page, so the guess costs nothing either way.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

@@ -415,3 +415,53 @@ usable.
 ⚠⚠ **None of this has been measured.** The old numbers were objectively too low and the new ones
 are ordinary; whether the emulator now *feels* fine is something only the project lead can say.
 A backup of the original sits beside it as `config.ini.bak-<epoch>`.
+
+## ⚠ Two ways a release build lies about what is in it, 2026-08-21
+
+Both were found while cutting a throwaway test APK for a trip, both produced a **wrong conclusion
+that survived until it was checked**, and both will happen again to anyone who trusts
+`BUILD SUCCESSFUL`.
+
+### Gradle does not watch `content/`
+
+`assembleRelease` re-bundles when `app/src` changes and **silently does not when
+`content/pois.json` does.** The content pack lives outside the Android project, so it is not in
+the bundle task's input set — `poiCatalogue.ts` imports it
+(`import rawPack from '../../../content/pois.json'`), but Gradle's up-to-date check never looks
+there.
+
+The symptom is a build that succeeds suspiciously fast:
+
+    BUILD SUCCESSFUL in 8s
+    629 actionable tasks: 6 executed, 623 up-to-date
+
+and an APK whose `assets/index.android.bundle` is **byte-identical to the previous one**. A
+content edit that was definitely on disk was definitely not in the APK.
+
+Force the bundle by deleting the task's outputs first:
+
+```bash
+rm -f app/android/app/build/generated/assets/react/release/index.android.bundle       app/android/app/build/intermediates/assets/release/mergeReleaseAssets/index.android.bundle
+cd app/android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+A real bundle costs ~25 s here, not 8. ⚠ **Do not trust the timing — verify the artefact.** The
+APK is a zip; read the bundle out and grep it for a string only the new content has:
+
+```powershell
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$z = [System.IO.Compression.ZipFile]::OpenRead('<path>.apk')
+$e = $z.Entries | Where-Object { $_.FullName -eq 'assets/index.android.bundle' }
+$s = $e.Open(); $ms = New-Object System.IO.MemoryStream; $s.CopyTo($ms); $s.Close()
+[System.Text.Encoding]::UTF8.GetString($ms.ToArray()).Contains('<some-new-id>')
+```
+
+### `assembleRelease` empties `outputs/apk/release/`
+
+Every run wipes that directory, so a hand-renamed APK from the previous build is **gone** — this
+ate two labelled builds before the pattern was obvious, including the one the Test Lab run of
+2026-08-19 had used. **Copy anything worth keeping out of the build tree in the same command that
+produced it**, and take a backup before rebuilding over a known-good APK.
+
+⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
+these docs is a **manual rename**, not something the build produces.

@@ -751,6 +751,177 @@ function centreAnchor(cx, cy, size, base, spec) {
 
 
 
+
+/* ------------------------------ the cross, actually right this time */
+
+/*
+ * ⚠⚠ **"STRAIGHT LINES AND AT THE END TRIANGLE SHAPE."**
+ * That sentence is the geometry, and it is **not** what any previous round drew.
+ *
+ * Every version so far flared **continuously from the centre** — a cross pattée,
+ * whose arms get steadily wider the whole way out. That is a Templar cross, and
+ * no amount of adjusting the flare or the curve was ever going to stop it being
+ * one, which is why four rounds of tuning failed.
+ *
+ * The flag's cross is built differently:
+ *
+ *   1. a **parallel-sided bar** from the centre, constant width, for most of the
+ *      arm's length;
+ *   2. then, near the end, the sides **step outward on straight diagonals** —
+ *      the triangular shoulders;
+ *   3. and a **flat tip** across the top.
+ *
+ * ⚠ **The bar is the point.** An arm that is a rectangle for two thirds of its
+ * length reads as a `+`; an arm that widens from the very centre reads as a
+ * heraldic cross. Same tip width, same reach, completely different object.
+ */
+
+/**
+ * One arm: bar, shoulders, flat tip. Rotated four times.
+ *
+ * `shoulder` is where along the arm the flare begins, as a fraction of the
+ * reach. At `1.0` there are no shoulders and it is a plain `+`; at `0` it flares
+ * from the centre and is the cross pattée that was wrong.
+ */
+function crossFlag(cx, cy, R, waist, tip, shoulder) {
+  const R1 = R * shoulder;
+  let d = '';
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const at = (x, y) => `${(cx + x * cos - y * sin).toFixed(2)} ${(cy + x * sin + y * cos).toFixed(2)}`;
+
+    d += `${k === 0 ? 'M' : 'L'}${at(-waist, -waist)} `;  // inner corner
+    d += `L${at(-waist, -R1)} `;                            // up the parallel bar
+    d += `L${at(-tip, -R)} `;                               // the diagonal shoulder
+    d += `L${at(tip, -R)} `;                                // across the flat tip
+    d += `L${at(waist, -R1)} `;                             // back down the shoulder
+    d += `L${at(waist, -waist)} `;                          // down the bar
+  }
+  return d + 'Z';
+}
+
+/** The same arm split along its spine, so facets follow the real outline. */
+function crossFlagFacets(cx, cy, R, waist, tip, shoulder, base) {
+  const R1 = R * shoulder;
+  const lightAngle = -Math.PI * 0.75;
+  let out = '';
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const at = (x, y) => `${(cx + x * cos - y * sin).toFixed(2)} ${(cy + x * sin + y * cos).toFixed(2)}`;
+
+    const halves = [
+      { d: `M${at(-waist, -waist)} L${at(-waist, -R1)} L${at(-tip, -R)} L${at(0, -R)} L${at(0, -waist)} Z`, facing: a - Math.PI / 2 - 0.6 },
+      { d: `M${at(0, -waist)} L${at(0, -R)} L${at(tip, -R)} L${at(waist, -R1)} L${at(waist, -waist)} Z`, facing: a - Math.PI / 2 + 0.6 },
+    ];
+    for (const half of halves) {
+      out += `<path d="${half.d}" fill="${shade(base, Math.cos(half.facing - lightAngle) * 0.4 - 0.08)}"/>`;
+    }
+  }
+  return out;
+}
+
+/** The flag, with the cross built the right way. */
+function flagTrue(w, opts = {}) {
+  const h = Math.round(w * 0.86);
+  const band = w * 0.235;
+  const cx = w / 2;
+  const cy = h / 2;
+  const R = h * 0.42;
+  const waist = R * (opts.waist ?? 0.2);
+  const tip = R * (opts.tip ?? 0.46);
+  const shoulder = opts.shoulder ?? 0.6;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    <rect width="${w}" height="${h}" fill="#F8D000"/>
+    <rect width="${band.toFixed(2)}" height="${h}" fill="#1F3A78"/>
+    <rect x="${(w - band).toFixed(2)}" width="${band.toFixed(2)}" height="${h}" fill="#1F3A78"/>
+    <path d="${crossFlag(cx, cy, R, waist, tip, shoulder)}" fill="#D22630"/>
+    <path d="${crossPlain(cx, cy, R * (opts.reach ?? 0.86), R * (opts.inner ?? 0.095))}" fill="#FFFFFF"/>
+  </svg>`;
+}
+
+/** And struck in metal. */
+function sealCrossFlag(id, tier, size, opts = {}) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+  const k = size / 132;
+
+  const light = shade(base, 0.46);
+  const dark = shade(base, -0.46);
+  const deep = shade(base, -0.68);
+  const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
+  const R = r - 26 * k;
+  const waist = R * (opts.waist ?? 0.2);
+  const tip = R * (opts.tip ?? 0.46);
+  const shoulder = opts.shoulder ?? 0.6;
+  const outline = crossFlag(c, c, R, waist, tip, shoulder);
+  const inner = crossPlain(c, c, R * (opts.reach ?? 0.86), R * (opts.inner ?? 0.095));
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="gface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/><stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="grim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/><stop offset="0.42" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.64)}"/>
+      </linearGradient>
+      <linearGradient id="gspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="gwell-${id}" cx="50%" cy="40%" r="64%">
+        <stop offset="0" stop-color="${shade(base, -0.04)}"/><stop offset="0.72" stop-color="${shade(base, -0.2)}"/><stop offset="1" stop-color="${shade(base, -0.5)}"/>
+      </radialGradient>
+    </defs>
+
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#grim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#gface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    ${beading(c, c, r - 9 * k, 34, shade(base, 0.55), 1.15 * k)}
+
+    <circle cx="${c}" cy="${c}" r="${(r - 15 * k).toFixed(2)}" fill="url(#gwell-${id})"/>
+    <circle cx="${c}" cy="${c}" r="${(r - 15.4 * k).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.5" stroke-width="${(1.6 * k).toFixed(2)}"/>
+
+    <path d="${outline}" transform="translate(${(-0.8 * k).toFixed(2)} ${(-1 * k).toFixed(2)})" fill="${shade(base, 0.74)}" fill-opacity="0.7"/>
+    <path d="${outline}" transform="translate(${(0.8 * k).toFixed(2)} ${(1.2 * k).toFixed(2)})" fill="${shade(base, -0.74)}" fill-opacity="0.8"/>
+    ${crossFlagFacets(c, c, R, waist, tip, shoulder, base)}
+
+    <path d="${inner}" transform="translate(0 ${(0.9 * k).toFixed(2)})" fill="${shade(base, -0.74)}" fill-opacity="0.85"/>
+    <path d="${inner}" transform="translate(0 ${(-0.7 * k).toFixed(2)})" fill="${shade(base, 0.78)}" fill-opacity="0.7"/>
+    <path d="${inner}" fill="${shade(base, 0.28)}"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#gspec-${id})"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function flagButton2(id, tier, size, opts) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:${Math.round(size * 0.07)}px">
+    ${sealCrossFlag(id, tier, size, opts)}
+    <div style="font:700 ${Math.round(size * 0.15)}px/1 -apple-system,Segoe UI,Roboto,sans-serif;color:#E8EEF2">23 / 60</div>
+  </div>`;
+}
+
+/** Where the shoulders start, as a dial. */
+const SHOULDER_SCALE = [
+  ['1', 'Shoulders at 70%', { shoulder: 0.7, tip: 0.5 }, 'Longest parallel bar, shortest triangles. The most <code>+</code>-like.'],
+  ['2', 'Shoulders at 60%', { shoulder: 0.6, tip: 0.46 }, '⚠ Closest to the flag as far as I can read it.'],
+  ['3', 'Shoulders at 50%', { shoulder: 0.5, tip: 0.44 }, 'Longer triangles, shorter bar. Starts drifting back towards heraldic.'],
+];
+
 /* ------------------------------------- the flag itself, for comparison */
 
 /*
@@ -1749,6 +1920,52 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>Built the right way — bar, shoulders, flat tip</h2>
+<p class="note">
+  ⚠⚠ <b>"Straight lines and at the end triangle shape."</b> That sentence is the
+  geometry, and it is <b>not what any previous round drew</b>.
+  <br><br>
+  Every version so far flared <b>continuously from the centre</b> — a cross pattée,
+  arms getting steadily wider the whole way out. <b>That is a Templar cross</b>, and
+  no amount of adjusting flare or curve was ever going to stop it being one. Four
+  rounds of tuning the wrong parameter.
+  <br><br>
+  The flag's cross is three parts: a <b>parallel-sided bar</b> from the centre for
+  most of the arm, then the sides <b>step out on straight diagonals</b> — the
+  triangular shoulders — then a <b>flat tip</b>.
+  <br><br>
+  ⚠ <b>The bar is the point.</b> An arm that is a rectangle for two thirds of its
+  length reads as a <code>+</code>; an arm that widens from the very centre reads as
+  heraldic. Same tip width, same reach, completely different object.
+</p>
+
+<div class="row" style="background:#141416">
+  <figure>${flagTrue(210)}<figcaption>the flag<br><span>bar + shoulders + flat tip</span></figcaption></figure>
+  <figure>${flagPanel(210, (cx, cy, R) => flagCrossPaths(cx, cy, R))}<figcaption>last round<br><span>flared from the centre</span></figcaption></figure>
+  <div style="max-width:42ch;color:#A0A0A8;font-size:14px;align-self:center">
+    ⚠ Left is the new construction, right is what was there before. <b>The left one
+    has straight parallel arms.</b> That is the whole difference, and it is why the
+    right one keeps reading as an order's badge.
+  </div>
+</div>
+
+<p class="note">⚠ Where the shoulders start, as a dial — because that one number decides how much <code>+</code> and how much cross:</p>
+<div class="row" style="background:#141416">
+${SHOULDER_SCALE.map(([id, title, opts, note]) => `
+  <figure>${flagTrue(170, opts)}<figcaption>${id} · ${title}</figcaption></figure>`).join('')}
+</div>
+${SHOULDER_SCALE.map(([id, title, opts, note]) => `<p class="note"><b>${id} — ${title}.</b> ${note}</p>`).join('')}
+
+<h2>Struck in metal</h2>
+<div class="row">${TIERS.map((t) => `<figure>${flagButton2(`GA-${t}`, t, STUDY)}<figcaption>${t}<br><span>${RANKS[t].label}</span></figcaption></figure>`).join('')}</div>
+<div class="row">
+  ${TIERS.map((t) => `<figure>${flagButton2(`GB-${t}`, t, BUTTON)}<figcaption>${t} · 64</figcaption></figure>`).join('')}
+  ${TIERS.map((t) => `<figure>${flagButton2(`GC-${t}`, t, 44)}<figcaption>${t} · 44</figcaption></figure>`).join('')}
+</div>
+<div class="map"><div class="row">
+  ${TIERS.map((t) => `<figure>${flagButton2(`GD-${t}`, t, BUTTON)}<figcaption>${t}</figcaption></figure>`).join('')}
+</div></div>
 
 <h2>The flag, beside the drawing</h2>
 <p class="note">

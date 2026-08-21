@@ -936,6 +936,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       thing next to the drawn thing makes the error obvious in a second. **Compare against the
       source; do not argue about it** — same habit as the flat shape check, and it should survive
       into whatever gets promoted.
+      **15.** *"Straight lines and at the end triangle shape."* ⚠⚠ **That sentence is the geometry,
+      and it is not what any previous round drew.** Every version flared **continuously from the
+      centre** — a cross pattée. **That is a Templar cross by construction**, and no amount of
+      adjusting flare or curve was ever going to stop it being one. **Four rounds spent tuning the
+      wrong parameter.**
+      — **The flag's cross is three parts:** a **parallel-sided bar** from the centre for most of
+      the arm, then the sides **step out on straight diagonals** — the triangular shoulders — then
+      a **flat tip**. ⚠ **The bar is the whole point.** An arm that is a rectangle for two thirds
+      of its length reads as a `+`; an arm that widens from the very centre reads as heraldic. Same
+      tip width, same reach, completely different object.
+      — ✅ `crossFlag()` takes a **`shoulder`** parameter — where along the arm the flare begins.
+      At `1.0` there are no shoulders and it is a plain `+`; at `0` it is the cross pattée that was
+      wrong all along. Drawn at 0.7 / 0.6 / 0.5 so the dial can be set by eye.
+      — ⚠ **The lesson, and it is the same one three rounds running:** I kept adjusting *numbers*
+      inside a construction that was itself wrong. **The user's description named the construction
+      in eight words.** When a shape is not converging, stop tuning it and ask what it is built
+      from.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

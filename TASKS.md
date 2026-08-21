@@ -871,6 +871,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       version is drawn beside it and why the 64 dp column is the one that decides.
       — **`crossSail` is the most specific to this app of anything drawn in ten rounds:** a
       caravel's sail carrying the cross, for an app named after the prow of the same ship.
+      **11.** *"Mais relevo e detalhe. Quero a cruz maior a utilizar o stamp todo e o número de
+      23/60 em baixo, fora da medalha."* ⚠⚠ **Two structural changes, not a bigger glyph.**
+      **(a) The well is gone** — a cross filling the seal cannot sit inside a pressed well, because
+      the well's edge would cut across its arms. The face now runs to the cord and the cross is
+      struck straight onto it. **(b) The count left the medal**, which frees the whole face and
+      turns the button from *a pill containing an icon and text* into **an object with a caption**.
+      — ⚠ **The relief is facets, not a gradient.** A raised cross is a set of **planes**: each arm
+      is split along its spine and each half shaded by which way it faces the light. That is what a
+      struck cross does, and no amount of soft shading on a flat silhouette imitates it. Plus a
+      raised keyline beneath the arms and the inner cross **engraved into** them rather than laid
+      on top — so it reads as one object instead of two stacked ones.
+      — ⚠⚠ **THIS CHANGES THE MAP BUTTON AND THAT IS NOT SETTLED.** `PrimaryOverlay` draws a
+      **horizontal pill** with the mark and the count side by side. A medal with the count beneath
+      it is a **stacked** control of a different shape, and **D-015's 60 dp tap floor then applies
+      to the medal alone** — a caption is not a tap target. The passport button is also the only
+      place the map screen shows progress at all, so the caption is load-bearing, not decoration.
+      **Settle the button's shape before promoting any of this.**
+      — Drawn with and without the inner cross, at study size, 64 dp and **44 dp**, plus on green.
+      ⚠ The inner cross is the first thing to die when the medal shrinks, which is why the solid
+      version with a centre boss is drawn beside it every time.
       — ⚠ **NEXT ACTION: the project lead looks at `tools/out/rank.html` and says what survives.**
       Then, and only then, promote the chosen seal into a pure module beside `stampTier.ts` with a
       second renderer, and replace `TIER_METAL`'s flat fills.

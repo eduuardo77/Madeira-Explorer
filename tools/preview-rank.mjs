@@ -747,6 +747,167 @@ function centreAnchor(cx, cy, size, base, spec) {
 }
 
 
+
+/* --------------------------------------------- the cross, filling the seal */
+
+/*
+ * ⚠⚠ **A DIFFERENT COMPOSITION, NOT A BIGGER GLYPH.**
+ * The project lead: *"quero a cruz maior a utilizar o stamp todo e o número de
+ * 23/60 em baixo, fora da medalha."*
+ *
+ * That is two changes and both are structural:
+ *
+ *   1. **The well goes.** A cross that fills the seal cannot sit inside a
+ *      pressed well — the well's edge would cut across its arms. So the face
+ *      runs all the way to the cord and the cross is struck straight onto it.
+ *   2. **The count leaves the medal.** Which frees the whole face, and turns the
+ *      button from *a pill containing an icon and some text* into **an object
+ *      with a caption**.
+ *
+ * ⚠ **That second one has a consequence outside this file.** On the map screen
+ * the passport button is a horizontal pill; a medal with the count underneath is
+ * a **stacked** control and a different shape. D-015's 60 dp tap floor applies to
+ * the medal alone, since the caption is not the target. Worth settling before
+ * this is promoted.
+ */
+
+/**
+ * A faceted cross pattée — each arm split along its spine, each half shaded by
+ * which way it faces.
+ *
+ * ⚠ **This is where the relief comes from, and it is not a gradient.** A raised
+ * cross is a set of *planes*: the left flank of an arm catches the light, the
+ * right flank turns away from it. Splitting every arm in two and shading the
+ * halves by their own facing is what a real struck cross does, and no amount of
+ * soft shading on a flat silhouette imitates it.
+ */
+function crossFacets(cx, cy, R, waist, tip, base) {
+  // Light from the top-left, which is where every other highlight in this file
+  // comes from. A medal lit from a second direction reads as a mistake.
+  const lightAngle = -Math.PI * 0.75;
+  let out = '';
+
+  for (let k = 0; k < 4; k += 1) {
+    const a = (k * Math.PI) / 2;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const put = (x, y) => `${(cx + x * cos - y * sin).toFixed(2)} ${(cy + x * sin + y * cos).toFixed(2)}`;
+
+    const halves = [
+      { pts: [[-waist, -waist], [-tip, -R], [0, -R], [0, -waist]], facing: a - Math.PI / 2 - 0.6 },
+      { pts: [[0, -waist], [0, -R], [tip, -R], [waist, -waist]], facing: a - Math.PI / 2 + 0.6 },
+    ];
+
+    for (const half of halves) {
+      // How square-on this plane is to the light, from -1 (away) to 1 (into it).
+      const facing = Math.cos(half.facing - lightAngle);
+      const amount = facing * 0.42 - 0.08;
+      out += `<path d="M${half.pts.map(([x, y]) => put(x, y)).join(' L')} Z" fill="${shade(base, amount)}"/>`;
+    }
+  }
+  return out;
+}
+
+/**
+ * The cross, struck across the whole face, with the count outside.
+ *
+ * Body, rim, cord, shadows, sheen and bounce are the refined seal's — untouched.
+ * What changes is that the well is gone and the cross owns the face.
+ */
+function sealBigCross(id, tier, size, variant) {
+  const rank = RANKS[tier];
+  const { base, spec, warm, wax } = rank;
+  const c = size / 2;
+  const r = size / 2 - size * 0.055;
+  const k = size / 132;
+
+  const light = shade(base, 0.46);
+  const dark = shade(base, -0.46);
+  const deep = shade(base, -0.68);
+  const hot = warm > 0.3 ? shade(base, 0.76) : shade(base, 0.95);
+  const turn = (0.62 - spec * 0.34).toFixed(2);
+
+  // The cross reaches almost to the cord — this is the whole point.
+  const R = r - 11 * k;
+  const waist = R * 0.19;
+  const tip = R * 0.58;
+  const outline = crossPattee(c, c, R, waist, tip);
+  const innerCross = crossPlain(c, c, R * 0.9, R * 0.1);
+
+  // A raised keyline: light copy pushed up, dark copy pushed down, under the
+  // faceted arms. Cheap, and it is what makes the cross sit *on* the metal.
+  const edge =
+    `<path d="${outline}" transform="translate(${(-0.9 * k).toFixed(2)} ${(-1.1 * k).toFixed(2)})" fill="${shade(base, 0.72)}" fill-opacity="0.75"/>` +
+    `<path d="${outline}" transform="translate(${(0.9 * k).toFixed(2)} ${(1.3 * k).toFixed(2)})" fill="${shade(base, -0.72)}" fill-opacity="0.8"/>`;
+
+  const facets = crossFacets(c, c, R, waist, tip, base);
+
+  // The inner cross, engraved rather than raised — cut into the arms, which is
+  // what makes it read as one object rather than two stacked ones.
+  const inset =
+    variant === 'solid'
+      ? ''
+      : `<path d="${innerCross}" transform="translate(0 ${(0.9 * k).toFixed(2)})" fill="${shade(base, -0.7)}" fill-opacity="0.85"/>` +
+        `<path d="${innerCross}" transform="translate(0 ${(-0.7 * k).toFixed(2)})" fill="${shade(base, 0.7)}" fill-opacity="0.6"/>` +
+        `<path d="${innerCross}" fill="${shade(base, -0.16)}"/>`;
+
+  // A small boss where the arms meet, so the centre is not a flat crossing.
+  const boss =
+    variant === 'solid'
+      ? `<circle cx="${c}" cy="${c}" r="${(R * 0.17).toFixed(2)}" fill="url(#xboss-${id})"/>
+         <circle cx="${c}" cy="${c}" r="${(R * 0.17).toFixed(2)}" fill="none" stroke="${deep}" stroke-opacity="0.5" stroke-width="${(0.8 * k).toFixed(2)}"/>`
+      : '';
+
+  return `
+  <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <radialGradient id="xface-${id}" cx="33%" cy="25%" r="80%">
+        <stop offset="0" stop-color="${shade(base, 0.5 + spec * 0.25)}"/>
+        <stop offset="${turn}" stop-color="${base}"/>
+        <stop offset="1" stop-color="${dark}"/>
+      </radialGradient>
+      <linearGradient id="xrim-${id}" x1="0.1" y1="1" x2="0.4" y2="0">
+        <stop offset="0" stop-color="${light}"/><stop offset="0.42" stop-color="${deep}"/><stop offset="1" stop-color="${shade(base, 0.64)}"/>
+      </linearGradient>
+      <linearGradient id="xspec-${id}" x1="0.05" y1="0" x2="0.75" y2="1">
+        <stop offset="0" stop-color="${hot}" stop-opacity="${(0.12 + spec * 0.82).toFixed(2)}"/>
+        <stop offset="${(0.08 + spec * 0.2).toFixed(2)}" stop-color="${hot}" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="xboss-${id}" cx="36%" cy="28%" r="72%">
+        <stop offset="0" stop-color="${shade(base, 0.6)}"/><stop offset="1" stop-color="${shade(base, -0.45)}"/>
+      </radialGradient>
+    </defs>
+
+    <path d="${sealPath(c, c + 4.2 * k, r * 1.008, 5 * k, wax)}" fill="#000" fill-opacity="0.18"/>
+    <path d="${sealPath(c, c + 1.6 * k, r, 5 * k, wax)}" fill="#000" fill-opacity="0.42"/>
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#xrim-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="url(#xface-${id})"/>
+    <path d="${sealPath(c, c, r - 5.5 * k, 3.4 * k, wax)}" fill="none" stroke="${shade(base, 0.7)}" stroke-opacity="0.35" stroke-width="${(0.7 * k).toFixed(2)}"/>
+
+    ${beading(c, c, r - 8 * k, 34, shade(base, 0.55), 1.15 * k)}
+
+    ${edge}
+    ${facets}
+    ${inset}
+    ${boss}
+
+    <path d="${sealPath(c, c, r, 5 * k, wax)}" fill="url(#xspec-${id})"/>
+    <path d="M${arcPt(c, c, r * 0.94, 0.2)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 0.6)}"
+      fill="none" stroke="${shade(base, 0.5)}" stroke-opacity="${(0.16 + spec * 0.34).toFixed(2)}" stroke-width="${((1 + spec * 1.2) * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${arcPt(c, c, r * 0.94, 1.18)} A ${(r * 0.94).toFixed(2)} ${(r * 0.94).toFixed(2)} 0 0 1 ${arcPt(c, c, r * 0.94, 1.62)}"
+      fill="none" stroke="${hot}" stroke-opacity="${(0.26 + spec * 0.58).toFixed(2)}" stroke-width="${((1.7 + spec * 2.3) * k).toFixed(2)}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/** The medal with its caption beneath it, which is the whole point of the change. */
+function crossButton(id, tier, size, variant) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:${Math.round(size * 0.07)}px">
+    ${sealBigCross(id, tier, size, variant)}
+    <div style="font:700 ${Math.round(size * 0.15)}px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:0.02em;color:#E8EEF2">23 / 60</div>
+  </div>`;
+}
+
 /* ------------------------------------------------ centres, the cross */
 
 /*
@@ -1109,6 +1270,47 @@ const html = `<!doctype html>
   unreliable in <code>react-native-svg</code> on Android and this has to be
   drawable by the app.
 </p>
+
+<h2>The cross, filling the seal — count underneath</h2>
+<p class="note">
+  ⚠⚠ <b>Two structural changes, not a bigger glyph.</b> <b>The well is gone</b> — a
+  cross that fills the seal cannot sit inside a pressed well, because the well's
+  edge would cut across its arms — so the face runs to the cord and the cross is
+  struck straight onto it. And <b>the count has left the medal</b>, which frees the
+  whole face and turns the button from <i>a pill containing an icon and some
+  text</i> into <b>an object with a caption</b>.
+  <br><br>
+  ⚠ <b>The relief is facets, not a gradient.</b> A raised cross is a set of
+  <i>planes</i>: each arm is split along its spine and each half is shaded by which
+  way it faces the light. That is what a struck cross actually does, and no amount
+  of soft shading on a flat silhouette imitates it. Plus a raised keyline under the
+  arms, and the inner cross <b>engraved into</b> them rather than laid on top — so
+  it reads as one object instead of two stacked ones.
+  <br><br>
+  ⚠ <b>One consequence outside this file:</b> on the map the passport button is a
+  horizontal pill. A medal with the count underneath is a <b>stacked</b> control and
+  a different shape, and D-015's 60 dp tap floor then applies to the medal alone,
+  since a caption is not a tap target. Worth settling before this is promoted.
+</p>
+<div class="row">${TIERS.map((t) => `<figure>${crossButton(`XA-${t}`, t, STUDY, 'inset')}<figcaption>${t}<br><span>${RANKS[t].label}</span></figcaption></figure>`).join('')}</div>
+<p class="note">⚠ And the solid version — no inner cross, a boss at the crossing instead. <b>The inner cross is the first thing to die when the medal shrinks</b>, so this is the honest comparison.</p>
+<div class="row">${TIERS.map((t) => `<figure>${crossButton(`XB-${t}`, t, STUDY, 'solid')}<figcaption>${t} · solid</figcaption></figure>`).join('')}</div>
+
+<h2>At the real button — 64 dp, and D-015's floor at 44</h2>
+<p class="note">⚠ The column that decides. Inset above, solid below.</p>
+<div class="row">
+  ${TIERS.map((t) => `<figure>${crossButton(`XC-${t}`, t, BUTTON, 'inset')}<figcaption>${t}</figcaption></figure>`).join('')}
+  ${TIERS.map((t) => `<figure>${crossButton(`XD-${t}`, t, 44, 'inset')}<figcaption>${t} · 44</figcaption></figure>`).join('')}
+</div>
+<div class="row">
+  ${TIERS.map((t) => `<figure>${crossButton(`XE-${t}`, t, BUTTON, 'solid')}<figcaption>${t} · solid</figcaption></figure>`).join('')}
+  ${TIERS.map((t) => `<figure>${crossButton(`XF-${t}`, t, 44, 'solid')}<figcaption>${t} · solid 44</figcaption></figure>`).join('')}
+</div>
+
+<h2>On the green it will sit on</h2>
+<div class="map"><div class="row">
+  ${TIERS.map((t) => `<figure>${crossButton(`XG-${t}`, t, BUTTON, 'inset')}<figcaption>${t}</figcaption></figure>`).join('')}
+</div></div>
 
 <h2>The ring — seven options</h2>
 <p class="note">

@@ -43,8 +43,12 @@ The documents cost more to read than the code does. In order of impact:
 
 ## The two things that are not yours to do
 
-1. **Getting a physical device.** No Android phone, no Mac. The emulator works
-   (`bash tools/run-emulator.sh`) and is legitimate for rendering, storage, UI, permissions and
+1. **Getting a physical device.** No Mac, and no Android phone of this project's own.
+   ⚠ **CHANGED 2026-08-21 — the project lead has temporary access to an Android**, a few days
+   only, one handset. Battery (T-054), background survival and OEM killers (T-051/T-053), GPS
+   under canopy (T-076–T-080) and one real trip (OD-10) are **answerable for the length of that
+   loan** — ask for the measurement rather than recording it as impossible. The emulator
+   (`bash tools/run-emulator.sh`) is still legitimate for rendering, storage, UI, permissions and
    replayed routes — and **worthless for battery, background survival and GPS realism**
    (CONTEXT §6.6). See `docs/dev-build.md`.
 2. ~~**Curating `content/pois.json`.**~~ **CHANGED 2026-08-16 — the arrangement is now
@@ -66,8 +70,10 @@ The documents cost more to read than the code does. In order of impact:
 ## Honesty rules, each of which cost something here
 
 - **Be precise about which half you mean.** The app runs on an emulator and the recorder records
-  *there*. Battery, background survival and GPS realism are unverified and no emulator can answer
-  them. 420 unit tests and a browser workbench are all the verification the *logic* has.
+  *there*; it has also run on **real hardware once** (Firebase Test Lab, Pixel 5, 2026-08-19 —
+  rendering only, nobody walked anywhere). Battery, background survival and GPS realism are
+  unverified and no emulator can answer them. 619 unit tests and a browser workbench are all the
+  verification the *logic* has.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not
   earned.

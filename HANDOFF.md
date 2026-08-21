@@ -8,12 +8,13 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **595 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **619 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
-Portuguese and German**. ⚠ **Nothing has ever run on real hardware**, and no threshold in the app
-has met real GPS.
+Portuguese and German**. ⚠ **The app has run on real hardware once** — Firebase Test Lab, Pixel 5,
+2026-08-19, map rendering included (item 0 below). ⚠ **No threshold in the app has met real GPS**,
+and battery and background survival are still unmeasured.
 
 ## What was settled 2026-08-17 — read these before touching related code
 
@@ -190,7 +191,7 @@ gradient.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 595 tests
+cd app && npm test          # 619 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

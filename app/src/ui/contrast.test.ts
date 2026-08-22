@@ -39,7 +39,7 @@ import { CATEGORIES } from '../content/contentPack.ts';
 import { designFor, UNCOLLECTED } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
 import { NIGHT_LAND } from '../map/googleNightStyle.ts';
-import { colors, mapChrome } from './theme.ts';
+import { colors, mapChrome, settingsLight } from './theme.ts';
 
 /** Body text. Above WCAG's 4.5, because this is read outdoors. */
 const BODY = 5;
@@ -180,6 +180,81 @@ test('outlines are visible enough to bound a tap target', () => {
       `border on ${surface} is ${ratio.toFixed(2)}:1, below ${BOUNDARY}`
     );
   }
+});
+
+// ---------------------------------------------------------------------------
+// The light settings screen (T-168, D-080)
+// ---------------------------------------------------------------------------
+
+test('every settings colour is readable on both surfaces it is drawn on', () => {
+  // ⚠ This screen is the one place in the app where a colour is read on
+  // **white**, and every instinct in `colors` above is calibrated for the
+  // opposite. Reusing the dark palette's blue here would have shipped a
+  // 2.6:1 action row — legible on a desk monitor, gone in Madeiran sun.
+  for (const surface of [settingsLight.background, settingsLight.surface]) {
+    for (const [name, colour] of [
+      ['text', settingsLight.text],
+      ['textMuted', settingsLight.textMuted],
+      ['action', settingsLight.action],
+      ['danger', settingsLight.danger],
+    ] as const) {
+      const ratio = contrastRatio(colour, surface);
+      assert.ok(
+        ratio >= BODY,
+        `settings ${name} on ${surface} is ${ratio.toFixed(2)}:1, below ${BODY}`
+      );
+    }
+  }
+});
+
+test('the settings blue and red are not Apple’s, and this is why', () => {
+  // ⚠ Somebody will "correct" these to the system colours one day, because
+  // the reference app uses them and they look right on a bright screen.
+  assert.ok(contrastRatio('#007AFF', '#FFFFFF') < BODY, 'the premise changed');
+  assert.ok(contrastRatio('#FF3B30', '#FFFFFF') < BODY, 'the premise changed');
+  assert.ok(
+    contrastRatio(settingsLight.action, settingsLight.surface) >
+      contrastRatio('#007AFF', '#FFFFFF')
+  );
+  assert.ok(
+    contrastRatio(settingsLight.danger, settingsLight.surface) >
+      contrastRatio('#FF3B30', '#FFFFFF')
+  );
+});
+
+test('a settings row outline can bound a tap target', () => {
+  // The separators and the segmented control's edges are what tell the user
+  // where the 60 dp target is — the same rule that caught `#314856` above.
+  for (const surface of [settingsLight.background, settingsLight.surface]) {
+    const ratio = contrastRatio(settingsLight.border, surface);
+    assert.ok(
+      ratio >= BOUNDARY,
+      `settings border on ${surface} is ${ratio.toFixed(2)}:1, below ${BOUNDARY}`
+    );
+  }
+});
+
+test('the selected segment keeps its label readable', () => {
+  // The tint is only half the signal (the weight is the other half, D-015),
+  // but the label still has to be read on it.
+  assert.ok(contrastRatio(settingsLight.text, settingsLight.selected) >= BODY);
+  assert.ok(contrastRatio(settingsLight.action, settingsLight.selected) >= BODY);
+});
+
+test('the Done button’s label is readable on it', () => {
+  assert.ok(
+    contrastRatio(settingsLight.surface, settingsLight.action) >= BODY,
+    'white on the settings blue'
+  );
+});
+
+test('the light screen is genuinely light, and the dark one genuinely dark', () => {
+  // A probe on the pair: if somebody ever "unifies" these two palettes, this
+  // is the assertion that notices before a user does.
+  assert.ok(
+    relativeLuminance(parseHex(settingsLight.background)) >
+      relativeLuminance(parseHex(colors.background)) * 10
+  );
 });
 
 // ---------------------------------------------------------------------------

@@ -156,6 +156,57 @@ export const mapChrome = {
   },
 } as const;
 
+/**
+ * Settings, which is light while every other screen is dark (T-168, D-080).
+ *
+ * ⚠ **THIS IS THE PROJECT LEAD'S CALL, MADE WITH THE APP IN THEIR HAND**
+ * (2026-08-22): *"I prefer light colour settings"*, against the reference app's
+ * own settings screen. It is a deliberate exception, not a drift — the map
+ * already inverts its chrome with the map style (`mapChrome` above), so this app
+ * was never uniformly dark; what is new is a *screen* that is light.
+ *
+ * ⚠ **WHY A SECOND PALETTE RATHER THAN A `light` VARIANT OF `colors`.** Every
+ * value above is measured against the dark surfaces it is drawn on, and the
+ * contrast floors are asymmetric: `action` (`#5AA9FF`) is 7.86:1 on the dark
+ * background and **2.6:1 on white**, so reusing it would have produced a blue
+ * action row nobody could read outdoors — the exact failure `contrast.test.ts`
+ * was written for, arriving through the door marked "reuse".
+ *
+ * ⚠ **AND WHY THESE BLUES AND REDS ARE NOT APPLE'S.** iOS system blue
+ * (`#007AFF`) is **4.02:1** on white and system red (`#FF3B30`) is 3.55:1 —
+ * both under this project's 5:1 floor for text read in Madeiran sun (D-015).
+ * The values here are the same hues carried down until they pass. They will
+ * look slightly darker than the reference app beside it; that is the trade
+ * D-015 already decided.
+ *
+ * Held by `contrast.test.ts`, on both surfaces each colour is drawn on.
+ */
+export const settingsLight = {
+  /** The page behind the cards — iOS `systemGroupedBackground`. */
+  background: '#F2F2F7',
+  /** A grouped card. White, so the rows read as raised out of the page. */
+  surface: '#FFFFFF',
+  /** Primary text. Near-black rather than black, matching the dark palette. */
+  text: '#1C1C1E',
+  /**
+   * Section headers and the footnotes under each card.
+   *
+   * ⚠ Darker than the grey a designer reaches for: 5.94:1 on the page and
+   * 6.63:1 on a card. D-015's third rule — recessive is not invisible — costs
+   * about two shades here, and the footnotes are where this screen does its
+   * explaining (design brief §5), so they are the last thing that may fade.
+   */
+  textMuted: '#5C5C63',
+  /** Row separators and card outlines. 4.07:1 on the page — it bounds a tap target. */
+  border: '#767676',
+  /** A tinted action row: *Open phone settings*, *Privacy*. 5.78:1 on a card. */
+  action: '#0B62CC',
+  /** The destructive action, and only ever beside the word for it. 5.88:1 on a card. */
+  danger: '#C8102E',
+  /** The selected segment of a choice row — a tint, with the label carrying the meaning. */
+  selected: '#E8F1FC',
+} as const;
+
 /** Minimum tap target, in dp. D-015: 60, not 44. */
 export const MIN_TAP_TARGET = 60;
 

@@ -15,6 +15,7 @@
  * explained why it matters. The safe choice is the one styled as primary.
  */
 
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
 import { t } from '../i18n';
 import {
@@ -52,7 +53,7 @@ import PrivacyPolicyView from './PrivacyPolicyView';
 import Constants from 'expo-constants';
 import { buildDonation, sendDonation } from '../souvenir/donateWalk';
 import SettingsView from './SettingsView';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { fontSize, MIN_TAP_TARGET, settingsLight, spacing } from './theme';
 
 export default function SettingsScreen({
   onClose,
@@ -163,6 +164,13 @@ export default function SettingsScreen({
   if (erased) {
     return (
       <View style={styles.centre}>
+        {/* ⚠ `App.tsx` sets `style="light"` for the whole app, because every
+            other screen is dark. Settings is not any more (D-080), and a white
+            clock on a near-white page is invisible — the same failure the map's
+            status-bar scrim was written for (T-112). Each light branch of this
+            screen sets it back; the privacy policy below is still dark and
+            deliberately does not. */}
+        <ExpoStatusBar style="dark" />
         <Text style={styles.title}>{t('erase.done.title')}</Text>
         <Text style={styles.body}>{t('erase.done.body')}</Text>
         <Pressable
@@ -184,6 +192,7 @@ export default function SettingsScreen({
   if (confirmingErase) {
     return (
       <View style={styles.root}>
+        <ExpoStatusBar style="dark" />
         <ScrollView contentContainerStyle={styles.confirmContent}>
           <Text style={styles.title}>{t('erase.confirm.title')}</Text>
           <Text style={styles.body}>{t('erase.confirm.body1')}</Text>
@@ -257,7 +266,9 @@ export default function SettingsScreen({
   }, [donating]);
 
   return (
-    <SettingsView
+    <View style={styles.root}>
+      <ExpoStatusBar style="dark" />
+      <SettingsView
       permission={permission}
       mapStyle={mapStyle}
       onChangeMapStyle={changeMapStyle}
@@ -285,15 +296,16 @@ export default function SettingsScreen({
       donating={donating}
       onDonateWalk={donateWalk}
       onClose={onClose}
-    />
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1, backgroundColor: settingsLight.background },
   centre: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: settingsLight.background,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
@@ -306,13 +318,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   title: {
-    color: colors.text,
+    color: settingsLight.text,
     fontSize: fontSize.title,
     fontWeight: '700',
     textAlign: 'center',
   },
   body: {
-    color: colors.text,
+    color: settingsLight.text,
     fontSize: fontSize.body,
     lineHeight: fontSize.body * 1.5,
     textAlign: 'center',
@@ -325,10 +337,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     borderRadius: 12,
-    backgroundColor: colors.action,
+    backgroundColor: settingsLight.action,
   },
   primaryText: {
-    color: colors.actionText,
+    color: settingsLight.surface,
     fontSize: fontSize.body,
     fontWeight: '700',
   },
@@ -338,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: colors.bad,
+    borderColor: settingsLight.danger,
   },
-  dangerText: { color: colors.bad, fontSize: fontSize.body, fontWeight: '700' },
+  dangerText: { color: settingsLight.danger, fontSize: fontSize.body, fontWeight: '700' },
 });

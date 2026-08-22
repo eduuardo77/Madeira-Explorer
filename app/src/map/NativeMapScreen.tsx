@@ -41,6 +41,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -59,7 +60,6 @@ import { runAwardPass } from '../progress/stampAwards';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import { startTrip, stopTrip } from '../recording/tripRecording';
-import { isBackgroundTrackingAllowed } from '../recording/trackingSettings';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -70,6 +70,7 @@ import PlaceCardView from '../ui/PlaceCardView';
 import PrimaryOverlay from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
+import { recenterCamera, RECENTER_MAX_AGE_MS } from './recenterCamera';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
@@ -108,15 +109,19 @@ const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as Bounds;
  * and it read as the app failing to fill the screen.
  *
  * Measured against `PrimaryOverlay` instead of guessed: the passport pill is
- * `MIN_TAP_TARGET` (60) plus `spacing.xl` (32) of bottom inset; the recording
- * control, when shown, adds another 60 and a `spacing.sm` (8) gap. So the real
- * numbers are 92 and 160 — and which one applies depends on whether the user
- * granted Always, which is why this is a function now rather than a constant.
+ * `MIN_TAP_TARGET` (60) plus `spacing.xl` (32) of bottom inset.
+ *
+ * ⚠ **A CONSTANT AGAIN SINCE D-080**, and the reason is worth keeping. It was a
+ * function of *"did the user grant Always"*, because the walk button was hidden
+ * from those who had. Both extra controls are now unconditional — re-center and
+ * the walk button, each `MIN_TAP_TARGET` with a `spacing.sm` gap — so the
+ * chrome is the same height for every user and there is nothing left to branch
+ * on. Getting this wrong is invisible in a screenshot and frames every trace
+ * too high (it once stood at 220 and drew coastal walks at 43% of screen
+ * height), so it is measured, not guessed.
  */
-function cameraPadding(hasRecordingControl: boolean) {
-  const bottomChrome = hasRecordingControl
-    ? MIN_TAP_TARGET * 2 + spacing.sm + spacing.xl
-    : MIN_TAP_TARGET + spacing.xl;
+function cameraPadding() {
+  const bottomChrome = MIN_TAP_TARGET * 3 + spacing.sm * 2 + spacing.xl;
   return {
     // The settings control plus the status bar it sits below.
     top: MIN_TAP_TARGET + spacing.xl + (StatusBar.currentHeight ?? 0),
@@ -207,8 +212,17 @@ export default function NativeMapScreen({
   const cameraHeldByFocus = useRef(false);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
   const [card, setCard] = useState<PlaceCard | null>(null);
-  const [needsRecordingControl, setNeedsRecordingControl] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  /**
+   * May Google draw its own blue dot? (T-167, D-080)
+   *
+   * ⚠ **Not "should" — "may".** The user asked for *"a pointer with my
+   * location"*, and Google's own dot is the one every Android user already
+   * recognises, heading arrow included. It is the platform's layer rather than
+   * ours, so the *permission* gates it: this is the OS's answer, read once at
+   * launch, not a preference.
+   */
+  const [canShowLocation, setCanShowLocation] = useState(false);
   /**
    * Which places have actually been awarded, and the live zoom needed to size
    * their marks (T-112). Zoom comes from `onCameraMove` because the user's own
@@ -250,7 +264,7 @@ export default function NativeMapScreen({
     fitBounds(bounds, {
       width,
       height,
-      padding: cameraPadding(needsRecordingControl),
+      padding: cameraPadding(),
     });
 
   useEffect(() => {
@@ -269,23 +283,19 @@ export default function NativeMapScreen({
       try {
         await runAwardPass();
 
-        const [nextProgress, permission, recording, backgroundAllowed] =
-          await Promise.all([
-            getCurrentProgress(),
-            locationProvider.getPermissionLevel(),
-            locationProvider.isRecording(),
-            isBackgroundTrackingAllowed(),
-          ]);
+        const [nextProgress, permission, recording] = await Promise.all([
+          getCurrentProgress(),
+          locationProvider.getPermissionLevel(),
+          locationProvider.isRecording(),
+        ]);
         if (!cancelled) {
           setProgress(nextProgress);
-          // ⚠ Two different reasons to show it, and both are the same to the
-          // user: the app cannot fill the map in by itself. Either the OS did
-          // not grant Always, or the user turned background tracking off
-          // themselves (T-146) — and somebody who turned it off deliberately
-          // still needs a way to record the walk they are on right now, which
-          // is the project lead's point in asking for this button.
-          setNeedsRecordingControl(permission !== 'always' || !backgroundAllowed);
           setIsRecording(recording);
+          // ⚠ The blue dot is Google's own, and it needs a granted permission
+          // to draw anything at all. Asking the map to show it while the OS has
+          // refused is how a map screen ends up throwing on launch, so the flag
+          // follows what the OS actually said (D-080).
+          setCanShowLocation(permission !== 'denied' && permission !== 'undetermined');
         }
 
         // The places, and which of them have been earned. Both are needed to
@@ -456,6 +466,44 @@ export default function NativeMapScreen({
     setTappedPlace(null);
   };
 
+  /**
+   * "Where am I" (T-167).
+   *
+   * ⚠ **It asks the OS, it does not read the trace.** The last recorded fix
+   * belongs to a walk that may have ended yesterday; `getLastKnownPosition`
+   * answers from the platform's own cache with a staleness bound, so a stale
+   * answer comes back as `null` rather than as a confident wrong place.
+   *
+   * ⚠ **And a miss is spoken, not swallowed.** Under canopy, or in the first
+   * seconds of a cold launch, there is genuinely no position — a control that
+   * silently does nothing there reads as a broken button, which is the same
+   * failure as the grey map reading as a broken app.
+   */
+  const recenter = () => {
+    void (async () => {
+      try {
+        const position = await locationProvider.getLastKnownPosition(
+          RECENTER_MAX_AGE_MS
+        );
+        const next = recenterCamera(position, zoom);
+
+        if (next === null) {
+          Alert.alert(t('map.noPositionTitle'), t('map.noPositionBody'));
+          return;
+        }
+
+        // ⚠ Releases the focus hold, or the framing effect fights the user:
+        // opening a place card sets `cameraHeldByFocus`, and a re-center after
+        // that is the user overruling the card's framing on purpose.
+        cameraHeldByFocus.current = true;
+        setCamera(next);
+      } catch (error) {
+        await recordingEventDao.logError('recenter', error);
+        Alert.alert(t('map.noPositionTitle'), t('map.noPositionBody'));
+      }
+    })();
+  };
+
   const toggleRecording = () => {
     void (async () => {
       try {
@@ -539,7 +587,13 @@ export default function NativeMapScreen({
             darkMap.mapStyleJson === undefined
               ? undefined
               : { json: darkMap.mapStyleJson },
-          isMyLocationEnabled: false,
+          // ⚠ Google's own blue dot, with the heading arrow Android users
+          // already know (T-167). Off for eighteen months because design brief
+          // §3 allowed the screen three controls and Google's my-location
+          // *button* came with it; `myLocationButtonEnabled: false` below keeps
+          // the button off while the dot comes back, so the app still owns its
+          // own chrome.
+          isMyLocationEnabled: canShowLocation,
           isTrafficEnabled: false,
           isBuildingEnabled: false,
           selectionEnabled: false,
@@ -593,8 +647,8 @@ export default function NativeMapScreen({
       <PrimaryOverlay
         progress={progress}
         mapStyle={styleName}
-        showRecordingControl={needsRecordingControl}
         isRecording={isRecording}
+        onRecenter={recenter}
         bottomSlot={
           card === null ? null : (
             <PlaceCardView card={card} onClose={closeCard} />

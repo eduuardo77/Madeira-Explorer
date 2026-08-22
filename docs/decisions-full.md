@@ -4376,3 +4376,82 @@ and still rendered as a crosshair.
 
 **Next, and not done here:** the per-place assignment for all sixty, one line of justification
 each, **draft and veto** (D-064).
+
+---
+
+## D-080 — The map screen is four controls, and Settings is light
+
+**Status:** **Accepted** — the project lead's decision, 2026-08-22, made with the app running on
+their own Android and against what this file previously said.
+
+**⚠ This is the first decision in the project's life taken while somebody was looking at the app on
+a real phone they own.** Every prior UI decision was taken against an emulator screenshot, a
+workbench in a browser, or a description. That is why three of the four parts below reverse
+something: they are not new information about users, they are the first contact with the product.
+
+### The decision, in four parts
+
+1. **The start/stop walk button is permanent.** It was conditional — shown only to users who had
+   *not* granted Always (D-008, design brief §3.3). The project lead granted Always, watched it
+   disappear, and asked for it back: *"The start walk button must be there every time regardless of
+   user choosing."*
+2. **A re-center control, with Google's own location dot.** *"first we should add again re-center
+   button for the app… We also need a pointer with my location."* Both were deliberately absent:
+   §3 allowed the screen three controls, and `isMyLocationEnabled` was `false`.
+3. **Settings is light** — grey page, white cards, tinted rows — while every other screen in the
+   app stays dark. *"I prefer light colour settings."*
+4. **The light/dark map toggle is hidden**, not deleted. *"lets hide the light / dark toggle for
+   now."*
+
+### What each one reverses, and why the old reasoning was wrong
+
+**The conditional walk button** rested on a sound-sounding inference: a user whose map fills in by
+itself never needs to press anything, so showing them a button is clutter. What it missed is that
+**starting a walk is also how a user says *this one counts*** — an intention, not a mechanism. It
+also produced the worst possible failure mode for a first-run experience: the app's most obvious
+verb is invisible to precisely the users who granted the most permission. The reference app
+(WalkNYC) shows it to everyone.
+
+⚠ **The rest of D-008 stands.** The app is still fully functional on While-Using alone; nothing
+about permissions changed. What changed is that the control is no longer *hidden from* the users
+who need it least.
+
+**The missing re-center** is the more interesting error, because the design documents contain its
+own refutation twice over. `SettingsMark` exists because the project lead asked what *"the button
+to centre the map"* did — of the settings gear. Before that, the passport's `🛂` was mistaken for
+the same thing. **Twice, the user looked at this screen and went hunting for a control that did not
+exist**, and both times it was recorded as an icon problem. It was a missing-feature problem.
+
+**Light settings** is a judgement call and the project lead's to make. The reason to record it
+rather than just do it: it makes `theme.ts` hold **two** palettes, and the second one exists
+because the first cannot serve it — the dark palette's action blue (`#5AA9FF`) measures **2.6:1 on
+white**. Reuse would have shipped an unreadable screen through the door marked "consistency".
+
+⚠ **And the light screen is not Apple's light screen.** iOS system blue is 4.02:1 on white and
+system red 3.55:1, both under this project's 5:1 floor for text read outdoors (D-015). The values
+in `settingsLight` are those hues carried down until they pass, and `contrast.test.ts` now holds
+them there — including two assertions that *fail if somebody restores the system colours*.
+
+### What was considered and rejected
+
+- **A setting for the walk button.** A preference to control the visibility of a control is the
+  shape of a product that could not decide. It also puts a frequent action behind a rare screen,
+  which design brief §3.2 exists to prevent.
+- **Drawing our own location dot.** Google's dot carries a heading arrow, an accuracy circle and
+  the platform's own animation, and the user asked for *"a pointer"* — which is what Android
+  already gives them. Ours would be a worse copy that also has to be kept alive by hand. The
+  my-location **button** stays off (`myLocationButtonEnabled: false`), because that one is chrome
+  and this app draws its own.
+- **A crosshair for the re-center icon.** Android's own my-location button is a crosshair, and
+  this screen has twice had a control mistaken for that one. `RecenterMark` is the navigation arrow
+  instead.
+- **Deleting the map-style toggle.** *"For now"* was the instruction; the preference, both styles,
+  Google's night map (T-147) and the souvenir's use of the dark one (D-026) are untouched and
+  tested. One block of JSX is commented out.
+
+### The cost, stated plainly
+
+The map screen is now **four controls plus a place card**, where design brief §3 says three. That
+document should be amended rather than quietly contradicted — the screen has not become cluttered,
+but the rule that kept it clean has been spent, and the next addition has no budget left to draw
+on.

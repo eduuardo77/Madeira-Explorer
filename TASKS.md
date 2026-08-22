@@ -1074,6 +1074,58 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `n('passport.collected')` with **zero as its own string**, because before you have been
       anywhere the number is a target and afterwards it is a record.
       — ⚠ **The German is still unreviewed (T-160a).** There is now more of it.
+- [x] **T-167** ✅ **The map gets a re-center button and a blue dot, 2026-08-22.** ⇠ D-080
+      — **The project lead, with the app on their own Android:** *"first we should add again
+      re-center button for the app… We also need a pointer with my location."*
+      — ⚠⚠ **THE DESIGN DOCUMENTS CONTAINED THE EVIDENCE FOR THIS TWICE AND IT WAS READ AS AN ICON
+      PROBLEM BOTH TIMES.** `StampMark` exists because the `🛂` passport button was mistaken for
+      *"the button to centre the map"*; `SettingsMark` exists because the `⚙` beside it *"looks
+      like a re-center button"*. The user was not misreading two icons. **They were looking for a
+      control that did not exist**, and each time the fix was to redraw the thing they had
+      mistaken it for.
+      — **The dot is Google's own** (`isMyLocationEnabled`), heading arrow and accuracy circle
+      included, gated on the OS permission rather than on a preference. Google's my-location
+      *button* stays off — that one is chrome, and this app draws its own.
+      — `recenterCamera.ts` is pure and holds the only real decision in it: **zoom in to street
+      level from wider than that, and otherwise keep the zoom the user chose**. Pressing it twice
+      from a pinched-in view moves the map and changes nothing else. 8 tests.
+      — ⚠ **A miss is spoken, not swallowed.** Under canopy there is genuinely no position; the
+      control says so in the user's language rather than doing nothing, which is how a working
+      button reads as broken. `RECENTER_MAX_AGE_MS` (2 min) is a **guess** — no GPS in this project
+      has met a laurel forest, and it is one of the numbers T-131 should correct.
+      — ⚠ **`cameraPadding` is a constant again.** It branched on "did the user grant Always"
+      because the walk button was hidden from those who had; both bottom controls are now
+      unconditional. Getting it wrong is invisible in a screenshot and frames every trace too high.
+- [x] **T-168** ✅ **Settings goes light, and the walk button becomes permanent, 2026-08-22.** ⇠ D-080
+      — **The project lead sent five screenshots of the reference app's settings screen** and
+      *"I prefer light colour settings… lets hide the light / dark toggle for now"*, plus *"The
+      start walk button must be there every time regardless of user choosing."*
+      — **The walk button was one line** (`showRecordingControl`) and the users it hid the control
+      from were exactly the ones who asked for it back. D-008's substance is untouched.
+      — ⚠⚠ **A SECOND PALETTE, NOT A SECOND USE OF THE FIRST.** `settingsLight` exists because
+      `colors.action` measures **2.6:1 on white**: reusing the dark palette here would have shipped
+      an unreadable action row through the door marked "consistency". And it is **not Apple's**
+      light palette either — system blue is 4.02:1 on white, system red 3.55:1, both under D-015's
+      floor. `contrast.test.ts` now fails the build if somebody restores the system colours.
+      — **Taken from the reference app:** the grouped light list, one card per idea with its
+      footnote under it, a **segmented control** for the three tracking qualities, an icon on the
+      two rows that change something you cannot undo by pressing again.
+      — ⚠ **The three quality paragraphs did not go with the stacked cards.** They are the only
+      thing on the screen that says what the options differ *by* — the app refuses to price them in
+      battery percent until somebody measures one (D-041) — so the footnote now changes with the
+      selection. And the segments **wrap rather than clip**: the reference app's own screenshot cuts
+      *"Battery Saver"* off mid-word, and German plus a scaled-up system font is worse.
+      — ⚠ **Two English strings were hiding inside `{}`**, `i18nCoverage.test.ts`'s known blind
+      spot: `'Off'` for a denied permission, and all three quality descriptions. Same shape as the
+      ten English accessibility labels T-166 found. Both now in `strings.ts`.
+      — ⚠ **The status bar had to follow.** `App.tsx` sets `style="light"` for the whole app; on a
+      near-white page a white clock is invisible. Each light branch of `SettingsScreen` sets it back.
+      — ⚠ **The map-style toggle is commented out, not deleted** — *"for now"*. The preference,
+      both styles, Google's night map and the souvenir's use of the dark one are untouched. **Do
+      not tidy up the unused props.**
+      — ⚠ **Left dark, and it now looks it:** `PrivacyPolicyView` and `DebugScreen` are both
+      reached from this screen and are both still dark. **Nobody has seen the join.**
+
 - [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
       — **The project lead:** *"One thing we should add is the ability to import data from Health,
       Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature

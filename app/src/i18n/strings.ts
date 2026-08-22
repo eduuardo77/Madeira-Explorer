@@ -176,6 +176,22 @@ export const STRINGS = {
     'Aufzeichnung beenden'
   ),
   'map.a11y.openPassport': s('Open your passport', 'Abrir o seu passaporte', 'Reisepass öffnen'),
+  'map.recenter': s('Re-center', 'Centrar', 'Zentrieren'),
+  'map.a11y.recenter': s(
+    'Centre the map on where you are',
+    'Centrar o mapa onde está',
+    'Karte auf Ihren Standort zentrieren'
+  ),
+  'map.noPositionTitle': s(
+    'Your phone has not found you yet',
+    'O seu telemóvel ainda não o encontrou',
+    'Ihr Telefon hat Sie noch nicht gefunden'
+  ),
+  'map.noPositionBody': s(
+    'This usually takes a few seconds outdoors, and longer under trees. Try again in a moment.',
+    'Ao ar livre costuma demorar alguns segundos, e mais debaixo de árvores. Tente outra vez daqui a pouco.',
+    'Draußen dauert das meist ein paar Sekunden, unter Bäumen länger. Versuchen Sie es gleich noch einmal.'
+  ),
 
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────
   'passport.title': s('Passport', 'Passaporte', 'Reisepass'),
@@ -382,6 +398,7 @@ export const STRINGS = {
     'Nur bei geöffneter App'
   ),
   'settings.permission.none': s('Not set up yet', 'Ainda não configurado', 'Noch nicht eingerichtet'),
+  'settings.permission.denied': s('Off', 'Desligado', 'Aus'),
   'settings.recording.footnoteLimited': s(
     'Your map only fills in while the app is open. You can change this on your phone’s settings screen.',
     'O seu mapa só se preenche com a aplicação aberta. Pode mudar isto nas definições do seu telemóvel.',
@@ -406,6 +423,25 @@ export const STRINGS = {
   'settings.quality.saver': s('Battery saver', 'Poupança de bateria', 'Akkusparen'),
   'settings.quality.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
   'settings.quality.best': s('Best detail', 'Máximo detalhe', 'Höchste Genauigkeit'),
+  // ⚠ These three were hardcoded English `description` props on the choice rows
+  // until 2026-08-22 — inside `{}`, which is `i18nCoverage.test.ts`'s known
+  // blind spot, so nothing failed and a Portuguese user read three English
+  // paragraphs. Same shape as the ten English accessibility labels in T-166.
+  'settings.quality.saver.detail': s(
+    'Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher.',
+    'Pergunta com menos frequência e deixa o telemóvel descansar quando está parado. Os seus lugares preenchem-se na mesma; a linha no mapa fica mais grosseira.',
+    'Fragt am seltensten und lässt Ihr Telefon ruhen, wenn Sie stehen. Ihre Orte füllen sich trotzdem; die Linie auf der Karte wird gröber.'
+  ),
+  'settings.quality.balanced.detail': s(
+    'The usual choice. Enough detail to recognise the walk you did, without following every step.',
+    'A escolha habitual. Detalhe suficiente para reconhecer a caminhada que fez, sem seguir cada passo.',
+    'Die übliche Wahl. Genug Detail, um Ihre Wanderung wiederzuerkennen, ohne jedem Schritt zu folgen.'
+  ),
+  'settings.quality.best.detail': s(
+    'Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way.',
+    'Pergunta com mais frequência e continua mesmo quando para, para que um almoço demorado não seja uma falha na linha. É o que mais gasta bateria, com folga.',
+    'Fragt am häufigsten und läuft weiter, auch wenn Sie stehen bleiben — ein langes Mittagessen wird so keine Lücke in der Linie. Verbraucht deutlich am meisten Akku.'
+  ),
   'settings.section.map': s('Map', 'Mapa', 'Karte'),
   'settings.map.footnote': s(
     'The map is Google’s and needs a connection to draw. Your trip is recorded either way — losing signal on a levada costs you the map, never the walk.',

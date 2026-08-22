@@ -1,5 +1,5 @@
 /**
- * The primary screen's chrome (T-075) — three controls over the map.
+ * The primary screen's chrome (T-075) — four controls over the map.
  *
  * THE WHOLE DESIGN, FROM `docs/design-brief.md` §3
  * -----------------------------------------------
@@ -7,10 +7,24 @@
  *   [ the map ] ────── the product; everything here is chrome over it
  *   stamp button, bottom-left ─── the passport, carrying the hero number
  *
- * And a conditional fourth: an explicit start/stop control, shown **only** to
- * users who have not granted Always (D-008, design brief §3.3). For them
- * start/stop is a primary action, not a setting — burying a frequent action in
- * a rare place would be the wrong trade. Users on Always never see it.
+ * ⚠⚠ **THE SCREEN IS FOUR CONTROLS SINCE 2026-08-22 (D-080), AND BOTH NEW ONES
+ * WERE ASKED FOR WITH THE APP IN HAND.**
+ *
+ *   re-center, above the walk button ─── "where am I", the thing every maps app has
+ *   start/stop walk, bottom ─────────── **always shown, whatever the permission**
+ *
+ * **The walk button used to be conditional** — shown only to users who had not
+ * granted Always (D-008, design brief §3.3), on the reasoning that somebody
+ * whose map fills in by itself never needs to press anything. The project lead
+ * granted Always, watched the button vanish, and asked for it back: *"The start
+ * walk button must be there every time regardless of user choosing."* They are
+ * right, and the old reasoning missed that starting a walk is also how you say
+ * *this one counts* — the reference app (WalkNYC) shows it to everyone for the
+ * same reason.
+ *
+ * ⚠ The rest of D-008 is untouched: the app is still fully functional on
+ * While-Using alone. What changed is only that the control is no longer hidden
+ * from the users who need it least.
  *
  * WHY THE STAMP BUTTON CARRIES THE NUMBER
  * ---------------------------------------
@@ -41,6 +55,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
+import RecenterMark from './RecenterMark';
 import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
 import { TIER_METAL, tierFor } from '../passport/stampTier';
@@ -52,6 +67,9 @@ const STAMP_MARK_SIZE = 34;
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 22;
+
+/** The re-center arrow. Between the two: a secondary control, but on the map. */
+const RECENTER_MARK_SIZE = 20;
 
 export type PrimaryOverlayProps = {
   progress: TripProgress;
@@ -67,12 +85,6 @@ export type PrimaryOverlayProps = {
    * map: `mapChrome` in `theme.ts`.
    */
   mapStyle: 'light' | 'dark';
-  /**
-   * Show the start/stop control. True only for users without Always
-   * permission (D-008) — the caller decides, because permission state is not
-   * this component's business.
-   */
-  showRecordingControl: boolean;
   isRecording: boolean;
   /**
    * Anything that shares the bottom of the screen — today, the place card
@@ -91,17 +103,19 @@ export type PrimaryOverlayProps = {
   onOpenPassport: () => void;
   onOpenSettings: () => void;
   onToggleRecording: () => void;
+  /** Centre the map on the user (T-167). The screen owns finding the position. */
+  onRecenter: () => void;
 };
 
 export default function PrimaryOverlay({
   progress,
   mapStyle,
-  showRecordingControl,
   isRecording,
   bottomSlot,
   onOpenPassport,
   onOpenSettings,
   onToggleRecording,
+  onRecenter,
 }: PrimaryOverlayProps) {
   // How far into the collection this is (D-078). The passport button has always
   // been drawn as a stamp; the rank is what kind of stamp it is.
@@ -163,43 +177,73 @@ export default function PrimaryOverlay({
             in the same column, so it can never cover them. */}
         {bottomSlot}
 
-        {showRecordingControl ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              isRecording
-                ? t('map.a11y.stopRecording')
-                : t('map.a11y.startRecording')
-            }
-            onPress={onToggleRecording}
-            style={({ pressed }) => [
-              styles.recording,
-              {
-                backgroundColor: chrome.surface,
-                // Elevation is what separates a white control from a pale map; see
-                // `mapChrome`. Zero on the dark map, where the border does that job.
-                elevation: chrome.elevation,
-                shadowColor: '#000000',
-                shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
-                shadowRadius: chrome.elevation,
-                shadowOffset: { width: 0, height: 1 },
-              },
-              chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
-              isRecording && styles.recordingActive,
-              pressed && styles.pressed,
-            ]}
-          >
-            {/* ⚠ "Start walk", not "Start recording" — the project lead's
-                wording, 2026-08-15, and it is the better one. "Recording" names
-                the mechanism; "walk" names the thing the user came to do, and
-                this button is now the primary action for anybody who has turned
-                background tracking off (T-146). Labelled with words, never an
-                icon alone (D-015). */}
-            <Text style={[styles.recordingText, { color: chrome.content }]}>
-              {isRecording ? t('map.stopWalk') : t('map.startWalk')}
-            </Text>
-          </Pressable>
-        ) : null}
+        {/* ⚠ Above the walk button and right-aligned, which is the reference
+            app's arrangement and also the only one that keeps design brief
+            §3.1's pairing rule: the passport stays alone on the left, so the
+            two controls a thumb can confuse are still on opposite sides.
+            Deliberately *narrower* than the walk pill — it is the answer to a
+            question, not the primary action. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('map.a11y.recenter')}
+          onPress={onRecenter}
+          style={({ pressed }) => [
+            styles.recenter,
+            {
+              backgroundColor: chrome.surface,
+              elevation: chrome.elevation,
+              shadowColor: '#000000',
+              shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+              shadowRadius: chrome.elevation,
+              shadowOffset: { width: 0, height: 1 },
+            },
+            chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <RecenterMark size={RECENTER_MARK_SIZE} color={chrome.content} />
+          {/* Words, never the arrow alone (D-015). */}
+          <Text style={[styles.recenterText, { color: chrome.content }]}>
+            {t('map.recenter')}
+          </Text>
+        </Pressable>
+
+        {/* ⚠ No condition here any more (D-080). It was
+            `showRecordingControl ? … : null` and the users it hid it from were
+            exactly the ones who asked for it back. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            isRecording
+              ? t('map.a11y.stopRecording')
+              : t('map.a11y.startRecording')
+          }
+          onPress={onToggleRecording}
+          style={({ pressed }) => [
+            styles.recording,
+            {
+              backgroundColor: chrome.surface,
+              // Elevation is what separates a white control from a pale map; see
+              // `mapChrome`. Zero on the dark map, where the border does that job.
+              elevation: chrome.elevation,
+              shadowColor: '#000000',
+              shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+              shadowRadius: chrome.elevation,
+              shadowOffset: { width: 0, height: 1 },
+            },
+            chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+            isRecording && styles.recordingActive,
+            pressed && styles.pressed,
+          ]}
+        >
+          {/* ⚠ "Start walk", not "Start recording" — the project lead's
+              wording, 2026-08-15, and it is the better one. "Recording" names
+              the mechanism; "walk" names the thing the user came to do.
+              Labelled with words, never an icon alone (D-015). */}
+          <Text style={[styles.recordingText, { color: chrome.content }]}>
+            {isRecording ? t('map.stopWalk') : t('map.startWalk')}
+          </Text>
+        </Pressable>
 
         <Pressable
           accessibilityRole="button"
@@ -262,6 +306,26 @@ const styles = StyleSheet.create({
     bottom: spacing.xl,
     gap: spacing.sm,
   },
+  recenter: {
+    // Right, above the walk button — the reference app's arrangement, and the
+    // one that keeps the passport alone on the left (design brief §3.1).
+    alignSelf: 'flex-end',
+    minHeight: MIN_TAP_TARGET,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    // Filled from `mapChrome` at render time, like the gear.
+  },
+  recenterText: {
+    fontSize: fontSize.body,
+    // ⚠ Not bold, and that is the hierarchy: the walk button below it is the
+    // primary action and wears the weight. Two bold pills stacked would read
+    // as two primary actions.
+    fontWeight: '500',
+  },
+
   recording: {
     // Right, because the passport is left. See the pairing note above.
     alignSelf: 'flex-end',

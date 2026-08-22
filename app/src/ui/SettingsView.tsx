@@ -23,6 +23,28 @@
  * user's words rather than a developer's, and a second confirmation is
  * required (T-125).
  *
+ * ⚠⚠ **IT IS LIGHT, AND EVERY OTHER SCREEN IN THIS APP IS DARK** (2026-08-22,
+ * D-080). The project lead asked for it with the app in their hand — *"I prefer
+ * light colour settings"* — after sending five screenshots of the reference
+ * app's own settings screen. The palette is `settingsLight` in `theme.ts`,
+ * which exists rather than reusing `colors` because the dark palette's blue is
+ * **2.6:1 on white**: reuse here would have shipped an unreadable action row.
+ *
+ * ⚠ **The light/dark map choice is hidden, not deleted** — same instruction,
+ * *"lets hide the light / dark toggle for now"*. The preference, its storage,
+ * both map styles and every test around them are untouched; one block of JSX is
+ * commented out and the props are still wired, so bringing it back is deleting
+ * a comment. **Do not "clean up" the unused props.**
+ *
+ * WHAT WAS TAKEN FROM THE REFERENCE APP, AND WHAT WAS NOT
+ * -------------------------------------------------------
+ * Taken: the light grouped list, the **one card per idea** with its footnote
+ * underneath, a **segmented control** for the three tracking qualities instead
+ * of three stacked cards, and an icon on the rows that carry weight.
+ * Not taken: its blues and reds — iOS system blue is 4.02:1 on white and system
+ * red 3.55:1, both under this project's 5:1 floor for text read in Madeiran sun
+ * (D-015). The hues here are the same idea carried down until they pass.
+ *
  * Presentational: props in, pixels out, so the workbench can mount it (D-038).
  */
 
@@ -38,7 +60,8 @@ import { APP_NAME } from '../brand';
 import { t } from '../i18n';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import type { TrackingQuality } from '../recording/trackingPreference';
-import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { fontSize, MIN_TAP_TARGET, radius, settingsLight, spacing } from './theme';
+import { PinMark, TrashMark } from './SettingsGlyphs';
 
 export type SettingsViewProps = {
   permission: PermissionLevel;
@@ -74,6 +97,9 @@ export type SettingsViewProps = {
   donating?: boolean;
   onClose: () => void;
 };
+
+/** The row icons. Big enough to read, small enough not to become the row. */
+const ROW_ICON_SIZE = 22;
 
 function Section({
   title,
@@ -119,24 +145,27 @@ function Action({
   label,
   onPress,
   danger,
+  icon,
 }: {
   label: string;
   onPress: () => void;
   danger?: boolean;
+  /** Drawn beside the words, never instead of them (D-015). */
+  icon?: React.ReactNode;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.action,
-        danger === true && styles.actionDanger,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.action, pressed && styles.pressed]}
     >
+      {icon === undefined ? null : <View style={styles.actionIcon}>{icon}</View>}
+      {/* ⚠ The `⚠  ` that used to be glued to the front of a destructive label
+          is gone: it was read out by the screen reader as the word "warning"
+          in English regardless of the user's language, and the row already
+          says *Erase everything* in red beside a bin. */}
       <Text style={[styles.actionText, danger === true && styles.dangerText]}>
-        {danger === true ? '⚠  ' : ''}
         {label}
       </Text>
     </Pressable>
@@ -157,14 +186,17 @@ function Toggle({
   value,
   onChange,
   disabled,
+  icon,
 }: {
   label: string;
   value: boolean;
   onChange: (next: boolean) => void;
   disabled?: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <View style={[styles.row, disabled === true && styles.rowDisabled]}>
+      {icon === undefined ? null : <View style={styles.actionIcon}>{icon}</View>}
       <Text style={styles.rowLabel}>{label}</Text>
       <Switch
         accessibilityLabel={label}
@@ -173,60 +205,84 @@ function Toggle({
         disabled={disabled}
         // Explicit colours: the platform default is a green that belongs to no
         // other part of this interface.
-        trackColor={{ false: colors.surfaceRaised, true: colors.action }}
-        thumbColor={colors.actionText}
+        trackColor={{ false: settingsLight.border, true: settingsLight.action }}
+        thumbColor={settingsLight.surface}
       />
     </View>
   );
 }
 
 /**
- * One of several exclusive choices, with room to say what it means (T-146).
+ * The three tracking qualities, as one segmented control (T-168).
  *
- * ⚠ The description is not decoration. These three options differ in a way the
- * user cannot see and the app is not allowed to price — see
- * `trackingPreference.ts` on why there are no percentages here — so the
- * sentence under each label is the entire basis for choosing. A row of bare
- * words would be three synonyms for "tracking".
+ * ⚠ **THIS REPLACED THREE STACKED CARDS, AND THE EXPLANATION DID NOT GO WITH
+ * THEM.** The old design gave each option a paragraph inside its own card,
+ * because these three differ in a way the user cannot see and the app is not
+ * allowed to price (`trackingPreference.ts` on why there are no percentages
+ * here, D-041 on why there is no battery number). The reference app's
+ * segmented control is what the project lead asked for — so the paragraph
+ * moved to the **section footnote**, which now changes with the selection.
+ * Nothing was deleted; the sentence that justifies the choice is still on
+ * screen, once, under the control.
+ *
+ * ⚠ **The labels wrap rather than clip.** In the reference app's own
+ * screenshot *"Battery Saver"* is cut off mid-word. German is worse
+ * (*Höchste Genauigkeit*), and CONTEXT §6.5's reader has the system font scaled
+ * up. Each segment is `flex: 1` with the label allowed two lines, so the row
+ * grows instead of truncating — the same rule as D-041's onboarding buttons.
  */
-function Choice({
-  label,
-  description,
-  selected,
-  onPress,
+function Segmented({
+  options,
 }: {
-  label: string;
-  description: string;
-  selected: boolean;
-  onPress: () => void;
+  options: { key: string; label: string; selected: boolean; onPress: () => void }[];
 }) {
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      accessibilityLabel={`${label}. ${description}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.stackedChoice,
-        selected && styles.stackedChoiceActive,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.stackedChoiceHeader}>
-        <Text
-          style={[
-            styles.stackedChoiceLabel,
-            selected && styles.stackedChoiceLabelActive,
+    <View style={styles.segmented}>
+      {options.map((option) => (
+        <Pressable
+          key={option.key}
+          accessibilityRole="radio"
+          accessibilityState={{ selected: option.selected }}
+          accessibilityLabel={option.label}
+          onPress={option.onPress}
+          style={({ pressed }) => [
+            styles.segment,
+            option.selected && styles.segmentSelected,
+            pressed && styles.pressed,
           ]}
         >
-          {label}
-        </Text>
-        {/* The tick, not just a border — D-015 forbids state carried by hue. */}
-        {selected ? <Text style={styles.stackedChoiceTick}>✓</Text> : null}
-      </View>
-      <Text style={styles.stackedChoiceDescription}>{description}</Text>
-    </Pressable>
+          <Text
+            numberOfLines={2}
+            style={[
+              styles.segmentText,
+              option.selected && styles.segmentTextSelected,
+            ]}
+          >
+            {option.label}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
   );
+}
+
+/**
+ * The sentence under the tracking card — the selected quality's own (T-168).
+ *
+ * ⚠ This is where the three paragraphs went when the stacked cards became a
+ * segmented control. They are not decoration: nothing else on this screen says
+ * what the difference between the options *is*, because the app refuses to
+ * price it in battery percentage until somebody measures one (D-041).
+ */
+function qualityFootnote(quality: TrackingQuality): string {
+  switch (quality) {
+    case 'saver':
+      return t('settings.quality.saver.detail');
+    case 'balanced':
+      return t('settings.quality.balanced.detail');
+    case 'precise':
+      return t('settings.quality.best.detail');
+  }
 }
 
 /** Permission, in the user's words rather than the platform's. */
@@ -237,7 +293,10 @@ function describePermission(permission: PermissionLevel): string {
     case 'while_using':
       return t('settings.permission.whenInUse');
     case 'denied':
-      return 'Off';
+      // ⚠ Was the string `'Off'`, in English, for every user of every language
+      // — invisible to `i18nCoverage.test.ts`, whose blind spot is text inside
+      // `{}`. Same shape as the ten English labels T-166 found.
+      return t('settings.permission.denied');
     case 'undetermined':
       return t('settings.permission.none');
   }
@@ -293,7 +352,14 @@ export default function SettingsView({
           </Section>
         ) : null}
 
-        {/* Between "Recording" (what the phone allows) and everything else:
+        {/* ⚠ ONE CARD, NOT TWO (T-168). The toggle and the three qualities
+            used to be separate sections, and separating them was the mistake:
+            the qualities only exist *because* the toggle is on, and a section
+            that appears out of nowhere when you flip a switch two cards above
+            reads as the screen rearranging itself. The reference app puts both
+            in one card under one heading, and it is right.
+
+            Between "Recording" (what the phone allows) and everything else:
             this is the user's own answer, and it only means anything once they
             have read what the phone has granted. */}
         <Section
@@ -301,12 +367,17 @@ export default function SettingsView({
           footnote={
             permission !== 'always'
               ? t('settings.background.blocked')
-              : backgroundTracking
-                ? t('settings.background.on')
-                : t('settings.background.off')
+              : !backgroundTracking
+                ? t('settings.background.off')
+                : // ⚠ The footnote now carries the *selected quality's* own
+                  // sentence, which is the whole justification for choosing it
+                  // (see `Segmented`). Off, or blocked, and it says that
+                  // instead — the state of the card, in one sentence, always.
+                  qualityFootnote(trackingQuality)
           }
         >
           <Toggle
+            icon={<PinMark size={ROW_ICON_SIZE} color={settingsLight.action} />}
             label={t('settings.background.toggle')}
             value={backgroundTracking && permission === 'always'}
             onChange={onChangeBackgroundTracking}
@@ -316,71 +387,50 @@ export default function SettingsView({
             // where the real gate is — which is the phone, not this screen.
             disabled={permission !== 'always'}
           />
+
+          {backgroundTracking && permission === 'always' ? (
+            <Segmented
+              options={[
+                {
+                  key: 'saver',
+                  label: t('settings.quality.saver'),
+                  selected: trackingQuality === 'saver',
+                  onPress: () => onChangeTrackingQuality('saver'),
+                },
+                {
+                  key: 'balanced',
+                  label: t('settings.quality.balanced'),
+                  selected: trackingQuality === 'balanced',
+                  onPress: () => onChangeTrackingQuality('balanced'),
+                },
+                {
+                  key: 'precise',
+                  label: t('settings.quality.best'),
+                  selected: trackingQuality === 'precise',
+                  onPress: () => onChangeTrackingQuality('precise'),
+                },
+              ]}
+            />
+          ) : null}
         </Section>
 
-        {backgroundTracking && permission === 'always' ? (
-          <Section
-            title={t('settings.section.quality')}
-            footnote={t('settings.quality.footnote')}
-          >
-            <Choice
-              label={t('settings.quality.saver')}
-              description="Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher."
-              selected={trackingQuality === 'saver'}
-              onPress={() => onChangeTrackingQuality('saver')}
-            />
-            <Choice
-              label={t('settings.quality.balanced')}
-              description="The usual choice. Enough detail to recognise the walk you did, without following every step."
-              selected={trackingQuality === 'balanced'}
-              onPress={() => onChangeTrackingQuality('balanced')}
-            />
-            <Choice
-              label={t('settings.quality.best')}
-              description="Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way."
-              selected={trackingQuality === 'precise'}
-              onPress={() => onChangeTrackingQuality('precise')}
-            />
-          </Section>
-        ) : null}
+        {/* ⚠⚠ **THE LIGHT/DARK MAP CHOICE IS HIDDEN, NOT REMOVED** — the
+            project lead, 2026-08-22: *"lets hide the light / dark toggle for
+            now"*. Everything behind it is intact and still tested: the stored
+            preference (`mapStylePreference.ts`), both map styles, Google's own
+            night map (T-147) and the souvenir's use of the dark one (D-026).
+            `mapStyle` and `onChangeMapStyle` are still props and still wired
+            by `SettingsScreen`, so restoring this screen's control is deleting
+            a comment — **do not "tidy up" the props on the way past.**
 
-        <Section
-          title={t('settings.section.appearance')}
-          footnote={t('settings.appearance.footnote')}
-        >
-          {/* Two labelled buttons rather than a switch: a switch needs the
-              user to know which state is which, and D-015 forbids meaning
-              carried by anything but words. */}
-          <View style={styles.choiceRow}>
-            {(['light', 'dark'] as const).map((option) => (
-              <Pressable
-                key={option}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  option === 'dark'
-                    ? t('settings.a11y.useDarkMap')
-                    : t('settings.a11y.useLightMap')
-                }
-                onPress={() => onChangeMapStyle(option)}
-                style={({ pressed }) => [
-                  styles.choice,
-                  mapStyle === option && styles.choiceActive,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.choiceText,
-                    mapStyle === option && styles.choiceTextActive,
-                  ]}
-                >
-                  {option === 'light' ? t('settings.appearance.light') : t('settings.appearance.dark')}
-                  {mapStyle === option ? '  ✓' : ''}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </Section>
+            <Section
+              title={t('settings.section.appearance')}
+              footnote={t('settings.appearance.footnote')}
+            >
+              … two labelled buttons, light and dark, with a tick on the
+              selected one (D-015: never hue alone) …
+            </Section>
+        */}
 
         {/* ⚠ This section said the opposite until 2026-08-14: *the whole island
             is already on your phone, so the map works with no signal and uses
@@ -433,6 +483,7 @@ export default function SettingsView({
           footnote={t('settings.erase.footnote')}
         >
           <Action
+            icon={<TrashMark size={ROW_ICON_SIZE} color={settingsLight.danger} />}
             label={t('settings.erase.action')}
             onPress={onEraseRequested}
             danger
@@ -455,7 +506,11 @@ export default function SettingsView({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+  // ⚠ Light, alone among this app's screens (D-080). Every colour below comes
+  // from `settingsLight`, whose values are measured against **these two
+  // surfaces** — the page and a white card — in `contrast.test.ts`. The dark
+  // palette's `colors` must not be mixed in here: its blue is 2.6:1 on white.
+  root: { flex: 1, backgroundColor: settingsLight.background },
   content: {
     padding: spacing.md,
     paddingTop: spacing.xl * 2,
@@ -465,7 +520,7 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   heading: {
-    color: colors.text,
+    color: settingsLight.text,
     // The same large title as the passport. Two screens, one rule.
     fontSize: fontSize.largeTitle,
     fontWeight: '700',
@@ -475,41 +530,57 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   section: {
-    backgroundColor: colors.surface,
+    backgroundColor: settingsLight.surface,
     borderRadius: radius.card,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     gap: spacing.sm,
+    // ⚠ White on `#F2F2F7` is **1.12:1** — the card is legible inside itself
+    // and nearly invisible against the page, which is the same problem the map
+    // chrome had (`mapChrome` in `theme.ts`). Elevation is what separates them
+    // on every platform; an outline here would read as an Android box.
+    elevation: 1,
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
   },
-  sectionDanger: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.bad,
-  },
+  // ⚠ The destructive card is not painted red. The reference app's *Danger
+  // Zone* is an ordinary card whose **words** are red, and that is also what
+  // D-015 asks for: meaning in the word first, the colour second. What makes
+  // this row safe is the second confirmation (T-125), not its border.
+  sectionDanger: {},
   sectionTitle: {
-    color: colors.textMuted,
+    color: settingsLight.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     paddingHorizontal: spacing.xs,
   },
-  dangerText: { color: colors.bad },
+  dangerText: { color: settingsLight.danger },
   footnote: {
-    color: colors.textMuted,
+    color: settingsLight.textMuted,
     fontSize: fontSize.small,
-    lineHeight: fontSize.small * 1.4,
+    lineHeight: Math.round(fontSize.small * 1.4),
     paddingHorizontal: spacing.xs,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
+    alignItems: 'center',
     gap: spacing.md,
-    minHeight: spacing.xl,
+    minHeight: MIN_TAP_TARGET,
   },
-  rowLabel: { color: colors.text, fontSize: fontSize.body, flexShrink: 1 },
+  rowLabel: {
+    color: settingsLight.text,
+    fontSize: fontSize.body,
+    flexShrink: 1,
+    // Takes the space the switch does not, so the switch stays hard right and
+    // a long German label wraps instead of shoving it off the card.
+    flexGrow: 1,
+  },
   rowValue: {
-    color: colors.textMuted,
+    color: settingsLight.textMuted,
     fontSize: fontSize.body,
     fontWeight: '600',
     textAlign: 'right',
@@ -517,74 +588,77 @@ const styles = StyleSheet.create({
   },
   action: {
     minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.control,
-    // Filled rather than outlined: on iOS a row inside a group is a surface,
-    // not a box drawn on one. The 60 dp target is the height (D-015).
-    backgroundColor: colors.surfaceRaised,
-  },
-  actionDanger: { borderWidth: 2, borderColor: colors.bad },
-  actionText: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
-  rowDisabled: { opacity: 0.5 },
-  stackedChoice: {
-    borderRadius: radius.control,
-    backgroundColor: colors.surfaceRaised,
-    padding: spacing.md,
-    gap: spacing.xs,
-    // Transparent rather than absent, so selecting a row cannot shift the rows
-    // around it by two pixels.
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  stackedChoiceActive: { borderColor: colors.action },
-  stackedChoiceHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
+    // ⚠ No fill. On the dark screen a row was a raised surface because that is
+    // how a dark grouped list separates rows; on white the row *is* the card,
+    // and a second grey rectangle inside it is the Android box this design
+    // spent D-054 removing. The 60 dp target is the height.
+    borderRadius: radius.control,
   },
-  stackedChoiceLabel: {
-    color: colors.textMuted,
+  actionIcon: {
+    width: ROW_ICON_SIZE,
+    alignItems: 'center',
+  },
+  // ⚠ Tinted text, iOS's plain button — and the tint is a *darker* blue than
+  // Apple's, because system blue is 4.02:1 on white (see the header).
+  actionText: {
+    color: settingsLight.action,
     fontSize: fontSize.body,
-    fontWeight: '700',
+    fontWeight: '600',
+    flexShrink: 1,
   },
-  stackedChoiceLabelActive: { color: colors.text },
-  stackedChoiceTick: {
-    color: colors.action,
-    fontSize: fontSize.small,
-    fontWeight: '700',
+  rowDisabled: { opacity: 0.5 },
+
+  // ── The segmented control (T-168) ────────────────────────────────────────
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: settingsLight.border,
+    // `hidden` so the selected segment's fill is clipped to the pill rather
+    // than squaring off its corners.
+    overflow: 'hidden',
   },
-  stackedChoiceDescription: {
-    color: colors.textMuted,
-    fontSize: fontSize.small,
-    lineHeight: Math.round(fontSize.small * 1.4),
-  },
-  choiceRow: { flexDirection: 'row', gap: spacing.sm },
-  choice: {
+  segment: {
     flex: 1,
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.control,
-    backgroundColor: colors.surfaceRaised,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    // The divider between segments. Only ever between: the first segment's
+    // left edge is the pill's own border.
+    borderLeftWidth: 1,
+    borderLeftColor: settingsLight.border,
   },
-  // ⚠ The tick in the label carries the state as well — D-015 forbids hue
-  // alone, and a "selected" that is only a border colour is exactly that.
-  choiceActive: { borderWidth: 2, borderColor: colors.action },
-  choiceText: { color: colors.textMuted, fontSize: fontSize.body, fontWeight: '700' },
-  choiceTextActive: { color: colors.text },
+  segmentSelected: { backgroundColor: settingsLight.selected },
+  segmentText: {
+    color: settingsLight.textMuted,
+    fontSize: fontSize.body,
+    textAlign: 'center',
+  },
+  // ⚠ Weight and ink as well as the fill — D-015 forbids state carried by hue
+  // alone, and a tinted background is exactly that on its own.
+  segmentTextSelected: { color: settingsLight.text, fontWeight: '700' },
+
   pressed: { opacity: 0.75 },
-  footer: { padding: spacing.md },
+  footer: {
+    padding: spacing.md,
+    backgroundColor: settingsLight.background,
+  },
   done: {
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.control,
-    backgroundColor: colors.action,
+    backgroundColor: settingsLight.action,
   },
   doneText: {
-    color: colors.actionText,
+    // White on `#0B62CC` measures 5.78:1 — above the floor, unlike white on
+    // Apple's own systemBlue, which is why this blue is not that blue.
+    color: settingsLight.surface,
     fontSize: fontSize.body,
     fontWeight: '700',
   },

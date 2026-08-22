@@ -363,10 +363,10 @@ export default function DesignWorkbench() {
               <PrimaryOverlay
                 mapStyle="light"
                 progress={progress}
-                showRecordingControl={
-                  screen === 'primary-while-using' || showsCard
-                }
                 isRecording={false}
+                // Nothing to press here — the workbench has no map to centre
+                // (D-080's re-center is measured on the device, not in the DOM).
+                onRecenter={() => undefined}
                 // Worst case on purpose: a While-Using user, so both bottom
                 // controls are present *and* a card is open.
                 bottomSlot={

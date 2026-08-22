@@ -16,6 +16,29 @@ Portuguese and German**. ⚠ **The app has run on real hardware once** — Fireb
 2026-08-19, map rendering included (item 0 below). ⚠ **No threshold in the app has met real GPS**,
 and battery and background survival are still unmeasured.
 
+## ⚠⚠ 2026-08-22 — THE PROJECT LEAD HAS AN ANDROID, PERMANENTLY, AND IS USING THE APP
+
+**This changes the project's whole shape.** Every UI decision before today was taken against an
+emulator, a browser workbench or a description; the first hour of real use produced **D-080** and
+two shipped tasks (T-167, T-168), three parts of which *reverse* a documented decision. Expect
+more of that, and treat "the docs say X" as weaker evidence than "the person holding the phone
+says Y".
+
+**Shipped today:** the map screen is **four controls** — the **walk button is permanent**
+(it was hidden from Always users, who are exactly the ones who asked for it back), a **re-center**
+control joins it, and **Google's own blue dot** is on. **Settings is light** (`settingsLight` in
+`theme.ts`, held by `contrast.test.ts`) with the reference app's grouped layout and a segmented
+control for tracking quality; the **light/dark map toggle is commented out, not deleted**.
+633 tests.
+
+⚠ **The build the project lead is testing is NOT built from this branch** — its counter reads
+`0 / 69`, and `content/pois.json` holds 60. It is a test APK with some Lisbon stamps in it.
+**Do not diagnose against its screenshots as though they were this code.**
+
+⚠ **Still unseen by anybody:** the light Settings screen next to the **dark** privacy policy and
+debug screen it opens, the re-center arrow at arm's length, and the segmented control at a
+scaled-up system font size.
+
 ## What was settled 2026-08-17 — read these before touching related code
 
 | | |

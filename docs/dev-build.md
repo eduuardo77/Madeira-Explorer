@@ -267,6 +267,121 @@ guessed constants.
 
 ---
 
+## ⚠ The phone is here — working against it without building an APK each time (2026-08-22)
+
+**Path B happened.** The project lead has an Android and keeps it. This section is the daily loop
+for changing the app and seeing the change on that phone **without producing a new APK**, and the
+one question it answers first is: *what has to be installed on the phone?*
+
+### What goes on the phone: one app, and it is not Expo Go
+
+**Install the app's own development build — nothing else.** `npx expo run:android` compiles it and
+pushes it over the cable; there is no Play Store download and no second app to keep in sync.
+
+⚠ **Expo Go cannot run this app, and reaching for it will waste an evening.** Expo Go carries a
+fixed set of native modules; this app draws **Google Maps through `expo-maps` with an API key
+injected by `app.config.js`**, records background location through a task manager, and ships under
+its own package name (`com.proa.madeira`, D-074). None of that exists inside somebody else's
+container app.
+
+What the development build *adds* over a release build is the **dev launcher**: the JavaScript is
+fetched from a Metro server on the laptop instead of being baked into the APK. That is the whole
+trick — **the native half is installed once, and the half that changes every day is downloaded on
+launch.**
+
+### One-time, on the phone
+
+1. **Settings → About phone → tap *Build number* seven times.** It says *You are now a developer*.
+2. **Settings → System → Developer options → USB debugging**, on.
+3. On Huawei/Xiaomi/Oppo skins there is a **second** switch, usually *Install via USB*. Without it
+   the install fails with a permission error that does not mention USB.
+4. Plug into the laptop and accept the **Allow USB debugging** fingerprint prompt on the phone.
+5. Check the laptop can see it:
+
+   ```powershell
+   tools\android-sdk\platform-tools\adb.exe devices     # one line, "device", not "unauthorized"
+   ```
+
+⚠ **`adb root` drops `adb reverse`** (HANDOFF). If the phone stops receiving the bundle after a
+root, that is why.
+
+### One-time, on the laptop
+
+```powershell
+cd C:\path\to\Madeira-Explorer
+git pull
+
+$env:ANDROID_HOME = "$PWD\tools\android-sdk"
+$env:JAVA_HOME    = "$PWD\tools\jdk\jdk-21.0.12+8"
+$env:PATH         = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:PATH"
+
+cd app
+npm install
+npx expo run:android            # ~4 minutes cold. Builds, installs, launches.
+```
+
+⚠ `app/.env` must hold the Maps key first, or the map is a grey grid — see the top of this file.
+The debug fingerprint is already on the key restriction, so a locally built debug or release APK
+draws the map; **Google's own re-signing fingerprint is the one still missing** (T-117e).
+
+### Every day after that
+
+```powershell
+cd app
+npx expo start --dev-client --tunnel
+```
+
+Open **Proa** on the phone; it finds the server and loads the current JavaScript. Then:
+
+- **`r`** in the terminal reloads the phone. Shaking the phone opens the dev menu.
+- Saving a file reloads it by itself (Fast Refresh).
+- **After `git pull`, Metro picks the new code up on the next reload.** No rebuild.
+
+`--tunnel` routes through the internet, so the phone does not need to be on the same wifi — it
+works on mobile data, with the laptop anywhere. It is slower than `--lan`; use `--lan` at the desk.
+
+### ⚠ When a rebuild IS unavoidable
+
+Fast Refresh moves **JavaScript**. It cannot move native code. Rebuild (`npx expo run:android`)
+after any of:
+
+- a new dependency with native code — **`expo-updates` will be one** when OTA goes in;
+- any change to `app.json` or `app.config.js` — permissions, plugins, the package name, the Maps
+  key. `expo-localization` is a config plugin and needed exactly this once already (T-160);
+- anything under `android/`, or a change of signing key.
+
+Everything in T-167 and T-168 — the re-center control, the permanent walk button, the light
+Settings — is JavaScript, and needs no rebuild after the first one.
+
+### ⚠ The dev build is for the desk, not for the levada
+
+**A development build has no JavaScript inside it.** With no Metro server it shows the launcher
+and cannot start — which is exactly the wrong property for a phone in a pocket four hours from a
+laptop. For a real walk, build the standalone one:
+
+```powershell
+npx expo run:android --variant release
+```
+
+That APK carries its own bundle, behaves like the shipping app, and is the only kind of build that
+can honestly answer battery (T-054) or overnight survival (T-051/T-053) — a phone tethered to
+Metro is not the app anybody will install.
+
+**Use both: the dev build to iterate, a release build to walk.** The two can be installed at once
+only if their package names differ, which they do not — so installing one replaces the other.
+
+### When it does not work
+
+| What you see | What it is |
+|---|---|
+| Grey grid **with** the Google wordmark | The API key. Package name **and** SHA-1 must both match (top of this file) |
+| Pure black map, no wordmark | The GPU. Emulator only — `-gpu host`. A real phone does not do this |
+| *Unable to load script* | Metro is not running, or the tunnel died. Restart `npx expo start --dev-client --tunnel` |
+| The phone is not listed by `adb devices` | Cable, USB-debugging prompt, or the OEM's *Install via USB* switch |
+| Fast Refresh stops applying changes | A native change slipped in — rebuild |
+
+---
+
 ## Path C — the iPhone, $99/year
 
 Needed eventually regardless: publishing to the App Store requires the same membership

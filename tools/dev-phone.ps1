@@ -15,9 +15,20 @@
   about environment variables. Every command below sets them itself, so there is
   no window that is "the right window".
 
-  ⚠ It never installs anything and never touches the phone's storage. The two
-  toolchains it points at are the ones already in the repository
-  (`tools/android-sdk`, `tools/jdk`), both gitignored, both re-fetchable.
+  ⚠ Nothing here installs anything system-wide or needs an administrator, and
+  nothing touches the phone's storage. `-Setup` fetches the two toolchains into
+  `tools\` — gitignored, re-fetchable, and removed completely by deleting those
+  two folders. That matters on a **borrowed** machine, which is exactly where
+  `-Setup` gets used.
+
+.PARAMETER Setup
+  Fetch the two toolchains this build needs — a portable Temurin JDK and the
+  Android command-line tools — into `tools\`, on a machine that has neither.
+  For a borrowed PC: nothing is installed system-wide, nothing needs an
+  administrator, and deleting `tools\jdk` and `tools\android-sdk` removes all
+  of it. **It does NOT fetch the emulator or its 4.2 GB system image** — with a
+  real phone plugged in, those are the largest thing you would download and
+  never use.
 
 .PARAMETER Start
   Start Metro for the development build. THE DAILY COMMAND.
@@ -41,6 +52,7 @@
 
 [CmdletBinding()]
 param(
+    [switch] $Setup,
     [switch] $Start,
     [switch] $Build,
     [switch] $Release,
@@ -57,32 +69,139 @@ function Warn($text) { Write-Host $text -ForegroundColor Yellow }
 function Die($text)  { Write-Host $text -ForegroundColor Red; exit 1 }
 
 # ---------------------------------------------------------------------------
-# The toolchains, found rather than assumed
+# The toolchains — fetched on request, then found rather than assumed
 # ---------------------------------------------------------------------------
+#
+# ⚠ THREE PLACES, IN THIS ORDER, AND THE ORDER IS THE POINT. The project's own
+# machine keeps both toolchains inside the repository (CONTEXT §6.7: no
+# system-wide Java for one build step). A borrowed machine may instead have
+# Android Studio, which ships both. Whatever is found first wins, so the same
+# command works on either without being told which it is.
 
-$sdk = Join-Path $repo 'tools\android-sdk'
-if (-not (Test-Path $sdk)) {
-    Die "No Android SDK at $sdk. Run: bash tools/fetch-android-emulator.sh"
-}
+$repoSdk = Join-Path $repo 'tools\android-sdk'
+$repoJdkParent = Join-Path $repo 'tools\jdk'
 
-# ⚠ Discovered, not hardcoded. The JDK folder carries its exact version in its
-# name (`jdk-21.0.12+8`), so a patch bump silently breaks a hardcoded path —
-# and the error Gradle gives for that is about Java, not about this line.
-$jdkParent = Join-Path $repo 'tools\jdk'
-$jdk = $null
-if (Test-Path $jdkParent) {
-    $jdk = Get-ChildItem -Path $jdkParent -Directory -Filter 'jdk-*' |
+function Find-RepoJdk {
+    if (-not (Test-Path $repoJdkParent)) { return $null }
+    # ⚠ Discovered, not hardcoded. The folder carries its exact patch version
+    # (`jdk-21.0.12+8`), so a bump renames it — and the error Gradle gives for a
+    # stale path is about Java, not about the path.
+    return Get-ChildItem -Path $repoJdkParent -Directory -Filter 'jdk-*' |
         Sort-Object Name -Descending |
-        Select-Object -First 1
+        Select-Object -First 1 |
+        ForEach-Object { $_.FullName }
 }
-if ($null -eq $jdk) {
-    Die "No JDK under $jdkParent. Run: bash tools/fetch-toolchain.sh"
+
+if ($Setup) {
+    # A portable JDK, pinned and checksummed exactly as tools/fetch-toolchain.sh
+    # pins it — two scripts fetching two different Javas is a bug waiting for a
+    # rainy day.
+    $jdkUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12_8.zip'
+    $jdkSha = '9ba963ee2371874a74185d18bc7bb2ab9407df7683300855ed7606e0662321d0'
+    $toolsUrl = 'https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip'
+
+    if ($null -eq (Find-RepoJdk)) {
+        Say 'Fetching the Temurin JDK (196 MB)…'
+        New-Item -ItemType Directory -Force -Path $repoJdkParent | Out-Null
+        $zip = Join-Path $repoJdkParent 'temurin.zip'
+        # ⚠ TLS 1.2 explicitly: PowerShell 5.1 still defaults to TLS 1.0 on some
+        # builds, and GitHub refuses it with a connection error that looks like
+        # a network fault.
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri $jdkUrl -OutFile $zip -UseBasicParsing
+
+        # Verify rather than trust — the same rule as the bash script.
+        $got = (Get-FileHash -Path $zip -Algorithm SHA256).Hash.ToLower()
+        if ($got -ne $jdkSha) {
+            Remove-Item $zip -Force
+            Die "JDK checksum mismatch.`n  expected $jdkSha`n  got      $got"
+        }
+        Expand-Archive -Path $zip -DestinationPath $repoJdkParent -Force
+        Remove-Item $zip -Force
+    } else {
+        Say 'JDK already present, skipping.'
+    }
+
+    if (-not (Test-Path (Join-Path $repoSdk 'cmdline-tools\latest'))) {
+        Say 'Fetching the Android command-line tools (~150 MB)…'
+        New-Item -ItemType Directory -Force -Path $repoSdk | Out-Null
+        $zip = Join-Path $repoSdk 'cmdline-tools.zip'
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri $toolsUrl -OutFile $zip -UseBasicParsing
+        $tmp = Join-Path $repoSdk 'tmp'
+        Expand-Archive -Path $zip -DestinationPath $tmp -Force
+        # ⚠ sdkmanager insists on living at cmdline-tools\latest\ or it cannot
+        # find its own packages. The zip does not put it there.
+        New-Item -ItemType Directory -Force -Path (Join-Path $repoSdk 'cmdline-tools') | Out-Null
+        Move-Item -Path (Join-Path $tmp 'cmdline-tools') -Destination (Join-Path $repoSdk 'cmdline-tools\latest')
+        Remove-Item $tmp -Recurse -Force
+        Remove-Item $zip -Force
+    } else {
+        Say 'Android command-line tools already present, skipping.'
+    }
+
+    $env:JAVA_HOME = Find-RepoJdk
+    $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+    $sdkManager = Join-Path $repoSdk 'cmdline-tools\latest\bin\sdkmanager.bat'
+
+    Warn ''
+    Warn 'Google now wants its licences accepted. Press y and Enter at each prompt.'
+    & $sdkManager --sdk_root="$repoSdk" --licenses
+
+    Say 'Fetching platform-tools (adb) — about 15 MB…'
+    & $sdkManager --sdk_root="$repoSdk" 'platform-tools'
+
+    Say ''
+    Say 'Toolchains ready. Next: .\tools\dev-phone.ps1 -Build'
+    Warn 'That first build downloads another ~4 GB through Gradle — the NDK and'
+    Warn 'the build tools. It is a one-off, and it lands in tools\android-sdk'
+    Warn 'and %USERPROFILE%\.gradle.'
+    exit 0
+}
+
+# Where is the SDK?
+$sdk = $null
+foreach ($candidate in @(
+    $repoSdk,
+    $env:ANDROID_HOME,
+    $env:ANDROID_SDK_ROOT,
+    (Join-Path $env:LOCALAPPDATA 'Android\Sdk')      # Android Studio's default
+)) {
+    if ($candidate -and (Test-Path $candidate)) { $sdk = $candidate; break }
+}
+if ($null -eq $sdk) {
+    Die @"
+No Android SDK found. Looked in:
+  $repoSdk
+  `$env:ANDROID_HOME / `$env:ANDROID_SDK_ROOT
+  $(Join-Path $env:LOCALAPPDATA 'Android\Sdk')
+
+On a machine that has never built this app:
+  .\tools\dev-phone.ps1 -Setup
+"@
+}
+
+# Where is Java?
+$jdkPath = Find-RepoJdk
+if ($null -eq $jdkPath) {
+    foreach ($candidate in @(
+        $env:JAVA_HOME,
+        'C:\Program Files\Android\Android Studio\jbr'   # Studio's bundled JDK
+    )) {
+        if ($candidate -and (Test-Path (Join-Path $candidate 'bin\java.exe'))) {
+            $jdkPath = $candidate
+            break
+        }
+    }
+}
+if ($null -eq $jdkPath) {
+    Die "No JDK found. Run: .\tools\dev-phone.ps1 -Setup"
 }
 
 $env:ANDROID_HOME = $sdk
 $env:ANDROID_SDK_ROOT = $sdk
-$env:JAVA_HOME = $jdk.FullName
-$env:PATH = "$($jdk.FullName)\bin;$sdk\platform-tools;$env:PATH"
+$env:JAVA_HOME = $jdkPath
+$env:PATH = "$jdkPath\bin;$sdk\platform-tools;$env:PATH"
 
 Say "JAVA_HOME    $env:JAVA_HOME"
 Say "ANDROID_HOME $env:ANDROID_HOME"

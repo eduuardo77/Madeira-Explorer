@@ -305,6 +305,72 @@ launch.**
 ⚠ **`adb root` drops `adb reverse`** (HANDOFF). If the phone stops receiving the bundle after a
 root, that is why.
 
+### ⚠ A Windows machine that has never built this — what has to be installed
+
+Three things, and **only the first two need an installer.** Everything else the project fetches
+into `tools\`, where deleting two folders removes it completely — which is the point when the
+machine is borrowed.
+
+| | Why | Admin needed? |
+|---|---|---|
+| **Node.js LTS** (22.x) | npm, Metro, and the unit tests, which use Node's own test runner | Yes, for the .msi |
+| **Git for Windows** | cloning, and the `git pull` in the daily loop | Yes, for the installer |
+| **JDK 21 + Android command-line tools** | Gradle and `adb` | **No** — `-Setup` puts them in `tools\` |
+
+```powershell
+git clone https://github.com/eduuardo77/Madeira-Explorer.git
+cd Madeira-Explorer
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned     # see below
+.\tools\dev-phone.ps1 -Setup                            # ~350 MB, no admin
+.\tools\dev-phone.ps1 -Build                            # ~4 GB more, once
+```
+
+⚠ **Android Studio is not required, and installing it is the slower path.** If the borrowed
+machine happens to have it, the script finds its SDK and its bundled JDK by itself and `-Setup` can
+be skipped.
+
+⚠ **If you cannot install anything at all** — a locked-down work laptop — Node and Git both have
+portable zip builds that run from a folder without an installer. That is the only part of this list
+with no no-admin route through the project's own scripts.
+
+#### What it costs the borrowed machine, honestly
+
+| | |
+|---|---|
+| Clone | ~30 MB |
+| `npm install` → `app\node_modules` | ~500 MB |
+| `-Setup` → `tools\jdk` + `tools\android-sdk` | ~350 MB |
+| The first build: NDK, build-tools, platforms | **~4 GB**, into `tools\android-sdk` |
+| Gradle's own cache | ~1.5 GB, into `%USERPROFILE%\.gradle` |
+
+**Call it 6–7 GB and an hour**, most of it downloading once. ⚠ **The emulator is deliberately not
+part of that** — `tools\fetch-android-emulator.sh` would add another 2.5 GB, of which a 4.2 GB
+system image is the bulk, and with a real phone plugged in it is the largest thing you could
+download and never use.
+
+#### Giving the machine back
+
+```powershell
+Remove-Item -Recurse -Force tools\android-sdk, tools\jdk, app\node_modules
+Remove-Item -Recurse -Force "$env:USERPROFILE\.gradle"
+```
+
+Then delete the clone. Nothing was written anywhere else, no service was installed, and
+`Set-ExecutionPolicy -Scope CurrentUser Restricted` puts back the one setting that was changed.
+
+⚠ **`app\.env` holds the Google Maps key and it is inside the clone.** Deleting the folder removes
+it; leaving the folder on somebody else's machine leaves the key on it too.
+
+#### ⚠ The phone's driver, which is the one Windows-only trap
+
+Windows needs a USB driver before `adb` can see the phone at all, and the failure looks identical
+to a bad cable. Windows Update usually supplies it on first connection — give it a minute and check
+Device Manager for a device with a warning triangle. If one is there, the **Google USB Driver**
+(`sdkmanager "extras;google;usb_driver"`) covers most handsets, and Huawei/Xiaomi/Oppo publish
+their own.
+
+---
+
 ### The laptop half, in PowerShell — what each line is for
 
 ⚠ **Everything below is typed into PowerShell on Windows.** Start menu → type
@@ -348,7 +414,16 @@ git pull
 git checkout claude/android-app-ui-improvements-gwu584
 ```
 
-#### 3. Build it onto the phone — one command
+#### 3. On a machine that has never built this, fetch the toolchains
+
+```powershell
+.\tools\dev-phone.ps1 -Setup
+```
+
+Skip it on a machine that already has `tools\android-sdk` and `tools\jdk`, or Android Studio —
+the script finds all three. See the section above for what it costs.
+
+#### 4. Build it onto the phone — one command
 
 ```powershell
 .\tools\dev-phone.ps1 -Build

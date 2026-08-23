@@ -305,45 +305,128 @@ launch.**
 ⚠ **`adb root` drops `adb reverse`** (HANDOFF). If the phone stops receiving the bundle after a
 root, that is why.
 
-### One-time, on the laptop
+### The laptop half, in PowerShell — what each line is for
+
+⚠ **Everything below is typed into PowerShell on Windows.** Start menu → type
+*PowerShell* → **Windows PowerShell**. It does **not** need to be run as administrator, and it must
+**not** be Command Prompt (`cmd.exe`), where `$env:` syntax is not a thing.
+
+#### 0. One line you may need before anything else works
 
 ```powershell
-cd C:\path\to\Madeira-Explorer
-git pull
-
-$env:ANDROID_HOME = "$PWD\tools\android-sdk"
-$env:JAVA_HOME    = "$PWD\tools\jdk\jdk-21.0.12+8"
-$env:PATH         = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:PATH"
-
-cd app
-npm install
-npx expo run:android            # ~4 minutes cold. Builds, installs, launches.
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-⚠ `app/.env` must hold the Maps key first, or the map is a grey grid — see the top of this file.
-The debug fingerprint is already on the key restriction, so a locally built debug or release APK
-draws the map; **Google's own re-signing fingerprint is the one still missing** (T-117e).
+Windows refuses to run local `.ps1` scripts by default — including npm's own launcher. The symptom
+is:
+
+```
+npm : File C:\Program Files\nodejs\npm.ps1 cannot be loaded because running scripts
+is disabled on this system.
+```
+
+`RemoteSigned` means *scripts written on this machine may run; scripts downloaded from the internet
+must be signed*. It is per-user, needs no administrator, and is asked for once ever. Type `Y`.
+
+#### 1. Get to the repository
+
+```powershell
+cd C:\Users\<you>\Madeira-Explorer
+```
+
+The path is whatever Explorer's address bar shows for the folder holding `app\`, `content\` and
+`tools\`. Quote it if it contains spaces: `cd "C:\My Projects\Madeira-Explorer"`.
+
+⚠ **Be at the repository root, not inside `app\`.** The next command reads `$PWD` — *the folder you
+are standing in* — to find the toolchains, and from the wrong folder it points at directories that
+do not exist.
+
+#### 2. Get the code
+
+```powershell
+git pull
+git checkout claude/android-app-ui-improvements-gwu584
+```
+
+#### 3. Build it onto the phone — one command
+
+```powershell
+.\tools\dev-phone.ps1 -Build
+```
+
+⚠ **The leading `.\` is required.** PowerShell will not run a script from the current directory
+without it, and the error it gives instead suggests the file does not exist.
+
+That script does five things, in this order, and stops with a plain-English reason if any of them
+is not true:
+
+1. **Points at the toolchains in this repository** — `tools\android-sdk` and `tools\jdk` — by
+   setting `JAVA_HOME`, `ANDROID_HOME` and `PATH`. Nothing is installed system-wide.
+2. **Checks `app\.env` has a Maps key**, because its absence is a grey grid that reads as a broken
+   app rather than as a missing key.
+3. **Runs `npm install`** if `node_modules` is not there.
+4. **Checks the phone is actually visible**, and says which of the three usual causes it is.
+5. **Runs `npx expo run:android`** — roughly four minutes the first time. It compiles, installs and
+   launches the app on the phone.
+
+#### ⚠ Why a script rather than four lines you paste
+
+```powershell
+$env:JAVA_HOME = "$PWD\tools\jdk\jdk-21.0.12+8"
+```
+
+`$env:NAME = "..."` sets an environment variable **for that PowerShell window only**. Close the
+window — or open a second one to run Metro alongside the build — and it is gone. What you get then
+is a Gradle error about a missing SDK that says nothing whatsoever about environment variables, on
+a machine where the SDK is present. Every mode of the script sets them itself, so **there is no
+"right window"** to keep open.
+
+It also does not hardcode the JDK's version. The folder is named `jdk-21.0.12+8`; a patch bump
+renames it, and a pasted path then breaks in a way that reads as a Java problem.
+
+If you would rather see it by hand, this is the whole of what it sets:
+
+```powershell
+$env:ANDROID_HOME = "$PWD\tools\android-sdk"
+$env:JAVA_HOME    = "$PWD\tools\jdk\jdk-21.0.12+8"   # ⚠ check the real folder name
+$env:PATH         = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:PATH"
+cd app
+npx expo run:android
+```
 
 ### Every day after that
 
 ```powershell
-cd app
-npx expo start --dev-client --tunnel
+.\tools\dev-phone.ps1 -Start
 ```
 
-Open **Proa** on the phone; it finds the server and loads the current JavaScript. Then:
+Metro starts and **keeps the window** — that is normal, it is a server, not a command that
+finishes. Leave it running and open Proa on the phone; it finds the server and loads the current
+JavaScript.
 
-- **`r`** in the terminal reloads the phone. Shaking the phone opens the dev menu.
+- **`r`** in that window reloads the phone. Shaking the phone opens the dev menu.
 - Saving a file reloads it by itself (Fast Refresh).
-- **After `git pull`, Metro picks the new code up on the next reload.** No rebuild.
+- **After `git pull` in a second window, the next reload has the new code.** No rebuild.
+- **Ctrl-C** stops the server.
 
-`--tunnel` routes through the internet, so the phone does not need to be on the same wifi — it
-works on mobile data, with the laptop anywhere. It is slower than `--lan`; use `--lan` at the desk.
+`-Start` tunnels through the internet by default, so the phone can be on mobile data with the
+laptop anywhere. At the desk, on the same wifi, `-Lan` is faster:
+
+```powershell
+.\tools\dev-phone.ps1 -Start -Lan
+```
+
+And for the build that goes walking — the one carrying its own JavaScript:
+
+```powershell
+.\tools\dev-phone.ps1 -Release
+```
+
 
 ### ⚠ When a rebuild IS unavoidable
 
-Fast Refresh moves **JavaScript**. It cannot move native code. Rebuild (`npx expo run:android`)
-after any of:
+Fast Refresh moves **JavaScript**. It cannot move native code. Rebuild
+(`.\tools\dev-phone.ps1 -Build`) after any of:
 
 - a new dependency with native code — **`expo-updates` will be one** when OTA goes in;
 - any change to `app.json` or `app.config.js` — permissions, plugins, the package name, the Maps
@@ -360,7 +443,7 @@ and cannot start — which is exactly the wrong property for a phone in a pocket
 laptop. For a real walk, build the standalone one:
 
 ```powershell
-npx expo run:android --variant release
+.\tools\dev-phone.ps1 -Release
 ```
 
 That APK carries its own bundle, behaves like the shipping app, and is the only kind of build that

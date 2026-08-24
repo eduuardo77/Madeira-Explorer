@@ -498,6 +498,37 @@ And for the build that goes walking — the one carrying its own JavaScript:
 ```
 
 
+### ⚠ What the first real Windows setup cost, 2026-08-22 — read before promising the loop
+
+The dev-client loop above is written as though it works. On the first machine that ever ran it — a
+**borrowed** Windows laptop, phone on a cable — **it did not**, and the standalone build is what
+actually got the app on screen. Four failures, in the order they happened:
+
+1. **The script would not parse.** `.gitattributes` forces LF repo-wide; **Windows PowerShell 5.1
+   will not recognise a here-string's closing `"@` in an LF-only file**, so it read the prose inside
+   an error message as code. Six "Unexpected token" errors pointing at English words. Fixed by
+   removing every here-string and pinning `*.ps1 text eol=crlf`. ⚠ **A parse error kills the whole
+   file**, so the `-Setup` run that "already happened" had in fact done nothing at all.
+2. **Mojibake.** PowerShell 5.1 reads a BOM-less `.ps1` as Windows-1252, so the house style's em
+   dashes arrived as `â€"`. The script is plain ASCII now.
+3. **`adb reverse` did nothing on the Huawei.** `adb reverse tcp:8081 tcp:8081` returned success,
+   and `http://localhost:8081/status` from the phone's browser could not connect. Some EMUI builds
+   refuse reverse forwarding. ⚠ **That browser check is the cheap way to split the problem** — it
+   answers "can the phone reach Metro at all" without involving the app.
+4. **The tunnel could not be installed.** `expo start --tunnel` offered to install `@expo/ngrok`
+   globally, reported success, then failed with *"Install @expo/ngrok and try again"* — **every
+   time**, because the global install did not land where Expo resolves from.
+   `npm install --no-save @expo/ngrok@^4.1.0` inside `app/` is the fix.
+
+**The lesson worth keeping:** the live-reload loop has four independent ways to fail on a machine
+nobody controls, and **`-Release` has none** — it carries its own JavaScript and needs no network,
+no cable after install, and no ngrok. On a borrowed or unfamiliar machine, **build the standalone
+one first and get the app on screen**, then sort the loop out afterwards. It is also the honest
+build for battery and background survival (T-054, T-051/T-053).
+
+This is the strongest argument yet for OTA (`expo-updates`): it removes the laptop from the loop
+entirely rather than making the laptop work.
+
 ### ⚠ When a rebuild IS unavoidable
 
 Fast Refresh moves **JavaScript**. It cannot move native code. Rebuild

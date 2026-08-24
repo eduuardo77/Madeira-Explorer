@@ -7,26 +7,26 @@
   that actually go wrong, and then either builds the app onto the phone or
   starts the Metro server that feeds it JavaScript.
 
-  ⚠ WHY THIS SCRIPT EXISTS RATHER THAN FOUR LINES IN A DOCUMENT
+  !! WHY THIS SCRIPT EXISTS RATHER THAN FOUR LINES IN A DOCUMENT
   -------------------------------------------------------------
   The environment variables live **only in the PowerShell window they were typed
-  into**. Close it, or open a second one for Metro, and they are gone — and the
+  into**. Close it, or open a second one for Metro, and they are gone -- and the
   failure that produces is a Gradle error about a missing SDK that says nothing
   about environment variables. Every command below sets them itself, so there is
   no window that is "the right window".
 
-  ⚠ Nothing here installs anything system-wide or needs an administrator, and
+  !! Nothing here installs anything system-wide or needs an administrator, and
   nothing touches the phone's storage. `-Setup` fetches the two toolchains into
-  `tools\` — gitignored, re-fetchable, and removed completely by deleting those
+  `tools\` -- gitignored, re-fetchable, and removed completely by deleting those
   two folders. That matters on a **borrowed** machine, which is exactly where
   `-Setup` gets used.
 
 .PARAMETER Setup
-  Fetch the two toolchains this build needs — a portable Temurin JDK and the
-  Android command-line tools — into `tools\`, on a machine that has neither.
+  Fetch the two toolchains this build needs -- a portable Temurin JDK and the
+  Android command-line tools -- into `tools\`, on a machine that has neither.
   For a borrowed PC: nothing is installed system-wide, nothing needs an
   administrator, and deleting `tools\jdk` and `tools\android-sdk` removes all
-  of it. **It does NOT fetch the emulator or its 4.2 GB system image** — with a
+  of it. **It does NOT fetch the emulator or its 4.2 GB system image** -- with a
   real phone plugged in, those are the largest thing you would download and
   never use.
 
@@ -38,7 +38,7 @@
   after any native change (a new native dependency, or an app.json edit).
 
 .PARAMETER Release
-  Compile the standalone build — the one that carries its own JavaScript and can
+  Compile the standalone build -- the one that carries its own JavaScript and can
   therefore go up a levada without a laptop.
 
 .PARAMETER Lan
@@ -69,11 +69,11 @@ function Warn($text) { Write-Host $text -ForegroundColor Yellow }
 function Die($text)  { Write-Host $text -ForegroundColor Red; exit 1 }
 
 # ---------------------------------------------------------------------------
-# The toolchains — fetched on request, then found rather than assumed
+# The toolchains -- fetched on request, then found rather than assumed
 # ---------------------------------------------------------------------------
 #
-# ⚠ THREE PLACES, IN THIS ORDER, AND THE ORDER IS THE POINT. The project's own
-# machine keeps both toolchains inside the repository (CONTEXT §6.7: no
+# !! THREE PLACES, IN THIS ORDER, AND THE ORDER IS THE POINT. The project's own
+# machine keeps both toolchains inside the repository (CONTEXT 6.7: no
 # system-wide Java for one build step). A borrowed machine may instead have
 # Android Studio, which ships both. Whatever is found first wins, so the same
 # command works on either without being told which it is.
@@ -83,8 +83,8 @@ $repoJdkParent = Join-Path $repo 'tools\jdk'
 
 function Find-RepoJdk {
     if (-not (Test-Path $repoJdkParent)) { return $null }
-    # ⚠ Discovered, not hardcoded. The folder carries its exact patch version
-    # (`jdk-21.0.12+8`), so a bump renames it — and the error Gradle gives for a
+    # !! Discovered, not hardcoded. The folder carries its exact patch version
+    # (`jdk-21.0.12+8`), so a bump renames it -- and the error Gradle gives for a
     # stale path is about Java, not about the path.
     return Get-ChildItem -Path $repoJdkParent -Directory -Filter 'jdk-*' |
         Sort-Object Name -Descending |
@@ -94,23 +94,23 @@ function Find-RepoJdk {
 
 if ($Setup) {
     # A portable JDK, pinned and checksummed exactly as tools/fetch-toolchain.sh
-    # pins it — two scripts fetching two different Javas is a bug waiting for a
+    # pins it -- two scripts fetching two different Javas is a bug waiting for a
     # rainy day.
     $jdkUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12_8.zip'
     $jdkSha = '9ba963ee2371874a74185d18bc7bb2ab9407df7683300855ed7606e0662321d0'
     $toolsUrl = 'https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip'
 
     if ($null -eq (Find-RepoJdk)) {
-        Say 'Fetching the Temurin JDK (196 MB)…'
+        Say 'Fetching the Temurin JDK (196 MB)...'
         New-Item -ItemType Directory -Force -Path $repoJdkParent | Out-Null
         $zip = Join-Path $repoJdkParent 'temurin.zip'
-        # ⚠ TLS 1.2 explicitly: PowerShell 5.1 still defaults to TLS 1.0 on some
+        # !! TLS 1.2 explicitly: PowerShell 5.1 still defaults to TLS 1.0 on some
         # builds, and GitHub refuses it with a connection error that looks like
         # a network fault.
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         Invoke-WebRequest -Uri $jdkUrl -OutFile $zip -UseBasicParsing
 
-        # Verify rather than trust — the same rule as the bash script.
+        # Verify rather than trust -- the same rule as the bash script.
         $got = (Get-FileHash -Path $zip -Algorithm SHA256).Hash.ToLower()
         if ($got -ne $jdkSha) {
             Remove-Item $zip -Force
@@ -123,14 +123,14 @@ if ($Setup) {
     }
 
     if (-not (Test-Path (Join-Path $repoSdk 'cmdline-tools\latest'))) {
-        Say 'Fetching the Android command-line tools (~150 MB)…'
+        Say 'Fetching the Android command-line tools (~150 MB)...'
         New-Item -ItemType Directory -Force -Path $repoSdk | Out-Null
         $zip = Join-Path $repoSdk 'cmdline-tools.zip'
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         Invoke-WebRequest -Uri $toolsUrl -OutFile $zip -UseBasicParsing
         $tmp = Join-Path $repoSdk 'tmp'
         Expand-Archive -Path $zip -DestinationPath $tmp -Force
-        # ⚠ sdkmanager insists on living at cmdline-tools\latest\ or it cannot
+        # !! sdkmanager insists on living at cmdline-tools\latest\ or it cannot
         # find its own packages. The zip does not put it there.
         New-Item -ItemType Directory -Force -Path (Join-Path $repoSdk 'cmdline-tools') | Out-Null
         Move-Item -Path (Join-Path $tmp 'cmdline-tools') -Destination (Join-Path $repoSdk 'cmdline-tools\latest')
@@ -148,12 +148,12 @@ if ($Setup) {
     Warn 'Google now wants its licences accepted. Press y and Enter at each prompt.'
     & $sdkManager --sdk_root="$repoSdk" --licenses
 
-    Say 'Fetching platform-tools (adb) — about 15 MB…'
+    Say 'Fetching platform-tools (adb) -- about 15 MB...'
     & $sdkManager --sdk_root="$repoSdk" 'platform-tools'
 
     Say ''
     Say 'Toolchains ready. Next: .\tools\dev-phone.ps1 -Build'
-    Warn 'That first build downloads another ~4 GB through Gradle — the NDK and'
+    Warn 'That first build downloads another ~4 GB through Gradle -- the NDK and'
     Warn 'the build tools. It is a one-off, and it lands in tools\android-sdk'
     Warn 'and %USERPROFILE%\.gradle.'
     exit 0
@@ -170,15 +170,13 @@ foreach ($candidate in @(
     if ($candidate -and (Test-Path $candidate)) { $sdk = $candidate; break }
 }
 if ($null -eq $sdk) {
-    Die @"
-No Android SDK found. Looked in:
-  $repoSdk
-  `$env:ANDROID_HOME / `$env:ANDROID_SDK_ROOT
-  $(Join-Path $env:LOCALAPPDATA 'Android\Sdk')
-
-On a machine that has never built this app:
-  .\tools\dev-phone.ps1 -Setup
-"@
+    $studio = Join-Path $env:LOCALAPPDATA 'Android\Sdk'
+    Die ("No Android SDK found. Looked in:`n" +
+         "  $repoSdk`n" +
+         "  ANDROID_HOME / ANDROID_SDK_ROOT`n" +
+         "  $studio`n`n" +
+         "On a machine that has never built this app:`n" +
+         "  .\tools\dev-phone.ps1 -Setup")
 }
 
 # Where is Java?
@@ -214,15 +212,15 @@ Say "ANDROID_HOME $env:ANDROID_HOME"
 #    that has cost this project a debugging session more than once (D-057).
 $envFile = Join-Path $appDir '.env'
 if (-not (Test-Path $envFile)) {
-    Warn "⚠ app\.env is missing — the map will be a GREY GRID and nothing else will fail."
+    Warn "!! app\.env is missing -- the map will be a GREY GRID and nothing else will fail."
     Warn "  copy app\.env.example to app\.env and paste the Google Maps key into it."
 } elseif (-not (Select-String -Path $envFile -Pattern 'GOOGLE_MAPS_API_KEY=\S' -Quiet)) {
-    Warn "⚠ app\.env has no key in GOOGLE_MAPS_API_KEY — the map will be a GREY GRID."
+    Warn "!! app\.env has no key in GOOGLE_MAPS_API_KEY -- the map will be a GREY GRID."
 }
 
 # 2. node_modules.
 if (-not (Test-Path (Join-Path $appDir 'node_modules'))) {
-    Warn "node_modules missing — running npm install first."
+    Warn "node_modules missing -- running npm install first."
     Push-Location $appDir
     try { & npm install } finally { Pop-Location }
 }
@@ -237,17 +235,15 @@ if ($Build -or $Release) {
     $devices = & $adb devices | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne '' }
 
     if (-not $devices) {
-        Die @"
-No device. In order, the three things it usually is:
-  1. the cable (a charge-only cable looks identical to a data one)
-  2. Developer options -> USB debugging, and the fingerprint prompt on the phone
-  3. on Huawei/Xiaomi/Oppo: a SECOND switch, usually 'Install via USB'
-"@
+        Die ("No device. In order, the three things it usually is:`n" +
+             "  1. the cable (a charge-only cable looks identical to a data one)`n" +
+             "  2. Developer options -> USB debugging, and the prompt on the phone`n" +
+             "  3. on Huawei/Xiaomi/Oppo: a SECOND switch, usually 'Install via USB'")
     }
 
     foreach ($line in $devices) {
         if ($line -match 'unauthorized') {
-            Die "The phone says unauthorized — accept the 'Allow USB debugging' prompt on its screen."
+            Die "The phone says unauthorized -- accept the 'Allow USB debugging' prompt on its screen."
         }
     }
 
@@ -261,14 +257,14 @@ No device. In order, the three things it usually is:
 Push-Location $appDir
 try {
     if ($Build) {
-        Say "Building the development build and installing it (~4 minutes cold)…"
+        Say "Building the development build and installing it (~4 minutes cold)..."
         & npx expo run:android
     }
     elseif ($Release) {
-        # ⚠ The build to take walking. A development build holds no JavaScript
-        # of its own, so without Metro it cannot start — and it is also the only
+        # !! The build to take walking. A development build holds no JavaScript
+        # of its own, so without Metro it cannot start -- and it is also the only
         # kind that can answer battery (T-054) or overnight survival honestly.
-        Say "Building the standalone release build…"
+        Say "Building the standalone release build..."
         & npx expo run:android --variant release
     }
     else {

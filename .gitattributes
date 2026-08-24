@@ -2,6 +2,12 @@
 # and any future contributor on macOS/Linux should see LF regardless.
 * text=auto eol=lf
 
+# ⚠ PowerShell 5.1 needs CRLF. `* text=auto eol=lf` above gave `tools/dev-phone.ps1`
+# LF endings, and 5.1 then refused to parse its here-strings — six "Unexpected
+# token" errors pointing at prose inside a string, on a borrowed Windows machine
+# with a phone plugged in and nothing else wrong (2026-08-22).
+*.ps1 text eol=crlf
+
 # Binary assets — never touch these.
 *.png binary
 *.jpg binary

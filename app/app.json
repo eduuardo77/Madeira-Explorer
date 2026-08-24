@@ -107,7 +107,19 @@
       "expo-dev-client",
       "expo-asset",
       "expo-maps",
-      "expo-localization"
-    ]
+      "expo-localization",
+      "expo-updates"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    }
   }
 }

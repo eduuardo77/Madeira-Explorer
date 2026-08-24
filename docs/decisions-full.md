@@ -4455,3 +4455,51 @@ The map screen is now **four controls plus a place card**, where design brief §
 document should be amended rather than quietly contradicted — the screen has not become cluttered,
 but the rule that kept it clean has been spent, and the next addition has no budget left to draw
 on.
+
+---
+
+## D-081 — The app updates its own JavaScript, over the air
+
+**Status:** **Accepted** — 2026-08-22, on the last evening of a borrowed laptop.
+
+**Decision:** ship `expo-updates`. The app asks Expo's update server on launch whether newer
+JavaScript exists for its runtime, downloads it if so, and applies it on the next launch.
+
+### Why this stopped being optional
+
+The project has **no Windows machine of its own.** The one that produced the working build was
+borrowed and went back the same evening. Without OTA, every change — a re-center tweak, a fix found
+on a real walk — would wait for hardware that may not exist for weeks, on a phone the project lead
+is carrying every day.
+
+⚠ **And the loop it replaces was measured, not imagined.** Getting the live-reload path working on
+that laptop failed four separate ways (`docs/dev-build.md`): a here-string this repository's own
+`eol=lf` rule made unparseable, Windows-1252 mojibake, `adb reverse` silently doing nothing on
+EMUI, and an `@expo/ngrok` install that reported success and was then not found. **The standalone
+build is what worked.** OTA removes the laptop rather than making the laptop work.
+
+### What it costs, and none of it is hidden
+
+1. **A network request the app did not make before**, on every launch. D-001 has now been narrowed
+   twice — D-057 for map tiles, this for updates — and `privacyPolicy.ts` gained a section in
+   English and Portuguese rather than letting "no server behind this app" quietly become false.
+   **The trip itself still never leaves the phone.** Expo sees that a phone asked and which version
+   it has.
+2. **A second way to ship, and only one of them can ship native code.** `runtimeVersion` is pinned
+   to `expo.version`, so a build ignores updates published for a different runtime instead of
+   crashing on missing native code. ⚠ The rule that keeps that true: **bump `expo.version`
+   whenever the native side changes.**
+3. **No review between a push and somebody's phone.** The GitHub workflow typechecks and runs the
+   633 tests before publishing, and that is the entire gate. It is a real risk and the mitigation
+   is honest rather than complete.
+
+### Rejected
+
+- **A Play internal testing track instead.** It ships the whole app, needs the $25 registration
+  (T-156's blocker), and updates arrive through the Play Store on Google's schedule. Right for
+  releases; useless for iterating on a phone tonight.
+- **A self-hosted update server.** `expo-updates` speaks a documented protocol and a static host
+  would do — but it is infrastructure this project would then own, and D-032 cut scope for exactly
+  this kind of reason.
+- **Waiting until the paid Play track exists.** That reverses the ordering: the phone is here now,
+  the store is not.

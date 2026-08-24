@@ -66,7 +66,7 @@
  * The date this text last changed, in ISO form. Shown to the user, and the
  * thing a returning reader checks first.
  */
-export const POLICY_VERSION = '2026-08-14';
+export const POLICY_VERSION = '2026-08-22';
 
 /**
  * The app's name as it appears to the user.
@@ -113,7 +113,7 @@ const SECTIONS_EN: PolicySection[] = [
     heading: 'The short version',
     paragraphs: [
       `${APP_NAME} records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.`,
-      'There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.',
+      'There is no account, no sign-up and no server of ours behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.',
       'The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because your trip never leaves the phone.',
       'Nobody is paying us for your data. There are no adverts and nothing is measuring how you use the app.',
     ],
@@ -152,6 +152,15 @@ const SECTIONS_EN: PolicySection[] = [
       'Google does not see your trip. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. That record is never sent to them or to us.',
       'This does mean the map needs an internet connection. Recording carries on regardless \u2014 your trip is still being saved with no signal at all, and it will appear on the map once you have one.',
       'Google has its own privacy policy, which covers what they do with those map requests.',
+    ],
+  },
+  {
+    heading: 'When the app updates itself',
+    paragraphs: [
+      'When you open the app it asks whether there is a newer version of it, and downloads one if there is. This is how a fix reaches you without you having to install anything.',
+      'That question goes to Expo, the company whose tools this app is built with. They see that a phone asked, and which version it already has. They do not see your trip, your stamps or your name, because none of that is sent.',
+      'It is one short request when the app opens, and nothing else. If you have no signal it fails quietly and the app carries on with the version it already has.',
+      'Expo has its own privacy policy, which covers what they do with those requests.',
     ],
   },
   {

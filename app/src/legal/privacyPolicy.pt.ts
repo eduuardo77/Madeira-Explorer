@@ -39,7 +39,7 @@ export const SECTIONS_PT: PolicySection[] = [
     heading: 'A versão curta',
     paragraphs: [
       `O ${APP_NAME} regista por onde anda durante as férias e mostra-lhe isso de volta como um mapa. Fica tudo no seu telemóvel.`,
-      'Não há conta, não há registo e não há servidor por trás desta aplicação. Não temos maneira de ver por onde andou, porque a sua viagem nunca nos é enviada. Não sabemos quem é e não conseguimos descobrir.',
+      'Não há conta, não há registo e não há servidor nosso por trás desta aplicação. Não temos maneira de ver por onde andou, porque a sua viagem nunca nos é enviada. Não sabemos quem é e não conseguimos descobrir.',
       'O mapa que vê por baixo da sua viagem vem da Google, como na maioria das aplicações de mapas. A Google vê que parte da ilha está a olhar. Não vê a sua viagem, porque a sua viagem nunca sai do telemóvel.',
       'Ninguém nos paga pelos seus dados. Não há publicidade e não há nada a medir como usa a aplicação.',
     ],
@@ -78,6 +78,15 @@ export const SECTIONS_PT: PolicySection[] = [
       'A Google não vê a sua viagem. A linha que mostra por onde andou é desenhada por esta aplicação, por cima do mapa deles, a partir do registo guardado no seu telemóvel. Esse registo nunca lhes é enviado, nem a nós.',
       'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma — a sua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiver ligação.',
       'A Google tem a sua própria política de privacidade, que cobre o que fazem com esses pedidos de mapa.',
+    ],
+  },
+  {
+    heading: 'Quando a aplicação se actualiza',
+    paragraphs: [
+      'Quando abre a aplicação, ela pergunta se existe uma versão mais recente e transfere-a se existir. É assim que uma correcção lhe chega sem ter de instalar nada.',
+      'Essa pergunta vai para a Expo, a empresa cujas ferramentas foram usadas para construir esta aplicação. Vêem que um telemóvel perguntou e que versão já tem. Não vêem a sua viagem, os seus carimbos nem o seu nome, porque nada disso é enviado.',
+      'É um pedido curto quando a aplicação abre, e mais nada. Se não tiver rede, falha em silêncio e a aplicação continua com a versão que já tem.',
+      'A Expo tem a sua própria política de privacidade, que cobre o que fazem com esses pedidos.',
     ],
   },
   {

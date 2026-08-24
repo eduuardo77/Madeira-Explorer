@@ -1,0 +1,72 @@
+# Publish a JavaScript update over the air (T-169, D-081).
+#
+# WHAT THIS REPLACES
+# ------------------
+# A rebuild, a cable, and a Windows machine. Everything in `app/src` is
+# JavaScript, so a change to it can reach an installed phone without any of
+# those - this workflow publishes it and the app picks it up on next launch.
+#
+# ⚠ IT CANNOT SHIP NATIVE CHANGES. A new native dependency, or an edit to
+# app.json's native config, still needs a real build. If you change either and
+# publish only an update, the phone downloads JavaScript that expects native
+# code it does not have - which is why `runtimeVersion` is pinned to the app
+# version: a mismatched build simply ignores the update instead of crashing.
+# Bump `expo.version` in app.json whenever the native side changes.
+#
+# ⚠ REQUIRES ONE SECRET: EXPO_TOKEN, from expo.dev -> account settings ->
+# access tokens. Without it every run fails at the publish step.
+name: OTA update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/**'
+      - 'app/App.tsx'
+      - 'app/index.ts'
+      - 'app/assets/**'
+      - 'content/**'
+  workflow_dispatch:
+    inputs:
+      message:
+        description: What this update changes
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        working-directory: app
+        run: npm ci
+
+      # The same checks a contributor runs locally. An update is live the moment
+      # it publishes - there is no review between here and somebody's phone, so
+      # this is the only gate there is.
+      - name: Typecheck
+        working-directory: app
+        run: npx tsc --noEmit
+
+      - name: Test
+        working-directory: app
+        run: npm test
+
+      - name: Publish the update
+        working-directory: app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # ⚠ The map key is baked into the native build, not into an update,
+          # so it is deliberately absent here. An update cannot change it.
+        run: >
+          npx eas-cli@latest update
+          --branch production
+          --message "${{ github.event.inputs.message || github.event.head_commit.message }}"
+          --non-interactive

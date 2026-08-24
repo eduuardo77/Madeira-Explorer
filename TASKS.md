@@ -1126,6 +1126,33 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **Left dark, and it now looks it:** `PrivacyPolicyView` and `DebugScreen` are both
       reached from this screen and are both still dark. **Nobody has seen the join.**
 
+- [x] **T-169** ✅ **The app updates itself over the air, 2026-08-22.** ⇠ D-081
+      — **Why it happened tonight:** the Windows machine was **borrowed and going back the same
+      evening**. Without this, a change could not reach the phone at all until hardware appeared
+      that may not exist for weeks — while the project lead carries the phone every day.
+      — ⚠⚠ **The loop it replaces failed four separate ways on that laptop**, all written up in
+      `docs/dev-build.md`: a here-string this repo's own `eol=lf` rule made unparseable by
+      PowerShell 5.1, Windows-1252 mojibake in a BOM-less `.ps1`, `adb reverse` silently doing
+      nothing on EMUI, and an `@expo/ngrok` global install that reported success and was then not
+      found. **The standalone build is what worked.** The lesson is in the doc: on unfamiliar
+      hardware build `-Release` first, fix the loop afterwards.
+      — **`runtimeVersion` is `appVersion`**, so a build ignores updates meant for another runtime
+      rather than crashing on native code it does not have. ⚠ **The rule that keeps that true:
+      bump `expo.version` whenever the native side changes.**
+      — ⚠ **A locally built APK carries no EAS channel**, so `app.json` pins one itself
+      (`requestHeaders["expo-channel-name"] = "production"`). Without it `eas update --branch
+      production` publishes into silence: no error, nothing arrives.
+      — ⚠ **It cost the privacy policy a section.** The app now asks Expo's servers something on
+      every launch. D-001 has been narrowed twice now (D-057 for tiles, this for updates), and
+      *"no server behind this app"* became *"no server of ours"* rather than quietly becoming
+      false. New section in English and Portuguese; `POLICY_VERSION` → 2026-08-22.
+      ⚠ **`docs/store-privacy-answers.md` predates this and has not been rechecked.**
+      — ⚠ **There is no review between a push and somebody's phone.** The workflow typechecks and
+      runs the 633 tests, and that is the whole gate. Stated rather than mitigated.
+      — ⚠ **Nothing has been published yet.** `eas init` needs the account owner's login, and the
+      first real update is the proof this works. Until one lands on the phone, this is a
+      configuration nobody has tested end to end.
+
 - [ ] **T-164** **Import walks the app did not record** ⇠ T-021, T-104, D-040 ⚠ **requested 2026-08-18**
       — **The project lead:** *"One thing we should add is the ability to import data from Health,
       Strava, Google Timeline, GPX, etc..."* — after reading that the reference app's real feature

@@ -24,6 +24,12 @@ two shipped tasks (T-167, T-168), three parts of which *reverse* a documented de
 more of that, and treat "the docs say X" as weaker evidence than "the person holding the phone
 says Y".
 
+**Also shipped, and it changes how this project ships:** **OTA updates (D-081, T-169).** The
+Windows machine was borrowed and went back the same night, so `expo-updates` is now what carries a
+JavaScript change to the phone — `eas update --branch production`, or a push to `main`. ⚠ **Native
+changes still need a build, and there is no machine to build on.** ⚠ **Bump `expo.version`
+whenever the native side changes**, or new builds accept stale updates.
+
 **Shipped today:** the map screen is **four controls** — the **walk button is permanent**
 (it was hidden from Always users, who are exactly the ones who asked for it back), a **re-center**
 control joins it, and **Google's own blue dot** is on. **Settings is light** (`settingsLight` in

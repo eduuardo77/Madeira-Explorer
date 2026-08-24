@@ -542,6 +542,75 @@ Fast Refresh moves **JavaScript**. It cannot move native code. Rebuild
 Everything in T-167 and T-168 — the re-center control, the permanent walk button, the light
 Settings — is JavaScript, and needs no rebuild after the first one.
 
+### Over-the-air updates — the laptop leaves the loop (T-169, D-081)
+
+**Set up 2026-08-22, on the last evening of a borrowed laptop.** After that machine goes back there
+is no Windows PC, so a change that needs a build cannot reach the phone at all. `expo-updates` is
+what makes the JavaScript half — which is all of `app/src`, and therefore almost everything —
+reachable anyway.
+
+#### What it can and cannot carry
+
+| | |
+|---|---|
+| ✅ Anything under `app/src`, `App.tsx`, assets, `content/` | published in seconds, live on next launch |
+| ❌ A new native dependency, or an `app.json` native change | still needs a real build on a real machine |
+
+⚠ **`runtimeVersion` is pinned to `expo.version` (policy `appVersion`).** A build only accepts
+updates published for its own runtime, so a JavaScript update that expects native code the installed
+APK lacks is **ignored rather than crashing**. The cost of that safety is a rule: **bump
+`expo.version` in `app.json` whenever the native side changes**, or new builds keep accepting old
+updates.
+
+#### One-time, and it needs the account owner
+
+The update URL embeds a project id that only the Expo account holder can create, so these four run
+on the project lead's own login:
+
+```powershell
+cd app
+npx eas-cli@latest login
+npx eas-cli@latest init                # creates the project, writes extra.eas.projectId
+npx eas-cli@latest update:configure    # writes updates.url into app.json
+```
+
+⚠ Then **commit the two fields those commands write** (`extra.eas.projectId` and `updates.url`) —
+without them in git, CI publishes to a project the app is not listening to, and nothing arrives with
+no error anywhere.
+
+Then the build that will receive updates, which must happen **after** the above:
+
+```powershell
+.\tools\dev-phone.ps1 -Release
+```
+
+#### Every time after that
+
+Publishing by hand:
+
+```powershell
+cd app
+npx eas-cli@latest update --branch production --message "what changed"
+```
+
+Or automatically: pushing to `main` runs `.github/workflows/ota-update.yml`, which typechecks,
+tests, and publishes. It needs one repository secret, **`EXPO_TOKEN`** (expo.dev → account settings
+→ access tokens → create, then GitHub → Settings → Secrets and variables → Actions).
+
+⚠ **A locally built APK carries no EAS channel**, so `app.json` pins one itself:
+`updates.requestHeaders["expo-channel-name"] = "production"`. That is what makes
+`eas update --branch production` reach a build made by `expo run:android` rather than by EAS.
+
+#### ⚠ It changed what the privacy policy has to say
+
+The app now asks Expo's servers for a new version on launch. That is a **third company seeing that a
+phone asked**, and D-073 forbids claiming otherwise, so `privacyPolicy.ts` gained a section — *When
+the app updates itself* — in English and Portuguese, and the short version no longer says "no
+server" without saying whose. `POLICY_VERSION` moved to `2026-08-22`.
+
+⚠ **The store privacy answers were written before this existed** (`docs/store-privacy-answers.md`).
+Check them before submitting.
+
 ### ⚠ The dev build is for the desk, not for the levada
 
 **A development build has no JavaScript inside it.** With no Metro server it shows the launcher

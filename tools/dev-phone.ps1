@@ -45,6 +45,12 @@
   With -Start: serve over the local network instead of a tunnel. Faster at the
   desk; requires the phone and the laptop on the same wifi.
 
+.PARAMETER Usb
+  With -Start: serve over the USB cable. No wifi, no tunnel, no ngrok, no
+  firewall prompt -- `adb reverse` points the phone's own localhost:8081 at this
+  laptop, so there is no address that has to be reachable from anywhere.
+  THE ONE TO USE AT THE DESK. The tunnel is for walking away from it.
+
 .EXAMPLE
   .\tools\dev-phone.ps1 -Build
   .\tools\dev-phone.ps1 -Start
@@ -56,7 +62,8 @@ param(
     [switch] $Start,
     [switch] $Build,
     [switch] $Release,
-    [switch] $Lan
+    [switch] $Lan,
+    [switch] $Usb
 )
 
 $ErrorActionPreference = 'Stop'
@@ -226,7 +233,7 @@ if (-not (Test-Path (Join-Path $appDir 'node_modules'))) {
 }
 
 # 3. The phone, but only when something is about to be pushed to it.
-if ($Build -or $Release) {
+if ($Build -or $Release -or $Usb) {
     $adb = Join-Path $sdk 'platform-tools\adb.exe'
     if (-not (Test-Path $adb)) {
         Die "adb not found at $adb"
@@ -266,6 +273,18 @@ try {
         # kind that can answer battery (T-054) or overnight survival honestly.
         Say "Building the standalone release build..."
         & npx expo run:android --variant release
+    }
+    elseif ($Usb) {
+        # !! No network at all. `adb reverse` makes the phone's own
+        # localhost:8081 arrive at this laptop down the cable, so "host
+        # unreachable" cannot happen: there is no host to reach. Wifi client
+        # isolation, Windows Firewall and a failed ngrok install are all
+        # sidestepped rather than diagnosed.
+        $adb = Join-Path $sdk 'platform-tools\adb.exe'
+        Say 'Pointing the phone localhost:8081 at this laptop over USB...'
+        & $adb reverse tcp:8081 tcp:8081 | Out-Null
+        Say 'Starting Metro (USB). Press a in this window to open the app.'
+        & npx expo start --dev-client --localhost
     }
     else {
         # The default, because it is the one typed every day.

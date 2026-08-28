@@ -18,7 +18,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { contrastRatio } from '../ui/contrast.ts';
-import { colors } from '../ui/theme.ts';
+import { colors, mapButton } from '../ui/theme.ts';
 import {
   TIERS,
   TIER_METAL,
@@ -120,7 +120,10 @@ test('the mark and the count stay readable on every metal', () => {
     const metal = TIER_METAL[tier];
     assert.ok(metal !== undefined, `${tier} has no metal`);
 
-    const ratio = contrastRatio(colors.actionText, metal.fill);
+    // ⚠ `metal.ink`, not `colors.actionText`. They were the same value until the
+    // app went light (2026-08-28); measuring the app's token here would now pass
+    // for `none` and lie about the four metals nobody would be able to read.
+    const ratio = contrastRatio(metal.ink, metal.fill);
     assert.ok(
       ratio >= 4.5,
       `the mark scores ${ratio.toFixed(2)}:1 on ${tier} (${metal.fill}) — under 4.5:1`
@@ -156,6 +159,8 @@ test('the metals are told apart from each other', () => {
 test('no rank is dressed as a trophy before the first stamp', () => {
   // `none` is the app's ordinary action colour. A metal here would be the app
   // congratulating somebody for having been nowhere.
-  assert.equal(TIER_METAL.none.fill, colors.action);
-  assert.notEqual(TIER_METAL.bronze.fill, colors.action);
+  // ⚠ `mapButton`, not `colors.action`: the button is on the map, and the page's
+  // action colour stopped being the button's the day the app went light.
+  assert.equal(TIER_METAL.none.fill, mapButton.fill);
+  assert.notEqual(TIER_METAL.bronze.fill, mapButton.fill);
 });

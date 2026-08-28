@@ -14,7 +14,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { contrastRatio } from '../ui/contrast.ts';
-import { colors } from '../ui/theme.ts';
+import { colors, mapButton, mapChrome } from '../ui/theme.ts';
 import {
   GOOGLE_NIGHT_STYLE_JSON,
   NIGHT_LAND,
@@ -151,15 +151,22 @@ test('⚠ the floating controls survive the night map', () => {
   //
   // So the dark map carries a hairline border, and this is the number that
   // says it is enough. 3:1 is the WCAG floor for a control that is not text.
+  //
+  // ⚠ **This measured `colors.textMuted` until 2026-08-28, which was the wrong
+  // token and passed by coincidence.** The control's edge comes from
+  // `mapChrome.dark.border` — chrome follows the map, never the app (`theme.ts`,
+  // `PrimaryOverlay.tsx`). While the app was also dark the two greys were close
+  // enough that nobody noticed; the day the app went light, this test failed for
+  // a control whose colour had not changed at all.
   assert.ok(
-    contrastRatio(colors.textMuted, NIGHT_LAND) >= 3,
+    contrastRatio(mapChrome.dark.border, NIGHT_LAND) >= 3,
     'the settings control outline is not legible on the night map'
   );
 
   // And the passport button, which is filled rather than outlined and is the
   // primary action — it must not need an outline to be found.
   assert.ok(
-    contrastRatio(colors.action, NIGHT_LAND) >= 3,
+    contrastRatio(mapButton.fill, NIGHT_LAND) >= 3,
     'the passport button does not stand off the night map'
   );
 });

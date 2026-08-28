@@ -148,14 +148,43 @@ export function toNextTier(collected: number, total: number): number | null {
  * ⚠ **Nobody has looked at these.** Contrast is asserted below; whether bronze
  * reads as bronze rather than as brown needs `preview-stamps.mjs` and eyes.
  */
-export type TierMetal = { fill: string; sheen: string };
+// ⚠ `theme.ts` is pure constants and imports nothing, so a pure module may
+// depend on it — unlike `i18n/index.ts`, which reaches expo-localization and
+// would break every Node test. The `.ts` extension is required by Node's
+// resolver for a module under unit test.
+import { mapButton } from '../ui/theme.ts';
 
+/**
+ * Ink for anything drawn on a metal. Near-black, because every metal is pale by
+ * nature — that is what makes it read as metal — and there is no light ink that
+ * survives on all four.
+ */
+const METAL_INK = '#1C1C1E';
+
+export type TierMetal = { fill: string; sheen: string; ink: string };
+
+/**
+ * ⚠ **`ink` exists because the app went light and the metals did not** (2026-08-28).
+ *
+ * The mark and the count used to be drawn in `colors.actionText`, which was
+ * near-black while the app was dark. The light palette inverted it to white, and
+ * white on four pale metals measures 1.2–2.5:1 — the rank would have quietly
+ * erased the number it exists to show. So the ink that reads on a metal is a
+ * property **of that metal**, not of the app's button, and it lives here.
+ *
+ * ⚠ `none` is the exception and must stay one: it is not a metal, it is the
+ * ordinary button, so it takes `mapButton`'s pair and follows it if that moves.
+ */
 export const TIER_METAL: Readonly<Record<Tier, TierMetal>> = {
-  none: { fill: '#5AA9FF', sheen: '#5AA9FF' },
-  bronze: { fill: '#C8874A', sheen: '#E8B383' },
-  silver: { fill: '#C6CBD2', sheen: '#EFF2F6' },
-  gold: { fill: '#E3B84A', sheen: '#F6DC90' },
+  // ⚠ Referenced, not retyped — the duplicated-constant trap, caught by the test
+  // below that asserts these two are the same colour. It reads from `mapButton`
+  // rather than `colors.action` because this button is drawn on the map, not on
+  // a page; see that token's note.
+  none: { fill: mapButton.fill, sheen: mapButton.fill, ink: mapButton.ink },
+  bronze: { fill: '#C8874A', sheen: '#E8B383', ink: METAL_INK },
+  silver: { fill: '#C6CBD2', sheen: '#EFF2F6', ink: METAL_INK },
+  gold: { fill: '#E3B84A', sheen: '#F6DC90', ink: METAL_INK },
   // ⚠ Platinum is not "brighter gold" — it is the one that reads as *cold*.
   // Warm metals sit beside each other and the eye stops separating them.
-  platinum: { fill: '#DCE8F2', sheen: '#FFFFFF' },
+  platinum: { fill: '#DCE8F2', sheen: '#FFFFFF', ink: METAL_INK },
 };

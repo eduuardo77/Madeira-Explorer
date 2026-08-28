@@ -45,7 +45,15 @@ import SettingsMark from './SettingsMark';
 import StampMark from './StampMark';
 import { TIER_METAL, tierFor } from '../passport/stampTier';
 import { n, t } from '../i18n';
-import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from './theme';
+import {
+  colors,
+  fontSize,
+  mapButton,
+  mapChrome,
+  MIN_TAP_TARGET,
+  radius,
+  spacing,
+} from './theme';
 
 /** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
 const STAMP_MARK_SIZE = 34;
@@ -223,8 +231,10 @@ export default function PrimaryOverlay({
             pressed && styles.pressed,
           ]}
         >
-          <StampMark size={STAMP_MARK_SIZE} color={colors.actionText} />
-          <Text style={styles.stampCount}>
+          {/* ⚠ The metal's own ink, not the app's. Every metal is pale, and the
+              light palette made `colors.actionText` white — see TIER_METAL. */}
+          <StampMark size={STAMP_MARK_SIZE} color={TIER_METAL[tier].ink} />
+          <Text style={[styles.stampCount, { color: TIER_METAL[tier].ink }]}>
             {progress.total === 0
               ? '—'
               : `${progress.collected} / ${progress.total}`}
@@ -290,7 +300,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.pill,
-    backgroundColor: colors.action,
+    // ⚠ `mapButton`, not `colors.action` — this control sits on the map, and the
+    // page's action blue went dark when the app went light. Overpainted by the
+    // rank metal at render time anyway; this is the `none` case.
+    backgroundColor: mapButton.fill,
   },
   stampCount: {
     color: colors.actionText,

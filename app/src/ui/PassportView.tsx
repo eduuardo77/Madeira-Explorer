@@ -354,7 +354,9 @@ function CategoryRow({
             failure; "3 of 40" reads as a start (CONTEXT §4.1). */}
         <View style={styles.rowHeaderRight}>
           <Text style={styles.rowCount}>
-            {total === 0 ? '—' : `${collected} of ${total}`}
+            {total === 0
+              ? '—'
+              : t('passport.category.count', { collected, total })}
           </Text>
           {/* iOS puts this exact control here — a tinted word at the trailing
               edge of a section header — which is most of why the row reads as
@@ -665,13 +667,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    backgroundColor: colors.surface,
+    // ⚠ `stampPage`, not `surface` — the album page stays dark while the rest
+    // of the app is light (2026-08-28). All thirty colourways are pale panels
+    // and every one of them measures below 3:1 on a white card; see the token's
+    // own note in `theme.ts`. This is the surface `contrast.test.ts` holds them
+    // against, so the two must not drift apart.
+    backgroundColor: colors.stampPage,
     borderRadius: radius.card,
     padding: spacing.md,
   },
   /** Collapsed: the same card, holding one scrolling row. */
   stampsStrip: {
-    backgroundColor: colors.surface,
+    // The same dark album page as the grid above, for the same measured reason.
+    backgroundColor: colors.stampPage,
     borderRadius: radius.card,
     // Vertical only. The horizontal padding belongs to the content, so that a
     // sticker can scroll all the way to the rounded edge and be clipped by it.

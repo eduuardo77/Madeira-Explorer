@@ -260,8 +260,17 @@ test('the sticker is visible against the passport page behind it', () => {
   // The stamps are drawn on `surface`, not `background` — they sit inside the
   // category row's card. Measuring against the wrong one was a second error
   // in the same assertion.
+  //
+  // ⚠⚠ **AND THE CARD IS `stampPage` SINCE 2026-08-28, NOT `surface`.** The app
+  // went light and the album page did not, because this very assertion said it
+  // could not: measured against a white card **all thirty** papers fail, worst
+  // 1.07:1. That is not a threshold to loosen — a sticker with no edge on a page
+  // that is mostly stickers (D-058) is the passport failing to be a passport.
+  // Re-deriving thirty colourways for a light ground is artwork (D-046) and
+  // needs an eye; until somebody does that, the page stays dark and this test is
+  // what stops the two drifting apart.
   for (const { category, colourway } of allColourways()) {
-    const ratio = contrastRatio(colourway.paper, colors.surface);
+    const ratio = contrastRatio(colourway.paper, colors.stampPage);
     assert.ok(
       ratio >= BOUNDARY,
       `${category} sticker ${colourway.paper} is ${ratio.toFixed(2)}:1 on the page`
@@ -298,7 +307,7 @@ test('an uncollected sticker is visible as a SHAPE on the page', () => {
   // The *border* is what has to clear the bar, not the paper: a die-cut
   // sticker reads by its edge, and keeping the paper muted is the whole point
   // of the uncollected state.
-  const edge = contrastRatio(UNCOLLECTED.border, colors.surface);
+  const edge = contrastRatio(UNCOLLECTED.border, colors.stampPage);
   assert.ok(
     edge >= BOUNDARY,
     `the uncollected sticker's edge is ${edge.toFixed(2)}:1 on the page`

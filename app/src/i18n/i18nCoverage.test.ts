@@ -169,6 +169,39 @@ test('no prose is hardcoded English in a text prop', () => {
   );
 });
 
+test('no English word is used to join two interpolations', () => {
+  const offenders: string[] = [];
+
+  for (const file of screens(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    if (relative in EXEMPT) {
+      continue;
+    }
+    const source = readFileSync(file, 'utf8');
+
+    // `${collected} of ${total}` — prose sitting BETWEEN two interpolations.
+    // Narrow on purpose: a word with an interpolation on each side is almost
+    // always a preposition or a conjunction, and those are exactly what does
+    // not survive translation. Anything looser trips over paths and URLs.
+    for (const match of source.matchAll(/`[^`]*\}\s+([A-Za-z]{2,})\s+\$\{[^`]*`/g)) {
+      offenders.push(`${relative}: ${match[0]} — "${match[1]}" is English`);
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `A word joining two values still has to be translated.\n\n` +
+      `⚠ THE ONE THIS WAS WRITTEN FOR: the passport showed "0 of 16" on an\n` +
+      `otherwise fully Portuguese screen until 2026-08-28. It sat inside a\n` +
+      `template literal in JSX, which both other tests document as their blind\n` +
+      `spot, so three passing i18n tests and a screen-by-screen review all missed\n` +
+      `a word visible five times on the app's second screen. German wants "von",\n` +
+      `Portuguese "de"; neither borrows "of".\n\n` +
+      offenders.join('\n')
+  );
+});
+
 test('the exemption list is documented and still real', () => {
   // An exemption for a file that has been deleted or renamed is an exemption
   // nobody notices has stopped applying — and the next file to take that path

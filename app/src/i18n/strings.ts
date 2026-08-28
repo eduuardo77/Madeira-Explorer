@@ -410,6 +410,15 @@ export const STRINGS = {
   // still what the screen reader announces — a segment two thirds narrower than
   // the label is a truncation waiting to happen, and Portuguese and German are
   // where it happens first.
+  // ⚠ `{collected} of {total}` was written into PassportView as a template
+  // literal until 2026-08-28, so the one English word on an otherwise Portuguese
+  // screen was the word joining two numbers. German needs `von`, not a
+  // preposition borrowed from English.
+  'passport.category.count': s(
+    '{collected} of {total}',
+    '{collected} de {total}',
+    '{collected} von {total}'
+  ),
   'settings.quality.short.saver': s('Saver', 'Poupança', 'Sparen'),
   'settings.quality.short.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
   'settings.quality.short.best': s('Precise', 'Preciso', 'Genau'),

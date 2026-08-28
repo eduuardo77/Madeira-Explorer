@@ -121,7 +121,7 @@ export default function App() {
   if (onboarding) {
     return (
       <View style={styles.root}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <OnboardingFlow onFinished={() => setOnboarding(false)} />
       </View>
     );
@@ -130,7 +130,7 @@ export default function App() {
   if (prompt !== null) {
     return (
       <View style={styles.root}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <OnboardingFlow
           initialScreen={prompt}
           onFinished={() => setPrompt(null)}
@@ -141,7 +141,7 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       {screen === 'map' ? (
         <MapScreen
           focusPlace={focusPlace}

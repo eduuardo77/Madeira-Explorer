@@ -363,12 +363,14 @@ export default function DesignWorkbench() {
               <PrimaryOverlay
                 mapStyle="light"
                 progress={progress}
-                showRecordingControl={
-                  screen === 'primary-while-using' || showsCard
-                }
-                isRecording={false}
-                // Worst case on purpose: a While-Using user, so both bottom
-                // controls are present *and* a card is open.
+                // ⚠ The walk button is no longer conditional (2026-08-28) — it is
+                // shown to everybody, so there is nothing for the workbench to
+                // toggle. `isWalking` is the state worth mounting both ways.
+                isWalking={screen === 'primary-while-using'}
+                showRecentre={showsCard}
+                onRecentre={() => undefined}
+                // Worst case on purpose: both bottom controls present *and* a
+                // card open.
                 bottomSlot={
                   showsCard ? (
                     <PlaceCardView

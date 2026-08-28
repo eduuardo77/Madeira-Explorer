@@ -60,6 +60,12 @@ import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import { startTrip, stopTrip } from '../recording/tripRecording';
 import { isBackgroundTrackingAllowed } from '../recording/trackingSettings';
+import {
+  actionForStartWalk,
+  actionForStopWalk,
+  parseWalkStarted,
+  type WalkState,
+} from '../recording/manualWalk';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -207,8 +213,21 @@ export default function NativeMapScreen({
   const cameraHeldByFocus = useRef(false);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
   const [card, setCard] = useState<PlaceCard | null>(null);
-  const [needsRecordingControl, setNeedsRecordingControl] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  /**
+   * The user's own walk (2026-08-28). ⚠ Starts `false` on every launch and is
+   * only ever moved by the button — see `manualWalk.ts`. Never derived from
+   * `isRecording`, which the app turns on by itself.
+   */
+  const [walkStarted, setWalkStarted] = useState(false);
+  /**
+   * Where the camera is looking, so *Re-centre* can know whether it is worth
+   * offering. Null until the first `onCameraMove`.
+   */
+  const [cameraCentre, setCameraCentre] =
+    useState<{ latitude: number; longitude: number } | null>(null);
+  /** The user's own position, for the same question. */
+  const [userAt, setUserAt] =
+    useState<{ latitude: number; longitude: number } | null>(null);
   /**
    * Which places have actually been awarded, and the live zoom needed to size
    * their marks (T-112). Zoom comes from `onCameraMove` because the user's own
@@ -250,7 +269,9 @@ export default function NativeMapScreen({
     fitBounds(bounds, {
       width,
       height,
-      padding: cameraPadding(needsRecordingControl),
+      // ⚠ Always true since 2026-08-28: the walk button is no longer
+      // conditional, so the bottom of the map is always spoken for.
+      padding: cameraPadding(true),
     });
 
   useEffect(() => {
@@ -269,23 +290,20 @@ export default function NativeMapScreen({
       try {
         await runAwardPass();
 
-        const [nextProgress, permission, recording, backgroundAllowed] =
-          await Promise.all([
-            getCurrentProgress(),
-            locationProvider.getPermissionLevel(),
-            locationProvider.isRecording(),
-            isBackgroundTrackingAllowed(),
-          ]);
+        const nextProgress = await getCurrentProgress();
+        // ⚠ The walk flag, read from storage and never inferred. The control
+        // itself is no longer conditional: the project lead asked for it for
+        // everybody, 2026-08-28. It used to appear only when
+        // `permission !== 'always' || !backgroundAllowed`, i.e. only when the
+        // app could not fill the map in by itself; those two are now read at
+        // press time by `isBackgroundRecordingLive`, because they can change
+        // while this screen is open and a stale copy decides wrongly.
+        const walkFlag = parseWalkStarted(
+          await appStateDao.get(appStateDao.AppStateKey.WalkStartedByUser)
+        );
         if (!cancelled) {
           setProgress(nextProgress);
-          // ⚠ Two different reasons to show it, and both are the same to the
-          // user: the app cannot fill the map in by itself. Either the OS did
-          // not grant Always, or the user turned background tracking off
-          // themselves (T-146) — and somebody who turned it off deliberately
-          // still needs a way to record the walk they are on right now, which
-          // is the project lead's point in asking for this button.
-          setNeedsRecordingControl(permission !== 'always' || !backgroundAllowed);
-          setIsRecording(recording);
+          setWalkStarted(walkFlag);
         }
 
         // The places, and which of them have been earned. Both are needed to
@@ -456,12 +474,69 @@ export default function NativeMapScreen({
     setTappedPlace(null);
   };
 
+  /**
+   * Keep a rough idea of where the user is, so *Re-centre* can hide when it has
+   * nothing to do (2026-08-28).
+   *
+   * ⚠ A poll rather than a subscription, and it is cheaper than it looks:
+   * `getLastKnownPosition` reads the system's cache and never powers up the GNSS
+   * chip (CONTEXT §6.3). Ten seconds is far below the rate at which somebody
+   * walks out of a 200 m circle, and this only runs while the map is on screen.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    const refresh = () => {
+      void (async () => {
+        const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
+        if (!cancelled && fix !== null) {
+          setUserAt({ latitude: fix.lat, longitude: fix.lon });
+        }
+      })();
+    };
+
+    refresh();
+    const timer = setInterval(refresh, 10_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
+
+  /**
+   * ⚠ Offered only when it would actually move the map. WalkNYC shows the same
+   * control the same way, and a re-centre button that is always lit is a button
+   * that does nothing most of the times it is pressed.
+   *
+   * Degrees, not metres: this is a "has the map wandered off" test, not a
+   * distance, and a haversine here would be arithmetic nobody reads. Longitude
+   * degrees shrink with latitude, which at Madeira's 32°N makes the east–west
+   * threshold about 15% tighter than the north–south one — harmless for a
+   * visibility rule, and wrong only if this ever becomes a measurement.
+   */
+  const showRecentre =
+    userAt !== null &&
+    cameraCentre !== null &&
+    (Math.abs(cameraCentre.latitude - userAt.latitude) > RECENTRE_SHOW_DEGREES ||
+      Math.abs(cameraCentre.longitude - userAt.longitude) > RECENTRE_SHOW_DEGREES);
+
   const toggleRecording = () => {
     void (async () => {
       try {
-        if (isRecording) {
-          await stopTrip();
-        } else {
+        // ⚠ Read the world *now* rather than trusting render-time state: the
+        // recorder can have been started by the launch sync, or stopped by the
+        // OS, since this screen last looked.
+        const walk: WalkState = {
+          startedByUser: walkStarted,
+          recorderRunning: await locationProvider.isRecording(),
+          backgroundRecording: await isBackgroundRecordingLive(),
+        };
+
+        const action = walkStarted
+          ? actionForStopWalk(walk)
+          : actionForStartWalk(walk);
+
+        if (action === 'start') {
           // The same profile the MapLibre screen used. ⚠ On the emulator this
           // must stay `driving` in practice — `walking` asks for `balanced`
           // accuracy, which an emulator cannot serve at all (D-047).
@@ -469,10 +544,49 @@ export default function NativeMapScreen({
           // geofences have to be registered in the same breath, and for
           // months they were not (T-145).
           await startTrip('walking');
+        } else if (action === 'stop') {
+          await stopTrip();
         }
-        setIsRecording(await locationProvider.isRecording());
+
+        // The flag is the button's truth, so it is written whatever the
+        // recorder did — including `leave-alone`, which is the ordinary case
+        // for somebody with background recording on.
+        const next = !walkStarted;
+        await appStateDao.set(
+          appStateDao.AppStateKey.WalkStartedByUser,
+          next ? 'true' : 'false'
+        );
+        setWalkStarted(next);
       } catch (error) {
-        await recordingEventDao.logError('recording toggle', error);
+        await recordingEventDao.logError('walk toggle', error);
+      }
+    })();
+  };
+
+  /**
+   * Re-centre on the user (2026-08-28).
+   *
+   * ⚠ `getLastKnownPosition`, not a fresh fix. It returns what the system
+   * already has and never powers up the GNSS chip (CONTEXT §6.3) — and with
+   * Google's own location layer on, something is keeping that cache warm. A
+   * button that costs a GPS acquisition every tap is the kind of thing that
+   * shows up in T-054 and nowhere else.
+   */
+  const recentre = () => {
+    void (async () => {
+      try {
+        const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
+        if (fix === null) {
+          return;
+        }
+        cameraHeldByFocus.current = true;
+        setCamera({
+          coordinates: { latitude: fix.lat, longitude: fix.lon },
+          zoom: RECENTRE_ZOOM,
+        });
+        setCameraCentre({ latitude: fix.lat, longitude: fix.lon });
+      } catch (error) {
+        await recordingEventDao.logError('recentre', error);
       }
     })();
   };
@@ -519,7 +633,18 @@ export default function NativeMapScreen({
         // ⚠ The only source of the user's own zoom. Without it the marks keep
         // the size they had when the camera was last set by the app, and a
         // pinch makes them grow or shrink with the ground.
-        onCameraMove={(event) => setZoom(event.zoom)}
+        onCameraMove={(event) => {
+          setZoom(event.zoom);
+          // Where we are looking, so *Re-centre* knows whether it has a job.
+          // ⚠ expo-maps types both halves as optional, so a partial coordinate is
+          // dropped rather than coerced — a centre with one axis missing would
+          // make the distance test below compare against zero and offer the
+          // button in the middle of the Atlantic.
+          const { latitude, longitude } = event.coordinates;
+          if (latitude !== undefined && longitude !== undefined) {
+            setCameraCentre({ latitude, longitude });
+          }
+        }}
         // The dark/light choice, and which of the two dark maps it draws —
         // Google's own by default (T-147). `darkMode.ts` holds that decision
         // and the reason it is not obvious.
@@ -539,7 +664,14 @@ export default function NativeMapScreen({
             darkMap.mapStyleJson === undefined
               ? undefined
               : { json: darkMap.mapStyleJson },
-          isMyLocationEnabled: false,
+          // ⚠ Google's own blue dot, on the project lead's instruction
+          // (2026-08-28). This is **data, not chrome**: the design brief's
+          // three-control budget is about buttons, and no drawing of ours
+          // would be the dot people already recognise — with the heading
+          // wedge and the accuracy halo that come with it for free.
+          // ⚠ Google's own re-centre button stays off below; ours is a
+          // labelled control, because D-015 forbids an icon alone.
+          isMyLocationEnabled: true,
           isTrafficEnabled: false,
           isBuildingEnabled: false,
           selectionEnabled: false,
@@ -593,8 +725,6 @@ export default function NativeMapScreen({
       <PrimaryOverlay
         progress={progress}
         mapStyle={styleName}
-        showRecordingControl={needsRecordingControl}
-        isRecording={isRecording}
         bottomSlot={
           card === null ? null : (
             <PlaceCardView card={card} onClose={closeCard} />
@@ -602,10 +732,49 @@ export default function NativeMapScreen({
         }
         onOpenPassport={onOpenPassport}
         onOpenSettings={onOpenSettings}
+        isWalking={walkStarted}
         onToggleRecording={toggleRecording}
+        showRecentre={showRecentre}
+        onRecentre={recentre}
       />
     </View>
   );
+}
+
+/**
+ * How stale a cached fix may be and still be worth re-centring on (2026-08-28).
+ *
+ * Two minutes: long enough that the answer is almost always already there, short
+ * enough that the map does not jump to where the user was before they walked
+ * away from it. A miss simply leaves the camera alone.
+ */
+const RECENTRE_MAX_AGE_MS = 2 * 60 * 1000;
+
+/** Street level — close enough to see which path you are standing on. */
+const RECENTRE_ZOOM = 16;
+
+/**
+ * How far the camera may drift before *Re-centre* is worth offering, in degrees
+ * of latitude. ~0.002° is roughly 200 m, which is about a screen at
+ * `RECENTRE_ZOOM` — below that the button would be offering to do nothing.
+ */
+const RECENTRE_SHOW_DEGREES = 0.002;
+
+/**
+ * Is background recording actually live — allowed by the user **and** granted by
+ * the OS?
+ *
+ * ⚠ Both halves, always. The user's preference alone is the state that looks
+ * enabled and records nothing (T-146), and treating it as live would make
+ * *Stop walk* leave the recorder running for somebody whose recorder was never
+ * running in the first place.
+ */
+async function isBackgroundRecordingLive(): Promise<boolean> {
+  const [allowed, permission] = await Promise.all([
+    isBackgroundTrackingAllowed(),
+    locationProvider.getPermissionLevel(),
+  ]);
+  return allowed && permission === 'always';
 }
 
 /** The box around drawn trace points, reusing the trace's own rule. */

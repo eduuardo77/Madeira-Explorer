@@ -164,6 +164,12 @@ export const STRINGS = {
   // ── The map screen (design brief §3) ────────────────────────────────────
   'map.startWalk': s('Start walk', 'Iniciar caminhada', 'Wanderung starten'),
   'map.stopWalk': s('Stop walk', 'Terminar caminhada', 'Wanderung beenden'),
+  'map.recentre': s('Re-center', 'Centrar', 'Zentrieren'),
+  'map.a11y.recentre': s(
+    'Center the map on where you are',
+    'Centrar o mapa onde está',
+    'Karte auf Ihren Standort zentrieren'
+  ),
   'map.a11y.settings': s('Settings', 'Definições', 'Einstellungen'),
   'map.a11y.startRecording': s(
     'Start recording this walk',

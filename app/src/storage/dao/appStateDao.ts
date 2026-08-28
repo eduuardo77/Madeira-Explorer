@@ -108,6 +108,19 @@ export const AppStateKey = {
    * the award pass — `freeTier.ts` explains why, and a test enforces it.
    */
   StampsUnlocked: 'stamps_unlocked',
+  /**
+   * Whether the user pressed *Start walk* and has not pressed *Stop* (2026-08-28).
+   *
+   * ⚠ **Not "is the recorder running".** The recorder starts by itself on launch
+   * for anybody with background recording (D-002), and the walk button must not
+   * light up because of it — `manualWalk.ts` is the whole argument, and the
+   * project lead's instruction was explicit.
+   *
+   * Stored rather than held in memory so a walk survives the app being closed
+   * half way through it, which on a levada is the normal case. Absent means no
+   * walk, which is what a fresh install and a fresh launch both want.
+   */
+  WalkStartedByUser: 'walk_started_by_user',
 } as const;
 
 export type AppStateKeyName =

@@ -42,6 +42,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
+import WalkMark from './WalkMark';
 import StampMark from './StampMark';
 import { TIER_METAL, tierFor } from '../passport/stampTier';
 import { n, t } from '../i18n';
@@ -60,6 +61,20 @@ const STAMP_MARK_SIZE = 34;
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 22;
+
+/** The glyph beside the words on the walk button. */
+const WALK_MARK_SIZE = 22;
+
+/**
+ * The ink on the walk button, both states.
+ *
+ * ⚠ White, and measured: 6.76:1 on `colors.good` and 5.92:1 on `colors.bad`,
+ * both above the project's 5:1 floor for text read outdoors. Not
+ * `colors.actionText` — that happens to be white today and is the page's
+ * token, which has already inverted once (2026-08-28) and would take this
+ * button's label with it next time.
+ */
+const WALK_INK = '#FFFFFF';
 
 export type PrimaryOverlayProps = {
   progress: TripProgress;
@@ -80,8 +95,18 @@ export type PrimaryOverlayProps = {
    * permission (D-008) — the caller decides, because permission state is not
    * this component's business.
    */
-  showRecordingControl: boolean;
-  isRecording: boolean;
+  /**
+   * Is the user on a walk **they started** (2026-08-28)?
+   *
+   * ⚠ Not "is the recorder running". The app starts the recorder by itself on
+   * launch for anybody with background recording, and binding this button to
+   * that made it open on *Stop walk* for a walk nobody began. `manualWalk.ts`
+   * is the argument; the project lead's instruction was explicit.
+   */
+  isWalking: boolean;
+  /** Offered only when the map has actually wandered off the user. */
+  showRecentre: boolean;
+  onRecentre: () => void;
   /**
    * Anything that shares the bottom of the screen — today, the place card
    * (T-115). Rendered **above** the controls, inside the same column.
@@ -104,8 +129,9 @@ export type PrimaryOverlayProps = {
 export default function PrimaryOverlay({
   progress,
   mapStyle,
-  showRecordingControl,
-  isRecording,
+  isWalking,
+  showRecentre,
+  onRecentre,
   bottomSlot,
   onOpenPassport,
   onOpenSettings,
@@ -171,21 +197,18 @@ export default function PrimaryOverlay({
             in the same column, so it can never cover them. */}
         {bottomSlot}
 
-        {showRecordingControl ? (
+        {/* ⚠ Re-centre, above the walk button and only when it would move
+            the map (2026-08-28). Compact and quiet: it is a convenience, not one
+            of the screen's three real controls (design brief §3). */}
+        {showRecentre ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={
-              isRecording
-                ? t('map.a11y.stopRecording')
-                : t('map.a11y.startRecording')
-            }
-            onPress={onToggleRecording}
+            accessibilityLabel={t('map.a11y.recentre')}
+            onPress={onRecentre}
             style={({ pressed }) => [
-              styles.recording,
+              styles.recentre,
               {
                 backgroundColor: chrome.surface,
-                // Elevation is what separates a white control from a pale map; see
-                // `mapChrome`. Zero on the dark map, where the border does that job.
                 elevation: chrome.elevation,
                 shadowColor: '#000000',
                 shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
@@ -193,21 +216,16 @@ export default function PrimaryOverlay({
                 shadowOffset: { width: 0, height: 1 },
               },
               chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
-              isRecording && styles.recordingActive,
               pressed && styles.pressed,
             ]}
           >
-            {/* ⚠ "Start walk", not "Start recording" — the project lead's
-                wording, 2026-08-15, and it is the better one. "Recording" names
-                the mechanism; "walk" names the thing the user came to do, and
-                this button is now the primary action for anybody who has turned
-                background tracking off (T-146). Labelled with words, never an
-                icon alone (D-015). */}
-            <Text style={[styles.recordingText, { color: chrome.content }]}>
-              {isRecording ? t('map.stopWalk') : t('map.startWalk')}
+            <Text style={[styles.recentreText, { color: chrome.content }]}>
+              {t('map.recentre')}
             </Text>
           </Pressable>
         ) : null}
+
+
 
         <Pressable
           accessibilityRole="button"
@@ -238,6 +256,45 @@ export default function PrimaryOverlay({
             {progress.total === 0
               ? '—'
               : `${progress.collected} / ${progress.total}`}
+          </Text>
+        </Pressable>
+
+        {/* ⚠ SHOWN TO EVERYBODY SINCE 2026-08-28, on the project lead's
+            instruction, and styled after the reference app: full width, filled,
+            glyph beside the words.
+
+            It used to appear only for people the app could not fill the map in
+            for. That made it a fallback; it is now the way anybody says "I am on
+            a walk", whatever their background setting. ⚠ Full width also settles
+            the mis-tap worry the old side-by-side layout had: this cannot be
+            confused with the passport pill above it at any width, because it is
+            a different shape, a different colour and a different size.
+
+            ⚠ Green and red are `colors.good` / `colors.bad`, which clear 5:1
+            with white and stand off Google's light land at 5.89:1 and 5.15:1.
+            They do NOT clear 3:1 on the night map (1.97 and 2.26) — the same
+            open question as the passport button, and T-065's to settle
+            outdoors. The word on the button is what carries the state (D-015);
+            the fill and the glyph reinforce it. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            isWalking ? t('map.a11y.stopRecording') : t('map.a11y.startRecording')
+          }
+          onPress={onToggleRecording}
+          style={({ pressed }) => [
+            styles.walk,
+            { backgroundColor: isWalking ? colors.bad : colors.good },
+            pressed && styles.pressed,
+          ]}
+        >
+          <WalkMark size={WALK_MARK_SIZE} stopped={isWalking} color={WALK_INK} />
+          {/* ⚠ "Start walk", not "Start recording" — the project lead's
+              wording, 2026-08-15, and it is the better one. "Recording" names
+              the mechanism; "walk" names the thing the user came to do.
+              Labelled with words, never a glyph alone (D-015). */}
+          <Text style={styles.walkText}>
+            {isWalking ? t('map.stopWalk') : t('map.startWalk')}
           </Text>
         </Pressable>
       </View>
@@ -272,22 +329,39 @@ const styles = StyleSheet.create({
     bottom: spacing.xl,
     gap: spacing.sm,
   },
-  recording: {
-    // Right, because the passport is left. See the pairing note above.
-    alignSelf: 'flex-end',
+  /** The reference app's shape: full width, tall, glyph and words centred. */
+  walk: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    minHeight: MIN_TAP_TARGET,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
+    // A filled colour on a pale map needs the same separation the white
+    // controls get; see `mapChrome.light`.
+    elevation: 3,
+    shadowColor: '#000000',
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  walkText: {
+    color: WALK_INK,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+  },
+  recentre: {
+    alignSelf: 'center',
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-    // A pill, matching the passport button opposite it.
     borderRadius: radius.pill,
-    // Filled from `mapChrome` at render time, like the gear.
   },
-  // ⚠ Recording is signalled by the word on the button ("Stop recording"), and
-  // this only reinforces it — D-015 forbids hue carrying the meaning alone.
-  recordingActive: { borderWidth: 2, borderColor: colors.bad },
-  recordingText: {
+  recentreText: {
     fontSize: fontSize.body,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 
   stampButton: {

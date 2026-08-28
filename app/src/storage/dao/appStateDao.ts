@@ -121,6 +121,15 @@ export const AppStateKey = {
    * walk, which is what a fresh install and a fresh launch both want.
    */
   WalkStartedByUser: 'walk_started_by_user',
+  /**
+   * Whether the keep-running screen has been shown once (2026-08-28, Android).
+   *
+   * ⚠ Shown once and never again, even if the user skips it. It is advice about
+   * the phone, not a setting: repeating it would be the app nagging about
+   * something it cannot check — `batteryOptimisation.ts` explains why the app
+   * can never read whether it is currently exempt.
+   */
+  KeepRunningSeen: 'keep_running_seen',
 } as const;
 
 export type AppStateKeyName =

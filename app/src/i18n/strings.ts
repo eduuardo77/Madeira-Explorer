@@ -86,6 +86,39 @@ export const STRINGS = {
     'E outra no fim, quando o seu mapa estiver pronto.',
     'Und eine am Ende, wenn Ihre Karte fertig ist.'
   ),
+  // ⚠ THE KEEP-RUNNING SCREEN (2026-08-28, Android only). Written for EMUI,
+  // MIUI and ColorOS, where an app is paused the moment it leaves the screen and
+  // nothing in the app can tell the user why the map stopped filling in. No
+  // jargon: "battery optimisation" is the phone's phrase and appears only in the
+  // note, so the screen the button opens is recognisable when they get there.
+  // ⚠ "Swipe away" is named in plain words because it is the one thing the user
+  // does that silently ends recording, and no permission can prevent it.
+  'onboarding.keepRunning.title': s(
+    'Let this app keep running',
+    'Deixe esta aplicação continuar',
+    'Lassen Sie diese App weiterlaufen'
+  ),
+  'onboarding.keepRunning.body1': s(
+    'Some phones pause apps to save power. If that happens to this one, your map quietly stops filling in.',
+    'Alguns telemóveis pausam aplicações para poupar energia. Se isso acontecer a esta, o seu mapa deixa de se preencher sem avisar.',
+    'Manche Telefone pausieren Apps, um Strom zu sparen. Passiert das hier, füllt sich Ihre Karte stillschweigend nicht mehr.'
+  ),
+  'onboarding.keepRunning.body2': s(
+    'And do not swipe this app away from your recent apps while you are out. Locking your phone or switching apps is fine — closing it is what stops the recording.',
+    'E não deslize esta aplicação para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal — fechá-la é que pára o registo.',
+    'Und wischen Sie diese App unterwegs nicht aus den zuletzt verwendeten Apps. Das Telefon sperren oder die App wechseln ist in Ordnung — sie zu schließen beendet die Aufzeichnung.'
+  ),
+  'onboarding.keepRunning.note': s(
+    'The button opens your phone’s own battery settings. Look for this app in the list.',
+    'O botão abre as definições de bateria do seu telemóvel. Procure esta aplicação na lista.',
+    'Die Schaltfläche öffnet die Akku-Einstellungen Ihres Telefons. Suchen Sie dort diese App.'
+  ),
+  'onboarding.keepRunning.open': s(
+    'Open battery settings',
+    'Abrir definições de bateria',
+    'Akku-Einstellungen öffnen'
+  ),
+  'onboarding.keepRunning.skip': s('Got it', 'Percebi', 'Verstanden'),
   'onboarding.messages.note': s(
     'Nothing else, ever. No offers, no reminders.',
     'Mais nada, nunca. Sem promoções, sem lembretes.',

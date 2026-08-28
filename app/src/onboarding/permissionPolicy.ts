@@ -45,6 +45,7 @@ export type OnboardingStep =
   | 'welcome'
   | 'location'
   | 'notifications'
+  | 'keep-running'
   | 'complete';
 
 /**
@@ -93,6 +94,14 @@ export type OnboardingState = {
   notifications: NotificationPermission;
   /** Set once the user has been through the sequence, however it went. */
   completed: boolean;
+  /**
+   * Android only — passed in rather than read here, the same way this module
+   * takes every other fact about the world. A pure module that imports
+   * `Platform` cannot be unit tested, which is the rule in CLAUDE.md.
+   */
+  android: boolean;
+  /** Whether the keep-running screen has already been shown once. */
+  keepRunningSeen: boolean;
 };
 
 /**
@@ -114,6 +123,18 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
   // and only if the OS has not already decided.
   if (state.notifications === 'undetermined') {
     return 'notifications';
+  }
+  // ⚠ Last, and Android only (2026-08-28). Some OEMs — EMUI, MIUI, ColorOS —
+  // pause an app the moment it leaves the screen, and then the map does not
+  // fill in and nothing in the app can say why. The reference app puts this in
+  // front of the user on first run and it is the single most useful thing it
+  // does on those phones.
+  //
+  // ⚠ It is a screen, not a gate (D-008): both actions move on, and it is shown
+  // once. It is deliberately after notifications rather than before, because two
+  // system dialogs back to back get both refused and this one opens a third.
+  if (state.android && !state.keepRunningSeen) {
+    return 'keep-running';
   }
   return 'complete';
 }

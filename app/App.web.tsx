@@ -207,6 +207,7 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
   { id: 'onboarding:notifications', label: 'Notifications ask' },
+  { id: 'onboarding:keep-running', label: 'Keep running (Android, 2026-08-28)' },
   { id: 'onboarding:android-disclosure', label: 'Play disclosure (T-121)' },
   { id: 'onboarding:always-upgrade', label: 'Always upgrade (T-043)' },
   { id: 'onboarding:downgrade', label: 'Downgrade (T-044)' },

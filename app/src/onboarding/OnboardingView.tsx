@@ -36,6 +36,7 @@ export type OnboardingScreen =
   | 'welcome'
   | 'location'
   | 'notifications'
+  | 'keep-running'
   | 'always-upgrade'
   | 'android-disclosure'
   | 'downgrade';
@@ -83,6 +84,24 @@ function copyFor(screen: OnboardingScreen): Copy {
         note: t('onboarding.messages.note'),
         continueLabel: t('onboarding.messages.allow'),
         skipLabel: t('onboarding.messages.deny'),
+      };
+
+    case 'keep-running':
+      // ⚠ Android only, and last (2026-08-28). Both actions move on — this is
+      // advice about the phone, not a permission, and D-008 forbids a gate
+      // either way. The affirmative opens the OS's own battery screen; the app
+      // can never read whether the exemption was actually granted, which is why
+      // the copy says "look for this app in the list" rather than claiming an
+      // outcome (`recording/batteryOptimisation.ts`).
+      return {
+        title: t('onboarding.keepRunning.title'),
+        body: [
+          t('onboarding.keepRunning.body1'),
+          t('onboarding.keepRunning.body2'),
+        ],
+        note: t('onboarding.keepRunning.note'),
+        continueLabel: t('onboarding.keepRunning.open'),
+        skipLabel: t('onboarding.keepRunning.skip'),
       };
 
     case 'android-disclosure':

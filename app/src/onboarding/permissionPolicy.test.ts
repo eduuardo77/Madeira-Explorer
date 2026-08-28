@@ -35,6 +35,11 @@ function onboarding(overrides: Partial<OnboardingState> = {}): OnboardingState {
     location: 'undetermined',
     notifications: 'undetermined',
     completed: false,
+    // ⚠ iOS by default in these fixtures, so the existing assertions keep
+    // measuring the sequence they were written for. The Android branch is
+    // asserted on its own below.
+    android: false,
+    keepRunningSeen: false,
     ...overrides,
   };
 }
@@ -185,4 +190,66 @@ test('when a figure exists the sentence reads plainly', () => {
   const rendered = `Recording uses about ${5}% of your battery per day.`;
   assert.match(rendered, /about 5% of your battery per day/);
   assert.doesNotMatch(rendered, /approximately|circa|~/);
+});
+
+test('Android gets the keep-running screen, last, and only once', () => {
+  const answered = {
+    location: 'while_using' as const,
+    notifications: 'granted' as const,
+    android: true,
+  };
+
+  // ⚠ Last on purpose. It opens a third system screen, and two system dialogs
+  // back to back already get both refused — the note at the top of this module.
+  assert.equal(nextOnboardingStep(onboarding(answered)), 'keep-running');
+
+  // Shown once, whatever the user did with it. The app cannot read whether the
+  // battery exemption was granted, so re-asking would be nagging about
+  // something it cannot check.
+  assert.equal(
+    nextOnboardingStep(onboarding({ ...answered, keepRunningSeen: true })),
+    'complete'
+  );
+});
+
+test('iOS never sees the keep-running screen', () => {
+  // It is advice about Android OEM battery managers. iOS has no equivalent
+  // screen to send anybody to, and `isBatteryExemptionAvailable` is false there.
+  assert.equal(
+    nextOnboardingStep(
+      onboarding({
+        location: 'while_using',
+        notifications: 'granted',
+        android: false,
+      })
+    ),
+    'complete'
+  );
+});
+
+test('the keep-running screen never jumps the queue', () => {
+  // Location and notifications are still asked first on Android — a user who
+  // has answered neither must not be handed battery advice about an app that
+  // has not yet explained what it does.
+  assert.equal(nextOnboardingStep(onboarding({ android: true })), 'welcome');
+  assert.equal(
+    nextOnboardingStep(onboarding({ android: true, location: 'while_using' })),
+    'notifications'
+  );
+});
+
+test('⚠ nothing about the new step can gate the user (D-008)', () => {
+  // The rule the whole module exists to keep. Somebody who refuses everything,
+  // on Android, still reaches a working app — through the advice screen, not
+  // stuck on it.
+  const refusedEverything = onboarding({
+    location: 'denied',
+    notifications: 'denied',
+    android: true,
+  });
+  assert.equal(nextOnboardingStep(refusedEverything), 'keep-running');
+  assert.equal(
+    nextOnboardingStep({ ...refusedEverything, keepRunningSeen: true }),
+    'complete'
+  );
 });

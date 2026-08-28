@@ -158,6 +158,15 @@ gradient.
   tier gates a display and nothing else** — the app monitors all sixty geofences and writes every
   award while unpaid, because that is the only thing that makes D-072's "buy later, get
   everything" true.
+- ⚠⚠ **A second Android SDK on this machine breaks every Gradle build.** `ANDROID_SDK_ROOT` was set
+  **persistently, at the Windows User level**, to `%LOCALAPPDATA%\Android\Sdk` — a real second SDK,
+  not a stale path. Gradle sees two different SDK locations, refuses to choose, and **fails during
+  configuration** with *"Several environment variables and/or system properties contain different
+  paths to the SDK"*. The env block below did not clear it, so the documented commands failed here.
+  ⚠ **The message does not name the cause:** it aborts while evaluating the root project, so it
+  blames `android/build.gradle` line 24 and `com.facebook.react.rootproject`. Removed from the User
+  environment 2026-08-28; `unset ANDROID_SDK_ROOT` added to the env block so a machine that still
+  has one set is not blocked.
 - ⚠⚠ **`-gpu host` renders the Google map as PURE BLACK.** No error, no wordmark. It reads as a
   broken app. `tools/run-emulator.sh` defaults to swiftshader; `MADEIRA_COLD=1` forces a cold boot.
   ⚠ **If the map is black, cold-boot before debugging the app.**
@@ -195,6 +204,7 @@ cd app && npm test          # 619 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk
+unset ANDROID_SDK_ROOT      # ⚠ see below -- without this, gradle refuses to configure
 export JAVA_HOME=$(pwd)/tools/jdk/jdk-21.0.12+8
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
 bash tools/run-emulator.sh          # then, in another shell:

@@ -416,6 +416,36 @@ usable.
 are ordinary; whether the emulator now *feels* fine is something only the project lead can say.
 A backup of the original sits beside it as `config.ini.bak-<epoch>`.
 
+## ⚠ A second SDK on the machine, and Gradle will not choose, 2026-08-28
+
+Found while building the first dev-client APK for a real phone. Every Gradle build from a fresh
+shell failed during **configuration**:
+
+    * What went wrong:
+    A problem occurred evaluating root project 'Proa'.
+    > Failed to apply plugin 'com.facebook.react.rootproject'.
+       > Several environment variables and/or system properties contain different paths to the SDK.
+         ANDROID_HOME: ...\Madeira\tools\android-sdk
+         ANDROID_SDK_ROOT: ...\AppData\Local\Android\Sdk
+
+`ANDROID_SDK_ROOT` was set **persistently at the Windows User level** to a second, real SDK
+(build-tools, platform-tools, platforms — an Android Studio install, not a stale path). The env
+block in `HANDOFF.md` set `ANDROID_HOME` and never cleared it, so following the documented
+instructions failed on this machine every time.
+
+⚠ **The message blames the wrong thing.** It names `android/build.gradle` line 24 and a React
+Native plugin, because that is where evaluation happened to abort — nothing in it says "you have
+two SDKs" unless you read to the fourth line.
+
+Fixed both ways: the variable was removed from the User environment on 2026-08-28, and
+`unset ANDROID_SDK_ROOT` is now in the env block so a machine that still has one set works anyway.
+
+⚠ **And a reporting trap that hid it for a while:** `./gradlew ... | tail -30` returns **`tail`'s**
+exit code, not Gradle's. A failed build reported success. Capture the log to a file and echo `$?`
+straight after Gradle, or read `BUILD SUCCESSFUL` out of the output — never trust a piped status.
+
+---
+
 ## ⚠ Two ways a release build lies about what is in it, 2026-08-21
 
 Both were found while cutting a throwaway test APK for a trip, both produced a **wrong conclusion

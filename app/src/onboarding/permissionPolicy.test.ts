@@ -110,14 +110,26 @@ test('the upgrade is offered on day 2 to a recording While-Using user', () => {
   assert.equal(decision.offer, true);
 });
 
-test('it is not offered on day one', () => {
-  // Two prompts in one morning — the day-1 health check is at 14h — is how
-  // you lose both.
+test('it is not offered in the first few hours', () => {
+  // ⚠ **This asserted 20 hours until 2026-08-28, when the delay was 40.** It is
+  // now 12 — the driving case, see ALWAYS_UPGRADE_DELAY_MS — so 20 hours is
+  // deliberately past the gate and the assertion moved with the constant rather
+  // than the constant being trimmed to keep an old assertion green.
   const decision = shouldOfferAlwaysUpgrade(
-    upgrade({ now: INSTALLED + 20 * HOUR })
+    upgrade({ now: INSTALLED + 6 * HOUR })
   );
   assert.equal(decision.offer, false);
   assert.match(decision.reason, /too early/);
+});
+
+test('by the next morning it is offered', () => {
+  // The point of shortening it: install in the afternoon, asked before setting
+  // off the next day, rather than losing the first day and a half of a holiday
+  // to a While-Using app that records nothing from a car.
+  assert.equal(
+    shouldOfferAlwaysUpgrade(upgrade({ now: INSTALLED + 20 * HOUR })).offer,
+    true
+  );
 });
 
 test('IT IS NEVER ASKED TWICE', () => {

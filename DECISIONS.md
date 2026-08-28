@@ -109,6 +109,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-078** | Stamps are **collectibles with a rank** — bronze/silver/gold/platinum by *how many* you have, shown on the passport button. | **Accepted** |
 | **D-079** | A stamp is a picture **of its place**, not of its category. Glyphs in `app/`, the assignment in `content/`. | **Provisional** |
 | **D-080** | The app is **light**; the passport's album page stays **dark**, because all thirty colourways fail on a light card. | **Accepted** |
+| **D-081** | The **pedometer waits for v2** — expo-sensors cannot read Android step history — and `ACTIVITY_RECOGNITION` is stripped meanwhile. | **Accepted** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

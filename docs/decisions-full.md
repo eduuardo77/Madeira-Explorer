@@ -4405,3 +4405,48 @@ want it dark."*
 against `colors.surface`. If the album page is ever lightened, thirty stickers lose their edges
 and the test is what says so. Settings, and every other screen, stay light.
 
+
+## D-081 — The pedometer waits for v2, and the permission goes with it
+
+**Status:** Accepted — the project lead asked for the pedometer on 2026-08-28 and left the timing
+to this session. The timing answer is **not now**, and the reason is capability, not appetite.
+
+**The decision.** `ACTIVITY_RECOGNITION` is stripped from release builds
+(`plugins/withoutUnusedPermissions.js`). No pedometer work ships in v1. It returns in v2 with the
+consumer that needs it.
+
+**Why not now — and this is a hard limit, not a preference.** `sensors.ts`'s `getStepsBetween`
+returns `null` on Android **by construction**:
+
+- `Pedometer.getStepCountAsync` is **iOS-only**. expo-sensors exposes no historical step query on
+  Android.
+- `Pedometer.watchStepCount` counts from the moment you subscribe, not from Android's boot-time
+  `TYPE_STEP_COUNTER`. A recorder that is suspended between location batches — the design target,
+  CONTEXT §6.3 — therefore loses exactly the steps it is trying to count. On a levada, with the
+  phone in a pocket for three hours, that is all of them.
+
+So the honest options are a **native module** reading the cumulative counter, or **Health Connect**
+— a new dependency, a separate permission and its own Play declaration. Both are real work and
+neither belongs in v1. Building the live watcher instead would ship a number that is wrong most of
+the time, which is worse than no number (the D-041 argument, one sensor along).
+
+⚠ **A stale comment had claimed otherwise.** The header of `sensors.ts` described an Android
+fallback that "accumulates from a live watcher"; no watcher was ever written. Corrected the same
+day. Anybody costing this work from the old comment would have thought it was nearly done.
+
+**Why strip the permission rather than leave it.** Android shows it as **"Physical activity"**, in
+the permission list, beside "location, all the time", in an app whose whole positioning is that it
+asks for exactly what it needs (D-044, CONTEXT §4.8). Same argument as `SYSTEM_ALERT_WINDOW` in
+T-117a, and stronger: that one was merely unused, this one **cannot be used**.
+
+**What it is worth when it returns.** More than it was before 2026-08-28, because of the project
+lead's point that Madeira is largely seen from a car. The pedometer is the one signal that
+separates walking from driving on an island where speed cannot — `movementPolicy.ts` already says
+so: *"The pedometer classifies; it never gates."* Its consumers are **T-090** (sensor-only levada
+crediting when GPS is gone under canopy) and **T-034a**. Battery is not the objection: Android's
+step counter is a low-power hardware sensor that counts while the CPU sleeps. ⚠ That is the
+sensor's documented design, **not a measurement of this app**, and D-041 applies.
+
+⚠ **Consequence, accepted:** trips recorded before v2 have no step data, extending D-050's
+trade rather than changing it.
+

@@ -142,11 +142,38 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
 /**
  * How long after install to offer the Always upgrade.
  *
- * T-043 says "~day 2". Forty hours puts it comfortably after the day-1 health
- * check at fourteen hours — two prompts in one morning is how you lose both —
- * and still leaves most of a week for the upgrade to be worth anything.
+ * ⚠ **TWELVE HOURS SINCE 2026-08-28. IT WAS FORTY.** T-043 said "~day 2" and
+ * forty hours delivered that, deliberately: it sits comfortably after the day-1
+ * health check at fourteen hours, because two prompts in one morning is how you
+ * lose both.
+ *
+ * ⚠ **What changed is what the app is for.** Forty hours was set while this was
+ * read as a walking app, where the While-Using fallback is tolerable — a walker
+ * is holding the phone anyway and presses the button at the trailhead. The
+ * project lead's point of 2026-08-28: a great deal of Madeira is seen **from a
+ * car**, and that user has the phone in a cradle or a pocket for six hours and
+ * will never press anything. On While-Using they record nothing, all day, while
+ * D-002 promises them the opposite. On a seven-day holiday forty hours is the
+ * first day and a half — usually the day people drive furthest.
+ *
+ * ⚠ **Twelve rather than "at the end of onboarding", which the reference app
+ * does.** The argument for asking *after* the app has visibly done something is
+ * the strong one and it survives: somebody who has watched a place fill in has a
+ * reason to say yes. Twelve hours means install in the afternoon, asked the next
+ * morning before setting off. It also keeps the ask away from onboarding's two
+ * system dialogs, which is the reason this delay exists at all.
+ *
+ * ⚠ **It now lands BEFORE the day-1 health check at fourteen hours**, which is
+ * the collision the forty was avoiding. Accepted, because the two are different
+ * in kind — one is a notification the user reads, the other is a screen they act
+ * on — and two hours apart is not "one morning". ⚠ If the health check ever
+ * starts arriving as a full-screen prompt, this ordering has to be revisited.
+ *
+ * ⚠ **Revisit after the first real trip.** The project lead is doing real-world
+ * testing on the P30 and said they would come back to this. Twelve is reasoned,
+ * not measured.
  */
-export const ALWAYS_UPGRADE_DELAY_MS = 40 * 60 * 60 * 1000;
+export const ALWAYS_UPGRADE_DELAY_MS = 12 * 60 * 60 * 1000;
 
 export type AlwaysUpgradeState = {
   location: PermissionLevel;

@@ -100,7 +100,7 @@
         }
       ],
       "./plugins/withAndroidBackupRules",
-      "./plugins/withoutDevPermissions",
+      "./plugins/withoutUnusedPermissions",
       "./plugins/withUploadSigning",
       "./plugins/withGoogleMapsApiKey",
       "./plugins/withLatestMapsRenderer",

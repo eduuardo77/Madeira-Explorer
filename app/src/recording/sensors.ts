@@ -17,11 +17,19 @@
  *    the high-rate Phase 0 field traces, which were captured with a logger held
  *    permanently awake and are therefore denser than anything we will get here.
  *
- * 2. Pedometer support is asymmetric. `getStepCountAsync` reads historical step
- *    counts from the OS on iOS. Android has no equivalent historical query in
- *    expo-sensors, so there we accumulate from a live watcher while the process
- *    is alive and lose steps taken while suspended. This is a known gap in the
- *    free stack, of a piece with the Android restart gap in D-025.
+ * 2. ⚠⚠ **THE PEDOMETER DOES NOTHING ON ANDROID, AND THIS PARAGRAPH USED TO
+ *    DESCRIBE A FALLBACK THAT WAS NEVER BUILT** (corrected 2026-08-28). It said
+ *    Android "accumulates from a live watcher"; `getStepsBetween` simply returns
+ *    `null` there, and no watcher exists anywhere in the app.
+ *
+ *    `getStepCountAsync` reads historical step counts from the OS **on iOS
+ *    only**. expo-sensors exposes no historical query on Android, and
+ *    `watchStepCount` counts from the moment you subscribe rather than reading
+ *    the OS's boot-time counter — so a recorder suspended between location
+ *    batches loses precisely the steps it wants, which on a levada is all of
+ *    them. Reading Android's cumulative `TYPE_STEP_COUNTER` needs a native
+ *    module or Health Connect. **D-081** holds the decision; Android is the only
+ *    platform this app currently ships on.
  */
 
 import { Platform } from 'react-native';

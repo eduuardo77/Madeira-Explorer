@@ -42,6 +42,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
+import RecentreMark from './RecentreMark';
 import WalkMark from './WalkMark';
 import StampMark from './StampMark';
 import { TIER_METAL, tierFor } from '../passport/stampTier';
@@ -61,6 +62,19 @@ const STAMP_MARK_SIZE = 34;
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 22;
+
+/** The re-centre pill: compact by design, see the hitSlop note at its call site. */
+const RECENTRE_HEIGHT = 40;
+const RECENTRE_MARK_SIZE = 17;
+
+/**
+ * Grows the 40 dp pill to a 60 dp target (D-015).
+ *
+ * ⚠ 10 dp top and bottom, and no more. The walk button sits directly below with
+ * `spacing.sm` between them; a taller slop would overlap the one control on this
+ * screen that must never be pressed by accident.
+ */
+const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 16, right: 16 };
 
 /** The glyph beside the words on the walk button. */
 const WALK_MARK_SIZE = 22;
@@ -205,6 +219,15 @@ export default function PrimaryOverlay({
             accessibilityRole="button"
             accessibilityLabel={t('map.a11y.recentre')}
             onPress={onRecentre}
+            // ⚠ The visible pill is deliberately smaller than the 60 dp D-015
+            // asks for, because the reference app's is and the project lead
+            // asked for theirs: a full-height chrome slab here shouted louder
+            // than the walk button below it, which is the actual primary
+            // action. The *target* is still 60 dp — that is what hitSlop buys,
+            // and `PassportView`'s "See all" does the same thing for the same
+            // reason. ⚠ The workbench cannot see hitSlop (see that file), so
+            // this target can only be checked on a device.
+            hitSlop={RECENTRE_HIT_SLOP}
             style={({ pressed }) => [
               styles.recentre,
               {
@@ -219,7 +242,8 @@ export default function PrimaryOverlay({
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.recentreText, { color: chrome.content }]}>
+            <RecentreMark size={RECENTRE_MARK_SIZE} color={chrome.link} />
+            <Text style={[styles.recentreText, { color: chrome.link }]}>
               {t('map.recentre')}
             </Text>
           </Pressable>
@@ -354,9 +378,13 @@ const styles = StyleSheet.create({
   },
   recentre: {
     alignSelf: 'center',
-    minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    // ⚠ Not MIN_TAP_TARGET. See the hitSlop note at the call site — the pill is
+    // 40 dp and the target is 60.
+    height: RECENTRE_HEIGHT,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
   },
   recentreText: {

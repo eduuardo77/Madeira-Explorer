@@ -359,3 +359,23 @@ test('⚠ a map control that does not contrast with its map must carry an edge o
     );
   }
 });
+
+test('⚠ the re-centre label is readable on its pill, in both map styles', () => {
+  // ⚠ **A per-style value, and this is why.** The pill follows the map
+  // (`mapChrome`), so its label is read once on white and once on near-black.
+  // The page's own tint is right for the first and 1.96:1 on the second; a
+  // single constant here would have been unreadable on one of the two maps and
+  // nobody would have seen it, because the dark map is currently switched off
+  // for users (`mapStylePreference.ts`) and only the souvenir renders it.
+  for (const style of ['light', 'dark'] as const) {
+    const ratio = contrastRatio(mapChrome[style].link, mapChrome[style].surface);
+    assert.ok(
+      ratio >= BODY,
+      `the re-centre label is ${ratio.toFixed(2)}:1 on the ${style} pill`
+    );
+  }
+
+  // And the two are genuinely different colours — a copy-paste that made them
+  // the same would pass the loop above for whichever style it copied.
+  assert.notEqual(mapChrome.light.link, mapChrome.dark.link);
+});

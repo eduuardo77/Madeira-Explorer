@@ -200,6 +200,14 @@ export const mapChrome = {
      */
     border: null,
     elevation: 3,
+    /**
+     * Tinted text on a map control — the re-centre pill (2026-08-28).
+     *
+     * The page's `tint`, which is 5.69:1 on this white pill. ⚠ It is only
+     * correct *here*: the same blue on the dark map's near-black pill is
+     * 1.96:1, which is why this is a per-style value and not one constant.
+     */
+    link: '#0A5AAE',
   },
   dark: {
     surface: '#1C1C1E',
@@ -219,6 +227,12 @@ export const mapChrome = {
     border: '#8E8E93',
     /** No shadow: a dark shadow under a dark control on dark ground is nothing. */
     elevation: 0,
+    /**
+     * ⚠ The light blue, not the page's tint. On this near-black pill the page's
+     * `#0A5AAE` measures 1.96:1 and the label would be unreadable; this is
+     * 6.93:1. Held by `contrast.test.ts` in both directions.
+     */
+    link: '#5AA9FF',
   },
 } as const;
 

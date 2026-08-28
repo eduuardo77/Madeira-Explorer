@@ -195,8 +195,35 @@ export const STRINGS = {
   'onboarding.downgrade.skip': s('Leave it', 'Deixar', 'Lassen'),
 
   // ── The map screen (design brief §3) ────────────────────────────────────
-  'map.startWalk': s('Start walk', 'Iniciar caminhada', 'Wanderung starten'),
-  'map.stopWalk': s('Stop walk', 'Terminar caminhada', 'Wanderung beenden'),
+  // ⚠ **"WALK" WAS THE WRONG WORD, AND IT WAS MINE** (renamed 2026-08-28).
+  // It arrived on 2026-08-15 with a good argument — "recording" names the
+  // mechanism, "walk" names the thing the user came to do — and the argument was
+  // right about mechanism words and wrong about this island. Proa is not a
+  // walking app: eleven of sixty places are levadas and the other forty-nine are
+  // mostly driven to, past viewpoints, along the north coast, through tunnels.
+  // A driver reading "Iniciar caminhada" is being asked to do something they are
+  // not doing.
+  //
+  // ⚠ There is no honest activity noun that covers both, and the obvious one is
+  // taken: "trip"/"viagem"/"Reise" already means **the whole holiday** to the
+  // user (`onboarding.welcome.body1`, the trip-end souvenir), so this button
+  // cannot borrow it without meaning two things at once. "Route" implies
+  // navigation, which this app never does.
+  //
+  // So it names the action instead. When you cannot name the activity truthfully,
+  // a plain mechanism word beats a wrong activity word — and "registar" is
+  // already the verb the rest of the app uses for this, in settings and in the
+  // screen-reader labels below.
+  'map.startWalk': s(
+    'Start recording',
+    'Começar a registar',
+    'Aufzeichnung starten'
+  ),
+  'map.stopWalk': s(
+    'Stop recording',
+    'Parar de registar',
+    'Aufzeichnung beenden'
+  ),
   'map.recentre': s('Re-center', 'Centrar', 'Zentrieren'),
   'map.a11y.recentre': s(
     'Center the map on where you are',
@@ -204,14 +231,17 @@ export const STRINGS = {
     'Karte auf Ihren Standort zentrieren'
   ),
   'map.a11y.settings': s('Settings', 'Definições', 'Einstellungen'),
+  // ⚠ "esta caminhada" removed with the button's own label — same reason. The
+  // German said "Wanderung", which is a *hike*, and was the most wrong of the
+  // three for somebody in a car.
   'map.a11y.startRecording': s(
-    'Start recording this walk',
-    'Começar a registar esta caminhada',
-    'Diese Wanderung aufzeichnen'
+    'Start recording where you go',
+    'Começar a registar por onde anda',
+    'Aufzeichnen, wo Sie unterwegs sind'
   ),
   'map.a11y.stopRecording': s(
-    'Stop recording this walk',
-    'Parar de registar esta caminhada',
+    'Stop recording where you go',
+    'Parar de registar por onde anda',
     'Aufzeichnung beenden'
   ),
   'map.a11y.openPassport': s('Open your passport', 'Abrir o seu passaporte', 'Reisepass öffnen'),
@@ -252,9 +282,9 @@ export const STRINGS = {
   'replay.watch': s('Watch your trip', 'Ver a sua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
   'replay.nothingToWatch': s(
-    'There is nothing to watch yet. Record a walk and it will appear here.',
-    'Ainda não há nada para ver. Grave uma caminhada e aparecerá aqui.',
-    'Es gibt noch nichts zu sehen. Zeichnen Sie eine Wanderung auf, dann erscheint sie hier.'
+    'There is nothing to watch yet. Record somewhere you go and it will appear here.',
+    'Ainda não há nada para ver. Registe um sítio por onde ande e aparecerá aqui.',
+    'Es gibt noch nichts zu sehen. Zeichnen Sie eine Fahrt oder einen Weg auf, dann erscheint sie hier.'
   ),
   'replay.a11y.play': s('Play your trip', 'Reproduzir a sua viagem', 'Ihre Reise abspielen'),
   'replay.a11y.pause': s('Pause', 'Pausa', 'Pause'),
@@ -394,9 +424,9 @@ export const STRINGS = {
     'Aufzeichnen, wenn die App geschlossen ist'
   ),
   'settings.background.off': s(
-    'Nothing is recorded while the app is closed. Use Start walk on the map to record one.',
-    'Nada é registado com a aplicação fechada. Use Iniciar caminhada no mapa para registar uma.',
-    'Bei geschlossener App wird nichts aufgezeichnet. Nutzen Sie Wanderung starten auf der Karte.'
+    'Nothing is recorded while the app is closed. Use Start recording on the map when you go out.',
+    'Nada é registado com a aplicação fechada. Use Começar a registar no mapa quando sair.',
+    'Bei geschlossener App wird nichts aufgezeichnet. Nutzen Sie Aufzeichnung starten auf der Karte, wenn Sie losziehen.'
   ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),
@@ -427,9 +457,9 @@ export const STRINGS = {
     'Ihre Karte füllt sich nur bei geöffneter App. Sie können das in den Einstellungen Ihres Telefons ändern.'
   ),
   'settings.background.blocked': s(
-    'Your phone has not given this app permission to record in the background, so this is off. You can still record a walk from the map screen whenever you like.',
-    'O seu telemóvel não deu autorização para registar em segundo plano, por isso isto está desligado. Pode na mesma registar uma caminhada a partir do mapa sempre que quiser.',
-    'Ihr Telefon hat dieser App keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus eine Wanderung aufzeichnen.'
+    'Your phone has not given this app permission to record in the background, so this is off. You can still record from the map screen whenever you go out.',
+    'O seu telemóvel não deu autorização para registar em segundo plano, por isso isto está desligado. Pode na mesma registar a partir do mapa sempre que sair.',
+    'Ihr Telefon hat dieser App keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus aufzeichnen.'
   ),
   'settings.background.on': s(
     'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start a walk yourself.',

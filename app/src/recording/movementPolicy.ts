@@ -88,6 +88,71 @@ export type MovementSample = Coordinate & {
   accuracyM: number | null;
 };
 
+/**
+ * Sustained speed above which the recorder samples at the driving rate
+ * (2026-08-28).
+ *
+ * ⚠ **THIS IS NOT T-034a, AND THE DIFFERENCE IS THE WHOLE JUSTIFICATION.**
+ * D-028 deferred telling walking from driving *for crediting*, because on this
+ * island speed cannot do it: Madeira's gradients and Funchal's traffic compress
+ * driving into walking speeds, so a threshold would mislabel constantly. That is
+ * still true and this does not attempt it.
+ *
+ * This asks a different and much easier question: **is the trace being
+ * under-sampled?** At the walking profile's 30-second floor, 60 km/h puts fixes
+ * ~500 m apart, and the VR1 and the ER101 coast road draw as a polygon that cuts
+ * every corner. The souvenir of a drive is then a picture of a road nobody took.
+ *
+ * ⚠ **The error is one-directional, which is what makes it safe without field
+ * data.** 7 m/s is 25 km/h. No walker sustains that over a minute, so a
+ * pedestrian can never trip it; slow town driving simply falls through to the
+ * walking profile, which is exactly today's behaviour. Being wrong costs a
+ * denser trace and never a sparser one.
+ *
+ * ⚠ **It does change a battery-affecting parameter, and battery is unmeasured**
+ * (D-041, T-054). The `driving` profile's own note argues it is the cheapest of
+ * the three in practice, because Madeira tourism runs on rental cars and the
+ * phone is usually on a charger — that argument is plausible and it is not a
+ * measurement. T-054 now has a real phone and must cover a drive, not just a day
+ * in a pocket.
+ */
+export const VEHICLE_SPEED_MPS = 7;
+
+/**
+ * The shortest gap between two fixes that may be used to compute a speed.
+ *
+ * ⚠ Without this, two consecutive noisy fixes make a car out of a standing user:
+ * the accuracy filter admits fixes up to 100 m, and two of those five seconds
+ * apart can show 20 m/s that nobody travelled. Over a full minute the same noise
+ * is under 2 m/s, comfortably below the threshold above.
+ */
+export const MIN_SPEED_GAP_MS = 60 * 1000;
+
+/**
+ * The fastest speed the window can actually evidence, in m/s.
+ *
+ * Pairwise rather than window-average: a drive with a ten-minute stop at a
+ * miradouro averages out to walking pace, and the drive still happened.
+ */
+export function fastestSustainedSpeedMps(samples: MovementSample[]): number {
+  let fastest = 0;
+
+  for (let i = 0; i < samples.length; i += 1) {
+    for (let j = i + 1; j < samples.length; j += 1) {
+      const gapMs = Math.abs(samples[i].ts - samples[j].ts);
+      if (gapMs < MIN_SPEED_GAP_MS) {
+        continue;
+      }
+      const speed = (distanceM(samples[i], samples[j]) / gapMs) * 1000;
+      if (speed > fastest) {
+        fastest = speed;
+      }
+    }
+  }
+
+  return fastest;
+}
+
 export type MovementDecision = {
   profile: SamplingProfile;
   /** Written to the recording diary, so a profile change is explicable later. */
@@ -152,10 +217,18 @@ export function decideProfile(
 
   // Moving wins immediately — see the asymmetry note at the top of the file.
   if (maxDisplacementM > MOVING_THRESHOLD_M) {
+    // ⚠ Vehicle *rate*, not vehicle *classification*. See VEHICLE_SPEED_MPS.
+    const fastest = fastestSustainedSpeedMps(inWindow);
+    const profile: SamplingProfile =
+      fastest >= VEHICLE_SPEED_MPS ? 'driving' : MOVING_PROFILE;
+
     return {
-      profile: MOVING_PROFILE,
-      reason: `moved ${Math.round(maxDisplacementM)} m`,
-      changed: current !== MOVING_PROFILE,
+      profile,
+      reason:
+        profile === 'driving'
+          ? `moved ${Math.round(maxDisplacementM)} m at up to ${Math.round(fastest * 3.6)} km/h`
+          : `moved ${Math.round(maxDisplacementM)} m`,
+      changed: current !== profile,
     };
   }
 

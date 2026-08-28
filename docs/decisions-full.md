@@ -4376,3 +4376,32 @@ and still rendered as a crosshair.
 
 **Next, and not done here:** the per-place assignment for all sixty, one line of justification
 each, **draft and veto** (D-064).
+
+## D-080 — The app is light; the passport's album page stays dark
+
+**Status:** Accepted — the project lead, 2026-08-28, having looked at it on a real screen.
+
+**The decision.** Every screen in the app is **light** (`theme.ts`). The passport's stamp
+strips and grids are drawn on **`colors.stampPage`, which is dark**, and that is deliberate
+rather than a leftover.
+
+**Why the page could not simply follow.** The thirty stamp colourways (D-046) are pale paper
+panels drawn to sit on a dark card. Measured against a white one, **all thirty fail** the 3:1
+boundary floor — worst **1.07:1**. The border cannot carry the edge either: **8 of 30** fail on
+white. Only the name band clears (worst 6.08:1), and a band is not an edge. A sticker with no
+edge, on a screen that is mostly stickers since D-058, is the passport failing to be a passport.
+
+**The alternative was rejected on cost, not on taste.** Re-deriving thirty colourways for a
+light ground is artwork, D-046 owns it, and nobody on this project can see — that is the whole
+reason `contrast.test.ts` exists. Loosening the floor instead would have been the cheap answer
+and the wrong one.
+
+**And then it turned out to be the better design.** Looked at on the P30, the dark strips read as
+**album pages** — which is what a passport of stamps should look like, and what the light-on-light
+version could never have been. The project lead: *"For the stamps and the whole passport page I
+want it dark."*
+
+⚠ **What this pins.** `contrast.test.ts` measures every colourway against `colors.stampPage`, not
+against `colors.surface`. If the album page is ever lightened, thirty stickers lose their edges
+and the test is what says so. Settings, and every other screen, stay light.
+

@@ -37,7 +37,12 @@ import {
 import { APP_NAME } from '../brand';
 import { t } from '../i18n';
 import type { PermissionLevel } from '../recording/LocationProvider';
-import type { TrackingQuality } from '../recording/trackingPreference';
+import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
+import type { StringKey } from '../i18n/strings';
+import {
+  TRACKING_QUALITIES,
+  type TrackingQuality,
+} from '../recording/trackingPreference';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 export type SettingsViewProps = {
@@ -181,51 +186,93 @@ function Toggle({
 }
 
 /**
- * One of several exclusive choices, with room to say what it means (T-146).
+ * What each tier is called and what it promises.
  *
- * ⚠ The description is not decoration. These three options differ in a way the
- * user cannot see and the app is not allowed to price — see
- * `trackingPreference.ts` on why there are no percentages here — so the
- * sentence under each label is the entire basis for choosing. A row of bare
- * words would be three synonyms for "tracking".
+ * A `Record` keyed by the type, so adding a tier to `trackingPreference.ts`
+ * fails the build here rather than rendering a blank segment. The **order** is
+ * not repeated — it comes from `TRACKING_QUALITIES`, which owns it — because a
+ * second copy of an order is a second thing to get out of step.
+ *
+ * ⚠ Three keys per tier, and they are not interchangeable. The segment is too
+ * narrow for the full name in Portuguese or German, so it wears `short`; the
+ * screen reader gets `full`, which is the real name; `detail` is the sentence
+ * below the control and the only place the difference is actually explained.
  */
-function Choice({
-  label,
-  description,
-  selected,
-  onPress,
+const QUALITY_TEXT: Record<
+  TrackingQuality,
+  { short: StringKey; full: StringKey; detail: StringKey }
+> = {
+  saver: {
+    short: 'settings.quality.short.saver',
+    full: 'settings.quality.saver',
+    detail: 'settings.quality.detail.saver',
+  },
+  balanced: {
+    short: 'settings.quality.short.balanced',
+    full: 'settings.quality.balanced',
+    detail: 'settings.quality.detail.balanced',
+  },
+  precise: {
+    short: 'settings.quality.short.best',
+    full: 'settings.quality.best',
+    detail: 'settings.quality.detail.best',
+  },
+};
+
+/**
+ * The three tiers as one pill, three segments wide (2026-08-28).
+ *
+ * ⚠ **This replaced three stacked cards on the project lead's instruction.**
+ * The reference app they pointed at puts this same choice in a segmented
+ * control with a single sentence underneath. Three full-width cards, each
+ * carrying its own paragraph, had made the most ordinary setting in the app the
+ * tallest thing on the screen — the user had to read three paragraphs to make
+ * one choice.
+ *
+ * ⚠ **D-015 is still satisfied, and not by the fill.** The selected segment is
+ * tinted, but what actually carries the state is the sentence directly below,
+ * which names the chosen tier and says what it does. That is the same argument
+ * `Toggle` makes above, and it is the reason the descriptions moved *out* of
+ * the segments rather than being deleted with them.
+ *
+ * ⚠ `numberOfLines={1}` is deliberate. A segment that wraps to two lines makes
+ * the pill taller than its neighbours and the row stops reading as one control;
+ * `short` exists precisely so nothing has to wrap.
+ */
+function Segmented({
+  value,
+  onChange,
 }: {
-  label: string;
-  description: string;
-  selected: boolean;
-  onPress: () => void;
+  value: TrackingQuality;
+  onChange: (next: TrackingQuality) => void;
 }) {
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      accessibilityLabel={`${label}. ${description}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.stackedChoice,
-        selected && styles.stackedChoiceActive,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.stackedChoiceHeader}>
-        <Text
-          style={[
-            styles.stackedChoiceLabel,
-            selected && styles.stackedChoiceLabelActive,
-          ]}
-        >
-          {label}
-        </Text>
-        {/* The tick, not just a border — D-015 forbids state carried by hue. */}
-        {selected ? <Text style={styles.stackedChoiceTick}>✓</Text> : null}
-      </View>
-      <Text style={styles.stackedChoiceDescription}>{description}</Text>
-    </Pressable>
+    <View style={styles.segmented} accessibilityRole="radiogroup">
+      {TRACKING_QUALITIES.map((quality) => {
+        const selected = quality === value;
+        return (
+          <Pressable
+            key={quality}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            accessibilityLabel={t(QUALITY_TEXT[quality].full)}
+            onPress={() => onChange(quality)}
+            style={({ pressed }) => [
+              styles.segment,
+              selected && styles.segmentActive,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text
+              numberOfLines={1}
+              style={[styles.segmentText, selected && styles.segmentTextActive]}
+            >
+              {t(QUALITY_TEXT[quality].short)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -260,6 +307,11 @@ export default function SettingsView({
   donating,
   onClose,
 }: SettingsViewProps) {
+  // Both halves of one decision. The switch means nothing until the phone
+  // has granted Always, and the tier means nothing until the switch is on —
+  // so the screen asks the question once and every branch below reads it.
+  const recordingInBackground = backgroundTracking && permission === 'always';
+
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -293,22 +345,27 @@ export default function SettingsView({
           </Section>
         ) : null}
 
-        {/* Between "Recording" (what the phone allows) and everything else:
-            this is the user's own answer, and it only means anything once they
-            have read what the phone has granted. */}
+        {/* ⚠ ONE CARD, NOT TWO (2026-08-28, the project lead's instruction).
+            "May the app record?" and "how closely?" were separate sections, and
+            the second appeared out of nowhere when you flipped the first —
+            which reads as a glitch rather than a reveal. In the reference app
+            they point at, consent and cost sit in one card because the second
+            is meaningless without the first. `trackingPreference.ts` still
+            keeps them as two independent stored values; only the presentation
+            is joined. */}
         <Section
           title={t('settings.section.background')}
           footnote={
             permission !== 'always'
               ? t('settings.background.blocked')
-              : backgroundTracking
-                ? t('settings.background.on')
+              : recordingInBackground
+                ? t('settings.quality.footnote')
                 : t('settings.background.off')
           }
         >
           <Toggle
             label={t('settings.background.toggle')}
-            value={backgroundTracking && permission === 'always'}
+            value={recordingInBackground}
             onChange={onChangeBackgroundTracking}
             // ⚠ Disabled rather than hidden when the permission is missing. A
             // control that vanishes leaves the user hunting for a setting they
@@ -316,71 +373,69 @@ export default function SettingsView({
             // where the real gate is — which is the phone, not this screen.
             disabled={permission !== 'always'}
           />
+          {recordingInBackground ? (
+            <>
+              <View style={styles.divider} />
+              <Segmented
+                value={trackingQuality}
+                onChange={onChangeTrackingQuality}
+              />
+              {/* The state, in words. Not decoration — see `Segmented`. */}
+              <Text style={styles.segmentDetail}>
+                {t(QUALITY_TEXT[trackingQuality].detail)}
+              </Text>
+            </>
+          ) : null}
         </Section>
 
-        {backgroundTracking && permission === 'always' ? (
+        {/* ⚠ HIDDEN, NOT DELETED (2026-08-28). The project lead asked for one
+            theme, always light, until the app has earned a second one. Light was
+            already the default and the style tuned for Madeiran sunlight (D-026),
+            so nothing a new user sees changes.
+            ⚠ The dark map is NOT dead: the souvenir renders dark whatever this
+            says. Only the *choice* is off, and `MAP_STYLE_CHOICE_ENABLED` in
+            `map/mapStylePreference.ts` is the one line that brings it back with
+            every stored preference intact. */}
+        {MAP_STYLE_CHOICE_ENABLED ? (
           <Section
-            title={t('settings.section.quality')}
-            footnote={t('settings.quality.footnote')}
+            title={t('settings.section.appearance')}
+            footnote={t('settings.appearance.footnote')}
           >
-            <Choice
-              label={t('settings.quality.saver')}
-              description="Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher."
-              selected={trackingQuality === 'saver'}
-              onPress={() => onChangeTrackingQuality('saver')}
-            />
-            <Choice
-              label={t('settings.quality.balanced')}
-              description="The usual choice. Enough detail to recognise the walk you did, without following every step."
-              selected={trackingQuality === 'balanced'}
-              onPress={() => onChangeTrackingQuality('balanced')}
-            />
-            <Choice
-              label={t('settings.quality.best')}
-              description="Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way."
-              selected={trackingQuality === 'precise'}
-              onPress={() => onChangeTrackingQuality('precise')}
-            />
-          </Section>
-        ) : null}
-
-        <Section
-          title={t('settings.section.appearance')}
-          footnote={t('settings.appearance.footnote')}
-        >
-          {/* Two labelled buttons rather than a switch: a switch needs the
-              user to know which state is which, and D-015 forbids meaning
-              carried by anything but words. */}
-          <View style={styles.choiceRow}>
-            {(['light', 'dark'] as const).map((option) => (
-              <Pressable
-                key={option}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  option === 'dark'
-                    ? t('settings.a11y.useDarkMap')
-                    : t('settings.a11y.useLightMap')
-                }
-                onPress={() => onChangeMapStyle(option)}
-                style={({ pressed }) => [
-                  styles.choice,
-                  mapStyle === option && styles.choiceActive,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.choiceText,
-                    mapStyle === option && styles.choiceTextActive,
+            {/* Two labelled buttons rather than a switch: a switch needs the
+                user to know which state is which, and D-015 forbids meaning
+                carried by anything but words. */}
+            <View style={styles.choiceRow}>
+              {(['light', 'dark'] as const).map((option) => (
+                <Pressable
+                  key={option}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    option === 'dark'
+                      ? t('settings.a11y.useDarkMap')
+                      : t('settings.a11y.useLightMap')
+                  }
+                  onPress={() => onChangeMapStyle(option)}
+                  style={({ pressed }) => [
+                    styles.choice,
+                    mapStyle === option && styles.choiceActive,
+                    pressed && styles.pressed,
                   ]}
                 >
-                  {option === 'light' ? t('settings.appearance.light') : t('settings.appearance.dark')}
-                  {mapStyle === option ? '  ✓' : ''}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </Section>
+                  <Text
+                    style={[
+                      styles.choiceText,
+                      mapStyle === option && styles.choiceTextActive,
+                    ]}
+                  >
+                    {option === 'light' ? t('settings.appearance.light') : t('settings.appearance.dark')}
+                    {mapStyle === option ? '  ✓' : ''}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </Section>
+
+        ) : null}
 
         {/* ⚠ This section said the opposite until 2026-08-14: *the whole island
             is already on your phone, so the map works with no signal and uses
@@ -527,35 +582,38 @@ const styles = StyleSheet.create({
   actionDanger: { borderWidth: 2, borderColor: colors.bad },
   actionText: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
   rowDisabled: { opacity: 0.5 },
-  stackedChoice: {
-    borderRadius: radius.control,
-    backgroundColor: colors.surfaceRaised,
-    padding: spacing.md,
-    gap: spacing.xs,
-    // Transparent rather than absent, so selecting a row cannot shift the rows
-    // around it by two pixels.
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  stackedChoiceActive: { borderColor: colors.action },
-  stackedChoiceHeader: {
+  // A hairline between the consent switch and the cost dial. They are one card
+  // now (see the section above) but they are still two questions, and without
+  // a rule between them the pill reads as part of the switch's row.
+  divider: { height: 1, backgroundColor: colors.surfaceRaised },
+  segmented: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: radius.control,
+    // The trough. Each segment paints over it when selected, so `overflow`
+    // is what keeps the tint inside the rounded ends.
+    backgroundColor: colors.surfaceRaised,
+    overflow: 'hidden',
+  },
+  segment: {
+    // Equal thirds regardless of how long the word is in this language.
+    flex: 1,
+    minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
   },
-  stackedChoiceLabel: {
+  segmentActive: { backgroundColor: colors.action },
+  segmentText: {
     color: colors.textMuted,
-    fontSize: fontSize.body,
-    fontWeight: '700',
-  },
-  stackedChoiceLabelActive: { color: colors.text },
-  stackedChoiceTick: {
-    color: colors.action,
     fontSize: fontSize.small,
     fontWeight: '700',
+    textAlign: 'center',
   },
-  stackedChoiceDescription: {
+  // ⚠ `actionText` on `action` is the pair `contrast.test.ts` already proves
+  // readable — the same one the primary button uses. Do not hand-pick a colour
+  // here; the test only covers the pairs the theme declares.
+  segmentTextActive: { color: colors.actionText },
+  segmentDetail: {
     color: colors.textMuted,
     fontSize: fontSize.small,
     lineHeight: Math.round(fontSize.small * 1.4),

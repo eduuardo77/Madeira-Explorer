@@ -406,6 +406,34 @@ export const STRINGS = {
   'settings.quality.saver': s('Battery saver', 'Poupança de bateria', 'Akkusparen'),
   'settings.quality.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
   'settings.quality.best': s('Best detail', 'Máximo detalhe', 'Höchste Genauigkeit'),
+  // ⚠ Short forms, for the three-across control only. The full names above are
+  // still what the screen reader announces — a segment two thirds narrower than
+  // the label is a truncation waiting to happen, and Portuguese and German are
+  // where it happens first.
+  'settings.quality.short.saver': s('Saver', 'Poupança', 'Sparen'),
+  'settings.quality.short.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
+  'settings.quality.short.best': s('Precise', 'Preciso', 'Genau'),
+  // ⚠⚠ These three were **hardcoded English inside SettingsView** until
+  // 2026-08-28 — three paragraphs of prose passed as a prop, which is the blind
+  // spot `i18nCoverage.test.ts` documents and now covers. A Portuguese user was
+  // reading English in the one place the app explains what it costs them.
+  // ⚠ No percentages, by D-041: they say what each tier *does*, never what it
+  // spends, because no battery figure in this project has been measured.
+  'settings.quality.detail.saver': s(
+    'Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher.',
+    'Pergunta com menos frequência e deixa o telemóvel descansar quando está parado. Os seus lugares continuam a preencher-se; a linha no mapa fica mais grosseira.',
+    'Fragt am seltensten und lässt Ihr Telefon ruhen, wenn Sie stehen bleiben. Ihre Orte füllen sich weiterhin; die Linie auf der Karte wird gröber.'
+  ),
+  'settings.quality.detail.balanced': s(
+    'The usual choice. Enough detail to recognise the walk you did, without following every step.',
+    'A escolha habitual. Detalhe suficiente para reconhecer a caminhada que fez, sem seguir cada passo.',
+    'Die übliche Wahl. Genug Detail, um Ihre Wanderung wiederzuerkennen, ohne jeden Schritt zu verfolgen.'
+  ),
+  'settings.quality.detail.best': s(
+    'Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way.',
+    'Pergunta com mais frequência e continua mesmo quando para, para que um almoço demorado não seja uma falha na linha. É a que mais bateria gasta, de longe.',
+    'Fragt am häufigsten und läuft weiter, auch wenn Sie anhalten — ein langes Mittagessen wird so keine Lücke in der Linie. Verbraucht mit Abstand am meisten Akku.'
+  ),
   'settings.section.map': s('Map', 'Mapa', 'Karte'),
   'settings.map.footnote': s(
     'The map is Google’s and needs a connection to draw. Your trip is recorded either way — losing signal on a levada costs you the map, never the walk.',

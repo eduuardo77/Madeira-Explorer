@@ -71,7 +71,7 @@ import PrimaryOverlay from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
-import { parseMapStyle } from './mapStylePreference';
+import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
 import { representativeGeofence } from './placeMarkers';
@@ -260,7 +260,7 @@ export default function NativeMapScreen({
       try {
         const preference = await appStateDao.get(appStateDao.AppStateKey.MapStyle);
         if (!cancelled) {
-          setStyleName(parseMapStyle(preference));
+          setStyleName(effectiveMapStyle(parseMapStyle(preference)));
         }
       } catch (error) {
         await recordingEventDao.logError('map style preference', error);

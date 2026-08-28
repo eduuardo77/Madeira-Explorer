@@ -13,7 +13,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DEFAULT_MAP_STYLE, parseMapStyle } from './mapStylePreference.ts';
+import {
+  DEFAULT_MAP_STYLE,
+  MAP_STYLE_CHOICE_ENABLED,
+  effectiveMapStyle,
+  parseMapStyle,
+} from './mapStylePreference.ts';
 
 test('light is the default, and it is a deliberate choice', () => {
   // D-026: the everyday map is read outdoors in Madeiran sunlight and the light
@@ -41,4 +46,21 @@ test('case and whitespace do not defeat it', () => {
   // could reasonably produce either.
   assert.equal(parseMapStyle(' Dark '), 'dark');
   assert.equal(parseMapStyle('LIGHT'), 'light');
+});
+
+test('the map style choice is off, so the everyday map is always light', () => {
+  // ⚠ This test is the switch's alarm, not its decoration. If somebody flips
+  // MAP_STYLE_CHOICE_ENABLED back on, this fails and makes them look at the
+  // settings section and the two screens that read the preference — which is
+  // the whole set of things that have to move together.
+  assert.equal(MAP_STYLE_CHOICE_ENABLED, false);
+  assert.equal(effectiveMapStyle('dark'), 'light');
+  assert.equal(effectiveMapStyle('light'), 'light');
+});
+
+test('a stored dark preference survives the choice being hidden', () => {
+  // The override is at the point of drawing, never at the point of storing.
+  // Someone who chose dark before today still has that value, and gets it back
+  // the moment the choice returns — rather than having been quietly reset.
+  assert.equal(parseMapStyle('dark'), 'dark');
 });

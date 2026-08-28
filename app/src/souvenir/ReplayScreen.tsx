@@ -55,7 +55,7 @@ import {
 import { t } from '../i18n';
 import { darkMapPropsFor } from '../map/darkMode';
 import type { MapStyleName } from '../map/mapStyle';
-import { parseMapStyle } from '../map/mapStylePreference';
+import { effectiveMapStyle, parseMapStyle } from '../map/mapStylePreference';
 import { supportsNativeDarkMap } from '../map/mapsRenderer';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
@@ -110,7 +110,7 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         }
 
         setComposition(plan);
-        setStyleName(parseMapStyle(preference));
+        setStyleName(effectiveMapStyle(parseMapStyle(preference)));
         if (trip !== null) {
           setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now()));
         }

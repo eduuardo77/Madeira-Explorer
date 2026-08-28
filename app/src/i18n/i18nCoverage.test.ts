@@ -127,6 +127,48 @@ test('no visible text is hardcoded English', () => {
   );
 });
 
+/**
+ * Text props that a component renders to the screen.
+ *
+ * ⚠ Deliberately a short list of names, not "every prop". The blunt version —
+ * any long quoted string — trips over `testID`, `resizeMode` and every style
+ * token in the app; these are the props that this codebase actually paints.
+ */
+const TEXT_PROPS =
+  /\b(?<!accessibility)(description|label|title|footnote|message|placeholder|caption|hint)="([^"]*)"/g;
+
+test('no prose is hardcoded English in a text prop', () => {
+  const offenders: string[] = [];
+
+  for (const file of screens(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    if (relative in EXEMPT) {
+      continue;
+    }
+    const source = readFileSync(file, 'utf8');
+
+    for (const match of source.matchAll(TEXT_PROPS)) {
+      if (HAS_A_WORD.test(match[2])) {
+        offenders.push(`${relative}: ${match[1]}="${match[2]}"`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `Text handed to a component as a prop still reaches the screen.\n\n` +
+      `⚠ THIS TEST EXISTS BECAUSE THE OTHER TWO MISSED IT. Until 2026-08-28 the\n` +
+      `three tracking-quality descriptions were three paragraphs of English\n` +
+      `written straight into SettingsView as description="…". They rendered\n` +
+      `inside {curly braces}, which the visible-text test documents as its own\n` +
+      `blind spot, and they were not accessibility labels — so both existing\n` +
+      `tests passed while a Portuguese user read English in the one place the\n` +
+      `app explains what recording costs them.\n\n` +
+      offenders.join('\n')
+  );
+});
+
 test('the exemption list is documented and still real', () => {
   // An exemption for a file that has been deleted or renamed is an exemption
   // nobody notices has stopped applying — and the next file to take that path

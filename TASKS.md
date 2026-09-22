@@ -612,7 +612,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       end is across the ridge in Porto Moniz). **PR 23 Levada da Azenha is `access=no` in OSM** —
       closed, so not added. Fajã do Rodrigues is believed to close often for rockfall — check
       before a release.
-- [x] **T-180** ✅ **The passport button is a stamp, 2026-09-22 (D-083).** Your latest *visible*
+- [x] **T-181** ✅ **The passport button is a stamp, 2026-09-22 (D-083).** Your latest *visible*
       stamp with a metal-and-hairline rank rim, no count. `passport/passportButton.ts` chooses
       the stamp through `visibleStamps`, so a locked stamp never reaches the map screen;
       `passport/stampRim.ts` draws the rim in both renderers. `StampMark.tsx` deleted — nothing

@@ -5,6 +5,12 @@ What the incumbents actually run, measured rather than assumed. Surveyed **2026-
 Method: inspected loaded resources and page markup directly where possible; App Store listings
 otherwise. Marked **[verified]** or **[secondary]** throughout — the difference matters.
 
+⚠ **The reference app has since been taken apart on a real phone.**
+[`docs/reference-app-teardown.md`](reference-app-teardown.md) — WalkNYC 1.1.6 over adb on the P30,
+2026-09-22: its permission flow, notification channels, battery exemption, Health Connect use, and
+**a false claim it exposed in our own privacy copy**. This file stays the place for what the two
+products *are*; that one is what they *do on a phone*.
+
 ---
 
 ## WalkMe — the direct competitor

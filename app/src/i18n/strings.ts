@@ -150,7 +150,7 @@ export const STRINGS = {
   ),
   'onboarding.background.body3': s(
     'You can say no and keep using the app — you will just start and stop recording yourself.',
-    'Pode recusar e continuar a usar a aplicação — só terá de iniciar e parar o registo a si próprio.',
+    'Pode recusar e continuar a usar a aplicação — só terá de ser você a iniciar e a parar o registo.',
     'Sie können ablehnen und die App weiter nutzen — dann starten und stoppen Sie die Aufzeichnung selbst.'
   ),
   'onboarding.background.continue': s('Continue', 'Continuar', 'Weiter'),

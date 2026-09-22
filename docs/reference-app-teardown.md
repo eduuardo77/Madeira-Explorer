@@ -8,10 +8,16 @@ here is a `D-0xx` and nothing here has been agreed.
 `docs/competitors.md` stays the place for what the two products *are*. This file is only the
 teardown: what they do on a phone, and what it says about ours.
 
-**How it was gathered.** `dumpsys package`, `dumpsys notification`, `dumpsys deviceidle whitelist`
-and `uiautomator dump` — no screenshots, no APK decompilation. Read-only: nothing was granted,
-revoked, sent or purchased, and the phone was left on the screen it started on. The one interactive
-thing done was **Run Simulation**, which the app's own copy says does not affect walk data.
+**How it was gathered.** `dumpsys package`, `dumpsys notification`, `dumpsys deviceidle whitelist`,
+`dumpsys activity services` and `uiautomator dump`; **one screenshot**, taken mid-simulation because
+the question was genuinely visual. No APK decompilation. Nothing was granted, revoked, sent or
+purchased, and the phone was left on the screen it started on.
+
+⚠ **What was deliberately not touched.** The **live recorder** — pressing *Start Walk* writes a
+walk into the project lead's own app, so **Run Simulation** was used instead, which the app's own
+copy says does not affect walk data (verified afterwards: it does not). **Import** was left alone
+entirely; it is an OAuth flow into the project lead's Strava and Google accounts. The leaderboard
+and anything else that talks to their server were not opened.
 
 ⚠ **Two limits on everything below.** It is **one handset on Android 10**, so some of what the
 permission flow does there (an inline *"allow all the time"* option) does not exist on Android 11+.
@@ -146,19 +152,54 @@ mounts, so it has to become an overlay the map renders rather than a branch in `
 
 ### 6. A shipped simulation mode — **idea, and it is aimed at a live blocker**
 
-Settings → **Run Simulation**: *"Replay a walk on the map. Your walk data will not be affected."*
-Watched running — the map animates, a **`SIMULATION MODE`** badge sits over the chrome, a **`80×`**
-speed control is exposed, the replayed walk's own clock is drawn on the map, and the block counter
-climbs live (0 → 4 blocks). Stopping it left the counter back at 0, so the promise holds.
+Settings → Simulation → **Run Simulation**: *"Replay a walk on the map. Your walk data will not be
+affected."* Run twice and watched to the end on 2026-09-22.
 
-**Ours:** replay exists for development (the browser workbench, D-038; replayed routes on the
-emulator) and is not in the app.
+**What it is.** One button. No walk picker, no speed picker, no length — it replays a **bundled,
+dated real walk** (*"fev 12  4:31:45 a.m."*, Greenwich Village round Washington Square) at **80×**.
+The multiplier is shown as a badge at the start and is **not persistent**; by mid-run it is gone.
+
+**What it does on screen, and three of these are the part worth copying.**
+
+- ⚠ **The primary action changes colour.** The app's chrome is green — gear, stats, *Start Walk*.
+  In simulation the button is **blue** and reads *Stop Simulation*, with a blue **`▶ SIMULATION
+  MODE`** pill above the progress bar. You cannot be in this mode and not know it.
+- ⚠ **The simulated position is drawn differently** — a grey pin, not the live blue location dot.
+  Simulated "where you are" never impersonates real "where you are".
+- Streets fill in **green segment by segment** as it passes, and the counter climbs live: it
+  reached **25 / 86 638 blocks**. Re-centre stays available throughout.
+
+**What it does not do.**
+
+- **No foreground service starts.** `dumpsys activity services com.walknyc.app` was empty for the
+  whole run — the simulation does not go near the recorder.
+- **No data is written.** Verified after stopping: `WALKS 0`, `New Blocks 0`, counter back to
+  `0 / 86 638`. Their promise holds.
+
+**Two things they got wrong, which are free for us to get right.**
+
+- ⚠ **There is no terminal state.** When the replayed walk ends, the clock disappears and the
+  counter freezes — but the badge still says `SIMULATION MODE`, the button still says *Stop
+  Simulation*, and nothing says it finished. The user has to notice that nothing is moving.
+  **Proa has a natural ending built already**: trip end → the souvenir (D-076). A simulation that
+  runs into the souvenir is the demo, and it is the thing their version is missing.
+- ⚠ **The banners stay up throughout.** The promo card and the orange permission warning cover
+  roughly the top third of the screen **during the one mode whose entire purpose is to show the
+  map off** — confirmed in a screenshot mid-run. Design brief §3 already watches for this.
 
 **Why this is not just a nice-to-have.** HANDOFF blocker 2 is *"nobody has completed a single trip
-with this app"*, and it names the consequence: **the store screenshots are a replayed route**. A
-user-facing simulation is how the reference app gets a populated map to photograph without walking
-anywhere — and it would let the project lead demo the whole chain on the sofa. ⚠ It is also
-squarely the kind of thing D-032 deletes, so this is a *cost* to weigh, not a recommendation.
+with this app"*, and it names the consequence: **the store screenshots are a replayed route**. This
+is how the reference app gets a populated map to photograph without walking anywhere, and it would
+let the project lead demo the whole chain from the sofa.
+
+**What we already have.** `tools/replay-route.sh` feeds a route into the emulator over adb, with
+four routes in `tools/routes/` — but it drives the *emulator's* GPS from a laptop, so it is not
+reachable on a real phone and not reachable by the project lead on a sofa. The gap is a user-facing
+entry point and the mode chrome, not the route data.
+
+⚠ **Costed, not recommended.** This is squarely the kind of thing D-032 deletes from v1, and the
+honest version of the argument is that it earns its place only if it is what unblocks the store
+screenshots.
 
 ---
 

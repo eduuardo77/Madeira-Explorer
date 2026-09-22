@@ -510,6 +510,14 @@ cd app && node -e "const fs=require('fs'),{applyContentBundleInputs:a}=require('
 
 **To check an APK's places:** `unzip -p <apk> assets/index.android.bundle | grep -ac "<a place name>"`.
 
+⚠ **Run `git status` in `app/` before building an APK for a phone.** The bundle is made from the
+**working tree**, and `app/android/` exists only in the main checkout — which other sessions edit.
+On 2026-09-22 a P30 build started while another session was creating `stampRim.ts` and
+`passportButton.ts`; checking the APK showed they had *not* been bundled (`rimElements`,
+`rimFor`, `'__passport'` absent; `dotsPath`, `stampElements` present as the control). That was
+timing, not a safeguard. Hermes keeps function names and string literals, so
+`grep -ac <name>` on the bundle is how to check.
+
 ## The field build — a release APK we can still read, 2026-09-22
 
 For a phone that is going to record a **real walk**: a release build (bundled JS, minified, no dev

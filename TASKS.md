@@ -377,7 +377,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       long page; five strips is one and a half screens with the hero still on it.
       — Notes: `docs/task-notes.md` (T-144)
 
-- [ ] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
+- [~] **T-051** 72-hour untouched-device soak test producing a continuous trace ⇠ T-047, T-048
+      — **Set up 2026-09-22 on the Huawei P30; the clock has NOT started.** Two conditions are
+      the project lead's to meet, and both are physical.
+      — ⚠⚠ **The phone must be UNPLUGGED.** `dumpsys deviceidle` reports
+      `mCharging=true mState=ACTIVE` for as long as the cable is in: **Doze never engages while
+      charging**, and Doze is the single biggest threat to a background recorder. A soak on a
+      charger tests almost nothing this task is about, and cannot answer T-054 at all.
+      — ⚠ **It must be charged first** — it was at 30%, which will not survive 72 hours.
+      — ⚠ **And untouched for three days**, which is the cost: it is a personal phone.
+      — ✅ **adb over WiFi is enabled** (`adb tcpip 5555`, 192.168.1.136) so the soak can be read
+      with the cable out. ⚠ It survives until the phone reboots, and it should be turned off
+      afterwards.
+      — ✅ **`tools/soak-check.sh`** is the read-only probe. It **never launches the app** —
+      waking it resets the very OEM timers being measured — and it asks the **OS**, not the app,
+      whether the recorder is alive, because T-174 is exactly the mistake of believing the app.
+      — ⚠ **T-174 was blocking this and was invisible.** The recorder had been dead since
+      28 August while the app reported it running; the soak would have produced 72 hours of
+      nothing. Baseline now reads `recorder ALIVE`, verified against `dumpsys`.
+      — ⚠ **T-048 is still `[~]`**, so gap annotation will not be automatic; the raw
+      `raw_fix`/`recording_event` rows are the evidence either way.
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046
 - [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038

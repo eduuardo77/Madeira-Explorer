@@ -707,6 +707,174 @@
       ]
     },
     {
+      "id": "levada-do-risco",
+      "name": "Levada do Risco",
+      "category": "levada",
+      "regionId": "calheta",
+      "geofences": [
+        {
+          "id": "levada-do-risco-start",
+          "role": "start",
+          "lat": 32.754,
+          "lon": -17.133,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-risco-start-casa",
+          "role": "start",
+          "lat": 32.7615,
+          "lon": -17.1348,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-risco-end",
+          "role": "end",
+          "lat": 32.7601,
+          "lon": -17.1234,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-do-alecrim",
+      "name": "Levada do Alecrim",
+      "category": "levada",
+      "regionId": "calheta",
+      "geofences": [
+        {
+          "id": "levada-do-alecrim-start",
+          "role": "start",
+          "lat": 32.754,
+          "lon": -17.133,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-alecrim-start-road",
+          "role": "start",
+          "lat": 32.758,
+          "lon": -17.1299,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-alecrim-end",
+          "role": "end",
+          "lat": 32.7569,
+          "lon": -17.112,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-do-moinho",
+      "name": "Levada do Moinho",
+      "category": "levada",
+      "regionId": "porto-moniz",
+      "geofences": [
+        {
+          "id": "levada-do-moinho-start",
+          "role": "start",
+          "lat": 32.8555,
+          "lon": -17.1778,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-moinho-end",
+          "role": "end",
+          "lat": 32.8294,
+          "lon": -17.2084,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-faja-do-rodrigues",
+      "name": "Levada Fajã do Rodrigues",
+      "category": "levada",
+      "regionId": "sao-vicente",
+      "geofences": [
+        {
+          "id": "levada-faja-do-rodrigues-start",
+          "role": "start",
+          "lat": 32.7791,
+          "lon": -17.0494,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-faja-do-rodrigues-end",
+          "role": "end",
+          "lat": 32.7884,
+          "lon": -17.0771,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-do-barreiro",
+      "name": "Levada do Barreiro",
+      "category": "levada",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "levada-do-barreiro-start",
+          "role": "start",
+          "lat": 32.726,
+          "lon": -16.9248,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-barreiro-end",
+          "role": "end",
+          "lat": 32.6953,
+          "lon": -16.9094,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-dos-tornos",
+      "name": "Levada dos Tornos",
+      "category": "levada",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "levada-dos-tornos-start",
+          "role": "start",
+          "lat": 32.683,
+          "lon": -16.8952,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-dos-tornos-end",
+          "role": "end",
+          "lat": 32.7155,
+          "lon": -16.8202,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "levada-do-canical",
+      "name": "Levada do Caniçal",
+      "category": "levada",
+      "regionId": "machico",
+      "geofences": [
+        {
+          "id": "levada-do-canical-start",
+          "role": "start",
+          "lat": 32.735,
+          "lon": -16.8041,
+          "radiusM": 250
+        },
+        {
+          "id": "levada-do-canical-end",
+          "role": "end",
+          "lat": 32.7328,
+          "lon": -16.7643,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
       "id": "pico-dos-barcelos",
       "name": "Pico dos Barcelos",
       "category": "viewpoint",

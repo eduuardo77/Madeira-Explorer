@@ -595,6 +595,23 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       and *Chão da Ribeira* — and one cut for the same reason, *Parque Ecológico do Funchal*,
       which I believe burned. Those three are where this pack is most likely to be wrong.
       — Notes: `docs/curation-draft.md` is the sheet as proposed. ⇠ T-066, D-064
+- [x] **T-066b** ✅ **Seven more levadas, 2026-09-22 (D-078) — 11 → 18, 67 places.** Drafted on
+      the official PR network and applied as drafted: *Risco* (PR 6.1), *Alecrim* (PR 6.2),
+      *Moinho* (PR 7), *Fajã do Rodrigues* (PR 16), *Barreiro* (PR 4), *Tornos* and *Caniçal*.
+      Sheet: `docs/curation-draft-levadas.md`.
+      — **Courses come from the route relation, not the name** (`COURSE_FROM_ROUTE` in
+      `build-levadas.mjs`): *Levada do Moinho* names two levadas 20 km apart, and Risco and
+      Barreiro carry 1 km and 0.1 km of named path on 3 km and 5 km routes. The eleven older
+      courses were left on name matching and rebuilt **byte-identical**.
+      — **A levada may have more than one `start`** — `judgeLevada` has always taken a set. The
+      project lead said PR 6.2's start is ambiguous, so Alecrim starts at the ER 105 car park *or*
+      where the route meets the road down to Casa do Rabaçal, and Risco at the car park *or* Casa
+      do Rabaçal (the shuttle stop). The validator's *"0 m apart"* warning on the shared car park
+      is expected: two walks, one car park.
+      — ⚠ **Found on the way:** I had PR 16's ends backwards; the region check caught it (the far
+      end is across the ridge in Porto Moniz). **PR 23 Levada da Azenha is `access=no` in OSM** —
+      closed, so not added. Fajã do Rodrigues is believed to close often for rockfall — check
+      before a release.
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073
@@ -979,8 +996,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `react-native-svg` on Android. Shadow is an offset copy, deboss is three passes, sheen is a
       gradient — that constraint is why these sketches are drawable by the app at all.
       — **Still to build:** the **per-place assignment** for all sixty (draft and veto, D-064); the
-      **date** on the stamp; **more levadas** now D-002 is loosened, with **PR numbers** as the
-      spine; and **3D** later (`TIER_METAL.sheen` exists unused for exactly that).
+      **date** on the stamp; ~~**more levadas** now D-002 is loosened, with **PR numbers** as the
+      spine~~ (T-066b); and **3D** later (`TIER_METAL.sheen` exists unused for exactly that).
 - [x] **T-158-orig** *(superseded by the above)* Deferred by the project lead ⇠ T-155
       — All the revenue now rests on the passport being desirable. Their words: *"we'll need then to
       make the stamps appealing enough to bring more revenue. But lets leave that for the future."*

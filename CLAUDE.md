@@ -62,8 +62,8 @@ The documents cost more to read than the code does. In order of impact:
    para ter um MVP."* **The canvas may grow, and levadas especially** — eleven of sixty is thin
    for what the island is. What has **not** changed: a place still has to be worth going to.
    Adding a mediocre one to round a number out is still the failure D-002 exists to prevent.
-   ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method — 16 viewpoints ·
-   11 levadas · 16 villages · 7 beaches · 10 landmarks. It is no longer scaffolding. Before editing
+   ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method; **67 since
+   2026-09-22 (T-066b)** — 16 viewpoints · 18 levadas · 16 villages · 7 beaches · 10 landmarks. It is no longer scaffolding. Before editing
    it, run `node tools/validate-content.mjs`; after editing it, run that plus
    `build-regions.mjs --assign` and `build-levadas.mjs`.
 

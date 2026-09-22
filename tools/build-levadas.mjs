@@ -64,6 +64,50 @@ const BBOX = '32.40,-17.32,33.20,-16.20';
 const TOLERANCE_DEG = 0.00008;
 
 /**
+ * Levadas whose course is an official route relation, not a name match.
+ *
+ * ⚠ **The name is not enough for these, and each fails differently.**
+ * `Levada do Moinho` names two levadas 20 km apart (the invariant below caught
+ * it once). `Levada do Risco` carries 1 km of named path on a 3 km signed
+ * route, and `Levada do Barreiro` 0.1 km on 5 km. `Levada dos Tornos` names
+ * 37 km of ways, of which OSM's southern route is the part people walk.
+ *
+ * A PR relation is the regional government's own route, signed and numbered,
+ * so where one exists it is the better course anyway. Keyed by place id and
+ * relation id — `ref` is not unique (`LC` is four different routes).
+ * The eleven places curated before 2026-09-22 stay on name matching; switching
+ * them would redraw courses that have been checked.
+ */
+const COURSE_FROM_ROUTE = {
+  'levada-do-risco': 2235098, // PR 6.1
+  'levada-do-alecrim': 4442860, // PR 6.2
+  'levada-do-moinho': 2754642, // PR 7 — not the Ponta do Sol one
+  'levada-faja-do-rodrigues': 4441613, // PR 16
+  'levada-do-barreiro': 13562619, // PR 4
+  'levada-dos-tornos': 3285943, // Levada dos Tornos - Sul
+  'levada-do-canical': 4442863, // Vereda da Levada do Caniçal
+};
+
+/** The member ways of each relation in `COURSE_FROM_ROUTE`, in one request. */
+async function fetchRoutes(ids) {
+  if (ids.length === 0) {
+    return new Map();
+  }
+  const result = await overpass(
+    `[out:json][timeout:180];relation(id:${ids.join(',')});out geom;`,
+    { tool: 'build-levadas' }
+  );
+  const byId = new Map();
+  for (const relation of result.elements ?? []) {
+    const ways = (relation.members ?? [])
+      .filter((member) => member.type === 'way' && Array.isArray(member.geometry))
+      .map((member) => ({ geometry: member.geometry }));
+    byId.set(relation.id, ways);
+  }
+  return byId;
+}
+
+/**
  * Every walkable levada on the island, and every channel, in two requests.
  *
  * ⚠ **This used to be one request per levada, and it did not survive contact
@@ -103,7 +147,10 @@ async function fetchAllLevadas() {
   const channels = await geometry('"waterway"');
   console.log(`${walkable.size} walkable, ${channels.size} channels`);
 
-  return { walkable, channels };
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const routes = await fetchRoutes(Object.values(COURSE_FROM_ROUTE));
+
+  return { walkable, channels, routes };
 }
 
 /**
@@ -193,15 +240,19 @@ function freeEnds(lines) {
 }
 
 function courseFor(place, index) {
+  const routeId = COURSE_FROM_ROUTE[place.id];
   // D-029: the user walks the path, not the channel. Fall back to the channel
   // only where no walkable way carries the name at all.
-  const onFoot = waysFor(place.name, index.walkable);
-  const byWater = onFoot.ways.length > 0
+  const onFoot =
+    routeId !== undefined
+      ? { ways: index.routes.get(routeId) ?? [], match: `relation ${routeId}` }
+      : waysFor(place.name, index.walkable);
+  const byWater = onFoot.ways.length > 0 || routeId !== undefined
     ? { ways: [], match: onFoot.match }
     : waysFor(place.name, index.channels);
 
   const chosen = onFoot.ways.length > 0 ? onFoot.ways : byWater.ways;
-  const source = onFoot.ways.length > 0 ? 'highway' : 'waterway';
+  const source = routeId !== undefined ? 'route' : onFoot.ways.length > 0 ? 'highway' : 'waterway';
   const match = onFoot.ways.length > 0 ? onFoot.match : byWater.match;
   const ways = chosen;
 
@@ -331,7 +382,7 @@ async function main() {
     simplifiedPoints += points;
 
     console.log(
-      `${course.wayCount} ${course.source} ways (${course.match} name match), ` +
+      `${course.wayCount} ${course.source} ways (${course.source === 'route' ? course.match : `${course.match} name match`}), ` +
         `${course.rawPoints} → ${points} points, ` +
         `${span(course.lines)} km across`
     );

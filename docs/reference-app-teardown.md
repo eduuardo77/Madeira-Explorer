@@ -29,7 +29,8 @@ with a year of data in it.
 ## Ranked
 
 Each item says what WalkNYC does, what Proa does today, and what it would take. Grade is
-**defect** (we are wrong), **idea** (they are better), or **evidence** (settles an open question).
+**defect** (we are wrong), **idea** (they are better), **evidence** (settles an open question),
+**correction** (this file was wrong) or **open** (not settled yet).
 
 ---
 
@@ -183,9 +184,10 @@ The multiplier is shown as a badge at the start and is **not persistent**; by mi
   Simulation*, and nothing says it finished. The user has to notice that nothing is moving.
   **Proa has a natural ending built already**: trip end → the souvenir (D-076). A simulation that
   runs into the souvenir is the demo, and it is the thing their version is missing.
-- ⚠ **The banners stay up throughout.** The promo card and the orange permission warning cover
-  roughly the top third of the screen **during the one mode whose entire purpose is to show the
-  map off** — confirmed in a screenshot mid-run. Design brief §3 already watches for this.
+- **The banners stay up throughout**, covering roughly the top third of the screen during the one
+  mode whose purpose is to show the map off. ⚠ This is a nit, not the design failure I first called
+  it — see item 11. A dedicated mode could hide transient chrome; the permission warning is
+  arguably still true during a simulation.
 
 **Why this is not just a nice-to-have.** HANDOFF blocker 2 is *"nobody has completed a single trip
 with this app"*, and it names the consequence: **the store screenshots are a replayed route**. This
@@ -268,14 +270,130 @@ not because it demonstrates anything.
 
 ---
 
+### 11. ⚠ The banners are well-behaved, and my first reading of them was wrong — **correction**
+
+**What I claimed**, twice: that the promo card and the orange permission warning "accumulate" over
+the map, and that this was the failure design brief §3 watches for. **The project lead pushed back
+— both banners carry an `×`, and they liked the pattern.** They were right, and it was testable, so
+it was tested rather than argued.
+
+**The test, 2026-09-22.** Dismissed the promo banner, `am force-stop`, cold relaunch. **It did not
+come back.** Dismissal is persistent.
+
+**So what is actually there is two different things that happen to be on screen at once on a fresh
+install:**
+
+| | Behaviour | Verdict |
+|---|---|---|
+| Promo card (*"New: import from Strava…"*) | Dismissible, **stays dismissed across a cold start** | Fine |
+| Orange warning (*"Always Gathering needs background location"*) | Dismissible, but **persists because the condition is still true** — background location is still denied | **Correct**, and the pattern item 4 recommends |
+
+**The correction that matters.** *"Two banners visible at once on a fresh install"* is not
+*"banners accumulate"*. The second is the design-brief §3 failure; the first is two well-behaved
+components that happen to coincide on day one. A warning that survives dismissal **while the
+problem survives** is not a nag, it is the app declining to forget a real defect — and it disappears
+by itself when the user fixes the permission.
+
+⚠ **This is the pattern to copy, not to avoid**, and it is the same conclusion item 4 reached from
+the other direction.
+
+⚠ **Note on the device:** the promo banner on the project lead's phone was dismissed by this test
+and will not return. Its feature is still reachable at Settings → Import.
+
+---
+
+### 12. "It runs smoother than mine" — partly measured, partly not yet — **open**
+
+The project lead's impression. Worth turning into numbers rather than agreeing with, and the
+numbers so far are **mixed and incomplete**.
+
+**Measured, and real:**
+
+| | WalkNYC 1.1.6 | Proa 0.1.0 |
+|---|---|---|
+| Installed APK | **53 MB** | **69 MB** |
+| Delivery | `splits=[base, config.arm64_v8a, config.pt, config.xxhdpi]` | **no splits — one universal APK** |
+| Cold start (`am start -W`) | **813 ms** | not measured — see below |
+
+⚠⚠ **The splits line is the finding.** WalkNYC ships as an **Android App Bundle**, so Play sent that
+phone one architecture, one density and **only Portuguese** (`config.pt`). Proa's build on the same
+phone is a universal APK carrying every architecture, every density and all three languages. Some
+of "smoother" is simply **less app**.
+
+⚠ **And `eas.json` has no production profile.** Both profiles are `distribution: internal` with
+`buildType: apk`. **Play has required an App Bundle for new apps since August 2021**, so the
+submission in HANDOFF blocker 1 cannot be made with what `eas.json` currently builds. That is a
+real gap, found by accident, and it is not a performance question.
+
+**Measured, and NOT yet a fair comparison:**
+
+| | WalkNYC | Proa |
+|---|---|---|
+| Frames sampled | 3 656 | 253 |
+| Janky | **15.81%** | **1.19%** |
+| 90th percentile | 19 ms | 10 ms |
+| 99th percentile | 69 ms | 26 ms |
+
+**On these numbers Proa is the smoother app, and the numbers should not be believed.** WalkNYC's
+3 656 frames are from being driven hard for an hour — scrolling settings, and an 80× map animation,
+which is the most expensive thing either app can do. Proa's 253 frames are whatever its last
+foreground session did four hours ago, almost certainly with no map animation in them. **Different
+work, so the comparison is meaningless in both directions** — it neither supports the impression nor
+refutes it.
+
+**What would settle it:** launch Proa, drive it the same way — open the map, pan, scroll settings —
+and read `gfxinfo` again. ⚠ **Not done, deliberately.** `tools/soak-check.sh` says in its own header
+that the probe *"never launches or foregrounds the app… opening the app resets exactly the OEM
+timers being measured"*, and T-051 is baselined on this handset. **Foregrounding Proa is the project
+lead's call, not a session's.**
+
+**One structural thing that no measurement will change.** WalkNYC is a native Android app — Jetpack
+Compose, `androidx.work`, Health Connect client, targetSdk 36. Proa is React Native under Expo.
+⚠ *Inferred* from the accessibility tree's shape and the `androidx.*` components, not from
+decompilation. That difference is not reversible inside v1 and is not being proposed as one; it is
+here so "smoother" is not mistaken for a bug with a fix.
+
+---
+
+### 13. Their settings screen, next to ours — **idea**
+
+The project lead likes theirs. Side by side:
+
+| WalkNYC | Proa |
+|---|---|
+| Profile · Goal · Import · **Passive Capture** · Data · Simulation · **Danger Zone** · **Contact** | Recording · If recording keeps stopping · Background tracking · Appearance · How closely · Map · About · Help improve the app · Erase |
+
+**Three things theirs does that ours does not.**
+
+- ⚠ **A human at the bottom.** *"Contact · Email me · Made by Joe Puccio · joepucc.io · Privacy
+  Policy."* A named person and a way to reach them. **Proa has no contact string at all** — grep
+  `strings.ts` for "contact" or "email" and there is nothing. For a paid app from an unknown solo
+  developer (D-072), a name and an address at the bottom of settings is cheap trust, and Play wants
+  a support contact on the listing regardless.
+- **"Danger Zone"** as the section name, rather than the neutral *"Erase"*. It signals before the
+  user reads the row. ⚠ Ours has the stronger confirmation flow behind it, so this is a label
+  question, not a safety one.
+- **Backup Data / Restore Data** — an explicit, user-controlled export to a file, separate from
+  the OS backup. Relevant to item 1: their privacy paragraph can honestly say *"you can also back
+  up your data to a file"* precisely because they built it.
+
+**One thing ours does better, worth not losing.** Every Proa section carries a footnote explaining
+what the control does *and what it costs* — `settings.background.off`, `settings.quality.footnote`,
+`settings.map.footnote`. WalkNYC does this in some sections and not others. Ours is more consistent.
+
+**The honest read of "I like theirs".** Their section names are mostly **nouns the user came for**
+(Profile, Goal, Import, Data), where several of ours name **mechanisms** (*"How closely"*,
+*"Background tracking"*, *"If recording keeps stopping"*). That is the difference worth chasing, and
+it is a copy change rather than a rebuild.
+
+---
+
 ## Not worth taking
 
 - **Six system dialogs in one minute.** Four of the six are OS dialogs, which the app cannot style,
   cannot re-ask, and gets one word back from. Proa fires one on first run and defers the background
   ask by twelve hours (D-008, D-081).
-- **The banner stack.** The promo banner and the permission warning are *both* over the map at all
-  times — including during a permission dialog, and including during **Simulation Mode**. Design
-  brief §3 already names this and T-144's note records it as the thing our map screen watches for.
+- ~~**The banner stack.**~~ **WITHDRAWN 2026-09-22 — I was wrong, see item 11.**
 - **The inline "allow all the time" option.** An Android 10 artefact. It does not exist on the
   phones we ship to.
 - **Their monetisation.** Already settled in `competitors.md`: no accounts, no purchases, so nothing
@@ -291,3 +409,5 @@ not because it demonstrates anything.
   accounts. Not touched.
 - The **leaderboard** and anything else that talks to their server.
 - **Behaviour with real data in it.** The install is fresh.
+- ⚠ **Proa driven the same way, for a fair frame-rate comparison** (item 12). Foregrounding Proa
+  resets the OEM timers T-051 is baselined on, so it waits for the project lead.

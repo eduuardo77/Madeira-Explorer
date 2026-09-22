@@ -1360,15 +1360,26 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       already queued and waiting on `getDatabase()` would deadlock against it.
       — ⚠ **Erase-all left the deleted history in the WAL's dead frames.** Fixed by the same
       truncate.
-- [ ] **T-179** **Find the statement that pinned the WAL** ⇠ T-142, T-178
-      — The suspect is `retryOnRelease` (`database.ts`): it retries a `getFirstAsync` whose first
-      attempt was rejected, which is only safe if the rejected attempt left **no stepped statement
-      behind**. `releasedObject.ts` argues nothing was *written*; nobody checked that nothing was
-      left *open*. Check expo-sqlite's native finalize path, then decide whether UI reads go
-      through a queue too.
-      — ⚠ Residual risk until then: auto-backup kills the process and copies the files before the
-      next open can truncate, so a pinned week can still exceed 25 MB. **Excluding `-wal` from
-      backup** would bound it at the cost of the last ≤1,000 frames — a §4a policy change, ask first.
+- [x] ✅ **T-179** **The statement that pinned the WAL — found, and every statement now held until
+      finalized, 2026-09-22.** ⇠ T-142, T-178 ⚠ **the fix is from source and upstream; the race
+      did not reproduce on the P30**
+      — **Cause: expo/expo#49799** (open, triage-verified; fix PR #49807 closed unmerged). An Expo
+      `AsyncFunction` converts its arguments on the modules queue after the JS call returns, and
+      nothing keeps a shared object's JS peer alive in between. expo-sqlite's `getFirstAsync` ends
+      `await statement.finalizeAsync()` and never reads the statement again.
+      — **Why a pin and not just a failed call** (expo-sqlite 57.0.1 source): the release runs
+      `resetNative()` with **no `sqlite3_finalize`**, and a `SELECT` has stepped one row by then —
+      so it stays active, holds the read transaction, and blocks every checkpoint.
+      — **Fix:** `storage/keepAlive.ts` + `withStatement` in `database.ts`; everything goes through
+      it, and a scan test fails if anything else calls `prepareAsync`.
+      — ⚠ **Found along the way: T-142's retry could write twice.** A release at `finalizeAsync`
+      comes after the statement ran. `releasedObject.ts` said the opposite; corrected.
+      — ⚠ **Not reproduced on the device.** `statementStress.ts` (debug screen) ran #48995's loop,
+      library vs held, at concurrency 8/64/256 with 70 SIGUSR1-forced ART GCs: **0 releases in
+      ~45,000 bare statements.** The probe is inert here, not proof the bug is absent — August had
+      two in six days. A `db_retry` or `wal_checkpoint` diary line is now the field signal.
+      — **Still the project lead's call:** excluding `-wal` from auto-backup would bound a pinned
+      week at the cost of the last ≤1,000 frames. Less urgent now; a §4a policy change.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

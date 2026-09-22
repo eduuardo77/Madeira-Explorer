@@ -302,3 +302,17 @@ The truncate is what makes *"delete my data"* true on disk.
 the process dies, and auto-backup kills the process and copies the files *before* the next open
 can truncate them. The app now writes a `wal_checkpoint` diary line when that happens, instead of
 it taking a phone plugged in by accident to find.
+
+### T-179 — the pin's cause, and a stress test that could not provoke it
+
+Cause from source and upstream, not from the phone: **expo/expo#49799** — a shared object's JS peer
+can be collected between an `AsyncFunction` call and the queue converting its arguments; in
+expo-sqlite the release destroys the binding without `sqlite3_finalize`, and a `SELECT` that has
+stepped one row keeps the read transaction. Fixed by holding every statement until finalized.
+
+On the P30, `statementStress.ts` (debug screen → *Statement leak stress*) ran #48995's loop with the
+library's calls and with the held ones, on throwaway databases, at concurrency 8, 64 and 256, while
+`run-as … kill -10` forced **70 ART GCs** (ART logs *"SIGUSR1 forcing GC"*, so they ran):
+**0 released-object rejections in ~45,000 bare statements**, every checkpoint clean. ⚠ **Read that
+as an inert probe, not an absent bug** — August produced two in six days of ordinary use, and
+upstream needed a blocked modules queue to make it fire on demand.

@@ -295,8 +295,8 @@ There is no server and no user account, but there **is** a database — a local 
   rest via the Data Protection class above.
 - **Size:** a full week of batched fixes plus sensor samples is roughly **1–5 MB**. Trivial.
   ⚠ **The WAL beside it is not, unless it is kept small** — the P30's reached 27 MB with a 684 KB
-  database (T-178). `storage/walPolicy.ts` bounds and truncates it; a pinned connection can
-  still grow it until the process dies (T-179).
+  database (T-178). `storage/walPolicy.ts` bounds and truncates it; the leaked statement
+  that once pinned it is prevented by holding every statement until finalized (T-179).
 - **Deleting the app deletes the data.** There is no server copy. This is the accepted cost of
   the privacy architecture (D-001), alongside no cross-device sync.
 

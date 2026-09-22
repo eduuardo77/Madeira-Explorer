@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **681 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **686 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **67 curated places**
 (16 viewpoints · 18 levadas · 16 villages · 7 beaches · 10 landmarks — seven levadas added
@@ -102,7 +102,9 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
    27 MB file: SQLite never shrinks it, and one August generation was pinned for six days by
    what looks like a leaked statement. Fixed with `journal_size_limit` plus a `TRUNCATE`
    checkpoint at open, trip end and erase-all — **verified on the P30 (field build): first launch
-   took the WAL from 27 MB to 78 KB, nothing lost.** ⚠ The pin itself is **T-179**, open.
+   took the WAL from 27 MB to 78 KB, nothing lost.** **T-179** found the pin: an expo-sqlite GC race (expo/expo#49799)
+   that leaks a stepped statement; every statement is now held until finalized. ⚠ It did not
+   reproduce on the P30 under stress — the fix is from source and upstream.
 
 ⚠ **Portuguese has now been seen on real hardware** (the map screen, 2026-09-22) — the line below
 about it never having been on a device is retired.

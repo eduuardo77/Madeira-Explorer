@@ -1170,6 +1170,33 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       chosen today is the class of guess this project has already paid for. **One Sensor Logger
       walk on one levada unblocks it** — the same fixture T-018/T-019/T-020/T-021 all wait on.
       — **Costing and rejected alternatives:** `docs/trace-fidelity.md`, D-082.
+- [ ] ⚠⚠ **T-171** **Leaving the archipelago puts the recorder in a trip-creation loop**
+      ⇠ T-100 ⚠ **measured on real hardware 2026-09-22** — `docs/field-notes.md`
+      — **30 trips in six days, 18 under 60 s, several 0 s.** `tripEnd.ts:186` ends a trip on the
+      first fix outside the archipelago — correct — but **nothing stops a new trip opening while
+      still outside**, so the next fix kills that one too, forever.
+      — ⚠⚠ **The user-visible cost is a notification storm.** D-011's cap is **per trip**, so
+      each new trip gets a fresh allowance: the log shows `reveal: 1 of 2` **25 times**, then
+      `reveal already sent` 41 times. **26 "your trip has ended" notifications.** The cap worked
+      exactly as specified and the churn underneath defeated it.
+      — **Who this hits:** a visitor flying home with the app still installed — i.e. **every
+      user, at the end of every trip.** It is the last thing the app does before they decide
+      whether to keep it.
+      — **The fix is not in `detectTripEnd`**, which is right. It is that the recorder must not
+      open a trip outside the bounds — and the cap probably wants to be per *departure*, not per
+      trip row.
+- [ ] **T-172** **Geofence registration fires an EXIT for every region at once** ⇠ T-145
+      — **2,699 geofence events on the P30, every one an `exit`, none an `enter`**, arriving in
+      simultaneous bursts: **83 sharing one timestamp**, then 81, then 74.
+      — `backgroundTasks.ts:135` maps the transition correctly, so this is the **initial trigger**
+      at registration, not the handler. ⚠ Not a correctness bug for stamps — an enter is what
+      awards — but it is ~2,700 junk rows a week and a burst of work on every rebuild.
+- [ ] **T-173** **Two runtime errors seen on real hardware, never before** ⚠ **2026-09-22**
+      — `ExpoLocation.startLocationUpdatesAsync` **rejected** at recording launch sync. If this is
+      reproducible it means **the recorder did not start**, which is the one failure the project
+      cannot tolerate (CONTEXT §2.4).
+      — `NativeStatement.finalizeAsync` **rejected** inside `onLocations` — a batch of fixes lost.
+      — Both from `recording_event` on 2026-08-28. Neither has ever appeared on the emulator.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

@@ -66,6 +66,30 @@ is drafted and ready to paste).
 3. **The curated 60 are one person's judgement.** *Achada do Marques* and *Chão da Ribeira* are
    flagged as most likely wrong.
 
+## ✅✅ THE PROJECT HAS REAL RECORDED DATA — found 2026-09-22
+
+**A Huawei P30 (ELE-L29, Android 10, Play Services current) was still plugged into the dev
+machine**, with the app's database from the August loan intact: **831 real fused fixes**, 30 trips,
+2,699 geofence events, 3,627 recording events, 22–28 August. `run-as` works on EMUI, so it came
+off cleanly. **Backed up outside the repo** at `Madeira-fieldwork/p30-2026-09-22/` with SHA-256
+sums — ⚠ **it must never be committed**: unmasked real movement, which is what D-016/D-040 exist
+for, and `tools/fixtures/` is deliberately *not* gitignored.
+
+**Everything measured from it is in `docs/field-notes.md`.** The three that change decisions:
+
+1. ⚠⚠ **The modelled noise is far more pessimistic than the island.** Cleanup cuts **43%** of drawn
+   length on `preview-trace.mjs`'s invented error and **2%** on real fixes. Every judgement about
+   the trace was made against the model. **Stop quoting the sweep as if it described Madeira.**
+2. ⚠⚠ **T-171 — flying home puts the recorder in a trip-creation loop**, and D-011's per-trip
+   notification cap is defeated by it: **26 "your trip has ended" notifications**. This hits
+   *every user at the end of every trip*.
+3. **Reported accuracy: p50 5.2 m, p90 20 m, p99 109 m, max 154 m** — bimodal, with almost nothing
+   between 20 m and 90 m. `MAX_DRAWN_ACCURACY_M = 120` rejects 0.6%; `NEVER_DRAWN = 500` never
+   fired. ⚠ All open-sky — canopy (T-018) is still unmeasured.
+
+⚠ **Portuguese has now been seen on real hardware** (the map screen, 2026-09-22) — the line below
+about it never having been on a device is retired.
+
 ## The cheapest thing that would change the most
 
 ⚠ **The project lead has an iPhone 15 and can run Sensor Logger.** That answers the *physics* half

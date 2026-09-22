@@ -1270,6 +1270,33 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **`defer` still re-registers geofences**, which the first version of the fix got
       wrong: geofencing needs no foreground service, and skipping it would stop a rebooted phone
       collecting stamps. `assert` does **not**, because `startTrip` already does it.
+      — ⚠ **And it re-asserts the profile the GATE chose, not `'walking'`.** Caught by looking
+      at what the change did: once the start stopped being conditional, hardcoding a profile meant
+      **every launch discarded the sampling gate's downshift**. Now `getCurrentSamplingProfile()`.
+- [ ] ⚠⚠ **T-175** **The sampling downshift is driven by the thing it exists to reduce**
+      ⇠ T-034, T-054 ⚠ **found 2026-09-22 while auditing efficiency**
+      — **`applySamplingGate` runs in exactly one place**: inside the location task
+      (`backgroundTasks.ts:94`), i.e. **only when the OS delivers fixes.** It reads a ten-minute
+      window of them and downshifts to the `stationary` profile when nothing has moved.
+      — ⚠⚠ **So the cheapest state is the one the app cannot notice it is in.** A phone indoors
+      on a table, GPS trying and failing, delivers **nothing** — so the gate never runs, and the
+      profile stays wherever it was last set. On the `precise` tier that is
+      `pauseWhenStationary: false`, i.e. the OS is never allowed to stop the chip either. **The
+      worse the situation, the less likely the mechanism that fixes it is to fire.**
+      — **Measured on the P30**, stationary indoors: the OS request was
+      `ACCURACY_FINE gps requested=+10s0ms` from `com.proa.madeira`, which is `walking × precise`
+      uniquely (30 s ÷ 3 = 10 s, accuracy `high`). It had been that way for as long as it had been
+      running. ⚠ `precise` is **not** the default — `DEFAULT_TRACKING_QUALITY` is `balanced` and
+      its reasoning is sound — but any user who picks *Máximo detalhe* gets this.
+      — **Candidate fixes, none chosen:** *(a)* give the gate a second trigger that does not
+      depend on fixes arriving — ⚠ which costs a periodic wake-up, the very thing being saved;
+      *(b)* let the OS decide, by never setting `pauseWhenStationary: false`, which makes the
+      `precise` tier cheaper and slightly less precise; *(c)* treat **absence** of fixes as
+      evidence of stillness and downshift from the health check, which already runs. **(c) looks
+      cheapest and reuses a wake-up the app already pays for.**
+      — ⚠ **This wants T-054's real numbers before it is tuned**, and those want a healthy
+      battery. What is measurable here regardless is **GPS-on time and wake-up count**, which a
+      degraded battery does not distort.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

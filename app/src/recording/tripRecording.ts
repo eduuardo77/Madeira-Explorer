@@ -50,6 +50,7 @@ import {
   shouldRefreshGeofences,
   type Visibility,
 } from './recordingAdmission';
+import { getCurrentSamplingProfile } from './samplingGate';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 
 /**
@@ -169,7 +170,16 @@ export async function syncRecordingWithPreferences(
       // second and never costs a trace.
       // ⚠ T-174: asserted, not conditional. `recording` is only used to say
       // what happened, never to decide whether to act — see above.
-      await startTrip('walking');
+      //
+      // ⚠⚠ **AND IT ASSERTS THE PROFILE THE GATE CHOSE, NOT `'walking'`.** This
+      // was a regression the moment the line above stopped being conditional:
+      // `startTrip` calls `setSamplingProfile`, so hardcoding a profile here
+      // meant **every launch threw away the sampling gate's downshift** and put
+      // a phone sitting on a table back on the moving profile. The gate only
+      // runs when the OS delivers fixes (`backgroundTasks.ts`), so it could be
+      // many minutes before it climbed back down — and on the `precise` tier,
+      // where `pauseWhenStationary` is false, that is continuous GPS.
+      await startTrip(await getCurrentSamplingProfile());
       await recordingEventDao.log(
         'start',
         recording

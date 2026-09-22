@@ -2,7 +2,7 @@
  * The T-179 measurement: does expo-sqlite leak statements on this phone, and
  * does `withStatement` stop it? Debug screen only — an instrument, not a feature.
  *
- * It runs expo/expo#48995's loop — eight concurrent read-then-write pairs on one
+ * It runs expo/expo#48995's loop — concurrent read-then-write pairs on one
  * handle, with heap churn between batches so Hermes actually collects — twice,
  * on two **throwaway databases with their own connections**:
  *
@@ -28,14 +28,28 @@ import { withStatement } from './database';
 
 type Arm = 'bare' | 'held';
 
-const BATCHES = 300;
-const CONCURRENCY = 8;
+/**
+ * Three loads. ⚠ At 8 — #48995's figure — the bare arm released **nothing** in
+ * 4,800 statements on the P30, with or without a forced-GC storm: the probe was
+ * inert, not the bug absent. expo-sqlite runs on `Dispatchers.IO` (64 threads)
+ * and SQLite serialises calls on one connection, so only a load well past 64
+ * leaves calls queued with their arguments unconverted — #49799's phase C.
+ */
+const LOADS: readonly { concurrency: number; batches: number }[] = [
+  { concurrency: 8, batches: 300 },
+  { concurrency: 64, batches: 60 },
+  { concurrency: 256, batches: 40 },
+];
+
+/** Objects allocated between batches, so Hermes collects inside the window. */
+const CHURN = 50_000;
 
 /** Written to so the churn cannot be optimised away. */
 let churnSink: unknown = null;
 
 export type StressResult = {
   arm: Arm;
+  concurrency: number;
   statements: number;
   released: number;
   otherErrors: number;
@@ -66,12 +80,17 @@ async function write(
   return withStatement(db, sql, (statement) => statement.executeAsync(a, b));
 }
 
-async function runArm(arm: Arm): Promise<StressResult> {
+async function runArm(
+  arm: Arm,
+  concurrency: number,
+  batches: number
+): Promise<StressResult> {
   const name = `t179-${arm}.db`;
   // A fresh connection of its own: never the cached handle `getDatabase` holds.
   const db = await SQLite.openDatabaseAsync(name, { useNewConnection: true });
   const result: StressResult = {
     arm,
+    concurrency,
     statements: 0,
     released: 0,
     otherErrors: 0,
@@ -86,9 +105,9 @@ async function runArm(arm: Arm): Promise<StressResult> {
       INSERT OR IGNORE INTO t (id, a, b) VALUES (1, '', '');
     `);
 
-    for (let batch = 0; batch < BATCHES; batch += 1) {
+    for (let batch = 0; batch < batches; batch += 1) {
       await Promise.all(
-        Array.from({ length: CONCURRENCY }, async (_, k) => {
+        Array.from({ length: concurrency }, async (_, k) => {
           try {
             await read(db, arm);
             await write(db, arm, `v${batch}-${k}`, k % 2 === 0 ? null : `x${k}`);
@@ -105,7 +124,7 @@ async function runArm(arm: Arm): Promise<StressResult> {
           }
         })
       );
-      churnSink = Array.from({ length: 5000 }, (_, i) => ({ i }));
+      churnSink = Array.from({ length: CHURN }, (_, i) => ({ i }));
     }
 
     try {
@@ -128,13 +147,15 @@ async function runArm(arm: Arm): Promise<StressResult> {
 
 /** Both arms, `held` first. Returns one line per arm for the alert. */
 export async function runStatementStress(): Promise<string> {
-  console.log(`T179 start: ${BATCHES} batches x ${CONCURRENCY} pairs per arm`);
+  console.log(`T179 start: ${JSON.stringify(LOADS)}, churn ${CHURN}`);
   const lines: string[] = [];
-  for (const arm of ['held', 'bare'] as const) {
-    const r = await runArm(arm);
-    lines.push(
-      `${r.arm}: ${r.released} released, ${r.otherErrors} other, checkpoint ${r.checkpoint}`
-    );
+  for (const { concurrency, batches } of LOADS) {
+    for (const arm of ['held', 'bare'] as const) {
+      const r = await runArm(arm, concurrency, batches);
+      lines.push(
+        `${r.arm} x${r.concurrency}: ${r.released} released, ${r.otherErrors} other, checkpoint ${r.checkpoint}`
+      );
+    }
   }
   churnSink = null;
   console.log('T179 done');

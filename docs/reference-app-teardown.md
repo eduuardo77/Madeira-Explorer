@@ -8,10 +8,13 @@ here is a `D-0xx` and nothing here has been agreed.
 `docs/competitors.md` stays the place for what the two products *are*. This file is only the
 teardown: what they do on a phone, and what it says about ours.
 
-**How it was gathered.** `dumpsys package`, `dumpsys notification`, `dumpsys deviceidle whitelist`,
-`dumpsys activity services` and `uiautomator dump`; **one screenshot**, taken mid-simulation because
-the question was genuinely visual. No APK decompilation. Nothing was granted, revoked, sent or
-purchased, and the phone was left on the screen it started on.
+**How it was gathered.** `dumpsys` (package, notification, deviceidle whitelist, activity services,
+gfxinfo), `uiautomator dump`, `am start -W`, and driving the UI with `input tap/swipe`; **one
+screenshot**, taken mid-simulation because the question was genuinely visual. No APK decompilation.
+**Nothing was granted, revoked, sent, purchased or deleted.**
+
+⚠ **The phone did not end as it was found** — see *State of the P30* at the bottom, which is the
+first thing a session picking this up should read.
 
 ⚠ **What was deliberately not touched.** The **live recorder** — pressing *Start Walk* writes a
 walk into the project lead's own app, so **Run Simulation** was used instead, which the app's own
@@ -23,6 +26,60 @@ and anything else that talks to their server were not opened.
 permission flow does there (an inline *"allow all the time"* option) does not exist on Android 11+.
 And the install is fresh — **0 of 86 638 blocks** — so nothing here is about how the app behaves
 with a year of data in it.
+
+---
+
+## The first-run permission sequence, which is where this started
+
+The project lead photographed WalkNYC's whole first run on 2026-09-22 and asked why some popups are
+blue and some green. **They are two different things alternating**, and the alternation is the
+design, not an accident.
+
+| # | What appears | Owner | What it actually is |
+|---|---|---|---|
+| 1 | *"WalkNYC uses your location…"* — green, *Not now / Continue* | **App** | Play's **prominent disclosure**. Note it discloses background use here, long before asking for it. |
+| 2 | *"Permitir… dados de atividade física?"* — blue | **OS** | `ACTIVITY_RECOGNITION` — the pedometer. |
+| 3 | *"Conceder acesso… à localização do dispositivo?"* — blue | **OS** | Foreground location. |
+| 4 | *"Track in the background?"* — green | **App** | A **pre-prompt**, whose only job is to stop a reflex denial of the dialog behind it. |
+| 5 | *"…aceder à localização a qualquer momento?"* — blue | **OS** | Background location. |
+| 6 | *"Ignorar otimizações de bateria?"* — blue | **OS** | The one-tap battery exemption. ⚠ *Inferred* from the declared restricted permission (item 8), not seen in a dump. |
+
+**Blue is the system**: the app cannot style it, cannot re-ask after two denials, and gets one word
+back. **Green is theirs**, where they can explain. Every green card sits immediately in front of a
+blue one — the standard pre-prompt pattern, spending a screen they control to buy a yes on the
+screen they get once. WalkNYC runs four of them back to back in under a minute, which is what makes
+it read as flicker rather than as a sequence.
+
+**Proa's equivalent on the same phone**, for comparison:
+
+1. Welcome (app, full screen) · 2. *"It needs to know where you go"* (app) · 3. **one blue dialog**
+— foreground location · 4. notifications screen, *expected to be skipped on Android ≤12*, which has
+no runtime notification permission — **unverified on the P30** · 5. *"Let this app keep running"*
+(app) · 6. the OS battery **settings list** (a screen to search, not a dialog — D-045).
+
+Then, **twelve hours later** (`ALWAYS_UPGRADE_DELAY_MS`), the disclosure screen and the blue
+background dialog.
+
+**So: they fire six popups in one minute, four of them blue. Proa fires one blue dialog on first
+run** and defers the background ask by half a day (D-008, D-081). Proa also has no popup 2 at all,
+because D-081 strips `ACTIVITY_RECOGNITION` from release builds.
+
+### The two manifests, side by side
+
+| | WalkNYC | Proa |
+|---|---|---|
+| `ACCESS_FINE_LOCATION` / `COARSE` | ✓ | ✓ |
+| `ACCESS_BACKGROUND_LOCATION` | ✓ `restricted=true` | ✓ |
+| `FOREGROUND_SERVICE` / `_LOCATION` | ✓ | ✓ |
+| `POST_NOTIFICATIONS`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED` | ✓ | ✓ |
+| `ACTIVITY_RECOGNITION` | ✓ granted | declared, **stripped from release** (D-081) |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | **✓** | ✗ — by choice (D-045) |
+| `android.permission.health.READ_STEPS` | **✓** | ✗ — v2 (D-081) |
+| `INTERNET`, `ACCESS_NETWORK_STATE` | **✓** — they have servers | ✗ |
+| `com.android.vending.CHECK_LICENSE` | ✓ | ✗ |
+
+The lists are near-identical apart from the four they add. ⚠ **Proa's is the shorter one**, which is
+the whole point of D-044 and CONTEXT §4.8, and worth not losing.
 
 ---
 
@@ -409,11 +466,52 @@ it is a copy change rather than a rebuild.
 
 ---
 
+### 14. They use WorkManager; we use expo-task-manager — **open**
+
+WalkNYC's enabled components include `androidx.work.impl.background.systemalarm.RescheduleReceiver`
+and `androidx.work.impl.background.systemjob.SystemJobService`. They are on **WorkManager**, which
+is Google's own answer to being killed: it persists its queue to disk, reschedules across reboots,
+and is the path OEM battery managers are least aggressive toward.
+
+**Ours** is `expo-task-manager` plus a foreground location service, with `RECEIVE_BOOT_COMPLETED`
+handled in `backgroundTasks.ts`.
+
+⚠ **Not a recommendation.** Switching is a large change to the one part of the app that is hardest
+to test without a device, and T-051/T-053 have not yet shown our approach failing. It is recorded
+because **if T-053 does show EMUI killing the recorder, this is the other lever** — alongside
+D-045's battery dialog — and it is better to know now that the reference app chose differently.
+
+---
+
+### 15. Things in their settings worth naming individually — **idea**
+
+Gathered from the settings screen; the structural comparison is item 13.
+
+- ⚠ **The user chooses the denominator.** A *Goal* section picks which boroughs count toward
+  progress, with the footnote *"Select which boroughs count toward your progress. This does not
+  affect your leaderboard position."* `0 / 86 638 blocks` is a demoralising number, and letting the
+  user shrink it is how they answer that. **Proa's 60 places is already small enough that this does
+  not transfer** — but the move behind it does: *when the total is the discouraging part, let the
+  user pick a smaller total.*
+- **They say plainly what imported data does not earn.** *"Imported walks show on your map and
+  statistics but do not count toward the leaderboard."* An honest exclusion, stated once, next to
+  the toggle that causes it.
+- **Passive Capture is a named tier list** — *Always Gathering · Default · Aggressive · Battery
+  Saver* — with one footnote covering all of them, ending *"Grant background location and physical
+  activity permission to enable always-on tracking."* **Permission repair inside settings**, again
+  (item 4), rather than only at first run.
+- **`Backup Data` / `Restore Data`** — an explicit user-controlled export to a file, separate from
+  the OS backup. It is what lets their privacy paragraph honestly offer an alternative (item 1).
+- **A `Danger Zone`** holding *Clear All Walk Data* and *Request data deletion*.
+
+---
+
+
 ## Not worth taking
 
-- **Six system dialogs in one minute.** Four of the six are OS dialogs, which the app cannot style,
-  cannot re-ask, and gets one word back from. Proa fires one on first run and defers the background
-  ask by twelve hours (D-008, D-081).
+- **Six system dialogs in one minute** — decomposed at the top of this file. Four of the six are OS
+  dialogs, which the app cannot style, cannot re-ask, and gets one word back from. Proa fires one on
+  first run and defers the background ask by twelve hours (D-008, D-081).
 - ~~**The banner stack.**~~ **WITHDRAWN 2026-09-22 — I was wrong, see item 11.**
 - **The inline "allow all the time" option.** An Android 10 artefact. It does not exist on the
   phones we ship to.
@@ -430,5 +528,41 @@ it is a copy change rather than a rebuild.
   accounts. Not touched.
 - The **leaderboard** and anything else that talks to their server.
 - **Behaviour with real data in it.** The install is fresh.
-- ⚠ **Proa driven the same way, for a fair frame-rate comparison** (item 12). Foregrounding Proa
-  resets the OEM timers T-051 is baselined on, so it waits for the project lead.
+- ⚠ **Proa measured at all.** Attempted 2026-09-22 with the project lead's go-ahead and
+  **abandoned**: the only build on the phone is a dev client that opens its own launcher, so there
+  was no Proa to measure (item 12). It needs a `preview` build first.
+- **Their live recorder UI**, and what their notification says while a walk runs — their service
+  was not running during this session, so the text was never read.
+
+---
+
+## What was already acted on, and where
+
+Four of these findings were implemented the same day rather than left in this file.
+
+| Finding | Commit | What changed |
+|---|---|---|
+| Their background pre-prompt names the chore it removes, and says what you keep | `f225b56` | `onboarding.upgrade.body2`, new `body3`, and every permission decline became *"No, I'll start it myself"* |
+| ⚠ Their *"only records while the pedometer detects walking"* bound was **not** copied | `f225b56` | Our equivalent has a known hole — T-175 — so promising it would be false for a user sitting indoors |
+| The Portuguese in the Play disclosure was not grammatical | `adc9bc6` | `a si próprio` → `ser você a` |
+| The walk/caminhada/Wanderung rename d4f3c43 started was unfinished | `0226373` | Four more strings; two levada ones deliberately kept |
+
+---
+
+## ⚠ State of the P30 after this session — read this before using it
+
+**2026-09-22, ~18:30.** Three things about that phone are not how they were found.
+
+1. ⚠⚠ **Proa's recorder is DEAD and cannot be restarted from the phone.** Benchmarking (item 12)
+   force-stopped the app, which dropped the in-memory JS bundle it had been running since ~13:47.
+   The dev launcher has nothing cached and Metro is not running, so **`npx expo start` plus a
+   reconnect is required** to get the app — and therefore the recorder — back.
+   - **T-051's soak is stopped by this.** ⚠ It was already proving nothing: the probe's own output
+     said *"PLUGGED IN — Doze will never engage"*, and the clock had never been started.
+2. **WalkNYC's promo banner is dismissed** and will not return (item 11). Its feature is still at
+   Settings → Import.
+3. **`adb tcpip` is on at `192.168.1.136`**, from the T-051 work, not from this session. It
+   survives until the phone reboots and the soak commit says to turn it off afterwards.
+
+**Unchanged:** no permission was granted or revoked on either app, nothing was sent, purchased or
+deleted, and WalkNYC's walk data is still empty — its simulation wrote nothing, verified.

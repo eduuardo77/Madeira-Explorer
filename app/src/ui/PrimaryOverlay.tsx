@@ -274,7 +274,7 @@ export default function PrimaryOverlay({
             design={designFor(passportStamp.placeId, passportStamp.category)}
             name={passportStamp.name}
             collected={passportStamp.collected}
-            rim={rimFor(tier)}
+            rim={rimFor(tier, mapStyle)}
             size={STAMP_BUTTON_SIZE * TILT_FIT}
           />
         </Pressable>

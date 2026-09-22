@@ -149,7 +149,7 @@ function tierRow() {
       !none,
       `width:${BUTTON_PX}px;height:${BUTTON_PX}px;`,
       undefined,
-      rimFor(tier)
+      rimFor(tier, ground === NIGHT_LAND ? 'dark' : 'light')
     ).replaceAll('panel-', `panel-${ground.slice(1)}-${tier}-`);
     return `
   <figure class="tier">

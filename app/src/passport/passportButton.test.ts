@@ -12,6 +12,8 @@ import { FREE_STAMP_ALLOWANCE } from '../entitlement/freeTier.ts';
 import { buttonStamp, PLACEHOLDER_ID } from './passportButton.ts';
 import { designFor } from './stampArt.ts';
 import { RIM_METAL_UNITS, RIM_PAD_UNITS, rimElements, rimFor } from './stampRim.ts';
+import { mapChrome } from '../ui/theme.ts';
+import { NIGHT_LAND } from '../map/googleNightStyle.ts';
 import { TIER_METAL, TIERS } from './stampTier.ts';
 
 const HOUR = 3_600_000;
@@ -77,19 +79,43 @@ test('a stamp for a place no longer in the pack is skipped, not drawn blank', ()
   assert.equal(stamp.placeId, 'viewpoint-1');
 });
 
-test('no rim before the first stamp; one rim per metal after it', () => {
-  assert.equal(rimFor('none'), null);
-  for (const tier of TIERS.filter((t) => t !== 'none')) {
-    assert.deepEqual(rimFor(tier), {
-      metal: TIER_METAL[tier].fill,
-      hairline: TIER_METAL[tier].ink,
-    });
+test('no metal before the first stamp; one rim per metal after it, on either map', () => {
+  assert.equal(rimFor('none', 'light'), null);
+  for (const style of ['light', 'dark'] as const) {
+    for (const tier of TIERS.filter((t) => t !== 'none')) {
+      assert.deepEqual(rimFor(tier, style), {
+        metal: TIER_METAL[tier].fill,
+        metalUnits: RIM_METAL_UNITS,
+        hairline: TIER_METAL[tier].ink,
+      });
+    }
   }
+});
+
+test('⚠ on the night map the placeholder gets a light edge, and it clears 3:1', async () => {
+  // Its own border measured 2.63:1 on the night land (2026-09-22); the project
+  // lead asked for the edge. The night map's own control edge, so it matches.
+  const { contrastRatio } = await import('../ui/contrast.ts');
+  const edge = rimFor('none', 'dark');
+  assert.ok(edge !== null);
+  assert.equal(edge.metal, mapChrome.dark.border);
+  assert.equal(edge.hairline, null);
+  assert.ok(edge.metalUnits < RIM_METAL_UNITS, 'an edge, thinner than a rank rim');
+  assert.ok(
+    contrastRatio(edge.metal, NIGHT_LAND) >= 3,
+    `the edge measures ${contrastRatio(edge.metal, NIGHT_LAND).toFixed(2)}:1 on the night map`
+  );
+  // One stroke, no hairline.
+  assert.equal(rimElements(designFor('x', 'levada'), edge).length, 1);
 });
 
 test('the rim follows the cut edge: hairline under metal, both wider than they show', () => {
   const design = designFor('viewpoint-0', 'viewpoint');
-  const [hairline, metal] = rimElements(design, { metal: '#C8874A', hairline: '#1C1C1E' });
+  const [hairline, metal] = rimElements(design, {
+    metal: '#C8874A',
+    metalUnits: RIM_METAL_UNITS,
+    hairline: '#1C1C1E',
+  });
 
   assert.equal(hairline.kind, 'polygon');
   assert.equal(metal.kind, 'polygon');
@@ -124,8 +150,8 @@ test('⚠ the hairline, as drawn, stands the pale metals off the light map', asy
       .join('');
 
   for (const tier of TIERS.filter((t) => t !== 'none')) {
-    const rim = rimFor(tier);
-    assert.ok(rim !== null);
+    const rim = rimFor(tier, 'light');
+    assert.ok(rim !== null && rim.hairline !== null);
     const drawn = over(rim.hairline, LIGHT_LAND, RIM_HAIRLINE_OPACITY);
     assert.ok(
       contrastRatio(drawn, LIGHT_LAND) >= 3,

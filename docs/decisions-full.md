@@ -4553,5 +4553,7 @@ the build if a locked stamp is ever chosen.
   **a metal coin** behind the stamp; **a corner medal**. The hairline is what makes the pale
   metals legible on the light map (tested: every metal ≥3:1 as drawn).
 
-⚠ **Open:** the grey placeholder's edge is **2.63:1 on the night map**, under the 3:1 floor for
-a control. It shows only before the first stamp. Not fixed — a design question, not a bug.
+**Amended the same day — the placeholder's night edge.** The grey placeholder's own border
+measured **2.63:1** on the night map, under the 3:1 floor for a control. On the project lead's
+yes, it now wears a thin light edge there only — `mapChrome.dark.border` (4.10:1), the edge the
+night map's other controls already use. On the light map it needed nothing (4.42:1).

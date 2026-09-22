@@ -620,7 +620,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Seen in the workbench, not on a phone.** 84 dp box, the tilted stamp 81 dp inside it,
       rim strokes in the DOM in the right order. `react-native-svg` on Android is unverified for
       `strokeLinejoin` and a padded viewBox.
-      — ⚠ **Open:** the grey placeholder's edge is 2.63:1 on the night map, under 3:1.
+      — ✅ The grey placeholder's edge measured 2.63:1 on the night map; on the project lead's yes it
+      now gets a thin light edge there (`mapChrome.dark.border`, 4.10:1), and a test holds it.
 - [x] **T-066c** ✅ **Fourteen more places and one cut, 2026-09-22 (D-078) — 67 → 80.** Applied
       as drafted: Eira do Serrado, Boca da Encumeada, Véu da Noiva, Ilhéus da Ribeira da Janela ·
       Porto da Cruz, Jardim do Mar, Paul do Mar · Fajã dos Padres · Jardim Botânico, Sé do

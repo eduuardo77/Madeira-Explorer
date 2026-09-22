@@ -26,13 +26,26 @@
  *
  * Round joins, because a `zigzag` or `torn` edge has sharp inward corners and a
  * mitred stroke spikes out of every one of them.
+ *
+ * THE PLACEHOLDER'S EDGE ON THE NIGHT MAP
+ * ---------------------------------------
+ * Before the first stamp there is no rank and so no metal — but the grey
+ * placeholder's own border measured **2.63:1** on the night land, under the
+ * 3:1 floor for a control. So on the night map, and only there, it gets a thin
+ * light edge: `mapChrome.dark.border`, the edge every other night-map control
+ * already wears (4.10:1). On the light map its border is 4.42:1 and it needs
+ * nothing. The project lead asked for it, 2026-09-22.
  */
 
 import { toPolygon, type StampDesign, type StampElement } from './stampArt.ts';
 import { TIER_METAL, type Tier } from './stampTier.ts';
+import { mapChrome } from '../ui/theme.ts';
 
 /** How much metal shows outside the cut edge, in canvas units (of 100). */
 export const RIM_METAL_UNITS = 4;
+
+/** How much of the placeholder's night edge shows — thinner: it is an edge, not a rank. */
+export const PLACEHOLDER_EDGE_UNITS = 2;
 
 /** How much hairline shows outside the metal. */
 export const RIM_HAIRLINE_UNITS = 1.5;
@@ -44,48 +57,61 @@ export const RIM_HAIRLINE_OPACITY = 0.55;
  * How far the rim reaches past the canvas, so a renderer can grow its viewBox.
  *
  * ⚠ Without this the rim is clipped wherever the cut edge touches the canvas
- * edge — which the scalloped silhouettes do.
+ * edge — which the scalloped silhouettes do. One pad for every rim, sized for
+ * the widest (metal plus hairline).
  */
 export const RIM_PAD_UNITS = RIM_METAL_UNITS + RIM_HAIRLINE_UNITS;
 
-export type Rim = { metal: string; hairline: string };
+/** `metal` is whatever the outer stroke is; `hairline` is null where there is none. */
+export type Rim = { metal: string; metalUnits: number; hairline: string | null };
 
 /**
- * The rim for a rank, or null for none.
+ * The rim for a rank on a given map, or null for none.
  *
- * `none` has no rim: before the first stamp the button shows the grey passport
+ * `none` never gets metal: before the first stamp the button shows the grey
  * placeholder, and a metal rim round a stamp nobody has earned would be a rank
- * nobody has either.
+ * nobody has either. On the night map it gets the light edge instead — see
+ * the header.
  */
-export function rimFor(tier: Tier): Rim | null {
+export function rimFor(tier: Tier, mapStyle: 'light' | 'dark'): Rim | null {
   if (tier === 'none') {
-    return null;
+    return mapStyle === 'dark'
+      ? { metal: mapChrome.dark.border, metalUnits: PLACEHOLDER_EDGE_UNITS, hairline: null }
+      : null;
   }
-  return { metal: TIER_METAL[tier].fill, hairline: TIER_METAL[tier].ink };
+  return {
+    metal: TIER_METAL[tier].fill,
+    metalUnits: RIM_METAL_UNITS,
+    hairline: TIER_METAL[tier].ink,
+  };
 }
 
-/** The rim's two strokes, bottom first. Draw them before the stamp's own elements. */
+/** The rim's strokes, bottom first. Draw them before the stamp's own elements. */
 export function rimElements(design: StampDesign, rim: Rim): StampElement[] {
   const points = toPolygon(design.cutOutline);
   // A stroke is centred on the line, so twice the visible width; the stamp on
   // top covers the inner half.
+  const metal: StampElement = {
+    kind: 'polygon',
+    points,
+    fill: 'none',
+    stroke: rim.metal,
+    strokeWidth: 2 * rim.metalUnits,
+    strokeLinejoin: 'round',
+  };
+  if (rim.hairline === null) {
+    return [metal];
+  }
   return [
     {
       kind: 'polygon',
       points,
       fill: 'none',
       stroke: rim.hairline,
-      strokeWidth: 2 * RIM_PAD_UNITS,
+      strokeWidth: 2 * (rim.metalUnits + RIM_HAIRLINE_UNITS),
       strokeLinejoin: 'round',
       opacity: RIM_HAIRLINE_OPACITY,
     },
-    {
-      kind: 'polygon',
-      points,
-      fill: 'none',
-      stroke: rim.metal,
-      strokeWidth: 2 * RIM_METAL_UNITS,
-      strokeLinejoin: 'round',
-    },
+    metal,
   ];
 }

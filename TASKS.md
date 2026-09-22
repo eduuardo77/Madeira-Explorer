@@ -1297,6 +1297,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **This wants T-054's real numbers before it is tuned**, and those want a healthy
       battery. What is measurable here regardless is **GPS-on time and wake-up count**, which a
       degraded battery does not distort.
+- [x] **T-176** **The privacy copy stopped contradicting the backup, and a field build exists**
+      ⇠ `docs/reference-app-teardown.md` §1 and §12 — 2026-09-22
+      — **Copy.** Six UI strings × three languages said nothing leaves the phone / there is no
+      backup — false, because `withAndroidBackupRules.js` puts the database in the phone's own
+      backup, and banned by D-073 anyway. Worst was `erase.confirm.body2`, telling the user this
+      was the only copy **while they decide to erase it**. Two policy sentences contradicted the
+      policy's own backup section. `i18n.test.ts` now fails on the phrases (checked against the
+      old strings). ⚠ The Portuguese policy wording still wants the project lead's eye (T-160b).
+      — **Field build.** `-PproaFieldBuild=true` makes a release APK whose **manifest** is
+      debuggable, so `run-as` can still pull the database after a real walk — `adb backup` gives
+      an empty file on the P30. Not `debuggable true` on the build type: that flips
+      `BuildConfig.DEBUG` and the app looks for Metro. `docs/dev-build.md` has the recipe and why
+      smoothness must never be measured on it.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

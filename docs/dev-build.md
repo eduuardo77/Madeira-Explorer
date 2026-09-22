@@ -495,3 +495,32 @@ produced it**, and take a backup before rebuilding over a known-good APK.
 
 ⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
 these docs is a **manual rename**, not something the build produces.
+
+## The field build — a release APK we can still read, 2026-09-22
+
+For a phone that is going to record a **real walk**: a release build (bundled JS, minified, no dev
+client, **no Metro**) that still lets `run-as` pull the database afterwards.
+
+```bash
+cd app/android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -PproaFieldBuild=true
+adb install -r app/build/outputs/apk/release/app-release.apk   # -r keeps the phone's data
+adb shell dumpsys package com.proa.madeira | grep pkgFlags      # must say DEBUGGABLE
+```
+
+**Why it exists.** The dev-client build cannot open without a laptop serving it, so it cannot go
+on a levada. A plain release build can — but is not debuggable, and **`run-as` is the only way this
+project gets the database off a phone**: `adb backup` returns an empty 47-byte file on the P30
+(tested 2026-09-22), and `tools/soak-check.sh` reads the WAL through `run-as` too.
+
+⚠ **Why not `debuggable true` on the build type.** It also sets `BuildConfig.DEBUG`, which React
+Native reads as *use developer support* — and the app goes looking for Metro again. So
+`plugins/withFieldBuild.js` sets `android:debuggable` in the **manifest only**, through a
+placeholder that is `false` unless `-PproaFieldBuild=true` is passed.
+
+⚠ **Never measure smoothness on it.** ART runs a debuggable app's Kotlin/Java less optimised. Build
+without the flag for that. Play rejects a debuggable upload, so it cannot ship by accident.
+
+⚠ **Both builds are signed with the public debug key** (no upload key is configured here), which is
+why `install -r` over the dev-client build keeps the data. Once an upload key exists the
+signatures differ, the install is refused, and **the only way past it is an uninstall that wipes
+the phone's trips — pull the database first.**

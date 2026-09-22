@@ -93,6 +93,11 @@ Each item says what WalkNYC does, what Proa does today, and what it would take. 
 
 ### 1. ⚠⚠ Our privacy copy claims something that is not true — **defect**
 
+✅ **Fixed 2026-09-22** — six strings, not four (`settings.help.footnote` also said *"Nothing
+leaves this phone unless you send it"*; the about key is `settings.about.footnote`, not
+`nothingLeaves`), plus two sentences in the privacy policy that contradicted its own backup
+section. `i18n.test.ts` now fails the build on the phrases — verified against the old strings.
+
 **Theirs**, in Settings:
 
 > your walk data is stored only on your phone, never on our servers. Uninstalling the app removes
@@ -546,6 +551,8 @@ Four of these findings were implemented the same day rather than left in this fi
 | ⚠ Their *"only records while the pedometer detects walking"* bound was **not** copied | `f225b56` | Our equivalent has a known hole — T-175 — so promising it would be false for a user sitting indoors |
 | The Portuguese in the Play disclosure was not grammatical | `adc9bc6` | `a si próprio` → `ser você a` |
 | The walk/caminhada/Wanderung rename d4f3c43 started was unfinished | `0226373` | Four more strings; two levada ones deliberately kept |
+| §1 — the privacy copy contradicted the backup | T-176 | Six strings × three languages, two policy sentences, a guard test |
+| §12 — no Proa on the phone that runs without Metro | T-176 | A **field build** (`plugins/withFieldBuild.js`, `docs/dev-build.md`) installed on the P30 |
 
 ---
 
@@ -553,6 +560,12 @@ Four of these findings were implemented the same day rather than left in this fi
 
 **2026-09-22, ~18:30.** Three things about that phone are not how they were found.
 
+0. ✅ **Superseded ~18:52 — the P30 now runs the FIELD BUILD** (T-176): a release APK, no Metro,
+   installed with `install -r` over the dev client, data intact (30 trips, 835 fixes, checked),
+   `soak-check.sh` reads `recorder ALIVE`. Item 1 below is history. ⚠ **Do not measure smoothness
+   on it** — it is debuggable on purpose; build without `-PproaFieldBuild` for that.
+   The pre-install database is at `Madeira-fieldwork/p30-2026-09-22b/`, the APK in
+   `Madeira-fieldwork/apks/`.
 1. ⚠⚠ **Proa's recorder is DEAD and cannot be restarted from the phone.** Benchmarking (item 12)
    force-stopped the app, which dropped the in-memory JS bundle it had been running since ~13:47.
    The dev launcher has nothing cached and Metro is not running, so **`npx expo start` plus a

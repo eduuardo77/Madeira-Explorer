@@ -1,6 +1,6 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-08-18.
+**For:** a session picking this project up cold. **Updated:** 2026-09-22.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
@@ -151,6 +151,18 @@ gradient.
 
 ## Traps. Each cost a session, and none was visible from the tests
 
+- ⚠⚠ **The map draws the UNCLEANED trace — found 2026-09-22, T-167, not yet fixed.**
+  `NativeMapScreen.tsx:326` calls `splitIntoSegments` (raw); the cleaned entry point is
+  `drawableSegments`. `traceCleanup.ts` reaches the souvenir card and every preview tool and
+  **not the map** — so everything previewed has been cleaned and the phone has not. The Google
+  screen (Aug 14) predates the cleanup (Aug 16), which was wired into `buildTrace`, whose only
+  caller is now `app/attic/`. **Same shape as T-145**: nothing tests `NativeMapScreen`.
+  Costing, and the two tiers beyond the fix: `docs/trace-fidelity.md`, **D-082 (Provisional)**.
+- ⚠ **`expo-maps` polylines take four properties and no more** — `points`, `color`, `geodesic`,
+  `width` (`GoogleMapsView.kt:158`). **No dash pattern** (so the dashed-bridge idea in
+  `traceGeoJson.ts:112` is not buildable), no joint type (miter, which turns a 1.3° corner into a
+  ~480 px spike), no caps, no zIndex. Alpha *does* work. Check this file before designing anything
+  that draws a line.
 - ⚠⚠ **T-145 — nothing started geofence monitoring, so no stamp could ever be awarded.** 399
   passing tests could not see it. **If you are about to trust a subsystem because its tests pass,
   read this one first.** ⚠ **T-155 was the same shape**, and is now guarded: `freeTier.test.ts`

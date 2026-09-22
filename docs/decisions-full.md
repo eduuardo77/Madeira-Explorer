@@ -4450,3 +4450,69 @@ sensor's documented design, **not a measurement of this app**, and D-041 applies
 ⚠ **Consequence, accepted:** trips recorded before v2 have no step data, extending D-050's
 trade rather than changing it.
 
+
+---
+
+## D-082 — The trace is cleaned, weighted honestly, and snapped only to levadas we ship
+
+**Status:** ⚠ **Provisional** — recommended 2026-09-22, not confirmed by the project lead.
+Research and costing: [`docs/trace-fidelity.md`](trace-fidelity.md).
+
+**What prompted it:** the project lead, looking at the running app — *"sometimes the app makes
+lines in random places which looks a bit odd. I want the app to only highlight the real roads
+which you can on google maps."*
+
+**The finding that reframes the request:** *"the line is not on the road"* has **four** causes, and
+only the last is the one D-032 deferred.
+
+**Decision, in three tiers:**
+
+1. **The map draws the cleaned trace.** `NativeMapScreen` calls `splitIntoSegments` — raw — while
+   `traceCleanup.ts` (T-150/D-066) is called by the souvenir card and every preview tool but not by
+   the map. This is a **bug**, not a scope question. Measured on the seafront route, the phone draws
+   **4.49 km for a 2.23 km walk with a 151 m worst error**, against 2.55 km and 20 m cleaned.
+2. **The line stops claiming a precision GPS has not got.** A 4 pt hairline draws every metre of
+   ordinary GPS error as a visible mistake; a wider, softer, translucent band puts the same error
+   *inside* the mark without faking anything. ⚠ Subject to the project lead's eye and to the
+   renderer test below.
+3. **Snapping, and only to the eleven levada courses already shipped.** Not a road graph.
+
+**Alternatives considered:**
+
+- *General map matching (Phase 4, T-082–T-098).* Rejected — **D-032 stands.** ~51,000 highway ways
+  plus 16,066 footways, for something D-002 calls decoration, while the reward rides on geofences.
+- *Google Roads API `snapToRoads`.* Rejected, and it is worse here than doing nothing. It snaps to
+  the **road** network: Caldeirão Verde's nearest road is the ER-101, several hundred metres away
+  and several hundred metres below. It would place the app's signature walks confidently and
+  spectacularly wrong — D-032's own rejected alternative wearing a Google logo — and it means
+  POSTing the user's trace to an endpoint, against D-001 and CONTEXT §2.5.
+- *Dashed bridges* (the open question left in `traceGeoJson.ts:112`). **Not implementable.**
+  `expo-maps@57.0.1` never passes `pattern` to the polyline. The nearest available thing is the
+  same stroke drawn faint, which is gated on the layering bug below.
+- *Smoothing the drawn line with splines.* Rejected for now. It moves points, and unlike snapping it
+  moves them toward nothing in particular — prettier, with no more claim to being where the user was.
+- *Fog-of-war reveal circles* (D-002's retained fallback). Not taken up: hundreds of circles per
+  trip, and it discards the one line the product is about.
+
+**Why snapping to levadas is not the thing D-032 rejected:** D-002's principle is *curate the
+canvas*; this applies it to the graph. The geometry is already on the device
+(`content/levadas.json`, real OSM ways via `tools/build-levadas.mjs`), so there is no import, no
+R-tree and no new storage. And the ambiguity that makes general matching hard does not exist here —
+a levada runs a contour on steep ground with no parallel candidate, where T-084's hard case is two
+roads vertically stacked. It also fixes the worst-looking case: canopy, where GPS is poorest and the
+app's signature walks are.
+
+⚠ **It breaks `traceCleanup.ts`'s one rule** — every surviving point is a position the device
+reported. It must therefore live in its **own module**, apply **at draw time only**, and leave
+D-010's raw rows untouched. The honest defence is that a polyline already interpolates: the straight
+segment between two fixes is a position nobody observed, and the only question is its shape. That is
+an argument, not a licence, which is why this is Provisional.
+
+⚠⚠ **Tier 3 is blocked on data and must not be built without it.** `tools/fixtures/` is empty until
+T-018. Choosing a corridor width today would be a guess of exactly the kind this project has already
+paid for. **One Sensor Logger recording of one levada unblocks it** — and the same fixture is what
+T-018, T-019, T-020 and T-021 have all been waiting on.
+
+**Consequence:** tier 1 is a bug fix and needs no approval. Tier 2 changes a design measured under
+D-015/D-026 and wants the project lead's eye. Tier 3 needs both a fixture and an explicit decision,
+because it edges the boundary D-032 drew.

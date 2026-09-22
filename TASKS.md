@@ -1106,6 +1106,59 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **`exportTrace.ts` and D-040 are the other end of this.** The masking rule exists so a
       trace cannot publish where the user sleeps; an *imported* trace has never been masked by us
       and must go through the same door before it reaches a souvenir.
+- [ ] **T-167** ⚠⚠ **The map draws the UNCLEANED trace — wire it up** ⇠ T-150 ⚠ **found 2026-09-22**
+      — **The project lead, looking at the running app:** *"sometimes the app makes lines in random
+      places which looks a bit odd."* They are looking at a real bug, not at D-032.
+      — **`NativeMapScreen.tsx:326` calls `splitIntoSegments` — raw.** The cleaned entry point is
+      `drawableSegments`. `traceCleanup.ts` is called by the souvenir card and by every preview
+      tool, and **not by the map**.
+      — **How it got that way:** `10fa42a` (Aug 14) wrote the Google screen against
+      `splitIntoSegments`; `98796d8` (Aug 16) added the cleanup and wired it into `buildTrace` —
+      whose only caller was the MapLibre screen, now in `app/attic/`, where it still is today.
+      — ⚠ **This is the T-145 shape.** Nothing tests `NativeMapScreen`, so 619 passing tests cannot
+      see it. **Ship the guard test with the fix**, in the shape of `freeTier.test.ts`.
+      — **What it costs today**, on `funchal-seafront` (⚠ modelled noise, not measured): the phone
+      draws **4.49 km for a 2.23 km walk, worst error 151 m, 211 vertices**; cleaned it is 2.55 km,
+      20 m and 35 vertices. Identical signatures — one import and one call site.
+- [ ] **T-168** **Settle what the renderer will actually draw — one emulator session** ⇠ T-167
+      — ⚠ **`expo-maps@57.0.1` passes only `points`, `color`, `geodesic`, `width` to the polyline**
+      (`GoogleMapsView.kt:158`). No `pattern`, no `jointType`, no caps, no `zIndex`. **So the
+      dashed bridge recorded in `traceGeoJson.ts:112` is not buildable**, and joints take the Maps
+      Compose default, which is **miter**.
+      — **Why miter matters:** spike length is `width / (2·sin(θ/2))`. On the raw trace **27 corners
+      are under 30° and the sharpest is 1.3°**, which mitres to ~480 px on an 11 px line — from a
+      vertex a few metres off the path. Cleaned, that is 2 corners and 9.7°. ⚠ **Hypothesis, not a
+      measurement** — whether Google applies a miter limit is undocumented. **Test: one screenshot
+      of a deliberately zigzagged fixture.**
+      — ⚠ **Re-test the two-polyline binding bug** recorded at `NativeMapScreen.tsx:156` (casing
+      rendered wrong; suspected binding **by array position rather than by `id`**). That note is
+      from 14 August. **If it is fixed, the casing, a translucent band and faint bridges all open
+      up at once** — highest value-per-minute test in this area.
+      — ✅ **Alpha is available**: `CircleRecord`'s default colour is `0x7F0000FF`, so translucent
+      strokes need no new capability.
+- [ ] **T-169** **Judge the trace's weight — band or hairline** ⇠ T-168, D-082 ⚠ **the project lead's eye**
+      — **The argument:** a 4 pt hairline is a *claim of precision*. GPS gives ±5–20 m open-sky and
+      worse under canopy, so every metre of ordinary error is drawn as a visible mistake. A wider,
+      softer, translucent band says *you were along here* and the same error falls inside the mark
+      — without faking anything, which is `traceCleanup.ts`'s own instinct.
+      — ⚠ **Pulls against `traceStyle.ts`** (*"the one saturated, heavy thing on the map"*) and
+      design-brief §2.3. Those are about **weight and contrast, not sharpness**, and a 12 pt band at
+      40% alpha can be heavier than a 4 pt hairline — but this is judged by eye, so it goes to the
+      workbench, not into `app/`.
+- [ ] **T-170** ⚠ **Snap the trace to the levada courses we already ship** ⇠ T-018, T-021, D-082
+      — ⭐ **The Proa-shaped answer to *"only highlight the real roads"*.** D-002 curated the canvas;
+      this curates the **graph**. `content/levadas.json` already holds eleven real OSM courses on
+      the device — so **no import, no R-tree, no new storage**, against T-082's ~51,000 ways.
+      — **The ambiguity that makes general matching hard is absent**: a levada runs a contour on
+      steep ground with no parallel candidate, where T-084's hard case is two roads stacked. And it
+      fixes the worst-looking case — canopy, where GPS is poorest and the signature walks are.
+      — ⚠ **It breaks `traceCleanup.ts`'s one rule** (never move a point). **Own module, draw time
+      only, raw rows untouched (D-010).** The defence — that a polyline already interpolates between
+      fixes — is an argument, not a licence.
+      — ⚠⚠ **DO NOT BUILD THIS WITHOUT A FIXTURE.** `tools/fixtures/` is empty; a corridor width
+      chosen today is the class of guess this project has already paid for. **One Sensor Logger
+      walk on one levada unblocks it** — the same fixture T-018/T-019/T-020/T-021 all wait on.
+      — **Costing and rejected alternatives:** `docs/trace-fidelity.md`, D-082.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { LogBox, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, LogBox, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from './src/content/contentPack';
 // ⚠ The platform's own map (D-057). `src/map/MapLibreScreen.tsx` is the same
 // screen on our offline tile pack, kept deliberately — swapping this import
@@ -110,7 +110,14 @@ export default function App() {
     // started (T-146), and re-register the regions if they have — ⚠ Android
     // forgets every geofence when the phone reboots and says nothing, which
     // would otherwise stop a holiday's collecting silently (T-145).
-    void syncRecordingWithPreferences();
+    // ⚠ T-173: the visibility is passed, not assumed. Android refuses a
+    // foreground service started from the background, and this effect also runs
+    // when the OS has woken us with nothing on screen — on the P30 that failure
+    // left the recorder stopped. `AppState` is the only thing that actually
+    // knows, so it is what gets asked.
+    void syncRecordingWithPreferences(
+      AppState.currentState === 'active' ? 'active' : 'background'
+    );
   }, []);
 
   if (onboarding === null) {

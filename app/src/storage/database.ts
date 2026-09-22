@@ -13,6 +13,7 @@
 import * as SQLite from 'expo-sqlite';
 import { MIGRATIONS } from './migrations';
 import { onceOrRetry } from './onceOrRetry';
+import { recordingQueue } from './recordingQueue';
 import {
   isReleasedSharedObject,
   MAX_RELEASED_OBJECT_RETRIES,
@@ -245,6 +246,12 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
  */
 export async function deleteAllUserData(): Promise<void> {
   const db = await getDatabase();
+  // ⚠⚠ T-173 — SERIALISED AGAINST THE RECORDER, not merely transactional. A
+  // transaction stops this half-deleting; it does not stop a location batch
+  // that already holds a trip id from inserting against it the moment this
+  // commits. That is a FOREIGN KEY failure and a lost batch, and it was
+  // observed on real hardware — see `storage/recordingQueue.ts`.
+  await recordingQueue(async () => {
   await db.withTransactionAsync(async () => {
     // Order matters: children before parents, because foreign_keys is ON.
     //
@@ -266,5 +273,9 @@ export async function deleteAllUserData(): Promise<void> {
   // Return the freed pages to the filesystem rather than leaving them in the
   // file. If a user asks us to delete their location history, the bytes should
   // actually go.
+  //
+  // Inside the queue as well: VACUUM rewrites the whole file and cannot run
+  // while another statement is open on the connection.
   await db.execAsync('VACUUM;');
+  });
 }

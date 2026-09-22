@@ -1170,7 +1170,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       chosen today is the class of guess this project has already paid for. **One Sensor Logger
       walk on one levada unblocks it** — the same fixture T-018/T-019/T-020/T-021 all wait on.
       — **Costing and rejected alternatives:** `docs/trace-fidelity.md`, D-082.
-- [ ] ⚠⚠ **T-171** **Leaving the archipelago puts the recorder in a trip-creation loop**
+- [x] ✅ **T-171** **Leaving the archipelago put the recorder in a trip-creation loop — fixed 2026-09-22.**
       ⇠ T-100 ⚠ **measured on real hardware 2026-09-22** — `docs/field-notes.md`
       — **30 trips in six days, 18 under 60 s, several 0 s.** `tripEnd.ts:186` ends a trip on the
       first fix outside the archipelago — correct — but **nothing stops a new trip opening while
@@ -1185,18 +1185,47 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **The fix is not in `detectTripEnd`**, which is right. It is that the recorder must not
       open a trip outside the bounds — and the cap probably wants to be per *departure*, not per
       trip row.
-- [ ] **T-172** **Geofence registration fires an EXIT for every region at once** ⇠ T-145
+      — ✅ **`recording/recordingAdmission.ts`** is the new pure module: **an out-of-bounds fix may
+      EXTEND a trip and may not OPEN one.** It is still stored whenever a trip is open, because it
+      is the evidence `tripEnd` needs — refusing to store it would trade a loop for a holiday that
+      never ends. `recordingSink` calls `getActiveTrip` instead of `getOrCreateActiveTrip` when
+      nothing in the batch qualifies.
+      — ✅ **The notification re-arm is guarded** in `tripDao`: `NOTIFICATION_REARM_AFTER_MS`
+      (12 h, ⚠ not tuned — churn is *under a second*, a repeat visit is *months*, so it sits in
+      an empty middle). A wild fix cannot suppress a trip either: anything worse than 200 m
+      abstains, mirroring the rule `tripEndDetection` already applies in the other direction.
+      — ✅ **The archipelago bounds moved to `content/archipelagoBounds.ts`** so the rule that
+      ENDS a trip and the rule that STARTS one cannot drift apart. That drift is the bug.
+      — ⚠⚠ **VERIFIED BY REPLAYING THE PHONE'S OWN 831 FIXES** through the new rules:
+      **226 trip creations → 1, and 226 notification re-arms → 1.**
+- [x] ✅ **T-172** **Geofence registration fired an EXIT for every region at once — fixed 2026-09-22.** ⇠ T-145
       — **2,699 geofence events on the P30, every one an `exit`, none an `enter`**, arriving in
       simultaneous bursts: **83 sharing one timestamp**, then 81, then 74.
       — `backgroundTasks.ts:135` maps the transition correctly, so this is the **initial trigger**
       at registration, not the handler. ⚠ Not a correctness bug for stamps — an enter is what
       awards — but it is ~2,700 junk rows a week and a burst of work on every rebuild.
-- [ ] **T-173** **Two runtime errors seen on real hardware, never before** ⚠ **2026-09-22**
+      — ✅ **The rule is memory, not a ban on exits.** Refusing exits outright would break dwell,
+      which `reconstructVisits` and `stampRules` both need. **You cannot leave somewhere you were
+      never recorded entering**, so an exit with no matching enter in the same trip is dropped —
+      `geofenceEventDao.hasEnterInTrip`, an `EXISTS` probe because this runs on the OS's delivery
+      path where a cold start brings 99 crossings in 100 ms.
+      — ⚠⚠ **Replayed over the phone's real events: 2,706 → 0.** Every single one was an
+      unpaired exit, which settles the diagnosis — not one was a real crossing.
+- [x] ✅ **T-173** **Two runtime errors seen on real hardware — both fixed 2026-09-22.**
       — `ExpoLocation.startLocationUpdatesAsync` **rejected** at recording launch sync. If this is
       reproducible it means **the recorder did not start**, which is the one failure the project
       cannot tolerate (CONTEXT §2.4).
       — `NativeStatement.finalizeAsync` **rejected** inside `onLocations` — a batch of fixes lost.
       — Both from `recording_event` on 2026-08-28. Neither has ever appeared on the emulator.
+      — ✅ **Foreground service:** `syncRecordingWithPreferences` now takes the app's visibility
+      and refuses to start unless it is `active`. ⚠ `inactive` is refused *with* `background` —
+      it is the app switcher, a call, a permission dialog, and Android does not care that it looks
+      transient. `App.tsx` passes `AppState.currentState` rather than assuming.
+      — ✅ **FOREIGN KEY failure — root cause found.** `deleteAllUserData` deletes every `trip`
+      row and ran **outside the sink's serial queue**: a batch holding a trip id inserted against
+      it the moment the delete committed. A transaction stops a half-delete; it does not stop
+      that. The queue is now shared — `storage/recordingQueue.ts` — and erase-all takes it.
+      ⚠ **Anything that deletes or rewrites `trip` and its children belongs in that queue.**
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

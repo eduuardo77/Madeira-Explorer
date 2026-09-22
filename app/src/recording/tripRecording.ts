@@ -45,6 +45,10 @@ import { locationProvider } from './ExpoLocationProvider';
 import type { SamplingProfile } from './LocationProvider';
 import { refreshGeofences, stopGeofences } from './geofenceManager';
 import { isBackgroundTrackingAllowed } from './trackingSettings';
+import {
+  mayStartForegroundService,
+  type Visibility,
+} from './recordingAdmission';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 
 /**
@@ -92,7 +96,9 @@ export async function stopTrip(): Promise<void> {
  *     by hand, and silently ending it would lose the one thing that cannot be
  *     recreated (D-010).
  */
-export async function syncRecordingWithPreferences(): Promise<void> {
+export async function syncRecordingWithPreferences(
+  visibility: Visibility = 'unknown'
+): Promise<void> {
   try {
     const [allowed, permission, recording] = await Promise.all([
       isBackgroundTrackingAllowed(),
@@ -106,6 +112,24 @@ export async function syncRecordingWithPreferences(): Promise<void> {
     }
 
     if (allowed && permission === 'always') {
+      // ⚠⚠ T-173 — MEASURED ON REAL HARDWARE, 2026-08-28. This call failed on
+      // the P30 with *"Foreground service cannot be started when the
+      // application is in the background"*, and **the recorder did not start**
+      // — which CONTEXT §2.4 calls the one loss that cannot be recovered.
+      //
+      // `expo-location`'s background updates need a foreground service, and
+      // Android refuses to start one from the background. The app can be woken
+      // with no UI at all, so "we are in `useEffect`" is not the same as "we
+      // are on screen". Asking is the fix; retrying on the next resume costs a
+      // second and never costs a trace.
+      if (!mayStartForegroundService(visibility)) {
+        await recordingEventDao.log(
+          'start',
+          `recording deferred: app is ${visibility}, cannot start a foreground service`
+        );
+        return;
+      }
+
       await startTrip('walking');
       await recordingEventDao.log(
         'start',
@@ -139,5 +163,7 @@ export async function applyBackgroundTrackingChange(
     return;
   }
 
-  await syncRecordingWithPreferences();
+  // The user just moved a switch, so the app is unambiguously on screen — which
+  // is what T-173's foreground-service gate needs to hear.
+  await syncRecordingWithPreferences('active');
 }

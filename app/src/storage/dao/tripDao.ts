@@ -7,6 +7,7 @@
  */
 
 import { getDatabase } from '../database';
+import { mayRearmNotifications } from '../../recording/recordingAdmission';
 import * as appStateDao from './appStateDao';
 import type { EndDetectionMethod, Trip } from '../types';
 
@@ -42,7 +43,15 @@ export async function getOrCreateActiveTrip(): Promise<Trip> {
   // not per install, because Madeira has an unusual number of repeat visitors
   // (CONTEXT §4.10) and counting per install would silently mute the app on
   // their second holiday — the one they are most likely to care about.
-  await appStateDao.set(appStateDao.AppStateKey.NotificationsSent, '');
+  //
+  // ⚠⚠ T-171 — BUT ONLY IF A TRIP ROW MEANS A NEW HOLIDAY. On the P30 it did
+  // not: trip churn re-armed this twenty-five times in one afternoon and sent
+  // **twenty-six** "your trip has ended" notifications. The cap was correct and
+  // the thing underneath it was not, which is why the guard lives here rather
+  // than in the notifier.
+  if (mayRearmNotifications(await lastEndedTs(db), startedTs)) {
+    await appStateDao.set(appStateDao.AppStateKey.NotificationsSent, '');
+  }
 
   return {
     id: result.lastInsertRowId,
@@ -81,4 +90,20 @@ export async function endTrip(
     method,
     tripId
   );
+}
+
+/**
+ * When the most recently finished trip ended, or null if none has.
+ *
+ * Private to the re-arm decision above. It asks for the largest `ended_ts`
+ * rather than the newest row, because the churn T-171 fixes produced trips
+ * whose start and end were the same millisecond.
+ */
+async function lastEndedTs(
+  db: Awaited<ReturnType<typeof getDatabase>>
+): Promise<number | null> {
+  const row = await db.getFirstAsync<{ ended: number | null }>(
+    'SELECT MAX(ended_ts) AS ended FROM trip;'
+  );
+  return row?.ended ?? null;
 }

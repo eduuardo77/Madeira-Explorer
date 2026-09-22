@@ -30,24 +30,16 @@ import { getCurrentProgress } from './currentProgress';
 import { runAwardPass } from './stampAwards';
 import type { GeofenceCrossing } from './stampRules';
 import { reconstructVisits } from './stampRules';
-import type { Bounds, TripEndDecision } from './tripEnd';
+import type { TripEndDecision } from './tripEnd';
 import { revealTitle, detectTripEnd, isOutsideBounds } from './tripEnd';
 
 /**
- * The archipelago's bounds, read from the shipped map style rather than
- * written here as coordinates — the app must not carry island knowledge
- * (D-017). Same source the camera uses.
+ * The archipelago's bounds. ⚠ Moved to `content/archipelagoBounds.ts` for
+ * T-171: the recorder now asks the same question before it opens a trip, and
+ * two copies of this box would let the rule that ENDS a trip disagree with the
+ * rule that STARTS one — which is precisely the loop T-171 fixes.
  */
-import lightTemplate from '../../assets/map/light.json';
-
-const [WEST, SOUTH, EAST, NORTH] = lightTemplate.metadata['madeira:bounds'] as [
-  number,
-  number,
-  number,
-  number,
-];
-
-const BOUNDS: Bounds = { west: WEST, south: SOUTH, east: EAST, north: NORTH };
+import { ARCHIPELAGO_BOUNDS as BOUNDS } from '../content/archipelagoBounds';
 
 const NOT_ENDED: TripEndDecision = {
   ended: false,

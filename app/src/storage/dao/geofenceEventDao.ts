@@ -68,3 +68,29 @@ export async function getEventsForPoi(
     poiId
   );
 }
+
+/**
+ * Has this place ever been *entered* during this trip?
+ *
+ * ⚠ **T-172.** The only caller is `recordingSink`, deciding whether an incoming
+ * exit is a real crossing or one of the registration burst — 2,699 of which
+ * landed on the P30, 83 sharing a single timestamp. `EXISTS` rather than a
+ * count or a fetch: this runs on the OS's delivery path, where a cold start can
+ * bring 99 crossings inside 100 ms (`storage/serialQueue.ts`), so it has to be
+ * an index probe and nothing more.
+ */
+export async function hasEnterInTrip(
+  tripId: number,
+  poiId: string
+): Promise<boolean> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ found: number }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM geofence_event
+        WHERE trip_id = ? AND poi_id = ? AND event_type IN ('enter', 'dwell')
+     ) AS found;`,
+    tripId,
+    poiId
+  );
+  return row?.found === 1;
+}

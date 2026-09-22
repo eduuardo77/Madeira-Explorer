@@ -27,12 +27,18 @@
  * re-enters it.
  */
 
+import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
+import {
+  batchMayStartTrip,
+  shouldRecordTransition,
+  transitionMayStartTrip,
+} from './recordingAdmission';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as sensorSampleDao from '../storage/dao/sensorSampleDao';
 import * as tripDao from '../storage/dao/tripDao';
-import { createSerialQueue } from '../storage/serialQueue';
+import { recordingQueue } from '../storage/recordingQueue';
 import type { RawFixInput } from '../storage/types';
 import type {
   GeofenceTransition,
@@ -99,8 +105,13 @@ async function captureSensorsFor(
  * so they race *each other* as readily as they race themselves — and the OS
  * delivering a location batch and a crossing in the same wake-up is the normal
  * case, not the unusual one.
+ *
+ * ⚠ **It is no longer private to this module (T-173).** `deleteAllUserData`
+ * takes it too: it deletes every trip row, and a batch holding a trip id across
+ * that delete failed with *"FOREIGN KEY constraint failed"* on real hardware.
+ * `storage/recordingQueue.ts` has the sequence.
  */
-const queue = createSerialQueue();
+const queue = recordingQueue;
 
 export const databaseSink: RecordingSink = {
   async onLocations(samples: LocationSample[]): Promise<void> {
@@ -110,7 +121,28 @@ export const databaseSink: RecordingSink = {
 
     await queue(async () => {
       try {
-        const trip = await tripDao.getOrCreateActiveTrip();
+        // ⚠⚠ T-171 — AN OUT-OF-BOUNDS FIX MAY EXTEND A TRIP AND MAY NOT OPEN
+        // ONE. Measured on real hardware: once the phone left the archipelago,
+        // every batch created a trip that `checkTripEnd` immediately and
+        // correctly ended, thirty times in six days. `recordingAdmission.ts`
+        // has the cycle written out.
+        //
+        // The fix is *only* about creating. These samples are still stored
+        // whenever a trip is open, because a fix outside the bounds is the
+        // evidence that ends the trip honestly — refusing to store it would
+        // trade a loop for a holiday that never finishes.
+        const trip = batchMayStartTrip(samples, ARCHIPELAGO_BOUNDS)
+          ? await tripDao.getOrCreateActiveTrip()
+          : await tripDao.getActiveTrip();
+
+        if (trip === null) {
+          // Nowhere to put them, and nothing worth opening a holiday for.
+          await recordingEventDao.log(
+            'batch',
+            `${samples.length} fixes outside the archipelago, no trip open`
+          );
+          return;
+        }
 
         const rows: RawFixInput[] = samples.map((sample) => ({
           trip_id: trip.id,
@@ -145,7 +177,32 @@ export const databaseSink: RecordingSink = {
   async onGeofenceTransition(transition: GeofenceTransition): Promise<void> {
     await queue(async () => {
       try {
-        const trip = await tripDao.getOrCreateActiveTrip();
+        // ⚠ T-171, same rule: only evidence of *being* somewhere opens a
+        // holiday. An exit is not that, and on this hardware it is usually not
+        // evidence of anything — see below.
+        const trip = transitionMayStartTrip(transition.eventType)
+          ? await tripDao.getOrCreateActiveTrip()
+          : await tripDao.getActiveTrip();
+
+        if (trip === null) {
+          return;
+        }
+
+        // ⚠⚠ T-172 — THE REGISTRATION BURST. All 2,699 crossings on the P30
+        // were exits, arriving 83 to a single timestamp: every monitored region
+        // reporting EXIT as the set is registered, because the phone is inside
+        // none of them. You cannot leave somewhere you were never recorded
+        // entering, and `stampRules` pairs an exit with its enter — so an
+        // unpaired one was never going to award anything, and dropping it costs
+        // nothing real.
+        const hasPriorEnter =
+          transition.eventType !== 'exit' ||
+          (await geofenceEventDao.hasEnterInTrip(trip.id, transition.poiId));
+
+        if (!shouldRecordTransition(transition.eventType, hasPriorEnter)) {
+          return;
+        }
+
         await geofenceEventDao.insertEvent({
           trip_id: trip.id,
           poi_id: transition.poiId,

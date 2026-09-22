@@ -201,3 +201,32 @@ likely to fly home *with the app installed* — is the case this hits.
 - **Battery** (T-054) and **background survival** (T-051/T-053). Recording clusters
   on five days with a 25-day gap, and "killed by EMUI" is indistinguishable here
   from "the app was not running". ⚠ The soak test is still the only way.
+
+### ✅ What was fixed because of this, 2026-09-22
+
+**T-171, T-172 and T-173, same day.** `recording/recordingAdmission.ts` holds the rules and its
+header carries the evidence. The shape they share: **extending a trip and starting one are
+different privileges** — an out-of-bounds fix is still stored when a trip is open, because it is
+what ends that trip honestly, and refusing to store it would trade a loop for a holiday that
+never finishes.
+
+Replayed over these same 831 fixes:
+
+| | before | after |
+|---|---|---|
+| trip creations | 226 | **1** |
+| notification re-arms | 226 | **1** |
+| geofence events written | 2,706 | **0** |
+
+⚠ **2,706 → 0 settles the diagnosis rather than overshooting it**: not one of those exits had a
+matching enter, so every single one was the registration artefact. A real exit — one that follows
+an enter — is kept, because it is half of a dwell and `stampRules` needs it.
+
+**Confirmed on the phone itself.** Before: `geofence exit camacha`, `geofence exit
+ponta-do-garajau-main`, `geofence exit praia-dos-reis-magos`, all at 11:16:27. After:
+`watching 74, 0 out of range` and **no exit rows at all**.
+
+⚠ **The FOREIGN KEY error had a different cause than it looked.** `deleteAllUserData` deletes
+every `trip` row and ran **outside the recorder's serial queue** — a batch holding a trip id
+inserted against it the moment the delete committed. A transaction stops a half-delete; it does
+not stop that. The queue is shared now (`storage/recordingQueue.ts`).

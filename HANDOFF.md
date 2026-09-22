@@ -80,9 +80,13 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
 1. ⚠⚠ **The modelled noise is far more pessimistic than the island.** Cleanup cuts **43%** of drawn
    length on `preview-trace.mjs`'s invented error and **2%** on real fixes. Every judgement about
    the trace was made against the model. **Stop quoting the sweep as if it described Madeira.**
-2. ⚠⚠ **T-171 — flying home puts the recorder in a trip-creation loop**, and D-011's per-trip
-   notification cap is defeated by it: **26 "your trip has ended" notifications**. This hits
-   *every user at the end of every trip*.
+2. ✅ **T-171/T-172/T-173 — three bugs it found, all fixed 2026-09-22.** Flying home put the
+   recorder in a trip-creation loop and defeated D-011's per-trip notification cap (**26 "your
+   trip has ended" notifications**); every geofence registration wrote an EXIT for all 74 regions;
+   the foreground service was started from the background and **the recorder did not start**.
+   Verified by replaying the phone's own 831 fixes — **226 trip creations → 1, 2,706 geofence
+   events → 0** — and then on the phone itself. `recording/recordingAdmission.ts` is the new pure
+   module and its header is the story.
 3. **Reported accuracy: p50 5.2 m, p90 20 m, p99 109 m, max 154 m** — bimodal, with almost nothing
    between 20 m and 90 m. `MAX_DRAWN_ACCURACY_M = 120` rejects 0.6%; `NEVER_DRAWN = 500` never
    fired. ⚠ All open-sky — canopy (T-018) is still unmeasured.

@@ -1226,6 +1226,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       it the moment the delete committed. A transaction stops a half-delete; it does not stop
       that. The queue is now shared — `storage/recordingQueue.ts` — and erase-all takes it.
       ⚠ **Anything that deletes or rewrites `trip` and its children belongs in that queue.**
+- [x] ⚠⚠ **T-174** ✅ **The recorder was DEAD and the app said it was recording — found and fixed
+      2026-09-22.** ⇠ T-173 ⚠ **found while setting up the T-051 soak, which it was blocking**
+      — **The state on the phone, all four at once:** the settings switch **on**; the screen
+      saying *"A registar a sua viagem"*; `dumpsys activity services` with **no foreground
+      service**; `dumpsys location` with **no request** from the package; and the database
+      **unwritten for minutes** while backgrounded. Last real fix: **2026-08-28** — the same day
+      as T-173's foreground-service refusal.
+      — **Mechanism.** `isRecording()` is `Location.hasStartedLocationUpdatesAsync`, which reports
+      that the **task is registered**, not that anything is running. That flag outlives the
+      service. `syncRecordingWithPreferences` asked it first and returned early, so once the
+      service died — an OEM kill, or T-173 firing *after* the task was registered — **the
+      recorder was never restarted for the life of the install.**
+      — ⚠⚠ **The app reported itself healthy while recording nothing**, which is worse than
+      failing loudly. Only a manual off-and-on in Settings recovered it, which no user would think
+      to do. **Proved on the device:** before the toggle, no service; after it,
+      `LocationTaskService isForeground=true` and a live `ACCURACY_FINE gps requested=+10s0ms`
+      request from `com.proa.madeira`.
+      — ✅ **The fix is to stop asking.** `recordingAction()` never takes `taskRegistered` as a
+      reason not to act — it decides from the preference, the permission and T-173's visibility
+      gate, and `startLocationUpdatesAsync` replaces options in place without dropping fixes
+      (`setSamplingProfile` already documented that). `taskRegistered` now only picks the wording
+      of the log line.
+      — ⚠ **`defer` still re-registers geofences**, which the first version of the fix got
+      wrong: geofencing needs no foreground service, and skipping it would stop a rebooted phone
+      collecting stamps. `assert` does **not**, because `startTrip` already does it.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

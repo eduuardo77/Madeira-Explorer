@@ -230,3 +230,38 @@ ponta-do-garajau-main`, `geofence exit praia-dos-reis-magos`, all at 11:16:27. A
 every `trip` row and ran **outside the recorder's serial queue** — a batch holding a trip id
 inserted against it the moment the delete committed. A transaction stops a half-delete; it does
 not stop that. The queue is shared now (`storage/recordingQueue.ts`).
+
+---
+
+## 2026-09-22 (later) — ⚠⚠ The recorder was dead, and the app said it was recording
+
+**Found while setting up the T-051 soak test, which it was silently blocking.** The soak would
+have run for 72 hours and returned nothing, with no explanation.
+
+Four observations, all at once, on the P30 with the switch **on** and the settings screen saying
+*"A registar a sua viagem"*:
+
+- `dumpsys activity services com.proa.madeira` — **no foreground service**
+- `dumpsys location` — **no request** from the package
+- `madeira.db-wal` mtime **frozen for minutes** while the app was backgrounded
+- last real fix in the database: **2026-08-28**, the same day as T-173's error
+
+**The mechanism.** `isRecording()` is `Location.hasStartedLocationUpdatesAsync`, which reports
+that the **task is registered** — a flag that outlives the service it stands for.
+`syncRecordingWithPreferences` asked it first and returned early, so once the service died (an OEM
+kill, or T-173's foreground-service refusal firing *after* the task was registered) **the recorder
+was never restarted again for the life of the install.**
+
+⚠ **The app reported itself healthy while recording nothing.** That is worse than failing loudly,
+and only a manual off-and-on in Settings recovered it — which no user would think to do. Nothing
+would have told them except T-049's day-1 check, which fires once.
+
+**Proved both ways on the device.** Toggling off and on produced `LocationTaskService
+isForeground=true` and a live `ACCURACY_FINE gps requested=+10s0ms` request where there had been
+nothing. After the fix, a force-stop followed by a relaunch brings both back **by itself** —
+which is exactly what the old code could not do.
+
+⚠ **This is the third time this project has shipped a subsystem nothing called** (T-145, T-167,
+now T-174), and the first where the app actively asserted the opposite. The pattern is worth
+naming: **a flag that means "we asked for X" is not evidence that X is happening**, and every
+place the app reports its own health from one is suspect.

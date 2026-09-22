@@ -46,7 +46,8 @@ import type { SamplingProfile } from './LocationProvider';
 import { refreshGeofences, stopGeofences } from './geofenceManager';
 import { isBackgroundTrackingAllowed } from './trackingSettings';
 import {
-  mayStartForegroundService,
+  recordingAction,
+  shouldRefreshGeofences,
   type Visibility,
 } from './recordingAdmission';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -87,14 +88,40 @@ export async function stopTrip(): Promise<void> {
  *
  * The three cases, and none of them may be merged:
  *
- *   - **Allowed, granted, not yet running.** Start. This is the promise.
- *   - **Already running.** Do not restart it — that would end the trip and open
- *     a new one — but do re-register the regions, because Android drops every
- *     geofence when the phone reboots and says nothing.
+ *   - **Allowed, granted.** (Re-)assert the recorder. See the warning below for
+ *     why this is not conditional on whether it thinks it is already running.
+ *   - **Running but not allowed.** Re-register the regions, because Android
+ *     drops every geofence when the phone reboots and says nothing.
  *   - **Not allowed, or not granted.** Do nothing at all, and in particular do
  *     not stop anything: the user may be part-way through a walk they started
  *     by hand, and silently ending it would lose the one thing that cannot be
  *     recreated (D-010).
+ *
+ * ⚠⚠ **T-174 — `isRecording()` IS NOT EVIDENCE THAT ANYTHING IS RUNNING, AND
+ * TRUSTING IT LEFT THIS PHONE DEAD FOR THREE WEEKS.** Found on the P30,
+ * 2026-09-22, and it is the worst failure this project has had:
+ *
+ *   - the settings screen said *"A registar a sua viagem"*, switch **on**;
+ *   - `dumpsys activity services` had **no foreground service**;
+ *   - `dumpsys location` had **no request** from this package;
+ *   - the database had not been written to in minutes of being backgrounded.
+ *
+ * `isRecording()` is `Location.hasStartedLocationUpdatesAsync`, which reports
+ * that the **task is registered** — a flag that outlives the service it stands
+ * for. When the service dies (an OEM kills it, or T-173's foreground-service
+ * refusal fires *after* the task was registered) the flag stays true, this
+ * function takes the "already running" branch, and **the recorder is never
+ * restarted for the life of the install.** The app then reports itself healthy
+ * while recording nothing, which is worse than failing loudly.
+ *
+ * The repair is to stop asking. `setSamplingProfile` already documents that
+ * calling `startLocationUpdatesAsync` again with the same task name **replaces
+ * the options in place and does not drop fixes** — so re-asserting is cheap
+ * when the service is alive and is the whole fix when it is not.
+ *
+ * ⚠ Only a manual off-and-on through Settings recovered it, which no user
+ * would think to do — nothing tells them anything is wrong except T-049's
+ * day-1 check, and that fires once.
  */
 export async function syncRecordingWithPreferences(
   visibility: Visibility = 'unknown'
@@ -106,12 +133,30 @@ export async function syncRecordingWithPreferences(
       locationProvider.isRecording(),
     ]);
 
-    if (recording) {
+    const action = recordingAction({
+      backgroundTrackingAllowed: allowed,
+      permission,
+      taskRegistered: recording,
+      visibility,
+    });
+
+    // ⚠ Regions first, and for every action but `none` — including `defer`.
+    // Geofencing needs no foreground service, so a launch that cannot start
+    // recording can still re-register; not doing so was the first version of
+    // this fix and it would have stopped a rebooted phone collecting stamps.
+    if (shouldRefreshGeofences(action)) {
       await refreshGeofences('app launch');
+    }
+
+    if (action === 'defer') {
+      await recordingEventDao.log(
+        'start',
+        `recording deferred: app is ${visibility}, cannot start a foreground service`
+      );
       return;
     }
 
-    if (allowed && permission === 'always') {
+    if (action === 'assert') {
       // ⚠⚠ T-173 — MEASURED ON REAL HARDWARE, 2026-08-28. This call failed on
       // the P30 with *"Foreground service cannot be started when the
       // application is in the background"*, and **the recorder did not start**
@@ -122,18 +167,14 @@ export async function syncRecordingWithPreferences(
       // with no UI at all, so "we are in `useEffect`" is not the same as "we
       // are on screen". Asking is the fix; retrying on the next resume costs a
       // second and never costs a trace.
-      if (!mayStartForegroundService(visibility)) {
-        await recordingEventDao.log(
-          'start',
-          `recording deferred: app is ${visibility}, cannot start a foreground service`
-        );
-        return;
-      }
-
+      // ⚠ T-174: asserted, not conditional. `recording` is only used to say
+      // what happened, never to decide whether to act — see above.
       await startTrip('walking');
       await recordingEventDao.log(
         'start',
-        'recording started automatically: background tracking is on'
+        recording
+          ? 'recording re-asserted on launch: the task was registered'
+          : 'recording started automatically: background tracking is on'
       );
     }
   } catch (error) {

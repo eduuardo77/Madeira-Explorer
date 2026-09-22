@@ -87,6 +87,12 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
    Verified by replaying the phone's own 831 fixes — **226 trip creations → 1, 2,706 geofence
    events → 0** — and then on the phone itself. `recording/recordingAdmission.ts` is the new pure
    module and its header is the story.
+   ⚠⚠ **And T-174, found while setting up the soak and blocking it: the recorder was DEAD and
+   the app said it was recording.** Switch on, screen saying *"A registar a sua viagem"*, no
+   foreground service, no OS location request, no database write since **28 August**.
+   `isRecording()` reports that the *task is registered*, not that anything runs — so once the
+   service died it was never restarted. **Check `dumpsys activity services` before believing any
+   recording state the app reports.**
 3. **Reported accuracy: p50 5.2 m, p90 20 m, p99 109 m, max 154 m** — bimodal, with almost nothing
    between 20 m and 90 m. `MAX_DRAWN_ACCURACY_M = 120` rejects 0.6%; `NEVER_DRAWN = 500` never
    fired. ⚠ All open-sky — canopy (T-018) is still unmeasured.

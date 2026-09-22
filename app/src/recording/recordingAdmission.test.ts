@@ -18,7 +18,9 @@ import {
   isCredibleExit,
   mayRearmNotifications,
   mayStartForegroundService,
+  recordingAction,
   shouldRecordTransition,
+  shouldRefreshGeofences,
   transitionMayStartTrip,
 } from './recordingAdmission.ts';
 import type { Bounds } from '../progress/tripEnd.ts';
@@ -165,4 +167,62 @@ test('⚠ inactive is refused with background, not allowed with active', () => {
 test('unknown is refused — the recorder can be woken with no UI at all', () => {
   // Guessing "active" here is exactly what T-173 was.
   assert.equal(mayStartForegroundService('unknown'), false);
+});
+
+// ---------------------------------------------------------------- T-174
+
+const LAUNCH = {
+  backgroundTrackingAllowed: true,
+  permission: 'always',
+  taskRegistered: false,
+  visibility: 'active' as const,
+};
+
+test('⚠⚠ a registered task does NOT stop the recorder being re-asserted', () => {
+  // The whole of T-174. On the P30 the task was registered, the switch was on,
+  // the settings screen said "A registar a sua viagem" — and there was no
+  // foreground service, no OS location request and no database write. The old
+  // branch returned early on exactly this input and never restarted anything.
+  assert.equal(recordingAction({ ...LAUNCH, taskRegistered: true }), 'assert');
+  assert.equal(recordingAction({ ...LAUNCH, taskRegistered: false }), 'assert');
+});
+
+test('wanted but not startable from here defers rather than failing', () => {
+  assert.equal(
+    recordingAction({ ...LAUNCH, taskRegistered: true, visibility: 'background' }),
+    'defer'
+  );
+});
+
+test('not allowed, but something is running: refresh and never stop it', () => {
+  // A manual walk. Stopping it would lose the one thing that cannot be
+  // recreated (D-010).
+  assert.equal(
+    recordingAction({
+      ...LAUNCH,
+      backgroundTrackingAllowed: false,
+      taskRegistered: true,
+    }),
+    'refresh'
+  );
+});
+
+test('without Always permission the switch cannot deliver, so nothing happens', () => {
+  assert.equal(
+    recordingAction({ ...LAUNCH, permission: 'whenInUse', taskRegistered: false }),
+    'none'
+  );
+});
+
+test('⚠ a deferred launch still re-registers its regions', () => {
+  // Geofencing needs no foreground service, and Android drops every geofence on
+  // reboot. Skipping this was the first version of the fix.
+  assert.equal(shouldRefreshGeofences('defer'), true);
+  assert.equal(shouldRefreshGeofences('refresh'), true);
+});
+
+test('⚠ asserting does NOT also refresh — startTrip does it', () => {
+  // Otherwise every launch registers the whole set twice.
+  assert.equal(shouldRefreshGeofences('assert'), false);
+  assert.equal(shouldRefreshGeofences('none'), false);
 });

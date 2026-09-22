@@ -216,3 +216,67 @@ export type Visibility = 'active' | 'background' | 'inactive' | 'unknown';
 export function mayStartForegroundService(visibility: Visibility): boolean {
   return visibility === 'active';
 }
+
+/**
+ * What `syncRecordingWithPreferences` should do on a launch.
+ *
+ * ⚠⚠ **T-174 — THE BRANCH THIS REPLACES LEFT A PHONE DEAD FOR THREE WEEKS.**
+ * The old shape asked *"is it already recording?"* first and returned early if
+ * so. But the only thing the app can ask is
+ * `Location.hasStartedLocationUpdatesAsync`, which reports that the **task is
+ * registered** — a flag that outlives the service it stands for. On the P30 the
+ * switch was on, the settings screen said *"A registar a sua viagem"*, and
+ * there was no foreground service, no OS location request and no database write
+ * in minutes. The flag was true, so nothing ever restarted it.
+ *
+ * So `recording` is deliberately **not** an input to whether we act. It is only
+ * an input to what we call it afterwards. The states that matter are the user's
+ * preference, the OS permission, and whether we may legally start a foreground
+ * service right now (T-173).
+ *
+ * ⚠ `refresh` still exists for one narrow case: something is registered while
+ * background tracking is *off*. That is a manual walk, which must not be
+ * stopped (D-010) but whose regions still need re-registering, because Android
+ * drops every geofence on reboot and says nothing.
+ */
+export type RecordingAction =
+  /** Assert the recorder: start it, or replace its options if it is alive. */
+  | 'assert'
+  /** Wanted, but a foreground service cannot be started from here (T-173). */
+  | 'defer'
+  /** Not wanted, but something is running: re-register its regions. */
+  | 'refresh'
+  /** Nothing is wanted and nothing is running. */
+  | 'none';
+
+export function recordingAction(input: {
+  backgroundTrackingAllowed: boolean;
+  permission: string;
+  taskRegistered: boolean;
+  visibility: Visibility;
+}): RecordingAction {
+  if (input.backgroundTrackingAllowed && input.permission === 'always') {
+    return mayStartForegroundService(input.visibility) ? 'assert' : 'defer';
+  }
+  return input.taskRegistered ? 'refresh' : 'none';
+}
+
+/**
+ * Should the geofence set be re-registered for this action?
+ *
+ * **`defer` and `refresh`, and not `assert`.** ⚠ Including `defer` matters and
+ * was missing from the first version of this rule: geofencing does not need a
+ * foreground service, so a launch that cannot start *recording* can still
+ * re-register the regions — and refusing to would mean a phone woken in the
+ * background silently stops collecting stamps after a reboot (T-145's failure,
+ * by another road).
+ *
+ * ⚠ `assert` is excluded because `startTrip` registers the regions itself,
+ * immediately after starting the recorder and in that order on purpose
+ * (`tripRecording.ts`). Refreshing here as well would register the whole set
+ * twice on every launch — two bursts of work, and before T-172 it would have
+ * been two bursts of spurious exits.
+ */
+export function shouldRefreshGeofences(action: RecordingAction): boolean {
+  return action === 'defer' || action === 'refresh';
+}

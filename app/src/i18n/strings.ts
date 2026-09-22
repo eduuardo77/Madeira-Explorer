@@ -245,6 +245,22 @@ export const STRINGS = {
   // a plain mechanism word beats a wrong activity word — and "registar" is
   // already the verb the rest of the app uses for this, in settings and in the
   // screen-reader labels below.
+  //
+  // ⚠ **THE 2026-08-28 SWEEP MISSED FOUR STRINGS. Finished 2026-09-22.**
+  // `settings.background.on`, `settings.quality.detail.balanced` and the three
+  // diagnostic-export strings (`settings.help.footnote`, `settings.help.send`,
+  // `donate.confirmTitle`) all still said walk / caminhada / Wanderung. Grep
+  // this file for those three words before assuming it is clean again.
+  //
+  // ⚠ **TWO ARE DELIBERATE AND MUST STAY.** `placeCard.a11y.showWithCourse`
+  // and the `settings.map.footnote` levada sentence both describe an actual
+  // levada on foot, where "the walk" is the true word and "the recording"
+  // would be the wrong one. The rule is not "never say walk" — it is "never
+  // call the user's drive a walk".
+  //
+  // ⚠ The KEYS still read `startWalk`/`stopWalk`. Identifiers, not copy; left
+  // alone because renaming them touches call sites and changes nothing a user
+  // ever sees.
   'map.startWalk': s(
     'Start recording',
     'Começar a registar',
@@ -493,9 +509,9 @@ export const STRINGS = {
     'Ihr Telefon hat dieser App keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus aufzeichnen.'
   ),
   'settings.background.on': s(
-    'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start a walk yourself.',
-    'O seu mapa preenche-se com a aplicação fechada. Desligue isto e nada é registado a não ser que inicie uma caminhada.',
-    'Ihre Karte füllt sich auch bei geschlossener App. Schalten Sie dies aus, wird nichts aufgezeichnet, außer Sie starten selbst eine Wanderung.'
+    'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start it yourself on the map.',
+    'O seu mapa preenche-se com a aplicação fechada. Desligue isto e nada é registado a não ser que seja você a começar a registar no mapa.',
+    'Ihre Karte füllt sich auch bei geschlossener App. Schalten Sie dies aus, wird nichts aufgezeichnet, außer Sie starten die Aufzeichnung selbst auf der Karte.'
   ),
   'settings.section.quality': s('How closely', 'Com que detalhe', 'Wie genau'),
   'settings.quality.footnote': s(
@@ -534,9 +550,9 @@ export const STRINGS = {
     'Fragt am seltensten und lässt Ihr Telefon ruhen, wenn Sie stehen bleiben. Ihre Orte füllen sich weiterhin; die Linie auf der Karte wird gröber.'
   ),
   'settings.quality.detail.balanced': s(
-    'The usual choice. Enough detail to recognise the walk you did, without following every step.',
-    'A escolha habitual. Detalhe suficiente para reconhecer a caminhada que fez, sem seguir cada passo.',
-    'Die übliche Wahl. Genug Detail, um Ihre Wanderung wiederzuerkennen, ohne jeden Schritt zu verfolgen.'
+    'The usual choice. Enough detail to recognise where you went, without following every step.',
+    'A escolha habitual. Detalhe suficiente para reconhecer por onde andou, sem seguir cada passo.',
+    'Die übliche Wahl. Genug Detail, um wiederzuerkennen, wo Sie waren, ohne jeden Schritt zu verfolgen.'
   ),
   'settings.quality.detail.best': s(
     'Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way.',
@@ -559,11 +575,11 @@ export const STRINGS = {
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),
   'settings.help.footnote': s(
-    'Sends one walk and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. Nothing leaves this phone unless you send it — and you choose where it goes.',
-    'Envia uma caminhada e o que a aplicação decidiu sobre ela. O sítio onde dormiu é removido, e não leva nome, conta, nem nada que o identifique a si ou ao telemóvel. Nada sai deste telemóvel a não ser que o envie — e é você que escolhe para onde vai.',
-    'Sendet eine Wanderung und das, was die App darüber entschieden hat. Ihr Übernachtungsort wird entfernt, und es enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Nichts verlässt dieses Telefon, außer Sie senden es — und Sie wählen, wohin.'
+    'Sends one recording and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. Nothing leaves this phone unless you send it — and you choose where it goes.',
+    'Envia um registo e o que a aplicação decidiu sobre ele. O sítio onde dormiu é removido, e não leva nome, conta, nem nada que o identifique a si ou ao telemóvel. Nada sai deste telemóvel a não ser que o envie — e é você que escolhe para onde vai.',
+    'Sendet eine Aufzeichnung und das, was die App darüber entschieden hat. Ihr Übernachtungsort wird entfernt, und es enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Nichts verlässt dieses Telefon, außer Sie senden es — und Sie wählen, wohin.'
   ),
-  'settings.help.send': s('Send a walk', 'Enviar uma caminhada', 'Eine Wanderung senden'),
+  'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),
   'settings.help.preparing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
   'settings.section.erase': s('Erase', 'Apagar', 'Löschen'),
   'settings.erase.footnote': s(
@@ -665,13 +681,17 @@ export const STRINGS = {
   ),
   'erase.done.done': s('Done', 'Concluído', 'Fertig'),
 
-  // ── Sending a walk (D-069) ──────────────────────────────────────────────
+  // ── Sending a recording (D-069) ─────────────────────────────────────────
   'donate.nothingTitle': s(
     'Nothing to send yet',
     'Ainda não há nada para enviar',
     'Noch nichts zum Senden'
   ),
-  'donate.confirmTitle': s('Send this walk?', 'Enviar esta caminhada?', 'Diese Wanderung senden?'),
+  'donate.confirmTitle': s(
+    'Send this recording?',
+    'Enviar este registo?',
+    'Diese Aufzeichnung senden?'
+  ),
   'donate.notNow': s('Not now', 'Agora não', 'Jetzt nicht'),
   'donate.send': s('Send', 'Enviar', 'Senden'),
   'donate.failedTitle': s('Could not send', 'Não foi possível enviar', 'Senden nicht möglich'),

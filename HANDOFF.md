@@ -100,9 +100,11 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
 ⚠ **Portuguese has now been seen on real hardware** (the map screen, 2026-09-22) — the line below
 about it never having been on a device is retired.
 
-⚠ **The P30 runs the FIELD BUILD since 2026-09-22 evening (T-176)** — a release APK that needs no
-Metro but still allows `run-as`, so a real walk can be pulled off it. Recipe and the one trap
-(never measure smoothness on it) in `docs/dev-build.md`. ⚠ `adb backup` does **not** work on that
+⚠ **The P30 runs a plain RELEASE build since 2026-09-22 evening (T-176)** — no Metro needed. To
+pull its database, swap in the **field build** (release, but `run-as` allowed) with `install -r`
+and swap back — tested, data kept both ways. Recipe in `docs/dev-build.md`.
+⚠⚠ **T-177: on that phone the map sometimes never appears** (2 of 9 launches) — blank grey, no
+wordmark, recorder unaffected. Not reproducible on demand; the signature is in the task. ⚠ `adb backup` does **not** work on that
 phone — it writes an empty file. The phone has **no SIM**: recording needs no internet, the map
 does.
 

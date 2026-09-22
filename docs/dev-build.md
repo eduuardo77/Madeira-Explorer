@@ -517,6 +517,11 @@ Native reads as *use developer support* — and the app goes looking for Metro a
 `plugins/withFieldBuild.js` sets `android:debuggable` in the **manifest only**, through a
 placeholder that is `false` unless `-PproaFieldBuild=true` is passed.
 
+⚠ **The swap is the tested route (2026-09-22):** walk with a plain release build, then
+`install -r` the field build **only to pull**, then `install -r` the plain one back. `install -r`
+kept the data both ways, and writes made by the plain build were readable after the swap. Play
+Protect asks to upload the APK each time; *Não enviar* lets the install go ahead.
+
 ⚠ **Never measure smoothness on it.** ART runs a debuggable app's Kotlin/Java less optimised. Build
 without the flag for that. Play rejects a debuggable upload, so it cannot ship by accident.
 

@@ -1310,6 +1310,27 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       an empty file on the P30. Not `debuggable true` on the build type: that flips
       `BuildConfig.DEBUG` and the app looks for Metro. `docs/dev-build.md` has the recipe and why
       smoothness must never be measured on it.
+- [ ] ⚠⚠ **T-177** **On real hardware the map sometimes never appears — blank light-grey screen,
+      no Google wordmark** ⇠ found 2026-09-22 on the P30, release builds, seen by the project lead
+      — **Signature**, from `dumpsys activity top`: `GoogleMapsView` → `ComposeView` →
+      `AndroidViewsHandler` with **no child** — maps-compose never attached its `MapView`. A good
+      launch has a `ViewFactoryHolder` there, and uiautomator shows *"Mapa do Google Maps"*. The
+      Maps SDK itself starts cleanly both times (key accepted, renderer LATEST, a GL surface made);
+      no error or exception is logged. The buttons over the map render normally.
+      — **Tally: 2 blank of 9 launches**, one on each build (field and plain release), both the
+      first launch after an install or force-stop. Fine: 3/3 cold starts after force-stop, 3/3
+      reopen after Back, 1/1 launch after an install whose process the recorder had already
+      started. **Not reproducible on demand.** The only error near a failure was
+      `HeadlessJsTaskContext: Cannot start headless task, CatalystInstance not available` —
+      the location task firing before React was up — ⚠ which is also a possible recording gap
+      at cold start and deserves its own look.
+      — ⚠ **First hypothesis was wrong and is recorded so nobody repeats it:** the debuggable
+      manifest flag (T-176) was blamed on one A/B pair; the plain build then failed too.
+      — **Workaround for a user today:** swipe the app away from recents and reopen. The
+      recorder is unaffected — `soak-check.sh` read ALIVE through every blank map.
+      — **Next step:** a launch loop on the P30 (force-stop / install / reboot × N) logging the
+      signature, to find the start path that fails; then read how `expo-maps` mounts its
+      composable. Nothing tests a screen (T-145/T-167 shape), so only a device sees this.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

@@ -560,9 +560,11 @@ Four of these findings were implemented the same day rather than left in this fi
 
 **2026-09-22, ~18:30.** Three things about that phone are not how they were found.
 
-0. ✅ **Superseded ~18:52 — the P30 now runs the FIELD BUILD** (T-176): a release APK, no Metro,
-   installed with `install -r` over the dev client, data intact (30 trips, 835 fixes, checked),
-   `soak-check.sh` reads `recorder ALIVE`. Item 1 below is history. ⚠ **Do not measure smoothness
+0. ✅ **Superseded ~19:02 — the P30 now runs a PLAIN RELEASE BUILD** (T-176): no Metro, installed
+   with `install -r` over the dev client, data intact (30 trips, 835 fixes, checked),
+   `soak-check.sh` reads `recorder ALIVE`. Item 1 below is history. `run-as` does **not** work on
+   it — swap in the field build to pull (`docs/dev-build.md`). ⚠ The map sometimes fails to
+   appear on it — T-177. ⚠ **Do not measure smoothness
    on it** — it is debuggable on purpose; build without `-PproaFieldBuild` for that.
    The pre-install database is at `Madeira-fieldwork/p30-2026-09-22b/`, the APK in
    `Madeira-fieldwork/apks/`.

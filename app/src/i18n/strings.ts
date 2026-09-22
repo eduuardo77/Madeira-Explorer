@@ -105,7 +105,7 @@ export const STRINGS = {
   ),
   'onboarding.keepRunning.body2': s(
     'And do not swipe this app away from your recent apps while you are out. Locking your phone or switching apps is fine — closing it is what stops the recording.',
-    'E não deslize esta aplicação para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal — fechá-la é que pára o registo.',
+    'E não deslize esta aplicação para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal — fechá-la é que para o registo.',
     'Und wischen Sie diese App unterwegs nicht aus den zuletzt verwendeten Apps. Das Telefon sperren oder die App wechseln ist in Ordnung — sie zu schließen beendet die Aufzeichnung.'
   ),
   'onboarding.keepRunning.note': s(
@@ -301,7 +301,7 @@ export const STRINGS = {
   // Nothing here may read as a scolding or as a countdown.
   'passport.locked.a11y': s(
     '{name}, collected. Unlock your passport to see this stamp.',
-    '{name}, visitado. Desbloqueie o seu passaporte para ver este selo.',
+    '{name}, visitado. Desbloqueie o seu passaporte para ver este carimbo.',
     '{name}, gesammelt. Schalten Sie Ihren Reisepass frei, um diesen Stempel zu sehen.'
   ),
   'passport.locked.badge.a11y': s('Locked', 'Bloqueado', 'Gesperrt'),
@@ -540,7 +540,7 @@ export const STRINGS = {
   ),
   'settings.quality.detail.best': s(
     'Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way.',
-    'Pergunta com mais frequência e continua mesmo quando para, para que um almoço demorado não seja uma falha na linha. É a que mais bateria gasta, de longe.',
+    'Pergunta com mais frequência e continua mesmo quando está parado, para que um almoço demorado não seja uma falha na linha. É a que mais bateria gasta, de longe.',
     'Fragt am häufigsten und läuft weiter, auch wenn Sie anhalten — ein langes Mittagessen wird so keine Lücke in der Linie. Verbraucht mit Abstand am meisten Akku.'
   ),
   'settings.section.map': s('Map', 'Mapa', 'Karte'),

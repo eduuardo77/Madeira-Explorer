@@ -545,7 +545,7 @@ export function dotsPath(outline: Point[], spacing: number, radius: number): str
  * anything of its own.
  */
 export type StampElement =
-  | { kind: 'polygon'; points: string; fill: string; stroke?: string; strokeWidth?: number; opacity?: number; clip?: boolean }
+  | { kind: 'polygon'; points: string; fill: string; stroke?: string; strokeWidth?: number; strokeLinejoin?: 'round'; opacity?: number; clip?: boolean }
   | { kind: 'path'; d: string; fill: string; transform?: string; opacity?: number; clip?: boolean }
   | { kind: 'rect'; x: number; y: number; width: number; height: number; fill: string; opacity?: number; clip?: boolean }
   | {

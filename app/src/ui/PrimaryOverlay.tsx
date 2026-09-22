@@ -5,20 +5,22 @@
  * -----------------------------------------------
  *   gear, top-left ─── settings, rare and slightly out of the way
  *   [ the map ] ────── the product; everything here is chrome over it
- *   stamp button, bottom-left ─── the passport, carrying the hero number
+ *   stamp button, bottom-left ─── the passport, drawn as your latest stamp
  *
  * And a conditional fourth: an explicit start/stop control, shown **only** to
  * users who have not granted Always (D-008, design brief §3.3). For them
  * start/stop is a primary action, not a setting — burying a frequent action in
  * a rare place would be the wrong trade. Users on Always never see it.
  *
- * WHY THE STAMP BUTTON CARRIES THE NUMBER
- * ---------------------------------------
- * T-075 requires one hero number, and the screen is allowed three things. Icon
- * plus `23 / 180` on a single element is how both survive — one element, two
- * jobs (design brief §3.1). It is stamps, never a coverage percentage (D-002),
- * and the competitor teardown in §6.3 shows exactly why: their `0.00%` needed
- * two decimal places to avoid reading as zero.
+ * ⚠ THE STAMP BUTTON IS A STAMP, AND THE NUMBER HAS LEFT IT (D-083, 2026-09-22)
+ * ---------------------------------------------------------------------------
+ * It carried the seal mark and `23 / 180` on a pill, because T-075 wanted one
+ * hero number on this screen. The project lead looked at it and asked for
+ * *"just a stamp figure on it"*, then chose from drawn options: **your most
+ * recent visible stamp**, the real artwork, with the rank (D-078) as a metal
+ * rim on its die-cut edge. `passport/passportButton.ts` picks the stamp —
+ * never a locked one — and `passport/stampRim.ts` draws the rim. The count is
+ * still read out by a screen reader here, and still shown in the passport.
  *
  * ⚠ BOTTOM-**LEFT**, ON THE PROJECT LEAD'S INSTRUCTION (2026-08-12)
  * ----------------------------------------------------------------
@@ -30,10 +32,10 @@
  * right, so neither is a mis-tap for the other. Both screen edges are
  * back-gesture territory on Android, hence the clearance on each.
  *
- * The icon is `StampMark`, not the `🛂` emoji it replaced. At 36 dp that glyph
- * rendered as a blue rectangle — the project lead looked at the running app and
- * asked what "the button to centre the map" did. D-015: minimal is not
- * unlabelled.
+ * Before the seal it was the `🛂` emoji, which at 36 dp rendered as a blue
+ * rectangle — the project lead asked what "the button to centre the map" did.
+ * A real stamp is the least ambiguous answer yet: it is the thing the passport
+ * is full of.
  *
  * Presentational: props in, pixels out, so the workbench can mount it.
  */
@@ -44,21 +46,20 @@ import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import RecentreMark from './RecentreMark';
 import WalkMark from './WalkMark';
-import StampMark from './StampMark';
-import { TIER_METAL, tierFor } from '../passport/stampTier';
+import StampArt from './StampArt';
+import { STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
+import { designFor, TILT_FIT } from '../passport/stampArt';
+import { rimFor } from '../passport/stampRim';
+import { tierFor } from '../passport/stampTier';
 import { n, t } from '../i18n';
 import {
   colors,
   fontSize,
-  mapButton,
   mapChrome,
   MIN_TAP_TARGET,
   radius,
   spacing,
 } from './theme';
-
-/** The mark's drawn size. Comfortably above the 24 dp its geometry is tested at. */
-const STAMP_MARK_SIZE = 34;
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 22;
@@ -92,6 +93,8 @@ const WALK_INK = '#FFFFFF';
 
 export type PrimaryOverlayProps = {
   progress: TripProgress;
+  /** The stamp the passport button shows — `buttonStamp()` decides it. */
+  passportStamp: ButtonStamp;
   /**
    * Which map is underneath (T-146).
    *
@@ -142,6 +145,7 @@ export type PrimaryOverlayProps = {
 
 export default function PrimaryOverlay({
   progress,
+  passportStamp,
   mapStyle,
   isWalking,
   showRecentre,
@@ -151,8 +155,7 @@ export default function PrimaryOverlay({
   onOpenSettings,
   onToggleRecording,
 }: PrimaryOverlayProps) {
-  // How far into the collection this is (D-078). The passport button has always
-  // been drawn as a stamp; the rank is what kind of stamp it is.
+  // How far into the collection this is (D-078) — the rim round the stamp.
   const tier = tierFor(progress.collected, progress.total);
 
   // The floating controls take their colours from the map underneath, not from
@@ -262,25 +265,18 @@ export default function PrimaryOverlay({
                 })
           }
           onPress={onOpenPassport}
-          style={({ pressed }) => [
-            styles.stampButton,
-            // ⚠ The rank, and it is the *fill* rather than the mark (D-078).
-            // The button has always been drawn as a stamp; now it is drawn as
-            // the stamp you have earned. Metals are pale by nature and none of
-            // them survives on the action blue — a test proved that before this
-            // line existed.
-            { backgroundColor: TIER_METAL[tier].fill },
-            pressed && styles.pressed,
-          ]}
+          style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
         >
-          {/* ⚠ The metal's own ink, not the app's. Every metal is pale, and the
-              light palette made `colors.actionText` white — see TIER_METAL. */}
-          <StampMark size={STAMP_MARK_SIZE} color={TIER_METAL[tier].ink} />
-          <Text style={[styles.stampCount, { color: TIER_METAL[tier].ink }]}>
-            {progress.total === 0
-              ? '—'
-              : `${progress.collected} / ${progress.total}`}
-          </Text>
+          {/* ⚠ `label` is the button's, so the stamp does not announce itself
+              as a second thing — the Pressable above says "open passport". */}
+          <StampArt
+            placeId={`button-${passportStamp.placeId}`}
+            design={designFor(passportStamp.placeId, passportStamp.category)}
+            name={passportStamp.name}
+            collected={passportStamp.collected}
+            rim={rimFor(tier)}
+            size={STAMP_BUTTON_SIZE * TILT_FIT}
+          />
         </Pressable>
 
         {/* ⚠ SHOWN TO EVERYBODY SINCE 2026-08-28, on the project lead's
@@ -396,20 +392,12 @@ const styles = StyleSheet.create({
     // Bottom-left, on the project lead's instruction — see the header. The
     // recording control sits opposite it.
     alignSelf: 'flex-start',
-    minHeight: MIN_TAP_TARGET,
-    flexDirection: 'row',
+    // ⚠ No fill and no shadow: the stamp is the button (D-083), and its
+    // hairline rim is what stands it off either map. Android draws no
+    // elevation shadow for a view without a background anyway.
+    width: Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET),
+    height: Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET),
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.pill,
-    // ⚠ `mapButton`, not `colors.action` — this control sits on the map, and the
-    // page's action blue went dark when the app went light. Overpainted by the
-    // rank metal at render time anyway; this is the `none` case.
-    backgroundColor: mapButton.fill,
-  },
-  stampCount: {
-    color: colors.actionText,
-    fontSize: fontSize.title,
-    fontWeight: '700',
+    justifyContent: 'center',
   },
 });

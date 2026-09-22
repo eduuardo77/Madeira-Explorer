@@ -20,6 +20,7 @@ import {
   stampElements,
   toPolygon,
 } from '../../app/src/passport/stampArt.ts';
+import { RIM_PAD_UNITS, rimElements } from '../../app/src/passport/stampRim.ts';
 import { projector } from '../../app/src/souvenir/frame.ts';
 import { CATEGORY_COLOUR, stampMarkPoints } from '../../app/src/souvenir/filmPaint.ts';
 
@@ -49,10 +50,17 @@ function attrs(element) {
  * `id` also names the clip path, which is not cosmetic: several stamps render
  * into one document here, and a shared id would make every band take the first
  * stamp's shape.
+ *
+ * `rim` is the passport button's rank rim (D-083), from `stampRim.ts`'s
+ * `rimFor`; the viewBox grows by the same pad `StampArt.tsx` uses.
  */
-export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined) {
+export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined, rim = null) {
   const design = designFor(id, category, motif);
-  const elements = stampElements(design, name, collected);
+  const elements = [
+    ...(rim === null ? [] : rimElements(design, rim)),
+    ...stampElements(design, name, collected),
+  ];
+  const pad = rim === null ? 0 : RIM_PAD_UNITS;
 
   const body = elements
     .map((element) => {
@@ -79,7 +87,7 @@ export function stampSvg(id, name, category, collected, extraStyle = '', motif =
   // would have silently clipped the band to the wrong outline.
   const panelPoints = toPolygon(design.panel);
 
-  return `<svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="transform: rotate(${design.tiltDeg}deg);${extraStyle}">
+  return `<svg viewBox="${-pad} ${-pad} ${CANVAS + 2 * pad} ${CANVAS + 2 * pad}" style="transform: rotate(${design.tiltDeg}deg);${extraStyle}">
       <defs><clipPath id="panel-${id}"><polygon points="${panelPoints}" /></clipPath></defs>
       ${body}
     </svg>`;

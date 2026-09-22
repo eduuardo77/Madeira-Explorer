@@ -56,6 +56,8 @@ import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
+import { isUnlocked } from '../entitlement/entitlementStore';
+import { buttonStamp, type ButtonStamp } from '../passport/passportButton';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import { startTrip, stopTrip } from '../recording/tripRecording';
@@ -212,6 +214,10 @@ export default function NativeMapScreen({
    */
   const cameraHeldByFocus = useRef(false);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
+  /** What the passport button draws (D-083) — the placeholder until loaded. */
+  const [passportStamp, setPassportStamp] = useState<ButtonStamp>(() =>
+    buttonStamp([], [], false, t('passport.title'))
+  );
   const [card, setCard] = useState<PlaceCard | null>(null);
   /**
    * The user's own walk (2026-08-28). ⚠ Starts `false` on every launch and is
@@ -318,6 +324,18 @@ export default function NativeMapScreen({
           const awarded = await stampAwardDao.getAwardedPlaceIds(trip.id);
           if (!cancelled) {
             setCollectedIds(awarded);
+          }
+          // ⚠ Through the free tier, like the passport: the button must never
+          // show a stamp the passport is withholding (passportButton.ts).
+          const awards = await stampAwardDao.getAwards(trip.id);
+          const nextStamp = buttonStamp(
+            awards.map((award) => ({ placeId: award.place_id, awardedTs: award.awarded_ts })),
+            pack.places,
+            await isUnlocked(),
+            t('passport.title')
+          );
+          if (!cancelled) {
+            setPassportStamp(nextStamp);
           }
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
@@ -735,6 +753,7 @@ export default function NativeMapScreen({
 
       <PrimaryOverlay
         progress={progress}
+        passportStamp={passportStamp}
         mapStyle={styleName}
         bottomSlot={
           card === null ? null : (

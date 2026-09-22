@@ -30,6 +30,7 @@ import {
   toPolygon,
   type StampDesign,
 } from '../passport/stampArt';
+import { RIM_PAD_UNITS, rimElements, type Rim } from '../passport/stampRim';
 
 export default function StampArt({
   placeId,
@@ -37,6 +38,7 @@ export default function StampArt({
   name,
   collected,
   label,
+  rim,
   size,
 }: {
   /**
@@ -57,17 +59,27 @@ export default function StampArt({
    * the user stood at. The passport passes the true sentence in.
    */
   label?: string;
+  /**
+   * The rank rim, for the passport button only (D-083). The viewBox grows to
+   * make room for it, so the stamp itself draws a little smaller in the same
+   * `size`.
+   */
+  rim?: Rim | null;
   /** Drawn square, in dp. */
   size: number;
 }) {
-  const elements = stampElements(design, name, collected);
+  const elements = [
+    ...(rim === undefined || rim === null ? [] : rimElements(design, rim)),
+    ...stampElements(design, name, collected),
+  ];
+  const pad = rim === undefined || rim === null ? 0 : RIM_PAD_UNITS;
   const clipId = `stamp-panel-${placeId}`;
 
   return (
     <Svg
       width={size}
       height={size}
-      viewBox={`0 0 ${CANVAS} ${CANVAS}`}
+      viewBox={`${-pad} ${-pad} ${CANVAS + 2 * pad} ${CANVAS + 2 * pad}`}
       // The tilt is applied here rather than inside the drawing, so the cut
       // edge is never clipped by its own viewBox.
       style={{ transform: [{ rotate: `${design.tiltDeg}deg` }] }}
@@ -90,6 +102,7 @@ export default function StampArt({
               fill={element.fill}
               stroke={element.stroke}
               strokeWidth={element.strokeWidth}
+              strokeLinejoin={element.strokeLinejoin}
               opacity={element.opacity}
             />
           );

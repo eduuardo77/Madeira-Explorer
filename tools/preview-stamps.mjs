@@ -31,10 +31,17 @@ import { CATEGORIES } from '../app/src/content/contentPack.ts';
 import { escapeXml, stampSvg } from './lib/svg-render.mjs';
 // Still needed here: the app's mark is drawn by this page's header, not by a
 // stamp.
-import { CANVAS } from '../app/src/passport/stampArt.ts';
+import { CANVAS, TILT_FIT } from '../app/src/passport/stampArt.ts';
 import { stampMarkPath, TILT_DEG } from '../app/src/passport/stampMark.ts';
 import { TIERS, TIER_METAL, TIER_THRESHOLDS } from '../app/src/passport/stampTier.ts';
 import { MOTIF_NAMES } from '../app/src/passport/stampMotif.ts';
+import { rimFor } from '../app/src/passport/stampRim.ts';
+import {
+  PLACEHOLDER_CATEGORY,
+  PLACEHOLDER_ID,
+  STAMP_BUTTON_SIZE,
+} from '../app/src/passport/passportButton.ts';
+import { NIGHT_LAND } from '../app/src/map/googleNightStyle.ts';
 // The real palette, not hexes retyped by eye. `theme.ts` has no imports of its
 // own, so Node can load it directly — and a preview whose colours differ from
 // the app's is exactly the thing this file's header warns against.
@@ -116,33 +123,40 @@ function markRow(ink) {
 }
 
 /**
- * The passport button at each rank (T-158, D-078).
+ * The passport button at each rank, on both maps (D-083, D-078).
  *
- * ⚠ **This is the whole reason the ranks can be looked at at all.** The button
- * lives on the map screen, which needs a device; the ranks are a fill and a
- * mark, which do not. Drawn at the real 36 dp mark size inside the real pill.
+ * The button is a real stamp now — the latest visible one — with the rank as a
+ * metal rim and dark hairline on its die-cut edge. Drawn at the app's size:
+ * `STAMP_BUTTON_SIZE`, the stamp at `TILT_FIT` of it. The ground is Google's light land
+ * and our night land, because a rim judged on this page's own dark background
+ * would flatter the pale metals — which is exactly how option 2 failed.
  *
- * The question it exists to answer is the one no test can: **does bronze read
- * as bronze, or as brown?** And does platinum read as *colder* than silver
- * rather than just paler.
+ * The question no test answers: does bronze read as bronze, and platinum as
+ * *colder* than silver rather than just paler?
  */
+const BUTTON_PX = Math.round(STAMP_BUTTON_SIZE * TILT_FIT);
+
 function tierRow() {
   const label = { none: 'no stamps yet', bronze: `${TIER_THRESHOLDS.bronze}+`,
                   silver: `${TIER_THRESHOLDS.silver}+`, gold: `${TIER_THRESHOLDS.gold}+`,
                   platinum: 'all of them' };
-  return TIERS.map((tier) => {
-    const metal = TIER_METAL[tier];
+  return ['#F2EFE9', NIGHT_LAND].map((ground) => TIERS.map((tier) => {
+    const none = tier === 'none';
+    const button = stampSvg(
+      none ? PLACEHOLDER_ID : 'viewpoint-1',
+      none ? 'Passport' : 'Eagle Point',
+      none ? PLACEHOLDER_CATEGORY : 'viewpoint',
+      !none,
+      `width:${BUTTON_PX}px;height:${BUTTON_PX}px;`,
+      undefined,
+      rimFor(tier)
+    ).replaceAll('panel-', `panel-${ground.slice(1)}-${tier}-`);
     return `
   <figure class="tier">
-    <div class="pill" style="background:${metal.fill}">
-      <svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="width:36px;height:36px">
-        <path d="${stampMarkPath()}" fill="${colors.actionText}" fill-rule="evenodd" transform="rotate(${TILT_DEG} ${CANVAS/2} ${CANVAS/2})" />
-      </svg>
-      <span style="color:${colors.actionText}">23 / 60</span>
-    </div>
+    <div style="background:${ground};width:120px;height:120px;border-radius:12px;display:flex;align-items:center;justify-content:center">${button}</div>
     <figcaption>${tier} · ${label[tier]}</figcaption>
   </figure>`;
-  }).join('');
+  }).join('')).join('</div><div class="tiers" style="margin-top:14px">');
 }
 
 /**
@@ -202,8 +216,11 @@ const html = `<!doctype html>
   Names are invented; <code>content/pois.json</code> is empty and is yours (T-066).
 </p>
 
-<h2>The passport mark (T-075)</h2>
+<h2>The passport mark (T-075) — ⚠ no longer on the button</h2>
 <p class="note">
+  ⚠ <b>Retired from the button on 2026-09-22 (D-083)</b>: the button is a real stamp now,
+  drawn below. The mark stays here because <code>preview-rank.mjs</code> still sketches with it.
+  <br><br>
   The icon on the primary screen's passport button — the <i>idea</i> of a stamp, not a stamp
   for a place. Cut by the same <code>cutEdge</code> the real stamps use, so it cannot drift
   away from them. It replaced a <code>🛂</code> emoji that rendered as a blue rectangle at
@@ -235,10 +252,14 @@ const html = `<!doctype html>
 </p>
 <div class="row">${motifRow()}</div>
 
-<h2>The rank, on the button itself (T-158, D-078)</h2>
+<h2>The rank, on the button itself (D-083, D-078)</h2>
 <p class="note">
-  The passport button <b>is</b> a stamp, and since D-078 it is the stamp you have
-  earned: the rank comes from <b>how many places you have collected</b>, never from
+  The passport button <b>is</b> a stamp — your latest visible one, or the grey placeholder
+  before your first — and the rank is its <b>metal rim with a dark hairline</b>, chosen by
+  the project lead from five drawn options (D-083). The top row is Google's light land, the
+  bottom our night land.
+  <br><br>
+  The rank itself: the rank comes from <b>how many places you have collected</b>, never from
   which ones — ranking places is what killed the "stars" proposal that stamps
   replaced. Silver lands exactly where the free tier ends (D-072), so a visitor who
   never pays reaches it and can see gold above them.

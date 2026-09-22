@@ -4520,3 +4520,38 @@ again. Tiers 2 and 3 are untouched and still Provisional.
 **Consequence:** tier 1 is a bug fix and needs no approval. Tier 2 changes a design measured under
 D-015/D-026 and wants the project lead's eye. Tier 3 needs both a fixture and an explicit decision,
 because it edges the boundary D-032 drew.
+
+## D-083 — The passport button is a stamp, and the count leaves it
+
+**Status:** Accepted — the project lead, 2026-09-22, chosen from drawn options.
+
+**Their words:** *"I want it to be just a stamp figure on it."* The button was the seal mark
+and `0 / 67` on a pill filled with the rank metal (T-075, D-078).
+
+### The decision
+
+- The button draws **your most recent *visible* stamp** — the real artwork, die-cut and in
+  colour. Before the first stamp, a grey placeholder stamp reading *Passport*.
+- The rank (D-078) is a **metal rim on the stamp's die-cut edge, with a dark hairline outside
+  it**. No rim before the first stamp.
+- **The count leaves the button.** It is still read out on the button by a screen reader, and
+  still shown in the passport. This overturns T-075's "one hero number on the primary screen".
+
+### Why "visible", and why it matters more than it looks
+
+The eleventh stamp onwards is locked until the unlock is bought (D-072, D-075). Showing the
+latest *earned* stamp would hand over, in full colour and on the most-looked-at screen, exactly
+the artwork €4.99 sells. `passportButton.ts` takes it from `visibleStamps`, and a test fails
+the build if a locked stamp is ever chosen.
+
+### Rejected — all drawn at real size before choosing
+
+- **A rubber-stamp pictogram** and **the old seal, bigger** — the other two of three. The real
+  stamp won *"for sure"*.
+- For the rank: **no rim** (the rank only inside the passport); **a bare metal rim** — liked,
+  but silver measures 1.42:1 and platinum **1.08:1** on Google's light land, so it vanished;
+  **a metal coin** behind the stamp; **a corner medal**. The hairline is what makes the pale
+  metals legible on the light map (tested: every metal ≥3:1 as drawn).
+
+⚠ **Open:** the grey placeholder's edge is **2.63:1 on the night map**, under the 3:1 floor for
+a control. It shows only before the first stamp. Not fixed — a design question, not a bug.

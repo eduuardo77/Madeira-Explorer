@@ -40,6 +40,7 @@ import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
+import { buttonStamp } from './src/passport/passportButton';
 import { colors, fontSize, spacing } from './src/ui/theme';
 
 /**
@@ -364,6 +365,16 @@ export default function DesignWorkbench() {
               <PrimaryOverlay
                 mapStyle="light"
                 progress={progress}
+                // A synthetic stamp once anything is collected, the placeholder
+                // before — no Madeira names here either (D-017).
+                passportStamp={buttonStamp(
+                  progress.collected === 0
+                    ? []
+                    : [{ placeId: 'workbench-latest', awardedTs: 0 }],
+                  [{ id: 'workbench-latest', name: 'Eagle Point', category: 'viewpoint' }],
+                  true,
+                  'Passport'
+                )}
                 // ⚠ The walk button is no longer conditional (2026-08-28) — it is
                 // shown to everybody, so there is nothing for the workbench to
                 // toggle. `isWalking` is the state worth mounting both ways.

@@ -286,7 +286,13 @@ scratch copy and then on the live phone:
 
 **Fixed:** `journal_size_limit = 1 MiB`, a `PASSIVE`+`TRUNCATE` checkpoint at every open, at trip
 end, and after erase-all's `VACUUM`. Replayed on a copy of the live files: **27 MB → 0 bytes, all
-836 fixes and 3,660 diary rows intact, `integrity_check` ok.** ⚠ **Not yet run on the phone.**
+836 fixes and 3,660 diary rows intact, `integrity_check` ok.**
+
+**Then on the phone** (field build, 19:40): pre-launch state pulled byte-exact to
+`Madeira-fieldwork/p30-2026-09-22c/` first. First launch took the WAL from **27,027,232 to 78,312
+bytes** (19 frames written after the truncate); every table's count equal or grown by the
+recorder's own new writes; `integrity_check` ok; foreground service back by itself. No
+`wal_checkpoint` diary line, correctly — 830 live frames, under the 2,000-frame stall threshold.
 
 ⚠ **Erase-all was not erasing.** Dead WAL frames hold old page versions, so after erase-all and
 `VACUUM` the deleted history sat on in the `-wal` file — six days of August, in the P30's case.

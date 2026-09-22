@@ -100,8 +100,8 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
 4. ✅ **T-178 — the WAL was 27 MB, over the ~25 MB auto-backup cap.** 615 live frames in a
    27 MB file: SQLite never shrinks it, and one August generation was pinned for six days by
    what looks like a leaked statement. Fixed with `journal_size_limit` plus a `TRUNCATE`
-   checkpoint at open, trip end and erase-all — **replayed on a copy of the live files, 27 MB →
-   0; not yet run on the phone.** ⚠ The pin itself is **T-179**, open.
+   checkpoint at open, trip end and erase-all — **verified on the P30 (field build): first launch
+   took the WAL from 27 MB to 78 KB, nothing lost.** ⚠ The pin itself is **T-179**, open.
 
 ⚠ **Portuguese has now been seen on real hardware** (the map screen, 2026-09-22) — the line below
 about it never having been on a device is retired.

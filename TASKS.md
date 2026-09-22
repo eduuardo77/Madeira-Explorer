@@ -1331,8 +1331,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Next step:** a launch loop on the P30 (force-stop / install / reboot × N) logging the
       signature, to find the start path that fails; then read how `expo-maps` mounts its
       composable. Nothing tests a screen (T-145/T-167 shape), so only a device sees this.
-- [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22**, not yet on
-      the phone. ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.
+- [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
+      on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
+      no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.
       — **Two causes, two fixes.** The file keeps its high-water size because nothing truncates
       it → `journal_size_limit` + `TRUNCATE` at open, trip end and erase-all (`storage/walPolicy.ts`,
       `truncateWal` in `database.ts`). And a leaked statement pinned the WAL for six days in

@@ -170,7 +170,7 @@ export type PassportStamp = {
   placeId: string;
   name: string;
   category: Category;
-  /** False draws the muted design (`stampArt.ts`) and reads "not collected yet". */
+  /** False draws the muted design (`stampArt.ts`); the cell says "not collected yet". */
   collected: boolean;
   /**
    * Earned, kept forever, and behind the €4.99 unlock (T-155, D-072).
@@ -331,9 +331,8 @@ function CategoryRow({
           design={designFor(stamp.placeId, stamp.category)}
           name={stamp.name}
           collected={locked ? false : stamp.collected}
-          // The sticker's own label would append "not collected yet", which is
-          // exactly the sentence a locked stamp must never say.
-          label={locked ? t('passport.locked.a11y', { name: stamp.name }) : undefined}
+          // The cell's Pressable above says "locked" in the user's language; the
+          // sticker itself is hidden from screen readers (StampArt).
           size={STAMP_DRAW_SIZE}
         />
         {locked ? <LockBadge /> : null}

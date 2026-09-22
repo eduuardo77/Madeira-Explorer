@@ -37,7 +37,6 @@ export default function StampArt({
   design,
   name,
   collected,
-  label,
   rim,
   size,
 }: {
@@ -50,15 +49,6 @@ export default function StampArt({
   design: StampDesign;
   name: string;
   collected: boolean;
-  /**
-   * What a screen reader should say, when the derived label would be wrong.
-   *
-   * ⚠ Exists for exactly one caller: a stamp that is **earned but locked**
-   * (T-155) is drawn with `collected={false}` so it gets the muted palette, and
-   * the derived label would then announce *"not collected yet"* about a place
-   * the user stood at. The passport passes the true sentence in.
-   */
-  label?: string;
   /**
    * The rank rim, for the passport button only (D-083). The viewBox grows to
    * make room for it, so the stamp itself draws a little smaller in the same
@@ -83,7 +73,13 @@ export default function StampArt({
       // The tilt is applied here rather than inside the drawing, so the cut
       // edge is never clipped by its own viewBox.
       style={{ transform: [{ rotate: `${design.tiltDeg}deg` }] }}
-      accessibilityLabel={label ?? `${name}${collected ? '' : ', not collected yet'}`}
+      // ⚠ Decorative, always. Every caller wraps the stamp in a Pressable that
+      // carries the translated sentence — the passport cell, the passport
+      // button. This used to label itself too, in English only (*"…, not
+      // collected yet"*), so TalkBack on the P30 read the button twice and
+      // the second time in the wrong language (found 2026-09-22).
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
     >
       <Defs>
         <ClipPath id={clipId}>

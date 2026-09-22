@@ -267,8 +267,8 @@ export default function PrimaryOverlay({
           onPress={onOpenPassport}
           style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
         >
-          {/* ⚠ `label` is the button's, so the stamp does not announce itself
-              as a second thing — the Pressable above says "open passport". */}
+          {/* The Pressable above says "open your passport, 3 of 80"; StampArt
+              hides itself from screen readers, so it is said once. */}
           <StampArt
             placeId={`button-${passportStamp.placeId}`}
             design={designFor(passportStamp.placeId, passportStamp.category)}

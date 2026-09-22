@@ -612,6 +612,22 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       end is across the ridge in Porto Moniz). **PR 23 Levada da Azenha is `access=no` in OSM** —
       closed, so not added. Fajã do Rodrigues is believed to close often for rockfall — check
       before a release.
+- [x] **T-066c** ✅ **Fourteen more places and one cut, 2026-09-22 (D-078) — 67 → 80.** Applied
+      as drafted: Eira do Serrado, Boca da Encumeada, Véu da Noiva, Ilhéus da Ribeira da Janela ·
+      Porto da Cruz, Jardim do Mar, Paul do Mar · Fajã dos Padres · Jardim Botânico, Sé do
+      Funchal, Mercado dos Lavradores, Farol da Ponta do Pargo, Museu CR7, Teleférico das Achadas
+      da Cruz. Sheet: `docs/curation-draft-others.md`.
+      — **Why the list could grow at all:** August's candidates came from the tile pack's labels,
+      which never held the Botanical Garden, the Sé or the market. This one queried OSM directly
+      and dropped anything inside an existing stamp's circle.
+      — **Encumeada Baixa cut** by the project lead. August kept it as *"the pass where the two
+      coasts meet"* — that is Boca da Encumeada, 8.7 km away; the reason was mine and wrong.
+      — **The two lifts are stamped at the bottom station** at 100 m, 330–470 m from the top, so
+      standing in the car park does not earn them. The Sé, the market, CR7 and the Teatro are
+      330–420 m apart, so all four are 120 m (the Teatro was 200).
+      — ⚠ **Still open: Pico Guindaste** may be 470 m from the miradouro people visit — OSM has two
+      *Guindaste* viewpoints east of it. Unanswered. `check-names` flags *Jardim Botânico da
+      Madeira* as short for OSM's full name; kept, because it is what is signed.
 - [ ] **T-067a** Porto Santo lock/unlock gate (D-024): hidden from map, region list and UI
       until an island-level geofence fires; unlock is permanent. **The stamp denominator must
       count unlocked regions only**, or the headline number breaks. ⇠ T-039, T-067, T-073

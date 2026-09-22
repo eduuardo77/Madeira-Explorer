@@ -1,5 +1,7 @@
 # Draft for the other four categories — a list to veto, not to approve
 
+> ✅ **Applied 2026-09-22, all of it (T-066c); Encumeada Baixa cut.** Pico Guindaste is still a question.
+
 **For:** the project lead. **Written:** 2026-09-22. **Method:** D-064 draft-and-veto, under D-078.
 Marks as in [`curation-draft.md`](curation-draft.md); `[wiki N]` is the number of Wikipedia
 languages with an article (fame, not merit).

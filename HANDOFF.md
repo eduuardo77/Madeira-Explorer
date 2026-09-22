@@ -10,9 +10,9 @@ The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **ru
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
 still image. **686 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
-unlock flag yet — T-156 is the money.** `content/pois.json` holds **67 curated places**
-(16 viewpoints · 18 levadas · 16 villages · 7 beaches · 10 landmarks — seven levadas added
-2026-09-22, T-066b). The UI speaks **English,
+unlock flag yet — T-156 is the money.** `content/pois.json` holds **80 curated places**
+(19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks — 21 added and one cut
+2026-09-22, T-066b/T-066c). The UI speaks **English,
 Portuguese and German**. ⚠ **The app has run on real hardware once** — Firebase Test Lab, Pixel 5,
 2026-08-19, map rendering included (item 0 below). ⚠ **No threshold in the app has met real GPS**,
 and battery and background survival are still unmeasured.
@@ -64,7 +64,7 @@ is drafted and ready to paste).
    (T-129), not a purchase** — and a purchase answers them for one handset.
 2. **Nobody has completed a single trip with this app.** OD-10 says use it yourself for one real
    trip before launching, and it is also how the store screenshots stop being a replayed route.
-3. **The curated 60 are one person's judgement.** *Achada do Marques* and *Chão da Ribeira* are
+3. **The curated 80 are one person's judgement.** *Achada do Marques* and *Chão da Ribeira* are
    flagged as most likely wrong.
 
 ## ✅✅ THE PROJECT HAS REAL RECORDED DATA — found 2026-09-22

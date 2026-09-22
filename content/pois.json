@@ -201,20 +201,6 @@
       ]
     },
     {
-      "id": "encumeada-baixa",
-      "name": "Encumeada Baixa",
-      "category": "viewpoint",
-      "regionId": "santana",
-      "geofences": [
-        {
-          "id": "encumeada-baixa",
-          "lat": 32.76332,
-          "lon": -16.92711,
-          "radiusM": 200
-        }
-      ]
-    },
-    {
       "id": "fortaleza-do-pico",
       "name": "Fortaleza do Pico",
       "category": "landmark",
@@ -266,7 +252,7 @@
           "id": "teatro-municipal-baltazar-dias",
           "lat": 32.64695,
           "lon": -16.91141,
-          "radiusM": 200
+          "radiusM": 120
         }
       ]
     },
@@ -505,6 +491,20 @@
           "lat": 32.74723,
           "lon": -16.69667,
           "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "faja-dos-padres",
+      "name": "Fajã dos Padres",
+      "category": "beach",
+      "regionId": "ribeira-brava",
+      "geofences": [
+        {
+          "id": "faja-dos-padres-main",
+          "lat": 32.656,
+          "lon": -17.025,
+          "radiusM": 100
         }
       ]
     },
@@ -1071,6 +1071,62 @@
       ]
     },
     {
+      "id": "eira-do-serrado",
+      "name": "Eira do Serrado",
+      "category": "viewpoint",
+      "regionId": "camara-de-lobos",
+      "geofences": [
+        {
+          "id": "eira-do-serrado-main",
+          "lat": 32.71035,
+          "lon": -16.96576,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "boca-da-encumeada",
+      "name": "Boca da Encumeada",
+      "category": "viewpoint",
+      "regionId": "sao-vicente",
+      "geofences": [
+        {
+          "id": "boca-da-encumeada-main",
+          "lat": 32.75456,
+          "lon": -17.01952,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "veu-da-noiva",
+      "name": "Véu da Noiva",
+      "category": "viewpoint",
+      "regionId": "porto-moniz",
+      "geofences": [
+        {
+          "id": "veu-da-noiva-main",
+          "lat": 32.81608,
+          "lon": -17.09514,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "ilheus-da-ribeira-da-janela",
+      "name": "Ilhéus da Ribeira da Janela",
+      "category": "viewpoint",
+      "regionId": "porto-moniz",
+      "geofences": [
+        {
+          "id": "ilheus-da-ribeira-da-janela-main",
+          "lat": 32.85529,
+          "lon": -17.1531,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
       "id": "santana",
       "name": "Santana",
       "category": "village",
@@ -1080,6 +1136,48 @@
           "id": "santana-main",
           "lat": 32.80491,
           "lon": -16.8813,
+          "radiusM": 600
+        }
+      ]
+    },
+    {
+      "id": "porto-da-cruz",
+      "name": "Porto da Cruz",
+      "category": "village",
+      "regionId": "machico",
+      "geofences": [
+        {
+          "id": "porto-da-cruz-main",
+          "lat": 32.77251,
+          "lon": -16.8286,
+          "radiusM": 600
+        }
+      ]
+    },
+    {
+      "id": "jardim-do-mar",
+      "name": "Jardim do Mar",
+      "category": "village",
+      "regionId": "calheta",
+      "geofences": [
+        {
+          "id": "jardim-do-mar-main",
+          "lat": 32.73756,
+          "lon": -17.21113,
+          "radiusM": 600
+        }
+      ]
+    },
+    {
+      "id": "paul-do-mar",
+      "name": "Paul do Mar",
+      "category": "village",
+      "regionId": "calheta",
+      "geofences": [
+        {
+          "id": "paul-do-mar-main",
+          "lat": 32.75477,
+          "lon": -17.22724,
           "radiusM": 600
         }
       ]
@@ -1095,6 +1193,90 @@
           "lat": 32.79755,
           "lon": -17.04206,
           "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "jardim-botanico-da-madeira",
+      "name": "Jardim Botânico da Madeira",
+      "category": "landmark",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "jardim-botanico-da-madeira-main",
+          "lat": 32.66222,
+          "lon": -16.89556,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "se-do-funchal",
+      "name": "Sé do Funchal",
+      "category": "landmark",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "se-do-funchal-main",
+          "lat": 32.64822,
+          "lon": -16.90823,
+          "radiusM": 120
+        }
+      ]
+    },
+    {
+      "id": "mercado-dos-lavradores",
+      "name": "Mercado dos Lavradores",
+      "category": "landmark",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "mercado-dos-lavradores-main",
+          "lat": 32.6487,
+          "lon": -16.90379,
+          "radiusM": 120
+        }
+      ]
+    },
+    {
+      "id": "farol-da-ponta-do-pargo",
+      "name": "Farol da Ponta do Pargo",
+      "category": "landmark",
+      "regionId": "calheta",
+      "geofences": [
+        {
+          "id": "farol-da-ponta-do-pargo-main",
+          "lat": 32.81393,
+          "lon": -17.26307,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "museu-cr7",
+      "name": "Museu CR7",
+      "category": "landmark",
+      "regionId": "funchal",
+      "geofences": [
+        {
+          "id": "museu-cr7-main",
+          "lat": 32.64412,
+          "lon": -16.91385,
+          "radiusM": 120
+        }
+      ]
+    },
+    {
+      "id": "teleferico-das-achadas-da-cruz",
+      "name": "Teleférico das Achadas da Cruz",
+      "category": "landmark",
+      "regionId": "porto-moniz",
+      "geofences": [
+        {
+          "id": "teleferico-das-achadas-da-cruz-main",
+          "lat": 32.8568,
+          "lon": -17.2117,
+          "radiusM": 100
         }
       ]
     }

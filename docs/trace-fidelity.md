@@ -29,11 +29,15 @@ most of what the eye is objecting to.
 
 ## 2. Cause A — the cleanup is written, tested, and not wired in
 
-`traceCleanup.ts` removes spikes, collapses standing-still scribble and simplifies jitter. It has
-its own test file. **The map screen does not call it.**
+✅ **Fixed 2026-09-22 (T-167).** Recorded as found, because the lesson is the valuable part.
 
-- [`NativeMapScreen.tsx:326`](../app/src/map/NativeMapScreen.tsx) calls `splitIntoSegments` — raw.
+`traceCleanup.ts` removes spikes, collapses standing-still scribble and simplifies jitter. It has
+its own test file. **The map screen did not call it.**
+
+- [`NativeMapScreen.tsx`](../app/src/map/NativeMapScreen.tsx) called `splitIntoSegments` — raw.
 - The cleaned entry point is `drawableSegments` ([`traceGeoJson.ts:314`](../app/src/map/traceGeoJson.ts)).
+- The guard is now [`traceDrawn.test.ts`](../app/src/map/traceDrawn.test.ts), verified by
+  reintroducing the bug and watching exactly one test fail.
 
 **How it happened.** `10fa42a` (Aug 14) wrote the Google screen against `splitIntoSegments`.
 `98796d8` (Aug 16, T-150/D-066) added the cleanup and wired it into `buildTrace` — and the screen
@@ -41,9 +45,10 @@ calling `buildTrace` at that moment was the MapLibre one, which is now in `app/a
 calls it today. The cleanup shipped into the retired screen, the souvenir card
 ([`shareTrip.ts:75`](../app/src/souvenir/shareTrip.ts)) and every preview tool. Not into the live map.
 
-**This is the T-145 shape.** No test covers `NativeMapScreen`, so 619 passing tests cannot see it.
+**This is the T-145 shape.** No test covered `NativeMapScreen`, so 644 passing tests could not see
+it — the project lead found it by looking at the running app.
 
-**What still runs on the map today:** the accuracy filter, the gap break, and the impossible-jump
+**What ran on the map before the fix:** the accuracy filter, the gap break, and the impossible-jump
 break. That last one only fires above **250 m *and* 55 m/s** — so a fix 150 m off the path, 20 s
 from its neighbours, implies 7.5 m/s, trips nothing, and is drawn in full as a V out and back.
 
@@ -51,7 +56,7 @@ Measured on `tools/routes/funchal-seafront.txt`:
 
 | | Drawn length | Worst error | Vertices |
 |---|---|---|---|
-| Raw — **what the phone draws** | 4.49 km | **151 m** | 211 |
+| Raw — **what the phone drew** | 4.49 km | **151 m** | 211 |
 | Cleaned — what the souvenir draws | 2.55 km | 20 m | 35 |
 | *(true walk)* | *2.23 km* | — | *181* |
 
@@ -72,7 +77,7 @@ interior angles on the same route:
 
 | | Vertices | Corners under 60° | Corners under 30° | Sharpest |
 |---|---|---|---|---|
-| Raw — **what the phone draws** | 211 | 46 | **27** | **1.3°** |
+| Raw — **what the phone drew** | 211 | 46 | **27** | **1.3°** |
 | Cleaned | 35 | 4 | 2 | 9.7° |
 
 A 1.3° corner on an 11 px line mitres to roughly **480 px** — most of the screen height — from a
@@ -228,6 +233,8 @@ whole trace to an endpoint, against D-001 and everything §2.5 buys.
 
 ## 8. Recommendation
 
+✅ **Tier 0 shipped 2026-09-22 (T-167).** The rest stands as written.
+
 **Tier 0 — do now, uncontroversial.** Wire the map to `drawableSegments`, plus a guard test in the
 shape of `freeTier.test.ts` so it cannot silently come unwired again. Identical signatures; one
 import and one call site. Fixes A, and most of B with it.
@@ -250,4 +257,4 @@ fixture is the thing T-018, T-019, T-020 and T-021 have all been waiting on.
 
 - **D-082**, Provisional, in `DECISIONS.md` and `docs/decisions-full.md`.
 - **T-167 … T-170** in `TASKS.md`.
-- Nothing in `app/` yet.
+- `app/src/map/NativeMapScreen.tsx` — tier 0, and `app/src/map/traceDrawn.test.ts`, its guard.

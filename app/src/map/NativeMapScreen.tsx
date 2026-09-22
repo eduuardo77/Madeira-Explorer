@@ -84,7 +84,7 @@ import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
-import { splitIntoSegments, traceBounds } from './traceGeoJson';
+import { drawableSegments, traceBounds } from './traceGeoJson';
 import { TRACE_PAINT } from './traceStyle';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -323,7 +323,18 @@ export default function NativeMapScreen({
           if (!cancelled) {
             // The same gap rule as before: where the recorder admits silence,
             // the drawing breaks rather than bridging it (ARCHITECTURE §10).
-            const segments = splitIntoSegments(fixes, GAP_THRESHOLD_MS);
+            //
+            // ⚠ **`drawableSegments`, never `splitIntoSegments` — T-167.** The
+            // raw splitter applies the accuracy filter and the two break rules
+            // and stops there, so spikes under 250 m, the scribble where
+            // somebody stood still, and every jitter vertex were all drawn in
+            // full. This screen called it for a month: it was written (Aug 14)
+            // before `traceCleanup.ts` existed (Aug 16), the cleanup was wired
+            // into `buildTrace`, and the only caller of *that* is the retired
+            // MapLibre screen in `app/attic/`. So the souvenir and every
+            // preview tool drew the cleaned trace and the phone did not.
+            // `traceDrawn.test.ts` fails the build if this comes unwired again.
+            const segments = drawableSegments(fixes, GAP_THRESHOLD_MS);
             setTracePolylines(
               segments.map((segment, index) => ({
                 id: `trace-${index}`,

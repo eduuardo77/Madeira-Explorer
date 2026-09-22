@@ -1106,7 +1106,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **`exportTrace.ts` and D-040 are the other end of this.** The masking rule exists so a
       trace cannot publish where the user sleeps; an *imported* trace has never been masked by us
       and must go through the same door before it reaches a souvenir.
-- [ ] **T-167** ⚠⚠ **The map draws the UNCLEANED trace — wire it up** ⇠ T-150 ⚠ **found 2026-09-22**
+- [x] **T-167** ✅ **The map draws the cleaned trace — found and fixed 2026-09-22.** ⇠ T-150
       — **The project lead, looking at the running app:** *"sometimes the app makes lines in random
       places which looks a bit odd."* They are looking at a real bug, not at D-032.
       — **`NativeMapScreen.tsx:326` calls `splitIntoSegments` — raw.** The cleaned entry point is
@@ -1120,6 +1120,17 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **What it costs today**, on `funchal-seafront` (⚠ modelled noise, not measured): the phone
       draws **4.49 km for a 2.23 km walk, worst error 151 m, 211 vertices**; cleaned it is 2.55 km,
       20 m and 35 vertices. Identical signatures — one import and one call site.
+      — ✅ **Fixed:** `drawableSegments` at `NativeMapScreen.tsx:337`, and
+      **`map/traceDrawn.test.ts`** is the guard — six tests, in `freeTier.test.ts`'s shape.
+      — ⚠ **The guard was checked by breaking it**, per CLAUDE.md's rule about probes that do not
+      move: putting `splitIntoSegments` back fails **one** test with the sentence that names the
+      cause, and the other five keep passing. A source check that cannot fail is decoration.
+      — ⚠ **`splitIntoSegments` is deliberately NOT forbidden generally.**
+      `souvenir/composition.ts` needs it — it paces the film by the fixes' own timestamps, and
+      cleaning first once moved a stamp cue to the start of the draw. The test asserts that
+      exception too, so a later tidy-up cannot quietly "fix" it.
+      — **644 tests, `tsc` strict clean.** ⚠ Causes B, C and D from
+      `docs/trace-fidelity.md` are untouched: T-168, T-169, T-170.
 - [ ] **T-168** **Settle what the renderer will actually draw — one emulator session** ⇠ T-167
       — ⚠ **`expo-maps@57.0.1` passes only `points`, `color`, `geodesic`, `width` to the polyline**
       (`GoogleMapsView.kt:158`). No `pattern`, no `jointType`, no caps, no `zIndex`. **So the

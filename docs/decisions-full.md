@@ -4513,6 +4513,10 @@ T-018. Choosing a corridor width today would be a guess of exactly the kind this
 paid for. **One Sensor Logger recording of one levada unblocks it** — and the same fixture is what
 T-018, T-019, T-020 and T-021 have all been waiting on.
 
+✅ **Tier 1 shipped 2026-09-22 (T-167)**, on the project lead's go-ahead: the map builds its
+trace with `drawableSegments`, and `map/traceDrawn.test.ts` fails the build if that comes unwired
+again. Tiers 2 and 3 are untouched and still Provisional.
+
 **Consequence:** tier 1 is a bug fix and needs no approval. Tier 2 changes a design measured under
 D-015/D-026 and wants the project lead's eye. Tier 3 needs both a fixture and an explicit decision,
 because it edges the boundary D-032 drew.

@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **619 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **644 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **60 curated places**
 (16 viewpoints · 11 levadas · 16 villages · 7 beaches · 10 landmarks). The UI speaks **English,
@@ -151,13 +151,17 @@ gradient.
 
 ## Traps. Each cost a session, and none was visible from the tests
 
-- ⚠⚠ **The map draws the UNCLEANED trace — found 2026-09-22, T-167, not yet fixed.**
-  `NativeMapScreen.tsx:326` calls `splitIntoSegments` (raw); the cleaned entry point is
-  `drawableSegments`. `traceCleanup.ts` reaches the souvenir card and every preview tool and
-  **not the map** — so everything previewed has been cleaned and the phone has not. The Google
-  screen (Aug 14) predates the cleanup (Aug 16), which was wired into `buildTrace`, whose only
-  caller is now `app/attic/`. **Same shape as T-145**: nothing tests `NativeMapScreen`.
-  Costing, and the two tiers beyond the fix: `docs/trace-fidelity.md`, **D-082 (Provisional)**.
+- ⚠⚠ **The map drew the UNCLEANED trace for a month — T-167, ✅ fixed 2026-09-22.**
+  `NativeMapScreen` called `splitIntoSegments` (raw) while `traceCleanup.ts` reached the souvenir
+  card and every preview tool — **so everything anybody previewed was clean and the phone never
+  was.** The Google screen (Aug 14) predates the cleanup (Aug 16), which was wired into
+  `buildTrace`, whose only caller is now `app/attic/`. **Same shape as T-145**: nothing tests a
+  screen, so 644 tests could not see it; the project lead found it by looking at the app.
+  **`map/traceDrawn.test.ts` is now the guard**, and it was verified by reintroducing the bug.
+  ⚠ **The lesson outlives the fix:** when a pure module is replaced by a different renderer,
+  check what the *new* screen calls — the old one keeps the correct call and keeps passing.
+  ⚠ **Three causes remain and are NOT fixed** — miter joints, the hairline's false precision,
+  and no snapping: `docs/trace-fidelity.md`, **D-082 (Provisional)**, T-168/T-169/T-170.
 - ⚠ **`expo-maps` polylines take four properties and no more** — `points`, `color`, `geodesic`,
   `width` (`GoogleMapsView.kt:158`). **No dash pattern** (so the dashed-bridge idea in
   `traceGeoJson.ts:112` is not buildable), no joint type (miter, which turns a 1.3° corner into a

@@ -154,7 +154,13 @@ export const STRINGS = {
     'Sie können ablehnen und die App weiter nutzen — dann starten und stoppen Sie die Aufzeichnung selbst.'
   ),
   'onboarding.background.continue': s('Continue', 'Continuar', 'Weiter'),
-  'onboarding.background.deny': s('No thanks', 'Não, obrigado', 'Nein, danke'),
+  // ⚠ The button only. The three bodies above are compliance text (T-121) and
+  // nothing here may weaken them.
+  'onboarding.background.deny': s(
+    'No, I’ll start it myself',
+    'Não, inicio eu',
+    'Nein, ich starte selbst'
+  ),
 
   // ── Onboarding: offering background recording later ─────────────────────
   'onboarding.upgrade.title': s(
@@ -168,12 +174,33 @@ export const STRINGS = {
     'Im Moment füllt sich Ihre Karte nur, solange die App geöffnet ist.'
   ),
   'onboarding.upgrade.body2': s(
-    'If you let it record in the background, you can put your phone away and it will keep going on its own.',
-    'Se o deixar registar em segundo plano, pode guardar o telemóvel e ele continua sozinho.',
-    'Wenn Sie die Aufzeichnung im Hintergrund erlauben, können Sie das Telefon weglegen und sie läuft von selbst weiter.'
+    'If you let it record in the background, you can put your phone away and it will keep going on its own — without pressing Start recording each time you go out.',
+    'Se o deixar registar em segundo plano, pode guardar o telemóvel e ele continua sozinho — sem carregar em Começar a registar de cada vez que sai.',
+    'Wenn Sie die Aufzeichnung im Hintergrund erlauben, können Sie das Telefon weglegen und sie läuft von selbst weiter — ohne jedes Mal auf Aufzeichnung starten zu tippen, wenn Sie losziehen.'
+  ),
+  // ⚠ What the user KEEPS if they say no (2026-09-22). The ask is the scariest
+  // one the app makes, and the cheapest way to lower its stakes is to say that
+  // refusing costs them nothing — which is true, because D-008 makes the manual
+  // recorder the supported configuration rather than a consolation.
+  // ⚠ It promises the map button, NOT a settings toggle. The in-app toggle is
+  // blocked without the OS grant (`settings.background.blocked`), so "turn it on
+  // later in settings" would be a path that does not work for exactly the user
+  // who was told about it. Same wording as `settings.background.off`.
+  'onboarding.upgrade.body3': s(
+    'Either way, nothing is lost: you can always press Start recording on the map when you go out.',
+    'De qualquer forma, não perde nada: pode sempre carregar em Começar a registar no mapa quando sair.',
+    'So oder so geht nichts verloren: Sie können auf der Karte jederzeit auf Aufzeichnung starten tippen, wenn Sie losziehen.'
   ),
   'onboarding.upgrade.continue': s('Turn it on', 'Ligar', 'Einschalten'),
-  'onboarding.upgrade.skip': s('Leave it as it is', 'Deixar como está', 'So lassen'),
+  // ⚠ The decline names an outcome rather than a refusal (2026-09-22). It was
+  // 'Leave it as it is', which is accurate and tells the user nothing about what
+  // happens next. D-008 says refusing is a supported way to use this app; a
+  // decline that describes the supported configuration is that claim in the copy.
+  'onboarding.upgrade.skip': s(
+    'No, I’ll start it myself',
+    'Não, inicio eu',
+    'Nein, ich starte selbst'
+  ),
 
   // ── Onboarding: the permission was silently downgraded (T-044) ──────────
   'onboarding.downgrade.title': s(
@@ -192,7 +219,11 @@ export const STRINGS = {
     'Das ist in Ordnung — aber dann müssen Sie sie jedes Mal selbst starten oder die Aufzeichnung im Hintergrund wieder einschalten.'
   ),
   'onboarding.downgrade.continue': s('Turn it back on', 'Voltar a ligar', 'Wieder einschalten'),
-  'onboarding.downgrade.skip': s('Leave it', 'Deixar', 'Lassen'),
+  'onboarding.downgrade.skip': s(
+    'No, I’ll start it myself',
+    'Não, inicio eu',
+    'Nein, ich starte selbst'
+  ),
 
   // ── The map screen (design brief §3) ────────────────────────────────────
   // ⚠ **"WALK" WAS THE WRONG WORD, AND IT WAS MINE** (renamed 2026-08-28).

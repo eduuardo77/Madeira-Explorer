@@ -122,9 +122,17 @@ function copyFor(screen: OnboardingScreen): Copy {
       };
 
     case 'always-upgrade':
+      // ⚠ `body3` is a third paragraph rather than the `note` slot, and that is
+      // deliberate: `note` belongs to `batterySentence()`, which is null only
+      // until T-054 measures it (D-041). Putting the what-you-keep line there
+      // would make the honest battery figure evict it the day it arrives.
       return {
         title: t('onboarding.upgrade.title'),
-        body: [t('onboarding.upgrade.body1'), t('onboarding.upgrade.body2')],
+        body: [
+          t('onboarding.upgrade.body1'),
+          t('onboarding.upgrade.body2'),
+          t('onboarding.upgrade.body3'),
+        ],
         note: batterySentence() ?? undefined,
         continueLabel: t('onboarding.upgrade.continue'),
         skipLabel: t('onboarding.upgrade.skip'),

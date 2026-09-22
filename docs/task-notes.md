@@ -233,6 +233,22 @@ grep -A30 "^### T-052a" docs/task-notes.md
       one morning loses both — and **exactly once, ever**. A second ask is pressure, and
       pressure is what gets permissions revoked (D-008). It also waits until something has been
       recorded, so the pitch can be made in terms of the map they already have.
+      — **Copy revised 2026-09-22**, from the reference app's own background pre-prompt, which the
+      project lead photographed on the P30. Two things it does that this screen did not: it names
+      the chore the permission removes (*"so you don't have to press Start Walk every time"*), and
+      it tells the user what they keep if they decline. Both are now in `onboarding.upgrade.body2`
+      and the new `body3`, and every decline button in the permission screens reads
+      *"No, I'll start it myself"* instead of *"Leave it as it is"* / *"Leave it"* / *"No thanks"*
+      — a decline that names the supported configuration rather than naming nothing, which is
+      D-008's claim written into the one place the user actually reads it.
+      — ⚠ **The reference app's third move was NOT copied, and the reason is D-041-shaped.** It
+      bounds the ask with *"It only records while your pedometer detects you're walking"*. Our
+      nearest true equivalent is the sampling gate, and it does not stop recording — it downshifts
+      — and **T-175 is open precisely because the downshift does not fire when a stationary phone
+      delivers no fixes.** A sentence promising it would be wrong for the user sitting in a hotel
+      room. `body3` promises the map button instead, which is unconditionally true.
+      — ⚠ `body3` is a third paragraph, not the `note` slot: `note` is reserved for
+      `batterySentence()`, which is null only until T-054 measures it.
 
 ### T-044
 

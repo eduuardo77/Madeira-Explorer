@@ -6,7 +6,7 @@
  * GPS is healthy. By the time we notice GPS has died it is too late to start.
  */
 
-import { getDatabase } from '../database';
+import { getDatabase, withStatement } from '../database';
 import type { SensorSample, SensorSampleInput } from '../types';
 
 export async function insertSamples(
@@ -20,25 +20,26 @@ export async function insertSamples(
   let inserted = 0;
 
   await db.withTransactionAsync(async () => {
-    const statement = await db.prepareAsync(
+    // T-179: `withStatement`, never `prepareAsync` — it keeps the statement
+    // reachable until it is finalized (see `storage/keepAlive.ts`).
+    await withStatement(
+      db,
       `INSERT INTO sensor_sample
          (trip_id, ts, pressure_hpa, relative_altitude_m, step_count_delta)
-       VALUES (?, ?, ?, ?, ?);`
-    );
-    try {
-      for (const sample of samples) {
-        await statement.executeAsync(
-          sample.trip_id,
-          sample.ts,
-          sample.pressure_hpa,
-          sample.relative_altitude_m,
-          sample.step_count_delta
-        );
-        inserted += 1;
+       VALUES (?, ?, ?, ?, ?);`,
+      async (statement) => {
+        for (const sample of samples) {
+          await statement.executeAsync(
+            sample.trip_id,
+            sample.ts,
+            sample.pressure_hpa,
+            sample.relative_altitude_m,
+            sample.step_count_delta
+          );
+          inserted += 1;
+        }
       }
-    } finally {
-      await statement.finalizeAsync();
-    }
+    );
   });
 
   return inserted;

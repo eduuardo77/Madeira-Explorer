@@ -15,6 +15,7 @@
  */
 
 import * as SQLite from 'expo-sqlite';
+import { createKeepAlive } from './keepAlive';
 import { MIGRATIONS } from './migrations';
 import { onceOrRetry } from './onceOrRetry';
 import { recordingQueue } from './recordingQueue';
@@ -59,6 +60,77 @@ const DATABASE_NAME = 'madeira.db';
 export const getDatabase = onceOrRetry<SQLite.SQLiteDatabase>(() =>
   openAndMigrate()
 );
+
+/**
+ * Every prepared statement, held reachable from prepare to finalize (T-179).
+ *
+ * ⚠⚠ `keepAlive.ts` has the whole story; the short version is that
+ * `expo-sqlite`'s own `runAsync` / `getFirstAsync` / `getAllAsync` let the JS
+ * statement be garbage-collected while its native `finalizeAsync` is still
+ * queued (expo/expo#49799). The release then destroys the native binding
+ * **without finalising the SQLite statement**, and a `SELECT` leaked after its
+ * first row holds a read transaction open until the process dies — which
+ * blocks every checkpoint. That was the August WAL (T-178).
+ *
+ * So the app does not call those three. `wrapped` below routes them through
+ * these helpers, and the two DAOs that prepare their own statement use
+ * `withStatement`. ⚠ **Nothing outside this file calls `prepareAsync`** —
+ * `keepAlive.test.ts` fails the build if something does.
+ */
+const keepAlive = createKeepAlive();
+
+/**
+ * Prepare `source`, hand the statement to `task`, finalize it — with the
+ * statement held for the whole of it, the finalize included.
+ */
+export async function withStatement<T>(
+  db: SQLite.SQLiteDatabase,
+  source: string,
+  task: (statement: SQLite.SQLiteStatement) => Promise<T>
+): Promise<T> {
+  const statement = await db.prepareAsync(source);
+  return keepAlive.hold(statement, async () => {
+    try {
+      return await task(statement);
+    } finally {
+      await statement.finalizeAsync();
+    }
+  });
+}
+
+/** `runAsync`, but with the statement held. Same result shape. */
+function runStatement(
+  db: SQLite.SQLiteDatabase,
+  source: string,
+  params: SQLite.SQLiteVariadicBindParams
+): Promise<SQLite.SQLiteRunResult> {
+  return withStatement(db, source, async (statement) => {
+    const result = await statement.executeAsync(...params);
+    return { lastInsertRowId: result.lastInsertRowId, changes: result.changes };
+  });
+}
+
+/** `getFirstAsync`, but with the statement held. */
+function firstRow<T>(
+  db: SQLite.SQLiteDatabase,
+  source: string,
+  params: SQLite.SQLiteVariadicBindParams
+): Promise<T | null> {
+  return withStatement(db, source, async (statement) =>
+    (await statement.executeAsync<T>(...params)).getFirstAsync()
+  );
+}
+
+/** `getAllAsync`, but with the statement held. */
+function allRows<T>(
+  db: SQLite.SQLiteDatabase,
+  source: string,
+  params: SQLite.SQLiteVariadicBindParams
+): Promise<T[]> {
+  return withStatement(db, source, async (statement) =>
+    (await statement.executeAsync<T>(...params)).getAllAsync()
+  );
+}
 
 /**
  * Retry one database call when `expo-sqlite` rejects it for a released object
@@ -140,14 +212,11 @@ function resilient(db: SQLite.SQLiteDatabase): SQLite.SQLiteDatabase {
    */
   const noteRecovery = (operation: string) => (attempt: number) => {
     const times = attempt === 1 ? 'once' : `${attempt} times`;
-    void db
-      .runAsync(
-        'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
-        Date.now(),
-        'db_retry',
-        `${operation}: released object, repeated ${times} and succeeded`
-      )
-      .catch(() => {});
+    void runStatement(
+      db,
+      'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
+      [Date.now(), 'db_retry', `${operation}: released object, repeated ${times} and succeeded`]
+    ).catch(() => {});
   };
 
   const wrapped = {
@@ -156,22 +225,23 @@ function resilient(db: SQLite.SQLiteDatabase): SQLite.SQLiteDatabase {
 
     runAsync: (source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
       retryOnRelease(
-        () => db.runAsync(source, ...params),
+        () => runStatement(db, source, params),
         noteRecovery('runAsync')
       ),
 
     getAllAsync: <T>(source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
       retryOnRelease(
-        () => db.getAllAsync<T>(source, ...params),
+        () => allRows<T>(db, source, params),
         noteRecovery('getAllAsync')
       ),
 
     getFirstAsync: <T>(source: string, ...params: SQLite.SQLiteVariadicBindParams) =>
       retryOnRelease(
-        () => db.getFirstAsync<T>(source, ...params),
+        () => firstRow<T>(db, source, params),
         noteRecovery('getFirstAsync')
       ),
 
+    // ⚠ Hands out an UNHELD statement. Only `withStatement` should call it.
     prepareAsync: (source: string) =>
       retryOnRelease(() => db.prepareAsync(source), noteRecovery('prepareAsync')),
 
@@ -223,8 +293,10 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
     );
   `);
 
-  const appliedRows = await db.getAllAsync<{ id: number }>(
-    'SELECT id FROM schema_migration;'
+  const appliedRows = await allRows<{ id: number }>(
+    db,
+    'SELECT id FROM schema_migration;',
+    []
   );
   const applied = new Set<number>();
   for (const row of appliedRows) {
@@ -242,11 +314,10 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
       for (const statement of migration.statements) {
         await db.execAsync(statement);
       }
-      await db.runAsync(
+      await runStatement(
+        db,
         'INSERT INTO schema_migration (id, name, applied_ts) VALUES (?, ?, ?);',
-        migration.id,
-        migration.name,
-        Date.now()
+        [migration.id, migration.name, Date.now()]
       );
     });
   }
@@ -354,11 +425,15 @@ async function checkpointAndNote(
 ): Promise<void> {
   let outcome: CheckpointOutcome;
   try {
-    const passive = await db.getFirstAsync<CheckpointRow>(
-      'PRAGMA wal_checkpoint(PASSIVE);'
+    const passive = await firstRow<CheckpointRow>(
+      db,
+      'PRAGMA wal_checkpoint(PASSIVE);',
+      []
     );
-    const truncate = await db.getFirstAsync<CheckpointRow>(
-      'PRAGMA wal_checkpoint(TRUNCATE);'
+    const truncate = await firstRow<CheckpointRow>(
+      db,
+      'PRAGMA wal_checkpoint(TRUNCATE);',
+      []
     );
     outcome = judgeCheckpoint(passive, truncate);
   } catch (error) {
@@ -369,12 +444,9 @@ async function checkpointAndNote(
   if (line === null) {
     return;
   }
-  await db
-    .runAsync(
-      'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
-      Date.now(),
-      'wal_checkpoint',
-      line
-    )
-    .catch(() => {});
+  await runStatement(
+    db,
+    'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
+    [Date.now(), 'wal_checkpoint', line]
+  ).catch(() => {});
 }

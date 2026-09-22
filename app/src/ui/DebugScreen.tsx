@@ -40,6 +40,7 @@ import {
   type RecorderHealth,
 } from '../recording/recorderHealth';
 import { deleteAllUserData } from '../storage/database';
+import { runStatementStress } from '../storage/statementStress';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 function formatTimestamp(ts: number | null): string {
@@ -550,6 +551,16 @@ export default function DebugScreen() {
             // Safe to press repeatedly: the pass is idempotent and derived
             // (T-071). Useful after changing thresholds during development.
             void runAction(() => runAwardPass());
+          }}
+        />
+        <Button
+          label="Statement leak stress (T-179)"
+          onPress={() => {
+            // Throwaway databases only — see statementStress.ts. Takes a
+            // minute; results also go to logcat, prefixed T179.
+            void runAction(async () => {
+              Alert.alert('T-179 stress', await runStatementStress());
+            });
           }}
         />
         <Button label="Delete all my data" onPress={confirmDeleteAll} destructive />

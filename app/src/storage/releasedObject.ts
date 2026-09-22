@@ -26,6 +26,15 @@
  * is what makes retrying the operation safe rather than a way to write twice.
  * A fresh call prepares a fresh statement.
  *
+ * ⚠⚠ **Except when the rejected call is `finalizeAsync` (T-179).** The cause
+ * is a garbage-collected JS statement (`keepAlive.ts`, expo/expo#49799), and
+ * at finalize the statement has **already executed**: a retried `runAsync`
+ * writes twice, and the first attempt's statement leaks — a stepped `SELECT`
+ * pins the WAL for the life of the process. Holding every statement until it
+ * is finalized (`withStatement` in `database.ts`) is what stops the release;
+ * this retry is now only the backstop, and a `db_retry` line in the diary means
+ * the hold has a gap somewhere.
+ *
  * That reasoning holds *only* for this signature. Any other failure — a
  * constraint violation, a disk error, a genuinely malformed statement — must
  * propagate untouched, because retrying those either changes data twice or

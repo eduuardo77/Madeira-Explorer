@@ -5,7 +5,7 @@
  * accumulate a day of fixes in memory. A crash costs seconds, not hours.
  */
 
-import { getDatabase } from '../database';
+import { getDatabase, withStatement } from '../database';
 import type { RawFix, RawFixInput } from '../types';
 
 /**
@@ -26,31 +26,32 @@ export async function insertFixes(fixes: RawFixInput[]): Promise<number> {
   let inserted = 0;
 
   await db.withTransactionAsync(async () => {
-    const statement = await db.prepareAsync(
+    // T-179: `withStatement`, never `prepareAsync` — it keeps the statement
+    // reachable until it is finalized (see `storage/keepAlive.ts`).
+    await withStatement(
+      db,
       `INSERT INTO raw_fix
          (trip_id, ts, lat, lon, accuracy_m, speed_mps, bearing_deg,
           altitude_m, activity_type, source)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
-    );
-    try {
-      for (const fix of fixes) {
-        await statement.executeAsync(
-          fix.trip_id,
-          fix.ts,
-          fix.lat,
-          fix.lon,
-          fix.accuracy_m,
-          fix.speed_mps,
-          fix.bearing_deg,
-          fix.altitude_m,
-          fix.activity_type,
-          fix.source
-        );
-        inserted += 1;
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      async (statement) => {
+        for (const fix of fixes) {
+          await statement.executeAsync(
+            fix.trip_id,
+            fix.ts,
+            fix.lat,
+            fix.lon,
+            fix.accuracy_m,
+            fix.speed_mps,
+            fix.bearing_deg,
+            fix.altitude_m,
+            fix.activity_type,
+            fix.source
+          );
+          inserted += 1;
+        }
       }
-    } finally {
-      await statement.finalizeAsync();
-    }
+    );
   });
 
   return inserted;

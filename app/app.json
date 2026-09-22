@@ -103,6 +103,7 @@
       "./plugins/withoutUnusedPermissions",
       "./plugins/withUploadSigning",
       "./plugins/withFieldBuild",
+      "./plugins/withContentBundleInputs",
       "./plugins/withGoogleMapsApiKey",
       "./plugins/withLatestMapsRenderer",
       "expo-dev-client",

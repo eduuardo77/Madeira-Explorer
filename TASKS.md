@@ -1399,6 +1399,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       checkpointed — the P30 wrote ~950 frames a day, so up to about **a day of the trip**, which
       is what *"my phone died on day 5"* needs. With the leak fixed and the WAL truncated at open
       and trip end, a normal WAL is ~4 MB beside a <1 MB database.
+- [x] ✅ **T-180** **A content-only change shipped the old places — the JS bundle was stale, fixed
+      2026-09-22.** ⚠ found because the P30 showed **0 / 67** with `content/pois.json` at 80
+      — The APK carried a bundle from before T-066c (*Encumeada Baixa* still in, none of its
+      fourteen places). Gradle: `:app:createBundleReleaseJsAndAssets UP-TO-DATE`. The RN Gradle
+      plugin's bundle inputs are the files under `app/`; the JS imports `../content/*.json`, which
+      is **outside `app/`**, so a content-only edit never re-bundled — and the build still passed.
+      — Fixed with `plugins/withContentBundleInputs.js`: declares `content/` as an input of every
+      `createBundle*JsAndAssets` task. Verified: reran with the input added; `UP-TO-DATE` when
+      nothing changed; reran when a file appeared in `content/` and again when it went. On the
+      P30: **0 / 80**.
+      — ⚠ **The main checkout's `android/` has the block applied by the plugin's own function**,
+      not by `prebuild --clean`, which would change the Maps SHA-1 (`docs/dev-build.md`). Any
+      other `android/` needs `npx expo prebuild` or the same one-liner.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

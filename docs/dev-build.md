@@ -496,6 +496,20 @@ produced it**, and take a backup before rebuilding over a known-good APK.
 ⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
 these docs is a **manual rename**, not something the build produces.
 
+## ⚠ Content changes need the bundle rebuilt — T-180, 2026-09-22
+
+The JS imports `content/pois.json`, `levadas.json` and `regions.json`, which live **outside
+`app/`**, and the React Native Gradle plugin only watches `app/`. Until T-180 a content-only change
+built "successfully" and shipped the **previous** places (the P30 showed 67 of 80).
+`plugins/withContentBundleInputs.js` now makes `content/` an input of the bundle task. On an
+`android/` generated before it, apply it without `--clean`:
+
+```bash
+cd app && node -e "const fs=require('fs'),{applyContentBundleInputs:a}=require('./plugins/withContentBundleInputs'),p='android/app/build.gradle';fs.writeFileSync(p,a(fs.readFileSync(p,'utf8')))"
+```
+
+**To check an APK's places:** `unzip -p <apk> assets/index.android.bundle | grep -ac "<a place name>"`.
+
 ## The field build — a release APK we can still read, 2026-09-22
 
 For a phone that is going to record a **real walk**: a release build (bundled JS, minified, no dev

@@ -114,7 +114,7 @@ const SECTIONS_EN: PolicySection[] = [
     paragraphs: [
       `${APP_NAME} records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.`,
       'There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.',
-      'The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because your trip never leaves the phone.',
+      'The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because the app never sends your trip to the map.',
       'Nobody is paying us for your data. There are no adverts and nothing is measuring how you use the app.',
     ],
   },
@@ -169,7 +169,7 @@ const SECTIONS_EN: PolicySection[] = [
     paragraphs: [
       'Settings has a button that erases everything the app has recorded. It takes effect immediately and completely.',
       'There is no account and no server, so there is nothing for us to delete at our end and nothing to ask us for. Deleting from your phone is the whole of it.',
-      'Because there is no copy anywhere else, erasing cannot be undone. If your phone backup still holds an older copy, that is yours to remove in your phone settings.',
+      'We keep no copy anywhere, so erasing cannot be undone from our side. If your phone backup still holds a copy, that is yours to remove in your phone settings.',
       'Removing the app deletes everything too.',
     ],
   },

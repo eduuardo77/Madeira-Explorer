@@ -128,3 +128,24 @@ test('a counted phrase can use the count it was given', () => {
   });
   assert.equal(text, 'Open your passport, 3 of 60 places collected');
 });
+
+test('⚠ no string claims the trip never leaves the phone, or that there is no backup', () => {
+  // D-073 bans "nothing leaves your phone" (Google's basemap, D-057), and it is
+  // false a second way: plugins/withAndroidBackupRules.js puts the database in
+  // the phone's own Google/iCloud backup on purpose (ARCHITECTURE §4a). Six
+  // strings said otherwise until 2026-09-22 — one of them inside the erase
+  // confirmation, at the moment the user decides (reference-app-teardown §1).
+  const banned = [
+    /leaves (this|your|the) phone/i, /nothing is uploaded/i, /\bno backup\b/i, /only copy/i,
+    /sai d[oe]s?t?e? telemóvel/i, /nada é enviado/i, /não há cópia de segurança/i, /única cópia/i,
+    /verlässt (dieses|Ihr) Telefon/i, /nichts wird hochgeladen/i, /keine Sicherung/i, /einzige Kopie/i,
+    /works offline/i,
+  ];
+  const found: string[] = [];
+  for (const [key, phrase] of Object.entries(STRINGS)) {
+    for (const [language, text] of Object.entries(phrase as Record<string, string>)) {
+      if (banned.some((re) => re.test(text))) found.push(`${key} [${language}]`);
+    }
+  }
+  assert.deepEqual(found, [], `strings that promise more than the app keeps:\n  ${found.join('\n  ')}`);
+});

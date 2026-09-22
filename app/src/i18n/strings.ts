@@ -61,9 +61,9 @@ export const STRINGS = {
     'Mehr macht die App nicht: Sie bemerkt die Orte, die Sie erreichen, und zeichnet Ihren Weg.'
   ),
   'onboarding.location.body2': s(
-    'Everything stays on this phone. There is no account, nothing is uploaded, and nobody else can see it.',
-    'Fica tudo neste telemóvel. Não há conta, nada é enviado e mais ninguém tem acesso.',
-    'Alles bleibt auf diesem Telefon. Es gibt kein Konto, nichts wird hochgeladen, und niemand sonst kann es sehen.'
+    'There is no account, and your trip is never sent to us. It stays on this phone — and in your phone’s own backup, if you have that switched on.',
+    'Não há conta e a sua viagem nunca nos é enviada. Fica neste telemóvel — e na cópia de segurança do próprio telemóvel, se a tiver ligada.',
+    'Es gibt kein Konto, und Ihre Reise wird nie an uns gesendet. Sie bleibt auf diesem Telefon — und in der eigenen Sicherung Ihres Telefons, falls diese eingeschaltet ist.'
   ),
   'onboarding.action.start': s('Get started', 'Começar', 'Los geht es'),
   'onboarding.action.allow': s('Allow location', 'Permitir localização', 'Standort erlauben'),
@@ -567,25 +567,25 @@ export const STRINGS = {
   ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
-    'Nothing you record leaves this phone. There is no account and no server.',
-    'Nada do que regista sai deste telemóvel. Não há conta nem servidor.',
-    'Nichts, was Sie aufzeichnen, verlässt dieses Telefon. Es gibt kein Konto und keinen Server.'
+    'Your trip is never sent to us. There is no account and no server. Your phone’s own backup includes it, if you have backups switched on.',
+    'A sua viagem nunca nos é enviada. Não há conta nem servidor. A cópia de segurança do seu telemóvel inclui-a, se a tiver ligada.',
+    'Ihre Reise wird nie an uns gesendet. Es gibt kein Konto und keinen Server. Die Sicherung Ihres Telefons enthält sie, falls Sie Sicherungen eingeschaltet haben.'
   ),
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),
   'settings.help.footnote': s(
-    'Sends one recording and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. Nothing leaves this phone unless you send it — and you choose where it goes.',
-    'Envia um registo e o que a aplicação decidiu sobre ele. O sítio onde dormiu é removido, e não leva nome, conta, nem nada que o identifique a si ou ao telemóvel. Nada sai deste telemóvel a não ser que o envie — e é você que escolhe para onde vai.',
-    'Sendet eine Aufzeichnung und das, was die App darüber entschieden hat. Ihr Übernachtungsort wird entfernt, und es enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Nichts verlässt dieses Telefon, außer Sie senden es — und Sie wählen, wohin.'
+    'Sends one recording and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. The recording is only sent if you send it — and you choose where it goes.',
+    'Envia um registo e o que a aplicação decidiu sobre ele. O sítio onde dormiu é removido, e não leva nome, conta, nem nada que o identifique a si ou ao telemóvel. O registo só é enviado se for você a enviá-lo — e é você que escolhe para onde vai.',
+    'Sendet eine Aufzeichnung und das, was die App darüber entschieden hat. Ihr Übernachtungsort wird entfernt, und es enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Die Aufzeichnung wird nur gesendet, wenn Sie sie senden — und Sie wählen, wohin.'
   ),
   'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),
   'settings.help.preparing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
   'settings.section.erase': s('Erase', 'Apagar', 'Löschen'),
   'settings.erase.footnote': s(
-    'This cannot be undone. There is no backup and no account to restore from — everything you recorded is only on this phone.',
-    'Isto não pode ser desfeito. Não há cópia de segurança nem conta para restaurar — tudo o que registou está apenas neste telemóvel.',
-    'Das lässt sich nicht rückgängig machen. Es gibt keine Sicherung und kein Konto zum Wiederherstellen — alles, was Sie aufgezeichnet haben, liegt nur auf diesem Telefon.'
+    'This cannot be undone — there is no account for us to restore it from. Your phone’s own backup may still hold a copy; your phone settings control it.',
+    'Isto não pode ser desfeito — não há conta a partir da qual o possamos restaurar. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é controlada nas definições do telemóvel.',
+    'Das lässt sich nicht rückgängig machen — es gibt kein Konto, aus dem wir es wiederherstellen könnten. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; Sie steuern sie in den Einstellungen Ihres Telefons.'
   ),
   'settings.erase.action': s(
     'Erase everything I have recorded',
@@ -663,9 +663,9 @@ export const STRINGS = {
     'Das löscht jeden Ort, den Sie besucht haben, die ganze Karte Ihrer Reise und jeden gesammelten Stempel.'
   ),
   'erase.confirm.body2': s(
-    'There is no backup. This app has no account and no server — what is on this phone is the only copy — so this cannot be undone.',
-    'Não há cópia de segurança. Esta aplicação não tem conta nem servidor — o que está neste telemóvel é a única cópia — por isso não se pode desfazer.',
-    'Es gibt keine Sicherung. Diese App hat kein Konto und keinen Server — was auf diesem Telefon liegt, ist die einzige Kopie — deshalb lässt sich das nicht rückgängig machen.'
+    'This app has no account and no server, so we cannot bring it back — this cannot be undone. Your phone’s own backup may still hold a copy; that is yours to keep or remove in your phone settings.',
+    'Esta aplicação não tem conta nem servidor, por isso não o podemos recuperar — não se pode desfazer. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é sua para manter ou apagar nas definições do telemóvel.',
+    'Diese App hat kein Konto und keinen Server, deshalb können wir nichts zurückholen — das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; ob Sie sie behalten oder löschen, entscheiden Sie in den Einstellungen Ihres Telefons.'
   ),
   'erase.confirm.keep': s('Keep my trip', 'Manter a minha viagem', 'Meine Reise behalten'),
   'erase.confirm.erase': s('Yes, erase everything', 'Sim, apagar tudo', 'Ja, alles löschen'),

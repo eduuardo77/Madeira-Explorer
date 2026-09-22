@@ -40,7 +40,7 @@ export const SECTIONS_PT: PolicySection[] = [
     paragraphs: [
       `O ${APP_NAME} regista por onde anda durante as férias e mostra-lhe isso de volta como um mapa. Fica tudo no seu telemóvel.`,
       'Não há conta, não há registo e não há servidor por trás desta aplicação. Não temos maneira de ver por onde andou, porque a sua viagem nunca nos é enviada. Não sabemos quem é e não conseguimos descobrir.',
-      'O mapa que vê por baixo da sua viagem vem da Google, como na maioria das aplicações de mapas. A Google vê que parte da ilha está a olhar. Não vê a sua viagem, porque a sua viagem nunca sai do telemóvel.',
+      'O mapa que vê por baixo da sua viagem vem da Google, como na maioria das aplicações de mapas. A Google vê que parte da ilha está a olhar. Não vê a sua viagem, porque a aplicação nunca envia a sua viagem para o mapa.',
       'Ninguém nos paga pelos seus dados. Não há publicidade e não há nada a medir como usa a aplicação.',
     ],
   },
@@ -95,7 +95,7 @@ export const SECTIONS_PT: PolicySection[] = [
     paragraphs: [
       'As definições têm um botão que apaga tudo o que a aplicação registou. Tem efeito imediato e completo.',
       'Não há conta nem servidor, por isso não há nada para apagarmos do nosso lado nem nada para nos pedir. Apagar do seu telemóvel é tudo o que há.',
-      'Como não existe cópia em mais lado nenhum, apagar não se pode desfazer. Se a cópia de segurança do seu telemóvel ainda guardar uma versão antiga, essa é sua para remover nas definições do telemóvel.',
+      'Não guardamos cópia em lado nenhum, por isso apagar não se pode desfazer do nosso lado. Se a cópia de segurança do seu telemóvel ainda guardar uma cópia, essa é sua para remover nas definições do telemóvel.',
       'Desinstalar a aplicação também apaga tudo.',
     ],
   },

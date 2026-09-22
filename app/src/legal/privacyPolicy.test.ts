@@ -194,7 +194,7 @@ test('⚠ the Portuguese policy makes the same promises as the English one', () 
     ['no server', 'não há servidor'],
     ['never sent to us', 'nunca nos é enviada'],
     ['no adverts', 'não há publicidade'],
-    ['never leaves the phone', 'nunca sai do telemóvel'],
+    ['never sends your trip to the map', 'nunca envia a sua viagem para o mapa'],
   ];
 
   const lost = promises.filter(([, portuguese]) => !pt.includes(portuguese));

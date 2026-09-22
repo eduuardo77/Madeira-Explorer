@@ -25,6 +25,7 @@ import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
+import { truncateWal } from '../storage/database';
 import { sendTripNotification } from '../notify/sendTripNotification';
 import { getCurrentProgress } from './currentProgress';
 import { runAwardPass } from './stampAwards';
@@ -137,6 +138,11 @@ export async function checkTripEnd(
     );
 
     await sendReveal();
+
+    // T-178: fold the trip into the database file and cut the WAL back, so the
+    // copy auto-backup takes is small and complete. After the reveal, which is
+    // the moment that matters and must not wait on disk I/O. Never throws.
+    await truncateWal('trip_end');
     return decision;
   } catch (error) {
     await recordingEventDao.logError('trip end', error);

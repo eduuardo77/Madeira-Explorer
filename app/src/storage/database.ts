@@ -8,6 +8,10 @@
  * WAL mode is not optional here. The recorder writes small batches frequently
  * from a background task while the app is suspended; WAL keeps those writes
  * cheap and stops a reader (the debug screen) from blocking a writer.
+ *
+ * ⚠ And WAL needs looking after on Android (T-178): the log is only ever cut
+ * back by a checkpoint, and it once reached 27 MB — over the auto-backup cap.
+ * `walPolicy.ts` has what was measured and what is done about it.
  */
 
 import * as SQLite from 'expo-sqlite';
@@ -18,6 +22,17 @@ import {
   isReleasedSharedObject,
   MAX_RELEASED_OBJECT_RETRIES,
 } from './releasedObject';
+import type {
+  CheckpointOutcome,
+  CheckpointRow,
+  WalCheckpointTrigger,
+} from './walPolicy';
+import {
+  checkpointDiaryLine,
+  JOURNAL_SIZE_LIMIT_BYTES,
+  judgeCheckpoint,
+  judgeCheckpointError,
+} from './walPolicy';
 
 const DATABASE_NAME = 'madeira.db';
 
@@ -188,6 +203,11 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
 
   // WAL: concurrent reader + writer, and cheaper small writes.
   await db.execAsync('PRAGMA journal_mode = WAL;');
+  // ⚠ T-178. Without this the WAL file stays at its largest-ever size, because
+  // SQLite resets the log but never shrinks the file — and on Android the clean
+  // close that would delete it never happens. The P30's was 27 MB with 615
+  // live frames. Per connection, not persistent: it has to be set on every open.
+  await db.execAsync(`PRAGMA journal_size_limit = ${JOURNAL_SIZE_LIMIT_BYTES};`);
   // NORMAL is the correct pairing with WAL: durable across app crashes, which
   // is what we actually care about. FULL would fsync on every commit for
   // protection against OS-level power loss, at a battery cost we do not want
@@ -230,6 +250,13 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
       );
     });
   }
+
+  // T-178: whatever the last process left in the WAL — including a WAL a leaked
+  // statement pinned until the process died — goes now, before anything else
+  // can hold the connection. ⚠ Directly, NOT through `truncateWal`: that takes
+  // `recordingQueue`, and a queued batch already waiting on `getDatabase()`
+  // would be waiting on this — a deadlock on the first launch with a backlog.
+  await checkpointAndNote(db, 'open');
 
   // Wrapped only after the migrations have run. A migration failing for a
   // released object should be loud and should not be retried behind anyone's
@@ -277,5 +304,77 @@ export async function deleteAllUserData(): Promise<void> {
   // Inside the queue as well: VACUUM rewrites the whole file and cannot run
   // while another statement is open on the connection.
   await db.execAsync('VACUUM;');
+  // ⚠ T-178 — and VACUUM alone does not make them go. The WAL keeps the old
+  // versions of every page in frames from earlier generations until something
+  // writes over them or truncates the file; the P30's held six days of August
+  // that way. Truncating is what makes "delete my data" true on disk.
+  await checkpointAndNote(db, 'erase_all');
   });
+}
+
+/**
+ * Fold the WAL into the database file and truncate it to zero (T-178).
+ *
+ * Called at trip end — a natural quiet moment, and the last write of a trip the
+ * user will want restored if the phone dies. Never throws: a checkpoint that
+ * cannot run leaves the data exactly where it was, and saying so in the diary
+ * is the whole of the useful response.
+ *
+ * ⚠ **Through `recordingQueue`**, because a `TRUNCATE` needs every other
+ * statement on the connection finished, and the recorder's batches are the
+ * ones that must not be made to fail. UI reads are not queued and can still
+ * make it return busy or blocked; that is harmless and is recorded.
+ * ⚠ **Never call this from inside a `recordingQueue` task** — it would wait for
+ * itself.
+ */
+export async function truncateWal(trigger: WalCheckpointTrigger): Promise<void> {
+  try {
+    await recordingQueue(async () => {
+      const db = await getDatabase();
+      await checkpointAndNote(db, trigger);
+    });
+  } catch {
+    // `getDatabase` failed, so there is no diary to write to either.
+  }
+}
+
+/**
+ * Run the checkpoint and write down anything worth knowing (see `walPolicy`).
+ *
+ * `PASSIVE` first, because a successful `TRUNCATE` reports a length of zero and
+ * only `PASSIVE` can say how long the WAL had grown — which is the number that
+ * would have explained the P30's file without a phone to take apart.
+ *
+ * The diary line goes through whichever handle it was given, fire-and-forget
+ * and swallowing its own failure, for the reason `noteRecovery` gives.
+ */
+async function checkpointAndNote(
+  db: SQLite.SQLiteDatabase,
+  trigger: WalCheckpointTrigger
+): Promise<void> {
+  let outcome: CheckpointOutcome;
+  try {
+    const passive = await db.getFirstAsync<CheckpointRow>(
+      'PRAGMA wal_checkpoint(PASSIVE);'
+    );
+    const truncate = await db.getFirstAsync<CheckpointRow>(
+      'PRAGMA wal_checkpoint(TRUNCATE);'
+    );
+    outcome = judgeCheckpoint(passive, truncate);
+  } catch (error) {
+    outcome = judgeCheckpointError(error);
+  }
+
+  const line = checkpointDiaryLine(trigger, outcome);
+  if (line === null) {
+    return;
+  }
+  await db
+    .runAsync(
+      'INSERT INTO recording_event (ts, kind, detail) VALUES (?, ?, ?);',
+      Date.now(),
+      'wal_checkpoint',
+      line
+    )
+    .catch(() => {});
 }

@@ -265,3 +265,34 @@ which is exactly what the old code could not do.
 now T-174), and the first where the app actively asserted the opposite. The pattern is worth
 naming: **a flag that means "we asked for X" is not evidence that X is happening**, and every
 place the app reports its own health from one is suspect.
+
+## 2026-09-22 (evening) — The WAL was 27 MB, over the auto-backup cap (T-178)
+
+`madeira.db` 684 KB, `madeira.db-wal` **27 MB**. Auto-backup takes the whole `SQLite/` folder and
+has historically capped app data around 25 MB — past it the *entire* backup can fail silently,
+which defeats ARCHITECTURE §4a. Read from the WAL's frame headers and the `-shm` index, on a
+scratch copy and then on the live phone:
+
+- **Only 615 of 6,560 frames were live.** Five generations by salt; today's reset normally at
+  ~1,000 frames (four resets in a few hours). SQLite resets the log but **never shrinks the file**
+  without `journal_size_limit` or a `TRUNCATE` checkpoint, and Android never closes cleanly. The
+  file was the high-water mark, not the current state.
+- **One generation ran 22 → 28 Aug 12:41 with no completed checkpoint** — ≥6,560 frames, ≥1,900
+  commits of median 3 frames. It ends when T-174's recorder died. Mechanism reproduced off-device
+  (SQLite 3.50): **one stepped-but-unfinalised statement on the same connection** makes every
+  checkpoint fail with *"database table is locked"*; 3,000 commits gave a 48 MB WAL. That week's
+  diary has two *"getFirstAsync: released object, repeated once"* lines (T-142) — a race that
+  rejects `finalizeAsync` would leak exactly that. ⚠ **Inferred, not observed.**
+
+**Fixed:** `journal_size_limit = 1 MiB`, a `PASSIVE`+`TRUNCATE` checkpoint at every open, at trip
+end, and after erase-all's `VACUUM`. Replayed on a copy of the live files: **27 MB → 0 bytes, all
+836 fixes and 3,660 diary rows intact, `integrity_check` ok.** ⚠ **Not yet run on the phone.**
+
+⚠ **Erase-all was not erasing.** Dead WAL frames hold old page versions, so after erase-all and
+`VACUUM` the deleted history sat on in the `-wal` file — six days of August, in the P30's case.
+The truncate is what makes *"delete my data"* true on disk.
+
+⚠ **What is not fixed:** a pinned connection refuses every checkpoint, so the WAL still grows until
+the process dies, and auto-backup kills the process and copies the files *before* the next open
+can truncate them. The app now writes a `wal_checkpoint` diary line when that happens, instead of
+it taking a phone plugged in by accident to find.

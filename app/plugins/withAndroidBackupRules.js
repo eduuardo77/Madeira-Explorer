@@ -22,6 +22,10 @@
  *   - `dataExtractionRules`   — Android 12 (API 31) and above
  * Both are declared; the OS picks the one it understands.
  *
+ * ⚠ `SQLite/` includes `madeira.db-wal`, and on the P30 that file alone reached
+ * 27 MB (T-178). The app now truncates it at open and at trip end — see
+ * `src/storage/walPolicy.ts` before assuming this folder is small.
+ *
  * NOTE: `expo-sqlite` stores databases under `<filesDir>/SQLite/`, which is why
  * the include path is `SQLite/` in the `file` domain. If that ever changes,
  * this plugin silently stops backing up user data — so it is worth re-checking

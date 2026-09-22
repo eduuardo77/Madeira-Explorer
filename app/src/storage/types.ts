@@ -79,7 +79,13 @@ export type RecordingEventKind =
    * *visible*: a fix that works silently cannot be told apart from a bug that
    * did not happen to fire, and this one is intermittent.
    */
-  | 'db_retry';
+  | 'db_retry'
+  /**
+   * A WAL checkpoint found something worth knowing: the log had stalled far
+   * past SQLite's autocheckpoint, or the checkpoint was refused (T-178).
+   * Routine checkpoints write nothing — `storage/walPolicy.ts` decides.
+   */
+  | 'wal_checkpoint';
 
 export type Trip = {
   id: number;

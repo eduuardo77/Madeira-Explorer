@@ -302,56 +302,77 @@ and will not return. Its feature is still reachable at Settings → Import.
 
 ---
 
-### 12. "It runs smoother than mine" — partly measured, partly not yet — **open**
+### 12. "It runs smoother than mine" — the comparison cannot be made yet, and finding out why is the finding — **correction + open**
 
-The project lead's impression. Worth turning into numbers rather than agreeing with, and the
-numbers so far are **mixed and incomplete**.
+The project lead's impression, and the project lead cleared the way to measure it properly on
+2026-09-22. It was measured, and then **almost all of it had to be thrown away.** What is left is
+more useful than the numbers would have been.
 
-**Measured, and real:**
+#### What survives — WalkNYC's side, all valid
 
-| | WalkNYC 1.1.6 | Proa 0.1.0 |
-|---|---|---|
-| Installed APK | **53 MB** | **69 MB** |
-| Delivery | `splits=[base, config.arm64_v8a, config.pt, config.xxhdpi]` | **no splits — one universal APK** |
-| Cold start (`am start -W`) | **813 ms** | not measured — see below |
+| | WalkNYC 1.1.6 (Play release) |
+|---|---|
+| Installed APK | 53 MB, `splits=[base, config.arm64_v8a, config.pt, config.xxhdpi]` |
+| Cold start (`am start -W`) | **760 ms** / 813 ms over two runs |
+| Pan-and-zoom workload | 230 frames, **0.87% janky**, 90th 7 ms, 99th 15 ms |
 
-⚠⚠ **The splits line is the finding.** WalkNYC ships as an **Android App Bundle**, so Play sent that
-phone one architecture, one density and **only Portuguese** (`config.pt`). Proa's build on the same
-phone is a universal APK carrying every architecture, every density and all three languages. Some
-of "smoother" is simply **less app**.
+An **App Bundle**, so Play sent that phone one architecture, one density and **only Portuguese**.
 
-⚠ **And `eas.json` has no production profile.** Both profiles are `distribution: internal` with
-`buildType: apk`. **Play has required an App Bundle for new apps since August 2021**, so the
-submission in HANDOFF blocker 1 cannot be made with what `eas.json` currently builds. That is a
-real gap, found by accident, and it is not a performance question.
+#### ⚠⚠ What had to be retracted — everything on Proa's side
 
-**Measured, and NOT yet a fair comparison:**
+**The benchmark measured the wrong app.** `am start` on `com.proa.madeira` opens the
+**expo-dev-launcher** — *"Development Build / DEVELOPMENT SERVERS / Start a local development
+server with npx expo start"*. The 1 931 ms cold start and the 1 415 frames at 26.43% jank are
+**the dev launcher's own list UI**, not Proa: no map, no trace, none of the app. Withdrawn
+entirely.
 
-| | WalkNYC | Proa |
-|---|---|---|
-| Frames sampled | 3 656 | 253 |
-| Janky | **15.81%** | **1.19%** |
-| 90th percentile | 19 ms | 10 ms |
-| 99th percentile | 69 ms | 26 ms |
+**The APK size comparison goes with it.** Proa's 69 MB is a **dev-client** build — `expo-dev-client`,
+every architecture, no minification. `docs/dev-build.md` says exactly this. 69 MB against a release
+App Bundle's 53 MB is not a comparison, it is two different kinds of artefact.
 
-**On these numbers Proa is the smoother app, and the numbers should not be believed.** WalkNYC's
-3 656 frames are from being driven hard for an hour — scrolling settings, and an 80× map animation,
-which is the most expensive thing either app can do. Proa's 253 frames are whatever its last
-foreground session did four hours ago, almost certainly with no map animation in them. **Different
-work, so the comparison is meaningless in both directions** — it neither supports the impression nor
-refutes it.
+**And a claim from the previous commit was simply wrong.** This file said *"`eas.json` has no
+production profile… the submission in HANDOFF blocker 1 cannot be made with what `eas.json`
+currently builds."* **There is a `production` profile.** It sets `autoIncrement: true` and no
+`android.buildType`, which takes EAS's Android default — `app-bundle`. **There is no Play blocker
+here and there never was.** ⚠ The error came from grepping `eas.json` for `buildType|apk|aab` and
+never reading it: the production profile contains none of those words, so it did not appear.
+CLAUDE.md's *"grep, do not read"* saves money; this is the shape of what it costs.
 
-**What would settle it:** launch Proa, drive it the same way — open the map, pan, scroll settings —
-and read `gfxinfo` again. ⚠ **Not done, deliberately.** `tools/soak-check.sh` says in its own header
-that the probe *"never launches or foregrounds the app… opening the app resets exactly the OEM
-timers being measured"*, and T-051 is baselined on this handset. **Foregrounding Proa is the project
-lead's call, not a session's.**
+#### The actual finding, which is worth more than the benchmark
 
-**One structural thing that no measurement will change.** WalkNYC is a native Android app — Jetpack
-Compose, `androidx.work`, Health Connect client, targetSdk 36. Proa is React Native under Expo.
-⚠ *Inferred* from the accessibility tree's shape and the `androidx.*` components, not from
-decompilation. That difference is not reversible inside v1 and is not being proposed as one; it is
-here so "smoother" is not mistaken for a bug with a fix.
+**The only Proa build on the P30 is a dev-client build that cannot run the app without a Metro
+server.** There is no bundle cached in the launcher and `npx expo start` is not running, so the app
+is currently unreachable on that phone.
+
+It follows that:
+
+- **Every impression anyone has of how Proa performs on real hardware is of a debug build** running
+  a development bundle — unminified JS, dev-mode checks, the dev client's own overhead. Comparing
+  that to a Play release of a native Jetpack Compose app is not a fair fight, and *"WalkNYC runs
+  smoother"* is very likely measuring that and not the product.
+- **T-051's soak is running the same dev build.** Its result is still meaningful for OEM killing —
+  EMUI does not care why a process exists — but it is not a soak of what users would install.
+- ⚠ **The recorder was killed by this measurement** and cannot be restarted without Metro, because
+  force-stopping the app dropped the in-memory bundle it had been running since earlier that day.
+  The soak was already invalid (the probe's own line: *"PLUGGED IN — Doze will never engage, this
+  soak proves nothing"*, and the clock was never started), but the recorder is down until somebody
+  runs `npx expo start` and reconnects the phone.
+
+#### What would make the question answerable
+
+Build the **`preview`** profile — `distribution: internal`, `buildType: apk`, **no**
+`developmentClient` — and install that. It is a release build: minified, bundled, no dev client, no
+Metro needed. Then the same workload against WalkNYC means something, **and so does the soak.**
+
+⚠ **Until that exists, the honest answer to "is theirs smoother?" is "nobody knows, and the app on
+the phone is not the app".**
+
+#### One structural thing no build will change
+
+WalkNYC is native Android — Jetpack Compose, `androidx.work`, Health Connect client, targetSdk 36.
+Proa is React Native under Expo. ⚠ *Inferred* from the accessibility tree's shape and the
+`androidx.*` components, not from decompilation. Not reversible inside v1 and not proposed as one;
+recorded so that a release-build measurement is read against the right baseline.
 
 ---
 

@@ -1394,8 +1394,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       library vs held, at concurrency 8/64/256 with 70 SIGUSR1-forced ART GCs: **0 releases in
       ~45,000 bare statements.** The probe is inert here, not proof the bug is absent — August had
       two in six days. A `db_retry` or `wal_checkpoint` diary line is now the field signal.
-      — **Still the project lead's call:** excluding `-wal` from auto-backup would bound a pinned
-      week at the cost of the last ≤1,000 frames. Less urgent now; a §4a policy change.
+      — ✅ **Decided 2026-09-22: the WAL stays in the backup** (project lead, on the assistant's
+      recommendation). Excluding it bounds a pinned week, but costs everything not yet
+      checkpointed — the P30 wrote ~950 frames a day, so up to about **a day of the trip**, which
+      is what *"my phone died on day 5"* needs. With the leak fixed and the WAL truncated at open
+      and trip end, a normal WAL is ~4 MB beside a <1 MB database.
 - [ ] **T-154** **Confirm the native dark map is still dark with the clutter rules applied**
       ⇠ a physical Android
       — ✅ **Applied 2026-08-17**, on the project lead's instruction that *"light and dark mode are

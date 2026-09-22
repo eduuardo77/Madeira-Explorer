@@ -297,6 +297,8 @@ There is no server and no user account, but there **is** a database — a local 
   ⚠ **The WAL beside it is not, unless it is kept small** — the P30's reached 27 MB with a 684 KB
   database (T-178). `storage/walPolicy.ts` bounds and truncates it; the leaked statement
   that once pinned it is prevented by holding every statement until finalized (T-179).
+  ⚠ **The WAL stays in the backup** (decided 2026-09-22): leaving it out would lose up to about
+  a day of commits that have not reached the database file yet.
 - **Deleting the app deletes the data.** There is no server copy. This is the accepted cost of
   the privacy architecture (D-001), alongside no cross-device sync.
 

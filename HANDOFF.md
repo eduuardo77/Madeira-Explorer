@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **686 tests**, `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **697 tests** (counted 2026-09-23), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **80 curated places**
 (19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks — 21 added and one cut
@@ -193,6 +193,11 @@ gradient.
 
 ## Next tasks, in the order that makes sense
 
+⚠⚠ **Superseded 2026-09-23 by *Release readiness* at the top of `TASKS.md`** (T-182–T-208),
+the plan from `docs/app-review-2026-09-22.md` (7/20). **The six decisions T-182–T-187 are the
+project lead's and gate most of it.** The list below still stands, placed inside that plan:
+T-156 waits on T-182, and T-158 is parked until Gate R1.
+
 1. **T-156** — Play Billing. `entitlementStore.setUnlocked` is the seam and nothing calls it, so
    **today no user can pay.** ⚠ It is also the first network call the app makes on its own
    account: T-156's own notes list the privacy copy that has to be reworded before it ships.
@@ -268,7 +273,7 @@ gradient.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 619 tests
+cd app && npm test          # 697 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

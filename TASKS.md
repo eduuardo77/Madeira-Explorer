@@ -3,7 +3,9 @@
 Ordered implementation checklist with explicit dependencies.
 
 **Document date:** 2026-08-06
-**Last updated:** 2026-08-17 — **the app is Proa (D-074)** and the UI speaks EN/PT/DE (T-160, T-160b). Also — **marketing planned (D-073): ASO on one free listing** (T-160–T-163), and ⚠ **D-071 partly reversed — stamps are a priority again** now D-072 makes them the revenue. Also — **OD-4 resolved (D-072): free on Play, 10 stamps + your first levada free, €4.99 unlocks the rest** (T-155–T-159). Also — the **Sensor Logger importer** (T-021), so a real walk becomes a
+**Last updated:** 2026-09-23 — **a release-readiness plan from the 2026-09-22 review (7/20) now
+leads this file** (T-182–T-208), and T-122 is reopened.
+**Previously 2026-08-17** — **the app is Proa (D-074)** and the UI speaks EN/PT/DE (T-160, T-160b). Also — **marketing planned (D-073): ASO on one free listing** (T-160–T-163), and ⚠ **D-071 partly reversed — stamps are a priority again** now D-072 makes them the revenue. Also — **OD-4 resolved (D-072): free on Play, 10 stamps + your first levada free, €4.99 unlocks the rest** (T-155–T-159). Also — the **Sensor Logger importer** (T-021), so a real walk becomes a
 fixture and the app's own `cleanTrace` can be run against it; plus three checkboxes that were
 stale — **T-107**, **T-108** and **T-130** all shipped on 2026-08-16 and were still unticked.
 **Previously 2026-08-16** — a long session. **Content curated** (T-066a, 79 → 60 places, D-064);
@@ -48,6 +50,162 @@ maintenance protocol in [CONTEXT.md §9](CONTEXT.md). A decision that changes th
 almost always changes tasks and dependencies here too.
 
 Legend: `[x]` done · `[ ]` not started · `[~]` in progress · `[!]` blocked
+
+---
+
+## Release readiness — the plan from the 2026-09-22 review ⚠ CURRENT PRIORITY
+
+**Added 2026-09-23, approved by the project lead.** Source: `docs/app-review-2026-09-22.md` —
+**7/20, not an MVP, not publishable.** Finding IDs (P0-1…P2-10) refer to that document. The
+review was checked against source before this was written. Three of its claims were corrected:
+**P2-4 was already fixed** by `e1d0b8c`, after the build it reviewed. **"Enviar um registo" is not
+a debug export**: it is D-069's walk donation (T-130), a deliberate feature, and it is not gated
+here. **"22% blank maps" is 2 launches of 9**, which has a 95% interval of about 6–55%. One bug it
+missed is **T-195**.
+
+**How every task below is done.** A task counts as done when it has: (a) the change, (b) a test
+that fails if the change is reverted, (c) evidence on the P30 (`uiautomator dump`, `dumpsys` or
+`sqlite3`) for anything a user can see, and (d) the docs updated in the same commit. The check
+that would have caught a problem comes before its fix (T-190).
+
+**Parked until Gate R1** (not cancelled): T-158 artwork (already deferred by the project lead),
+T-164 import, T-105b video, T-168–T-170 trace work, and new content.
+
+### Decisions only the project lead can make (tier 3)
+
+Nothing that depends on one of these starts until it is made. Each becomes a D-entry once decided.
+
+- [ ] **T-182** **Decide what the paywall does at launch** — P0-3. Three options: billing in
+      public v1, or a v1 with no lock (then say how early users are grandfathered, since D-075
+      never takes a visible stamp away), or dropping the lock idea. *Recommended: run the beta
+      unlocked, and ship public v1 with T-156.*
+- [ ] **T-183** **Decide what "recording" means** — P1-2. Today the home button says *Começar a
+      registar* while background recording is already on. *Recommended: background recording is
+      the product. The home control shows the real state, and "Start" appears only when
+      background permission was refused (D-008).*
+- [ ] **T-184** **Decide whether the home map shows places not yet collected** — P1-1. This
+      revisits D-070 (Provisional). *Recommended: faint marks for all 80, with the nearest one to
+      three called out.*
+- [ ] **T-185** **Decide how a trip ends when nobody flies home** — P1-7: residents, long stays,
+      and a phone that is off on the flight. *Recommended: fix T-195 first, then add a manual
+      "finish this trip".*
+- [ ] **T-186** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
+      designer. The project has nobody to judge artwork.*
+- [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
+      `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
+      (T-117e). **Start them on day one**: each is small, but they take the longest to come back.
+
+### Stage 1 — Release hygiene (desk work, small items, done in parallel)
+
+- [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186 —
+      P0-1. Replaces Expo's template. Verified by eye on the P30's home screen and status bar;
+      one screenshot is justified here.
+- [ ] **T-189** **Only dev and field builds can reach the debug screen** — P0-2. `DebugScreen`
+      (with its hard-coded "Phase 1 debug view" and its recording buttons) and the *Detalhes
+      técnicos* link must not exist in a store build. ⚠ **Not `__DEV__` alone**: that would also
+      strip it from the field build (`-PproaFieldBuild`, `docs/dev-build.md`), which is how the
+      P30 gets inspected. Gate it on a build flag, and add a test that finds any ungated route.
+- [ ] **T-190** **Close the `{}` blind spot in `i18nCoverage.test.ts`, then fix every English
+      leak** — P1-4, P1-5. The leaks: `placeCard.ts` `CATEGORY_LABELS` / `STRAIGHT_LINE_NOTE`,
+      `PlaceCardView.tsx` *"· Collected"* / *"away,"*, and `shareCard.ts` *"places collected"*. Pure
+      modules take a `Language` parameter. Do the gate first and watch it fail on these leaks.
+      Done when a `pt-PT` dump of the place card, share card and passport has no English. That
+      dump also confirms P2-4 (fixed in `e1d0b8c`).
+- [ ] **T-191** **Portuguese copy** — P2-1, P2-2, P2-3, P1-6:
+      - one "Ver todos…" string per category (*os 19 Aldeias* is a gender error; check German's
+        genders too)
+      - *Boas-vindas* instead of *Bem-vindo*
+      - a "0 / 80" caption that names what the number counts
+      - remove the Settings sentence saying the app has not been tested on a real phone
+        (`strings.ts` ~519)
+- [ ] **T-192** **Share: a proper file name, and nothing to share at zero** — P1-5.
+      `captureRef`'s `fileName` option (view-shot 5.1.0 supports it) → `Proa-<date>.png`. Share
+      is disabled until the first stamp.
+- [ ] **T-193** **No absolute privacy claims anywhere** — P0-7. Rewrite the iOS purpose strings
+      in `app.json` (*"never uploaded"*, *"Nothing is uploaded"*) to the in-app wording, and
+      extend `brand.test.ts` to reject the phrases D-073 forbids in `app.json` and `strings.ts`.
+- [ ] **T-194** **Trim the release manifest** ⇠ T-117c. Settle T-117c (FCM only for local
+      notifications), then strip the 17 launcher-badge permissions if the badge is not used.
+      Re-read `dumpsys package` on the P30 to confirm.
+
+### Stage 2 — Correctness and stability
+
+- [ ] **T-195** ⚠ **A trip cannot end once recording resumes after a silence** — found 2026-09-23
+      while checking the review; **from reading the code, not yet reproduced.**
+      - `recordingSink` appends to any open trip (`getOrCreateActiveTrip`).
+      - `checkTripEnd` measures silence from the trip's latest fix.
+      - When T-174 restarted the P30's recorder on 22 Sep, the first new fix cut a 25-day silence
+        to zero, so `INACTIVITY_END_MS` could never fire. **This is why trip 30 is open**, and it
+        is a bug, separate from T-185.
+      - **First, a failing test** replaying trip 30's shape. Then close the stale trip at its last
+        fix before the gap, and open a new one.
+      - ⚠ Decide whether a trip closed this late still gets its reveal (D-011).
+- [ ] **T-177** (above, Phase 3) — **the plan for it:**
+      1. Run a launch loop on the P30 of 50 or more force-stop / install / reboot starts, logging
+         the signature. That gives a real rate.
+      2. Read how `expo-maps` mounts its view.
+      3. **Accept a fix only after 60 clean launches in a row** (upper bound under about 5%).
+      4. If the cause is upstream, a remount watchdog is acceptable, but call it a workaround.
+- [ ] **T-196** **The location task fires before React is up** — split out of T-177. The
+      `HeadlessJsTaskContext: CatalystInstance not available` warning at cold start may mean the
+      first fixes are lost. Measure it on the P30: compare fixes in the database with fixes the
+      OS delivered.
+- [ ] **T-197** **Memory doubles after sharing** — P2-9. 510 MB PSS against 275 MB at rest. Find
+      out what holds the capture and release it. The recorder shares this process, so the
+      memory pressure puts it at risk.
+
+### Stage 3 — Product clarity (after the decisions it depends on)
+
+- [ ] **T-198** **One recording model, used the same way on home, Settings and onboarding** ⇠
+      T-183. The home control reads the recorder's real state, the same check `soak-check.sh`
+      makes, not `isRecording()` (T-174).
+- [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
+- [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. It names the stamps, the 80
+      places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
+      on a device: view it on the emulator, not on the P30, whose data must not be wiped.
+- [ ] **T-201** **The place card gives a reason to go** — P1-4. A "why go" line and practical
+      information (length, difficulty, access) for all 80 places, stored in `content/` (D-017),
+      drafted and vetoed as D-064 sets out; a dimmed backdrop behind the sheet. Photos only with
+      clear rights. **The biggest single job in this plan.**
+- [ ] **T-202** **Settings for a store app** — P1-6. Half the copy, and explain the *Abrir
+      definições do telemóvel* button. Add version, language choice, support contact and
+      open-source licences; add restore purchase with T-156.
+- [ ] **T-203** **A design pass on the passport and the empty state** — P2-5, P2-6, P2-7, P2-8.
+      The grey uncollected stamps that look alike, dark panels on a light page, the placeholder
+      blob, and zero-width tap areas on stamps past the right edge.
+- [ ] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195.
+
+### Stage 4 — Proof on a real phone
+
+- [ ] **T-205** **One real trip, planned and evidenced** (OD-10) ⇠ T-195, T-177 — P0-4. First
+      confirm the P30 is still available. Use a release build, a route through at least three of
+      the 80 places, and a trip end. Evidence:
+      - stamps in the database, pulled via the field build
+      - the notification seen
+      - the souvenir and the replay (OD-12) seen moving
+      - one screenshot of each
+      Take T-054 battery readings along the way.
+
+### Stage 5 — Store and compliance
+
+- **T-122 is reopened** (below): its answer, "no data collected", is contradicted by T-117c.
+- [ ] **T-206** **Host the privacy policy and set `CONTACT_EMAIL`** ⇠ T-187. Unblocks T-123 and
+      the Play listing.
+- [ ] **T-207** **Internal testing track and pre-launch report** ⇠ T-117e, T-206, T-189 — D-077.
+      Add Google's re-signing SHA-1 to the Maps key *before* reading anything, or every screenshot
+      is a grey map. Read crashes, accessibility and screenshots per language.
+- Then T-123 (background location), T-133 (listing), T-156 (billing ⇠ T-182), T-160a (German).
+
+### Gates
+
+- [ ] **T-208** **Re-run the review at each gate**, using the review's §2 method and weights, and
+      record the score. No predicted scores.
+- **Gate R1 — MVP:** P0-1 to P0-5 closed (T-188, T-189, T-182 applied, T-177, T-205), and one
+  real trip gave a stamp, a trip end and a souvenir.
+- **Gate R2 — closed beta (T-129):** R1 met; T-193, T-194, T-122, T-206 and T-207 done; the
+  pre-launch report is clean; T-208 re-run.
+- **Gate R3 — public (T-137):** R2 met; T-135 shows no false or missed stamps; billing works
+  end to end including restore, or T-182 chose otherwise; T-123 approved; T-198–T-202 done.
 
 ---
 
@@ -1374,6 +1532,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Next step:** a launch loop on the P30 (force-stop / install / reboot × N) logging the
       signature, to find the start path that fails; then read how `expo-maps` mounts its
       composable. Nothing tests a screen (T-145/T-167 shape), so only a device sees this.
+      — **The acceptance bar and the plan are in *Release readiness* at the top of this file
+      (2026-09-23):** 60 clean launches in a row before a fix counts. The cold-start warning is
+      split out as T-196.
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.
@@ -1916,8 +2077,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-121** Android prominent-disclosure screen before requesting background location
       ⇠ T-043
       — Notes: `docs/task-notes.md` (T-121)
-- [x] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
+- [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
       — Notes: `docs/task-notes.md` (T-122)
+      — ⚠ **Reopened 2026-09-23.** The release APK carries the Maps SDK, FCM and the install
+        referrer (T-117c), and Play counts what third-party SDKs collect. Redo the answers
+        against Google's own data disclosures for each SDK in the APK ⇠ T-194.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
 - [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117

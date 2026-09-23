@@ -40,8 +40,11 @@ const srcRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
  * can ever read this"* — not *"this screen is unimportant"*.
  */
 const EXEMPT: Record<string, string> = {
+  // ⚠ This reason was FALSE until 2026-09-23: the review found the screen
+  // reachable from Settings in the release build. T-189 made it true, and
+  // `ui/releaseSurface.test.ts` keeps it true.
   'ui/DebugScreen.tsx':
-    'developer-only, reachable solely from the dev menu and never shipped as a route',
+    'developer-only: App.tsx routes to it only under __DEV__ (T-189, releaseSurface.test.ts)',
 };
 
 function screens(dir: string): string[] {
@@ -323,7 +326,9 @@ function withoutComments(source: string): string {
 test('⚠ T-190 — no English prose is written into any module a user can read', () => {
   const offenders: string[] = [];
 
-  for (const file of allModules(srcRoot)) {
+  // `App.tsx` sits beside `src/`, not in it, and it is the one module every
+  // screen passes through (T-189 found English in it).
+  for (const file of [...allModules(srcRoot), path.join(srcRoot, '..', 'App.tsx')]) {
     const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
     if (
       relative in EXEMPT ||

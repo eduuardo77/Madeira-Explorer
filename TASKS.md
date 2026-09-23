@@ -100,7 +100,15 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186, T-187 (trademark search first) — D-086. A pure module plus a second renderer, like the stamps —
       P0-1. Replaces Expo's template. Verified by eye on the P30's home screen and status bar;
       one screenshot is justified here.
-- [ ] **T-189** **Only dev and field builds can reach the debug screen** — P0-2. `DebugScreen`
+- [~] **T-189** ✅ **Code done 2026-09-23, ⚠ not yet seen on the P30: `__DEV__` only, and the field
+      build loses the screen too.** ⚠ **This reverses the note below, which I wrote the same day.** A
+      flag inlined into the JS bundle is not a Gradle or Metro input, so a bundle built under one
+      setting can be reused under the other. That is T-180's stale-bundle shape, and here it would
+      put the debug route into a *store* build. Field work reads the phone through `dumpsys` and
+      `sqlite3` anyway. Guarded by `ui/releaseSurface.test.ts` (checked by removing the guard). The
+      i18n gate now also reads `App.tsx`, and `DebugScreen`'s exemption, which *said* it was never
+      shipped, is now true. *"Enviar um registo"* is D-069 and stays.
+      — *Original note:* **Only dev and field builds can reach the debug screen** — P0-2. `DebugScreen`
       (with its hard-coded "Phase 1 debug view" and its recording buttons) and the *Detalhes
       técnicos* link must not exist in a store build. ⚠ **Not `__DEV__` alone**: that would also
       strip it from the field build (`-PproaFieldBuild`, `docs/dev-build.md`), which is how the

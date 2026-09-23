@@ -65,7 +65,11 @@ export type SettingsViewProps = {
    */
   onOpenBatterySettings: (() => void) | null;
   onOpenPrivacyPolicy: () => void;
-  onOpenDebug: () => void;
+  /**
+   * The debug screen. **Undefined in every release build** (T-189), which hides
+   * the row: `App.tsx` passes it only under `__DEV__`.
+   */
+  onOpenDebug?: () => void;
   /** Opens the confirmation. Must never erase on its own (T-125). */
   onEraseRequested: () => void;
   /**
@@ -462,7 +466,9 @@ export default function SettingsView({
           footnote={t('settings.about.footnote')}
         >
           <Action label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
-          <Action label={t('settings.about.technical')} onPress={onOpenDebug} />
+          {onOpenDebug === undefined ? null : (
+            <Action label={t('settings.about.technical')} onPress={onOpenDebug} />
+          )}
         </Section>
 
         {/* A rare action, so it lives where rare lives (design brief §3.2) —

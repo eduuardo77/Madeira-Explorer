@@ -60,7 +60,8 @@ export default function SettingsScreen({
   onOpenDebug,
 }: {
   onClose: () => void;
-  onOpenDebug: () => void;
+  /** Development builds only (T-189). */
+  onOpenDebug?: () => void;
 }) {
   const [permission, setPermission] = useState<PermissionLevel>('undetermined');
   const [mapStyle, setMapStyle] = useState<'light' | 'dark'>('light');

@@ -172,11 +172,13 @@ export default function App() {
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}
-          onOpenDebug={() => setScreen('debug')}
+          // ⚠ T-189: development builds only. The review found this screen,
+          // headed "Phase 1 debug view. Not the product.", reachable from
+          // Settings in the release build on the P30. `releaseSurface.test.ts`
+          // fails if a debug route loses its guard.
+          onOpenDebug={__DEV__ ? () => setScreen('debug') : undefined}
         />
-      ) : (
-        <DebugScreen />
-      )}
+      ) : __DEV__ && screen === 'debug' ? <DebugScreen /> : null}
       {/* ⚠ **Only on the debug screen**, where it is the way back.
           It used to float over every screen, including the map and the
           passport, and a screenshot showed what that costs: a stray developer
@@ -184,10 +186,10 @@ export default function App() {
           own floating bubble. The debug screen is reached from Settings (its
           row was always there) — which is also where design brief §5 says it
           belongs. */}
-      {screen === 'debug' ? (
+      {__DEV__ && screen === 'debug' ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to the map"
+          accessibilityLabel="Back to the map" // i18n-exempt: development builds only (T-189)
           onPress={() => setScreen('map')}
           style={styles.switcher}
         >

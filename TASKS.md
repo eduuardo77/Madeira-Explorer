@@ -145,7 +145,13 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       **Share: a proper file name, and nothing to share at zero** — P1-5.
       `captureRef`'s `fileName` option (view-shot 5.1.0 supports it) → `Proa-<date>.png`. Share
       is disabled until the first stamp.
-- [ ] **T-193** **No absolute privacy claims anywhere** — P0-7. Rewrite the iOS purpose strings
+- [x] **T-193** ✅ **Done 2026-09-23.** All five permission texts in `app.json` now say what the in-app
+      copy says: *never sent to us, no account*. A new test reads every string in `app.json`
+      against the banned list. ⚠ **Widening the list found one more, in the worst place:** Play's
+      prominent disclosure (`onboarding.background.body2`) said *"never uploaded, never shared"*.
+      *Never shared* is untrue as soon as a user shares their souvenir. It now says *never sent to
+      us, never sold, never for advertising*. ⚠ Nothing on iOS is built, so the iOS texts are
+      checked by test only. **No absolute privacy claims anywhere** — P0-7. Rewrite the iOS purpose strings
       in `app.json` (*"never uploaded"*, *"Nothing is uploaded"*) to the in-app wording, and
       extend `brand.test.ts` to reject the phrases D-073 forbids in `app.json` and `strings.ts`.
 - [ ] **T-194** **Trim the release manifest** ⇠ T-117c. Settle T-117c (FCM only for local
@@ -191,7 +197,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       T-183, D-087. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
-- [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. It names the stamps, the 80
+- [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
+      names *Madeira* in `strings.ts`, which breaks D-017; read the name from the content pack's
+      `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
       on a device: view it on the emulator, not on the P30, whose data must not be wiped.
 - [ ] **T-201** **The place card gives a reason to go** — P1-4. A "why go" line and practical

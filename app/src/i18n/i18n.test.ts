@@ -12,6 +12,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { LANGUAGES, FALLBACK_LANGUAGE, languageFor } from './languages.ts';
 import { PLURALS, STRINGS } from './strings.ts';
@@ -129,18 +132,27 @@ test('a counted phrase can use the count it was given', () => {
   assert.equal(text, 'Open your passport, 3 of 60 places collected');
 });
 
+/**
+ * Promises the app cannot keep, in any language (D-073, teardown §1, T-193).
+ * `/never uploaded/` joined 2026-09-23: the iOS permission texts said it.
+ */
+const BANNED_PRIVACY_CLAIMS = [
+    /leaves (this|your|the) phone/i, /nothing is uploaded/i, /never uploaded/i, /\bno backup\b/i, /only copy/i,
+    /sai d[oe]s?t?e? telemóvel/i, /nada é enviado/i, /não há cópia de segurança/i, /única cópia/i,
+    /verlässt (dieses|Ihr) Telefon/i, /nichts wird hochgeladen/i, /keine Sicherung/i, /einzige Kopie/i,
+    /works offline/i,
+    // T-193: the absolute forms of "uploaded" and "shared" in all three.
+    /nunca é enviad[oa]/i, /nie hochgeladen/i,
+    /never shared/i, /nunca é partilhad[oa]/i, /nie weitergegeben/i,
+];
+
 test('⚠ no string claims the trip never leaves the phone, or that there is no backup', () => {
   // D-073 bans "nothing leaves your phone" (Google's basemap, D-057), and it is
   // false a second way: plugins/withAndroidBackupRules.js puts the database in
   // the phone's own Google/iCloud backup on purpose (ARCHITECTURE §4a). Six
   // strings said otherwise until 2026-09-22 — one of them inside the erase
   // confirmation, at the moment the user decides (reference-app-teardown §1).
-  const banned = [
-    /leaves (this|your|the) phone/i, /nothing is uploaded/i, /\bno backup\b/i, /only copy/i,
-    /sai d[oe]s?t?e? telemóvel/i, /nada é enviado/i, /não há cópia de segurança/i, /única cópia/i,
-    /verlässt (dieses|Ihr) Telefon/i, /nichts wird hochgeladen/i, /keine Sicherung/i, /einzige Kopie/i,
-    /works offline/i,
-  ];
+  const banned = BANNED_PRIVACY_CLAIMS;
   const found: string[] = [];
   for (const [key, phrase] of Object.entries(STRINGS)) {
     for (const [language, text] of Object.entries(phrase as Record<string, string>)) {
@@ -148,4 +160,24 @@ test('⚠ no string claims the trip never leaves the phone, or that there is no 
     }
   }
   assert.deepEqual(found, [], `strings that promise more than the app keeps:\n  ${found.join('\n  ')}`);
+});
+
+
+test('⚠ T-193 — the permission texts in app.json make no promise the app cannot keep', () => {
+  // The review (P0-7) found "Your location stays on this phone and is never
+  // uploaded" in the iOS purpose strings: the absolute claim D-073 forbids, in
+  // the text a reviewer, a journalist or a data-protection authority reads
+  // first. The in-app copy already said the true thing: never sent *to us*.
+  const appJson = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'app.json');
+  const texts: string[] = [];
+  const walk = (node: unknown): void => {
+    if (typeof node === 'string') texts.push(node);
+    else if (Array.isArray(node)) node.forEach(walk);
+    else if (node !== null && typeof node === 'object') Object.values(node).forEach(walk);
+  };
+  walk(JSON.parse(readFileSync(appJson, 'utf8')));
+  const found = texts.filter((text) => BANNED_PRIVACY_CLAIMS.some((re) => re.test(text)));
+  assert.deepEqual(found, []);
+  // And the probe is real: the permission texts are in what it read.
+  assert.ok(texts.some((text) => /never sent to us/.test(text)));
 });

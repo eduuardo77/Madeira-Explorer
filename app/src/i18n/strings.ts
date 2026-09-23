@@ -150,10 +150,14 @@ export const STRINGS = {
     'Para preencher o seu mapa sem que tenha de se lembrar de nada, esta aplicação recolhe dados de localização mesmo quando está fechada ou não está a ser usada.',
     'Damit sich Ihre Karte füllt, ohne dass Sie an etwas denken müssen, erfasst diese App Standortdaten auch dann, wenn sie geschlossen ist oder nicht verwendet wird.'
   ),
+  // ⚠ T-193: Play's prominent disclosure. It said "never uploaded, never
+  // shared" — absolute (D-073), and "never shared" is untrue the moment a user
+  // shares their souvenir, which the privacy policy says publishes where they
+  // went. What is true: never sent to us, never sold, never for ads.
   'onboarding.background.body2': s(
-    'It is used only to draw your own map on this phone. It is never uploaded, never shared, and never used for advertising.',
-    'Serve apenas para desenhar o seu próprio mapa neste telemóvel. Nunca é enviado, nunca é partilhado e nunca é usado para publicidade.',
-    'Sie dienen ausschließlich dazu, Ihre eigene Karte auf diesem Telefon zu zeichnen. Sie werden nie hochgeladen, nie weitergegeben und nie für Werbung genutzt.'
+    'It is used only to draw your own map on this phone. It is never sent to us, never sold, and never used for advertising.',
+    'Serve apenas para desenhar o seu próprio mapa neste telemóvel. Nunca nos é enviado, nunca é vendido e nunca é usado para publicidade.',
+    'Sie dienen ausschließlich dazu, Ihre eigene Karte auf diesem Telefon zu zeichnen. Sie werden nie an uns gesendet, nie verkauft und nie für Werbung genutzt.'
   ),
   'onboarding.background.body3': s(
     'You can say no and keep using the app — you will just start and stop recording yourself.',

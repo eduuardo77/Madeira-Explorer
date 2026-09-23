@@ -11,9 +11,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.proa.madeira",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone and is never uploaded.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
-        "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account - your trip stays on this phone.",
+        "NSLocationWhenInUseUsageDescription": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your trip is never sent to us, and there is no account.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Your trip is never sent to us, and there is no account.",
+        "NSLocationAlwaysUsageDescription": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Your trip is never sent to us, and there is no account.",
         "NSMotionUsageDescription": "Proa uses the step counter and air-pressure sensor to work out where you walked when GPS is blocked by tunnels or forest canopy.",
         "UIBackgroundModes": [
           "location",
@@ -84,8 +84,8 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your location stays on this phone.",
-          "locationAlwaysAndWhenInUsePermission": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Nothing is uploaded and there is no account.",
+          "locationWhenInUsePermission": "Proa notes the roads and trails you travel, so it can show you a map of everywhere you went. Your trip is never sent to us, and there is no account.",
+          "locationAlwaysAndWhenInUsePermission": "So your map keeps filling in while the app is closed, Proa needs to record your location in the background. Your trip is never sent to us, and there is no account.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true

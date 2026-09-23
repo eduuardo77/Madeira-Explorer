@@ -265,7 +265,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
          in place. The guard is a source scan whose first version passed with the call removed
          (it matched the word in a comment); it now matches the call.
       2. **An outing started during a pause recorded nothing.** Starting one now ends the
-         pause. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
+         pause.
+      ✅ **Both fixes seen on the P30** (build from `13893fa`, installed 17:01). With the app in
+      the background, *Preciso* gave `FINE gps +10 s`; switching to *Equilibrado* dropped the
+      request **without a relaunch**, and switching back restored it. Pausing, then starting an
+      outing, cleared the pause notice. The project lead's tier was left on *Máximo detalhe*. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [~] **T-199** **The home map shows what there is to collect** ⇠ T-184. ✅ **Code done 2026-09-23,
       ⚠ not yet seen on the P30.** `map/placesToCollect.ts` (8 tests) draws every uncollected place

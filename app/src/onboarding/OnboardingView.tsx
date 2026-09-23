@@ -30,6 +30,7 @@
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
+import { getContentPack } from '../content/poiCatalogue';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
 
 export type OnboardingScreen =
@@ -63,7 +64,14 @@ function copyFor(screen: OnboardingScreen): Copy {
     case 'welcome':
       return {
         title: t('onboarding.welcome.title'),
-        body: [t('onboarding.welcome.body1'), t('onboarding.welcome.body2')],
+        body: [
+          // The pack's own facts (D-017): never the island's name in app/.
+          t('onboarding.welcome.body1', {
+            destination: getContentPack().destination ?? t('share.fallbackTitle'),
+            count: getContentPack().places.length,
+          }),
+          t('onboarding.welcome.body2'),
+        ],
         continueLabel: t('onboarding.action.start'),
         skipLabel: t('onboarding.action.notNow'),
       };

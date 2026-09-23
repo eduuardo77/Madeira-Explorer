@@ -46,7 +46,13 @@ export const STRINGS = {
   // `i18n.test.ts` fails the build on a placeholder followed by "visitado".
   // ── Onboarding (T-114, D-041) ───────────────────────────────────────────
   // T-191: "Bem-vindo" addresses a man; "Boas-vindas" addresses anyone.
-  'onboarding.welcome.title': s('Welcome', 'Boas-vindas', 'Willkommen'),
+  // ⚠ T-200 (review P1-3): onboarding sold a passive tracker — "this app
+  // quietly notes the places you visit" — which is the part competitors give
+  // away, and never mentioned the passport, the stamps or the app's own name.
+  // It now leads with what is collected. `{destination}` and `{count}` come
+  // from the content pack; the island's name used to be written here, against
+  // D-017.
+  'onboarding.welcome.title': s('Welcome to {app}', 'Boas-vindas ao {app}', 'Willkommen bei {app}'),
   // ⚠ Never rendered until T-054 measures the figure (D-041); translated ahead of it.
   'onboarding.battery': s(
     'Recording uses about {percent}% of your battery per day.',
@@ -54,14 +60,14 @@ export const STRINGS = {
     'Die Aufzeichnung verbraucht etwa {percent} % des Akkus pro Tag.'
   ),
   'onboarding.welcome.body1': s(
-    'This app quietly notes the places you visit around Madeira, and turns them into a map of your trip.',
-    'Esta aplicação regista discretamente os lugares por onde passa na Madeira e transforma-os num mapa da sua viagem.',
-    'Diese App merkt sich unauffällig die Orte, die Sie auf Madeira besuchen, und macht daraus eine Karte Ihrer Reise.'
+    '{destination} has {count} places waiting for a stamp in your passport. Go to one, and its stamp appears by itself.',
+    '{destination} tem {count} lugares à espera de um carimbo no seu passaporte. Vá a um, e o carimbo aparece sozinho.',
+    '{destination} hat {count} Orte, die auf einen Stempel in Ihrem Reisepass warten. Gehen Sie zu einem, und der Stempel erscheint von selbst.'
   ),
   'onboarding.welcome.body2': s(
-    'You do not need to open it again. On your way home it will show you everywhere you went.',
-    'Não precisa de a abrir outra vez. Na viagem de regresso, mostra-lhe tudo por onde andou.',
-    'Sie müssen sie nicht wieder öffnen. Auf dem Heimweg zeigt sie Ihnen, wo Sie überall waren.'
+    'Along the way {app} draws everywhere you went, and on your way home it turns the trip into a map to keep.',
+    'Pelo caminho, o {app} desenha tudo por onde passou e, no regresso, transforma a viagem num mapa para guardar.',
+    'Unterwegs zeichnet {app} alles auf, wo Sie waren, und auf dem Heimweg wird daraus eine Karte zum Behalten.'
   ),
   'onboarding.location.title': s(
     'It needs to know where you go',
@@ -69,9 +75,9 @@ export const STRINGS = {
     'Sie muss wissen, wohin Sie gehen'
   ),
   'onboarding.location.body1': s(
-    'That is the whole app: it notices the places you reach, and draws where you travelled.',
-    'É isso que a aplicação faz: repara nos lugares a que chega e desenha por onde viajou.',
-    'Mehr macht die App nicht: Sie bemerkt die Orte, die Sie erreichen, und zeichnet Ihren Weg.'
+    'That is how stamps are collected: {app} notices the places you reach, and draws where you travelled.',
+    'É assim que se obtêm os carimbos: o {app} repara nos lugares a que chega e desenha por onde viajou.',
+    'So kommen die Stempel zustande: {app} bemerkt die Orte, die Sie erreichen, und zeichnet Ihren Weg.'
   ),
   'onboarding.location.body2': s(
     'There is no account, and your trip is never sent to us. It stays on this phone — and in your phone’s own backup, if you have that switched on.',
@@ -107,9 +113,9 @@ export const STRINGS = {
   // ⚠ "Swipe away" is named in plain words because it is the one thing the user
   // does that silently ends recording, and no permission can prevent it.
   'onboarding.keepRunning.title': s(
-    'Let this app keep running',
-    'Deixe esta aplicação continuar',
-    'Lassen Sie diese App weiterlaufen'
+    'Let {app} keep running',
+    'Deixe o {app} continuar',
+    'Lassen Sie {app} weiterlaufen'
   ),
   'onboarding.keepRunning.body1': s(
     'Some phones pause apps to save power. If that happens to this one, your map quietly stops filling in.',
@@ -117,14 +123,14 @@ export const STRINGS = {
     'Manche Telefone pausieren Apps, um Strom zu sparen. Passiert das hier, füllt sich Ihre Karte stillschweigend nicht mehr.'
   ),
   'onboarding.keepRunning.body2': s(
-    'And do not swipe this app away from your recent apps while you are out. Locking your phone or switching apps is fine — closing it is what stops the recording.',
-    'E não deslize esta aplicação para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal — fechá-la é que para o registo.',
-    'Und wischen Sie diese App unterwegs nicht aus den zuletzt verwendeten Apps. Das Telefon sperren oder die App wechseln ist in Ordnung — sie zu schließen beendet die Aufzeichnung.'
+    'And do not swipe {app} away from your recent apps while you are out. Locking your phone or switching apps is fine — closing it is what stops the recording.',
+    'E não deslize o {app} para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal — fechá-la é que para o registo.',
+    'Und wischen Sie {app} unterwegs nicht aus den zuletzt verwendeten Apps. Das Telefon sperren oder die App wechseln ist in Ordnung — sie zu schließen beendet die Aufzeichnung.'
   ),
   'onboarding.keepRunning.note': s(
-    'The button opens your phone’s own battery settings. Look for this app in the list.',
-    'O botão abre as definições de bateria do seu telemóvel. Procure esta aplicação na lista.',
-    'Die Schaltfläche öffnet die Akku-Einstellungen Ihres Telefons. Suchen Sie dort diese App.'
+    'The button opens your phone’s own battery settings. Look for {app} in the list.',
+    'O botão abre as definições de bateria do seu telemóvel. Procure o {app} na lista.',
+    'Die Schaltfläche öffnet die Akku-Einstellungen Ihres Telefons. Suchen Sie dort {app}.'
   ),
   'onboarding.keepRunning.open': s(
     'Open battery settings',
@@ -152,9 +158,9 @@ export const STRINGS = {
     'Aufzeichnung bei geschlossener App'
   ),
   'onboarding.background.body1': s(
-    'To fill in your map without you having to remember anything, this app collects location data even when it is closed or not in use.',
-    'Para preencher o seu mapa sem que tenha de se lembrar de nada, esta aplicação recolhe dados de localização mesmo quando está fechada ou não está a ser usada.',
-    'Damit sich Ihre Karte füllt, ohne dass Sie an etwas denken müssen, erfasst diese App Standortdaten auch dann, wenn sie geschlossen ist oder nicht verwendet wird.'
+    'To fill in your map without you having to remember anything, {app} collects location data even when it is closed or not in use.',
+    'Para preencher o seu mapa sem que tenha de se lembrar de nada, o {app} recolhe dados de localização mesmo quando está fechada ou não está a ser usada.',
+    'Damit sich Ihre Karte füllt, ohne dass Sie an etwas denken müssen, erfasst {app} Standortdaten auch dann, wenn sie geschlossen ist oder nicht verwendet wird.'
   ),
   // ⚠ T-193: Play's prominent disclosure. It said "never uploaded, never
   // shared" — absolute (D-073), and "never shared" is untrue the moment a user
@@ -226,9 +232,9 @@ export const STRINGS = {
     'Ihre Karte füllt sich nicht mehr'
   ),
   'onboarding.downgrade.body1': s(
-    'Your phone recently switched this app back to recording only while it is open.',
-    'O seu telemóvel voltou a pôr esta aplicação a registar apenas quando está aberta.',
-    'Ihr Telefon hat diese App kürzlich wieder auf Aufzeichnung nur bei geöffneter App zurückgestellt.'
+    'Your phone recently switched {app} back to recording only while it is open.',
+    'O seu telemóvel voltou a pôr o {app} a registar apenas quando está aberto.',
+    'Ihr Telefon hat {app} kürzlich wieder auf Aufzeichnung nur bei geöffneter App zurückgestellt.'
   ),
   'onboarding.downgrade.body2': s(
     'That is fine — but you will need to start it yourself each time, or turn background recording back on.',
@@ -620,14 +626,14 @@ export const STRINGS = {
     'Wenn die Aufzeichnung immer wieder stoppt'
   ),
   'settings.keepRunning': s(
-    'Let this app keep running',
-    'Deixar esta aplicação continuar',
-    'Diese App weiterlaufen lassen'
+    'Let {app} keep running',
+    'Deixar o {app} continuar',
+    '{app} weiterlaufen lassen'
   ),
   'settings.keepRunning.footnote': s(
-    'Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let this app keep running. Look for {app} in the list.',
-    'Alguns telemóveis pausam aplicações para poupar bateria, o que pode impedir o mapa de se preencher. Isto abre as definições de bateria do seu telemóvel, onde pode deixar esta aplicação continuar. Procure {app} na lista.',
-    'Manche Telefone pausieren Apps, um Akku zu sparen — dann füllt sich Ihre Karte nicht mehr. Dies öffnet die Akku-Einstellungen Ihres Telefons, wo Sie diese App weiterlaufen lassen können. Suchen Sie {app} in der Liste.'
+    'Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let {app} keep running. Look for {app} in the list.',
+    'Alguns telemóveis pausam aplicações para poupar bateria, o que pode impedir o mapa de se preencher. Isto abre as definições de bateria do seu telemóvel, onde pode deixar o {app} continuar. Procure {app} na lista.',
+    'Manche Telefone pausieren Apps, um Akku zu sparen — dann füllt sich Ihre Karte nicht mehr. Dies öffnet die Akku-Einstellungen Ihres Telefons, wo Sie {app} weiterlaufen lassen können. Suchen Sie {app} in der Liste.'
   ),
   'settings.openPhoneSettings': s(
     'Open phone settings',
@@ -689,9 +695,9 @@ export const STRINGS = {
     'Ihre Karte füllt sich nur bei geöffneter App. Sie können das in den Einstellungen Ihres Telefons ändern.'
   ),
   'settings.background.blocked': s(
-    'Your phone has not given this app permission to record in the background, so this is off. You can still record from the map screen whenever you go out.',
-    'O seu telemóvel não deu autorização para registar em segundo plano, por isso isto está desligado. Pode na mesma registar a partir do mapa sempre que sair.',
-    'Ihr Telefon hat dieser App keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus aufzeichnen.'
+    'Your phone has not given {app} permission to record in the background, so this is off. You can still record from the map screen whenever you go out.',
+    'O seu telemóvel não deu ao {app} autorização para registar em segundo plano, por isso isto está desligado. Pode na mesma registar a partir do mapa sempre que sair.',
+    'Ihr Telefon hat {app} keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus aufzeichnen.'
   ),
   'settings.background.on': s(
     'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start it yourself on the map.',
@@ -867,9 +873,9 @@ export const STRINGS = {
     'Das löscht jeden Ort, den Sie besucht haben, die ganze Karte Ihrer Reise und jeden gesammelten Stempel.'
   ),
   'erase.confirm.body2': s(
-    'This app has no account and no server, so we cannot bring it back — this cannot be undone. Your phone’s own backup may still hold a copy; that is yours to keep or remove in your phone settings.',
-    'Esta aplicação não tem conta nem servidor, por isso não o podemos recuperar — não se pode desfazer. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é sua para manter ou apagar nas definições do telemóvel.',
-    'Diese App hat kein Konto und keinen Server, deshalb können wir nichts zurückholen — das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; ob Sie sie behalten oder löschen, entscheiden Sie in den Einstellungen Ihres Telefons.'
+    '{app} has no account and no server, so we cannot bring it back — this cannot be undone. Your phone’s own backup may still hold a copy; that is yours to keep or remove in your phone settings.',
+    'O {app} não tem conta nem servidor, por isso não o podemos recuperar — não se pode desfazer. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é sua para manter ou apagar nas definições do telemóvel.',
+    '{app} hat kein Konto und keinen Server, deshalb können wir nichts zurückholen — das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; ob Sie sie behalten oder löschen, entscheiden Sie in den Einstellungen Ihres Telefons.'
   ),
   'erase.confirm.keep': s('Keep my trip', 'Manter a minha viagem', 'Meine Reise behalten'),
   'erase.confirm.erase': s('Yes, erase everything', 'Sim, apagar tudo', 'Ja, alles löschen'),

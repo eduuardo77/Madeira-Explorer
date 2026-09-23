@@ -293,7 +293,17 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         ring's card (the phone had locked).
       — ✅ **Answer built 2026-09-23 (D-085 amended, Provisional):** `ui/NearestChip.tsx`, *"Mais perto por
         visitar: {nome}"*, which opens the place's card. ⚠ Not yet on the device.
-- [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
+- [x] **T-200** ✅ **Done 2026-09-23, seen in the workbench:** *"Welcome to Proa / Madeira has 80
+      places waiting for a stamp in your passport. Go to one, and its stamp appears by itself."*
+      The name comes from `brand.ts` and the destination and count from the content pack.
+      - `t()` and `n()` now fill `{app}` themselves, so no call site can forget it.
+      - Every *"this app"* / *"esta aplicação"* / *"diese App"* became the name (14 strings), Play's
+        background-location disclosure included.
+      - Tests fail on *Madeira* anywhere in `strings.ts` (D-017), on *"this app"*, and on a welcome
+        screen without passport, stamp, `{app}`, `{destination}` or `{count}`. The placeholder
+        test caught a Portuguese line that had never named the app.
+      ⚠ Not seen on the P30: that means wiping its data, and that phone holds the only field
+      data. **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
       names *Madeira* in `strings.ts`, which breaks D-017; read the name from the content pack's
       `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen

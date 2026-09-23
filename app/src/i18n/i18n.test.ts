@@ -195,3 +195,31 @@ test('⚠ T-191 — no Portuguese adjective agrees with a placeholder it cannot 
   }
   assert.deepEqual(found, []);
 });
+
+test('⚠ T-200 — no string names the island (D-017), and none says "this app"', () => {
+  // The welcome screen said "around Madeira", against D-017's absolute rule
+  // that no Madeira knowledge lives in app/. And the app called itself "this
+  // app" throughout — its name never appeared in onboarding (review P1-3).
+  // `t()` fills {app} from brand.ts; the pack gives {destination}.
+  const banned = [/madeira/i, /\bthis app\b/i, /\besta aplicação\b/i, /\bdiese[rn]? App\b/i];
+  const found: string[] = [];
+  for (const [key, phrase] of Object.entries(STRINGS)) {
+    for (const [language, text] of Object.entries(phrase as Record<string, string>)) {
+      if (banned.some((re) => re.test(text))) found.push(`${key} [${language}]`);
+    }
+  }
+  assert.deepEqual(found, []);
+});
+
+test('⚠ T-200 — the welcome screen sells the passport, by name, in every language', () => {
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const title = translate(STRINGS['onboarding.welcome.title'], language);
+    const body = translate(STRINGS['onboarding.welcome.body1'], language);
+    assert.match(title, /\{app\}/, `${language}: the title does not name the app`);
+    assert.match(body, /\{destination\}/, `${language}: the island is not read from the pack`);
+    assert.match(body, /\{count\}/, `${language}: the number of places is not shown`);
+    assert.match(body, /passport|passaporte|Reisepass/i, `${language}: no passport`);
+    assert.match(body, /stamp|carimbo|Stempel/i, `${language}: no stamp`);
+  }
+});
+

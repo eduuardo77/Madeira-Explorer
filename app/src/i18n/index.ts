@@ -18,20 +18,26 @@
  * directly and stay pure; the impure caller passes `deviceLanguage()` in. That is
  * the split CLAUDE.md describes for `stampRules`/`stampAwards` and
  * `movementPolicy`/`samplingGate`, applied to language.
+ *
+ * ⚠ T-200: `{app}` is filled here, from `brand.ts`, for every string. The app
+ * called itself "this app" throughout until 2026-09-23 (review P1-3) — the name
+ * never appeared in onboarding — and a placeholder every call site had to
+ * remember to pass would have been the same bug waiting to happen again.
  */
 
+import { APP_NAME } from '../brand.ts';
 import { deviceLanguage } from './deviceLocale.ts';
 import { PLURALS, STRINGS, type PluralKey, type StringKey } from './strings.ts';
 import { plural, translate, type Values } from './translate.ts';
 
 /** A translated string. */
 export function t(key: StringKey, values?: Values): string {
-  return translate(STRINGS[key], deviceLanguage(), values);
+  return translate(STRINGS[key], deviceLanguage(), { app: APP_NAME, ...values });
 }
 
 /** A translated string that depends on a count. `count` is passed in for you. */
 export function n(key: PluralKey, count: number, values?: Values): string {
-  return plural(PLURALS[key], count, deviceLanguage(), values);
+  return plural(PLURALS[key], count, deviceLanguage(), { app: APP_NAME, ...values });
 }
 
 export { deviceLanguage } from './deviceLocale.ts';

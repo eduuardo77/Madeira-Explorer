@@ -109,8 +109,36 @@ async function retune(): Promise<void> {
   await locationProvider.setSamplingProfile(await getCurrentSamplingProfile());
 }
 
+/**
+ * Apply a changed tier to a recorder that is already running (T-198).
+ *
+ * ⚠⚠ **Found on the P30, 2026-09-23: changing the tier in Settings changed
+ * nothing until the next launch.** `changeTrackingQuality` stored the choice
+ * and stopped; `buildOptions` reads it only when location updates are
+ * (re)started, which a running recorder does on a profile change or at the
+ * next launch. So the control looked like it worked and did not, since T-146.
+ * Measured: switching *Preciso* → *Equilibrado* left the request at +10 s
+ * until the app was relaunched.
+ *
+ * Does nothing when the recorder is not running: there is nothing to retune,
+ * and starting one is not this control's business.
+ */
+export async function retuneRecorder(): Promise<void> {
+  if (await locationProvider.isRecording()) {
+    await retune();
+    await recordingEventDao.log('outing', 'tier changed: recorder retuned in place');
+  }
+}
+
 /** The user pressed *Começar passeio*. */
 export async function startOuting(nowMs: number): Promise<void> {
+  // ⚠ Found on the P30, 2026-09-23: an outing started during a pause recorded
+  // nothing, because the sink drops everything until the pause ends. Pressing
+  // *Começar passeio* is an explicit request to record, so it ends the pause.
+  if ((await getPausedUntil()) !== null) {
+    await setPausedUntil(null);
+    await recordingEventDao.log('outing', 'pause ended by starting an outing');
+  }
   const action = actionForStartWalk(await walkState(false));
   // The flag first: `buildOptions` reads it, whichever branch runs below.
   await setWalkInProgress(true, nowMs);

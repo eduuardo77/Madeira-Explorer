@@ -186,3 +186,25 @@ test('⚠ D-087 — the sink checks the pause on both of its write paths', () =>
   }
 });
 
+test('⚠ T-198 — a new tier is applied to the running recorder, not only stored', () => {
+  // Found on the P30: Preciso -> Equilibrado left the GPS request at +10 s
+  // until the app was relaunched. Storing without retuning is the bug.
+  const source = readFileSync(path.join(srcRoot, 'ui/SettingsScreen.tsx'), 'utf8');
+  const change = source.slice(source.indexOf('const changeTrackingQuality'));
+  const body = change.slice(0, change.indexOf('}, [])'));
+  assert.match(body, /setTrackingQuality\(next\)/);
+  // The call, not the word: the comment above it names the function too, and
+  // the first version of this test passed with the call removed.
+  assert.match(body, /\.then\(retuneRecorder\)/);
+});
+
+test('⚠ T-198 — starting an outing ends a pause before it starts recording', () => {
+  // Found on the P30: an outing started while paused recorded nothing, because
+  // the sink drops everything until the pause ends.
+  const source = readFileSync(path.join(srcRoot, 'recording/walkSession.ts'), 'utf8');
+  const body = source.slice(source.indexOf('export async function startOuting'));
+  const clear = body.indexOf('setPausedUntil(null)');
+  const start = body.indexOf('startTrip(');
+  assert.ok(clear !== -1 && clear < start);
+});
+

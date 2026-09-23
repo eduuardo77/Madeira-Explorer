@@ -46,7 +46,7 @@ import {
   getPausedUntil,
   setTrackingQuality,
 } from '../recording/trackingSettings';
-import { pauseRecording, resumeRecording } from '../recording/walkSession';
+import { pauseRecording, resumeRecording, retuneRecorder } from '../recording/walkSession';
 import { applyBackgroundTrackingChange } from '../recording/tripRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
@@ -137,7 +137,11 @@ export default function SettingsScreen({
    */
   const changeTrackingQuality = useCallback((next: TrackingQuality) => {
     setQuality(next);
-    void setTrackingQuality(next).catch(() => undefined);
+    // ⚠ T-198: stored AND applied. Storing alone left a running recorder on the
+    // old tier until the next launch (walkSession.retuneRecorder).
+    void setTrackingQuality(next)
+      .then(retuneRecorder)
+      .catch(() => undefined);
   }, []);
 
   /**

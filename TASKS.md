@@ -245,7 +245,27 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         would have reset `recorderSilence`'s evidence.
       - Found along the way: erase-all deleted `app_state` under the tier cache (since T-146).
         `forgetCachedTrackingSettings` now runs after it.
-      ⚠ **Not yet seen on the device.** ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
+      ✅ **Seen on the P30 2026-09-23** (field build `5af1ec6`, pt-PT), checked with `dumpsys`, not by eye:
+      - The home screen reads *Começar passeio*, with no notice while recording works.
+      - Outing on the *Equilibrado* tier, app in the background: **no GPS request → `FINE gps
+        +10 s`**, and the notification changes to *Passeio em curso*. Ended: the request is gone
+        and the notification is back. The summary read *Passeio terminado / < 1 min · distância
+        não medida / Nenhum carimbo novo neste passeio*. That is honest: indoors, lying still,
+        no fixes arrived.
+      - Pause: Settings shows *Em pausa até às 17:52 · Retomar agora*; the map notice reads
+        *Registo em pausa até às 17:52 · Retomar* (one screenshot: placed beside the settings
+        control, readable). *Retomar* clears it.
+      ⚠ **Not seen:** the sink actually dropping fixes during a pause. Indoors and stationary,
+      nothing was delivered to drop (0 stored, 0 dropped). Tests only, until a pause happens
+      outdoors while moving. Also unexercised: `needs-always`, `recorder-stopped`, and the trip
+      channel.
+      ⚠⚠ **The device found two bugs, both fixed after `5af1ec6`:**
+      1. **Changing the tier in Settings did nothing until the next launch** (since T-146).
+         *Preciso* → *Equilibrado* left the request at +10 s. `retuneRecorder` now applies it
+         in place. The guard is a source scan whose first version passed with the call removed
+         (it matched the word in a comment); it now matches the call.
+      2. **An outing started during a pause recorded nothing.** Starting one now ends the
+         pause. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`

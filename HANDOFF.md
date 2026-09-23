@@ -17,6 +17,23 @@ Portuguese and German**. ⚠ **The app has run on real hardware once** — Fireb
 2026-08-19, map rendering included (item 0 below). ⚠ **No threshold in the app has met real GPS**,
 and battery and background survival are still unmeasured.
 
+## 2026-09-23 — the release-readiness plan is under way (`TASKS.md`, top section)
+
+The review (`docs/app-review-2026-09-22.md`, 7/20) became tasks **T-182–T-208**. Done and seen on
+the P30: **T-189** (no debug route in release), **T-190** (the i18n gate now reads every module;
+it found the reveal notification in English), **T-191**, **T-192**, **T-193**, **T-194** (12
+permissions), and **T-198** (D-087: *Começar passeio* changes the recorder, plus pause and
+summary). Code only: **T-195** (a silent trip can end again), **T-199** (rings for places to
+collect: the rule holds, but an unlabelled ring does not yet sell anything; see the task).
+**T-177 is measured:** 20% of cold starts go wrong, 10% show no map within 45 s. Next: an A/B
+of the launch-time geofence burst. The decisions waiting on the project lead are in T-185, and in
+D-087's three Provisional choices.
+
+⚠⚠ **The P30 has the FIELD build from `c15c8a9` installed** (debuggable, and slower: never
+measure smoothness on it). Put the plain release back before any performance reading. Every
+install waits on a **Play Protect prompt only the project lead can answer**. The database was
+backed up before the first install: `Madeira-fieldwork/p30-2026-09-23/`.
+
 ## What was settled 2026-08-17 — read these before touching related code
 
 | | |
@@ -109,7 +126,7 @@ for, and `tools/fixtures/` is deliberately *not* gitignored.
 ⚠ **Portuguese has now been seen on real hardware** (the map screen, 2026-09-22) — the line below
 about it never having been on a device is retired.
 
-⚠ **The P30 runs a plain RELEASE build since 2026-09-22 evening (T-176)** — no Metro needed. To
+⚠ ~~**The P30 runs a plain RELEASE build since 2026-09-22 evening (T-176)**~~ **Superseded 2026-09-23: a field build is installed, see the top of this file.** No Metro needed either way. To
 pull its database, swap in the **field build** (release, but `run-as` allowed) with `install -r`
 and swap back — tested, data kept both ways. Recipe in `docs/dev-build.md`. Current: built from
 `e1b1af1` (T-178/T-179/T-180 in, **80 places**), installed 21:23; last pull before it is `Madeira-fieldwork/p30-2026-09-22d/`.

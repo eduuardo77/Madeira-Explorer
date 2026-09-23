@@ -36,6 +36,8 @@ import {
 } from 'react-native';
 import { APP_NAME } from '../brand';
 import { t } from '../i18n';
+import { systemLanguage } from '../i18n/deviceLocale';
+import { LANGUAGE_NAMES, LANGUAGES, type Language } from '../i18n/languages';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { formatClock } from '../recording/recorderControls';
 import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
@@ -73,6 +75,12 @@ export type SettingsViewProps = {
   onOpenDebug?: () => void;
   /** Opens the confirmation. Must never erase on its own (T-125). */
   onEraseRequested: () => void;
+  /**
+   * The language chosen here, or null to follow the phone (T-202). Absent
+   * hides the section (the workbench).
+   */
+  languageChoice?: Language | null;
+  onChangeLanguage?: (language: Language | null) => void;
   /** `0.1.0`: the version a support email needs (T-202). Absent hides the row. */
   version?: string;
   /**
@@ -330,6 +338,8 @@ export default function SettingsView({
   onResume,
   version,
   onContact,
+  languageChoice,
+  onChangeLanguage,
   onClose,
 }: SettingsViewProps) {
   // Both halves of one decision. The switch means nothing until the phone
@@ -500,6 +510,38 @@ export default function SettingsView({
           title={t('settings.section.map')}
           footnote={t('settings.map.footnote')}
         />
+
+        {/* T-202. Radio rows, not the tier's segmented control: four options,
+            and "Automatic" has to say which language it resolves to. */}
+        {languageChoice === undefined || onChangeLanguage === undefined ? null : (
+          <Section
+            title={t('settings.section.language')}
+            footnote={t('settings.language.footnote')}
+          >
+            <View accessibilityRole="radiogroup">
+              {([null, ...LANGUAGES] as (Language | null)[]).map((option) => {
+                const selected = option === languageChoice;
+                const label =
+                  option === null
+                    ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
+                    : LANGUAGE_NAMES[option];
+                return (
+                  <Pressable
+                    key={option ?? 'auto'}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={label}
+                    onPress={() => onChangeLanguage(option)}
+                    style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+                  >
+                    <Text style={styles.rowLabel}>{label}</Text>
+                    <Text style={styles.rowValue}>{selected ? '✓' : ''}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Section>
+        )}
 
         <Section
           title={t('settings.section.about')}

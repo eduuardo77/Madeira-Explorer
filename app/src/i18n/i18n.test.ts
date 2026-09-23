@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { LANGUAGES, FALLBACK_LANGUAGE, languageFor } from './languages.ts';
+import { LANGUAGES, LANGUAGE_NAMES, FALLBACK_LANGUAGE, languageFor, parseLanguageChoice } from './languages.ts';
 import { PLURALS, STRINGS } from './strings.ts';
 import { interpolate, plural, translate } from './translate.ts';
 
@@ -221,5 +221,18 @@ test('⚠ T-200 — the welcome screen sells the passport, by name, in every lan
     assert.match(body, /passport|passaporte|Reisepass/i, `${language}: no passport`);
     assert.match(body, /stamp|carimbo|Stempel/i, `${language}: no stamp`);
   }
+});
+
+test('T-202 — a stored language choice parses, and anything else follows the phone', () => {
+  assert.equal(parseLanguageChoice('pt'), 'pt');
+  assert.equal(parseLanguageChoice(' DE '), 'de');
+  for (const raw of [null, '', 'auto', 'fr', 'pt-PT']) {
+    assert.equal(parseLanguageChoice(raw), null, String(raw));
+  }
+});
+
+test('T-202 — every language is named in itself, never translated', () => {
+  assert.deepEqual(LANGUAGE_NAMES, { en: 'English', pt: 'Português', de: 'Deutsch' });
+  assert.deepEqual(Object.keys(LANGUAGE_NAMES).sort(), [...LANGUAGES].sort());
 });
 

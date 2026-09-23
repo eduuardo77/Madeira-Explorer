@@ -27,6 +27,7 @@ import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
 import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
+import { loadLanguageChoice } from '../i18n/languageChoice';
 
 /**
  * Convert an Expo location into our own shape.
@@ -58,6 +59,9 @@ function toLocationSample(location: Location.LocationObject): LocationSample {
 }
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  // T-202: this can run with no App.tsx behind it, and what it posts (the
+  // recorder's notification, the reveal) must speak the language the user chose.
+  await loadLanguageChoice();
   if (error) {
     await databaseSink.onError(`location task: ${error.message}`);
     return;
@@ -95,6 +99,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 });
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
+  await loadLanguageChoice();
   if (error) {
     await databaseSink.onError(`geofence task: ${error.message}`);
     return;

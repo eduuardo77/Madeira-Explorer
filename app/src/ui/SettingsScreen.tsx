@@ -47,6 +47,9 @@ import {
   setTrackingQuality,
 } from '../recording/trackingSettings';
 import { pauseRecording, resumeRecording, retuneRecorder } from '../recording/walkSession';
+import { setChosenLanguage } from '../i18n/deviceLocale';
+import { saveLanguageChoice } from '../i18n/languageChoice';
+import { parseLanguageChoice, type Language } from '../i18n/languages';
 import { applyBackgroundTrackingChange } from '../recording/tripRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
@@ -80,6 +83,8 @@ export default function SettingsScreen({
   const [showingPolicy, setShowingPolicy] = useState(false);
   /** True while a walk report is being assembled (OD-11, D-069). */
   const [donating, setDonating] = useState(false);
+  /** T-202: the language chosen here, or null to follow the phone. */
+  const [languageChoice, setLanguageChoiceState] = useState<Language | null>(null);
   /** D-087 §6: when the pause ends, or null. */
   const [pausedUntil, setPausedUntilState] = useState<number | null>(null);
 
@@ -100,6 +105,10 @@ export default function SettingsScreen({
 
     void getTrackingQuality().then(setQuality).catch(() => undefined);
     void getPausedUntil().then(setPausedUntilState).catch(() => undefined);
+    void appStateDao
+      .get(appStateDao.AppStateKey.Language)
+      .then((raw) => setLanguageChoiceState(parseLanguageChoice(raw)))
+      .catch(() => undefined);
   }, []);
 
   /**
@@ -171,6 +180,8 @@ export default function SettingsScreen({
       // ⚠ T-198: `app_state` is gone, so the settings cached in memory must go
       // too, or a pause, a walk or a tier would outlive the erase that deleted it.
       forgetCachedTrackingSettings();
+      // The stored language went with app_state; follow the phone again.
+      setChosenLanguage(null);
       // Either way the user gets told, rather than left looking at an
       // unchanged screen wondering whether it worked.
       setErased(true);
@@ -311,6 +322,15 @@ export default function SettingsScreen({
               void Linking.openURL(`mailto:${CONTACT_EMAIL}`).catch(() => undefined);
             }
       }
+      languageChoice={languageChoice}
+      onChangeLanguage={(language) => {
+        setLanguageChoiceState(language);
+        void saveLanguageChoice(language)
+          // The recorder's ongoing notification is written when its options
+          // are applied, so re-apply them for it to speak the new language.
+          .then(retuneRecorder)
+          .catch(() => undefined);
+      }}
       pausedUntil={pausedUntil}
       onPause={() => {
         void pauseRecording(Date.now())

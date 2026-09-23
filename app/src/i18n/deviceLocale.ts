@@ -24,6 +24,8 @@ import { getLocales } from 'expo-localization';
 import { FALLBACK_LANGUAGE, languageFor, type Language } from './languages.ts';
 
 let cached: Language | null = null;
+/** The user's own choice in Settings (T-202), or null to follow the phone. */
+let chosen: Language | null = null;
 
 /**
  * The language to render in.
@@ -33,6 +35,20 @@ let cached: Language | null = null;
  * least explicable.
  */
 export function deviceLanguage(): Language {
+  return chosen ?? systemLanguage();
+}
+
+/**
+ * Apply the user's choice (T-202). Null follows the phone again. Loaded from
+ * storage by `languageChoice.ts` before the first screen and in background
+ * tasks, so a notification speaks the same language the app does.
+ */
+export function setChosenLanguage(language: Language | null): void {
+  chosen = language;
+}
+
+/** The phone's own language, whatever the user chose. For "Automatic (…)". */
+export function systemLanguage(): Language {
   if (cached !== null) {
     return cached;
   }

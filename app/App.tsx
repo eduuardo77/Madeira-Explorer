@@ -19,6 +19,7 @@ import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
+import { loadLanguageChoice } from './src/i18n/languageChoice';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
 /**
@@ -73,6 +74,10 @@ export default function App() {
   useEffect(() => {
     void (async () => {
       try {
+        // T-202: the chosen language before the first screen, which waits on
+        // this effect (onboarding is null until it finishes) and so never
+        // renders in the wrong language first.
+        await loadLanguageChoice();
         const done = await appStateDao.getFlag(
           appStateDao.AppStateKey.OnboardingCompleted
         );

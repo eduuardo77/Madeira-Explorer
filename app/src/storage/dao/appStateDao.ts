@@ -135,6 +135,11 @@ export const AppStateKey = {
    */
   PausedUntil: 'paused_until',
   /**
+   * The language chosen in Settings (T-202): `en`, `pt`, `de`, or empty to
+   * follow the phone. Read by `i18n/languageChoice.ts`.
+   */
+  Language: 'language',
+  /**
    * Whether the keep-running screen has been shown once (2026-08-28, Android).
    *
    * ⚠ Shown once and never again, even if the user skips it. It is advice about

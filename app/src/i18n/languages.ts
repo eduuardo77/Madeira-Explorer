@@ -60,3 +60,25 @@ export function languageFor(
   }
   return FALLBACK_LANGUAGE;
 }
+
+/**
+ * Each language's name **in that language** (T-202). Never translated: a
+ * German visitor stuck in a Portuguese interface is looking for "Deutsch", not
+ * for "Alemão". The one place in the app where these words may not come from
+ * `strings.ts`.
+ */
+export const LANGUAGE_NAMES: Record<Language, string> = {
+  en: 'English',
+  pt: 'Português',
+  de: 'Deutsch',
+};
+
+/**
+ * The stored choice: a language, or null for "follow the phone" (T-202).
+ * Anything unreadable is null, so a broken row can only ever fall back to the
+ * phone's language, never lock the user into one they did not pick.
+ */
+export function parseLanguageChoice(raw: string | null): Language | null {
+  const value = (raw ?? '').trim().toLowerCase();
+  return (LANGUAGES as readonly string[]).includes(value) ? (value as Language) : null;
+}

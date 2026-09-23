@@ -771,6 +771,17 @@ export const STRINGS = {
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
   // T-202: what a store app is expected to show about itself.
   'settings.about.version': s('Version', 'Versão', 'Version'),
+  // T-202: the app followed the phone's language and nothing else, so a
+  // visitor whose phone is in a language this app does not speak got English
+  // with no way out, and one who wanted English on a Portuguese phone could not
+  // have it. Each language is named in itself (LANGUAGE_NAMES), never here.
+  'settings.section.language': s('Language', 'Idioma', 'Sprache'),
+  'settings.language.auto': s('Automatic ({language})', 'Automático ({language})', 'Automatisch ({language})'),
+  'settings.language.footnote': s(
+    'Automatic follows your phone.',
+    'Automático segue o telemóvel.',
+    'Automatisch folgt Ihrem Telefon.'
+  ),
   'settings.about.contact': s('Contact us', 'Contactar-nos', 'Kontakt'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),

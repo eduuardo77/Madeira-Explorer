@@ -42,8 +42,11 @@ import {
   getTrackingQuality,
   isBackgroundTrackingAllowed,
   setBackgroundTrackingAllowed,
+  forgetCachedTrackingSettings,
+  getPausedUntil,
   setTrackingQuality,
 } from '../recording/trackingSettings';
+import { pauseRecording, resumeRecording } from '../recording/walkSession';
 import { applyBackgroundTrackingChange } from '../recording/tripRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
@@ -76,6 +79,8 @@ export default function SettingsScreen({
   const [showingPolicy, setShowingPolicy] = useState(false);
   /** True while a walk report is being assembled (OD-11, D-069). */
   const [donating, setDonating] = useState(false);
+  /** D-087 §6: when the pause ends, or null. */
+  const [pausedUntil, setPausedUntilState] = useState<number | null>(null);
 
   useEffect(() => {
     void locationProvider
@@ -93,6 +98,7 @@ export default function SettingsScreen({
       .catch(() => undefined);
 
     void getTrackingQuality().then(setQuality).catch(() => undefined);
+    void getPausedUntil().then(setPausedUntilState).catch(() => undefined);
   }, []);
 
   /**
@@ -153,9 +159,13 @@ export default function SettingsScreen({
       try {
         await deleteAllUserData();
       } catch (error) {
+        // (The caches are forgotten below whatever happened here.)
         // The diary may itself have just been deleted; log on a best effort.
         await recordingEventDao.logError('erase all', error);
       }
+      // ⚠ T-198: `app_state` is gone, so the settings cached in memory must go
+      // too, or a pause, a walk or a tier would outlive the erase that deleted it.
+      forgetCachedTrackingSettings();
       // Either way the user gets told, rather than left looking at an
       // unchanged screen wondering whether it worked.
       setErased(true);
@@ -287,6 +297,17 @@ export default function SettingsScreen({
       onEraseRequested={() => setConfirmingErase(true)}
       donating={donating}
       onDonateWalk={donateWalk}
+      pausedUntil={pausedUntil}
+      onPause={() => {
+        void pauseRecording(Date.now())
+          .then(setPausedUntilState)
+          .catch(() => undefined);
+      }}
+      onResume={() => {
+        void resumeRecording()
+          .then(() => setPausedUntilState(null))
+          .catch(() => undefined);
+      }}
       onClose={onClose}
     />
   );

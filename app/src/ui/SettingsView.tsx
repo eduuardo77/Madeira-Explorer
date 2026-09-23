@@ -37,6 +37,7 @@ import {
 import { APP_NAME } from '../brand';
 import { t } from '../i18n';
 import type { PermissionLevel } from '../recording/LocationProvider';
+import { formatClock } from '../recording/recorderControls';
 import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
 import type { StringKey } from '../i18n/strings';
 import {
@@ -81,6 +82,13 @@ export type SettingsViewProps = {
   onDonateWalk?: () => void;
   /** True while the file is being built, so the row can say so. */
   donating?: boolean;
+  /**
+   * The end of the current pause, or null (D-087 §6). Optional so the workbench
+   * can mount the screen with no recorder behind it; absent hides the control.
+   */
+  pausedUntil?: number | null;
+  onPause?: () => void;
+  onResume?: () => void;
   onClose: () => void;
 };
 
@@ -309,6 +317,9 @@ export default function SettingsView({
   onEraseRequested,
   onDonateWalk,
   donating,
+  pausedUntil,
+  onPause,
+  onResume,
   onClose,
 }: SettingsViewProps) {
   // Both halves of one decision. The switch means nothing until the phone
@@ -388,6 +399,25 @@ export default function SettingsView({
               <Text style={styles.segmentDetail}>
                 {t(QUALITY_TEXT[trackingQuality].detail)}
               </Text>
+              {/* D-087 §6 — the pause lives with the thing it pauses. A pause in
+                  the past is no pause, the same rule the sink applies. */}
+              {onPause === undefined || onResume === undefined ? null : (
+                <>
+                  <View style={styles.divider} />
+                  {pausedUntil != null && pausedUntil > Date.now() ? (
+                    <>
+                      <Row
+                        label={t('settings.pause.until', { time: formatClock(pausedUntil) })}
+                        value=""
+                      />
+                      <Action label={t('settings.pause.resume')} onPress={onResume} />
+                    </>
+                  ) : (
+                    <Action label={t('settings.pause.hour')} onPress={onPause} />
+                  )}
+                  <Text style={styles.segmentDetail}>{t('settings.pause.footnote')}</Text>
+                </>
+              )}
             </>
           ) : null}
         </Section>

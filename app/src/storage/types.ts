@@ -57,6 +57,13 @@ export type RecordingEventKind =
   /** The trip was detected as over, and by which signal (T-099, D-012). */
   | 'trip_end'
   /**
+   * An outing started or ended, a pause, or a restart from the silence notice
+   * (D-087, T-198). ⚠ Its own kind, **not** `start`/`stop`: `recorderSilence`
+   * reads the last `start` as the moment recording began, and an outing
+   * logged as one would reset the evidence the silence notice depends on.
+   */
+  | 'outing'
+  /**
    * A trace left the app, and how much of it was masked (T-104, D-016). The
    * one diary line that records a privacy-relevant action.
    */

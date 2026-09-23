@@ -41,6 +41,8 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Linking,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -60,14 +62,21 @@ import { isUnlocked } from '../entitlement/entitlementStore';
 import { buttonStamp, type ButtonStamp } from '../passport/passportButton';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
-import { startTrip, stopTrip } from '../recording/tripRecording';
-import { isBackgroundTrackingAllowed } from '../recording/trackingSettings';
 import {
-  actionForStartWalk,
-  actionForStopWalk,
-  parseWalkStarted,
-  type WalkState,
-} from '../recording/manualWalk';
+  endOuting,
+  readControlInput,
+  restartRecording,
+  resumeRecording,
+  startOuting,
+} from '../recording/walkSession';
+import {
+  formatClock,
+  formatDuration,
+  primaryControl,
+  recorderNotice,
+  type ControlInput,
+  type RecorderNotice,
+} from '../recording/recorderControls';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -75,7 +84,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
-import PrimaryOverlay from '../ui/PrimaryOverlay';
+import PrimaryOverlay, { type MapNotice } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
@@ -226,6 +235,18 @@ export default function NativeMapScreen({
    */
   const [walkStarted, setWalkStarted] = useState(false);
   /**
+   * What the recorder is doing, read from evidence (D-087, T-174). Null until
+   * the first read; the button shows *start* until then, the safe default.
+   */
+  const [controlInput, setControlInput] = useState<ControlInput | null>(null);
+  const [silentForMs, setSilentForMs] = useState<number | null>(null);
+  /** Notices closed this session. `recorder-stopped` never lands here (T-174). */
+  const [dismissedNotices, setDismissedNotices] = useState<
+    ReadonlySet<Exclude<RecorderNotice, null>>
+  >(new Set());
+  /** A press is being handled; a second tap must not start a second outing. */
+  const [busy, setBusy] = useState(false);
+  /**
    * Where the camera is looking, so *Re-centre* can know whether it is worth
    * offering. Null until the first `onCameraMove`.
    */
@@ -304,12 +325,12 @@ export default function NativeMapScreen({
         // app could not fill the map in by itself; those two are now read at
         // press time by `isBackgroundRecordingLive`, because they can change
         // while this screen is open and a stale copy decides wrongly.
-        const walkFlag = parseWalkStarted(
-          await appStateDao.get(appStateDao.AppStateKey.WalkStartedByUser)
-        );
+        const control = await readControlInput(Date.now());
         if (!cancelled) {
           setProgress(nextProgress);
-          setWalkStarted(walkFlag);
+          setWalkStarted(control.input.walkInProgress);
+          setControlInput(control.input);
+          setSilentForMs(control.silentForMs);
         }
 
         // The places, and which of them have been earned. Both are needed to
@@ -523,6 +544,20 @@ export default function NativeMapScreen({
           setUserAt({ latitude: fix.lat, longitude: fix.lon });
         }
       })();
+      // D-087 §4: the same poll keeps the notice honest. A recorder can stop,
+      // or a pause end, while the map is on screen.
+      void (async () => {
+        try {
+          const control = await readControlInput(Date.now());
+          if (!cancelled) {
+            setControlInput(control.input);
+            setSilentForMs(control.silentForMs);
+            setWalkStarted(control.input.walkInProgress);
+          }
+        } catch (error) {
+          await recordingEventDao.logError('control state', error);
+        }
+      })();
     };
 
     refresh();
@@ -550,48 +585,83 @@ export default function NativeMapScreen({
     (Math.abs(cameraCentre.latitude - userAt.latitude) > RECENTRE_SHOW_DEGREES ||
       Math.abs(cameraCentre.longitude - userAt.longitude) > RECENTRE_SHOW_DEGREES);
 
+  /** Re-read the recorder's state now, after something the user did. */
+  const rereadControl = async () => {
+    const control = await readControlInput(Date.now());
+    setControlInput(control.input);
+    setSilentForMs(control.silentForMs);
+    setWalkStarted(control.input.walkInProgress);
+  };
+
+  /**
+   * The main button (D-087 §3). What it does is decided by `primaryControl`
+   * from evidence, never from what this screen last rendered.
+   */
   const toggleRecording = () => {
+    if (busy) {
+      return;
+    }
+    setBusy(true);
     void (async () => {
       try {
-        // ⚠ Read the world *now* rather than trusting render-time state: the
-        // recorder can have been started by the launch sync, or stopped by the
-        // OS, since this screen last looked.
-        const walk: WalkState = {
-          startedByUser: walkStarted,
-          recorderRunning: await locationProvider.isRecording(),
-          backgroundRecording: await isBackgroundRecordingLive(),
-        };
-
-        const action = walkStarted
-          ? actionForStopWalk(walk)
-          : actionForStartWalk(walk);
-
-        if (action === 'start') {
-          // The same profile the MapLibre screen used. ⚠ On the emulator this
-          // must stay `driving` in practice — `walking` asks for `balanced`
-          // accuracy, which an emulator cannot serve at all (D-047).
-          // ⚠ `startTrip`, never `locationProvider.startRecording` — the
-          // geofences have to be registered in the same breath, and for
-          // months they were not (T-145).
-          await startTrip('walking');
-        } else if (action === 'stop') {
-          await stopTrip();
+        const now = Date.now();
+        const current = (await readControlInput(now)).input;
+        const control = primaryControl(current);
+        if (control === 'grant-location') {
+          await locationProvider.requestWhileUsingPermission();
+        } else if (control === 'start-walk') {
+          await startOuting(now);
+        } else {
+          // D-087 §7: a short summary when the outing ends.
+          const summary = await endOuting(now);
+          Alert.alert(summary.title, summary.lines.join('\n'), [{ text: t('walk.summary.ok') }]);
         }
-
-        // The flag is the button's truth, so it is written whatever the
-        // recorder did — including `leave-alone`, which is the ordinary case
-        // for somebody with background recording on.
-        const next = !walkStarted;
-        await appStateDao.set(
-          appStateDao.AppStateKey.WalkStartedByUser,
-          next ? 'true' : 'false'
-        );
-        setWalkStarted(next);
+        await rereadControl();
       } catch (error) {
         await recordingEventDao.logError('walk toggle', error);
+      } finally {
+        setBusy(false);
       }
     })();
   };
+
+  /** The notice in words, and what tapping it does (D-087 §4). */
+  const noticeKind =
+    controlInput === null ? null : recorderNotice(controlInput, dismissedNotices);
+  const dismiss = (kind: Exclude<RecorderNotice, null>) => () =>
+    setDismissedNotices((closed) => new Set([...closed, kind]));
+  const act = (action: () => Promise<void>) => () => {
+    void (async () => {
+      try {
+        await action();
+        await rereadControl();
+      } catch (error) {
+        await recordingEventDao.logError('notice action', error);
+      }
+    })();
+  };
+  const notice: MapNotice | null =
+    noticeKind === 'paused' && controlInput?.pausedUntilTs != null
+      ? {
+          text: t('notice.paused', { time: formatClock(controlInput.pausedUntilTs) }),
+          actionLabel: t('notice.paused.action'),
+          onAction: act(resumeRecording),
+        }
+      : noticeKind === 'needs-always'
+        ? {
+            text: t('notice.needsAlways'),
+            actionLabel: t('notice.needsAlways.action'),
+            onAction: act(() => Linking.openSettings()),
+            onDismiss: dismiss('needs-always'),
+          }
+        : noticeKind === 'recorder-stopped'
+          ? {
+              text: t('notice.silent', { duration: formatDuration(silentForMs ?? 0) }),
+              actionLabel: t('notice.silent.action'),
+              onAction: act(restartRecording),
+              // ⚠ No onDismiss: hiding this is how T-174 went unseen for weeks.
+            }
+          : null;
 
   /**
    * Re-centre on the user (2026-08-28).
@@ -764,6 +834,8 @@ export default function NativeMapScreen({
         onOpenPassport={onOpenPassport}
         onOpenSettings={onOpenSettings}
         isWalking={walkStarted}
+        control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}
+        notice={notice}
         onToggleRecording={toggleRecording}
         showRecentre={showRecentre}
         onRecentre={recentre}
@@ -790,23 +862,6 @@ const RECENTRE_ZOOM = 16;
  * `RECENTRE_ZOOM` — below that the button would be offering to do nothing.
  */
 const RECENTRE_SHOW_DEGREES = 0.002;
-
-/**
- * Is background recording actually live — allowed by the user **and** granted by
- * the OS?
- *
- * ⚠ Both halves, always. The user's preference alone is the state that looks
- * enabled and records nothing (T-146), and treating it as live would make
- * *Stop walk* leave the recorder running for somebody whose recorder was never
- * running in the first place.
- */
-async function isBackgroundRecordingLive(): Promise<boolean> {
-  const [allowed, permission] = await Promise.all([
-    isBackgroundTrackingAllowed(),
-    locationProvider.getPermissionLevel(),
-  ]);
-  return allowed && permission === 'always';
-}
 
 /** The box around drawn trace points, reusing the trace's own rule. */
 function traceBoundsOf(points: [number, number][]): Bounds {

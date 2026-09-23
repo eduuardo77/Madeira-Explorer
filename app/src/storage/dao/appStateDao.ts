@@ -122,6 +122,19 @@ export const AppStateKey = {
    */
   WalkStartedByUser: 'walk_started_by_user',
   /**
+   * When the current walk began, epoch ms (D-087, T-198). Read when the walk
+   * stops, for its summary. Absent when no walk is running.
+   */
+  WalkStartedTs: 'walk_started_ts',
+  /**
+   * Automatic recording is paused until this moment, epoch ms (D-087, T-198).
+   *
+   * ⚠ A moment, not a flag: the pause ends by the clock passing it, with nothing
+   * that has to wake up and switch it off. `recordingSink` drops what arrives
+   * before it. Absent, unreadable or in the past means not paused.
+   */
+  PausedUntil: 'paused_until',
+  /**
    * Whether the keep-running screen has been shown once (2026-08-28, Android).
    *
    * ⚠ Shown once and never again, even if the user skips it. It is advice about

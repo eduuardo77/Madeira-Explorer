@@ -33,6 +33,10 @@ import type { PermissionLevel } from './LocationProvider.ts';
 import type { SilenceState } from './recorderSilence.ts';
 import type { TrackingQuality } from './trackingPreference.ts';
 import { distanceM } from './distance.ts';
+import type { Language } from '../i18n/languages.ts';
+import { PLURALS, STRINGS } from '../i18n/strings.ts';
+import { plural, translate } from '../i18n/translate.ts';
+import { formatDistance } from '../places/placeCard.ts';
 
 /** The main button, in each of its three states (D-087 §3). */
 export type PrimaryControl = 'grant-location' | 'start-walk' | 'stop-walk';
@@ -179,3 +183,51 @@ export function walkSummary(input: {
       .map((award) => award.placeId),
   };
 }
+
+/** `14:05`, the phone's local time. The same in all three languages. */
+export function formatClock(ts: number): string {
+  const at = new Date(ts);
+  return `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`;
+}
+
+/**
+ * `25 min`, `1 h 05 min`. Written the same way in all three languages.
+ *
+ * Under a minute says `< 1 min` rather than `0 min`, which would read as a
+ * failure to record anything.
+ */
+export function formatDuration(ms: number): string {
+  const minutes = Math.floor(Math.max(0, ms) / 60_000);
+  if (minutes < 1) {
+    return '< 1 min';
+  }
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+  return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`;
+}
+
+/** The summary as the user reads it: a title and its lines (D-087 §7). */
+export function describeWalkSummary(
+  summary: WalkSummary,
+  placeNames: ReadonlyMap<string, string>,
+  language: Language
+): { title: string; lines: string[] } {
+  const distance =
+    summary.distanceM === null
+      ? translate(STRINGS['walk.summary.noDistance'], language)
+      : formatDistance(summary.distanceM, language);
+  const names = summary.placeIds.map((id) => placeNames.get(id) ?? id);
+  return {
+    title: translate(STRINGS['walk.summary.title'], language),
+    lines: [
+      `${formatDuration(summary.durationMs)} · ${distance}`,
+      names.length === 0
+        ? translate(STRINGS['walk.summary.noStamps'], language)
+        : plural(PLURALS['walk.summary.stamps'], names.length, language, {
+            names: names.join(', '),
+          }),
+    ],
+  };
+}
+

@@ -229,7 +229,23 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       cannot be dismissed, per T-174), the pause (the sink drops what arrives, so nothing has to
       wake up to resume), a walk taking `precise`, and the summary. ⚠ **Still to do:** the wiring,
       the strings, the two notification channels, and the pause's lengths and where it lives
-      (D-087 leaves those open). ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
+      (D-087 leaves those open).
+      — ✅ **Wired 2026-09-23 (code).**
+      - `recording/walkSession.ts` is the impure half: it reads the control state from evidence,
+        and starts and ends outings.
+      - A walk changes the recorder through `buildOptions` (`precise`, plus its own notification
+        text), re-applied in place with `setSamplingProfile`, never restarted (D-010).
+        `manualWalk` gained `retune`.
+      - The sink drops fixes and crossings while paused.
+      - The map shows the button's three states and the notice. The notice is polled on the
+        existing 10 s timer, and `recorder-stopped` cannot be dismissed.
+      - Settings is *Registo automático* and has the pause. Ending an outing shows its summary.
+      - The trip messages have their own Android channel with sound.
+      - Outing, pause and restart lines use a new diary kind, `outing`: logged as `start` they
+        would have reset `recorderSilence`'s evidence.
+      - Found along the way: erase-all deleted `app_state` under the tier cache (since T-146).
+        `forgetCachedTrackingSettings` now runs after it.
+      ⚠ **Not yet seen on the device.** ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`

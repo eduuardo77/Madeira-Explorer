@@ -19,10 +19,15 @@
  */
 
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import { t } from '../i18n';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import type { NotificationKind } from './notificationPolicy';
 import { canNotify, parseSent, serialiseSent } from './notificationPolicy';
+
+/** D-087 §5: the channel both trip messages are posted on (Android). Stable: renaming it orphans the user's own setting for it. */
+export const TRIP_CHANNEL_ID = 'trip-messages';
 
 export type SendResult = {
   sent: boolean;
@@ -66,11 +71,25 @@ export async function sendTripNotification(
       serialiseSent([...sentSoFar, kind])
     );
 
+    // ⚠ D-087 §5 — the two trip messages get a channel of their own, one that
+    // makes a sound. Without it they shared whatever Expo's default was, and
+    // teardown item 3 found the risk: a health check that arrives silently is
+    // the failure T-049 exists to prevent. The recorder's ongoing notification
+    // stays on expo-location's quiet channel, so a user can silence that one
+    // without silencing these.
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(TRIP_CHANNEL_ID, {
+        name: t('notify.channel.trip'),
+        description: t('notify.channel.tripDescription'),
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+    }
+
     await Notifications.scheduleNotificationAsync({
       // Immediately. Both callers are reached only once their own moment has
       // arrived, so there is nothing left to wait for.
       content: { title, body },
-      trigger: null,
+      trigger: Platform.OS === 'android' ? { channelId: TRIP_CHANNEL_ID } : null,
     });
 
     await recordingEventDao.log('notification', decision.reason);

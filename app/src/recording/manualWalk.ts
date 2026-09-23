@@ -55,8 +55,16 @@ export type WalkState = {
   backgroundRecording: boolean;
 };
 
-/** What the recorder should do. `leave-running` also covers "leave stopped". */
-export type RecorderAction = 'start' | 'stop' | 'leave-alone';
+/**
+ * What the recorder should do.
+ *
+ * ⚠ `retune` (D-087, 2026-09-23) re-applies the recorder's options **in place**
+ * (`setSamplingProfile` with the current profile, which replaces the options
+ * without dropping fixes). It is how a walk changes a recorder that is already
+ * running. Until D-087 that case was `leave-alone`: the button changed a flag,
+ * a colour and a word, and the recorder nothing (review P1-2).
+ */
+export type RecorderAction = 'start' | 'stop' | 'retune' | 'leave-alone';
 
 /**
  * ⚠ Anything unreadable is **false**, and this is the opposite of
@@ -93,7 +101,7 @@ export function isWalkInProgress(state: WalkState): boolean {
  * and open a new one, splitting one walk into two in the database (D-010).
  */
 export function actionForStartWalk(state: WalkState): RecorderAction {
-  return state.recorderRunning ? 'leave-alone' : 'start';
+  return state.recorderRunning ? 'retune' : 'start';
 }
 
 /**
@@ -104,7 +112,8 @@ export function actionForStartWalk(state: WalkState): RecorderAction {
  */
 export function actionForStopWalk(state: WalkState): RecorderAction {
   if (state.backgroundRecording) {
-    return 'leave-alone';
+    // Keep recording, and hand the user's own tier back (D-087 §2).
+    return state.recorderRunning ? 'retune' : 'leave-alone';
   }
   return state.recorderRunning ? 'stop' : 'leave-alone';
 }

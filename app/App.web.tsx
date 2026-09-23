@@ -26,7 +26,7 @@
  */
 
 import { useState } from 'react';
-import { deviceLanguage } from './src/i18n';
+import { deviceLanguage, t } from './src/i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CATEGORIES } from './src/content/contentPack';
 import type { StampAward } from './src/storage/types';
@@ -190,6 +190,8 @@ type Screen =
   | 'passport'
   | 'primary'
   | 'primary-while-using'
+  | 'primary-silent'
+  | 'primary-no-location'
   | 'place-card'
   | 'place-card-collected'
   | 'settings'
@@ -201,7 +203,9 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
   { id: 'passport-confirm', label: 'Passport — "did you walk it?" (T-149)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
-  { id: 'primary-while-using', label: 'Primary — While-Using' },
+  { id: 'primary-while-using', label: 'Primary — While-Using, on an outing' },
+  { id: 'primary-silent', label: 'Primary — nothing recorded (T-198)' },
+  { id: 'primary-no-location', label: 'Primary — no location (T-198)' },
   { id: 'place-card', label: 'Place card (T-115)' },
   { id: 'place-card-collected', label: 'Place card — collected, no fix' },
   { id: 'settings', label: 'Settings (T-141/T-125)' },
@@ -382,6 +386,33 @@ export default function DesignWorkbench() {
                 // shown to everybody, so there is nothing for the workbench to
                 // toggle. `isWalking` is the state worth mounting both ways.
                 isWalking={screen === 'primary-while-using'}
+                // D-087: the button's three states and the two notices worth
+                // judging for layout — the dismissible one and the one that is
+                // not. Longest text on purpose (German is longest; switch the
+                // browser language to see it).
+                control={
+                  screen === 'primary-no-location'
+                    ? 'grant-location'
+                    : screen === 'primary-while-using'
+                      ? 'stop-walk'
+                      : 'start-walk'
+                }
+                notice={
+                  screen === 'primary-while-using'
+                    ? {
+                        text: t('notice.needsAlways'),
+                        actionLabel: t('notice.needsAlways.action'),
+                        onAction: () => undefined,
+                        onDismiss: () => undefined,
+                      }
+                    : screen === 'primary-silent'
+                      ? {
+                          text: t('notice.silent', { duration: '1 h 02 min' }),
+                          actionLabel: t('notice.silent.action'),
+                          onAction: () => undefined,
+                        }
+                      : null
+                }
                 showRecentre={showsCard}
                 onRecentre={() => undefined}
                 // Worst case on purpose: both bottom controls present *and* a

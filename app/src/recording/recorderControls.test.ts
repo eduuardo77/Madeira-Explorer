@@ -6,6 +6,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   effectiveQuality,
   isPaused,
@@ -13,8 +16,13 @@ import {
   recorderNotice,
   shouldStore,
   walkSummary,
+  describeWalkSummary,
+  formatClock,
+  formatDuration,
   type ControlInput,
 } from './recorderControls.ts';
+
+const srcRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const NOW = Date.parse('2026-09-23T10:00:00Z');
 const HOUR = 3_600_000;
@@ -134,3 +142,47 @@ test('a walk with fewer than two usable fixes has no distance, not zero', () => 
   });
   assert.equal(summary.distanceM, null);
 });
+
+test('durations read as a person says them, and never as "0 min"', () => {
+  assert.equal(formatDuration(20_000), '< 1 min');
+  assert.equal(formatDuration(25 * 60_000), '25 min');
+  assert.equal(formatDuration(65 * 60_000), '1 h 05 min');
+});
+
+test('the clock is local and zero-padded', () => {
+  assert.equal(formatClock(new Date(2026, 8, 23, 9, 5).getTime()), '09:05');
+});
+
+test('the summary in Portuguese: time, distance, and the stamps by name', () => {
+  const described = describeWalkSummary(
+    { durationMs: 65 * 60_000, distanceM: 3200, placeIds: ['a', 'b'] },
+    new Map([['a', 'Pico do Areeiro'], ['b', 'Pico Ruivo']]),
+    'pt'
+  );
+  assert.equal(described.title, 'Passeio terminado');
+  assert.deepEqual(described.lines, [
+    '1 h 05 min · 3,2 km',
+    'Carimbos obtidos: Pico do Areeiro, Pico Ruivo',
+  ]);
+});
+
+test('no stamps and no distance are both said, not left blank', () => {
+  const described = describeWalkSummary(
+    { durationMs: 10 * 60_000, distanceM: null, placeIds: [] },
+    new Map(),
+    'en'
+  );
+  assert.deepEqual(described.lines, ['10 min · distance not measured', 'No new stamps on this outing.']);
+});
+
+test('⚠ D-087 — the sink checks the pause on both of its write paths', () => {
+  // A pause the recorder ignores would be a promise broken in silence.
+  const source = readFileSync(path.join(srcRoot, 'recording/recordingSink.ts'), 'utf8');
+  for (const handler of ['async onLocations(', 'async onGeofenceTransition(']) {
+    const body = source.slice(source.indexOf(handler));
+    const check = body.indexOf('shouldStore(');
+    const store = body.indexOf('queue(');
+    assert.ok(check !== -1 && check < store, `${handler} stores before checking the pause`);
+  }
+});
+

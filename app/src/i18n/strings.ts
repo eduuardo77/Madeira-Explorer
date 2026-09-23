@@ -191,9 +191,9 @@ export const STRINGS = {
     'Im Moment füllt sich Ihre Karte nur, solange die App geöffnet ist.'
   ),
   'onboarding.upgrade.body2': s(
-    'If you let it record in the background, you can put your phone away and it will keep going on its own — without pressing Start recording each time you go out.',
-    'Se o deixar registar em segundo plano, pode guardar o telemóvel e ele continua sozinho — sem carregar em Começar a registar de cada vez que sai.',
-    'Wenn Sie die Aufzeichnung im Hintergrund erlauben, können Sie das Telefon weglegen und sie läuft von selbst weiter — ohne jedes Mal auf Aufzeichnung starten zu tippen, wenn Sie losziehen.'
+    'If you let it record in the background, you can put your phone away and it will keep going on its own — without pressing Start an outing each time you go out.',
+    'Se o deixar registar em segundo plano, pode guardar o telemóvel e ele continua sozinho — sem carregar em Começar passeio de cada vez que sai.',
+    'Wenn Sie die Aufzeichnung im Hintergrund erlauben, können Sie das Telefon weglegen und sie läuft von selbst weiter — ohne jedes Mal auf Ausflug starten zu tippen, wenn Sie losziehen.'
   ),
   // ⚠ What the user KEEPS if they say no (2026-09-22). The ask is the scariest
   // one the app makes, and the cheapest way to lower its stakes is to say that
@@ -204,9 +204,9 @@ export const STRINGS = {
   // later in settings" would be a path that does not work for exactly the user
   // who was told about it. Same wording as `settings.background.off`.
   'onboarding.upgrade.body3': s(
-    'Either way, nothing is lost: you can always press Start recording on the map when you go out.',
-    'De qualquer forma, não perde nada: pode sempre carregar em Começar a registar no mapa quando sair.',
-    'So oder so geht nichts verloren: Sie können auf der Karte jederzeit auf Aufzeichnung starten tippen, wenn Sie losziehen.'
+    'Either way, nothing is lost: you can always press Start an outing on the map when you go out.',
+    'De qualquer forma, não perde nada: pode sempre carregar em Começar passeio no mapa quando sair.',
+    'So oder so geht nichts verloren: Sie können auf der Karte jederzeit auf Ausflug starten tippen, wenn Sie losziehen.'
   ),
   'onboarding.upgrade.continue': s('Turn it on', 'Ligar', 'Einschalten'),
   // ⚠ The decline names an outcome rather than a refusal (2026-09-22). It was
@@ -278,16 +278,19 @@ export const STRINGS = {
   // ⚠ The KEYS still read `startWalk`/`stopWalk`. Identifiers, not copy; left
   // alone because renaming them touches call sites and changes nothing a user
   // ever sees.
-  'map.startWalk': s(
-    'Start recording',
-    'Começar a registar',
-    'Aufzeichnung starten'
-  ),
-  'map.stopWalk': s(
-    'Stop recording',
-    'Parar de registar',
-    'Aufzeichnung beenden'
-  ),
+  //
+  // ⚠⚠ **D-087 (2026-09-23) CHANGED WHAT THE BUTTON IS, SO IT CHANGED ITS WORD.**
+  // "Começar a registar" sat on the home screen while automatic recording was
+  // already running (review P1-2), because one verb named two things. The
+  // button now starts a separate thing — an outing the recorder follows more
+  // closely until it is ended — and the verb *registar* belongs to automatic
+  // recording alone, in Settings.
+  // The noun keeps the lesson above: **passeio** is a walk *or* a drive in
+  // Portuguese ("um passeio de carro"); English "walk" and German "Spaziergang"
+  // would not be, so they say **outing** and **Ausflug**. Provisional wording
+  // inside D-087 — the project lead confirmed "passeio".
+  'map.startWalk': s('Start an outing', 'Começar passeio', 'Ausflug starten'),
+  'map.stopWalk': s('End outing', 'Terminar passeio', 'Ausflug beenden'),
   'map.recentre': s('Re-center', 'Centrar', 'Zentrieren'),
   'map.a11y.recentre': s(
     'Center the map on where you are',
@@ -299,15 +302,58 @@ export const STRINGS = {
   // German said "Wanderung", which is a *hike*, and was the most wrong of the
   // three for somebody in a car.
   'map.a11y.startRecording': s(
-    'Start recording where you go',
-    'Começar a registar por onde anda',
-    'Aufzeichnen, wo Sie unterwegs sind'
+    'Start an outing. The app follows it more closely until you end it.',
+    'Começar um passeio. A aplicação acompanha-o com mais detalhe até o terminar.',
+    'Einen Ausflug starten. Die App verfolgt ihn genauer, bis Sie ihn beenden.'
   ),
   'map.a11y.stopRecording': s(
-    'Stop recording where you go',
-    'Parar de registar por onde anda',
-    'Aufzeichnung beenden'
+    'End this outing and see its summary',
+    'Terminar este passeio e ver o resumo',
+    'Diesen Ausflug beenden und die Zusammenfassung sehen'
   ),
+  // D-087 §3: with no location permission at all, the button asks for it.
+  'map.grantLocation': s('Allow location', 'Permitir localização', 'Standort erlauben'),
+  'map.a11y.grantLocation': s(
+    'Allow location, so the app can record where you go',
+    'Permitir a localização, para a aplicação poder registar por onde anda',
+    'Standort erlauben, damit die App aufzeichnen kann, wo Sie unterwegs sind'
+  ),
+  // ── D-087 §4: what the map says about automatic recording, only when wrong ──
+  'notice.paused': s(
+    'Recording paused until {time}',
+    'Registo em pausa até às {time}',
+    'Aufzeichnung pausiert bis {time}'
+  ),
+  'notice.paused.action': s('Resume', 'Retomar', 'Fortsetzen'),
+  // Names the phone's own words for the setting (teardown item 4).
+  'notice.needsAlways': s(
+    'Automatic recording needs location set to “Allow all the time”',
+    'O registo automático precisa da localização em “Permitir sempre”',
+    'Die automatische Aufzeichnung braucht den Standort auf „Immer zulassen“'
+  ),
+  'notice.needsAlways.action': s('Open phone settings', 'Abrir definições do telemóvel', 'Telefoneinstellungen öffnen'),
+  // ⚠ Says what was measured — nothing arrived — and not that the recorder is
+  // dead, which the app cannot see (recorderSilence.ts). Not dismissible (T-174).
+  'notice.silent': s(
+    'Nothing recorded for {duration}',
+    'Nada registado há {duration}',
+    'Seit {duration} nichts aufgezeichnet'
+  ),
+  'notice.silent.action': s('Restart recording', 'Reiniciar o registo', 'Aufzeichnung neu starten'),
+  'notice.a11y.dismiss': s('Dismiss', 'Fechar', 'Schließen'),
+  // ── D-087 §7: the short summary when an outing ends ──
+  'walk.summary.title': s('Outing ended', 'Passeio terminado', 'Ausflug beendet'),
+  'walk.summary.noDistance': s(
+    'distance not measured',
+    'distância não medida',
+    'Strecke nicht gemessen'
+  ),
+  'walk.summary.noStamps': s(
+    'No new stamps on this outing.',
+    'Nenhum carimbo novo neste passeio.',
+    'Keine neuen Stempel auf diesem Ausflug.'
+  ),
+  'walk.summary.ok': s('OK', 'OK', 'OK'),
   'map.a11y.openPassport': s('Open your passport', 'Abrir o seu passaporte', 'Reisepass öffnen'),
 
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────
@@ -580,10 +626,21 @@ export const STRINGS = {
     'Abrir definições do telemóvel',
     'Telefoneinstellungen öffnen'
   ),
+  // D-087 §1: background recording has its own name, and it lives here.
   'settings.section.background': s(
-    'Background tracking',
-    'Registo em segundo plano',
-    'Aufzeichnung im Hintergrund'
+    'Automatic recording',
+    'Registo automático',
+    'Automatische Aufzeichnung'
+  ),
+  // D-087 §6. ⚠ One hour is Provisional: the project lead's own example ("not
+  // the next hour"); the lengths were left open.
+  'settings.pause.hour': s('Pause for an hour', 'Pausar durante uma hora', 'Eine Stunde pausieren'),
+  'settings.pause.resume': s('Resume now', 'Retomar agora', 'Jetzt fortsetzen'),
+  'settings.pause.until': s('Paused until {time}', 'Em pausa até às {time}', 'Pausiert bis {time}'),
+  'settings.pause.footnote': s(
+    'Nothing is recorded while paused, and no stamps are collected. It resumes on its own.',
+    'Durante a pausa nada é registado e não se obtêm carimbos. Retoma sozinho.',
+    'Während der Pause wird nichts aufgezeichnet und es werden keine Stempel gesammelt. Sie endet von selbst.'
   ),
   'settings.background.toggle': s(
     'Record while the app is closed',
@@ -591,9 +648,9 @@ export const STRINGS = {
     'Aufzeichnen, wenn die App geschlossen ist'
   ),
   'settings.background.off': s(
-    'Nothing is recorded while the app is closed. Use Start recording on the map when you go out.',
-    'Nada é registado com a aplicação fechada. Use Começar a registar no mapa quando sair.',
-    'Bei geschlossener App wird nichts aufgezeichnet. Nutzen Sie Aufzeichnung starten auf der Karte, wenn Sie losziehen.'
+    'Nothing is recorded while the app is closed. Use Start an outing on the map when you go out.',
+    'Nada é registado com a aplicação fechada. Use Começar passeio no mapa quando sair.',
+    'Bei geschlossener App wird nichts aufgezeichnet. Nutzen Sie Ausflug starten auf der Karte, wenn Sie losziehen.'
   ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),
@@ -717,6 +774,14 @@ export const STRINGS = {
   ),
 
   // ── Notifications (D-011: only two per trip) ────────────────────────────
+  // D-087 §5: the Android channel both trip messages use. Shown by name in the
+  // phone's own notification settings.
+  'notify.channel.trip': s('Trip messages', 'Mensagens da viagem', 'Reisenachrichten'),
+  'notify.channel.tripDescription': s(
+    'The two messages each trip: one to confirm recording works, one when your map is ready.',
+    'As duas mensagens de cada viagem: uma a confirmar que o registo funciona e outra quando o mapa estiver pronto.',
+    'Die zwei Nachrichten pro Reise: eine zur Bestätigung, dass die Aufzeichnung läuft, und eine, wenn Ihre Karte fertig ist.'
+  ),
   'notify.recording.title': s(
     'Recording your trip',
     'A registar a sua viagem',
@@ -741,6 +806,14 @@ export const STRINGS = {
     'Your map is filling in nicely',
     'O seu mapa está a preencher-se bem',
     'Ihre Karte füllt sich schön'
+  ),
+  // D-087 §5: the same ongoing notification while a walk is running. No timer:
+  // expo-location's foreground-service options take a title and a body only.
+  'notify.walk.title': s('Walk in progress', 'Passeio em curso', 'Spaziergang läuft'),
+  'notify.walk.body': s(
+    '{app} is recording this walk in more detail until you end it.',
+    'O {app} está a registar este passeio com mais detalhe até o terminar.',
+    '{app} zeichnet diesen Spaziergang genauer auf, bis Sie ihn beenden.'
   ),
   'notify.recording.body': s(
     '{app} is noting where you have been.',
@@ -829,6 +902,11 @@ export const PLURALS = {
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),
     other: s('places collected', 'lugares visitados', 'Orte gesammelt'),
+  },
+  // D-087 §7: which stamps the outing collected. `{names}` is joined by the caller.
+  'walk.summary.stamps': {
+    one: s('Stamp collected: {names}', 'Carimbo obtido: {names}', 'Stempel gesammelt: {names}'),
+    other: s('Stamps collected: {names}', 'Carimbos obtidos: {names}', 'Stempel gesammelt: {names}'),
   },
   'reveal.body': {
     one: s(

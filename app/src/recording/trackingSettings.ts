@@ -15,6 +15,7 @@
  */
 
 import * as appStateDao from '../storage/dao/appStateDao';
+import { parseWalkStarted } from './manualWalk';
 import {
   DEFAULT_BACKGROUND_TRACKING,
   DEFAULT_TRACKING_QUALITY,
@@ -70,3 +71,84 @@ export async function setBackgroundTrackingAllowed(
     allowed ? 'true' : 'false'
   );
 }
+
+// ── D-087: a walk, and a pause (T-198) ─────────────────────────────────────
+//
+// Both are read on the recorder's own paths — `buildOptions` when location
+// updates are (re)started, `recordingSink` on every batch — so both are cached
+// the way the tier is, and this module is their only writer.
+
+let cachedWalk: boolean | null = null;
+let cachedPausedUntil: number | null | undefined;
+
+/** Whether the user has a walk running. Unreadable is `false` (manualWalk.ts). */
+export async function getWalkInProgress(): Promise<boolean> {
+  if (cachedWalk !== null) {
+    return cachedWalk;
+  }
+  try {
+    cachedWalk = parseWalkStarted(
+      await appStateDao.get(appStateDao.AppStateKey.WalkStartedByUser)
+    );
+  } catch {
+    return false;
+  }
+  return cachedWalk;
+}
+
+/** When the running walk began, or null. */
+export async function getWalkStartedTs(): Promise<number | null> {
+  try {
+    return parseTimestamp(await appStateDao.get(appStateDao.AppStateKey.WalkStartedTs));
+  } catch {
+    return null;
+  }
+}
+
+export async function setWalkInProgress(inProgress: boolean, nowMs: number): Promise<void> {
+  cachedWalk = inProgress;
+  await appStateDao.set(appStateDao.AppStateKey.WalkStartedByUser, inProgress ? 'true' : 'false');
+  await appStateDao.set(appStateDao.AppStateKey.WalkStartedTs, inProgress ? String(nowMs) : '');
+}
+
+/** The end of the current pause, or null. A past moment is returned as is; `isPaused` judges it. */
+export async function getPausedUntil(): Promise<number | null> {
+  if (cachedPausedUntil !== undefined) {
+    return cachedPausedUntil;
+  }
+  try {
+    cachedPausedUntil = parseTimestamp(
+      await appStateDao.get(appStateDao.AppStateKey.PausedUntil)
+    );
+  } catch {
+    // ⚠ Unreadable is *not paused*. A broken row must never silently stop the
+    // recorder storing anything (D-010).
+    return null;
+  }
+  return cachedPausedUntil;
+}
+
+export async function setPausedUntil(untilTs: number | null): Promise<void> {
+  cachedPausedUntil = untilTs;
+  await appStateDao.set(appStateDao.AppStateKey.PausedUntil, untilTs === null ? '' : String(untilTs));
+}
+
+function parseTimestamp(raw: string | null): number | null {
+  const value = Number((raw ?? '').trim());
+  return raw !== null && raw.trim() !== '' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/**
+ * Forget everything cached here (T-198). Called after erase-all, which deletes
+ * `app_state` underneath these caches.
+ *
+ * ⚠ Found while adding the walk and pause caches: the tier cache has had this
+ * gap since T-146, so an erase kept the user's old tier in memory until the
+ * next launch.
+ */
+export function forgetCachedTrackingSettings(): void {
+  cachedQuality = null;
+  cachedWalk = null;
+  cachedPausedUntil = undefined;
+}
+

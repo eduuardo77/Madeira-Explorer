@@ -20,7 +20,8 @@ import type {
 } from './LocationProvider';
 import { getSamplingParameters } from './samplingPolicy';
 import { scaleForQuality } from './trackingPreference';
-import { getTrackingQuality } from './trackingSettings';
+import { effectiveQuality } from './recorderControls';
+import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 function toExpoAccuracy(
@@ -62,9 +63,14 @@ function toExpoActivityType(profile: SamplingProfile): Location.ActivityType {
 async function buildOptions(
   profile: SamplingProfile
 ): Promise<Location.LocationTaskOptions> {
+  // ⚠ D-087 §2: a walk takes the finest tier the app has, whatever the user
+  // chose for automatic recording, and hands theirs back when it ends. This
+  // is the one place a walk changes the recorder; `setSamplingProfile` with
+  // the current profile re-applies it in place when a walk starts or stops.
+  const walking = await getWalkInProgress();
   const parameters = scaleForQuality(
     getSamplingParameters(profile),
-    await getTrackingQuality()
+    effectiveQuality(await getTrackingQuality(), walking)
   );
 
   return {
@@ -103,8 +109,11 @@ async function buildOptions(
     // the honest trade — OEM battery managers kill everything else
     // (ARCHITECTURE §6.2).
     foregroundService: {
-      notificationTitle: t('notify.recording.title'),
-      notificationBody: t('notify.recording.body', { app: APP_NAME }),
+      // D-087 §5: the ongoing notification says which of the two is running.
+      notificationTitle: walking ? t('notify.walk.title') : t('notify.recording.title'),
+      notificationBody: walking
+        ? t('notify.walk.body', { app: APP_NAME })
+        : t('notify.recording.body', { app: APP_NAME }),
       notificationColor: '#1B2A33',
       killServiceOnDestroy: false,
     },

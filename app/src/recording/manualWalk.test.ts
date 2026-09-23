@@ -60,11 +60,13 @@ test('an unreadable stored value means no walk', () => {
 
 test('starting a walk never restarts a recorder that is already running', () => {
   // Restarting would close the open trip and open a new one, cutting one walk
-  // into two rows nobody can rejoin (D-010).
-  assert.equal(actionForStartWalk(state({ recorderRunning: true })), 'leave-alone');
+  // into two rows nobody can rejoin (D-010). ⚠ D-087: it RETUNES it instead —
+  // options replaced in place — because a walk must change the recorder. Until
+  // 2026-09-23 this was 'leave-alone' and the button did nothing (review P1-2).
+  assert.equal(actionForStartWalk(state({ recorderRunning: true })), 'retune');
   assert.equal(
     actionForStartWalk(state({ recorderRunning: true, backgroundRecording: true })),
-    'leave-alone'
+    'retune'
   );
   assert.equal(actionForStartWalk(state()), 'start');
 });
@@ -77,11 +79,16 @@ test('stopping a walk stops the recorder only when the button owns it', () => {
   );
 
   // ⚠ With it, the recorder belongs to D-002. Ending the walk must not turn off
-  // the thing that fills the map in — the button never claimed to touch it.
+  // the thing that fills the map in; it retunes it back to the user's own tier
+  // (D-087 §2).
   assert.equal(
     actionForStopWalk(
       state({ startedByUser: true, recorderRunning: true, backgroundRecording: true })
     ),
+    'retune'
+  );
+  assert.equal(
+    actionForStopWalk(state({ startedByUser: true, backgroundRecording: true })),
     'leave-alone'
   );
 

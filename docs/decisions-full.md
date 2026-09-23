@@ -4664,8 +4664,16 @@ in Settings. The button can be the main control because pressing it has a conseq
    is recorded while paused, and the pause ends on its own.
 7. **Stopping a walk shows a short summary.** Here WalkNYC is not followed (it shows nothing).
 
-**Still open:** the pause's lengths and where it lives; what the summary holds (distance and time
-are measured; places passed are only as good as the geofences). And a user without background
+**Built 2026-09-23 (T-198), with three choices marked ⚠ Provisional for the project lead:**
+- **The noun.** *Passeio*, as confirmed. English and German say **outing / Ausflug**, not *walk /
+  Spaziergang*. Those two are on foot only, and `strings.ts` records why that failed before
+  (2026-08-28): most of the places are driven to. *Passeio* covers both.
+- **The pause** is one hour, from Settings → *Registo automático*, repeatable, and cancellable
+  from the map's notice. *"Not the next hour"* was the project lead's own example.
+- **The summary** shows duration, the recorded distance (or *"distância não medida"*), and the
+  stamps collected during the outing, by name, in a plain alert.
+
+**Still open:** anything beyond those three. And a user without background
 permission gets the same button, which is their only way to record, as D-008 intends.
 
 **Rejected.** The button as it is (a flag with no consequence). Hiding the button when automatic

@@ -52,6 +52,7 @@ import { designFor, TILT_FIT } from '../passport/stampArt';
 import { rimFor } from '../passport/stampRim';
 import { tierFor } from '../passport/stampTier';
 import { n, t } from '../i18n';
+import type { PrimaryControl } from '../recording/recorderControls';
 import {
   colors,
   fontSize,
@@ -91,6 +92,9 @@ const WALK_MARK_SIZE = 22;
  */
 const WALK_INK = '#FFFFFF';
 
+/** The × is small on purpose; its target is not (D-015). */
+const NOTICE_DISMISS_HIT_SLOP = { top: 12, bottom: 12, left: 12, right: 12 };
+
 export type PrimaryOverlayProps = {
   progress: TripProgress;
   /** The stamp the passport button shows — `buttonStamp()` decides it. */
@@ -121,6 +125,16 @@ export type PrimaryOverlayProps = {
    * is the argument; the project lead's instruction was explicit.
    */
   isWalking: boolean;
+  /**
+   * What the main button does (D-087 §3). `grant-location` takes it over when
+   * the app has no location at all; otherwise it starts or ends an outing.
+   */
+  control: PrimaryControl;
+  /**
+   * The one thing to say about automatic recording, or null (D-087 §4). Only
+   * ever about something wrong, or a pause the user chose.
+   */
+  notice: MapNotice | null;
   /** Offered only when the map has actually wandered off the user. */
   showRecentre: boolean;
   onRecentre: () => void;
@@ -143,11 +157,22 @@ export type PrimaryOverlayProps = {
   onToggleRecording: () => void;
 };
 
+/** A notice, already in words: `NativeMapScreen` decides it, this draws it. */
+export type MapNotice = {
+  text: string;
+  actionLabel: string;
+  onAction: () => void;
+  /** Absent for a notice that may not be dismissed (T-174). */
+  onDismiss?: () => void;
+};
+
 export default function PrimaryOverlay({
   progress,
   passportStamp,
   mapStyle,
   isWalking,
+  control,
+  notice,
   showRecentre,
   onRecentre,
   bottomSlot,
@@ -197,6 +222,48 @@ export default function PrimaryOverlay({
             handful of toggles (design brief §3.2, CONTEXT §6.5). */}
         <SettingsMark size={SETTINGS_MARK_SIZE} color={chrome.content} />
       </Pressable>
+
+      {/* D-087 §4 — automatic recording speaks only when something is wrong.
+          Beside the settings control, because it is about a setting, and
+          nowhere near the two primary controls at the bottom. The words carry
+          the state (D-015); the whole card is the action. */}
+      {notice === null ? null : (
+        <View
+          style={[
+            styles.notice,
+            {
+              backgroundColor: chrome.surface,
+              elevation: chrome.elevation,
+              shadowColor: '#000000',
+              shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+              shadowRadius: chrome.elevation,
+              shadowOffset: { width: 0, height: 1 },
+            },
+            chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+          ]}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${notice.text}. ${notice.actionLabel}`}
+            onPress={notice.onAction}
+            style={({ pressed }) => [styles.noticeBody, pressed && styles.pressed]}
+          >
+            <Text style={[styles.noticeText, { color: chrome.content }]}>{notice.text}</Text>
+            <Text style={[styles.noticeAction, { color: chrome.link }]}>{notice.actionLabel}</Text>
+          </Pressable>
+          {notice.onDismiss === undefined ? null : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('notice.a11y.dismiss')}
+              onPress={notice.onDismiss}
+              hitSlop={NOTICE_DISMISS_HIT_SLOP}
+              style={({ pressed }) => [styles.noticeDismiss, pressed && styles.pressed]}
+            >
+              <Text style={[styles.noticeDismissText, { color: chrome.content }]}>×</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
 
       {/* The two bottom controls stack rather than share a row.
           Measured, not assumed: side by side they overlapped by 38px on a
@@ -299,12 +366,23 @@ export default function PrimaryOverlay({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            isWalking ? t('map.a11y.stopRecording') : t('map.a11y.startRecording')
+            control === 'grant-location'
+              ? t('map.a11y.grantLocation')
+              : isWalking
+                ? t('map.a11y.stopRecording')
+                : t('map.a11y.startRecording')
           }
           onPress={onToggleRecording}
           style={({ pressed }) => [
             styles.walk,
-            { backgroundColor: isWalking ? colors.bad : colors.good },
+            {
+              backgroundColor:
+                control === 'grant-location'
+                  ? colors.action
+                  : isWalking
+                    ? colors.bad
+                    : colors.good,
+            },
             pressed && styles.pressed,
           ]}
         >
@@ -314,7 +392,11 @@ export default function PrimaryOverlay({
               the mechanism; "walk" names the thing the user came to do.
               Labelled with words, never a glyph alone (D-015). */}
           <Text style={styles.walkText}>
-            {isWalking ? t('map.stopWalk') : t('map.startWalk')}
+            {control === 'grant-location'
+              ? t('map.grantLocation')
+              : isWalking
+                ? t('map.stopWalk')
+                : t('map.startWalk')}
           </Text>
         </Pressable>
       </View>
@@ -341,6 +423,39 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     // ⚠ No `backgroundColor` here: it comes from `mapChrome` at render time,
     // because it depends on which map is underneath.
+  },
+  notice: {
+    position: 'absolute',
+    top: spacing.xl + spacing.md,
+    left: spacing.md + MIN_TAP_TARGET + spacing.sm,
+    right: spacing.md,
+    minHeight: MIN_TAP_TARGET,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.card,
+    paddingLeft: spacing.md,
+  },
+  noticeBody: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    gap: 2,
+  },
+  noticeText: {
+    fontSize: fontSize.body,
+    fontWeight: '600',
+  },
+  noticeAction: {
+    fontSize: fontSize.body,
+  },
+  noticeDismiss: {
+    width: 36,
+    height: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noticeDismissText: {
+    fontSize: fontSize.title,
+    lineHeight: fontSize.title + 2,
   },
   bottom: {
     position: 'absolute',

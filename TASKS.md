@@ -167,7 +167,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ✅ **Fixed in code 2026-09-23:** `recordingAdmission.tripHasLapsed` (pure, same threshold and `>=`
       as `detectTripEnd`), called by `recordingSink.closeLapsedTrip` on **both** write paths before a
       trip is chosen. 6 tests; the guard was checked by removing the call. ⚠ **Not yet on the device.**
-      Installing it will end trip 30 dated 28 Aug and send its reveal.
+      ⚠ **Corrected the same day:** installing it will **not** end trip 30. The gap is already
+      inside that trip and its latest fix is recent, so the rule has nothing to act on. It prevents
+      the next gap, not the last one. Seeing it fire on a phone needs a real ≥3-day silence;
+      moving the phone's clock is a system setting and not ours to change. Until then the proof is
+      the tests built on trip 30's real shape.
       — *Original note:*
       - `recordingSink` appends to any open trip (`getOrCreateActiveTrip`).
       - `checkTripEnd` measures silence from the trip's latest fix.

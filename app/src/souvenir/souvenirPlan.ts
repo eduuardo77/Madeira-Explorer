@@ -67,7 +67,7 @@ export async function getSouvenirComposition(): Promise<Composition> {
       'export',
       composition.renderable
         ? `souvenir: ${composition.durationMs} ms, ${composition.reason}`
-        : `souvenir declined: ${composition.reason}`
+        : `souvenir declined: ${composition.reason}` // i18n-exempt: the second branch of a diary log line
     );
 
     return composition;

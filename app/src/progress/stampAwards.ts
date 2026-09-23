@@ -20,6 +20,7 @@
  */
 
 import type { Place } from '../content/contentPack';
+import type { WalkedEvidence } from './levadaCoverage';
 import { getContentPack } from '../content/poiCatalogue';
 import { getLevadaCourse } from '../content/levadaCourses';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
@@ -50,7 +51,11 @@ export type AwardPassResult = {
    * sees, which is a state this project has been bitten by twice (T-145,
    * T-146); it is called out in TASKS rather than left to be discovered.
    */
-  awaitingConfirmation: { placeId: string; evidence: string }[];
+  /**
+   * `evidence` is the diary's sentence, kept for the award row if the user
+   * confirms; `walked` is the same measurement as numbers, for the question.
+   */
+  awaitingConfirmation: { placeId: string; evidence: string; walked: WalkedEvidence | null }[];
 };
 
 const EMPTY: AwardPassResult = {
@@ -244,7 +249,11 @@ async function creditLevadasByCoverage(
       // The evidence travels with the id: the screen that asks must not
       // recompute D-065's arithmetic, because a second implementation is free
       // to disagree with the first.
-      result.awaitingConfirmation.push({ placeId: place.id, evidence: verdict.reason });
+      result.awaitingConfirmation.push({
+        placeId: place.id,
+        evidence: verdict.reason,
+        walked: verdict.walked,
+      });
       await recordingEventDao.log(
         'stamp',
         `${place.name}: ${verdict.reason} — not awarded, worth asking (T-149)`

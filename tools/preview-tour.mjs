@@ -98,6 +98,8 @@ if (!film.renderable) {
 const card = renderShareCardSvg(
   buildShareCard({
     destination: 'Madeira',
+    // The card follows the sender's phone (T-190); the preview draws English.
+    language: 'en',
     dateRange: '12–19 August 2026',
     collected: 23,
     total: 60,

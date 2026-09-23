@@ -29,13 +29,35 @@ import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
-import { getExportableTrace } from './exportTrace';
+import { deviceLanguage, t } from '../i18n';
+import { getExportableTrace, type ExportRefusal } from './exportTrace';
 import { buildShareCard, formatDateRange, type CardPoint, type ShareCard } from './shareCard';
+
+/**
+ * Why a share did not happen, for the screen to translate (T-190).
+ * `unavailable` is a phone with no share sheet.
+ */
+export type ShareRefusal = ExportRefusal | 'unavailable';
+
+/** `share.refusal.*`, one per code. The screens say this; the diary says `reason`. */
+export const REFUSAL_KEYS = {
+  nothing: 'share.refusal.nothing',
+  withheld: 'share.refusal.withheld',
+  unavailable: 'share.refusal.unavailable',
+  failed: 'share.refusal.failed',
+} as const satisfies Record<ShareRefusal, string>;
 
 export type ShareCardResult =
   | { ok: true; card: ShareCard }
-  /** Refused, with a sentence the screen can show as it stands. */
-  | { ok: false; reason: string };
+  /**
+   * Refused. `refusal` is what the screen shows, translated; `reason` is the
+   * diary's English and is **never** shown (`i18nCoverage.test.ts`).
+   */
+  | { ok: false; refusal: ShareRefusal; reason: string };
+
+export type ShareSendResult =
+  | { ok: true }
+  | { ok: false; refusal: ShareRefusal; reason: string };
 
 /**
  * Everything the card needs, from the database.
@@ -52,12 +74,12 @@ export async function buildCardForTrip(
     if (!trace.safeToShare) {
       // ⚠ The refusal is the feature. ARCHITECTURE §10 forbids showing an
       // export the app cannot vouch for.
-      return { ok: false, reason: trace.reason };
+      return { ok: false, refusal: trace.refusal ?? 'failed', reason: trace.reason };
     }
 
     const trip = (await tripDao.getActiveTrip()) ?? (await tripDao.getMostRecentTrip());
     if (trip === null) {
-      return { ok: false, reason: 'no trip to share yet' };
+      return { ok: false, refusal: 'nothing', reason: 'no trip to share yet' };
     }
 
     const progress = await getCurrentProgress();
@@ -79,17 +101,18 @@ export async function buildCardForTrip(
     return {
       ok: true,
       card: buildShareCard({
-        destination: pack.destination ?? 'Your trip',
+        destination: pack.destination ?? t('share.fallbackTitle'),
         dateRange: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs),
         collected: progress.collected,
         total: progress.total,
         strokes,
         stampNames: names,
+        language: deviceLanguage(),
       }),
     };
   } catch (error) {
     await recordingEventDao.logError('share card', error);
-    return { ok: false, reason: 'the trip could not be read' };
+    return { ok: false, refusal: 'failed', reason: 'the trip could not be read' };
   }
 }
 
@@ -103,27 +126,27 @@ export async function buildCardForTrip(
  */
 export async function shareCardImage(
   viewRef: React.RefObject<View | null>
-): Promise<{ ok: boolean; reason?: string }> {
+): Promise<ShareSendResult> {
   try {
     if (viewRef.current === null) {
-      return { ok: false, reason: 'the card is not on screen yet' };
+      return { ok: false, refusal: 'failed', reason: 'the card is not on screen yet' };
     }
 
     const uri = await captureRef(viewRef, { format: 'png', quality: 1, result: 'tmpfile' });
 
     if (!(await Sharing.isAvailableAsync())) {
       // A device with no share sheet at all. Rare, and not worth a crash.
-      return { ok: false, reason: 'this device cannot share files' };
+      return { ok: false, refusal: 'unavailable', reason: 'this device cannot share files' };
     }
 
     await Sharing.shareAsync(uri, {
       mimeType: 'image/png',
-      dialogTitle: 'Share your trip',
+      dialogTitle: t('passport.share.dialogTitle'),
       UTI: 'public.png',
     });
     return { ok: true };
   } catch (error) {
     await recordingEventDao.logError('share card image', error);
-    return { ok: false, reason: 'the image could not be shared' };
+    return { ok: false, refusal: 'failed', reason: 'the image could not be shared' };
   }
 }

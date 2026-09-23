@@ -217,3 +217,195 @@ test('the exemption list is documented and still real', () => {
     );
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// T-190 — THE BLIND SPOT, CLOSED (2026-09-23)
+//
+// Every test above reads `.tsx` files, and only text written *directly* into
+// JSX. The review of 2026-09-22 found English on a Portuguese phone in exactly
+// the places that left out: the place card's category and distance were
+// constants in `placeCard.ts`, the share card's "places collected" was in
+// `shareCard.ts`, and "· Collected" sat inside `{}`. Checking the review found
+// more of the same: the passport's "Did you walk the …?" prompt, the share
+// sheet's title, the walk-report description, and every failure alert, which
+// showed the diary's English `reason` under a translated title.
+//
+// So this reads every string literal in every module, `.ts` and `.tsx`, inside
+// `{}` and template literals too. Two kinds of English are allowed, and each
+// has a rule rather than an exemption:
+//
+//   - **The diary.** Text passed to a logger or an Error, or stored as a
+//     `reason`, is for the recording diary, the debug screen and the award
+//     rows. It is English on purpose: it is read by whoever fixes the app.
+//   - **A `reason` is never shown.** The second test below fails if a screen
+//     renders one, which is what makes the first rule safe.
+//
+// ⚠ ITS OWN BLIND SPOT: a single English word. `'Viewpoint'` is indistinguishable
+// from an identifier like `'walking'`, so one word alone is not flagged — the
+// place card's category names would have passed as single words, and were
+// caught only because *"Levada walk"* is two. Verified 2026-09-23 by planting
+// every leak from the review in a probe file: all but that class failed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Two words or more, or a word after a `·` separator: prose, not an identifier. */
+const PROSE = /[A-Za-z]{2,}(?:[ ,]+[A-Za-z]{2,})+|^\s*·\s*[A-Za-z]{2,}/;
+
+/**
+ * A literal directly after one of these is diary, not something a user reads:
+ * a logger (with or without its `kind` argument first), an Error, an assertion,
+ * a `reason`, or a verdict helper named in capitals — `CONTINUES`, `SILENT`,
+ * `NOT_AWARDED` — which is this codebase's convention for "a decision, and the
+ * diary line that explains it".
+ */
+const DIARY_CONTEXT =
+  /(?:\blog|\blogError|console\.\w+|Error|\bassert\w*|\b[A-Z][A-Z_]{2,})\(\s*(?:'[a-z_ ]+',\s*)?$|\breason\s*[:=]\s*$|\breason\s*:\s*\S*\?\s*$/;
+
+/**
+ * A line may say why its literal is not screen text: `// i18n-exempt: <why>`.
+ * For the one-off — an SVG attribute, a stored reason built by a helper. The
+ * *why* is required: the last test in this file fails a bare marker.
+ */
+const LINE_EXEMPT = /\/\/ i18n-exempt: (.*)$/;
+
+/** Directories whose strings are not screen text, with the reason. */
+const NOT_SCREEN_TEXT: Record<string, string> = {
+  'i18n/': 'the catalogue itself — this is where the English is supposed to be',
+  'storage/': 'SQL, migrations and diary lines; nothing here is rendered',
+  'legal/':
+    'the privacy policy is one whole document per language, checked by privacyPolicy.test.ts',
+};
+
+/**
+ * Modules whose English is diary-only but not written as a `reason`, with why.
+ *
+ * ⚠ The same bar as `EXEMPT`: *"no user can ever read this"*. A module that
+ * builds anything a screen shows does not belong here, however many diary
+ * lines it also writes — convert its diary lines to `reason` instead.
+ */
+const DIARY_ONLY: Record<string, string> = {
+  'content/contentPack.ts':
+    'validation messages for a malformed content pack; validate-content.mjs refuses to ship one',
+  'content/regionPack.ts':
+    'validation messages for a malformed region pack; build-regions.mjs refuses to ship one',
+  'map/mapAssets.ts': 'font family names and bundled asset paths, not prose',
+  'recording/geofenceManager.ts': 'geofence diary lines, read on the debug screen only',
+  'recording/tripRecording.ts': 'recorder diary lines, read on the debug screen only',
+  'recording/recorderSilence.ts':
+    'the silence verdict detail, whose only reader is the debug screen (recorderHealth)',
+  'recording/movementPolicy.ts': 'sampling decisions, written to the diary only',
+  'recording/locationProbe.ts': 'the location probe behind a debug-screen button',
+  'recording/ExpoLocationProvider.ts': 'recorder warnings, written to the diary only',
+  'recording/recordingSink.ts': 'batch diary lines, written to the diary only',
+  'progress/stampRules.ts':
+    'why a stamp was or was not awarded, stored on the award row; never rendered',
+};
+
+function allModules(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      out.push(...allModules(full));
+    } else if (/\.tsx?$/.test(entry) && !entry.includes('.test.')) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+/** Comments out, newlines kept, so a match can still name its line. */
+function withoutComments(source: string): string {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:'"`\\])\/\/.*$/gm, (_whole, before: string) => before);
+}
+
+test('⚠ T-190 — no English prose is written into any module a user can read', () => {
+  const offenders: string[] = [];
+
+  for (const file of allModules(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    if (
+      relative in EXEMPT ||
+      relative in DIARY_ONLY ||
+      Object.keys(NOT_SCREEN_TEXT).some((dir) => relative.startsWith(dir))
+    ) {
+      continue;
+    }
+    const original = readFileSync(file, 'utf8').split('\n');
+    const source = withoutComments(original.join('\n'));
+
+    for (const match of source.matchAll(
+      /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g
+    )) {
+      const literal = match[0].slice(1, -1).replace(/\$\{[^}]*\}/g, ' ');
+      if (!PROSE.test(literal) || literal.trimStart().startsWith('<')) {
+        continue;
+      }
+      const before = source.slice(Math.max(0, match.index - 60), match.index);
+      if (DIARY_CONTEXT.test(before)) {
+        continue;
+      }
+      const line = source.slice(0, match.index).split('\n').length;
+      if (LINE_EXEMPT.test(original[line - 1])) {
+        continue;
+      }
+      offenders.push(`${relative}:${line}: ${match[0].slice(0, 90)}`);
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `English prose outside i18n/strings.ts. If a user can read it, it needs a key\n` +
+      `in all three languages. If it is diary, pass it to a logger or store it as\n` +
+      `a \`reason\` — and never render a reason.\n\n` +
+      offenders.join('\n')
+  );
+});
+
+test('⚠ T-190 — no screen shows a diary `reason`', () => {
+  // Until 2026-09-23 the share and walk-donation alerts showed `built.reason`
+  // under a translated title — "the trip could not be read" on a Portuguese
+  // phone. A refusal now carries a code the screen translates.
+  const offenders: string[] = [];
+  for (const file of screens(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    if (relative in EXEMPT) {
+      continue;
+    }
+    const source = withoutComments(readFileSync(file, 'utf8'));
+    source.split('\n').forEach((text, index) => {
+      if (/\.reason\b/.test(text)) {
+        offenders.push(`${relative}:${index + 1}: ${text.trim()}`);
+      }
+    });
+  }
+  assert.deepEqual(offenders, [], offenders.join('\n'));
+});
+
+test('the diary-only list is documented and still real', () => {
+  for (const [relative, reason] of Object.entries(DIARY_ONLY)) {
+    assert.ok(reason.length > 20, `${relative} is diary-only without a real reason given`);
+    assert.doesNotThrow(
+      () => statSync(path.join(srcRoot, relative)),
+      `${relative} is diary-only but no longer exists`
+    );
+  }
+});
+
+test('every i18n-exempt line says why', () => {
+  const bare: string[] = [];
+  for (const file of allModules(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    readFileSync(file, 'utf8')
+      .split('\n')
+      .forEach((text, index) => {
+        const marker = LINE_EXEMPT.exec(text);
+        if (marker !== null && marker[1].trim().length < 15) {
+          bare.push(`${relative}:${index + 1}`);
+        }
+      });
+  }
+  assert.deepEqual(bare, [], `An exemption without a reason is a habit, not a rule.\n${bare.join('\n')}`);
+});

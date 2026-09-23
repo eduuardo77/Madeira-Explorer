@@ -39,6 +39,9 @@
 
 import type { EndDetectionMethod } from '../storage/types.ts';
 import type { Visit } from './stampRules.ts';
+import type { Language } from '../i18n/languages.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
 
 /**
  * ⚠ NONE OF THESE IS TUNED. T-131 retunes against real trips; every ending is
@@ -234,9 +237,9 @@ export function detectTripEnd(input: TripEndInput): TripEndDecision {
  * is the copy on the moment D-012 calls the best in the product, and D-013
  * gives it one job — get somebody in a departure lounge to open the app.
  */
-export function revealTitle(destination: string | null): string {
+export function revealTitle(destination: string | null, language: Language): string {
   if (destination === null || destination.trim() === '') {
-    return 'Your map is ready';
+    return translate(STRINGS['reveal.titleGeneric'], language);
   }
-  return `Your ${destination.trim()} map is ready`;
+  return translate(STRINGS['reveal.title'], language, { destination: destination.trim() });
 }

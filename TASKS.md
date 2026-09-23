@@ -105,7 +105,15 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       técnicos* link must not exist in a store build. ⚠ **Not `__DEV__` alone**: that would also
       strip it from the field build (`-PproaFieldBuild`, `docs/dev-build.md`), which is how the
       P30 gets inspected. Gate it on a build flag, and add a test that finds any ungated route.
-- [ ] **T-190** **Close the `{}` blind spot in `i18nCoverage.test.ts`, then fix every English
+- [~] **T-190** ✅ **Code done 2026-09-23; ⚠ not yet seen on the P30.** The new gate reads every
+      string literal in every `.ts`/`.tsx`, and a second test forbids any screen from rendering a
+      diary `reason`. **It found more than the review did:** the stamp confirmation prompt
+      (English, *and* it repeated its own last clause), the share sheet's title, every share or
+      donate failure alert (it showed the English `reason`), the walk-report description, *"and N
+      more"* on the share card, and **the reveal notification's title and body** — D-012's best
+      moment, English on every phone. Distances now use a decimal comma in pt/de. ⚠ Single English
+      words are the gate's own blind spot (documented in the test). 717 tests.
+      — *Original task:* **Close the `{}` blind spot in `i18nCoverage.test.ts`, then fix every English
       leak** — P1-4, P1-5. The leaks: `placeCard.ts` `CATEGORY_LABELS` / `STRAIGHT_LINE_NOTE`,
       `PlaceCardView.tsx` *"· Collected"* / *"away,"*, and `shareCard.ts` *"places collected"*. Pure
       modules take a `Language` parameter. Do the gate first and watch it fail on these leaks.

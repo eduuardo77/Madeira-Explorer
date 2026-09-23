@@ -41,6 +41,9 @@
 
 /** A point of the trace, in [lon, lat]. */
 import { APP_NAME } from '../brand.ts';
+import type { Language } from '../i18n/languages.ts';
+import { PLURALS, STRINGS } from '../i18n/strings.ts';
+import { plural, translate } from '../i18n/translate.ts';
 
 export type CardPoint = [lon: number, lat: number];
 
@@ -55,6 +58,11 @@ export type ShareCardInput = {
   strokes: readonly (readonly CardPoint[])[];
   /** Up to `MAX_NAMED_STAMPS` place names to list; the rest become a count. */
   stampNames: readonly string[];
+  /**
+   * The card is an image other people read, so its words follow the sender's
+   * phone (T-190). Passed in: this module is pure.
+   */
+  language: Language;
 };
 
 /** What the renderers draw. Card coordinates, origin top-left. */
@@ -131,6 +139,7 @@ export function approximateTextWidth(text: string, size: number): number {
 export function wrapStampNames(
   names: readonly string[],
   maxWidth: number,
+  language: Language,
   size: number = STAMP_TEXT_SIZE
 ): string[] {
   if (names.length === 0) {
@@ -139,7 +148,11 @@ export function wrapStampNames(
 
   const shown = names.slice(0, MAX_NAMED_STAMPS);
   const rest = names.length - shown.length;
-  const parts = rest > 0 ? [...shown, `and ${rest} more`] : [...shown];
+  // ⚠ T-190: English on every phone until 2026-09-23.
+  const parts =
+    rest > 0
+      ? [...shown, translate(STRINGS['share.andMore'], language, { count: rest })]
+      : [...shown];
 
   const lines: string[] = [];
   let current = '';
@@ -257,7 +270,8 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
     kind: 'text',
     x: SIDE_MARGIN,
     y: 540,
-    text: input.collected === 1 ? 'place collected' : 'places collected',
+    // ⚠ T-190: English on every phone until 2026-09-23 (review P1-5).
+    text: plural(PLURALS['passport.collected'], input.collected, input.language),
     size: 40,
     weight: 'regular',
     colour: MUTED,
@@ -271,7 +285,7 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
   // The places themselves, under the trace. Wrapped rather than shrunk, and
   // laid out upwards from a fixed baseline so one line and three lines both
   // sit the same distance above the app's name.
-  const lines = wrapStampNames(input.stampNames, CARD_WIDTH - SIDE_MARGIN * 2);
+  const lines = wrapStampNames(input.stampNames, CARD_WIDTH - SIDE_MARGIN * 2, input.language);
   const lineHeight = Math.round(STAMP_TEXT_SIZE * 1.45);
   lines.forEach((line, index) => {
     elements.push({
@@ -384,7 +398,7 @@ export function renderShareCardSvg(card: ShareCard): string {
       parts.push(
         `<text x="${element.x}" y="${element.y}" fill="${element.colour}" ` +
           `font-size="${element.size}" font-weight="${element.weight === 'bold' ? '700' : '400'}" ` +
-          `font-family="system-ui, -apple-system, Roboto, sans-serif" ` +
+          `font-family="system-ui, -apple-system, Roboto, sans-serif" ` + // i18n-exempt: an SVG attribute
           `text-anchor="${element.anchor}">${escapeXml(element.text)}</text>`
       );
     }

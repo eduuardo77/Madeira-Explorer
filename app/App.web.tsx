@@ -26,6 +26,7 @@
  */
 
 import { useState } from 'react';
+import { deviceLanguage } from './src/i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CATEGORIES } from './src/content/contentPack';
 import type { StampAward } from './src/storage/types';
@@ -237,6 +238,8 @@ function makeCard(collected: boolean, distance: boolean) {
       ? { ts: now - 120_000, lat: 32.65, lon: -16.91, accuracy_m: 15 }
       : null,
     nowMs: now,
+    // The workbench follows the browser's language, as the app follows the phone's.
+    language: deviceLanguage(),
   });
 }
 

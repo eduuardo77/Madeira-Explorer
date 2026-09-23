@@ -40,6 +40,12 @@ const s = (en: string, pt: string, de: string): Phrase => ({ en, pt, de });
 export const STRINGS = {
   // ── Onboarding (T-114, D-041) ───────────────────────────────────────────
   'onboarding.welcome.title': s('Welcome', 'Bem-vindo', 'Willkommen'),
+  // ⚠ Never rendered until T-054 measures the figure (D-041); translated ahead of it.
+  'onboarding.battery': s(
+    'Recording uses about {percent}% of your battery per day.',
+    'O registo gasta cerca de {percent}% da bateria por dia.',
+    'Die Aufzeichnung verbraucht etwa {percent} % des Akkus pro Tag.'
+  ),
   'onboarding.welcome.body1': s(
     'This app quietly notes the places you visit around Madeira, and turns them into a map of your trip.',
     'Esta aplicação regista discretamente os lugares por onde passa na Madeira e transforma-os num mapa da sua viagem.',
@@ -306,6 +312,50 @@ export const STRINGS = {
     'Noch nichts zum Teilen'
   ),
   'passport.share.failedTitle': s('Could not share', 'Não foi possível partilhar', 'Teilen nicht möglich'),
+  // T-190: the title of the phone's own share sheet. It was English on every phone.
+  'passport.share.dialogTitle': s('Share your trip', 'Partilhar a sua viagem', 'Ihre Reise teilen'),
+  // The card's heading when the content pack names no destination.
+  'share.fallbackTitle': s('Your trip', 'A sua viagem', 'Ihre Reise'),
+  // T-190: after the named stamps on the share card. Was English on every phone.
+  'share.andMore': s('and {count} more', 'e mais {count}', 'und {count} weitere'),
+  // ⚠ T-190: the reveal (T-102) — the notification D-012 calls the best moment
+  // in the product — was English on every phone until 2026-09-23.
+  // `{destination}` comes from the content pack (D-017). Portuguese puts it
+  // first to avoid choosing an article for a name this file cannot know.
+  'reveal.title': s(
+    'Your {destination} map is ready',
+    '{destination}: o seu mapa está pronto',
+    'Ihre {destination}-Karte ist fertig'
+  ),
+  'reveal.titleGeneric': s('Your map is ready', 'O seu mapa está pronto', 'Ihre Karte ist fertig'),
+  'reveal.bodyNoPlaces': s(
+    'Open the app to see the map of everywhere you went.',
+    'Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+    'Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
+  ),
+  // ⚠ T-190: why a share or a send was refused, as a person reads it. These
+  // replace the diary sentences (`reason`) the screens used to show in English;
+  // the diary keeps those. One key per refusal code in `exportTrace.ts`.
+  'share.refusal.nothing': s(
+    'Nothing has been recorded yet. Your trip appears here once you have been out with the app.',
+    'Ainda não foi registado nada. A sua viagem aparece aqui depois de sair com a aplicação.',
+    'Es wurde noch nichts aufgezeichnet. Ihre Reise erscheint hier, sobald Sie mit der App unterwegs waren.'
+  ),
+  'share.refusal.withheld': s(
+    'This trip cannot be shared yet: the app could not work out where you spent the night, so it cannot hide it.',
+    'Esta viagem ainda não pode ser partilhada: a aplicação não conseguiu perceber onde passou a noite, por isso não o consegue esconder.',
+    'Diese Reise kann noch nicht geteilt werden: Die App konnte nicht erkennen, wo Sie übernachtet haben, und kann es daher nicht ausblenden.'
+  ),
+  'share.refusal.unavailable': s(
+    'This phone has no way to share files.',
+    'Este telemóvel não tem forma de partilhar ficheiros.',
+    'Dieses Telefon kann keine Dateien teilen.'
+  ),
+  'share.refusal.failed': s(
+    'Something went wrong. Please try again.',
+    'Algo correu mal. Tente novamente.',
+    'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.'
+  ),
   'passport.category.viewpoint': s('Viewpoints', 'Miradouros', 'Aussichtspunkte'),
   'passport.category.levada': s('Levadas', 'Levadas', 'Levadas'),
   'passport.category.village': s('Villages', 'Aldeias', 'Dörfer'),
@@ -389,7 +439,38 @@ export const STRINGS = {
     '{name}, noch nicht gesammelt'
   ),
 
+  // T-190: the card's own words. Singular, because the card is about one place;
+  // the passport's category names are plural headings.
+  'placeCard.category.viewpoint': s('Viewpoint', 'Miradouro', 'Aussichtspunkt'),
+  'placeCard.category.levada': s('Levada walk', 'Levada', 'Levada-Wanderung'),
+  'placeCard.category.village': s('Village', 'Aldeia', 'Dorf'),
+  'placeCard.category.beach': s('Beach', 'Praia', 'Strand'),
+  'placeCard.category.landmark': s('Landmark', 'Monumento', 'Sehenswürdigkeit'),
+  'placeCard.collected': s('{category} · Collected', '{category} · Visitado', '{category} · Gesammelt'),
+  // ⚠ One sentence, not a number and a note: the qualification has to travel
+  // with the number in every language (placeCard.ts rule 2).
+  'placeCard.distance': s(
+    '{distance} away, in a straight line',
+    'A {distance}, em linha reta',
+    '{distance} entfernt, Luftlinie'
+  ),
   'placeCard.showOnMap': s('Show on map', 'Ver no mapa', 'Auf der Karte zeigen'),
+  // T-190: the passport's "did you walk it?" question (T-149). It was English on
+  // every phone until 2026-09-23. `{name}` is always a levada: only a course can
+  // be half-walked.
+  'confirm.question': s(
+    'Did you walk the {name}?',
+    'Percorreu a {name}?',
+    'Sind Sie die {name} gegangen?'
+  ),
+  'confirm.detail': s(
+    'The trace shows {covered} of {course} ({percent}%) — enough to ask, not enough for the app to be sure.',
+    'O registo mostra {covered} de {course} ({percent}%) — o suficiente para perguntar, não para a aplicação ter a certeza.',
+    'Die Aufzeichnung zeigt {covered} von {course} ({percent} %) — genug, um zu fragen, aber nicht genug, damit die App sicher ist.'
+  ),
+  // ⚠ Not "Yes": the button says what it does (D-015).
+  'confirm.yes': s('I walked it', 'Fiz este percurso', 'Bin ich gegangen'),
+  'confirm.no': s('Not this time', 'Desta vez não', 'Diesmal nicht'),
   'placeCard.a11y.show': s(
     'Show {name} on the map',
     'Ver {name} no mapa',
@@ -695,6 +776,7 @@ export const STRINGS = {
   'donate.notNow': s('Not now', 'Agora não', 'Jetzt nicht'),
   'donate.send': s('Send', 'Enviar', 'Senden'),
   'donate.failedTitle': s('Could not send', 'Não foi possível enviar', 'Senden nicht möglich'),
+  'donate.dialogTitle': s('Send this walk', 'Enviar este passeio', 'Diesen Spaziergang senden'),
 
 } as const satisfies Record<string, Phrase>;
 
@@ -705,6 +787,32 @@ export const PLURALS = {
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),
     other: s('places collected', 'lugares visitados', 'Orte gesammelt'),
+  },
+  'reveal.body': {
+    one: s(
+      'You collected {count} place. Open the app to see the map of everywhere you went.',
+      'Visitou {count} lugar. Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+      'Sie haben {count} Ort gesammelt. Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
+    ),
+    other: s(
+      'You collected {count} places. Open the app to see the map of everywhere you went.',
+      'Visitou {count} lugares. Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+      'Sie haben {count} Orte gesammelt. Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
+    ),
+  },
+  // T-190: what a donated walk contains, shown before it is sent. Was English on
+  // every phone. `{count}` is the places the app judged.
+  'donate.description': {
+    one: s(
+      'This sends {points} location points from {minutes} minutes of your trip, and what the app decided about {count} place. Where you slept has been removed. It contains no name, no account and nothing that identifies you or your phone. You choose where it goes.',
+      'Isto envia {points} pontos de localização de {minutes} minutos da sua viagem, e o que a aplicação decidiu sobre {count} lugar. O sítio onde dormiu foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é sua.',
+      'Gesendet werden {points} Standortpunkte aus {minutes} Minuten Ihrer Reise und was die App über {count} Ort entschieden hat. Wo Sie übernachtet haben, wurde entfernt. Die Datei enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Sie entscheiden, wohin sie geht.'
+    ),
+    other: s(
+      'This sends {points} location points from {minutes} minutes of your trip, and what the app decided about {count} places. Where you slept has been removed. It contains no name, no account and nothing that identifies you or your phone. You choose where it goes.',
+      'Isto envia {points} pontos de localização de {minutes} minutos da sua viagem, e o que a aplicação decidiu sobre {count} lugares. O sítio onde dormiu foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é sua.',
+      'Gesendet werden {points} Standortpunkte aus {minutes} Minuten Ihrer Reise und was die App über {count} Orte entschieden hat. Wo Sie übernachtet haben, wurde entfernt. Die Datei enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Sie entscheiden, wohin sie geht.'
+    ),
   },
   'passport.a11y.openWithCount': {
     one: s(

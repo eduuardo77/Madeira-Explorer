@@ -7,7 +7,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
+import type { WalkedEvidence } from '../progress/levadaCoverage';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
@@ -35,7 +36,7 @@ import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
 import ShareCardView from '../souvenir/ShareCardView';
 import type { ShareCard } from '../souvenir/shareCard';
-import { buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
+import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
@@ -166,6 +167,7 @@ export default function PassportScreen({
           lon: geofence.lon,
           position,
           nowMs: Date.now(),
+          language: deviceLanguage(),
         })
       );
     })();
@@ -188,9 +190,11 @@ export default function PassportScreen({
       const built = await buildCardForTrip();
       if (!built.ok) {
         setSharing(false);
-        // The honest sentence from the export door, shown rather than swallowed
+        // The honest answer from the export door, shown rather than swallowed
         // (ARCHITECTURE §10) — most often "the trace could not be masked".
-        Alert.alert(t('passport.share.nothingTitle'), built.reason);
+        // ⚠ T-190: the translated refusal, never `reason`, which is the diary's
+        // English and was shown here until 2026-09-23.
+        Alert.alert(t('passport.share.nothingTitle'), t(REFUSAL_KEYS[built.refusal]));
         return;
       }
 
@@ -200,8 +204,8 @@ export default function PassportScreen({
       const shared = await shareCardImage(shareCardRef);
       setShareCard(null);
       setSharing(false);
-      if (!shared.ok && shared.reason !== undefined) {
-        Alert.alert(t('passport.share.failedTitle'), shared.reason);
+      if (!shared.ok) {
+        Alert.alert(t('passport.share.failedTitle'), t(REFUSAL_KEYS[shared.refusal]));
       }
     })();
   };
@@ -366,7 +370,11 @@ export default function PassportScreen({
  * has already declined.
  */
 async function resolvePrompt(
-  awaitingConfirmation: readonly { placeId: string; evidence: string }[],
+  awaitingConfirmation: readonly {
+    placeId: string;
+    evidence: string;
+    walked: WalkedEvidence | null;
+  }[],
   awarded: Set<string>
 ): Promise<{ prompt: ConfirmationPrompt; evidence: string } | null> {
   if (awaitingConfirmation.length === 0) {
@@ -387,14 +395,14 @@ async function resolvePrompt(
 
   const places = getContentPack().places;
   const candidates: ConfirmationCandidate[] = [];
-  for (const { placeId, evidence } of awaitingConfirmation) {
+  for (const { placeId, evidence, walked } of awaitingConfirmation) {
     const place = places.find((candidate) => candidate.id === placeId);
     if (place !== undefined) {
-      candidates.push({ placeId, name: place.name, evidence });
+      candidates.push({ placeId, name: place.name, evidence, walked });
     }
   }
 
-  const prompt = nextPrompt(candidates, new Set(declined), awarded);
+  const prompt = nextPrompt(candidates, new Set(declined), awarded, deviceLanguage());
   if (prompt === null) {
     return null;
   }

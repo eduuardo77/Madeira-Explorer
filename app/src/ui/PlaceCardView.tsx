@@ -30,7 +30,6 @@
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { PlaceCard } from '../places/placeCard';
-import { STRAIGHT_LINE_NOTE } from '../places/placeCard';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 import { t } from '../i18n';
 
@@ -64,7 +63,7 @@ export default function PlaceCardView({
       <View style={styles.grabber} accessibilityElementsHidden />
 
       <Text style={styles.meta}>
-        {card.collected ? `${card.categoryLabel} · Collected` : card.categoryLabel}
+        {card.metaLabel}
       </Text>
 
       {/* No `numberOfLines`: a long Portuguese place name must wrap rather
@@ -85,12 +84,12 @@ export default function PlaceCardView({
         <Text style={styles.region}>{card.regionLabel}</Text>
       )}
 
-      {card.distanceLabel === null ? null : (
+      {card.distanceSentence === null ? null : (
         // The qualification travels with the number (`placeCard.ts` rule 2).
         // On this island a straight line and a drive are very different
         // things, and the card must not be read as the second one.
         <Text style={styles.distance}>
-          {card.distanceLabel} away, {STRAIGHT_LINE_NOTE}
+          {card.distanceSentence}
         </Text>
       )}
 

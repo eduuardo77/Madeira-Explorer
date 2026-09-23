@@ -101,7 +101,7 @@ test('an empty note is null, never an empty string in the file', () => {
 });
 
 test('the description says what is in it, and counts what it says', () => {
-  const description = describeWalkReport(buildWalkReport(input()));
+  const description = describeWalkReport(buildWalkReport(input()), 'en');
   assert.match(description, /2 location points/);
   assert.match(description, /1 place\b/);
   assert.match(description, /Where you slept has been removed/);
@@ -112,10 +112,21 @@ test('a walk with no fixes is still describable rather than a crash', () => {
   const report = buildWalkReport(input({ fixes: [] }));
   assert.equal(report.startedTs, null);
   assert.equal(walkReportFilename(report), 'madeira-walk.json');
-  assert.match(describeWalkReport(report), /0 location points/);
+  assert.match(describeWalkReport(report, 'en'), /0 location points/);
 });
 
 test('the filename is dated from the walk, not from when it was sent', () => {
   const report = buildWalkReport(input());
   assert.match(walkReportFilename(report), /^madeira-walk-\d{4}-\d{2}-\d{2}\.json$/);
+});
+
+test('⚠ T-190 — the description follows the phone, not English', () => {
+  // It was English on every phone until 2026-09-23, in the dialog shown before
+  // a user decides to send their walk.
+  const report = buildWalkReport(input());
+  const pt = describeWalkReport(report, 'pt');
+  assert.match(pt, /2 pontos de localização/);
+  assert.match(pt, /sobre 1 lugar[.]/);
+  assert.doesNotMatch(pt, /location points|Where you slept/);
+  assert.match(describeWalkReport(report, 'de'), /2 Standortpunkte/);
 });

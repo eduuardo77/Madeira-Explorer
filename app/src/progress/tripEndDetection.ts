@@ -26,6 +26,7 @@ import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { truncateWal } from '../storage/database';
+import { deviceLanguage, n, t } from '../i18n';
 import { sendTripNotification } from '../notify/sendTripNotification';
 import { getCurrentProgress } from './currentProgress';
 import { runAwardPass } from './stampAwards';
@@ -160,18 +161,17 @@ export async function checkTripEnd(
 async function sendReveal(): Promise<void> {
   const progress = await getCurrentProgress();
 
+  // ⚠ T-190: this and the title were English on every phone until 2026-09-23.
   const body =
     progress.total === 0
-      ? 'Open the app to see the map of everywhere you went.'
-      : `You collected ${progress.collected} ${
-          progress.collected === 1 ? 'place' : 'places'
-        }. Open the app to see the map of everywhere you went.`;
+      ? t('reveal.bodyNoPlaces')
+      : n('reveal.body', progress.collected);
 
   // Through the one door, which owns the D-011 cap (T-116). The island's name
   // comes from the content pack, never from a literal here (D-017, T-116a).
   await sendTripNotification(
     'reveal',
-    revealTitle(getContentPack().destination),
+    revealTitle(getContentPack().destination, deviceLanguage()),
     body
   );
 }

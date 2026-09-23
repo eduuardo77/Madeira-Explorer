@@ -41,6 +41,7 @@ function input(overrides: Partial<ShareCardInput> = {}): ShareCardInput {
     total: 60,
     strokes: [WALK],
     stampNames: ['High Rock', 'Water Walk', 'Old Fort'],
+    language: 'en',
     ...overrides,
   };
 }
@@ -162,7 +163,7 @@ test('the stamp line stays readable with real Madeira names', () => {
 
 test('a name is never split across two lines', () => {
   const names = ['Levada das 25 Fontes', 'Praia do Porto do Seixal', 'Pico Ruivo'];
-  const lines = wrapStampNames(names, 888);
+  const lines = wrapStampNames(names, 888, 'en');
   for (const name of names) {
     assert.ok(
       lines.some((line) => line.includes(name)),
@@ -185,4 +186,21 @@ test('a day trip is one date, not a range of one', () => {
   const morning = Date.UTC(2026, 7, 12, 8);
   const evening = Date.UTC(2026, 7, 12, 20);
   assert.ok(!formatDateRange(morning, evening).includes('–'));
+});
+
+test("⚠ T-190 — the count under the number is in the sender's language", () => {
+  // Review P1-5: a Portuguese user shared a card reading "places collected".
+  const texts = (card: ReturnType<typeof buildShareCard>) =>
+    card.elements.flatMap((element) => (element.kind === 'text' ? [element.text] : []));
+  assert.ok(texts(buildShareCard(input({ language: 'pt' }))).includes('lugares visitados'));
+  assert.ok(texts(buildShareCard(input({ language: 'pt', collected: 1 }))).includes('lugar visitado'));
+  assert.ok(texts(buildShareCard(input({ language: 'de' }))).includes('Orte gesammelt'));
+  assert.ok(!texts(buildShareCard(input({ language: 'pt' }))).includes('places collected'));
+});
+
+test('T-190 — "and N more" is in the sender’s language', () => {
+  const names = Array.from({ length: MAX_NAMED_STAMPS + 4 }, (_, i) => `Place ${i}`);
+  assert.ok(wrapStampNames(names, 5000, 'pt').join(' ').includes('e mais 4'));
+  assert.ok(wrapStampNames(names, 5000, 'de').join(' ').includes('und 4 weitere'));
+  assert.ok(!wrapStampNames(names, 5000, 'pt').join(' ').includes('more'));
 });

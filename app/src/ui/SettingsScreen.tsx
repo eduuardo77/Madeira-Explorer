@@ -51,6 +51,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import Constants from 'expo-constants';
 import { buildDonation, sendDonation } from '../souvenir/donateWalk';
+import { REFUSAL_KEYS } from '../souvenir/shareTrip';
 import SettingsView from './SettingsView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
@@ -234,7 +235,8 @@ export default function SettingsScreen({
       );
       if (!built.ok) {
         setDonating(false);
-        Alert.alert(t('donate.nothingTitle'), built.reason);
+        // ⚠ T-190: the translated refusal, never the diary's English `reason`.
+        Alert.alert(t('donate.nothingTitle'), t(REFUSAL_KEYS[built.refusal]));
         return;
       }
 
@@ -246,8 +248,8 @@ export default function SettingsScreen({
             void (async () => {
               const sent = await sendDonation(built.report);
               setDonating(false);
-              if (!sent.ok && sent.reason !== undefined) {
-                Alert.alert(t('donate.failedTitle'), sent.reason);
+              if (!sent.ok) {
+                Alert.alert(t('donate.failedTitle'), t(REFUSAL_KEYS[sent.refusal]));
               }
             })();
           },

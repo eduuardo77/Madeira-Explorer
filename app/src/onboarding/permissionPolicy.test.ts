@@ -194,7 +194,8 @@ test('NO BATTERY FIGURE IS STATED UNTIL ONE IS MEASURED', () => {
   // one. T-054 has not run — the app has never been on a phone — so the copy
   // must omit the claim entirely rather than estimate it.
   assert.equal(MEASURED_BATTERY_PERCENT_PER_DAY, null);
-  assert.equal(batterySentence(), null);
+  assert.equal(batterySentence('en'), null);
+  assert.equal(batterySentence('pt'), null);
 });
 
 test('when a figure exists the sentence reads plainly', () => {

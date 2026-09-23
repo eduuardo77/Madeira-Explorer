@@ -41,30 +41,31 @@ function input(overrides: Partial<PlaceCardInput> = {}): PlaceCardInput {
     lon: -16.91,
     position: position(),
     nowMs: NOW,
+    language: 'en',
     ...overrides,
   };
 }
 
 test('formatting drops precision as the number grows', () => {
-  assert.equal(formatDistance(0), '10 m');
-  assert.equal(formatDistance(3), '10 m');
-  assert.equal(formatDistance(447), '450 m');
-  assert.equal(formatDistance(999), '1000 m');
-  assert.equal(formatDistance(1000), '1.0 km');
-  assert.equal(formatDistance(1243), '1.2 km');
-  assert.equal(formatDistance(9949), '9.9 km');
-  assert.equal(formatDistance(23_400), '23 km');
+  assert.equal(formatDistance(0, 'en'), '10 m');
+  assert.equal(formatDistance(3, 'en'), '10 m');
+  assert.equal(formatDistance(447, 'en'), '450 m');
+  assert.equal(formatDistance(999, 'en'), '1000 m');
+  assert.equal(formatDistance(1000, 'en'), '1.0 km');
+  assert.equal(formatDistance(1243, 'en'), '1.2 km');
+  assert.equal(formatDistance(9949, 'en'), '9.9 km');
+  assert.equal(formatDistance(23_400, 'en'), '23 km');
 });
 
 test('a distance is never reported as zero', () => {
   // `0 m` reads as a bug, not as "you are standing on it".
-  assert.equal(formatDistance(0), '10 m');
-  assert.ok(!formatDistance(4).startsWith('0'));
+  assert.equal(formatDistance(0, 'en'), '10 m');
+  assert.ok(!formatDistance(4, 'en').startsWith('0'));
 });
 
 test('formatting refuses nonsense rather than printing NaN', () => {
-  assert.throws(() => formatDistance(Number.NaN));
-  assert.throws(() => formatDistance(-1));
+  assert.throws(() => formatDistance(Number.NaN, 'en'));
+  assert.throws(() => formatDistance(-1, 'en'));
 });
 
 test('a fresh, precise fix gives a distance', () => {
@@ -148,4 +149,37 @@ test('the coordinate the Directions button will use is the one on the card', () 
   const card = buildPlaceCard(input({ lat: 32.75, lon: -16.95 }));
   assert.equal(card.lat, 32.75);
   assert.equal(card.lon, -16.95);
+});
+
+// ── T-190: the card speaks the phone's language ──
+
+test('⚠ T-190 — on a Portuguese phone the card has no English in it', () => {
+  // Review P1-4, seen on the P30: "VIEWPOINT" and "13 km away, in a straight line".
+  const card = buildPlaceCard(input({ category: 'viewpoint', collected: true, language: 'pt' }));
+  assert.equal(card.categoryLabel, 'Miradouro');
+  assert.equal(card.metaLabel, 'Miradouro · Visitado');
+  assert.equal(card.distanceSentence, 'A 1,1 km, em linha reta');
+});
+
+test('T-190 — German writes the decimal with a comma too', () => {
+  assert.equal(formatDistance(1243, 'de'), '1,2 km');
+  assert.equal(formatDistance(1243, 'pt'), '1,2 km');
+  assert.equal(formatDistance(1243, 'en'), '1.2 km');
+  // Whole numbers have no separator to get wrong.
+  assert.equal(formatDistance(23_400, 'pt'), '23 km');
+  assert.equal(formatDistance(447, 'de'), '450 m');
+});
+
+test('T-190 — the qualification travels with the number, in every language', () => {
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const card = buildPlaceCard(input({ language }));
+    assert.ok(card.distanceSentence !== null);
+    assert.ok(card.distanceSentence.includes(card.distanceLabel!), language);
+  }
+  const noFix = buildPlaceCard(input({ position: null, language: 'pt' }));
+  assert.equal(noFix.distanceSentence, null);
+});
+
+test('T-190 — an uncollected place shows only its category', () => {
+  assert.equal(buildPlaceCard(input({ collected: false, language: 'de' })).metaLabel, 'Aussichtspunkt');
 });

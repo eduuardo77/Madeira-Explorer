@@ -474,7 +474,9 @@ export default function PassportView({
           <Text style={styles.confirmQuestion}>{confirmation.question}</Text>
           {/* The evidence, in the question. The answer should be a memory
               check, not a guess about what the app wants to hear. */}
-          <Text style={styles.confirmDetail}>{confirmation.detail}</Text>
+          {confirmation.detail === '' ? null : (
+            <Text style={styles.confirmDetail}>{confirmation.detail}</Text>
+          )}
           <View style={styles.confirmActions}>
             <Pressable
               accessibilityRole="button"

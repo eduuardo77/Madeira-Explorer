@@ -28,7 +28,7 @@
  */
 
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { t } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
 
@@ -72,7 +72,7 @@ function copyFor(screen: OnboardingScreen): Copy {
       return {
         title: t('onboarding.location.title'),
         body: [t('onboarding.location.body1'), t('onboarding.location.body2')],
-        note: batterySentence() ?? undefined,
+        note: batterySentence(deviceLanguage()) ?? undefined,
         continueLabel: t('onboarding.action.allow'),
         skipLabel: t('onboarding.action.skip'),
       };
@@ -133,7 +133,7 @@ function copyFor(screen: OnboardingScreen): Copy {
           t('onboarding.upgrade.body2'),
           t('onboarding.upgrade.body3'),
         ],
-        note: batterySentence() ?? undefined,
+        note: batterySentence(deviceLanguage()) ?? undefined,
         continueLabel: t('onboarding.upgrade.continue'),
         skipLabel: t('onboarding.upgrade.skip'),
       };

@@ -157,6 +157,18 @@ export type Coverage = {
   paceMps: number | null;
 };
 
+/**
+ * The numbers behind a verdict, for a screen to put into words (T-190).
+ * `reason` is the diary's English sentence built from these; the passport asks
+ * its question from these instead, in the phone's language.
+ */
+export type WalkedEvidence = {
+  coveredM: number;
+  courseM: number;
+  /** Rounded, as the diary shows it. */
+  percent: number;
+};
+
 export type CoverageVerdict = {
   /** Award it now. */
   credited: boolean;
@@ -174,6 +186,8 @@ export type CoverageVerdict = {
   reason: string;
   /** 0–1, stored, never shown (D-009, T-072). */
   confidence: number;
+  /** Null only when no fix was ever beside the course. */
+  walked: WalkedEvidence | null;
 };
 
 /** Metres per degree of latitude, and of longitude at a given latitude. */
@@ -400,6 +414,11 @@ function readable(metres: number): string {
 export function judgeCoverage(coverage: Coverage): CoverageVerdict {
   const percent = Math.round(coverage.fraction * 100);
   const walked = `${readable(coverage.coveredM)} of ${readable(coverage.courseM)} (${percent}%)`;
+  const evidence: WalkedEvidence = {
+    coveredM: coverage.coveredM,
+    courseM: coverage.courseM,
+    percent,
+  };
 
   if (coverage.fixesOnCourse === 0) {
     return {
@@ -407,6 +426,7 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
       offerConfirmation: false,
       reason: 'no fix was ever beside this course',
       confidence: 0,
+      walked: null,
     };
   }
 
@@ -437,6 +457,7 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
       offerConfirmation: false,
       reason: `${walked} covered at ${coverage.paceMps.toFixed(1)} m/s — too fast to have been walked`,
       confidence: 0,
+      walked: evidence,
     };
   }
 
@@ -449,6 +470,7 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
       // what credits a there-and-back that never reached the far end.
       reason: `walked ${walked} of the course over ${Math.round(minutes)} min`,
       confidence: Math.min(1, 0.6 + coverage.fraction * 0.4),
+      walked: evidence,
     };
   }
 
@@ -458,6 +480,7 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
       offerConfirmation: true,
       reason: `walked ${walked} — enough to ask, not enough to award`,
       confidence: coverage.fraction,
+      walked: evidence,
     };
   }
 
@@ -466,5 +489,6 @@ export function judgeCoverage(coverage: Coverage): CoverageVerdict {
     offerConfirmation: false,
     reason: `only ${walked} of the course`,
     confidence: coverage.fraction,
+    walked: evidence,
   };
 }

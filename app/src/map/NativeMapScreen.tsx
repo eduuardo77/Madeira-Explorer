@@ -90,7 +90,7 @@ import { drawableSegments, traceBounds } from './traceGeoJson';
 import { TRACE_PAINT } from './traceStyle';
 
 import lightTemplate from '../../assets/map/light.json';
-import { t } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
 
 /**
  * The island, for a user who has recorded nothing yet.
@@ -466,6 +466,7 @@ export default function NativeMapScreen({
           lon: geofence.lon,
           position,
           nowMs: Date.now(),
+          language: deviceLanguage(),
         })
       );
 

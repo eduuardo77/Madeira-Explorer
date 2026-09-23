@@ -46,6 +46,10 @@
  * Pure: no database, no clock, no Expo. Tested in `walkReport.test.ts`.
  */
 
+import type { Language } from '../i18n/languages.ts';
+import { PLURALS } from '../i18n/strings.ts';
+import { plural } from '../i18n/translate.ts';
+
 /** The current shape. Bumped whenever a field changes meaning, never reused. */
 export const WALK_REPORT_SCHEMA = 1;
 
@@ -127,19 +131,19 @@ export function buildWalkReport(input: WalkReportInput): WalkReport {
  * time somebody adds a field. If this file changes, this sentence is in the
  * diff.
  */
-export function describeWalkReport(report: WalkReport): string {
+export function describeWalkReport(report: WalkReport, language: Language): string {
   const walks = report.decisions.length;
   const minutes =
     report.startedTs === null || report.endedTs === null
       ? 0
       : Math.round((report.endedTs - report.startedTs) / 60000);
 
-  return (
-    `This sends ${report.fixCount} location points from ${minutes} minutes of your trip, ` +
-    `and what the app decided about ${walks} ${walks === 1 ? 'place' : 'places'}. ` +
-    `Where you slept has been removed. It contains no name, no account and nothing ` +
-    `that identifies you or your phone. You choose where it goes.`
-  );
+  // ⚠ T-190: English on every phone until 2026-09-23, shown in the confirm
+  // dialog before a user sends a walk.
+  return plural(PLURALS['donate.description'], walks, language, {
+    points: report.fixCount,
+    minutes,
+  });
 }
 
 /** The file, as it is written and sent. Stable key order, so diffs are readable. */

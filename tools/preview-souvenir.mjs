@@ -50,6 +50,8 @@ const cleaned = cleanTrace(fixes).fixes.map((fix) => [fix.lon, fix.lat]);
 
 const card = buildShareCard({
   destination: 'Madeira',
+  // The card follows the sender's phone (T-190); the preview draws English.
+  language: 'en',
   dateRange: '12–19 August 2026',
   collected: 23,
   total: 60,

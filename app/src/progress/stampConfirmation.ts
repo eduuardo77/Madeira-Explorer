@@ -30,13 +30,25 @@
  * Pure: no database, no clock, no Expo. Tested in `stampConfirmation.test.ts`.
  */
 
+import type { Language } from '../i18n/languages.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
+import { formatDistance } from '../places/placeCard.ts';
+import type { WalkedEvidence } from './levadaCoverage.ts';
+
 /** What the award pass found, plus what the app already knows about it. */
 export type ConfirmationCandidate = {
   placeId: string;
   /** Display name — the question names the place, not its id. */
   name: string;
-  /** The verdict's own words: `"walked 2.1 km of 5.0 km (42%)"`. */
+  /**
+   * The verdict's own diary sentence, kept for `confirmationReason`. **Never
+   * shown**: it is English, and it already ends *"— enough to ask, not enough
+   * to award"*, which the prompt used to repeat (T-190).
+   */
   evidence: string;
+  /** The measurement as numbers, which is what the question is written from. */
+  walked: WalkedEvidence | null;
 };
 
 export type ConfirmationPrompt = {
@@ -61,7 +73,8 @@ export type ConfirmationPrompt = {
 export function nextPrompt(
   candidates: readonly ConfirmationCandidate[],
   declined: ReadonlySet<string>,
-  awarded: ReadonlySet<string> = new Set()
+  awarded: ReadonlySet<string>,
+  language: Language
 ): ConfirmationPrompt | null {
   const asking = candidates.find(
     (candidate) => !declined.has(candidate.placeId) && !awarded.has(candidate.placeId)
@@ -70,21 +83,32 @@ export function nextPrompt(
     return null;
   }
 
+  // ⚠ T-190: all four were English on every phone until 2026-09-23, and
+  // `detail` repeated its own last clause, because it appended one to a diary
+  // sentence that already ended with it.
+  const say = (key: keyof typeof STRINGS, values?: Record<string, string | number>) =>
+    translate(STRINGS[key], language, values);
+
   return {
     placeId: asking.placeId,
     // The place's own name, unadorned. "Did you walk the Levada do Furado?"
     // reads as a question about a walk; "Confirm visit to POI" reads as a form.
-    question: `Did you walk the ${asking.name}?`,
-    detail: `${capitalise(asking.evidence)} — enough to ask, not enough for the app to be sure.`,
+    question: say('confirm.question', { name: asking.name }),
+    // A candidate is only ever offered with numbers (`judgeCoverage`); without
+    // them the question alone is still honest, so the detail is simply absent.
+    detail:
+      asking.walked === null
+        ? ''
+        : say('confirm.detail', {
+            covered: formatDistance(asking.walked.coveredM, language),
+            course: formatDistance(asking.walked.courseM, language),
+            percent: asking.walked.percent,
+          }),
     // ⚠ Not "Yes". The button says what it does, because a screen reader user
     // hears the buttons out of order and "Yes" alone means nothing (D-015).
-    confirmLabel: 'I walked it',
-    declineLabel: 'Not this time',
+    confirmLabel: say('confirm.yes'),
+    declineLabel: say('confirm.no'),
   };
-}
-
-function capitalise(text: string): string {
-  return text.length === 0 ? text : text[0].toUpperCase() + text.slice(1);
 }
 
 /**
@@ -96,7 +120,7 @@ function capitalise(text: string): string {
  * a data point saying *the bar was too high here*.
  */
 export function confirmationReason(evidence: string): string {
-  return `confirmed by the user: ${evidence}`;
+  return `confirmed by the user: ${evidence}`; // i18n-exempt: stored on the award row, never rendered
 }
 
 /**

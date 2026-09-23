@@ -42,6 +42,9 @@ import type { Category } from '../content/contentPack.ts';
 import { hasCourse } from '../map/levadaHighlight.ts';
 import { distanceM, isUsableCoordinate } from '../recording/distance.ts';
 import { MAX_DRAWN_ACCURACY_M } from '../map/traceGeoJson.ts';
+import type { Language } from '../i18n/languages.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
 
 /**
  * How old the last fix may be before the card stops claiming to know where the
@@ -80,6 +83,8 @@ export type PlaceCardInput = {
   /** Null when no trip is recording, or nothing has been recorded yet. */
   position: LastKnownPosition | null;
   nowMs: number;
+  /** Passed in, because this module is pure and may not import `i18n/index.ts`. */
+  language: Language;
 };
 
 export type PlaceCard = {
@@ -106,27 +111,34 @@ export type PlaceCard = {
   lon: number;
   /** Metres, straight line. Null when rule 1 above withholds it. */
   distanceM: number | null;
-  /** `"3.2 km"`. Null exactly when `distanceM` is. */
+  /** `"3.2 km"`, `"3,2 km"` in Portuguese. Null exactly when `distanceM` is. */
   distanceLabel: string | null;
+  /** The line above the name: the category, and whether it is collected. */
+  metaLabel: string;
+  /**
+   * The distance *with* its qualification, as one translated sentence (rule
+   * 2). Null exactly when `distanceM` is. Render this, never `distanceLabel`
+   * alone.
+   */
+  distanceSentence: string | null;
 };
 
 /**
  * The word the card shows. Not the slug: `levada` is a category id, "Levada
  * walk" is what it is.
+ *
+ * ⚠ T-190: these were English constants here until 2026-09-23, and a
+ * Portuguese phone showed *VIEWPOINT* and *"13 km away, in a straight line"*
+ * (review P1-4). `i18nCoverage.test.ts` could not see them, because it only
+ * read `.tsx` files; it now reads this one too.
  */
-const CATEGORY_LABELS: Record<Category, string> = {
-  viewpoint: 'Viewpoint',
-  levada: 'Levada walk',
-  village: 'Village',
-  beach: 'Beach',
-  landmark: 'Landmark',
-};
-
-/**
- * The sentence the distance appears in. Rule 2 above — kept as a constant so
- * the qualification travels with the number wherever it is rendered.
- */
-export const STRAIGHT_LINE_NOTE = 'in a straight line';
+const CATEGORY_KEYS = {
+  viewpoint: 'placeCard.category.viewpoint',
+  levada: 'placeCard.category.levada',
+  village: 'placeCard.category.village',
+  beach: 'placeCard.category.beach',
+  landmark: 'placeCard.category.landmark',
+} as const satisfies Record<Category, keyof typeof STRINGS>;
 
 /**
  * Metres as something a person reads at arm's length.
@@ -136,7 +148,7 @@ export const STRAIGHT_LINE_NOTE = 'in a straight line';
  * that this is a measured walking distance. Below a kilometre it rounds to the
  * nearest 10 m, and never below 10 — `0 m` would read as an error.
  */
-export function formatDistance(metres: number): string {
+export function formatDistance(metres: number, language: Language): string {
   if (!Number.isFinite(metres) || metres < 0) {
     throw new Error(`not a distance: ${metres}`);
   }
@@ -148,7 +160,12 @@ export function formatDistance(metres: number): string {
   const km = metres / 1000;
   // One decimal up to 10 km, whole kilometres beyond — an island 57 km across
   // never needs `23.4 km`.
-  return km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`;
+  // ⚠ Portuguese and German write the decimal with a comma. By hand rather
+  // than `toLocaleString`, because Hermes's Intl is not complete (HANDOFF).
+  const decimal = language === 'en' ? '.' : ',';
+  return km < 10
+    ? `${km.toFixed(1).replace('.', decimal)} km`
+    : `${Math.round(km)} km`;
 }
 
 /**
@@ -187,6 +204,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     lon,
     position,
     nowMs,
+    language,
   } = input;
 
   const measurable =
@@ -198,10 +216,16 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     ? distanceM({ lat: position.lat, lon: position.lon }, { lat, lon })
     : null;
 
+  const categoryLabel = translate(STRINGS[CATEGORY_KEYS[category]], language);
+  const distanceLabel = metres === null ? null : formatDistance(metres, language);
+
   return {
     placeId,
     name,
-    categoryLabel: CATEGORY_LABELS[category],
+    categoryLabel,
+    metaLabel: collected
+      ? translate(STRINGS['placeCard.collected'], language, { category: categoryLabel })
+      : categoryLabel,
     // Trimmed, and whitespace becomes null: a card with an empty line where
     // the municipality should be is worse than one that never claimed to know.
     regionLabel: regionName?.trim() || null,
@@ -210,6 +234,10 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     lat,
     lon,
     distanceM: metres,
-    distanceLabel: metres === null ? null : formatDistance(metres),
+    distanceLabel,
+    distanceSentence:
+      distanceLabel === null
+        ? null
+        : translate(STRINGS['placeCard.distance'], language, { distance: distanceLabel }),
   };
 }

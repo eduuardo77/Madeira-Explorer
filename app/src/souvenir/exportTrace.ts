@@ -17,6 +17,15 @@ import * as tripDao from '../storage/dao/tripDao';
 import type { Accommodation, OvernightFix } from './accommodation';
 import { detectAccommodation, maskTrace } from './accommodation';
 
+/**
+ * Why nothing can be exported, as a code a screen can translate (T-190).
+ *
+ * `reason` stays the diary's English sentence. Screens show this instead: until
+ * 2026-09-23 they showed `reason` itself, so a Portuguese phone read
+ * *"nothing recorded"* inside a translated alert.
+ */
+export type ExportRefusal = 'nothing' | 'withheld' | 'failed';
+
 export type ExportableTrace = {
   /** Safe to render, safe to share. */
   fixes: OvernightFix[];
@@ -30,6 +39,8 @@ export type ExportableTrace = {
    * map (ARCHITECTURE §10).
    */
   safeToShare: boolean;
+  /** Null exactly when `safeToShare` is true. */
+  refusal: ExportRefusal | null;
 };
 
 const NOTHING: ExportableTrace = {
@@ -38,6 +49,7 @@ const NOTHING: ExportableTrace = {
   removedCount: 0,
   reason: 'no trip to export',
   safeToShare: false,
+  refusal: 'nothing',
 };
 
 /**
@@ -79,11 +91,14 @@ export async function getExportableTrace(): Promise<ExportableTrace> {
       removedCount: masked.removedCount,
       reason: masked.reason,
       safeToShare: masked.fixes.length > 0,
+      // Everything masked away is the same answer to the user as masking
+      // refused: there is nothing it is safe to show.
+      refusal: masked.fixes.length > 0 ? null : 'withheld',
     };
   } catch (error) {
     await recordingEventDao.logError('export trace', error);
     // A failure here must never fall through to an unmasked export.
-    return { ...NOTHING, reason: 'export failed' };
+    return { ...NOTHING, reason: 'export failed', refusal: 'failed' };
   }
 }
 

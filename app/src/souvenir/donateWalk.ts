@@ -27,7 +27,9 @@ import { MAX_ARRIVAL_SPEED_MPS, MIN_DWELL_SECONDS } from '../progress/stampRules
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
+import { deviceLanguage, t } from '../i18n';
 import { getExportableTrace } from './exportTrace';
+import type { ShareRefusal, ShareSendResult } from './shareTrip';
 import {
   buildWalkReport,
   describeWalkReport,
@@ -61,7 +63,8 @@ function thresholdsInForce(): Record<string, number> {
 
 export type DonationResult =
   | { ok: true; report: WalkReport; description: string }
-  | { ok: false; reason: string };
+  /** As `ShareCardResult`: the screen shows `refusal`, the diary keeps `reason`. */
+  | { ok: false; refusal: ShareRefusal; reason: string };
 
 /**
  * Build the report for the most recent trip.
@@ -73,12 +76,12 @@ export async function buildDonation(appVersion: string): Promise<DonationResult>
   try {
     const trace = await getExportableTrace();
     if (!trace.safeToShare) {
-      return { ok: false, reason: trace.reason };
+      return { ok: false, refusal: trace.refusal ?? 'failed', reason: trace.reason };
     }
 
     const trip = (await tripDao.getActiveTrip()) ?? (await tripDao.getMostRecentTrip());
     if (trip === null) {
-      return { ok: false, reason: 'no trip recorded yet' };
+      return { ok: false, refusal: 'nothing', reason: 'no trip recorded yet' };
     }
 
     const pack = getContentPack();
@@ -99,7 +102,7 @@ export async function buildDonation(appVersion: string): Promise<DonationResult>
               // An award row can carry a null reason from before the rules
               // explained themselves; the report says so rather than dropping
               // the decision, because the decision is the valuable part.
-              reason: award.reason ?? 'no reason recorded',
+              reason: award.reason ?? 'no reason recorded', // i18n-exempt: a field of the sent JSON report
               confidence: award.confidence,
               dwellSeconds: award.dwell_seconds,
               meanSpeedMps: award.mean_speed_mps,
@@ -119,10 +122,10 @@ export async function buildDonation(appVersion: string): Promise<DonationResult>
       thresholds: thresholdsInForce(),
     });
 
-    return { ok: true, report, description: describeWalkReport(report) };
+    return { ok: true, report, description: describeWalkReport(report, deviceLanguage()) };
   } catch (error) {
     await recordingEventDao.logError('walk report', error);
-    return { ok: false, reason: 'the trip could not be read' };
+    return { ok: false, refusal: 'failed', reason: 'the trip could not be read' };
   }
 }
 
@@ -133,7 +136,7 @@ export async function buildDonation(appVersion: string): Promise<DonationResult>
  * moment the user has sent it; leaving copies in the app's permanent storage
  * would accumulate their trips in a second place for no reason.
  */
-export async function sendDonation(report: WalkReport): Promise<{ ok: boolean; reason?: string }> {
+export async function sendDonation(report: WalkReport): Promise<ShareSendResult> {
   try {
     // ⚠ SDK 57's `File`/`Paths` API, the one `mapAssets.ts` already uses —
     // not `FileSystem.cacheDirectory`, which belongs to the legacy surface and
@@ -146,17 +149,17 @@ export async function sendDonation(report: WalkReport): Promise<{ ok: boolean; r
     file.write(renderWalkReport(report));
 
     if (!(await Sharing.isAvailableAsync())) {
-      return { ok: false, reason: 'this device cannot share files' };
+      return { ok: false, refusal: 'unavailable', reason: 'this device cannot share files' };
     }
 
     await Sharing.shareAsync(file.uri, {
       mimeType: 'application/json',
-      dialogTitle: 'Send this walk',
+      dialogTitle: t('donate.dialogTitle'),
       UTI: 'public.json',
     });
     return { ok: true };
   } catch (error) {
     await recordingEventDao.logError('send walk report', error);
-    return { ok: false, reason: 'the file could not be shared' };
+    return { ok: false, refusal: 'failed', reason: 'the file could not be shared' };
   }
 }

@@ -37,6 +37,9 @@
  */
 
 import type { PermissionLevel } from '../recording/LocationProvider.ts';
+import type { Language } from '../i18n/languages.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
 
 /** Whether the OS will show our notifications. */
 export type NotificationPermission = 'granted' | 'denied' | 'undetermined';
@@ -82,11 +85,15 @@ export const MEASURED_BATTERY_PERCENT_PER_DAY: number | null = null;
  * parameter as `decideHealthCheck`** — it is a pure module under Node's test
  * runner, so it cannot import `i18n/index.ts`.
  */
-export function batterySentence(): string | null {
+export function batterySentence(language: Language): string | null {
   if (MEASURED_BATTERY_PERCENT_PER_DAY === null) {
     return null;
   }
-  return `Recording uses about ${MEASURED_BATTERY_PERCENT_PER_DAY}% of your battery per day.`;
+  // T-190: translated now rather than on the day T-054 lands, so the day the
+  // figure is measured cannot also be the day an English sentence ships.
+  return translate(STRINGS['onboarding.battery'], language, {
+    percent: MEASURED_BATTERY_PERCENT_PER_DAY,
+  });
 }
 
 export type OnboardingState = {

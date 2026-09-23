@@ -1609,6 +1609,31 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **The acceptance bar and the plan are in *Release readiness* at the top of this file
       (2026-09-23):** 60 clean launches in a row before a fix counts. The cold-start warning is
       split out as T-196.
+      — ✅ **MEASURED 2026-09-23 on the P30:** 30 force-stopped cold starts, field build `2ea386f`.
+      Each launch was polled every 1 s with `dumpsys activity top`, **restricted to Proa's own
+      task**:
+      - **24** normal: map in 2–6 s, median 3 s.
+      - **3** late: `AndroidViewsHandler` with no `MapView` for 13–34 s, then the map (17/22/38 s).
+      - **3** failed: still empty at 45 s.
+
+      So **20% go wrong and 10% show no map within 45 s** (95% interval ≈2–27%). The old *"2 of
+      9"* was about right. Some "blank maps" are ~20-second delays, not permanent; nothing waited
+      longer than 45 s, so whether the rest ever recover is unknown.
+      — ⚠ **Three probes were wrong before this one, all recorded so nobody repeats them:**
+      1. A fixed 8 s check counted a late map as blank.
+      2. `uiautomator dump` crashed *itself* when polled (*"UiAutomationService already
+         registered"*), inflating times and producing false "other" results.
+      3. `dumpsys activity top` lists every task, and a "holder present" check matched
+         **WalkNYC's** map.
+      — **Not the cause, checked:** the Maps SDK's `ClientParamsBlocking` stack appears in two
+      failures and in none of three later slow launches, so it does not tell good from bad.
+      — **Lead, untested:** every launch fires a burst of `madeira-geofencing` jobs on the main
+      thread (0–33 per launch) as the region set is re-registered. **Next experiment:** the same
+      loop with the launch-time geofence refresh suppressed, A/B. ⚠ Launches were slower after 30
+      back-to-back cold starts; run A and B interleaved, not one after the other.
+      — **Mitigation available whatever the cause:** remount the map when no `MapView` exists after
+      N s (a key change on the expo-maps view). A workaround, not a fix, and it must be called
+      one.
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.

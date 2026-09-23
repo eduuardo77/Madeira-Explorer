@@ -21,6 +21,7 @@ import {
   formatDateRange,
   MAX_NAMED_STAMPS,
   renderShareCardSvg,
+  shareImageFilename,
   wrapStampNames,
   type CardPoint,
   type ShareCardInput,
@@ -203,4 +204,12 @@ test('T-190 — "and N more" is in the sender’s language', () => {
   assert.ok(wrapStampNames(names, 5000, 'pt').join(' ').includes('e mais 4'));
   assert.ok(wrapStampNames(names, 5000, 'de').join(' ').includes('und 4 weitere'));
   assert.ok(!wrapStampNames(names, 5000, 'pt').join(' ').includes('more'));
+});
+
+test('⚠ T-192 — the shared image is named after the app and the day, not the framework', () => {
+  // It was ReactNative-snapshot-image<digits>.png, in the share sheet and in
+  // the recipient's chat (review P1-5).
+  const name = shareImageFilename(new Date(2026, 8, 3, 12, 0).getTime());
+  assert.match(name, /^[A-Z][a-z]+-2026-09-03\.png$/);
+  assert.doesNotMatch(name, /ReactNative|snapshot/);
 });

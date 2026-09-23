@@ -180,8 +180,10 @@ export default function PassportScreen({
    * after the frame the card was drawn in, which is exactly the moment it
    * becomes photographable.
    */
+  const canShare = progress !== null && progress.collected > 0;
+
   const shareTrip = () => {
-    if (sharing) {
+    if (sharing || !canShare) {
       return;
     }
     setSharing(true);
@@ -321,11 +323,20 @@ export default function PassportScreen({
         </View>
       )}
 
+      {/* ⚠ T-192: nothing to share before the first stamp. It used to share
+          at 0 / 80, and the image was almost entirely black (review P1-5). */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('passport.a11y.share')}
+        accessibilityHint={canShare ? undefined : t('passport.a11y.shareLater')}
+        accessibilityState={{ disabled: !canShare }}
+        disabled={!canShare}
         onPress={shareTrip}
-        style={({ pressed }) => [styles.share, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.share,
+          !canShare && styles.shareDisabled,
+          pressed && styles.pressed,
+        ]}
       >
         <Text style={styles.shareText}>{sharing ? t('passport.sharing') : t('passport.share')}</Text>
       </Pressable>
@@ -473,6 +484,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
   },
+  // Disabled controls are exempt from the contrast floor (WCAG 1.4.3); the
+  // hint says why it is off.
+  shareDisabled: { opacity: 0.4 },
   shareText: {
     color: colors.tint,
     fontSize: fontSize.body,

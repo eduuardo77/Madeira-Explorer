@@ -138,7 +138,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       - a "0 / 80" caption that names what the number counts
       - remove the Settings sentence saying the app has not been tested on a real phone
         (`strings.ts` ~519)
-- [ ] **T-192** **Share: a proper file name, and nothing to share at zero** — P1-5.
+- [~] **T-192** ✅ **Code done 2026-09-23, ⚠ not yet on the P30.** ⚠ view-shot's `fileName` option
+      still appends digits (`File.createTempFile`), so the capture is *moved* to
+      `<APP_NAME>-YYYY-MM-DD.png` in the cache; a failed move falls back to the old name, logged.
+      Share is disabled at 0 stamps, with a screen-reader hint saying why.
+      **Share: a proper file name, and nothing to share at zero** — P1-5.
       `captureRef`'s `fileName` option (view-shot 5.1.0 supports it) → `Proa-<date>.png`. Share
       is disabled until the first stamp.
 - [ ] **T-193** **No absolute privacy claims anywhere** — P0-7. Rewrite the iOS purpose strings

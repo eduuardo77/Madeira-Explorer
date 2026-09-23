@@ -341,6 +341,20 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
  * if the long form is ever judged too heavy for the card, the fix is to write
  * the compact form by hand from the parts, not to reach for `formatRange`.
  */
+/**
+ * The shared image's file name: `<APP_NAME>-2026-09-23.png` (T-192).
+ *
+ * ⚠ The share sheet shows it, and so does whoever receives the image. It was
+ * `ReactNative-snapshot-image<digits>.png` until 2026-09-23: view-shot's own
+ * default, which named the framework to every recipient (review P1-5). The
+ * date is the phone's local day, the one the user would write.
+ */
+export function shareImageFilename(nowMs: number): string {
+  const day = new Date(nowMs);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${APP_NAME}-${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}.png`;
+}
+
 export function formatDateRange(startTs: number, endTs: number): string {
   const start = new Date(startTs);
   const end = new Date(endTs);

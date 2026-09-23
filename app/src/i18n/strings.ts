@@ -412,6 +412,12 @@ export const STRINGS = {
     'Partilhar a sua viagem como imagem',
     'Ihre Reise als Bild teilen'
   ),
+  // T-192: said when Share is disabled, so a screen reader knows why.
+  'passport.a11y.shareLater': s(
+    'Sharing opens after your first stamp',
+    'A partilha fica disponível depois do primeiro carimbo',
+    'Teilen ist nach Ihrem ersten Stempel möglich'
+  ),
   'passport.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
   'passport.a11y.stampCollected': s(
     '{name}, collected. Open to show it on the map.',

@@ -18,6 +18,7 @@
  * which keeps D-001 true.
  */
 
+import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import type { View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
@@ -31,7 +32,13 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { deviceLanguage, t } from '../i18n';
 import { getExportableTrace, type ExportRefusal } from './exportTrace';
-import { buildShareCard, formatDateRange, type CardPoint, type ShareCard } from './shareCard';
+import {
+  buildShareCard,
+  formatDateRange,
+  shareImageFilename,
+  type CardPoint,
+  type ShareCard,
+} from './shareCard';
 
 /**
  * Why a share did not happen, for the screen to translate (T-190).
@@ -117,6 +124,25 @@ export async function buildCardForTrip(
 }
 
 /**
+ * Give the capture a name a person would choose (T-192).
+ *
+ * view-shot writes `ReactNative-snapshot-image<digits>.png`, and its own
+ * `fileName` option still appends digits (`File.createTempFile`), so the file
+ * is moved instead. ⚠ **A failed rename must not cost the share**: the
+ * worst case is the old name, logged.
+ */
+async function nameTheImage(capturedUri: string): Promise<string> {
+  try {
+    const named = new File(Paths.cache, shareImageFilename(Date.now()));
+    await new File(capturedUri).move(named, { overwrite: true });
+    return named.uri;
+  } catch (error) {
+    await recordingEventDao.logError('share image name', error);
+    return capturedUri;
+  }
+}
+
+/**
  * Photograph the drawn card and hand it to the OS share sheet.
  *
  * `viewRef` must point at a mounted `ShareCardView`. The capture is a file in
@@ -132,7 +158,8 @@ export async function shareCardImage(
       return { ok: false, refusal: 'failed', reason: 'the card is not on screen yet' };
     }
 
-    const uri = await captureRef(viewRef, { format: 'png', quality: 1, result: 'tmpfile' });
+    const captured = await captureRef(viewRef, { format: 'png', quality: 1, result: 'tmpfile' });
+    const uri = await nameTheImage(captured);
 
     if (!(await Sharing.isAvailableAsync())) {
       // A device with no share sheet at all. Rare, and not worth a crash.

@@ -53,6 +53,7 @@ import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import Constants from 'expo-constants';
+import { CONTACT_EMAIL } from '../legal/privacyPolicy';
 import { buildDonation, sendDonation } from '../souvenir/donateWalk';
 import { REFUSAL_KEYS } from '../souvenir/shareTrip';
 import SettingsView from './SettingsView';
@@ -301,6 +302,15 @@ export default function SettingsScreen({
       onEraseRequested={() => setConfirmingErase(true)}
       donating={donating}
       onDonateWalk={donateWalk}
+      // T-202: the version a support email needs. From the manifest, never typed.
+      version={Constants.expoConfig?.version}
+      onContact={
+        CONTACT_EMAIL === null
+          ? undefined
+          : () => {
+              void Linking.openURL(`mailto:${CONTACT_EMAIL}`).catch(() => undefined);
+            }
+      }
       pausedUntil={pausedUntil}
       onPause={() => {
         void pauseRecording(Date.now())

@@ -631,14 +631,17 @@ export const STRINGS = {
     '{app} weiterlaufen lassen'
   ),
   'settings.keepRunning.footnote': s(
-    'Some phones pause apps to save battery, which can stop your map filling in. This opens your phone’s battery settings, where you can let {app} keep running. Look for {app} in the list.',
-    'Alguns telemóveis pausam aplicações para poupar bateria, o que pode impedir o mapa de se preencher. Isto abre as definições de bateria do seu telemóvel, onde pode deixar o {app} continuar. Procure {app} na lista.',
-    'Manche Telefone pausieren Apps, um Akku zu sparen — dann füllt sich Ihre Karte nicht mehr. Dies öffnet die Akku-Einstellungen Ihres Telefons, wo Sie {app} weiterlaufen lassen können. Suchen Sie {app} in der Liste.'
+    'Some phones pause apps to save battery, and the map stops filling in. This opens the battery settings: find {app} there and let it run.',
+    'Alguns telemóveis pausam aplicações para poupar bateria, e o mapa deixa de se preencher. Isto abre as definições de bateria: procure o {app} e deixe-o correr.',
+    'Manche Telefone pausieren Apps, um Akku zu sparen — dann füllt sich die Karte nicht mehr. Dies öffnet die Akku-Einstellungen: Suchen Sie {app} und lassen Sie es laufen.'
   ),
+  // ⚠ T-202: it said "Open phone settings" beside "Recording your trip", and
+  // the review could not tell why recording would send you there. It is where
+  // location access is changed, so it says that.
   'settings.openPhoneSettings': s(
-    'Open phone settings',
-    'Abrir definições do telemóvel',
-    'Telefoneinstellungen öffnen'
+    'Change location access',
+    'Alterar acesso à localização',
+    'Standortzugriff ändern'
   ),
   // D-087 §1: background recording has its own name, and it lives here.
   'settings.section.background': s(
@@ -690,14 +693,14 @@ export const STRINGS = {
   ),
   'settings.permission.none': s('Not set up yet', 'Ainda não configurado', 'Noch nicht eingerichtet'),
   'settings.recording.footnoteLimited': s(
-    'Your map only fills in while the app is open. You can change this on your phone’s settings screen.',
-    'O seu mapa só se preenche com a aplicação aberta. Pode mudar isto nas definições do seu telemóvel.',
-    'Ihre Karte füllt sich nur bei geöffneter App. Sie können das in den Einstellungen Ihres Telefons ändern.'
+    'Your map fills in only while the app is open. To let it fill in by itself, set location to “Allow all the time”.',
+    'O mapa só se preenche com a aplicação aberta. Para se preencher sozinho, ponha a localização em “Permitir sempre”.',
+    'Die Karte füllt sich nur bei geöffneter App. Damit sie sich von selbst füllt, stellen Sie den Standort auf „Immer zulassen“.'
   ),
   'settings.background.blocked': s(
-    'Your phone has not given {app} permission to record in the background, so this is off. You can still record from the map screen whenever you go out.',
-    'O seu telemóvel não deu ao {app} autorização para registar em segundo plano, por isso isto está desligado. Pode na mesma registar a partir do mapa sempre que sair.',
-    'Ihr Telefon hat {app} keine Erlaubnis zur Aufzeichnung im Hintergrund gegeben, deshalb ist dies aus. Sie können jederzeit vom Kartenbildschirm aus aufzeichnen.'
+    'This needs location set to “Allow all the time” for {app} (Recording, above). Until then, use Start an outing on the map.',
+    'Precisa da localização do {app} em “Permitir sempre” (Registo, acima). Até lá, use Começar passeio no mapa.',
+    'Dafür braucht {app} den Standort auf „Immer zulassen“ (Aufzeichnung, oben). Bis dahin nutzen Sie Ausflug starten auf der Karte.'
   ),
   'settings.background.on': s(
     'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start it yourself on the map.',
@@ -755,9 +758,9 @@ export const STRINGS = {
   ),
   'settings.section.map': s('Map', 'Mapa', 'Karte'),
   'settings.map.footnote': s(
-    'The map is Google’s and needs a connection to draw. Your trip is recorded either way — losing signal on a levada costs you the map, never the walk.',
-    'O mapa é da Google e precisa de ligação para ser desenhado. A sua viagem é registada de qualquer forma — ficar sem rede numa levada custa-lhe o mapa, nunca a caminhada.',
-    'Die Karte stammt von Google und braucht eine Verbindung. Ihre Reise wird so oder so aufgezeichnet — kein Empfang auf einer Levada kostet Sie die Karte, nie die Wanderung.'
+    'The map is Google’s and needs a connection to draw. Your trip is recorded either way.',
+    'O mapa é da Google e precisa de ligação para ser desenhado. A viagem é registada na mesma.',
+    'Die Karte stammt von Google und braucht eine Verbindung. Ihre Reise wird trotzdem aufgezeichnet.'
   ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
@@ -766,20 +769,25 @@ export const STRINGS = {
     'Ihre Reise wird nie an uns gesendet. Es gibt kein Konto und keinen Server. Die Sicherung Ihres Telefons enthält sie, falls Sie Sicherungen eingeschaltet haben.'
   ),
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
+  // T-202: what a store app is expected to show about itself.
+  'settings.about.version': s('Version', 'Versão', 'Version'),
+  'settings.about.contact': s('Contact us', 'Contactar-nos', 'Kontakt'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),
   'settings.help.footnote': s(
-    'Sends one recording and what the app decided about it. Where you slept is removed, and it carries no name, no account and nothing that identifies you or your phone. The recording is only sent if you send it — and you choose where it goes.',
-    'Envia um registo e o que a aplicação decidiu sobre ele. O sítio onde dormiu é removido, e não leva nome, conta, nem nada que o identifique a si ou ao telemóvel. O registo só é enviado se for você a enviá-lo — e é você que escolhe para onde vai.',
-    'Sendet eine Aufzeichnung und das, was die App darüber entschieden hat. Ihr Übernachtungsort wird entfernt, und es enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Die Aufzeichnung wird nur gesendet, wenn Sie sie senden — und Sie wählen, wohin.'
+    // ⚠ T-202: shorter, and the Portuguese no longer says "o identifique a si"
+    // (masculine) or "é você que escolhe" (blunt in pt-PT).
+    'Sends one recording and what the app decided about it, to help tune it. Where you slept is removed; no name, no account. Only if you send it, to wherever you choose.',
+    'Envia um registo e o que a aplicação decidiu sobre ele, para a ajudar a afinar. O sítio onde dormiu é removido; sem nome nem conta. Só é enviado se o enviar, para onde escolher.',
+    'Sendet eine Aufzeichnung und die Entscheidungen der App dazu, damit sie besser wird. Ihr Übernachtungsort wird entfernt; kein Name, kein Konto. Nur wenn Sie sie senden, wohin Sie wollen.'
   ),
   'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),
   'settings.help.preparing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
   'settings.section.erase': s('Erase', 'Apagar', 'Löschen'),
   'settings.erase.footnote': s(
-    'This cannot be undone — there is no account for us to restore it from. Your phone’s own backup may still hold a copy; your phone settings control it.',
-    'Isto não pode ser desfeito — não há conta a partir da qual o possamos restaurar. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é controlada nas definições do telemóvel.',
-    'Das lässt sich nicht rückgängig machen — es gibt kein Konto, aus dem wir es wiederherstellen könnten. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; Sie steuern sie in den Einstellungen Ihres Telefons.'
+    'This cannot be undone. Your phone’s own backup may still hold a copy.',
+    'Não pode ser desfeito. A cópia de segurança do telemóvel pode ainda guardar uma cópia.',
+    'Das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten.'
   ),
   'settings.erase.action': s(
     'Erase everything I have recorded',

@@ -73,6 +73,14 @@ export type SettingsViewProps = {
   onOpenDebug?: () => void;
   /** Opens the confirmation. Must never erase on its own (T-125). */
   onEraseRequested: () => void;
+  /** `0.1.0`: the version a support email needs (T-202). Absent hides the row. */
+  version?: string;
+  /**
+   * Opens a mail to the support address (T-202). ⚠ Absent until
+   * `privacyPolicy.CONTACT_EMAIL` exists, which waits on the project lead's
+   * domain (T-187, D-044): no address, no row, rather than a dead one.
+   */
+  onContact?: () => void;
   /**
    * Send one walk back so the thresholds can stop being guesses (OD-11, D-069).
    *
@@ -320,6 +328,8 @@ export default function SettingsView({
   pausedUntil,
   onPause,
   onResume,
+  version,
+  onContact,
   onClose,
 }: SettingsViewProps) {
   // Both halves of one decision. The switch means nothing until the phone
@@ -496,6 +506,12 @@ export default function SettingsView({
           footnote={t('settings.about.footnote')}
         >
           <Action label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
+          {onContact === undefined ? null : (
+            <Action label={t('settings.about.contact')} onPress={onContact} />
+          )}
+          {version === undefined ? null : (
+            <Row label={t('settings.about.version')} value={version} />
+          )}
           {onOpenDebug === undefined ? null : (
             <Action label={t('settings.about.technical')} onPress={onOpenDebug} />
           )}

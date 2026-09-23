@@ -50,7 +50,7 @@
  * `recordingAdmission.test.ts`.
  */
 
-import { isOutsideBounds, type Bounds } from '../progress/tripEnd.ts';
+import { INACTIVITY_END_MS, isOutsideBounds, type Bounds } from '../progress/tripEnd.ts';
 import type { GeofenceEventType } from '../storage/types.ts';
 
 /**
@@ -108,6 +108,33 @@ export function batchMayStartTrip(
   bounds: Bounds
 ): boolean {
   return fixes.some((fix) => fixMayStartTrip(fix, bounds));
+}
+
+/**
+ * Has the open trip lapsed before this evidence arrived? (T-195)
+ *
+ * ⚠ **The silence rule could never fire once recording resumed.** `tripEnd`
+ * measures silence from the trip's *latest* fix, and this sink appended every
+ * new fix to whatever trip was open. On the P30 the recorder died on 28 August
+ * (T-174) and came back on 22 September: the first fix of the 22nd went into
+ * trip 30, silence dropped from 24.9 days to zero, and the trip stayed open.
+ * The launch-time check lost the same race: `app_launch` and that batch were
+ * logged in the same second, the batch first.
+ *
+ * So the question is asked *here*, before anything is stored, using the
+ * incoming evidence's own time as "now". It uses the same threshold as
+ * `detectTripEnd`, and the same `>=`, so the two cannot disagree about whether a
+ * trip is over. The caller ends the lapsed trip through `checkTripEnd`, which
+ * dates the end to the last fix, not to the new one.
+ *
+ * Pure: no database, no clock of its own.
+ */
+export function tripHasLapsed(
+  trip: { startedTs: number; lastFixTs: number | null },
+  incomingTs: number,
+  silenceMs: number = INACTIVITY_END_MS
+): boolean {
+  return incomingTs - (trip.lastFixTs ?? trip.startedTs) >= silenceMs;
 }
 
 /**

@@ -130,8 +130,15 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 
 ### Stage 2 — Correctness and stability
 
-- [ ] **T-195** ⚠ **A trip cannot end once recording resumes after a silence** — found 2026-09-23
-      while checking the review; **from reading the code, not yet reproduced.**
+- [~] **T-195** ⚠ **A trip cannot end once recording resumes after a silence** — found 2026-09-23
+      while checking the review. ✅ **Confirmed in the P30's own database** (`p30-2026-09-22d`): trip 30
+      holds a **24.9-day gap** (28 Aug 13:21 → 22 Sep 10:19), and the launch check lost the race:
+      `app_launch` and the first batch were logged in the same second, the batch first.
+      ✅ **Fixed in code 2026-09-23:** `recordingAdmission.tripHasLapsed` (pure, same threshold and `>=`
+      as `detectTripEnd`), called by `recordingSink.closeLapsedTrip` on **both** write paths before a
+      trip is chosen. 6 tests; the guard was checked by removing the call. ⚠ **Not yet on the device.**
+      Installing it will end trip 30 dated 28 Aug and send its reveal.
+      — *Original note:*
       - `recordingSink` appends to any open trip (`getOrCreateActiveTrip`).
       - `checkTripEnd` measures silence from the trip's latest fix.
       - When T-174 restarted the P30's recorder on 22 Sep, the first new fix cut a 25-day silence

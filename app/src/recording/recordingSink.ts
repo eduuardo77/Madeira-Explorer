@@ -32,7 +32,9 @@ import {
   batchMayStartTrip,
   shouldRecordTransition,
   transitionMayStartTrip,
+  tripHasLapsed,
 } from './recordingAdmission';
+import { checkTripEnd } from '../progress/tripEndDetection';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -113,6 +115,43 @@ async function captureSensorsFor(
  */
 const queue = recordingQueue;
 
+/**
+ * End the open trip if it went silent before this evidence arrived (T-195).
+ *
+ * Called inside the queue, before either handler chooses a trip. Without it, the
+ * first fix after a dead recorder or a phone left in a drawer joins the old trip
+ * and `tripEnd`'s silence rule can never fire. That is how trip 30 on the P30 was
+ * still open after 25 days: `recordingAdmission.tripHasLapsed` has the story.
+ *
+ * `checkTripEnd` does the ending, so a lapsed trip is closed exactly the way a
+ * launch would close it: the award pass, the reveal (D-011 counts per trip), the
+ * WAL truncate, and an end dated to the last fix. It takes no queue of its own,
+ * so calling it from inside this one cannot deadlock.
+ *
+ * ⚠ **Never throws.** A failure here must not cost the batch behind it (D-010):
+ * the worst case is the old behaviour, the evidence joining the old trip.
+ */
+async function closeLapsedTrip(incomingTs: number): Promise<void> {
+  try {
+    const open = await tripDao.getActiveTrip();
+    if (open === null) {
+      return;
+    }
+    const lastFix = await rawFixDao.getLastFix(open.id);
+    const lastFixTs = lastFix?.ts ?? null;
+    if (!tripHasLapsed({ startedTs: open.started_ts, lastFixTs }, incomingTs)) {
+      return;
+    }
+    await recordingEventDao.log(
+      'trip_end',
+      `lapsed: trip ${open.id} silent since ${new Date(lastFixTs ?? open.started_ts).toISOString()}`
+    );
+    await checkTripEnd(incomingTs);
+  } catch (error) {
+    await recordingEventDao.logError('closeLapsedTrip', error);
+  }
+}
+
 export const databaseSink: RecordingSink = {
   async onLocations(samples: LocationSample[]): Promise<void> {
     if (samples.length === 0) {
@@ -131,6 +170,10 @@ export const databaseSink: RecordingSink = {
         // whenever a trip is open, because a fix outside the bounds is the
         // evidence that ends the trip honestly — refusing to store it would
         // trade a loop for a holiday that never finishes.
+        //
+        // ⚠ T-195 — but not in a trip that already lapsed. Asked with the
+        // batch's earliest time, because that is when the silence ended.
+        await closeLapsedTrip(Math.min(...samples.map((sample) => sample.ts)));
         const trip = batchMayStartTrip(samples, ARCHIPELAGO_BOUNDS)
           ? await tripDao.getOrCreateActiveTrip()
           : await tripDao.getActiveTrip();
@@ -180,6 +223,9 @@ export const databaseSink: RecordingSink = {
         // ⚠ T-171, same rule: only evidence of *being* somewhere opens a
         // holiday. An exit is not that, and on this hardware it is usually not
         // evidence of anything — see below.
+        // ⚠ T-195: and a crossing after a long silence must not join the
+        // lapsed trip either, or a stamp would be filed in the wrong holiday.
+        await closeLapsedTrip(transition.ts);
         const trip = transitionMayStartTrip(transition.eventType)
           ? await tripDao.getOrCreateActiveTrip()
           : await tripDao.getActiveTrip();

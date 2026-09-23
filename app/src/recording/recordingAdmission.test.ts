@@ -10,6 +10,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   NOTIFICATION_REARM_AFTER_MS,
@@ -22,8 +25,10 @@ import {
   shouldRecordTransition,
   shouldRefreshGeofences,
   transitionMayStartTrip,
+  tripHasLapsed,
 } from './recordingAdmission.ts';
 import type { Bounds } from '../progress/tripEnd.ts';
+import { INACTIVITY_END_MS, detectTripEnd } from '../progress/tripEnd.ts';
 
 /** Madeira and Porto Santo together (D-021), near enough for a test. */
 const BOUNDS: Bounds = {
@@ -225,4 +230,96 @@ test('⚠ asserting does NOT also refresh — startTrip does it', () => {
   // Otherwise every launch registers the whole set twice.
   assert.equal(shouldRefreshGeofences('assert'), false);
   assert.equal(shouldRefreshGeofences('none'), false);
+});
+
+// ── T-195: a trip must be able to end after a silence, even once recording resumes ──
+
+const srcRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/** Trip 30 on the P30, from its own database (`p30-2026-09-22d`). */
+const TRIP_30 = {
+  startedTs: Date.parse('2026-08-28T10:59:56Z'),
+  lastFixBeforeGap: Date.parse('2026-08-28T12:21:25Z'),
+  firstFixAfterGap: Date.parse('2026-09-22T09:19:50Z'),
+};
+
+test('⚠⚠ T-195 — trip 30: a 24.9-day silence has lapsed when the next fix arrives', () => {
+  assert.equal(
+    tripHasLapsed(
+      { startedTs: TRIP_30.startedTs, lastFixTs: TRIP_30.lastFixBeforeGap },
+      TRIP_30.firstFixAfterGap
+    ),
+    true
+  );
+});
+
+test('T-195 — an ordinary gap in a live holiday has not lapsed', () => {
+  const lastFixTs = TRIP_30.lastFixBeforeGap;
+  // A night, a day at the pool, two days with the phone off.
+  for (const hours of [8, 26, 48, 71]) {
+    assert.equal(
+      tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs }, lastFixTs + hours * 3_600_000),
+      false,
+      `${hours} h`
+    );
+  }
+});
+
+test('T-195 — the boundary is the same one detectTripEnd uses, so they cannot disagree', () => {
+  const lastFixTs = TRIP_30.lastFixBeforeGap;
+  for (const incomingTs of [
+    lastFixTs + INACTIVITY_END_MS - 1,
+    lastFixTs + INACTIVITY_END_MS,
+    lastFixTs + INACTIVITY_END_MS + 1,
+  ]) {
+    const decision = detectTripEnd({
+      tripStartedTs: TRIP_30.startedTs,
+      now: incomingTs,
+      departureVisits: [],
+      hasTravelledElsewhere: true,
+      leftBoundsTs: null,
+      lastFixTs,
+    });
+    assert.equal(
+      tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs }, incomingTs),
+      decision.ended
+    );
+  }
+});
+
+test('T-195 — the lapsed trip ends at its last fix, not when the new evidence arrived', () => {
+  // What the sink relies on when it calls checkTripEnd(incomingTs): the souvenir
+  // must not claim 25 empty days (ARCHITECTURE §10).
+  const decision = detectTripEnd({
+    tripStartedTs: TRIP_30.startedTs,
+    now: TRIP_30.firstFixAfterGap,
+    departureVisits: [],
+    hasTravelledElsewhere: true,
+    leftBoundsTs: null,
+    lastFixTs: TRIP_30.lastFixBeforeGap,
+  });
+  assert.equal(decision.method, 'inactivity');
+  assert.equal(decision.endedTs, TRIP_30.lastFixBeforeGap);
+});
+
+test('T-195 — a trip with no fixes at all is measured from its start', () => {
+  assert.equal(
+    tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs: null }, TRIP_30.startedTs + INACTIVITY_END_MS),
+    true
+  );
+});
+
+test('⚠ T-195 — the sink asks before it stores, on both of its write paths', () => {
+  // The pure rule is worthless if nothing calls it — T-145 and T-167 were both
+  // that shape. Each handler must close a lapsed trip before choosing a trip.
+  const source = readFileSync(path.join(srcRoot, 'recording/recordingSink.ts'), 'utf8');
+  for (const handler of ['async onLocations(', 'async onGeofenceTransition(']) {
+    const start = source.indexOf(handler);
+    assert.notEqual(start, -1, handler);
+    const body = source.slice(start);
+    const close = body.indexOf('closeLapsedTrip(');
+    const choose = body.indexOf('getOrCreateActiveTrip()');
+    assert.notEqual(close, -1, `${handler} never closes a lapsed trip`);
+    assert.ok(close < choose, `${handler} chooses a trip before closing a lapsed one`);
+  }
 });

@@ -267,7 +267,14 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       2. **An outing started during a pause recorded nothing.** Starting one now ends the
          pause. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
-- [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
+- [~] **T-199** **The home map shows what there is to collect** ⇠ T-184. ✅ **Code done 2026-09-23,
+      ⚠ not yet seen on the P30.** `map/placesToCollect.ts` (8 tests) draws every uncollected place
+      as a hollow ring, with the nearest three (from the last known position) as a larger hollow
+      ring in the collected disc's grey. **D-085's rule is kept by construction:** hollow against
+      filled, a circle against Google's teardrops, grey against the blue location dot and green
+      parks, and a test checks every ring on both maps. Shown from z8, so the island view on day
+      one has them (`MIN_MARK_ZOOM` for collected stays 10). Tapping a ring opens its card, now
+      asked whether it is collected. ⚠ Judged by eye on the device next; no paint is new.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
       names *Madeira* in `strings.ts`, which breaks D-017; read the name from the content pack's
       `destination`, as the reveal does. It names the stamps, the 80

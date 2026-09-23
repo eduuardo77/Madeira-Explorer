@@ -91,6 +91,7 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
+import { buildToCollectMarks } from './placesToCollect';
 import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
@@ -285,6 +286,21 @@ export default function NativeMapScreen({
    * Falls back to the camera's own zoom before the first `onCameraMove` lands,
    * so the marks appear on the first frame rather than after the first pan.
    */
+  /**
+   * ⚠ D-085 (2026-09-23): the places still to collect, as hollow rings, the
+   * nearest three called out. Drawn *under* the collected marks, so a place
+   * is never shown as both. `placesToCollect.ts` holds the rule that they can
+   * never look collected.
+   */
+  const toCollectMarks = buildToCollectMarks({
+    places,
+    collectedIds,
+    zoom: zoom ?? camera?.zoom ?? 0,
+    position: userAt === null ? null : { lat: userAt.latitude, lon: userAt.longitude },
+    faint: PLACE_MARKER_PAINT[styleName].uncollected,
+    collected: PLACE_MARKER_PAINT[styleName].collected,
+  });
+
   const collectedMarks = buildCollectedMarks(
     places,
     collectedIds,
@@ -720,14 +736,14 @@ export default function NativeMapScreen({
         // The places already earned (T-112). Circles rather than markers
         // because a marker needs an image ref and therefore `expo-image`, which
         // this app does not carry — see `collectedMarks.ts`.
-        circles={collectedMarks}
+        circles={[...toCollectMarks, ...collectedMarks]}
         onCircleClick={(circle) => {
           const place = places.find((candidate) => candidate.id === circle.id);
           if (place !== undefined) {
             // Same route in as the passport's *Show on map* (D-052), so a mark
             // on the map and a stamp in the passport open the identical card.
-            // Only collected places are drawn, so `collected` is known.
-            setTappedPlace({ place, collected: true });
+            // ⚠ Since D-085 not every drawn place is collected, so it is asked.
+            setTappedPlace({ place, collected: collectedIds.has(place.id) });
           }
         }}
         // ⚠ The only source of the user's own zoom. Without it the marks keep

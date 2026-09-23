@@ -4607,6 +4607,11 @@ Google's POI layer stays on (its 2026-08-19 amendment).
 list in the passport (the home screen still sells nothing); a toggle (a setting, and a default
 still to choose).
 
+⚠ **It also reverses D-052 revised (2026-08-13)**, where the project lead asked for every place
+marker to go (*"I would like to delete them"*). That was about eighty equal dots competing with
+the trace. This is the same set, but hollow, small, and subordinate to the collected marks, and the
+project lead chose it with the review's evidence in hand. Built as T-199 (`placesToCollect.ts`).
+
 ## D-086 — The icon and brand mark are drawn in-house, from the stamp artwork
 
 **Status:** Accepted — the project lead, 2026-09-23 (T-186, option B).

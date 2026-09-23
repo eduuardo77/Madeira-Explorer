@@ -414,3 +414,29 @@ test('every i18n-exempt line says why', () => {
   }
   assert.deepEqual(bare, [], `An exemption without a reason is a habit, not a rule.\n${bare.join('\n')}`);
 });
+
+test('⚠ T-202 — no English inside a <Text> between {} expressions', () => {
+  // The privacy screen's dateline was `{APP_NAME} · last changed {POLICY_VERSION}`:
+  // plain JSX text between two expressions. The first test here reads only a
+  // <Text> with no braces at all, and the literal scan above reads only quoted
+  // strings, so "last changed" was English on every phone and nothing saw it.
+  const offenders: string[] = [];
+  for (const file of screens(srcRoot)) {
+    const relative = path.relative(srcRoot, file).replace(/\\/g, '/');
+    if (relative in EXEMPT) {
+      continue;
+    }
+    const source = withoutComments(readFileSync(file, 'utf8'));
+    for (const match of source.matchAll(/<Text\b[^>]*>([\s\S]*?)<\/Text>/g)) {
+      let inner = match[1];
+      // Drop expressions (innermost first), then any nested elements.
+      for (let i = 0; i < 5; i += 1) inner = inner.replace(/\{[^{}]*\}/g, ' ');
+      inner = inner.replace(/<[^>]*>/g, ' ').trim();
+      if (/[A-Za-z]{2,}/.test(inner)) {
+        offenders.push(`${relative}: <Text>…${inner}…</Text>`);
+      }
+    }
+  }
+  assert.deepEqual(offenders, [], offenders.join('\n'));
+});
+

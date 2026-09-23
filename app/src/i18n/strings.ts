@@ -374,6 +374,8 @@ export const STRINGS = {
   'passport.title': s('Passport', 'Passaporte', 'Reisepass'),
   'passport.back': s('Map', 'Mapa', 'Karte'),
   'passport.seeAll': s('See all', 'Ver tudo', 'Alle ansehen'),
+  // T-202: under the rows, the date of the newest stamp.
+  'passport.mostRecent': s('Most recent: {date}', 'Mais recente: {date}', 'Zuletzt: {date}'),
   'passport.showLess': s('Show less', 'Ver menos', 'Weniger anzeigen'),
   'passport.share': s('Share', 'Partilhar', 'Teilen'),
   'passport.sharing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
@@ -582,6 +584,23 @@ export const STRINGS = {
   ),
 
   'privacy.title': s('Your privacy', 'A sua privacidade', 'Ihre Privatsphäre'),
+  // ⚠ T-202: the dateline under the title said "last changed" in English on
+  // every phone. It sat as plain JSX text between two {} expressions, which no
+  // i18n check read; `i18nCoverage.test.ts` does now.
+  'privacy.lastChanged': s('{app} · last changed {date}', '{app} · alterada em {date}', '{app} · zuletzt geändert am {date}'),
+  // T-202: the open-source licences screen.
+  'licences.title': s('Open-source licences', 'Licenças de código aberto', 'Open-Source-Lizenzen'),
+  'licences.note': s(
+    '{app} is built with {count} open-source packages, listed below with their licences. Google Maps and Google Play services are used under Google’s own terms.',
+    'O {app} é feito com {count} pacotes de código aberto, listados abaixo com as suas licenças. O Google Maps e os serviços Google Play são usados nos termos da própria Google.',
+    '{app} nutzt {count} Open-Source-Pakete, unten mit ihren Lizenzen aufgeführt. Google Maps und die Google Play-Dienste werden zu Googles eigenen Bedingungen verwendet.'
+  ),
+  'licences.noText': s(
+    'Released under {license}. The package ships no licence file of its own.',
+    'Publicado sob {license}. O pacote não traz ficheiro de licença próprio.',
+    'Veröffentlicht unter {license}. Das Paket enthält keine eigene Lizenzdatei.'
+  ),
+  'licences.a11y.back': s('Back to settings', 'Voltar às definições', 'Zurück zu den Einstellungen'),
   'privacy.a11y.back': s(
     'Back to settings',
     'Voltar às definições',
@@ -783,6 +802,7 @@ export const STRINGS = {
     'Automatisch folgt Ihrem Telefon.'
   ),
   'settings.about.contact': s('Contact us', 'Contactar-nos', 'Kontakt'),
+  'settings.about.licences': s('Open-source licences', 'Licenças de código aberto', 'Open-Source-Lizenzen'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),
   'settings.help.footnote': s(

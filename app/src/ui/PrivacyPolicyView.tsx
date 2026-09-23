@@ -20,7 +20,6 @@
  * Presentational: props in, pixels out, so the workbench can mount it (D-038).
  */
 
-import { APP_NAME } from '../brand';
 import { deviceLanguage, t } from '../i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
@@ -39,7 +38,7 @@ export default function PrivacyPolicyView({
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.heading}>{t('privacy.title')}</Text>
         <Text style={styles.dateline}>
-          {APP_NAME} · last changed {POLICY_VERSION}
+          {t('privacy.lastChanged', { date: POLICY_VERSION })}
         </Text>
 
         {policySections(deviceLanguage()).map((section) => (

@@ -68,6 +68,8 @@ export type SettingsViewProps = {
    */
   onOpenBatterySettings: (() => void) | null;
   onOpenPrivacyPolicy: () => void;
+  /** The open-source licences (T-202). Absent hides the row (the workbench). */
+  onOpenLicences?: () => void;
   /**
    * The debug screen. **Undefined in every release build** (T-189), which hides
    * the row: `App.tsx` passes it only under `__DEV__`.
@@ -329,6 +331,7 @@ export default function SettingsView({
   onOpenSystemSettings,
   onOpenBatterySettings,
   onOpenPrivacyPolicy,
+  onOpenLicences,
   onOpenDebug,
   onEraseRequested,
   onDonateWalk,
@@ -550,6 +553,9 @@ export default function SettingsView({
           <Action label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
           {onContact === undefined ? null : (
             <Action label={t('settings.about.contact')} onPress={onContact} />
+          )}
+          {onOpenLicences === undefined ? null : (
+            <Action label={t('settings.about.licences')} onPress={onOpenLicences} />
           )}
           {version === undefined ? null : (
             <Row label={t('settings.about.version')} value={version} />

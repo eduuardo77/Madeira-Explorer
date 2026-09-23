@@ -518,9 +518,14 @@ export default function PassportView({
 
       {awards.length > 0 ? (
         <Text style={styles.footnote}>
-          Most recent: {new Date(
-            Math.max(...awards.map((award) => award.awarded_ts))
-          ).toLocaleDateString()}
+          {/* ⚠ T-202: "Most recent:" was English on every phone, as JSX text
+              beside an expression, which no check read until the gate that
+              found it (i18nCoverage.test.ts). */}
+          {t('passport.mostRecent', {
+            date: new Date(
+              Math.max(...awards.map((award) => award.awarded_ts))
+            ).toLocaleDateString(),
+          })}
         </Text>
       ) : null}
     </ScrollView>

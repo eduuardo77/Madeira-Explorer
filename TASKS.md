@@ -312,7 +312,19 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       information (length, difficulty, access) for all 80 places, stored in `content/` (D-017),
       drafted and vetoed as D-064 sets out; a dimmed backdrop behind the sheet. Photos only with
       clear rights. **The biggest single job in this plan.**
-- [ ] **T-202** **Settings for a store app** — P1-6. Half the copy, and explain the *Abrir
+- [~] **T-202** ✅ **Code done 2026-09-23 in three parts; ⚠ not yet on the P30.**
+      1. Copy about half the length. The button reads *Alterar acesso à localização*, and the
+         footnote names *"Permitir sempre"*. About shows the version. *Contactar-nos* stays
+         hidden until `CONTACT_EMAIL` exists (T-187).
+      2. A language choice (*Automático (…)* / English / Português / Deutsch), applied before the
+         first screen and in both background tasks.
+      3. An open-source licences screen from `tools/build-licences.mjs` (119 npm packages).
+         `licences.test.ts` fails if a direct dependency is missing. ⚠ Native Android libraries
+         are named with Google's terms, not listed: that needs Google's oss-licenses plugin.
+      ⚠ **Found along the way:** two more English strings on every phone, *"last changed"* (privacy
+      screen) and *"Most recent:"* (passport). Both were JSX text beside `{}` expressions, which no
+      check read. The i18n gate now does, and it found the second one itself.
+      Restore purchase waits for T-156. **Settings for a store app** — P1-6. Half the copy, and explain the *Abrir
       definições do telemóvel* button. Add version, language choice, support contact and
       open-source licences; add restore purchase with T-156.
 - [ ] **T-203** **A design pass on the passport and the empty state** — P2-5, P2-6, P2-7, P2-8.

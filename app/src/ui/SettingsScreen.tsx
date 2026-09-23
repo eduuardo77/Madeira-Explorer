@@ -55,6 +55,7 @@ import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
+import LicencesView from './LicencesView';
 import Constants from 'expo-constants';
 import { CONTACT_EMAIL } from '../legal/privacyPolicy';
 import { buildDonation, sendDonation } from '../souvenir/donateWalk';
@@ -81,6 +82,7 @@ export default function SettingsScreen({
   const [confirmingErase, setConfirmingErase] = useState(false);
   const [erased, setErased] = useState(false);
   const [showingPolicy, setShowingPolicy] = useState(false);
+  const [showingLicences, setShowingLicences] = useState(false);
   /** True while a walk report is being assembled (OD-11, D-069). */
   const [donating, setDonating] = useState(false);
   /** T-202: the language chosen here, or null to follow the phone. */
@@ -205,6 +207,9 @@ export default function SettingsScreen({
     );
   }
 
+  if (showingLicences) {
+    return <LicencesView onClose={() => setShowingLicences(false)} />;
+  }
   if (showingPolicy) {
     return <PrivacyPolicyView onClose={() => setShowingPolicy(false)} />;
   }
@@ -309,6 +314,7 @@ export default function SettingsScreen({
       // Shown in the app rather than opened in a browser: this app makes no
       // network requests (D-001), and the reader may well have no signal.
       onOpenPrivacyPolicy={() => setShowingPolicy(true)}
+      onOpenLicences={() => setShowingLicences(true)}
       onOpenDebug={onOpenDebug}
       onEraseRequested={() => setConfirmingErase(true)}
       donating={donating}

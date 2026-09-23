@@ -279,6 +279,18 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       parks, and a test checks every ring on both maps. Shown from z8, so the island view on day
       one has them (`MIN_MARK_ZOOM` for collected stays 10). Tapping a ring opens its card, now
       asked whether it is collected. ⚠ Judged by eye on the device next; no paint is new.
+      — **Seen on the P30 2026-09-23** (build from `c15c8a9`, one screenshot at street zoom):
+      - ✅ The ring renders hollow and grey, and reads as neither a stamp, a Google teardrop nor
+        the location dot. D-085's hard rule holds on the device.
+      - ⚠⚠ **But it does not yet do the job P1-1 asked for.** The ring has **no label**, and it
+        sits just below **Google's own pin for the same beach** (*Praia dos Reis Magos*). A new
+        user sees an unexplained small circle beside a named green pin. With one place in view,
+        the "nearest" call-out cannot be told from a plain ring. **Needs a design answer, not a
+        tweak.** Candidates to put to the project lead: a label on the nearest ones (expo-maps
+        markers need `expo-image`, see `collectedMarks.ts`), hiding Google's POI pin where one of
+        ours sits, or a one-line *"3 lugares perto de si"* entry into the passport.
+      - ⚠ **Not seen:** the island view with all 80 (adb cannot pinch), and the tap to open a
+        ring's card (the phone had locked).
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
       names *Madeira* in `strings.ts`, which breaks D-017; read the name from the content pack's
       `destination`, as the reveal does. It names the stamps, the 80

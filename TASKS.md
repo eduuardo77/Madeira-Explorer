@@ -75,21 +75,21 @@ T-164 import, T-105b video, T-168–T-170 trace work, and new content.
 
 Nothing that depends on one of these starts until it is made. Each becomes a D-entry once decided.
 
-- [ ] **T-182** **Decide what the paywall does at launch** — P0-3. Three options: billing in
+- [x] **T-182** ✅ **Decided 2026-09-23: A — D-084.** **Decide what the paywall does at launch** — P0-3. Three options: billing in
       public v1, or a v1 with no lock (then say how early users are grandfathered, since D-075
       never takes a visible stamp away), or dropping the lock idea. *Recommended: run the beta
       unlocked, and ship public v1 with T-156.*
-- [ ] **T-183** **Decide what "recording" means** — P1-2. Today the home button says *Começar a
+- [~] **T-183** ⚠ **Direction given 2026-09-23: model it on WalkNYC's recorder** (`docs/reference-app-teardown.md` items 4, 6, 15). The proposal is to be written and confirmed before T-198. **Decide what "recording" means** — P1-2. Today the home button says *Começar a
       registar* while background recording is already on. *Recommended: background recording is
       the product. The home control shows the real state, and "Start" appears only when
       background permission was refused (D-008).*
-- [ ] **T-184** **Decide whether the home map shows places not yet collected** — P1-1. This
+- [x] **T-184** ✅ **Decided 2026-09-23: A — D-085.** **Decide whether the home map shows places not yet collected** — P1-1. This
       revisits D-070 (Provisional). *Recommended: faint marks for all 80, with the nearest one to
       three called out.*
-- [ ] **T-185** **Decide how a trip ends when nobody flies home** — P1-7: residents, long stays,
+- [ ] **T-185** ⚠ **Still open 2026-09-23: the project lead does not know yet.** Fix T-195 first; it may shrink the question. **Decide how a trip ends when nobody flies home** — P1-7: residents, long stays,
       and a phone that is off on the flight. *Recommended: fix T-195 first, then add a manual
       "finish this trip".*
-- [ ] **T-186** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
+- [x] **T-186** ✅ **Decided 2026-09-23: B, in-house from the stamp art — D-086.** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
       designer. The project has nobody to judge artwork.*
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
@@ -97,7 +97,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 
 ### Stage 1 — Release hygiene (desk work, small items, done in parallel)
 
-- [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186 —
+- [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186, T-187 (trademark search first) — D-086. A pure module plus a second renderer, like the stamps —
       P0-1. Replaces Expo's template. Verified by eye on the P30's home screen and status bar;
       one screenshot is justified here.
 - [ ] **T-189** **Only dev and field builds can reach the debug screen** — P0-2. `DebugScreen`

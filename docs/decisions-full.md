@@ -3459,6 +3459,8 @@ recommendation in OD-11 was this *first* rather than this *only*.
 
 **Status:** Provisional · **Date:** 2026-08-17 · **Tasks:** T-152, T-153, T-112
 
+⚠ **Amended 2026-09-23 by D-085:** the map also shows the places still to collect, as faint marks, with the nearest called out. *"Nothing else"* no longer holds.
+
 ### The problem, found by looking rather than by testing
 
 The primary screen said `1 / 60` in its hero and **marked nothing on the map**. Worse, Google's
@@ -4557,3 +4559,67 @@ the build if a locked stamp is ever chosen.
 measured **2.63:1** on the night map, under the 3:1 floor for a control. On the project lead's
 yes, it now wears a thin light edge there only — `mapChrome.dark.border` (4.10:1), the edge the
 night map's other controls already use. On the light map it needed nothing (4.42:1).
+
+## D-084 — Public v1 ships with Play Billing working; the closed beta runs unlocked
+
+**Status:** Accepted — the project lead, 2026-09-23 (T-182, option A). ⚠ The *beta runs unlocked*
+half came with the recommendation and was not confirmed separately. Treat that half as Provisional.
+
+**The problem.** The build locks stamp 11 onward (T-155, D-075), and nothing lets a user pay
+(T-156). A padlock with no purchase screen reads as a broken reward
+(`docs/app-review-2026-09-22.md`, P0-3).
+
+**The decision.** No public release until billing works end to end: purchase, restore (offline
+after the first sync), and refunds. Closed-beta builds carry the entitlement open, so testers
+never meet a lock they cannot open, and their trips produce complete data.
+
+**Rejected.**
+- **Launch unlocked, add billing later.** D-075 never takes a visible stamp away, so every early
+  user would have to be grandfathered for good. They are the keenest users, and they would never
+  pay. The flag is local and is lost on reinstall. And the update that adds the lock draws "the
+  update made it worse" reviews.
+- **Drop the stamp paywall.** It reopens D-072.
+
+**Why not the cheap path.** Break-even is $25 (D-072), so revenue is not urgent. What billing at
+launch buys is *learning whether anyone pays*, without spending the early users to get there.
+
+**Cost, already on record in T-156.** It is the app's first network call of its own. The privacy
+wording, the Data Safety answers (T-122) and T-117b/T-127 all have to be restated before release.
+
+## D-085 — The home map shows the places still to collect (amends D-070)
+
+**Status:** Accepted — the project lead, 2026-09-23 (T-184, option A with the recommendation).
+
+**The problem.** Under D-070, a new user at 0 stamps sees Google's map, Google's own pins and a
+button. Nothing shows the 80 places, even though they are what the product sells
+(review P1-1).
+
+**The decision.** Every place in the pack is drawn as a **faint mark**. The **nearest one to
+three** not yet collected are called out. Collected places keep D-070's ring-and-disc mark.
+⚠ **The one hard rule: a faint mark must never be mistakable for a collected one, or for a
+Google pin.** Three marks on one map, judged by eye at street zoom and island zoom, on both map
+styles. Contrast is measured the way D-070's marks were.
+
+**What of D-070 stands.** Collected places are the app's own marks; the chrome follows the map;
+Google's POI layer stays on (its 2026-08-19 amendment).
+
+**Rejected.** Only the nearest 1–3 (hides how big the collection is); nothing on the map with a
+list in the passport (the home screen still sells nothing); a toggle (a setting, and a default
+still to choose).
+
+## D-086 — The icon and brand mark are drawn in-house, from the stamp artwork
+
+**Status:** Accepted — the project lead, 2026-09-23 (T-186, option B).
+
+**The decision.** The launcher icon, adaptive icon, splash and notification icon are derived from
+the stamp artwork system (D-046, D-079), so the icon and the passport read as one product. They
+follow the project's rule for artwork (CLAUDE.md): **the design is a pure module, a second
+renderer draws what ships, and it is looked at as well as measured.** Checks: legible at 48 px,
+the notification icon as a flat silhouette, and the adaptive icon's safe zone under every mask
+shape.
+
+**Order.** The trademark search on "Proa" (D-074, T-187) comes first: a mark drawn for a name
+that may change is wasted.
+
+**Rejected.** A paid designer (recommended, declined). AI generation (uniqueness and trademark
+risk, and weakest for a mark to be registered).

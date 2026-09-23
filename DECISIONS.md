@@ -98,7 +98,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-067** | The accuracy cut is a preference, not a veto. A canopy stretch still draws. | Provisional |
 | **D-068** | A levada is credited by time as well as distance. You cannot always finish one. | Provisional |
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
-| **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. | Provisional |
+| **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. ⚠ *Amended by D-085.* | Provisional |
 | **D-071** | The map is the product. ⚠ **Partly reversed 2026-08-17: stamps are a priority again** (D-072 made them the revenue). | **Superseded in part** |
 | **D-072** | **Free on Play. Trace always free; 10 stamps + your first levada free; €4.99 unlocks the rest.** | **Accepted** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
@@ -112,6 +112,9 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-081** | The **pedometer waits for v2** — expo-sensors cannot read Android step history — and `ACTIVITY_RECOGNITION` is stripped meanwhile. | **Accepted** |
 | **D-082** | The drawn trace gets **cleanup wired in, an honest line weight, and snapping only to shipped levada courses** — general matching stays deferred. | **Provisional** |
 | **D-083** | The passport button **is your latest visible stamp**, with the rank as a **metal rim and dark hairline**; the count leaves the button. | **Accepted** |
+| **D-084** | **Public v1 ships with Play Billing working**; the closed beta runs unlocked. | **Accepted** |
+| **D-085** | The home map shows **every place faintly** and calls out the **nearest 1–3** — amends D-070. | **Accepted** |
+| **D-086** | The icon and brand mark are **drawn in-house from the stamp artwork**, after the trademark search. | **Accepted** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

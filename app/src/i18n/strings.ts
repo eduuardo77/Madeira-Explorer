@@ -39,7 +39,8 @@ const s = (en: string, pt: string, de: string): Phrase => ({ en, pt, de });
 
 export const STRINGS = {
   // ── Onboarding (T-114, D-041) ───────────────────────────────────────────
-  'onboarding.welcome.title': s('Welcome', 'Bem-vindo', 'Willkommen'),
+  // T-191: "Bem-vindo" addresses a man; "Boas-vindas" addresses anyone.
+  'onboarding.welcome.title': s('Welcome', 'Boas-vindas', 'Willkommen'),
   // ⚠ Never rendered until T-054 measures the figure (D-041); translated ahead of it.
   'onboarding.battery': s(
     'Recording uses about {percent}% of your battery per day.',
@@ -395,7 +396,6 @@ export const STRINGS = {
   // remember — the same rule `brand.test.ts` enforces for the app's name.
   'common.done': s('Done', 'Concluído', 'Fertig'),
   'common.close': s('Close', 'Fechar', 'Schließen'),
-  'passport.toCollect': s('places to collect', 'lugares por visitar', 'Orte zu sammeln'),
   'passport.invitation': s(
     'These are the places. Go to one and it fills in by itself.',
     'Estes são os lugares. Vá a um e ele preenche-se sozinho.',
@@ -423,10 +423,33 @@ export const STRINGS = {
     '{name}, ainda não visitado. Abrir para ver no mapa.',
     '{name}, noch nicht gesammelt. Öffnen, um es auf der Karte zu zeigen.'
   ),
-  'passport.a11y.seeAllRow': s(
-    'See all {total} {category}',
-    'Ver todos os {total} {category}',
-    'Alle {total} {category} ansehen'
+  // ⚠ T-191: one sentence per category, never "{category}" spliced in. The
+  // shared form read "Ver todos os 19 Aldeias": aldeias, levadas and praias are
+  // feminine, and the article has to agree with the noun it cannot see.
+  'passport.a11y.seeAll.viewpoint': s(
+    'See all {total} viewpoints',
+    'Ver os {total} miradouros',
+    'Alle {total} Aussichtspunkte ansehen'
+  ),
+  'passport.a11y.seeAll.levada': s(
+    'See all {total} levadas',
+    'Ver as {total} levadas',
+    'Alle {total} Levadas ansehen'
+  ),
+  'passport.a11y.seeAll.village': s(
+    'See all {total} villages',
+    'Ver as {total} aldeias',
+    'Alle {total} Dörfer ansehen'
+  ),
+  'passport.a11y.seeAll.beach': s(
+    'See all {total} beaches',
+    'Ver as {total} praias',
+    'Alle {total} Strände ansehen'
+  ),
+  'passport.a11y.seeAll.landmark': s(
+    'See all {total} landmarks',
+    'Ver os {total} monumentos',
+    'Alle {total} Sehenswürdigkeiten ansehen'
   ),
   'passport.a11y.collapseRow': s(
     'Collapse {category} back to one row',
@@ -596,9 +619,12 @@ export const STRINGS = {
   ),
   'settings.section.quality': s('How closely', 'Com que detalhe', 'Wie genau'),
   'settings.quality.footnote': s(
-    'Each one changes how often the app asks your phone where you are, which is what uses the battery. We would rather show you a measured number than a guess, and measuring it needs a real phone — so for now the difference is described instead.',
-    'Cada opção muda a frequência com que a aplicação pergunta ao telemóvel onde está, e é isso que gasta bateria. Preferimos mostrar-lhe um número medido a um palpite, e medi-lo exige um telemóvel real — por isso, para já, a diferença é descrita.',
-    'Jede Stufe ändert, wie oft die App Ihr Telefon nach dem Standort fragt — und genau das verbraucht Akku. Wir zeigen lieber einen gemessenen Wert als eine Schätzung, und dafür braucht es ein echtes Telefon. Bis dahin wird der Unterschied beschrieben.'
+    // ⚠ T-191: this used to add that measuring the cost "needs a real phone" —
+    // true, and a sentence telling every user the app had never been measured
+    // on one. The number itself stays unstated until T-054 (D-041).
+    'Each one changes how often the app asks your phone where you are, which is what uses the battery. The more closely it follows you, the more battery it uses.',
+    'Cada opção muda a frequência com que a aplicação pergunta ao telemóvel onde está, e é isso que gasta bateria. Quanto mais de perto o acompanha, mais bateria gasta.',
+    'Jede Stufe ändert, wie oft die App Ihr Telefon nach dem Standort fragt — und genau das verbraucht Akku. Je genauer sie Ihnen folgt, desto mehr Akku braucht sie.'
   ),
   'settings.quality.saver': s('Battery saver', 'Poupança de bateria', 'Akkusparen'),
   'settings.quality.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),

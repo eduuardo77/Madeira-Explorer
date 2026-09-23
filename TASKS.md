@@ -127,7 +127,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       modules take a `Language` parameter. Do the gate first and watch it fail on these leaks.
       Done when a `pt-PT` dump of the place card, share card and passport has no English. That
       dump also confirms P2-4 (fixed in `e1d0b8c`).
-- [ ] **T-191** **Portuguese copy** — P2-1, P2-2, P2-3, P1-6:
+- [~] **T-191** ✅ **Code done 2026-09-23, ⚠ not yet on the P30.** One "see all" sentence per category,
+      *Boas-vindas*, and the caption under the number is `passport.collected` at zero too (*0 / 80
+      lugares visitados*). The quality footnote no longer tells users measuring needs a real phone;
+      it says what the setting trades, still without a number (D-041). ⚠ German is still unreviewed
+      (T-160a). **Portuguese copy** — P2-1, P2-2, P2-3, P1-6:
       - one "Ver todos…" string per category (*os 19 Aldeias* is a gender error; check German's
         genders too)
       - *Boas-vindas* instead of *Bem-vindo*

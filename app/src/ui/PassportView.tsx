@@ -58,6 +58,7 @@ import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
 import { n, t } from '../i18n';
+import type { StringKey } from '../i18n/strings';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
@@ -103,6 +104,15 @@ const LOCK_GLYPH = 12;
  * once at import, before the device language is known, and every user would get
  * whichever language happened to load first.
  */
+/** T-191: one whole sentence per category, so the article agrees with its noun. */
+const SEE_ALL_KEYS = {
+  viewpoint: 'passport.a11y.seeAll.viewpoint',
+  levada: 'passport.a11y.seeAll.levada',
+  village: 'passport.a11y.seeAll.village',
+  beach: 'passport.a11y.seeAll.beach',
+  landmark: 'passport.a11y.seeAll.landmark',
+} as const satisfies Record<Category, StringKey>;
+
 const categoryLabel = (category: Category): string =>
   ({
     viewpoint: t('passport.category.viewpoint'),
@@ -366,10 +376,7 @@ function CategoryRow({
               accessibilityLabel={
                 expanded
                   ? t('passport.a11y.collapseRow', { category: categoryLabel(category) })
-                  : t('passport.a11y.seeAllRow', {
-                      total,
-                      category: categoryLabel(category),
-                    })
+                  : t(SEE_ALL_KEYS[category], { total })
               }
               onPress={() => setExpanded((open) => !open)}
               // The word is small, so the tap target is grown around it
@@ -440,14 +447,12 @@ export default function PassportView({
             <Text style={styles.heroTotal}> / {progress.total}</Text>
           </Text>
           <Text style={styles.heroLabel}>
-            {/* ⚠ Zero is not the plural of anything here — it is a different
-                sentence. Before you have been anywhere the number is a target
-                ("places to collect"), and afterwards it is a record ("places
-                collected"). `n()` handles one-versus-many; the zero case is its
-                own string. */}
-            {progress.collected === 0
-              ? t('passport.toCollect')
-              : n('passport.collected', progress.collected)}
+            {/* ⚠ T-191: the caption names what the big number counts, at zero
+                too. It used to switch to "places to collect" at zero, and on
+                a Portuguese phone "0 / 80 lugares por visitar" read backwards:
+                the number counted visits and the words counted what was left
+                (review P2-3). Zero takes the plural in all three languages. */}
+            {n('passport.collected', progress.collected)}
           </Text>
           {progress.collected === 0 ? (
             <Text style={styles.heroInvitation}>{t('passport.invitation')}</Text>

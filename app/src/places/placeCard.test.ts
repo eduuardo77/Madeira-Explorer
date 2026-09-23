@@ -157,7 +157,7 @@ test('⚠ T-190 — on a Portuguese phone the card has no English in it', () => 
   // Review P1-4, seen on the P30: "VIEWPOINT" and "13 km away, in a straight line".
   const card = buildPlaceCard(input({ category: 'viewpoint', collected: true, language: 'pt' }));
   assert.equal(card.categoryLabel, 'Miradouro');
-  assert.equal(card.metaLabel, 'Miradouro · Visitado');
+  assert.equal(card.metaLabel, 'Miradouro · Já lá esteve');
   assert.equal(card.distanceSentence, 'A 1,1 km, em linha reta');
 });
 

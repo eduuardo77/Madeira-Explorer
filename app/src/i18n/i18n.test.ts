@@ -181,3 +181,17 @@ test('⚠ T-193 — the permission texts in app.json make no promise the app can
   // And the probe is real: the permission texts are in what it read.
   assert.ok(texts.some((text) => /never sent to us/.test(text)));
 });
+
+test('⚠ T-191 — no Portuguese adjective agrees with a placeholder it cannot see', () => {
+  // Seen on the P30: "Levada do Furado, ainda não visitado", "Aldeia · Visitado",
+  // "Ver todos os 19 Aldeias". A {name} or {category} can be either gender.
+  const agreeing = /\{(name|category)\}[^{]{0,40}\b(visitad[oa]s?|colecionad[oa]s?|todos os|todas as)\b/i;
+  const found: string[] = [];
+  const all = { ...STRINGS, ...Object.fromEntries(
+    Object.entries(PLURALS).flatMap(([k, v]) => [[`${k}.one`, v.one], [`${k}.other`, v.other]])
+  ) } as Record<string, { pt: string }>;
+  for (const [key, phrase] of Object.entries(all)) {
+    if (agreeing.test(phrase.pt)) found.push(`${key}: ${phrase.pt}`);
+  }
+  assert.deepEqual(found, []);
+});

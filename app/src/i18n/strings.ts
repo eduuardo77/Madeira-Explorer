@@ -38,6 +38,12 @@ import type { Phrase, PluralPhrase } from './translate.ts';
 const s = (en: string, pt: string, de: string): Phrase => ({ en, pt, de });
 
 export const STRINGS = {
+  // ⚠ T-191 (found on the P30, 2026-09-23): no Portuguese phrase may make an
+  // adjective agree with a noun it cannot see. "{name}, ainda não visitado"
+  // read "Levada do Furado, ainda não visitado", and "{category} · Visitado"
+  // read "Aldeia · Visitado". Place names and categories come in both genders,
+  // so these say "já lá esteve" / "ainda por visitar", which agree with nothing.
+  // `i18n.test.ts` fails the build on a placeholder followed by "visitado".
   // ── Onboarding (T-114, D-041) ───────────────────────────────────────────
   // T-191: "Bem-vindo" addresses a man; "Boas-vindas" addresses anyone.
   'onboarding.welcome.title': s('Welcome', 'Boas-vindas', 'Willkommen'),
@@ -372,7 +378,7 @@ export const STRINGS = {
   // Nothing here may read as a scolding or as a countdown.
   'passport.locked.a11y': s(
     '{name}, collected. Unlock your passport to see this stamp.',
-    '{name}, visitado. Desbloqueie o seu passaporte para ver este carimbo.',
+    '{name}: já lá esteve. Desbloqueie o seu passaporte para ver este carimbo.',
     '{name}, gesammelt. Schalten Sie Ihren Reisepass frei, um diesen Stempel zu sehen.'
   ),
   'passport.locked.badge.a11y': s('Locked', 'Bloqueado', 'Gesperrt'),
@@ -425,12 +431,12 @@ export const STRINGS = {
   'passport.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
   'passport.a11y.stampCollected': s(
     '{name}, collected. Open to show it on the map.',
-    '{name}, visitado. Abrir para ver no mapa.',
+    '{name}: já lá esteve. Abrir para ver no mapa.',
     '{name}, gesammelt. Öffnen, um es auf der Karte zu zeigen.'
   ),
   'passport.a11y.stampUncollected': s(
     '{name}, not collected yet. Open to show it on the map.',
-    '{name}, ainda não visitado. Abrir para ver no mapa.',
+    '{name}: ainda por visitar. Abrir para ver no mapa.',
     '{name}, noch nicht gesammelt. Öffnen, um es auf der Karte zu zeigen.'
   ),
   // ⚠ T-191: one sentence per category, never "{category}" spliced in. The
@@ -468,7 +474,7 @@ export const STRINGS = {
   ),
   'stamp.a11y.notCollected': s(
     '{name}, not collected yet',
-    '{name}, ainda não visitado',
+    '{name}: ainda por visitar',
     '{name}, noch nicht gesammelt'
   ),
 
@@ -479,7 +485,7 @@ export const STRINGS = {
   'placeCard.category.village': s('Village', 'Aldeia', 'Dorf'),
   'placeCard.category.beach': s('Beach', 'Praia', 'Strand'),
   'placeCard.category.landmark': s('Landmark', 'Monumento', 'Sehenswürdigkeit'),
-  'placeCard.collected': s('{category} · Collected', '{category} · Visitado', '{category} · Gesammelt'),
+  'placeCard.collected': s('{category} · Collected', '{category} · Já lá esteve', '{category} · Gesammelt'),
   // ⚠ One sentence, not a number and a note: the qualification has to travel
   // with the number in every language (placeCard.ts rule 2).
   'placeCard.distance': s(

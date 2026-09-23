@@ -100,8 +100,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186, T-187 (trademark search first) — D-086. A pure module plus a second renderer, like the stamps —
       P0-1. Replaces Expo's template. Verified by eye on the P30's home screen and status bar;
       one screenshot is justified here.
-- [~] **T-189** ✅ **Code done 2026-09-23, ⚠ not yet seen on the P30: `__DEV__` only, and the field
-      build loses the screen too.** ⚠ **This reverses the note below, which I wrote the same day.** A
+- [x] **T-189** ✅ **Seen on the P30 2026-09-23** (field build from `2ea386f`): Settings → *Sobre* shows
+      only *Privacidade*. **`__DEV__` only, and the field build loses the screen too.** ⚠ **This reverses the note below, which I wrote the same day.** A
       flag inlined into the JS bundle is not a Gradle or Metro input, so a bundle built under one
       setting can be reused under the other. That is T-180's stale-bundle shape, and here it would
       put the debug route into a *store* build. Field work reads the phone through `dumpsys` and
@@ -113,7 +113,10 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       técnicos* link must not exist in a store build. ⚠ **Not `__DEV__` alone**: that would also
       strip it from the field build (`-PproaFieldBuild`, `docs/dev-build.md`), which is how the
       P30 gets inspected. Gate it on a build flag, and add a test that finds any ungated route.
-- [~] **T-190** ✅ **Code done 2026-09-23; ⚠ not yet seen on the P30.** The new gate reads every
+- [~] **T-190** ✅ **Code done 2026-09-23. Seen on the P30 (pt-PT) the same day:** the place card reads
+      *MIRADOURO · Pico do Areeiro · Santana · A 13 km, em linha reta*; every passport label is
+      Portuguese and each stamp is read once (P2-4). ⚠ **Not yet seen, because they need a stamp or
+      a trip end:** the share image, the refusal alerts, the confirmation prompt, the reveal. The new gate reads every
       string literal in every `.ts`/`.tsx`, and a second test forbids any screen from rendering a
       diary `reason`. **It found more than the review did:** the stamp confirmation prompt
       (English, *and* it repeated its own last clause), the share sheet's title, every share or
@@ -127,7 +130,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       modules take a `Language` parameter. Do the gate first and watch it fail on these leaks.
       Done when a `pt-PT` dump of the place card, share card and passport has no English. That
       dump also confirms P2-4 (fixed in `e1d0b8c`).
-- [~] **T-191** ✅ **Code done 2026-09-23, ⚠ not yet on the P30.** One "see all" sentence per category,
+- [x] **T-191** ✅ **Seen on the P30 2026-09-23:** *0 / 80 lugares visitados*, *Ver as 18 levadas*, *Ver os
+      19 miradouros*, and the new footnote. ⚠ **The device found one more of the same kind:**
+      *"Levada do Furado, ainda não visitado"*. `{name}` can be either gender, and so can the card's
+      *"{category} · Visitado"*, which I had written that morning (*Aldeia · Visitado*). All five now
+      say *já lá esteve* / *ainda por visitar*, which agree with nothing, and `i18n.test.ts` fails
+      on an agreeing word after `{name}`/`{category}` (checked by planting the old phrase). One "see all" sentence per category,
       *Boas-vindas*, and the caption under the number is `passport.collected` at zero too (*0 / 80
       lugares visitados*). The quality footnote no longer tells users measuring needs a real phone;
       it says what the setting trades, still without a number (D-041). ⚠ German is still unreviewed
@@ -138,7 +146,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       - a "0 / 80" caption that names what the number counts
       - remove the Settings sentence saying the app has not been tested on a real phone
         (`strings.ts` ~519)
-- [~] **T-192** ✅ **Code done 2026-09-23, ⚠ not yet on the P30.** ⚠ view-shot's `fileName` option
+- [~] **T-192** ✅ **Code done 2026-09-23. Seen on the P30: Share is disabled at 0 / 80.** ⚠ The file name
+      cannot be seen until there is a stamp to share. ⚠ view-shot's `fileName` option
       still appends digits (`File.createTempFile`), so the capture is *moved* to
       `<APP_NAME>-YYYY-MM-DD.png` in the cache; a failed move falls back to the old name, logged.
       Share is disabled at 0 stamps, with a screen-reader hint saying why.
@@ -154,7 +163,14 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       checked by test only. **No absolute privacy claims anywhere** — P0-7. Rewrite the iOS purpose strings
       in `app.json` (*"never uploaded"*, *"Nothing is uploaded"*) to the in-app wording, and
       extend `brand.test.ts` to reject the phrases D-073 forbids in `app.json` and `strings.ts`.
-- [ ] **T-194** **Trim the release manifest** ⇠ T-117c. Settle T-117c (FCM only for local
+- [~] **T-194** ✅ **Done 2026-09-23; seen on the P30:** `dumpsys package` lists **12** requested
+      permissions: location ×3, foreground service ×2, internet, network state, notifications,
+      boot, wake lock, vibrate, and AndroidX's own receiver permission. Push, the install referrer
+      and all **20** ShortcutBadger entries (the review counted 17) are gone. Only the
+      *permissions* are stripped; the libraries stay, so nothing can fail on a missing class.
+      `releasePermissions.test.ts` pins both directions: what must go, and what must never go.
+      ⚠ A D-011 notification has not fired on this build yet. Local notifications do not use FCM, so
+      none should be affected, but that is reasoning, not observation. **Trim the release manifest** ⇠ T-117c. Settle T-117c (FCM only for local
       notifications), then strip the 17 launcher-badge permissions if the badge is not used.
       Re-read `dumpsys package` on the P30 to confirm.
 

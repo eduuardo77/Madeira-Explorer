@@ -42,13 +42,9 @@
  * failure mode as the `-gpu host` flag which kept its justification after the
  * thing it justified was deleted.
  *
- * ⚠⚠ **WHAT THIS DOES NOT FIX.** The same APK also carries
- * `com.google.android.c2dm.permission.RECEIVE`, from
- * **`com.google.firebase:firebase-messaging`**, pulled in by `expo-notifications`
- * — which this app uses for *local* notifications only (D-011). And
- * `BIND_GET_INSTALL_REFERRER_SERVICE`, from `com.android.installreferrer`.
- * Those come from inside a dependency, not from our manifest, and removing them
- * is a different and larger decision — see T-117c.
+ * ⚠ **Extended 2026-09-23 (T-194, settling T-117c)** to permissions that come
+ * from *inside* product dependencies. See `FROM_DEPENDENCIES` below. The libraries
+ * stay; only their permissions go.
  */
 
 // ⚠ `expo/config-plugins`, not `@expo/config-plugins` — the other plugins in
@@ -87,7 +83,57 @@ const DEV_CLIENT = [
  */
 const UNUSED_BY_V1 = ['android.permission.ACTIVITY_RECOGNITION'];
 
-const REMOVE = [...DEV_CLIENT, ...UNUSED_BY_V1];
+/**
+ * Permissions a dependency declares for a feature this app never calls (T-194).
+ *
+ * The review of 2026-09-22 read them off the P30's `dumpsys package`: a
+ * privacy-first app asking for the right to receive push messages, to read the
+ * Play install referrer, and for twenty launcher permissions from five vendors.
+ * A careful user reads that list, and so does a Play reviewer, next to
+ * "location, all the time".
+ *
+ * ⚠ **Only permissions are removed, never components.** The libraries stay, so
+ * nothing that calls them can fail on a missing class; without the permission
+ * the feature behind it simply cannot happen. Local notifications (D-011) do not
+ * use FCM at all: `scheduleNotificationAsync` posts through the OS's
+ * NotificationManager.
+ *
+ *   - **Push** — `firebase-messaging` via `expo-notifications`. Nothing requests
+ *     a push token, and there is no `google-services.json`.
+ *   - **Install referrer** — `com.android.installreferrer` via `expo-application`.
+ *     Nothing calls `getInstallReferrerAsync`.
+ *   - **Launcher badges** — `me.leolin:ShortcutBadger` via `expo-notifications`,
+ *     all twenty entries of its manifest (1.1.22). Nothing sets a badge count.
+ *
+ * ⚠ **If any of these features is ever wanted, its permission returns here, and
+ * with it a Data Safety answer** (T-122).
+ */
+const FROM_DEPENDENCIES = [
+  'com.google.android.c2dm.permission.RECEIVE',
+  'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE',
+  'com.android.launcher.permission.READ_SETTINGS',
+  'com.android.launcher.permission.WRITE_SETTINGS',
+  'com.android.launcher.permission.INSTALL_SHORTCUT',
+  'com.android.launcher.permission.UNINSTALL_SHORTCUT',
+  'com.sec.android.provider.badge.permission.READ',
+  'com.sec.android.provider.badge.permission.WRITE',
+  'com.htc.launcher.permission.READ_SETTINGS',
+  'com.htc.launcher.permission.UPDATE_SHORTCUT',
+  'com.sonyericsson.home.permission.BROADCAST_BADGE',
+  'com.sonymobile.home.permission.PROVIDER_INSERT_BADGE',
+  'com.anddoes.launcher.permission.UPDATE_COUNT',
+  'com.majeur.launcher.permission.UPDATE_BADGE',
+  'com.huawei.android.launcher.permission.CHANGE_BADGE',
+  'com.huawei.android.launcher.permission.READ_SETTINGS',
+  'com.huawei.android.launcher.permission.WRITE_SETTINGS',
+  'android.permission.READ_APP_BADGE',
+  'com.oppo.launcher.permission.READ_SETTINGS',
+  'com.oppo.launcher.permission.WRITE_SETTINGS',
+  'me.everything.badger.permission.BADGE_COUNT_READ',
+  'me.everything.badger.permission.BADGE_COUNT_WRITE',
+];
+
+const REMOVE = [...DEV_CLIENT, ...UNUSED_BY_V1, ...FROM_DEPENDENCIES];
 
 const MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
 <!--
@@ -106,7 +152,7 @@ ${REMOVE.map(
 </manifest>
 `;
 
-module.exports = function withoutUnusedPermissions(config) {
+function withoutUnusedPermissions(config) {
   return withDangerousMod(config, [
     'android',
     async (cfg) => {
@@ -121,4 +167,14 @@ module.exports = function withoutUnusedPermissions(config) {
       return cfg;
     },
   ]);
+}
+
+module.exports = withoutUnusedPermissions;
+// For releasePermissions.test.ts, and for applying the file without a prebuild
+// (`node -e "require('./plugins/withoutUnusedPermissions').writeReleaseManifest('android')"`).
+module.exports.REMOVE = REMOVE;
+module.exports.writeReleaseManifest = (platformProjectRoot) => {
+  const dir = path.join(platformProjectRoot, 'app', 'src', 'release');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'AndroidManifest.xml'), MANIFEST, 'utf8');
 };

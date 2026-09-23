@@ -91,7 +91,8 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
-import { buildToCollectMarks } from './placesToCollect';
+import { buildToCollectMarks, nearestToCollect } from './placesToCollect';
+import NearestChip from '../ui/NearestChip';
 import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
@@ -300,6 +301,12 @@ export default function NativeMapScreen({
     faint: PLACE_MARKER_PAINT[styleName].uncollected,
     collected: PLACE_MARKER_PAINT[styleName].collected,
   });
+
+  const nearest = nearestToCollect(
+    places,
+    collectedIds,
+    userAt === null ? null : { lat: userAt.latitude, lon: userAt.longitude }
+  );
 
   const collectedMarks = buildCollectedMarks(
     places,
@@ -843,9 +850,16 @@ export default function NativeMapScreen({
         passportStamp={passportStamp}
         mapStyle={styleName}
         bottomSlot={
-          card === null ? null : (
+          card !== null ? (
             <PlaceCardView card={card} onClose={closeCard} />
-          )
+          ) : nearest !== null ? (
+            // D-085: the ring's words. Tapping opens the same card a ring does.
+            <NearestChip
+              name={nearest.name}
+              mapStyle={styleName}
+              onPress={() => setTappedPlace({ place: nearest, collected: false })}
+            />
+          ) : null
         }
         onOpenPassport={onOpenPassport}
         onOpenSettings={onOpenSettings}

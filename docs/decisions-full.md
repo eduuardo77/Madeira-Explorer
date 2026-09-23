@@ -4612,6 +4612,14 @@ marker to go (*"I would like to delete them"*). That was about eighty equal dots
 the trace. This is the same set, but hollow, small, and subordinate to the collected marks, and the
 project lead chose it with the review's evidence in hand. Built as T-199 (`placesToCollect.ts`).
 
+⚠ **Amended 2026-09-23, Provisional: a chip names the nearest.** Seen on the P30, a ring alone
+was an unlabelled circle beside Google's own named pin for the same beach. The project lead took
+*"your recommendation"*. I had offered three options without naming one, so this choice is
+mine, and marked Provisional. **One line above the controls, *"Mais perto por visitar:
+{nome}"*, which opens that place's card**, with no distance on the chip (placeCard rule 2).
+Rejected: map labels (they need `expo-image`, a dependency and a network audit, D-043), and
+hiding Google's pin where ours sits (the POI layer is all or nothing).
+
 ## D-086 — The icon and brand mark are drawn in-house, from the stamp artwork
 
 **Status:** Accepted — the project lead, 2026-09-23 (T-186, option B).

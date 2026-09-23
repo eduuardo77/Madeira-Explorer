@@ -13,6 +13,7 @@ import {
   MIN_TO_COLLECT_ZOOM,
   NEAREST_COUNT,
   nearestPaint,
+  nearestToCollect,
 } from './placesToCollect.ts';
 import { PLACE_MARKER_PAINT } from './placeStyle.ts';
 
@@ -119,3 +120,12 @@ test('rings hold a constant size on screen as the map zooms', () => {
   const far = marks({ zoom: 12 })[0];
   assert.ok(Math.abs(far.radius / near.radius - 2) < 1e-9);
 });
+
+test('the chip names the nearest place still to collect, and nothing without a position', () => {
+  assert.equal(nearestToCollect(PLACES, new Set(), USER)?.id, 'p1');
+  assert.equal(nearestToCollect(PLACES, new Set(['p1', 'p2']), USER)?.id, 'p3');
+  assert.equal(nearestToCollect(PLACES, new Set(), null), null);
+  const all = new Set(PLACES.map((p) => p.id));
+  assert.equal(nearestToCollect(PLACES, all, USER), null, 'everything collected: nothing to point at');
+});
+

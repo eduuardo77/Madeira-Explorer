@@ -129,3 +129,39 @@ export function buildToCollectMarks(input: {
     };
   });
 }
+
+/**
+ * The single nearest place still to collect, or null (D-085, 2026-09-23).
+ *
+ * ⚠ Why this exists: seen on the P30, a ring by itself is an **unlabelled small
+ * circle** next to Google's own named pin for the same place, and says nothing
+ * about what it is. The map's chip names this one, and tapping it opens the
+ * place's card. No distance on the chip: the card carries the distance
+ * together with its "in a straight line" (placeCard.ts rule 2), and a chip
+ * would separate them.
+ */
+export function nearestToCollect(
+  places: readonly Place[],
+  collectedIds: ReadonlySet<string>,
+  position: { lat: number; lon: number } | null
+): Place | null {
+  if (position === null) {
+    return null;
+  }
+  let best: { place: Place; away: number } | null = null;
+  for (const place of places) {
+    if (collectedIds.has(place.id)) {
+      continue;
+    }
+    const geofence = representativeGeofence(place);
+    if (geofence === undefined) {
+      continue;
+    }
+    const away = distanceM(position, geofence);
+    if (best === null || away < best.away) {
+      best = { place, away };
+    }
+  }
+  return best?.place ?? null;
+}
+

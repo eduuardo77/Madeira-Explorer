@@ -291,6 +291,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         ours sits, or a one-line *"3 lugares perto de si"* entry into the passport.
       - ⚠ **Not seen:** the island view with all 80 (adb cannot pinch), and the tap to open a
         ring's card (the phone had locked).
+      — ✅ **Answer built 2026-09-23 (D-085 amended, Provisional):** `ui/NearestChip.tsx`, *"Mais perto por
+        visitar: {nome}"*, which opens the place's card. ⚠ Not yet on the device.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`
       names *Madeira* in `strings.ts`, which breaks D-017; read the name from the content pack's
       `destination`, as the reveal does. It names the stamps, the 80

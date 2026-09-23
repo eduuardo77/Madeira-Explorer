@@ -292,6 +292,14 @@ export const STRINGS = {
   'map.startWalk': s('Start an outing', 'Começar passeio', 'Ausflug starten'),
   'map.stopWalk': s('End outing', 'Terminar passeio', 'Ausflug beenden'),
   'map.recentre': s('Re-center', 'Centrar', 'Zentrieren'),
+  // D-085: names the nearest place still to collect. No distance on purpose —
+  // the card shows it with its "in a straight line" (placeCard.ts rule 2).
+  'map.nearest': s('Nearest to collect: {name}', 'Mais perto por visitar: {name}', 'Als Nächstes zu sammeln: {name}'),
+  'map.a11y.nearest': s(
+    'Nearest place still to collect: {name}. Opens its details.',
+    'Lugar mais perto ainda por visitar: {name}. Abre os detalhes.',
+    'Nächster Ort, der noch fehlt: {name}. Öffnet die Details.'
+  ),
   'map.a11y.recentre': s(
     'Center the map on where you are',
     'Centrar o mapa onde está',

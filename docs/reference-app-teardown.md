@@ -512,6 +512,37 @@ Gathered from the settings screen; the structural comparison is item 13.
 ---
 
 
+### 16. The live recorder, seen 2026-09-23 — **evidence**, for T-183
+
+On the project lead's go-ahead, one walk was started and stopped after about a minute, with the
+phone stationary. Gathered with `uiautomator dump`, `dumpsys activity services`, `dumpsys
+notification` and `dumpsys location`, plus one screenshot. It may have left a short walk in the
+project lead's WalkNYC history. Proa's own recorder stayed running throughout.
+
+| | Idle, app open | Walking | After *Stop Walk* |
+|---|---|---|---|
+| Button | *Start Walk* | ⚠ full-width **red** *Stop Walk* with a stop glyph | *Start Walk* again |
+| Service | none | `WalkTrackingService`, foreground | gone |
+| GPS request | **5 s**, while the app is in front; none once it is in the background | **1 s** | 5 s while in front |
+| Notification | — | *"WalkNYC · Walking"* with elapsed time (`showWhen`), channel `walknyc.tracking`, **importance 2** (silent) | removed |
+| Anything else | banner *"Always Gathering needs background location"* (dismissible), `0 / 86 638 blocks · 0,0%` | a *Re-center* chip appeared; **no** distance, timer or pill on screen | **no** summary, no sheet — straight back |
+
+**What it teaches.** A WalkNYC walk **changes what the recorder does**: a separate service, and
+GPS five times as often. That is why its button can be the main control without confusing anyone:
+pressing it has a consequence. Background recording, *Always Gathering*, is a different thing with
+a different name, and it lives in Settings.
+
+⚠ **Correction to what was said in chat on 2026-09-22.** The pill above the button is simulation
+mode's (item 6). A real walk shows none.
+
+**What Proa does today.** The button already copies theirs (full width, green and red, since
+2026-08-28), but **with background recording on, pressing it does nothing**:
+`manualWalk.ts` returns `leave-alone`, and only the flag, the colour and the word change. The
+word is *"Começar a registar"* (`strings.ts:264`), although the code comment above it says
+*"Start walk"*. That is review P1-2.
+
+---
+
 ## Not worth taking
 
 - **Six system dialogs in one minute** — decomposed at the top of this file. Four of the six are OS
@@ -527,8 +558,7 @@ Gathered from the settings screen; the structural comparison is item 13.
 
 ## What has not been looked at
 
-- The **live recording UI** — deliberately skipped, because starting a walk writes data to the
-  project lead's own app. The simulation was used instead.
+- ~~The **live recording UI**~~ — **seen 2026-09-23, item 16.**
 - **Import (Strava / Apple Health / Google Timeline)** — an OAuth flow into the project lead's
   accounts. Not touched.
 - The **leaderboard** and anything else that talks to their server.
@@ -536,8 +566,7 @@ Gathered from the settings screen; the structural comparison is item 13.
 - ⚠ **Proa measured at all.** Attempted 2026-09-22 with the project lead's go-ahead and
   **abandoned**: the only build on the phone is a dev client that opens its own launcher, so there
   was no Proa to measure (item 12). It needs a `preview` build first.
-- **Their live recorder UI**, and what their notification says while a walk runs — their service
-  was not running during this session, so the text was never read.
+- ~~**Their live recorder UI**, and their walk notification~~ — **seen 2026-09-23, item 16.**
 
 ---
 

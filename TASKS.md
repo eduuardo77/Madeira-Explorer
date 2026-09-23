@@ -79,7 +79,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       public v1, or a v1 with no lock (then say how early users are grandfathered, since D-075
       never takes a visible stamp away), or dropping the lock idea. *Recommended: run the beta
       unlocked, and ship public v1 with T-156.*
-- [~] **T-183** ⚠ **Direction given 2026-09-23: model it on WalkNYC's recorder** (`docs/reference-app-teardown.md` items 4, 6, 15). The proposal is to be written and confirmed before T-198. **Decide what "recording" means** — P1-2. Today the home button says *Começar a
+- [~] **T-183** ⚠ **Direction given 2026-09-23: model it on WalkNYC's recorder. Proposal written as D-087 (Provisional)**, after seeing their walk live (teardown item 16). **Waiting on:** confirmation, pause yes or no, and what stopping a walk shows. **Decide what "recording" means** — P1-2. Today the home button says *Começar a
       registar* while background recording is already on. *Recommended: background recording is
       the product. The home control shows the real state, and "Start" appears only when
       background permission was refused (D-008).*
@@ -157,7 +157,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 ### Stage 3 — Product clarity (after the decisions it depends on)
 
 - [ ] **T-198** **One recording model, used the same way on home, Settings and onboarding** ⇠
-      T-183. The home control reads the recorder's real state, the same check `soak-check.sh`
+      T-183, D-087. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. It names the stamps, the 80

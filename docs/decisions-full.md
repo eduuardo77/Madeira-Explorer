@@ -4623,3 +4623,47 @@ that may change is wasted.
 
 **Rejected.** A paid designer (recommended, declined). AI generation (uniqueness and trademark
 risk, and weakest for a mark to be registered).
+
+## D-087 — A walk is a thing you start, and it changes what the recorder does; background recording has its own name
+
+**Status:** ⚠ **Provisional** — drafted 2026-09-23 on the project lead's direction for T-183
+(*"take inspiration on WalkNYC recorder"*). The specifics below are not yet confirmed.
+
+**The problem, measured.** With background recording on, the main button reads *"Começar a
+registar"*, and pressing it does **nothing**: `manualWalk.ts` returns `leave-alone`, and only a
+flag, a colour and a word change. Settings says *"A registar a sua viagem"* at the same moment
+(review P1-2). Proa copied WalkNYC's button on 2026-08-28, but not what the button does.
+
+**What WalkNYC does, seen live on the P30** (`docs/reference-app-teardown.md` item 16).
+*Start Walk* starts its own foreground service and moves GPS from 5 s to **1 s**. *Stop Walk*
+ends both. The background recorder, *Always Gathering*, is a separate thing with a separate name,
+in Settings. The button can be the main control because pressing it has a consequence.
+
+### The proposal
+
+1. **Two names, never shared.** A **walk** (*passeio*, *Spaziergang*) is what the main button
+   starts. **Automatic recording** (*registo automático*) is the background recorder, and it lives
+   in Settings. The verb *registar* leaves the main button.
+2. **A walk changes the recorder.** For its duration the recorder samples at the finest setting
+   the app has, then drops back to the user's own level. ⚠ The walk interval is a tuning
+   question: today's floor is 10 s (`trackingPreference.ts`). Going lower is a battery cost
+   nobody has measured (T-054), so any number waits for a measurement. **Stamps are awarded the
+   same with or without a walk**: a walk buys a finer trace, never a stamp.
+3. **One button, three states, read from the real recorder** (not `isRecording()`, T-174):
+   no location permission → *Permitir localização* · idle → *Começar passeio*, green · walking →
+   *Terminar passeio*, red.
+4. **Automatic recording speaks only when something is wrong.** Missing background permission, or
+   a recorder found dead, shows a **dismissible** banner naming the exact OS wording (teardown
+   item 4). When it works, the map adds nothing, as WalkNYC's does.
+5. **Two notification channels** (teardown item 3). A walk shows *"Proa · Passeio em curso"* with
+   elapsed time, silent. Automatic recording keeps its own silent notification. D-011's two trip
+   messages go on a channel that makes a sound.
+
+**Still open:** a pause (*"not the next hour"*); whether stopping a walk shows anything
+(WalkNYC shows nothing); and whether a user without background permission gets the same button
+(it would be their only way to record, as D-008 intends today).
+
+**Rejected.** The button as it is (a flag with no consequence). Hiding the button when automatic
+recording is on: then nobody could say "I'm walking now", and WalkNYC shows it to everyone. One
+single mode (review option A): simpler, but it throws away the only thing the main button can
+usefully do for someone whose recorder is already running.

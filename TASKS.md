@@ -203,7 +203,17 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       2. Read how `expo-maps` mounts its view.
       3. **Accept a fix only after 60 clean launches in a row** (upper bound under about 5%).
       4. If the cause is upstream, a remount watchdog is acceptable, but call it a workaround.
-- [ ] **T-196** **The location task fires before React is up** — split out of T-177. The
+- [ ] **T-196** **The location task fires before React is up** — split out of T-177.
+      — **Read from source 2026-09-23 (expo-task-manager 57.0.9, `TaskService.java`), not yet measured.**
+      The event is **not dropped**: with no task manager yet it is queued
+      (`mTasksAndEventsRepository`) and runs once the app loads. The logged warning comes from a
+      different step, `maybeStartHeadlessTask`, which only keeps **JS timers** alive while the
+      Activity is paused. ⚠ **So the risk is a stall, not a loss.** If that step fails, promises in
+      the handler (every database write) can hang until the app comes to the front. The
+      keep-alive is retried only on the *first* event of a new batch, which cannot arrive while
+      the current batch hangs. **To measure:** a cold start with the screen off (reboot, or the
+      recorder restarted by the OS). Read the diary's `batch` timestamps against logcat's
+      `Handling job`/`TaskService` lines; a gap between delivery and write is the stall. The
       `HeadlessJsTaskContext: CatalystInstance not available` warning at cold start may mean the
       first fixes are lost. Measure it on the P30: compare fixes in the database with fixes the
       OS delivered.
@@ -213,8 +223,13 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 
 ### Stage 3 — Product clarity (after the decisions it depends on)
 
-- [ ] **T-198** **One recording model, used the same way on home, Settings and onboarding** ⇠
-      T-183, D-087. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
+- [~] **T-198** **One recording model, used the same way on home, Settings and onboarding** ⇠
+      T-183, D-087. ✅ **Pure half done 2026-09-23:** `recording/recorderControls.ts` (12 tests). It
+      covers the button's three states, the one notice the home screen may show (`recorder-stopped`
+      cannot be dismissed, per T-174), the pause (the sink drops what arrives, so nothing has to
+      wake up to resume), a walk taking `precise`, and the summary. ⚠ **Still to do:** the wiring,
+      the strings, the two notification channels, and the pause's lengths and where it lives
+      (D-087 leaves those open). ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [ ] **T-199** **The home map shows what there is to collect** ⇠ T-184.
 - [ ] **T-200** **Onboarding sells the passport** ⇠ T-183 — P1-3. ⚠ **Also found 2026-09-23:** `onboarding.welcome.body1`

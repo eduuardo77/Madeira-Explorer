@@ -79,7 +79,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       public v1, or a v1 with no lock (then say how early users are grandfathered, since D-075
       never takes a visible stamp away), or dropping the lock idea. *Recommended: run the beta
       unlocked, and ship public v1 with T-156.*
-- [~] **T-183** ⚠ **Direction given 2026-09-23: model it on WalkNYC's recorder. Proposal written as D-087 (Provisional)**, after seeing their walk live (teardown item 16). **Waiting on:** confirmation, pause yes or no, and what stopping a walk shows. **Decide what "recording" means** — P1-2. Today the home button says *Começar a
+- [x] **T-183** ✅ **Decided 2026-09-23 — D-087, after WalkNYC's recorder: pause yes, a short summary when a walk stops.** **Decide what "recording" means** — P1-2. Today the home button says *Começar a
       registar* while background recording is already on. *Recommended: background recording is
       the product. The home control shows the real state, and "Start" appears only when
       background permission was refused (D-008).*

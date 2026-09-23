@@ -4626,8 +4626,9 @@ risk, and weakest for a mark to be registered).
 
 ## D-087 — A walk is a thing you start, and it changes what the recorder does; background recording has its own name
 
-**Status:** ⚠ **Provisional** — drafted 2026-09-23 on the project lead's direction for T-183
-(*"take inspiration on WalkNYC recorder"*). The specifics below are not yet confirmed.
+**Status:** Accepted — the project lead, 2026-09-23: *"D-087 confirmed, pause yes, show a short
+summary"*. Drafted the same day on their direction for T-183 (*"take inspiration on WalkNYC
+recorder"*).
 
 **The problem, measured.** With background recording on, the main button reads *"Começar a
 registar"*, and pressing it does **nothing**: `manualWalk.ts` returns `leave-alone`, and only a
@@ -4659,9 +4660,13 @@ in Settings. The button can be the main control because pressing it has a conseq
    elapsed time, silent. Automatic recording keeps its own silent notification. D-011's two trip
    messages go on a channel that makes a sound.
 
-**Still open:** a pause (*"not the next hour"*); whether stopping a walk shows anything
-(WalkNYC shows nothing); and whether a user without background permission gets the same button
-(it would be their only way to record, as D-008 intends today).
+6. **Pause: yes.** Automatic recording can be paused for a stretch (*"not the next hour"*). Nothing
+   is recorded while paused, and the pause ends on its own.
+7. **Stopping a walk shows a short summary.** Here WalkNYC is not followed (it shows nothing).
+
+**Still open:** the pause's lengths and where it lives; what the summary holds (distance and time
+are measured; places passed are only as good as the geofences). And a user without background
+permission gets the same button, which is their only way to record, as D-008 intends.
 
 **Rejected.** The button as it is (a flag with no consequence). Hiding the button when automatic
 recording is on: then nobody could say "I'm walking now", and WalkNYC shows it to everyone. One

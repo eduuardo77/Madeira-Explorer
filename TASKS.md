@@ -274,7 +274,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [~] **T-199** **The home map shows what there is to collect** ⇠ T-184. ✅ **Code done 2026-09-23,
       ⚠ the rings not yet judged by eye on the P30.** ⚠ **The chip is gone (2026-09-24):** seen on the
       P30 reading *"Mais perto por visitar: Praia dos Reis Magos"*, then removed on the project
-      lead's word, to keep the map as quiet as WalkNYC's (D-085). `map/placesToCollect.ts` (8 tests) draws every uncollected place
+      lead's word, to keep the map as quiet as WalkNYC's (D-085). ✅ Gone on the P30
+      (`675ae50`): the home screen reads only *Começar passeio*. `map/placesToCollect.ts` (8 tests) draws every uncollected place
       as a hollow ring, with the nearest three (from the last known position) as a larger hollow
       ring in the collected disc's grey. **D-085's rule is kept by construction:** hollow against
       filled, a circle against Google's teardrops, grey against the blue location dot and green
@@ -392,14 +393,16 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       proves it flags the old file at the crash line). ✅ **Seen on the P30 (`885965a`):**
       Licenças, Privacidade and the erase confirmation (left with *Manter a minha viagem*) all
       open and close in one process, and the crash buffer stays empty.
-- [~] **T-211** ⚠ **Android's Back button left the app from every screen** — found on the P30
+- [x] **T-211** ⚠ **Android's Back button left the app from every screen** — found on the P30
       2026-09-24, while probing T-177: Back in Settings went to the launcher. There was no
       `BackHandler` anywhere, so Back from Settings, the passport, the replay, the licences,
       the privacy text or an open place card all exited. ✅ **Code 2026-09-24:**
       `navigation/backNavigation.ts` (pure: settings/passport/debug → map, replay → passport,
       map → the OS) and `ui/useBackHandler.ts`. Inner things (a card, licences, privacy, the
       erase confirmation) register only while open, so the newest, innermost handler runs first.
-      ⚠ **Not yet on the P30.**
+      ✅ **Seen on the P30 2026-09-24 (release `675ae50`):** Settings → Back → map; Licences →
+      Back → Settings → Back → map. Back on the map sends the app to the background, and the recorder
+      keeps running (checked at 60 s).
 - [ ] **T-210** ⚠ **An app update stopped the recorder, and nothing restarted it for 22 h** —
       found on the P30 2026-09-24. The release was installed over the field build at 20:23. The
       next morning the home map said *Nada registado há 22 h 14 min*, and the foreground service
@@ -1832,6 +1835,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         reset EMUI's prelaunch). That says nothing about the fix. **The proof is an A/B on the
         failing path:** field builds with 6.10.0 and 6.12.1, `bgstart.sh`. It kills the process,
         Android restarts it in the background, then the app is opened.
+      - ⚠ **That A/B cannot be run on this phone (tried 2026-09-24).** After a kill, EMUI never
+        restarted the process in the background within 90 s (T-210 again). `run-as kill` is
+        denied by SELinux on the release-signed process. No pending job existed to force. The
+        pre-started processes came from EMUI's own prelaunch, which cannot be triggered. **What
+        stands:** the upstream report names exactly 6.10.0 and exactly this symptom, and the device
+        behaves as that bug predicts (map created then torn down; no recovery on remount; only in
+        pre-started processes). The fix is Google's own. **Open:** a blank-prone launch seen
+        coming up on 6.12.1. It will happen with ordinary use once EMUI prelaunches Proa again.
+        Check with `adb logcat` for a launch that has no `createClassLoader … com.proa` line.
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.

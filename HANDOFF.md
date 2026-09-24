@@ -35,8 +35,13 @@ is in** (a `why` line on the card, and a dimmed passport behind it). Its content
 release build since 2026-08-16** (a hook below early returns, T-209: fixed and seen). And **an app
 update stops the recorder until the app is opened**, because EMUI withholds `MY_PACKAGE_REPLACED`
 (T-210, half measured).
+**T-177's cause is found:** maps-compose 6.10.0's initializer bug (googlemaps/android-maps-compose#776),
+triggered when EMUI or Android pre-started the app's process. It is fixed by forcing 6.12.1
+(`plugins/withMapsComposeFix.js`), binary-checked against expo-maps' precompiled AAR. ⚠ **Do not
+run force-stop loops on the P30 again:** after hundreds, EMUI's iAware began force-stopping Proa on
+launch (`CrashClean`).
 
-⚠ **The P30 runs the plain RELEASE build from `885965a` since 2026-09-24 15:25** (`pkgFlags`
+⚠ **The P30 runs the plain RELEASE build from `675ae50` since 2026-09-24 17:23** (maps-compose 6.12.1, T-177) (`pkgFlags`
 has no `DEBUGGABLE`), so performance readings are valid again. To pull its database, swap in the
 field build first (below). Every install waits on a **Play Protect prompt only the project lead
 can answer**. Backups: `Madeira-fieldwork/p30-2026-09-23/` (before the field build) and

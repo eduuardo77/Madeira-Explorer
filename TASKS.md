@@ -422,6 +422,23 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       aplicações → Proa* to manual (all three on) and I repeat the install. If it recovers,
       *Deixar o Proa continuar* has to point Huawei users at that screen, not only at the
       battery one.
+      — ✅ **Second half measured 2026-09-24**, after the project lead set *Iniciar aplicações →
+      Proa* to manual with all three switches on. Recorder running, app in the background,
+      `install -r` at 19:13:37.
+      - **The broadcast now arrives.** `Start proc … for broadcast {…TaskBroadcastReceiver}`,
+        `TaskService: Handling intent with action 'android.intent.action.MY_PACKAGE_REPLACED'`,
+        and a headless task ran our JavaScript.
+      - **The recorder still did not come back.** At +15/30/60/90 s there was no foreground
+        service and no location request. Opening the app restored it at once.
+      - **So there are two blockers, not one.** EMUI's launch manager was the first, and the
+        setting removes it. The second is starting the recorder from the background: T-173
+        measured EMUI refusing a background foreground-service start on this phone. The exact
+        failing step inside Expo is not in the log.
+      - **What the app can do: ⚠ a decision for the project lead.** The headless run after an
+        update can see *"should be recording, is not"* but cannot fix it from the background.
+        Proposed: post one notification, *"Proa was updated — open it to keep recording"*, whose
+        tap restarts the recorder. D-087 allows a notice when something is wrong, and this is
+        the one case that is wrong silently.
 - **Gate R1 — MVP:** P0-1 to P0-5 closed (T-188, T-189, T-182 applied, T-177, T-205), and one
   real trip gave a stamp, a trip end and a souvenir.
 - **Gate R2 — closed beta (T-129):** R1 met; T-193, T-194, T-122, T-206 and T-207 done; the

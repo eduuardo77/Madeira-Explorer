@@ -31,8 +31,12 @@ D-087's three Provisional choices.
 **2026-09-24:** T-200 and T-202 are done (T-202 still to be seen on the P30). **T-201's mechanism
 is in** (a `why` line on the card, and a dimmed passport behind it). Its content is
 `docs/why-go-draft.md`, **waiting on the project lead's veto**.
+⚠ **Found on the P30 the same day:** Settings → Privacidade / Apagar / Licenças **crashed every
+release build since 2026-08-16** (a hook below early returns, T-209: fixed and seen). And **an app
+update stops the recorder until the app is opened**, because EMUI withholds `MY_PACKAGE_REPLACED`
+(T-210, half measured).
 
-⚠ **The P30 runs the plain RELEASE build from `6333ada` since 2026-09-23 20:23** (`pkgFlags`
+⚠ **The P30 runs the plain RELEASE build from `885965a` since 2026-09-24 15:25** (`pkgFlags`
 has no `DEBUGGABLE`), so performance readings are valid again. To pull its database, swap in the
 field build first (below). Every install waits on a **Play Protect prompt only the project lead
 can answer**. Backups: `Madeira-fieldwork/p30-2026-09-23/` (before the field build) and

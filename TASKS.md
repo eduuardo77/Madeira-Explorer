@@ -272,7 +272,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       outing, cleared the pause notice. The project lead's tier was left on *Máximo detalhe*. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [~] **T-199** **The home map shows what there is to collect** ⇠ T-184. ✅ **Code done 2026-09-23,
-      ⚠ not yet seen on the P30.** `map/placesToCollect.ts` (8 tests) draws every uncollected place
+      ⚠ the rings not yet judged by eye on the P30; the chip seen 2026-09-24: *"Mais perto por
+      visitar: Praia dos Reis Magos"*.** `map/placesToCollect.ts` (8 tests) draws every uncollected place
       as a hollow ring, with the nearest three (from the last known position) as a larger hollow
       ring in the collected disc's grey. **D-085's rule is kept by construction:** hollow against
       filled, a circle against Google's teardrops, grey against the blue location dot and green
@@ -323,7 +324,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       information (length, difficulty, access) for all 80 places, stored in `content/` (D-017),
       drafted and vetoed as D-064 sets out; a dimmed backdrop behind the sheet. Photos only with
       clear rights. **The biggest single job in this plan.**
-- [~] **T-202** ✅ **Code done 2026-09-23 in three parts; ⚠ not yet on the P30.**
+- [x] **T-202** ✅ **Seen on the P30 (pt-PT) 2026-09-24, release from `885965a`:** *Versão 0.1.0*,
+      no *Contactar-nos* (no `CONTACT_EMAIL` yet), and licences opening with *"O Proa é feito com
+      119 pacotes…"*, rows expanding. *English* changed the screen at once, and the recorder's
+      notification with it (*Recording your trip*); *Automático (Português)* brought both back.
+      The phone is left on Automático. ⚠ The first try crashed the app: see T-209.
+      **Code done 2026-09-23 in three parts:**
       1. Copy about half the length. The button reads *Alterar acesso à localização*, and the
          footnote names *"Permitir sempre"*. About shows the version. *Contactar-nos* stays
          hidden until `CONTACT_EMAIL` exists (T-187).
@@ -368,15 +374,16 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 
 - [ ] **T-208** **Re-run the review at each gate**, using the review's §2 method and weights, and
       record the score. No predicted scores.
-- [~] **T-209** ⚠ **Found on the P30 2026-09-24: Settings crashed the app, and took the recorder
+- [x] **T-209** ⚠ **Found on the P30 2026-09-24: Settings crashed the app, and took the recorder
       with it.** Tapping *Licenças de código aberto* closed the app. Logcat: *"Rendered fewer
       hooks than expected"* in `SettingsScreen`. `donateWalk` (a `useCallback`) had sat below
       the early-return screens since D-069 (2026-08-16), so **Privacidade, Apagar tudo and
       Licenças each crashed every release build for five weeks**. It went unseen because a dev
       build shows a red box, no test renders a component, and there is no ESLint. ✅ Fixed:
       the hook is moved up, and `hooksOrder.test.ts` guards every component (its fixture test
-      proves it flags the old file at the crash line). ⚠ To see on the P30: all three rows open
-      and close without a crash.
+      proves it flags the old file at the crash line). ✅ **Seen on the P30 (`885965a`):**
+      Licenças, Privacidade and the erase confirmation (left with *Manter a minha viagem*) all
+      open and close in one process, and the crash buffer stays empty.
 - [ ] **T-210** ⚠ **An app update stopped the recorder, and nothing restarted it for 22 h** —
       found on the P30 2026-09-24. The release was installed over the field build at 20:23. The
       next morning the home map said *Nada registado há 22 h 14 min*, and the foreground service
@@ -386,6 +393,16 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       A Play auto-update mid-holiday would do the same, silently. **To measure:** `install -r`
       the same APK with the app closed and check `dumpsys activity services` a minute later,
       then repeat with EMUI's launch manager set to manual. Needs a Play Protect tap each time.
+      ✅ **First half measured 2026-09-24:** with the recorder running and the app in the
+      background, `install -r` at 15:25:49; at 15:27:11 there was no process, no service and no
+      location request. Android sent `MY_PACKAGE_REPLACED` (it is in the log, and other apps'
+      receivers ran), the receiver is in the release manifest (`aapt2`), and **the app's process
+      was never started**. When that receiver does run, Expo restores the task (`TaskService`'s
+      constructor calls `restoreTasks()`). So **EMUI withheld the broadcast.** Stock Android
+      would probably not, but that is not measured. **Next:** the project lead sets *Iniciar
+      aplicações → Proa* to manual (all three on) and I repeat the install. If it recovers,
+      *Deixar o Proa continuar* has to point Huawei users at that screen, not only at the
+      battery one.
 - **Gate R1 — MVP:** P0-1 to P0-5 closed (T-188, T-189, T-182 applied, T-177, T-205), and one
   real trip gave a stamp, a trip end and a souvenir.
 - **Gate R2 — closed beta (T-129):** R1 met; T-193, T-194, T-122, T-206 and T-207 done; the

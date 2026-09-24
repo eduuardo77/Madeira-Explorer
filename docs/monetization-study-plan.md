@@ -34,7 +34,7 @@ the public release that D-084 gates on billing.**
 | | Free | Paid (one unlock) |
 |---|---|---|
 | **Map of where you walked / been** | ✅ Unlimited, forever | same |
-| **Recorder, trips, places-to-collect rings** | ✅ Unlimited | same |
+| **Recorder, trips** | ✅ Unlimited | same |
 | **Stamps** | **Very limited** — N to be set by Q2 | All 80 |
 | **Timelapse video** | ✅ Yes, with a **huge** watermark | Clean — with the brand mark D-013 needs (Q4) |
 | **Still share image** | ⚠ Not stated — Q4 | ⚠ |
@@ -103,6 +103,37 @@ most: a car tour through Madeira collects far fewer stamps than its route sugges
 
 **Answered when:** there is, for each itinerary, a *stamps by day* curve, and the real trip has
 confirmed or broken at least one of them.
+
+**Desk answer, 2026-09-24** (`node tools/stamp-days.mjs`, `--detail` for every stop). Eight
+published itineraries, each with its URL in the tool. *low* counts the places a guide names; *high*
+adds places whose geofence overlaps a stop's (Monte Palace sits inside Monte's circle).
+
+| Itinerary | Stamps held at end of each day | Lock at N=3 | N=5 | N=10 |
+|---|---|---|---|---|
+| Hire car, one week | 3-4 · 9-13 · 10-14 · 13-17 · 17-22 · 20-25 · 21-26 | day 1-2 | day 2 | day 2-4 |
+| Hiker, one week | 3 · 6 · 8 · 12-14 · 12-14 · 13-15 · 13-15 | day 2 | day 2 | day 4 |
+| Long weekend, hire car | 6-9 · 12-17 · 15-20 | day 1 | day 1 | day 2 |
+| Long weekend, no car | 2 · 4-5 · 6-7 | day 2 | day 3 | never |
+| Hiker, long weekend | 1-2 · 3-4 · 4-5 | day 2-3 | never | never |
+| Organised tours, 3 days | 4 · 7-8 · 11-14 | day 1 | day 2 | day 3 |
+| Cruise, a day ashore (two tours) | 4-5 | day 1 | never | never |
+
+What it says, before T-205 checks it:
+- ⚠ **D-072's 10 is not generous for anyone with a car.** A hire-car visitor passes it on day 2
+  to 4, a long weekend by car on day 2. The fear that "nobody reaches stamp 11" holds only for
+  cruise passengers, visitors without a car and a hiker's long weekend.
+- **N=3 locks nearly everyone on day 1**, before the first evening: the "before trust exists"
+  row of Q2's table, now with numbers.
+- **Q2's own target, the typical day-2 count, is about 6 to 8** (median of the day-2 column). N=5
+  locks most car visitors on day 2 and never locks a cruise passenger.
+- A cruise passenger collects 4 or 5 in the one day they have. Any N at or above 5 gives them
+  everything they will ever earn for free, which may be the right answer: they cannot become a
+  paying customer on a later day anyway.
+- **Levadas arrive late.** Every week-long itinerary walks its first levada on day 3 to 6, so a
+  "first levada" guarantee (D-072) mostly unlocks a stamp *after* the count lock has fallen.
+- ⚠ Guides list highlights. A real visitor also stops at places no guide names, so the real
+  curve is probably steeper than *low*. The model assumes every named stop is a stop on foot of
+  3 minutes or more.
 
 ### Q2 — How limited is "very limited"? decides N
 
@@ -176,6 +207,15 @@ frame each covers.
 **Answered when:** one free and one paid mark specified in pixels and position, with the
 "would you post it" answers beside them.
 
+**Mock-ups drawn, 2026-09-24:** `node tools/preview-film.mjs --watermarks` writes
+`tools/out/watermark-sizes.html`, three marks over the mid-film and final frames at 360 x 640:
+*small (paid)* 0.9% of the frame, bottom right; *medium* 5.2%, lower third; *huge (free)* 14.3%,
+tilted across the centre at 55% opacity. **All three stay clear of Google's attribution (bottom
+left) and of the hero number**, measured as boxes. ⚠ No basemap in this renderer, so the mark is
+seen against flat ground; the "would you post it" question wants a version over a real replay
+screenshot, which needs a trip with a trace on the P30. **Still open:** the people to ask (the
+project lead's), and their answers.
+
 ### Q5 — The video does not export yet ⚠ a dependency, not a design question
 
 **The fact.** Exporting the timelapse to MP4 is **T-105b-v2**, an open spike: it encodes
@@ -208,6 +248,24 @@ deadline.
 then decide.
 **Answered when:** one price, one or two products, written into D-089.
 
+**Desk check, 2026-09-24.** Prices seen today:
+
+| App | Model and price | Change since August |
+|---|---|---|
+| WalkMe, Madeira (App Store) | Free + Basic $7.99 · Week Pass $9.99 · Plus $14.99 · Explorer $49.99 | Week Pass was $8.99 |
+| Fog of World | $29.99 one-off, Android and iOS | none |
+| komoot | Regions (€3.99 one, €8.99 bundle) closed to new accounts since March 2025; Premium only | moved to subscription |
+| MysteryHike (fog genre) | $6.99/month, $39.99/year, lifetime $59.99 to $79.99 | new here |
+
+Recommendation, for the project lead's call:
+- **€5.99, one product.** The closest competitor's cheapest unlock is $7.99, and its tourist
+  product, the Week Pass, just rose to $9.99. €5.99 stays under both while charging for a free
+  tier that now gives less. €7.99 is defensible too; €4.99 was set for a paid listing, a reason
+  that no longer applies.
+- **One product** (study rule 6). Nothing in the check argues for two.
+- **Regional pricing: accept Play's conversions.** Buyers are visitors paying in their home
+  currency, and a hand-set table is upkeep with no evidence behind it.
+
 ### Q7 — Can a small allowance still earn good reviews?
 
 Write the three most likely 1-star reviews for the hypothesis, e.g. *"only 3 stamps free, then
@@ -234,6 +292,24 @@ RevenueCat. Why:
 
 **Answered when:** those four are checked against the library's docs and changelog, and the
 choice goes into D-089.
+
+**Checked, 2026-09-24.** `expo-iap` stands, with one caveat about refunds.
+1. ✅ **Expo SDK 57.** Its setup page (openiap.dev) names SDK 57 with React Native 0.86 as the
+   validated baseline, which is this app (Expo ~57.0.12, RN 0.86.2). Latest 5.6.3, 2026-09-19,
+   seven releases in the last month. ⚠ The GitHub repository moved into the `hyodotdev/openiap`
+   monorepo; the npm package is the same one.
+2. ✅ **Play Billing Library v9.1.0.** Google's floor is v8 for any new app or update since
+   2026-08-31, so it is one major version ahead of the requirement.
+3. ⚠ **Refunds, without a server: partly.** Google documents the Voided Purchases API as the way to
+   learn of a refund, and that is a server call with a service account, which rule 4 rules out.
+   On the phone, `getAvailablePurchases` asks Play what is owned *now*, and the docs do not say
+   whether a refunded one-time purchase drops out of it. **Accepted risk:** a single €5 to €8
+   unlock, so the most a refund abuser can take is one price. Verify with a test refund once the
+   upload key exists (T-187), and write down what was seen.
+4. ✅ **Acknowledgement.** It is not automatic: the app must call `finishTransaction` after
+   granting, or Play refunds the purchase after 3 days. Google also asks the app to query
+   purchases at launch and on resume, to catch one completed while the app was closed. Both
+   belong in T-156's spec.
 
 ### Q9 — Privacy and store paperwork
 

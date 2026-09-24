@@ -102,6 +102,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       unlimited. Desk work first (Q1 itinerary model, Q4 watermark mock-ups, Q6 price, Q8 library
       check). The lead decides N, video path A/B and the price. **No `app/` change until D-089 is
       Accepted.**
+      ⚠ **Desk half done 2026-09-24:** Q1's model (`tools/stamp-days.mjs`), Q4's mock-ups
+      (`preview-film.mjs --watermarks`), Q6's price check and Q8's four checks are written into the
+      plan. Waiting on the project lead: N (Q2), A/B (Q5), the price (Q6), people for Q3/Q4.
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
       (T-117e). **Start them on day one**: each is small, but they take the longest to come back.

@@ -57,9 +57,8 @@ for a launch without a `createClassLoader … com.proa` line.
 5. **D-089 study:** N (Q2), the watermark A/B (Q5), the price (Q6), and people for Q3/Q4.
 
 **Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
-2026-09-24) puts billing *after* the monetisation study. Start with the study questions that need
-nobody (`docs/monetization-study-plan.md` §4): **Q1's desk model, Q4's watermark mock-ups, Q6's
-price check, Q8's billing-library checks** (`expo-iap` recommended). Outside monetisation: T-197
+2026-09-24) puts billing *after* the monetisation study. ✅ **The study's desk half is done (2026-09-24)**: Q1, Q4, Q6, Q8 are written into
+`docs/monetization-study-plan.md`. The rest waits on the project lead (N, A/B, price, people). Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.

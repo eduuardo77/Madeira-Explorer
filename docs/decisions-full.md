@@ -4768,6 +4768,8 @@ release.**
   only and the video paywall arrives with export, which is additive.
 - **Price** (Q6): €4.99 against €5.99–€7.99.
 - **Billing library** (Q8): on-device `expo-iap` recommended over RevenueCat, pending four checks.
+  ⚠ **Checked 2026-09-24:** SDK 57 validated, Billing Library v9.1, acknowledgement is ours to
+  call; refunds cannot be seen without a server and that risk is accepted (study plan Q8).
 
 **Rejected for now.**
 - **Keep D-072 unchanged.** Nobody knows whether a visitor ever reaches stamp 11. If they do

@@ -179,3 +179,88 @@ for (const scene of composition.scenes) {
   );
 }
 console.log(`\nWrote tools/out/film-contact-sheet.html (${chosen.length} frames drawn)`);
+
+// --- watermark sizes (D-089 study, Q4) ---------------------------------------
+//
+//     node tools/preview-film.mjs --watermarks  → tools/out/watermark-sizes.html
+//
+// Three candidate marks over real frames of this film, so "how big is huge"
+// can be answered by looking rather than in words. ⚠ No basemap: the film is
+// Google's map (D-076) and this renderer has none, so the ground here is flat.
+// The marks are drafts for people to react to, not a design.
+//
+// Google's attribution is drawn as a reserved box, bottom left, because rule 5
+// of the study says it stays visible in every video: a mark that covers it is
+// a mark that cannot ship, and the table says so.
+
+if (process.argv.includes('--watermarks')) {
+  const { APP_NAME } = await import('../app/src/brand.ts');
+  const W = 360;
+  const H = 640;
+  // Google's logo as it sits on the map: bottom left, about 66 x 26 dp.
+  const attribution = { x: 8, y: H - 34, w: 66, h: 26 };
+
+  const MARKS = [
+    { name: 'small (paid)', x: W - 8 - 76, y: H - 8 - 26, w: 76, h: 26, opacity: 0.85, rotate: 0 },
+    { name: 'medium', x: (W - 200) / 2, y: H * 0.64, w: 200, h: 60, opacity: 0.8, rotate: 0 },
+    { name: 'huge (free)', x: (W - 300) / 2, y: (H - 110) / 2, w: 300, h: 110, opacity: 0.55, rotate: -18 },
+  ];
+
+  const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  // The hero number, where `filmFrameSvg` draws it, measured as a box.
+  const heroBox = { x: W / 2 - W * 0.24, y: H - H * 0.14 - W / 7, w: W * 0.48, h: W / 7 + 4 };
+
+  const markSvg = (mark) => {
+    const cx = mark.x + mark.w / 2;
+    const cy = mark.y + mark.h / 2;
+    return `<g opacity="${mark.opacity}" transform="rotate(${mark.rotate} ${cx} ${cy})">
+      <rect x="${mark.x}" y="${mark.y}" width="${mark.w}" height="${mark.h}" rx="${mark.h / 2}" fill="#FFFFFF"/>
+      <text x="${cx}" y="${cy + mark.h * 0.2}" text-anchor="middle" font-size="${Math.round(mark.h * 0.58)}" font-weight="800" fill="#1B6B3A" font-family="system-ui, -apple-system, Roboto, sans-serif">${APP_NAME}</text>
+    </g>`;
+  };
+
+  const frames = [0.5, 1].map((fraction) =>
+    frameAt(composition, schedule[Math.round(fraction * (schedule.length - 1))])
+  );
+
+  const rows = MARKS.map((mark) => {
+    const coverage = ((mark.w * mark.h) / (W * H)) * 100;
+    const svgs = frames
+      .map((frame) =>
+        filmFrameSvg(frame, W, H).replace(
+          '</svg>',
+          `<rect x="${attribution.x}" y="${attribution.y}" width="${attribution.w}" height="${attribution.h}" fill="none" stroke="#FFD166" stroke-dasharray="4 3"/>
+           <text x="${attribution.x + 6}" y="${attribution.y + 18}" font-size="14" fill="#FFD166" font-family="system-ui, sans-serif">Google</text>
+           ${markSvg(mark)}</svg>`
+        )
+      )
+      .map((svg) => `<div class="frame">${svg}</div>`)
+      .join('');
+    const notes = [
+      `${coverage.toFixed(1)}% of the frame (unrotated box)`,
+      overlaps(mark, attribution) ? '⚠ covers Google\'s attribution' : 'clear of Google\'s attribution',
+      overlaps(mark, heroBox) ? '⚠ overlaps the hero number' : 'clear of the hero number',
+    ];
+    console.log(`  ${mark.name.padEnd(13)} ${notes.join(' · ')}`);
+    return `<section><h2>${mark.name}</h2><p>${notes.join(' · ')}</p><div class="row">${svgs}</div></section>`;
+  }).join('\n');
+
+  const sheet = `<!doctype html>
+<meta charset="utf-8">
+<title>Watermark sizes</title>
+<style>
+  body { background: #1C1C1E; color: #F1F7FF; font: 14px/1.5 system-ui, sans-serif; margin: 24px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .frame svg { width: 270px; height: 480px; }
+  h2 { font-size: 16px; margin: 24px 0 4px; }
+  p { color: #A0A0A8; margin: 0 0 8px; }
+</style>
+<h1>Watermark sizes, D-089 study Q4</h1>
+<p>Mid-film and final frame, drawn at 360 x 640. No basemap (the real film is Google's map).
+The dashed yellow box is where Google's attribution sits; it must stay visible in every video.
+Drafts to show people, not a design.</p>
+${rows}
+`;
+  writeFileSync(path.join(outDir, 'watermark-sizes.html'), sheet);
+  console.log('\nWrote tools/out/watermark-sizes.html');
+}

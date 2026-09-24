@@ -226,6 +226,18 @@ the validator checks for.
 
 Four decimal places is about 11 m, which is plenty. More is harmless.
 
+### `why` — optional, one line on why the place is worth going to (T-201)
+
+```json
+"why": { "en": "The highest point on the island.", "pt": "…", "de": "…" }
+```
+
+Shown on the place card under the name, **in the phone's language only**. A language left out
+shows no line in that language, never another language's line. At most 140 characters (about
+three lines on the card). A malformed `why` is dropped and the place is kept, and the
+validator reports it. It counts how many places have a line. The draft to veto is
+`docs/why-go-draft.md`.
+
 ---
 
 ## `levadas.json` — generated, never hand-edited (D-055)

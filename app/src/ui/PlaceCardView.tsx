@@ -13,6 +13,10 @@
  * is, and a way to see it on the map. No description, no opening hours, no
  * reviews, no "nearby" list.
  *
+ * ⚠ **One line of "why go" since T-201**, from the content pack: the review
+ * (P1-4) found a card that gave no reason to go anywhere. One line, not a
+ * description — the list above still holds.
+ *
  * ⚠ **No photo, because there is no photo.** The content pack has no image
  * field (`placeCard.ts` explains why that is a T-066 question, not a rendering
  * one). The layout leaves the slot at the top of the card, so adding one later
@@ -69,6 +73,11 @@ export default function PlaceCardView({
       {/* No `numberOfLines`: a long Portuguese place name must wrap rather
           than be cut, and at 2× text scaling most of them will. */}
       <Text style={styles.name}>{card.name}</Text>
+
+      {/* T-201: the reason to go (review P1-4). Under the name, because it is
+          about the place; above the municipality and the distance, which are
+          about getting there. */}
+      {card.whyLine === null ? null : <Text style={styles.why}>{card.whyLine}</Text>}
 
       {/* The municipality (T-067, D-027) — *where is this*, which is the one
           question the card could not answer.
@@ -168,6 +177,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: fontSize.title,
     fontWeight: '800',
+  },
+  why: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    lineHeight: fontSize.body * 1.35,
+    // Clear of the municipality under it, which is the same size and colour.
+    marginBottom: spacing.sm,
   },
   // Body weight, a step above the distance under it. The municipality is a
   // fact about the place; the distance is a qualified estimate about the

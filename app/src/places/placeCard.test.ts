@@ -183,3 +183,15 @@ test('T-190 — the qualification travels with the number, in every language', (
 test('T-190 — an uncollected place shows only its category', () => {
   assert.equal(buildPlaceCard(input({ collected: false, language: 'de' })).metaLabel, 'Aussichtspunkt');
 });
+
+test('T-201: the card carries the "why go" line in its own language', () => {
+  const why = { en: 'The view.', pt: 'A vista.', de: 'Die Aussicht.' };
+  assert.equal(buildPlaceCard(input({ why, language: 'pt' })).whyLine, 'A vista.');
+  assert.equal(buildPlaceCard(input({ why, language: 'de' })).whyLine, 'Die Aussicht.');
+});
+
+test('⚠ T-201: a line missing in this language is no line — never another language', () => {
+  const card = buildPlaceCard(input({ why: { en: 'The view.' }, language: 'pt' }));
+  assert.equal(card.whyLine, null);
+  assert.equal(buildPlaceCard(input()).whyLine, null);
+});

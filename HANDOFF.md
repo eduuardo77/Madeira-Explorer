@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **697 tests** (counted 2026-09-23), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **766 tests** (counted 2026-09-24), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **80 curated places**
 (19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks — 21 added and one cut
@@ -28,11 +28,15 @@ collect: the rule holds, but an unlabelled ring does not yet sell anything; see 
 **T-177 is measured:** 20% of cold starts go wrong, 10% show no map within 45 s. Next: an A/B
 of the launch-time geofence burst. The decisions waiting on the project lead are in T-185, and in
 D-087's three Provisional choices.
+**2026-09-24:** T-200 and T-202 are done (T-202 still to be seen on the P30). **T-201's mechanism
+is in** (a `why` line on the card, and a dimmed passport behind it). Its content is
+`docs/why-go-draft.md`, **waiting on the project lead's veto**.
 
-⚠⚠ **The P30 has the FIELD build from `c15c8a9` installed** (debuggable, and slower: never
-measure smoothness on it). Put the plain release back before any performance reading. Every
-install waits on a **Play Protect prompt only the project lead can answer**. The database was
-backed up before the first install: `Madeira-fieldwork/p30-2026-09-23/`.
+⚠ **The P30 runs the plain RELEASE build from `6333ada` since 2026-09-23 20:23** (`pkgFlags`
+has no `DEBUGGABLE`), so performance readings are valid again. To pull its database, swap in the
+field build first (below). Every install waits on a **Play Protect prompt only the project lead
+can answer**. Backups: `Madeira-fieldwork/p30-2026-09-23/` (before the field build) and
+`p30-2026-09-23b/` (before this release; 5712 fixes, integrity ok).
 
 ## What was settled 2026-08-17 — read these before touching related code
 
@@ -290,7 +294,7 @@ T-156 waits on T-182, and T-158 is parked until Gate R1.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 697 tests
+cd app && npm test          # 766 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

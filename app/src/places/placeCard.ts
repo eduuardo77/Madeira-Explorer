@@ -38,7 +38,7 @@
  * Tested in `placeCard.test.ts`.
  */
 
-import type { Category } from '../content/contentPack.ts';
+import type { Category, PlaceWhy } from '../content/contentPack.ts';
 import { hasCourse } from '../map/levadaHighlight.ts';
 import { distanceM, isUsableCoordinate } from '../recording/distance.ts';
 import { MAX_DRAWN_ACCURACY_M } from '../map/traceGeoJson.ts';
@@ -85,6 +85,8 @@ export type PlaceCardInput = {
   nowMs: number;
   /** Passed in, because this module is pure and may not import `i18n/index.ts`. */
   language: Language;
+  /** The pack's "why go" lines (T-201), if it has any. */
+  why?: PlaceWhy;
 };
 
 export type PlaceCard = {
@@ -121,6 +123,11 @@ export type PlaceCard = {
    * alone.
    */
   distanceSentence: string | null;
+  /**
+   * Why go, in the card's language (T-201, review P1-4). Null when the pack has
+   * no line for this place in this language — never another language's line.
+   */
+  whyLine: string | null;
 };
 
 /**
@@ -205,6 +212,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     position,
     nowMs,
     language,
+    why,
   } = input;
 
   const measurable =
@@ -239,5 +247,6 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
       distanceLabel === null
         ? null
         : translate(STRINGS['placeCard.distance'], language, { distance: distanceLabel }),
+    whyLine: why?.[language]?.trim() || null,
   };
 }

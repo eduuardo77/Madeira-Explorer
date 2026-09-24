@@ -178,7 +178,13 @@ async function main() {
 
   // Everything the app itself would drop.
   for (const problem of parsed.problems) {
-    error(problem.where, problem.problem);
+    // A bad `why` line is dropped and its place kept (T-201), so it is a
+    // warning: the error list below means "this place will not reach the app".
+    if (problem.problem.startsWith('`why')) {
+      warn(problem.where, problem.problem);
+    } else {
+      error(problem.where, problem.problem);
+    }
   }
 
   const places = parsed.pack.places;
@@ -420,6 +426,31 @@ async function main() {
       console.log(`  ${name.padEnd(24)} ${String(count).padStart(4)}`);
     }
   }
+
+  // T-201: the "why go" line. A place without one is counted, not warned
+  // about — the card simply has a line fewer. A place with some languages and
+  // not others *is* warned about: the card shows nothing in the missing one.
+  const WHY_LANGUAGES = ['en', 'pt', 'de'];
+  // Measured in the workbench 2026-09-24: the card's text is 324 px wide at
+  // 17 px, and an 89-character line took 2 lines, so 140 is about 3-4. Room for
+  // German, which runs longer; past it the line becomes the description the
+  // card deliberately does not have (PlaceCardView).
+  const WHY_MAX_CHARS = 140;
+  let withWhy = 0;
+  for (const place of places) {
+    if (place.why === undefined) continue;
+    withWhy += 1;
+    const missing = WHY_LANGUAGES.filter((language) => place.why[language] === undefined);
+    if (missing.length > 0) {
+      warn(place.id, `\`why\` has no ${missing.join(', ')} — the card shows no line in that language`);
+    }
+    for (const [language, line] of Object.entries(place.why)) {
+      if (line.length > WHY_MAX_CHARS) {
+        warn(place.id, `\`why.${language}\` is ${line.length} characters; a card line is at most ${WHY_MAX_CHARS}`);
+      }
+    }
+  }
+  console.log(`\nWhy go (T-201): ${withWhy} of ${places.length} places have a line.`);
 
   if (warnings.length > 0) {
     console.log(`\n${warnings.length} warning(s):`);

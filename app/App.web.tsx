@@ -244,6 +244,12 @@ function makeCard(collected: boolean, distance: boolean) {
     nowMs: now,
     // The workbench follows the browser's language, as the app follows the phone's.
     language: deviceLanguage(),
+    // T-201: the longest a line should run, to judge the wrap. Invented.
+    why: {
+      en: 'A canal cut into the cliff, with the whole valley falling away on one side of the path.',
+      pt: 'Um canal escavado na falésia, com todo o vale a cair de um dos lados do caminho.',
+      de: 'Ein in die Klippe gehauener Kanal, und auf einer Seite des Weges fällt das ganze Tal ab.',
+    },
   });
 }
 

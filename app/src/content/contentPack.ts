@@ -31,6 +31,7 @@
 import { isUsableCoordinate } from '../recording/distance.ts';
 import type { GeofencePlace } from '../recording/geofenceSelection.ts';
 import { isMechanismRegionId } from '../recording/geofenceSelection.ts';
+import { LANGUAGES, type Language } from '../i18n/languages.ts';
 
 /**
  * The five categories, and there is deliberately no "Other" (D-027). A place
@@ -87,7 +88,17 @@ export type Place = {
   regionId: string;
   /** One for most places; a start and an end for a levada. */
   geofences: PlaceGeofence[];
+  /**
+   * One line on why the place is worth going to, per language (T-201, review
+   * P1-4). Optional: a place without one shows a card with a line fewer. A
+   * language missing here shows nothing in that language, never another
+   * language's line — `validate-content.mjs` reports the gap.
+   */
+  why?: PlaceWhy;
 };
+
+/** `{ en, pt, de }`, each optional. See `Place.why`. */
+export type PlaceWhy = Partial<Record<Language, string>>;
 
 /**
  * A place whose geofence ends the trip, not a place that earns a stamp
@@ -385,7 +396,44 @@ function parsePlace(
     seenGeofenceIds.add(geofenceId);
   }
 
-  return { id, name, category, regionId, geofences };
+  const why = parseWhy(row.why, named, problems);
+  return why === undefined
+    ? { id, name, category, regionId, geofences }
+    : { id, name, category, regionId, geofences, why };
+}
+
+/**
+ * The optional "why go" line (T-201).
+ *
+ * ⚠ **A bad line never costs the place.** The stamp is what the place is for;
+ * the line is decoration. So a malformed `why` is reported and dropped, and the
+ * place is kept — the opposite of a bad geofence, which drops the place.
+ */
+function parseWhy(
+  raw: unknown,
+  where: string,
+  problems: ContentProblem[]
+): PlaceWhy | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    problems.push({ where, problem: '`why` must be an object of languages, like { "en": "…" }' });
+    return undefined;
+  }
+  const why: PlaceWhy = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!(LANGUAGES as readonly string[]).includes(key)) {
+      problems.push({ where, problem: `\`why\` has an unknown language ${JSON.stringify(key)}` });
+      continue;
+    }
+    if (typeof value !== 'string' || value.trim() === '') {
+      problems.push({ where, problem: `\`why.${key}\` must be a non-empty string` });
+      continue;
+    }
+    why[key as Language] = value.trim();
+  }
+  return Object.keys(why).length === 0 ? undefined : why;
 }
 
 function parseGeofence(

@@ -146,6 +146,14 @@ export const colors = {
    * artwork and needs an eye (D-046, and nobody here can see).
    */
   stampPage: '#1C1C1E',
+
+  /**
+   * The dimmed backdrop behind a sheet (T-201, review P1-4): the coloured
+   * stamps behind the place card competed with it. Translucent black, so it
+   * dims whatever is behind it — the dark album page included — without
+   * choosing a colour of its own.
+   */
+  scrim: 'rgba(0, 0, 0, 0.5)',
 } as const;
 
 /**

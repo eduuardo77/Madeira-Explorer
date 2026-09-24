@@ -511,6 +511,7 @@ export default function NativeMapScreen({
           position,
           nowMs: Date.now(),
           language: deviceLanguage(),
+          why: requestedPlace.place.why,
         })
       );
 

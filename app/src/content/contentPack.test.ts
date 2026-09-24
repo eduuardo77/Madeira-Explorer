@@ -364,3 +364,33 @@ test('a destination is trimmed, so stray whitespace never reaches the copy', () 
   });
   assert.equal(pack.destination, 'Madeira');
 });
+
+test('T-201: a "why go" line is read per language and trimmed', () => {
+  const { pack: parsed, problems } = parseContentPack(
+    pack([placeRow({ why: { en: '  The view.  ', pt: 'A vista.' } })])
+  );
+  assert.deepEqual(problems, []);
+  assert.deepEqual(parsed.places[0].why, { en: 'The view.', pt: 'A vista.' });
+});
+
+test('T-201: no "why" is no field, not an empty one', () => {
+  const { pack: parsed } = parseContentPack(pack([placeRow()]));
+  assert.equal('why' in parsed.places[0], false);
+});
+
+test('⚠ T-201: a malformed "why" is reported and dropped — the place and its stamp stay', () => {
+  for (const why of ['The view.', ['The view.'], null, { fr: 'La vue.' }, { en: '   ' }, { en: 3 }]) {
+    const { pack: parsed, problems } = parseContentPack(pack([placeRow({ why })]));
+    assert.equal(parsed.places.length, 1, JSON.stringify(why));
+    assert.equal(parsed.places[0].why, undefined, JSON.stringify(why));
+    assert.equal(problems.length, 1, JSON.stringify(why));
+  }
+});
+
+test('T-201: one bad language keeps the good ones', () => {
+  const { pack: parsed, problems } = parseContentPack(
+    pack([placeRow({ why: { en: 'The view.', xx: 'Nope.' } })])
+  );
+  assert.deepEqual(parsed.places[0].why, { en: 'The view.' });
+  assert.equal(problems.length, 1);
+});

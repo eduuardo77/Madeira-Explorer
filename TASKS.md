@@ -308,7 +308,18 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
       on a device: view it on the emulator, not on the P30, whose data must not be wiped.
-- [ ] **T-201** **The place card gives a reason to go** — P1-4. A "why go" line and practical
+- [~] **T-201** ✅ **Mechanism done 2026-09-24; ⚠ the content waits on the project lead's veto.**
+      `pois.json` places take an optional `why: { en, pt, de }`. It is parsed so that a bad line
+      is dropped and its place kept, never the other way. The card shows the line in its own
+      language or not at all, never another language's. `validate-content.mjs` counts coverage
+      (0 / 80 today) and warns on missing languages and on lines over 140 characters (measured:
+      about 3–4 lines on the card). The passport now dims behind the card, and a tap on the
+      dimmed page closes it. The map does not dim, because that would hide the ring the card is
+      about. **Next: the veto of `docs/why-go-draft.md`** (80 English lines, 4 left blank, ⚠
+      on the facts I am unsure of), then pt/de, then into `pois.json`. Practical information
+      (length, time, difficulty) is **not** drafted: it comes from IFCN's official PR figures,
+      not from memory.
+      **The original task:** The place card gives a reason to go — P1-4. A "why go" line and practical
       information (length, difficulty, access) for all 80 places, stored in `content/` (D-017),
       drafted and vetoed as D-064 sets out; a dimmed backdrop behind the sheet. Photos only with
       clear rights. **The biggest single job in this plan.**

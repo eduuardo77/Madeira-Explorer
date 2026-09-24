@@ -168,6 +168,7 @@ export default function PassportScreen({
           position,
           nowMs: Date.now(),
           language: deviceLanguage(),
+          why: place.why,
         })
       );
     })();
@@ -300,6 +301,19 @@ export default function PassportScreen({
         />
       )}
 
+      {/* T-201: dim the stamps behind the card, which competed with it (review
+          P1-4). Tapping the dimmed page closes the card, as a sheet's backdrop
+          does. Drawn before the back and share controls, so they stay above it
+          and reachable: the card is still not modal (PlaceCardView). Hidden
+          from screen readers, which close the card with its own button. */}
+      {card === null ? null : (
+        <Pressable
+          style={styles.scrim}
+          onPress={closeCard}
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+        />
+      )}
       {card === null ? null : (
         <View style={styles.cardHolder} pointerEvents="box-none">
           <PlaceCardView
@@ -464,6 +478,7 @@ function earnedStamps(awards: StampAward[]): EarnedStamp[] {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  scrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: colors.scrim },
   cardHolder: {
     position: 'absolute',
     left: spacing.md,

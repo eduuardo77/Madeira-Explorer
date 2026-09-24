@@ -81,7 +81,7 @@ lead outdoors.
   file with the Write tool.
 - **Play Protect prompts on every install**, and only the project lead can tap them.
 
-⚠ **The P30 runs a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:48 with the rings removed and the passport row (stamp 108 dp, *Centrar* beside it)**, with option D, End
+⚠ **The P30 runs a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:52 with the rings removed and the passport row (stamp 101 dp, *Centrar* centred beside it)**, with option D, End
 trip, the update notice, T-212 and maps-compose 6.12.1 (`pkgFlags` has no `DEBUGGABLE`, so
 performance readings are valid). Its old trip was closed by the *End trip* test and automatic
 recording was switched back on, so a new trip opens at the next fix. The next install also brings

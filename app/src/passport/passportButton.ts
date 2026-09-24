@@ -46,11 +46,11 @@ export const PLACEHOLDER_ID = '__passport';
  *
  * The stamp is drawn at `TILT_FIT` of it, because a tilted square is wider
  * than its own side, and the rim's pad comes out of the same square — so the
- * stamp itself is ~90 dp. It was 84 (a ~70 dp stamp, the size approved in the
- * drawn options) until the project lead asked for it bigger on 2026-09-24.
+ * stamp itself is ~84 dp. It was 84 (a ~70 dp stamp, the size approved in the
+ * drawn options) until the project lead asked for it 20% bigger on 2026-09-24.
  * Here rather than in `PrimaryOverlay.tsx` so the preview draws the same size.
  */
-export const STAMP_BUTTON_SIZE = 108;
+export const STAMP_BUTTON_SIZE = 101;
 
 /** The placeholder's emblem. A levada, because that is what the app is for (D-072). */
 export const PLACEHOLDER_CATEGORY: Category = 'levada';

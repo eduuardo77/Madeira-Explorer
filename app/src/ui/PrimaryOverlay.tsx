@@ -74,9 +74,13 @@ const RECENTRE_MARK_SIZE = 17;
  *
  * ⚠ 10 dp top and bottom, and no more. The walk button sits below, the pill
  * centred on the stamp's row (2026-09-24); a taller slop would reach toward the
- * one control on this screen that must never be pressed by accident.
+ * one control on this screen that must never be pressed by accident. Nothing
+ * sideways: the pill is already wider than 60 dp, and the stamp is beside it.
  */
-const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 16, right: 16 };
+const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 0, right: 0 };
+
+/** The passport button's box: the stamp, never under the 60 dp target. */
+const STAMP_BOX = Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET);
 
 /** The glyph beside the words on the walk button. */
 const WALK_MARK_SIZE = 22;
@@ -284,8 +288,9 @@ export default function PrimaryOverlay({
         {/* The passport stamp and *Re-centre* share one row, directly above
             the walk button (the project lead, 2026-09-24: re-centre used to
             float above the passport, in the middle of the map). The stamp
-            keeps the left edge; re-centre takes the right, so the two stay
-            apart and neither is a mis-tap for the other. */}
+            keeps the left edge and re-centre is centred on the screen, in a
+            middle column that mirrors the stamp's width on the right, so it
+            can never reach the stamp whatever the label's length. */}
         <View style={styles.row} pointerEvents="box-none">
           <Pressable
             accessibilityRole="button"
@@ -312,40 +317,49 @@ export default function PrimaryOverlay({
             />
           </Pressable>
 
-          {showRecentre ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('map.a11y.recentre')}
-              onPress={onRecentre}
-              // ⚠ The visible pill is deliberately smaller than the 60 dp D-015
-              // asks for, because the reference app's is and the project lead
-              // asked for theirs: a full-height chrome slab here shouted louder
-              // than the walk button below it, which is the actual primary
-              // action. The *target* is still 60 dp — that is what hitSlop buys,
-              // and `PassportView`'s "See all" does the same thing for the same
-              // reason. ⚠ The workbench cannot see hitSlop (see that file), so
-              // this target can only be checked on a device.
-              hitSlop={RECENTRE_HIT_SLOP}
-              style={({ pressed }) => [
-                styles.recentre,
-                {
-                  backgroundColor: chrome.surface,
-                  elevation: chrome.elevation,
-                  shadowColor: '#000000',
-                  shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
-                  shadowRadius: chrome.elevation,
-                  shadowOffset: { width: 0, height: 1 },
-                },
-                chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
-                pressed && styles.pressed,
-              ]}
-            >
-              <RecentreMark size={RECENTRE_MARK_SIZE} color={chrome.link} />
-              <Text style={[styles.recentreText, { color: chrome.link }]}>
-                {t('map.recentre')}
-              </Text>
-            </Pressable>
-          ) : null}
+          <View style={styles.rowCentre} pointerEvents="box-none">
+            {showRecentre ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('map.a11y.recentre')}
+                onPress={onRecentre}
+                // ⚠ The visible pill is deliberately smaller than the 60 dp D-015
+                // asks for, because the reference app's is and the project lead
+                // asked for theirs: a full-height chrome slab here shouted louder
+                // than the walk button below it, which is the actual primary
+                // action. The *target* is still 60 dp — that is what hitSlop buys,
+                // and `PassportView`'s "See all" does the same thing for the same
+                // reason. ⚠ The workbench cannot see hitSlop (see that file), so
+                // this target can only be checked on a device.
+                hitSlop={RECENTRE_HIT_SLOP}
+                style={({ pressed }) => [
+                  styles.recentre,
+                  {
+                    backgroundColor: chrome.surface,
+                    elevation: chrome.elevation,
+                    shadowColor: '#000000',
+                    shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+                    shadowRadius: chrome.elevation,
+                    shadowOffset: { width: 0, height: 1 },
+                  },
+                  chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <RecentreMark size={RECENTRE_MARK_SIZE} color={chrome.link} />
+                {/* One line, shrunk if it must: "Zentrieren" is the widest and
+                    the column is only as wide as the screen less two stamps. */}
+                <Text
+                  style={[styles.recentreText, { color: chrome.link }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {t('map.recentre')}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+          <View style={styles.rowMirror} pointerEvents="none" />
         </View>
 
         {/* ⚠ SHOWN TO EVERYBODY SINCE 2026-08-28, on the project lead's
@@ -489,12 +503,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     fontWeight: '700',
   },
-  /** The passport stamp on the left, re-centre on the right (2026-09-24). */
+  /** The passport stamp on the left, re-centre centred (2026-09-24). */
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
+  rowCentre: { flex: 1, alignItems: 'center' },
+  /** As wide as the stamp, so the middle column is centred on the screen. */
+  rowMirror: { width: STAMP_BOX },
   recentre: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -515,8 +531,8 @@ const styles = StyleSheet.create({
     // ⚠ No fill and no shadow: the stamp is the button (D-083), and its
     // hairline rim is what stands it off either map. Android draws no
     // elevation shadow for a view without a background anyway.
-    width: Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET),
-    height: Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET),
+    width: STAMP_BOX,
+    height: STAMP_BOX,
     alignItems: 'center',
     justifyContent: 'center',
   },

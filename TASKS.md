@@ -222,6 +222,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       `HeadlessJsTaskContext: CatalystInstance not available` warning at cold start may mean the
       first fixes are lost. Measure it on the P30: compare fixes in the database with fixes the
       OS delivered.
+      — **One observation, 2026-09-24 (the T-210 update test).** A background cold start with
+      events queued: `Start proc … for broadcast` at 19:13:38.991, then `Handling job …
+      madeira-location-updates` at 39.659, then `Finished task …` and `Finished headless task 1`.
+      The queued batch **was processed, within a second, with no Activity**. That is one run, not
+      a rate. The stall this task describes (a keep-alive failing mid-batch) was not seen. The
+      measurement that settles it is still a DB-versus-delivered comparison on a field build.
 - [ ] **T-197** **Memory doubles after sharing** — P2-9. 510 MB PSS against 275 MB at rest. Find
       out what holds the capture and release it. The recorder shares this process, so the
       memory pressure puts it at risk.

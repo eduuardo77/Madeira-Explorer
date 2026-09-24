@@ -2356,6 +2356,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **Reopened 2026-09-23.** The release APK carries the Maps SDK, FCM and the install
         referrer (T-117c), and Play counts what third-party SDKs collect. Redo the answers
         against Google's own data disclosures for each SDK in the APK ⇠ T-194.
+      — ✅ **Drafted 2026-09-24** in `docs/store-privacy-answers.md`, each row sourced. The
+        Maps SDK makes the answer **Yes, collected**: crash logs, diagnostics, a pseudonymous
+        device ID, app interactions. Location is **not** declared, because IP is not used to locate.
+        Firebase and the install referrer send nothing: Firebase never initializes (seen on the P30),
+        and the referrer's permission was removed. ⚠ **Two calls are the project lead's:** *shared
+        or not* (the service-provider exception) and *deletion: No* (Google holds the SDK's data).
+        Also one sentence to add to the in-app policy in three languages (D-044). Billing (T-156)
+        adds purchase history.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
 - [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117

@@ -77,22 +77,51 @@ If one is ever changed, change both in the same piece of work.
 
 ## Google Play — Data safety (T-122)
 
-In Play Console → App content → Data safety.
+> ### ⚠ REDONE 2026-09-24, as a DRAFT for the project lead to read — not yet submitted
+> The old answer was **"No data collected"**. It is wrong for the APK that ships. Google's rule
+> counts *"user data transmitted off device from your app by libraries and/or SDKs used in your
+> app, irrespective of whether data is transmitted to you or a third-party server"*
+> ([Data safety guidance](https://support.google.com/googleplay/android-developer/answer/10787469)),
+> and the Maps SDK transmits some. **Not legal advice**, the same caveat as above.
 
-| Question | Answer |
-|---|---|
-| Does your app collect or share any of the required user data types? | **No** |
-| Is all of the user data collected by your app encrypted in transit? | *(not asked — nothing is transmitted)* |
-| Do you provide a way for users to request that their data is deleted? | **Yes** |
+### What each SDK in the release APK sends, and the evidence
 
-**On deletion**, answer yes and explain plainly: the app has no account and no server, so there
-is nothing held anywhere to request deletion of; Settings has a control that erases everything
-on the device immediately and permanently (T-125), and uninstalling does the same. That is the
-whole mechanism, and the privacy policy says so in the same words (D-044).
+| SDK in the APK | What leaves the phone | Evidence |
+|---|---|---|
+| **Maps SDK for Android** (via expo-maps) | Device metadata (OS version, model, brand, form factor), SDK version and result counts; stack traces and crash metrics; **IP address** "to understand usage"; a pseudonymous **Maps SDK identifier** for counting daily active users; **map interaction events** (panning and zooming when the Map Camera APIs are used, which this app does) | Google's [Maps SDK data disclosure](https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure), read 2026-09-24 |
+| **Firebase Cloud Messaging** (inside expo-notifications) | **Nothing.** Firebase never starts: the release build has no `google-services.json`, so no Firebase installation ID is created and FCM never registers | Seen on the P30, every launch: `FirebaseApp: Default FirebaseApp failed to initialize because no default options were found` |
+| **Play Install Referrer** (a transitive dependency) | **Nothing.** The permission that lets it reach the Play Store is removed from the manifest (T-194), and no code calls it | `withoutUnusedPermissions.js`; `dumpsys package` on the P30 lists 12 permissions |
+| **Google Play services location** (the recorder) | Fixes are handed to the app **on the phone**. Whether the phone improves them with Wi-Fi and cell data is *Google Location Accuracy*, a device setting the user controls, not something this app sends | D-010; the recorder stores fixes only in the local database |
 
-**Play also requires a privacy policy URL.** ⚠ **Blocked** — `docs/privacy-policy.md` is
-written and generated, but there is no domain to host it on and `CONTACT_EMAIL` is still null
-(D-044). Both block T-123 as well.
+**The trip itself** (trace, stamps, diary) is still never transmitted by the app. That claim
+stands, and it is the one the listing should lead with.
+
+### The answers, as drafted
+
+| Question | Draft answer | Why |
+|---|---|---|
+| Does your app collect or share any of the required user data types? | **Yes** | The Maps SDK rows above |
+| **Collected** data types | **App info and performance → Crash logs; Diagnostics.** **Device or other IDs** (the pseudonymous Maps SDK identifier). **App activity → App interactions** (map panning and zooming) | Google's own definitions: crash logs are *"stack traces, or other information directly related to a crash"*; device IDs include *"Firebase installation ID"*-style app identifiers; app interactions are *"how a user interacts with the app"* |
+| Location? | **Not declared** | The only location that leaves the phone is the IP address, and Google says to declare IP as location *"where developers use IP addresses as a means to determine location"*. Neither this app nor, per its disclosure, the Maps SDK does |
+| Shared? | ⚠ **Draft: not shared** | Google processes it to run the map this app uses. The *"service provider"* exception may cover that, but a reviewer could read Google as a third party using the data for its own purposes (measuring the SDK). **This is the call to confirm.** The conservative alternative is to mark the same types as *shared* |
+| Processed ephemerally? | **No** | Crash metrics and a daily-active-user identifier are retained by design |
+| Required or optional? | **Required** | The map cannot be used without the SDK |
+| Purposes | **App functionality; Analytics** | Stability and usage measurement are the purposes Google gives |
+| Encrypted in transit? | **Yes** | The manifest sets `usesCleartextTraffic=false` for the whole process, and the Maps SDK runs in it |
+| Can users request deletion? | ⚠ **Draft: No** | The app's own data is only on the phone and *Apagar tudo* erases it (T-125). But the question is about **collected** data, and the only collected data is the Maps SDK's, held by Google under Google's policy, which the app cannot delete. Saying *Yes* would promise something the app cannot do |
+
+⚠ **Coming with T-156 (billing):** Play Billing adds **Financial info → Purchase history**. Redo
+this table in the same piece of work.
+
+⚠ **Keep the in-app policy in step (D-044).** `legal/privacyPolicy.ts` says Google sees which
+part of the island the user is looking at. It does **not** yet say that the map component also
+sends Google device details, crash reports, a pseudonymous identifier and how the map is
+moved. **Proposed sentence, pending the project lead:** *"The map component also sends Google
+basic details about your phone, crash reports, an anonymous identifier for counting users, and
+how you move the map. It never sends your trip."* (in en, pt and de).
+
+**Play also requires a privacy policy URL.** ⚠ **Blocked** on T-187 (a domain) and
+`CONTACT_EMAIL`, as before.
 
 ---
 
@@ -107,9 +136,8 @@ they obviously understand, which both platforms treat as outside the disclosure.
 transmits it on its own, and the user's accommodation is removed before the export exists at
 all (D-040).
 
-**The Directions hand-off (T-115, D-018).** Tapping a place offers one button that opens Apple
-or Google Maps. What is handed over is a **curated place's coordinates from the content pack**,
-not the user's location or history — and again only on an explicit tap.
+~~**The Directions hand-off (T-115, D-018).**~~ Removed by D-055: the card has no Directions
+button, so nothing is handed to another app.
 
 **The device's own encrypted backup.** The trip database participates in normal iCloud/Google
 backup, deliberately (ARCHITECTURE §4a) — it is the answer to "my phone died on day 5". That is
@@ -119,7 +147,8 @@ section, because the user can reach it and may want to turn it off.
 
 **Firebase Cloud Messaging in the Android build (D-043).** It ships inside
 `expo-notifications`, is never asked for a push token, and has no configuration to register
-with. It collects nothing, so there is nothing to declare — but see the risk below.
+with. It collects nothing, so there is nothing to declare — but see the risk below. ✅ **Observed 2026-09-24:** every launch on the P30
+logs *"Default FirebaseApp failed to initialize because no default options were found"*.
 
 ---
 

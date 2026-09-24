@@ -348,6 +348,13 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [ ] **T-203** **A design pass on the passport and the empty state** — P2-5, P2-6, P2-7, P2-8.
       The grey uncollected stamps that look alike, dark panels on a light page, the placeholder
       blob, and zero-width tap areas on stamps past the right edge.
+      — **P2-7 needs no change (checked 2026-09-24).** Each category row is a horizontal
+      `ScrollView` (`PassportView.tsx`). uiautomator reports a child scrolled off-screen with its
+      bounds clipped to the screen edge, so *Bica da Cana* at `[1032,1184][1032,1472]` is the
+      next stamp in a carousel, reached by swiping. It is not a broken tap area.
+      — **P2-8 is the project lead's call, not a fix:** the grey *"Passport"* placeholder is
+      D-083's own choice from three drawn options. The review reads it as a dark blob. That is a
+      judgement by eye on the P30, so it is asked, not changed.
 - [ ] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195.
 
 ### Stage 4 — Proof on a real phone
@@ -1772,6 +1779,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — **Mitigation available whatever the cause:** remount the map when no `MapView` exists after
       N s (a key change on the expo-maps view). A workaround, not a fix, and it must be called
       one.
+      — ✅ **2026-09-24: a mechanism, read from source (commit `1dfb549`).**
+      - **Why the map is blank.** `ExpoComposeView` (expo-modules-core 57.0.10, the same on Expo's
+        `main`) pins the map's composition to `appContext.currentActivity` **when the view is
+        built**. With no current Activity it falls back to disposing the composition on the first
+        re-attach after a detach. That listener runs after `onAttachedToWindow` has made a fresh
+        composition, so the fresh one dies and nothing replaces it. That is the measured
+        signature.
+      - **What the log shows.** Stuck launch 24: maps-compose's initializer at 28.796, a `MapView`
+        created at 28.804, the map ready at 29.033, and at 10 s no `MapView` in the tree.
+      - **When the Activity is missing.** React sets it in `onHostResume`, the same moment
+        `AppState` turns `active`. It can be null while views mount when JavaScript was already
+        running (T-196). 2 of the 4 captured blanks were warm starts into a process that already
+        existed.
+      - **Fix:** `map/mapMountGate.ts`. The map waits for the first `active` and then latches. A
+        test fails if `GoogleMaps.View` renders outside the gate.
+      - **Also read, not the cause here.** maps-compose's `GoogleMapsInitializer` catches
+        `Exception`, and coroutine cancellation is one. A map disposed mid-init therefore leaves
+        the state `FAILURE` for the life of the process.
+      — **Baseline on the plain release before the fix:** **1 blank in 97 force-stopped cold
+      starts** (probe 5: 1/25; probe 6: 0/72), against 6/30 on the field build on 2026-09-23. On
+      cold starts, "60 clean in a row" cannot tell a fix from luck. **The proof targets warm
+      starts** (`warmloop.sh`: Back, wait 2–12 s, relaunch, with the recorder keeping the process
+      alive).
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.

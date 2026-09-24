@@ -61,7 +61,8 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('licences.a11y.back')}
+          accessibilityLabel={t('common.done')}
+          accessibilityHint={t('licences.a11y.back')}
           onPress={onClose}
           style={({ pressed }) => [styles.done, pressed && styles.pressed]}
         >

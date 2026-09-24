@@ -510,7 +510,7 @@ function earnedStamps(awards: StampAward[]): EarnedStamp[] {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: album.background },
-  scrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: colors.scrim },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
   cardHolder: {
     position: 'absolute',
     left: spacing.md,

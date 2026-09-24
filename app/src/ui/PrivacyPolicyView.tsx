@@ -56,7 +56,8 @@ export default function PrivacyPolicyView({
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('privacy.a11y.back')}
+          accessibilityLabel={t('common.done')}
+          accessibilityHint={t('privacy.a11y.back')}
           onPress={onClose}
           style={({ pressed }) => [styles.done, pressed && styles.pressed]}
         >

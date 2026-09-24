@@ -307,7 +307,7 @@ export const STRINGS = {
     '{collected} von {total} Orten'
   ),
   'map.a11y.recentre': s(
-    'Center the map on where you are',
+    'Re-center the map on where you are',
     'Centrar o mapa onde está',
     'Karte auf Ihren Standort zentrieren'
   ),
@@ -723,6 +723,9 @@ export const STRINGS = {
     'Nur bei geöffneter App'
   ),
   'settings.permission.none': s('Not set up yet', 'Ainda não configurado', 'Noch nicht eingerichtet'),
+  // ⚠ Was the English word 'Off' returned from SettingsView on every phone, found
+  // 2026-09-24. `i18nCoverage.test.ts` reads JSX text and props, not a `return`.
+  'settings.permission.denied': s('Not allowed', 'Não permitido', 'Nicht erlaubt'),
   'settings.recording.footnoteLimited': s(
     'Your map fills in only while the app is open. To let it fill in by itself, set location to “Allow all the time”.',
     'O mapa só se preenche com a aplicação aberta. Para se preencher sozinho, ponha a localização em “Permitir sempre”.',
@@ -747,13 +750,6 @@ export const STRINGS = {
     'Cada opção muda a frequência com que a aplicação pergunta ao telemóvel onde está, e é isso que gasta bateria. Quanto mais de perto o acompanha, mais bateria gasta.',
     'Jede Stufe ändert, wie oft die App Ihr Telefon nach dem Standort fragt, und genau das verbraucht Akku. Je genauer sie Ihnen folgt, desto mehr Akku braucht sie.'
   ),
-  'settings.quality.saver': s('Battery saver', 'Poupança de bateria', 'Akkusparen'),
-  'settings.quality.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
-  'settings.quality.best': s('Best detail', 'Máximo detalhe', 'Höchste Genauigkeit'),
-  // ⚠ Short forms, for the three-across control only. The full names above are
-  // still what the screen reader announces — a segment two thirds narrower than
-  // the label is a truncation waiting to happen, and Portuguese and German are
-  // where it happens first.
   // ⚠ `{collected} of {total}` was written into PassportView as a template
   // literal until 2026-08-28, so the one English word on an otherwise Portuguese
   // screen was the word joining two numbers. German needs `von`, not a
@@ -763,6 +759,10 @@ export const STRINGS = {
     '{collected} de {total}',
     '{collected} von {total}'
   ),
+  // The tier names, short enough for a three-across control in Portuguese and
+  // German. ⚠ These are also what the screen reader says (review N4): there is
+  // no separate spoken name, because one that differs from the visible word
+  // cannot be matched to it (WCAG 2.5.3).
   'settings.quality.short.saver': s('Saver', 'Poupança', 'Sparen'),
   'settings.quality.short.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
   'settings.quality.short.best': s('Precise', 'Preciso', 'Genau'),

@@ -465,7 +465,7 @@ export default function PassportView({
           ) : onWatch === undefined ? null : (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t('replay.a11y.play')}
+              accessibilityLabel={t('replay.watch')}
               onPress={onWatch}
               // Two words, so the target is grown around them rather than left
               // at the size of the text (D-015).

@@ -11,8 +11,11 @@
  *
  *   1. **Every section gets a header and a plain-English footnote** saying what
  *      it does and what it costs.
- *   2. **The destructive action goes last, in its own section, in red, with an
- *      icon.** Findable, not fat-fingerable.
+ *   2. **The destructive action goes last, in its own section, in red.**
+ *      Findable, not fat-fingerable. Its words carry the meaning, so colour is
+ *      never the only signal (D-015). ⚠ It also carried a ⚠ emoji until
+ *      2026-09-24; the review (N7) read that as a warning sign pasted on rather
+ *      than a designed control, and an emoji draws differently on every skin.
  *
  * ERASING IS PERMANENT AND THE COPY HAS TO SAY SO
  * -----------------------------------------------
@@ -170,10 +173,7 @@ function Action({
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.actionText, danger === true && styles.dangerText]}>
-        {danger === true ? '⚠  ' : ''}
-        {label}
-      </Text>
+      <Text style={[styles.actionText, danger === true && styles.dangerText]}>{label}</Text>
     </Pressable>
   );
 }
@@ -223,28 +223,28 @@ function Toggle({
  * not repeated — it comes from `TRACKING_QUALITIES`, which owns it — because a
  * second copy of an order is a second thing to get out of step.
  *
- * ⚠ Three keys per tier, and they are not interchangeable. The segment is too
- * narrow for the full name in Portuguese or German, so it wears `short`; the
- * screen reader gets `full`, which is the real name; `detail` is the sentence
- * below the control and the only place the difference is actually explained.
+ * Two keys per tier: `short` is the word on the segment, and `detail` is the
+ * sentence below the control that explains it.
+ *
+ * ⚠ **The screen reader says the word on the segment, not a longer name**
+ * (review N4, 2026-09-24). It used to announce a separate full name, so a
+ * segment reading *Preciso* was spoken as *Máximo detalhe*: a user who says
+ * what they see to voice control, or a sighted helper beside a TalkBack user,
+ * could not match the two (WCAG 2.5.3, label in name). Each segment's hint is
+ * its `detail` sentence instead, so a screen-reader user hears what an option
+ * does before choosing it, which the full name never told them.
  */
-const QUALITY_TEXT: Record<
-  TrackingQuality,
-  { short: StringKey; full: StringKey; detail: StringKey }
-> = {
+const QUALITY_TEXT: Record<TrackingQuality, { short: StringKey; detail: StringKey }> = {
   saver: {
     short: 'settings.quality.short.saver',
-    full: 'settings.quality.saver',
     detail: 'settings.quality.detail.saver',
   },
   balanced: {
     short: 'settings.quality.short.balanced',
-    full: 'settings.quality.balanced',
     detail: 'settings.quality.detail.balanced',
   },
   precise: {
     short: 'settings.quality.short.best',
-    full: 'settings.quality.best',
     detail: 'settings.quality.detail.best',
   },
 };
@@ -284,8 +284,9 @@ function Segmented({
           <Pressable
             key={quality}
             accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={t(QUALITY_TEXT[quality].full)}
+            accessibilityState={{ checked: selected }}
+            accessibilityLabel={t(QUALITY_TEXT[quality].short)}
+            accessibilityHint={t(QUALITY_TEXT[quality].detail)}
             onPress={() => onChange(quality)}
             style={({ pressed }) => [
               styles.segment,
@@ -314,7 +315,7 @@ function describePermission(permission: PermissionLevel): string {
     case 'while_using':
       return t('settings.permission.whenInUse');
     case 'denied':
-      return 'Off';
+      return t('settings.permission.denied');
     case 'undetermined':
       return t('settings.permission.none');
   }
@@ -532,10 +533,10 @@ export default function SettingsView({
                   <Pressable
                     key={option ?? 'auto'}
                     accessibilityRole="radio"
-                    accessibilityState={{ selected }}
+                    accessibilityState={{ checked: selected }}
                     accessibilityLabel={label}
                     onPress={() => onChangeLanguage(option)}
-                    style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+                    style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}
                   >
                     <Text style={styles.rowLabel}>{label}</Text>
                     <Text style={styles.rowValue}>{selected ? '✓' : ''}</Text>
@@ -598,7 +599,8 @@ export default function SettingsView({
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('settings.a11y.backToMap')}
+          accessibilityLabel={t('settings.done')}
+          accessibilityHint={t('settings.a11y.backToMap')}
           onPress={onClose}
           style={({ pressed }) => [styles.done, pressed && styles.pressed]}
         >
@@ -661,6 +663,16 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     gap: spacing.md,
     minHeight: spacing.xl,
+  },
+  // ⚠ A row you can press is a tap target, and a tap target is 60 dp (D-015).
+  // The language options used `row`, which is 32 dp because it was drawn for
+  // text that only reads; the review measured them from source (N4).
+  radioRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.md,
+    minHeight: MIN_TAP_TARGET,
   },
   rowLabel: { color: colors.text, fontSize: fontSize.body, flexShrink: 1 },
   rowValue: {

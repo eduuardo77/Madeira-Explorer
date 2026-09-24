@@ -29,6 +29,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { MIN_TAP_TARGET, fontSize } from './theme.ts';
+import { LANGUAGES } from '../i18n/languages.ts';
+import { STRINGS, type StringKey } from '../i18n/strings.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const srcRoot = path.resolve(here, '..');
@@ -146,6 +148,107 @@ test('a hit target is computed on four sides, never guessed as one number', () =
   );
 });
 
+// ---------------------------------------------------------------------------
+// Rules added after the second review (2026-09-24, N4)
+// ---------------------------------------------------------------------------
+//
+// ⚠ The review read the source and found three failures this file could not
+// see: a 32 dp row you could press, radio rows that never said which one was
+// chosen, and a control whose spoken name was not its visible word. Each rule
+// below is the check that would have caught one of them.
+
+/**
+ * A radio or checkbox that reports `selected` rather than `checked`: the key
+ * `selected`, first or after a comma, so `{{ checked: selected }}` (a variable
+ * that happens to be called that) passes.
+ */
+const SELECTED_NOT_CHECKED =
+  /accessibilityRole="(radio|checkbox)"[^<]*?accessibilityState=\{\{(?:[^}]*,)?\s*selected\s*[:,}]/;
+
+test('a radio or checkbox says whether it is checked, not selected', () => {
+  // Android's TalkBack announces a radio's state from `checked`. Given
+  // `selected`, it says nothing at all about which language is the chosen one,
+  // which was the whole point of the control (review N4).
+  const offenders = sources().filter((file) => SELECTED_NOT_CHECKED.test(code(file)));
+
+  assert.deepEqual(
+    offenders.map(relative),
+    [],
+    'these give a radio or checkbox `selected`; TalkBack needs `checked`'
+  );
+});
+
+test('every pressable reaches the tap target, or grows its target with hitSlop', () => {
+  // The language rows used a 32 dp text row as their style, and nothing here
+  // looked at what a Pressable's style resolved to (review N4). This does, from
+  // source: a Pressable passes when it has `hitSlop`, fills the screen, or one
+  // of the styles it names is sized from MIN_TAP_TARGET, directly or through a
+  // constant built from it (`STAMP_BOX`, `STAMP_SIZE`).
+  //
+  // ⚠ Still a proxy, and it says so: it proves the style *asks* for 60 dp, not
+  // that the phone draws it. A measurement on the device is the real check.
+  const offenders: string[] = [];
+
+  for (const file of sources().filter((candidate) => candidate.endsWith('.tsx'))) {
+    const source = code(file);
+    const sized = tapSizedNames(source);
+
+    for (const match of source.matchAll(/<Pressable\b/g)) {
+      const props = openingProps(source, match.index);
+      if (/hitSlop\s*=|absoluteFill/.test(props)) {
+        continue;
+      }
+      const styleNames = [...props.matchAll(/styles\.(\w+)/g)].map((found) => found[1]);
+      const reaches = styleNames.some((name) => {
+        const body = styleBody(source, name);
+        return body !== null && (/absoluteFill/.test(body) || mentionsAny(body, sized));
+      });
+      if (!reaches) {
+        offenders.push(`${relative(file)}:${lineOf(source, match.index)}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    'these Pressables are not sized from MIN_TAP_TARGET and carry no hitSlop (D-015)'
+  );
+});
+
+test('a control’s spoken name contains the words it shows', () => {
+  // WCAG 2.5.3, label in name. Seven controls broke it on 2026-09-24: every
+  // *Concluído* was spoken as *Voltar ao mapa* or *Voltar às definições*, so a
+  // voice-control user saying the word on the button pressed nothing. The
+  // longer explanation belongs in `accessibilityHint`, which is where it went.
+  //
+  // Checked wherever both are literal catalogue keys, in every language, since
+  // a translation can break it when the English does not.
+  const offenders: string[] = [];
+
+  for (const file of sources().filter((candidate) => candidate.endsWith('.tsx'))) {
+    for (const block of code(file).match(/<Pressable\b[\s\S]*?<\/Pressable>/g) ?? []) {
+      const spoken = /accessibilityLabel=\{\s*t\(\s*'([\w.]+)'/.exec(block)?.[1];
+      const shown = /<Text\b[^>]*>\s*\{\s*t\(\s*'([\w.]+)'/.exec(block)?.[1];
+      if (spoken === undefined || shown === undefined || spoken === shown) {
+        continue;
+      }
+      for (const language of LANGUAGES) {
+        const name = STRINGS[spoken as StringKey];
+        const label = STRINGS[shown as StringKey];
+        if (!('en' in name) || !('en' in label)) {
+          continue; // plural forms carry numbers; not this rule's concern
+        }
+        if (!words(name[language]).includes(words(label[language]))) {
+          offenders.push(`${relative(file)} ${language}: "${label[language]}" is spoken as "${name[language]}"`);
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(offenders, [], 'these controls are spoken as something other than what they show');
+});
+
 test('the rules above actually match something, so they are not vacuous', () => {
   // Probe check. Every assertion here is "this list is empty", which is also
   // what a broken pattern produces. So: prove the patterns fire on text that
@@ -170,6 +273,36 @@ test('the rules above actually match something, so they are not vacuous', () => 
   assert.doesNotMatch('  fontSize: fontSize.body,', /fontSize:\s*\d/);
   assert.doesNotMatch('  fontSize: bandHeight * 0.62,', /fontSize:\s*\d/);
 
+  // The three review rules, each shown the exact shape it was written for.
+  assert.match(
+    'accessibilityRole="radio"\n accessibilityState={{ selected }}',
+    SELECTED_NOT_CHECKED
+  );
+  assert.match(
+    'accessibilityRole="checkbox" accessibilityState={{ disabled, selected: on }}',
+    SELECTED_NOT_CHECKED
+  );
+  assert.doesNotMatch(
+    'accessibilityRole="radio"\n accessibilityState={{ checked: selected }}',
+    SELECTED_NOT_CHECKED
+  );
+  const rowSource = 'x = <Pressable style={styles.row}><Text/></Pressable>;\n  row: {\n    minHeight: spacing.xl,\n  },';
+  assert.equal(
+    styleBody(rowSource, 'row')?.includes('MIN_TAP_TARGET'),
+    false,
+    'the 32 dp row must not read as sized'
+  );
+  assert.ok(
+    mentionsAny('width: STAMP_BOX,', tapSizedNames('const STAMP_BOX = Math.max(A, MIN_TAP_TARGET);')),
+    'a size built from MIN_TAP_TARGET is not being followed'
+  );
+  assert.equal(
+    words('Voltar ao mapa').includes(words('Concluído')),
+    false,
+    'label in name would pass the case it was written for'
+  );
+  assert.ok(words('Centrar o mapa onde está').includes(words('Centrar')));
+
   // The comment stripper must remove prose without eating code — theme.ts
   // both documents the rule and must keep passing it.
   const theme = code(path.join(srcRoot, 'ui', 'theme.ts'));
@@ -189,6 +322,66 @@ function code(file: string): string {
   return readFileSync(file, 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+/**
+ * `MIN_TAP_TARGET` and every constant in the file built from it, so a style
+ * that says `width: STAMP_BOX` counts as sized when `STAMP_BOX` is
+ * `Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET)`.
+ */
+function tapSizedNames(source: string): string[] {
+  const names = ['MIN_TAP_TARGET'];
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const match of source.matchAll(/\bconst\s+(\w+)\s*=([^;]*);/g)) {
+      if (!names.includes(match[1]) && mentionsAny(match[2], names)) {
+        names.push(match[1]);
+        grew = true;
+      }
+    }
+  }
+  return names;
+}
+
+function mentionsAny(text: string, names: string[]): boolean {
+  return names.some((name) => new RegExp(`\\b${name}\\b`).test(text));
+}
+
+/**
+ * A Pressable's props: from `<Pressable` to the first `<` after it, which is
+ * its first child or its closing tag. Props here never contain a `<`.
+ */
+function openingProps(source: string, start: number): string {
+  const next = source.indexOf('<', start + 1);
+  return source.slice(start, next === -1 ? undefined : next);
+}
+
+/** The body of `name: { ... }` in the file's StyleSheet, braces balanced. */
+function styleBody(source: string, name: string): string | null {
+  const found = new RegExp(`\\n\\s+${name}:\\s*\\{`).exec(source);
+  if (found === null) {
+    return null;
+  }
+  let at = found.index + found[0].length;
+  for (let depth = 1; depth > 0 && at < source.length; at += 1) {
+    if (source[at] === '{') depth += 1;
+    if (source[at] === '}') depth -= 1;
+  }
+  return source.slice(found.index, at);
+}
+
+function lineOf(source: string, index: number): number {
+  return source.slice(0, index).split('\n').length;
+}
+
+/** Lower case, placeholders and punctuation gone: the words a person says. */
+function words(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\{\w+\}/g, ' ')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
 }
 
 /** Every `.ts`/`.tsx` under `src/`, tests excluded. */

@@ -115,6 +115,41 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
       (T-117e). **Start them on day one**: each is small, but they take the longest to come back.
 
+### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
+
+**Added 2026-09-24, from the plan the project lead approved.** N-numbers are the review's. Their
+answers: N1 is T-214; the trip history is the replay (N2), offered without a stamp; the place
+card keeps *Show on map* and gets no hand-off (D-055 stands) and no photo; one control language
+and a quieter *Terminar viagem*. Checked against source first: **two review claims are wrong.**
+*Terminar viagem* was already tinted text, not a filled button (N7); and N4 was not one control
+but eight (below). N9 is T-197's; N11 is T-222.
+
+- [x] **T-215** **Accessibility from source (N4), and the rules that hold it.** The language rows
+      were 32 dp against D-015's 60, not Android's 48 as the review had it; both radio groups
+      reported `selected`, so TalkBack never said which was chosen. **Label in name failed in
+      seven more places**, found by the new rule: every *Concluído* was spoken as *Voltar ao
+      mapa* or *Voltar às definições*, *Ver a sua viagem* as *Reproduzir*, English *Re-center* as
+      *Center the map*. The spoken name is now the visible word and the explanation is the hint.
+      The notice banner's pressable body only reached its text height. **Found beside it:**
+      `describePermission` returned the English *'Off'* on every phone (`settings.permission.denied`).
+      *Apagar tudo* loses its ⚠ emoji (N7): the words and the red carry it.
+      `accessibility.test.ts` gains three rules (checked, tap target from styles, label in name),
+      each proved against the shape it was written for.
+- [ ] **T-216** **The privacy policy says only what is true (N6).** Plus four stale claims the
+      review missed: "two notifications, ever", "sharing is the one time your trip leaves",
+      a map "left out of the backup" that no longer exists, and a "video" that is not built.
+      ⚠ Controller and contact still wait on T-187; the Portuguese wants the project lead's eye.
+- [ ] **T-217** **The replay without a stamp (N2).** *Watch* whenever the trip has a trace.
+- [ ] **T-218** **The place card shows the stamp, on the album's dark (N3).**
+- [ ] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
+      fourth sticker began exactly at the card's edge.
+- [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
+- [ ] **T-221** **Licences: what ships, JavaScript and native (N5).**
+- [ ] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**
+- [ ] **T-223** **The home map frames the island and cannot be lost in the ocean (N8)** ⇠ check
+      first that `expo-maps` can bound the camera at all.
+- [ ] **T-224** **N12:** *"Vá a um e ele preenche-se sozinho"* reads as the place filling itself.
+
 ### Stage 1 — Release hygiene (desk work, small items, done in parallel)
 
 - [ ] **T-188** **A real launcher icon, adaptive icon, splash and notification icon** ⇠ T-186, T-187 (trademark search first) — D-086. A pure module plus a second renderer, like the stamps —

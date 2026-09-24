@@ -278,7 +278,8 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         <Text style={styles.empty}>{t('replay.nothingToWatch')}</Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('replay.a11y.close')}
+          accessibilityLabel={t('replay.close')}
+          accessibilityHint={t('replay.a11y.close')}
           onPress={onClose}
           style={({ pressed }) => [styles.close, pressed && styles.pressed]}
         >
@@ -362,7 +363,8 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('replay.a11y.close')}
+        accessibilityLabel={t('replay.close')}
+        accessibilityHint={t('replay.a11y.close')}
         onPress={onClose}
         style={({ pressed }) => [styles.close, pressed && styles.pressed]}
       >

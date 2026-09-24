@@ -519,6 +519,11 @@ const styles = StyleSheet.create({
   },
   noticeBody: {
     flex: 1,
+    // The banner is 60 dp, but a pressable only reaches as far as its own box:
+    // this one sized itself to its text, so one short line left a target
+    // under D-015's floor inside a banner that looked big enough.
+    minHeight: MIN_TAP_TARGET,
+    justifyContent: 'center',
     paddingVertical: spacing.sm,
     gap: 2,
   },

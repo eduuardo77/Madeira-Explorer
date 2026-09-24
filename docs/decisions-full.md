@@ -4731,3 +4731,39 @@ just sent the user in to look. The screens now show the open trip or else the la
 waits three days for a souvenir. Ending the trip and leaving the recorder running: it replaces the
 trip the user just finished.
 
+
+## D-089 — Free tier under study: very few stamps, a heavily watermarked video, the map unlimited
+
+**Status: Provisional**, 2026-09-24. This is the project lead's working hypothesis, and it is being
+studied, not built. **The full plan is in `docs/monetization-study-plan.md`.** D-072 and T-159 stay
+in force until this entry is Accepted.
+
+**The direction, in the project lead's words:** *"Very limited stamp collection and a timelapse with
+huge watermarks. For the map walked/been places I would keep it unlimited."*
+
+**What it would change.**
+- The allowance drops from D-072's *10 + first levada* to a small N. The number is not chosen:
+  study Q1/Q2 set it from how many stamps a real visitor collects each day.
+- The exported video becomes free with a large mark, and clean (small brand mark only) when paid.
+  That reverses T-159.
+- The map of where you have been stays free and unlimited, which is research §4's rule.
+
+**Why it is not a rug pull:** nothing has shipped. No user ever had 10 free stamps or a clean
+exported video, so drawing the line lower before the first public release takes nothing away.
+After that release, the same change would be a rug pull. **So the study's deadline is D-084's public
+release.**
+
+**Open inside it**, each a study question:
+- **N**, and what the user sees at stamp N+1 (Q2, Q3).
+- **The tension with D-013** (Q4). The watermark is the distribution strategy, and a huge one may
+  stop people posting. Paid still carries a small mark.
+- **Video export (T-105b-v2) is an open spike** (Q5). The recommended path is that v1 sells stamps
+  only and the video paywall arrives with export, which is additive.
+- **Price** (Q6): €4.99 against €5.99–€7.99.
+- **Billing library** (Q8): on-device `expo-iap` recommended over RevenueCat, pending four checks.
+
+**Rejected for now.**
+- **Keep D-072 unchanged.** Nobody knows whether a visitor ever reaches stamp 11. If they do
+  not, the model earns nothing.
+- **A geographic gate** (research §14's ✅). It stays the fallback if a count gate reads badly in
+  study.

@@ -117,6 +117,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-086** | The icon and brand mark are **drawn in-house from the stamp artwork**, after the trademark search. | **Accepted** |
 | **D-087** | A **walk** is started from the main button and **changes the recorder**; background recording is **automatic recording**, in Settings. After WalkNYC. Pause, and a summary at the end. | **Accepted** |
 | **D-088** | A trip ends at the **airport**, after **three days of silence**, or by the user's **End trip** (passport), which also turns automatic recording off (⚠ that part Provisional). | **Accepted** |
+| **D-089** | **Under study:** a *very small* stamp allowance, the exported video free but **heavily watermarked**, the map of where you have been **unlimited**. Plan in `docs/monetization-study-plan.md`; D-072/T-159 stand until accepted. | **Provisional** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

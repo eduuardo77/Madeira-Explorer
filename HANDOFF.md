@@ -1,52 +1,88 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-09-22.
+**For:** a session picking this project up cold. **Updated:** 2026-09-24 (end of the session that
+worked the release-readiness plan).
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## State, in one paragraph
 
-The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
-emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **768 tests** (counted 2026-09-24), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
-ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
-unlock flag yet — T-156 is the money.** `content/pois.json` holds **80 curated places**
-(19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks — 21 added and one cut
-2026-09-22, T-066b/T-066c). The UI speaks **English,
-Portuguese and German**. ⚠ **The app has run on real hardware once** — Firebase Test Lab, Pixel 5,
-2026-08-19, map rendering included (item 0 below). ⚠ **No threshold in the app has met real GPS**,
-and battery and background survival are still unmeasured.
+The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on a real phone**
+(the project lead's Huawei P30, Android 10, EMUI): record → stamps → trace on Google Maps → passport
+→ place card → trip end → souvenir still image. **782 tests** (counted 2026-09-24), `tsc` strict
+clean. The **free tier is in** (T-155): stamps 11+ are drawn locked. **A closed-beta build unlocks
+everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
+pay yet: T-156 (billing) is next.** `content/pois.json` holds **80 curated places**. The UI speaks
+**English, Portuguese and German**, and **no user-facing text may contain a dash** (— or –): the
+project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolicy.test.ts` enforce
+it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
+completed a real trip** (T-205).
 
-## 2026-09-23 — the release-readiness plan is under way (`TASKS.md`, top section)
+## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 
-The review (`docs/app-review-2026-09-22.md`, 7/20) became tasks **T-182–T-208**. Done and seen on
-the P30: **T-189** (no debug route in release), **T-190** (the i18n gate now reads every module;
-it found the reveal notification in English), **T-191**, **T-192**, **T-193**, **T-194** (12
-permissions), and **T-198** (D-087: *Começar passeio* changes the recorder, plus pause and
-summary). Code only: **T-195** (a silent trip can end again), **T-199** (rings for places to
-collect: the rule holds, but an unlabelled ring does not yet sell anything; see the task).
-**T-177 was measured** (20% of cold starts went wrong on 2026-09-23) **and its cause found on
-2026-09-24** (see below). **T-185 is decided (D-088)**, and D-087's three choices are accepted.
-Waiting on the project lead: the T-201 veto, T-122's three calls, T-187, and the T-210
-notification.
-**2026-09-24:** T-200 and T-202 are done (T-202 still to be seen on the P30). **T-201's mechanism
-is in** (a `why` line on the card, and a dimmed passport behind it). Its content is
-`docs/why-go-draft.md`, **waiting on the project lead's veto**.
-⚠ **Found on the P30 the same day:** Settings → Privacidade / Apagar / Licenças **crashed every
-release build since 2026-08-16** (a hook below early returns, T-209: fixed and seen). And **an app
-update stops the recorder until the app is opened**, because EMUI withholds `MY_PACKAGE_REPLACED`
-(T-210, half measured).
-**T-177's cause is found:** maps-compose 6.10.0's initializer bug (googlemaps/android-maps-compose#776),
-triggered when EMUI or Android pre-started the app's process. It is fixed by forcing 6.12.1
-(`plugins/withMapsComposeFix.js`), binary-checked against expo-maps' precompiled AAR. ⚠ **Do not
-run force-stop loops on the P30 again:** after hundreds, EMUI's iAware began force-stopping Proa on
-launch (`CrashClean`).
+The review (`docs/app-review-2026-09-22.md`, scored 7/20) became the plan. Status on 2026-09-24:
 
-⚠ **The P30 runs a BETA release build (unlocked, D-084) from 2026-09-24 20:29**, with option D, End trip, the update notice and T-212 (maps-compose 6.12.1) (`pkgFlags`
-has no `DEBUGGABLE`), so performance readings are valid again. To pull its database, swap in the
-field build first (below). Every install waits on a **Play Protect prompt only the project lead
-can answer**. Backups: `Madeira-fieldwork/p30-2026-09-23/` (before the field build) and
-`p30-2026-09-23b/` (before this release; 5712 fixes, integrity ok).
+**Decided:** T-182 (D-084: billing in public v1, beta unlocked, now built), T-183 (D-087: the
+WalkNYC-style outing, pause and summary; all three of its Provisional choices accepted), T-184
+(D-085: faint rings for places to collect; the "nearest" chip was built and then removed on the
+project lead's word), T-185 (D-088: a trip ends at the airport, after 3 days of silence, or by
+*End trip*), T-186 (D-086: icon in-house from the stamp art).
+
+**Done and seen on the P30:** T-189 (no debug route in release), T-190/T-191/T-193/T-194
+(Portuguese everywhere, honest permission texts, 12 permissions), T-198 (the outing), T-200
+(onboarding), T-202 (Settings: version, language, licences), T-204 (*Terminar viagem* in the
+passport), T-209 (Settings crashed on Privacy, Erase and Licences since 2026-08-16; fixed), T-210
+(after an update a native receiver posts *"Abra o Proa para continuar a registar"*), T-211
+(Android Back goes back instead of exiting), T-212 (opening the app now restarts a recorder that
+was deferred because the process started in the background), T-203 option D (the passport is one
+dark album and unvisited stamps keep a muted hue of their own).
+
+**Fixed, not yet proven on the device:** **T-177, the blank map at startup.** Cause: a maps-compose
+6.10.0 bug (googlemaps/android-maps-compose#776) that expo-maps pins; it strikes when the app's
+process was pre-started in the background (22 of 22 blank launches). Fixed by forcing 6.12.1
+(`plugins/withMapsComposeFix.js`), binary-checked against expo-maps' precompiled AAR. It cannot be
+induced on the P30, so the proof is a natural pre-started launch with a map. Look in `adb logcat`
+for a launch without a `createClassLoader … com.proa` line.
+
+**Waiting on the project lead:**
+1. **T-201:** veto `docs/why-go-draft.md` (80 English "why go" lines, about 20 marked ⚠, 4
+   blank). Then translate to pt/de and fill `why` in `content/pois.json`.
+2. **T-122:** three calls in `docs/store-privacy-answers.md` (shared or not; deletion "No"; one
+   sentence for the privacy policy in three languages).
+3. **T-187:** trademark search (blocks the icon, T-188), a domain plus `CONTACT_EMAIL` (blocks
+   T-206/T-123), and the Play upload key (blocks T-207 and any real billing test).
+4. **T-203 P2-8:** whether the grey "Passport" placeholder button (D-083) should change. Asked,
+   not decided.
+
+**Next for the assistant:** **T-156 Play Billing** (write and unit-test now; a real purchase needs a
+Play test track, so T-187). Then T-197 (memory after sharing: needs a stamp on the phone) and T-196
+(the stall question has one clean observation; the DB-versus-delivered measure needs a field
+build). T-205, one real trip, is the MVP gate and needs the project lead outdoors.
+
+## Traps found in this session (read before touching the P30)
+
+- **Never run force-stop loops on the P30.** After a few hundred, EMUI's iAware began force-stopping
+  Proa 2 ms after launch (`iAwareF[CrashClean]`). Keep device loops short and spaced.
+- **`TaskStop` does not kill a background bash script here.** Two probe loops once drove the phone at
+  the same time. The probe scripts take a pid lock; kill leftovers by pid (`ps -ef | grep loop`).
+- **`am start -W` hangs forever** if the app never comes to the front. A hung probe looks like
+  silence.
+- **EMUI setting, done by the project lead:** *Definições → Bateria → Iniciar aplicações → Proa*
+  set to manual with all three switches on. Without it, an update never wakes the app.
+- **Gradle does not re-bundle when only an environment variable changes** (beta versus store) or
+  when only `content/` changes. Delete the bundle outputs first (`docs/dev-build.md`).
+- **`run-as` works only on the field build** (debuggable). The P30 now runs a beta *release* build.
+- **Shell heredocs collapse backslashes** in regexes and escapes (`\b`, `—`). Write scripts to a
+  file with the Write tool.
+- **Play Protect prompts on every install**, and only the project lead can tap them.
+
+⚠ **The P30 runs a BETA release build (unlocked, D-084) from 2026-09-24 20:29**, with option D, End
+trip, the update notice, T-212 and maps-compose 6.12.1 (`pkgFlags` has no `DEBUGGABLE`, so
+performance readings are valid). Its old trip was closed by the *End trip* test and automatic
+recording was switched back on, so a new trip opens at the next fix. The next install also brings
+`dismissUpdateNotice` (committed, not yet on the phone). To pull the database, swap in the field
+build first. Backups: `Madeira-fieldwork/p30-2026-09-23/` and `p30-2026-09-23b/` (5712 fixes,
+integrity ok).
 
 ## What was settled 2026-08-17 — read these before touching related code
 
@@ -304,7 +340,7 @@ T-156 waits on T-182, and T-158 is parked until Gate R1.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 768 tests
+cd app && npm test          # 782 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

@@ -96,6 +96,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       "finish this trip".*
 - [x] **T-186** ✅ **Decided 2026-09-23: B, in-house from the stamp art — D-086.** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
       designer. The project has nobody to judge artwork.*
+- [ ] **T-213** **The monetisation study — D-089 (Provisional)** ⇠ nothing; ⚠ must finish before
+      D-084's public release. Plan: `docs/monetization-study-plan.md`. The project lead's
+      hypothesis, 2026-09-24: very few free stamps, the video free with a huge watermark, the map
+      unlimited. Desk work first (Q1 itinerary model, Q4 watermark mock-ups, Q6 price, Q8 library
+      check). The lead decides N, video path A/B and the price. **No `app/` change until D-089 is
+      Accepted.**
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
       (T-117e). **Start them on day one**: each is small, but they take the longest to come back.
@@ -202,7 +208,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       - **First, a failing test** replaying trip 30's shape. Then close the stale trip at its last
         fix before the gap, and open a new one.
       - ⚠ Decide whether a trip closed this late still gets its reveal (D-011).
-- [ ] **T-177** (above, Phase 3) — **the plan for it:**
+- [~] **T-177** (above, Phase 3) — **the plan for it:**
       1. Run a launch loop on the P30 of 50 or more force-stop / install / reboot starts, logging
          the signature. That gives a real rate.
       2. Read how `expo-maps` mounts its view.
@@ -357,7 +363,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       Restore purchase waits for T-156. **Settings for a store app** — P1-6. Half the copy, and explain the *Abrir
       definições do telemóvel* button. Add version, language choice, support contact and
       open-source licences; add restore purchase with T-156.
-- [ ] **T-203** **A design pass on the passport and the empty state** — P2-5, P2-6, P2-7, P2-8.
+- [~] **T-203** **A design pass on the passport and the empty state** — P2-5, P2-6, P2-7, P2-8.
       The grey uncollected stamps that look alike, dark panels on a light page, the placeholder
       blob, and zero-width tap areas on stamps past the right edge.
       — **P2-7 needs no change (checked 2026-09-24).** Each category row is a horizontal
@@ -383,7 +389,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         placeholder (D-083) takes the levada hue now, too. ✅ **Seen on the P30 (one screenshot):**
         one dark album with hairline panels and a light status bar. Unvisited viewpoints are warm
         browns and levadas teal and olive, still muted, with grey bands.
-- [~] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195. ✅ **Code 2026-09-24 (D-088):**
+- [x] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195. ✅ **Code 2026-09-24 (D-088):**
       *Terminar viagem* at the bottom of the passport, behind a confirmation.
       `recording/finishTrip.ts` switches automatic recording off **first** and then closes the
       trip (`endTripByUser`: award pass, `manual`, no reveal). A test guards that order. **Found
@@ -441,7 +447,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ✅ **Seen on the P30 2026-09-24 (release `675ae50`):** Settings → Back → map; Licences →
       Back → Settings → Back → map. Back on the map sends the app to the background, and the recorder
       keeps running (checked at 60 s).
-- [ ] **T-210** ⚠ **An app update stopped the recorder, and nothing restarted it for 22 h** —
+- [x] **T-210** ⚠ **An app update stopped the recorder, and nothing restarted it for 22 h** —
       found on the P30 2026-09-24. The release was installed over the field build at 20:23. The
       next morning the home map said *Nada registado há 22 h 14 min*, and the foreground service
       came back only when the app was opened. `expo-task-manager` declares a receiver for
@@ -1811,7 +1817,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       an empty file on the P30. Not `debuggable true` on the build type: that flips
       `BuildConfig.DEBUG` and the app looks for Metro. `docs/dev-build.md` has the recipe and why
       smoothness must never be measured on it.
-- [ ] ⚠⚠ **T-177** **On real hardware the map sometimes never appears — blank light-grey screen,
+- [~] ⚠⚠ **T-177** **On real hardware the map sometimes never appears — blank light-grey screen,
       no Google wordmark** ⇠ found 2026-09-22 on the P30, release builds, seen by the project lead
       — **Signature**, from `dumpsys activity top`: `GoogleMapsView` → `ComposeView` →
       `AndroidViewsHandler` with **no child** — maps-compose never attached its `MapView`. A good
@@ -2464,7 +2470,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-121** Android prominent-disclosure screen before requesting background location
       ⇠ T-043
       — Notes: `docs/task-notes.md` (T-121)
-- [ ] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
+- [~] **T-122** Android Data Safety form — no data collected, no data shared ⇠ T-117
       — Notes: `docs/task-notes.md` (T-122)
       — ⚠ **Reopened 2026-09-23.** The release APK carries the Maps SDK, FCM and the install
         referrer (T-117c), and Play counts what third-party SDKs collect. Redo the answers

@@ -538,7 +538,7 @@ Tracked in full in [PROJECT_PLAN.md](PROJECT_PLAN.md) under "Outstanding decisio
 | OD-1 | React Native or Flutter? | ~~All of Phase 1~~ | **Resolved 2026-08-06 — React Native** (D-023). Phase 1 unblocked. |
 | OD-2 | Is Porto Santo in scope? | Tile bounds, POI curation, trip-end detection | **Resolved 2026-08-06 — included** (D-021) |
 | OD-3 | Hero number: stamps or road coverage? | Primary screen, data model | **Resolved 2026-08-06 — stamps** (D-002 Accepted) |
-| ~~OD-4~~ | Monetisation | **RESOLVED 2026-08-17 → D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even **$25**. ⚠ One-way on Android. No ads ever; print-on-demand dropped. |
+| ~~OD-4~~ | Monetisation | **RESOLVED 2026-08-17 → D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even **$25**. ⚠ One-way on Android. No ads ever; print-on-demand dropped. ⚠ **Under review 2026-09-24 — D-089 (Provisional), `docs/monetization-study-plan.md`.** |
 | OD-5 | Cruise day-trippers as a segment? | Content curation | Open, not blocking. Not designed for; happy accident if it works. |
 | OD-6 | Raw trace retention policy | Phase 1 schema | **Resolved 2026-08-06 — retain**, with a delete-all control (D-010 Accepted) |
 | OD-7 | Levada data source and licensing | ~~Content, matching~~ | **Resolved 2026-08-08 — OSM alone is sufficient** (D-029). The 44 official PR routes are already in OSM, so no external licensing arises. Select by name + relation, never by tag. See `docs/osm-coverage.md` |

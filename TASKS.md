@@ -1809,6 +1809,29 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       signature, and that is all it can claim. ⚠ **A probe mistake, recorded:** the first old-build
       run was corrupted by a second loop still driving the phone. `TaskStop` does not kill the
       child bash script here, so the loops now take a pid lock.
+      — ✅✅ **THE CAUSE, 2026-09-24: a maps-compose 6.10.0 bug, googlemaps/android-maps-compose#776.**
+      - **The bug.** expo-maps pins 6.10.0. There, `GoogleMapsInitializer` sets `SUCCESS` inside
+        `withContext(IO)`. A recomposition before `withContext` returns cancels the
+        `LaunchedEffect`, and `catch (_: Exception)` turns the cancellation into `FAILURE`, which
+        is never retried. Fixed upstream in **6.12.0** (#778).
+      - **The trigger, measured.** 22/22 blank launches ran in an app process that already
+        existed before the launch (no class loader, no Firebase provider, no `onCreate` lines).
+        37/37 good ones created theirs during the launch.
+      - **Remounting does not help.** 3/3 blank maps stayed blank, because the state was
+        `FAILURE`.
+      - **The gate from `1dfb549` was wrong and is reverted.** Its marker never fired in 60
+        launches, 17 of which went blank.
+      - **Fix (`675ae50`):** `plugins/withMapsComposeFix.js` forces 6.12.1 in `allprojects`.
+        expo-maps is a **precompiled AAR**, so compatibility was checked, not assumed: 17/17
+        classes and 34/34 methods and fields it references exist in 6.12.1, and the checker flags
+        planted fakes. `src/mapsComposeFix.test.ts` fails once expo-maps pins ≥ 6.12.0.
+      - ⚠ **The probes harmed the phone.** After hundreds of force-stops, EMUI's iAware
+        force-stopped Proa 2 ms after launch (`iAwareF[CrashClean]`). A normal launch worked
+        again minutes later. Keep device loops short and spaced.
+      - **Release loop on 6.12.1:** 29/29 clean, but **all 29 were fresh processes** (the reinstall
+        reset EMUI's prelaunch). That says nothing about the fix. **The proof is an A/B on the
+        failing path:** field builds with 6.10.0 and 6.12.1, `bgstart.sh`. It kills the process,
+        Android restarts it in the background, then the app is opened.
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.

@@ -85,7 +85,7 @@ test('⚠ T-190 — the detail says "enough to ask" once, not twice', () => {
   assert.ok(prompt !== null);
   assert.equal(
     prompt.detail,
-    'The trace shows 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure.'
+    'The trace shows 2.1 km of 5.0 km (42%): enough to ask, not enough for the app to be sure.'
   );
   assert.equal(prompt.detail.split('enough to ask').length - 1, 1);
 });

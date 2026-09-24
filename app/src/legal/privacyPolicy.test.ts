@@ -236,3 +236,12 @@ test('⚠ Portuguese sentences stay as short as the English ones', () => {
     .reduce((worst, sentence) => Math.max(worst, sentence.split(/\s+/).length), 0);
   assert.ok(longest <= 60, `longest Portuguese sentence is ${longest} words`);
 });
+
+test('no dash in the policy a user reads, in any language (2026-09-24)', () => {
+  // The project lead: the dash "gives AI vibes". i18n.test.ts guards STRINGS;
+  // the policy's own text lives here.
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const text = JSON.stringify(policySections(language));
+    assert.equal(/[—–]/.test(text), false, `a dash in the ${language} policy`);
+  }
+});

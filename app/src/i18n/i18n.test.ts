@@ -236,3 +236,17 @@ test('T-202 — every language is named in itself, never translated', () => {
   assert.deepEqual(Object.keys(LANGUAGE_NAMES).sort(), [...LANGUAGES].sort());
 });
 
+test('no dash in anything a user reads (the project lead, 2026-09-24)', () => {
+  // "Be careful with the — dash, which gives AI vibes." A comma, a colon or a
+  // full stop reads as written by a person; this keeps it that way in all
+  // three languages. Code comments are not strings and are not checked.
+  const offenders: string[] = [];
+  for (const [key, value] of Object.entries(STRINGS)) {
+    for (const [language, text] of Object.entries(value)) {
+      const flat = typeof text === 'string' ? text : JSON.stringify(text);
+      if (/[\u2014\u2013]/.test(flat)) offenders.push(`${key} [${language}]`);
+    }
+  }
+  assert.deepEqual(offenders, []);
+});
+

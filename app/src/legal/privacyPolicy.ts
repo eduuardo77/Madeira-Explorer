@@ -131,7 +131,7 @@ const SECTIONS_EN: PolicySection[] = [
     heading: 'Where all of that is kept',
     paragraphs: [
       'On your phone, in storage that only this app can read.',
-      'Your trip is included in the ordinary backup your phone already makes to iCloud or to Google, if you have backups switched on. That is what protects your holiday if your phone is lost or broken halfway through it. That backup is yours, under your own account and your own encryption — we cannot reach it, and neither can anyone else without your account.',
+      'Your trip is included in the ordinary backup your phone already makes to iCloud or to Google, if you have backups switched on. That is what protects your holiday if your phone is lost or broken halfway through it. That backup is yours, under your own account and your own encryption. We cannot reach it, and neither can anyone else without your account.',
       'You can turn that off in your phone settings, in the same place you control backups for everything else.',
       'The map of the island itself is left out of the backup. It is large, it is the same for everybody, and the app can simply build it again.',
     ],
@@ -140,7 +140,7 @@ const SECTIONS_EN: PolicySection[] = [
     heading: 'When you share your trip',
     paragraphs: [
       'At the end of your holiday the app can make a short video or a picture of your map, for you to share if you want to.',
-      'Sharing it is the one time your trip leaves your phone, and it goes wherever you send it — not to us. Anyone who sees it can see roughly where you went.',
+      'Sharing it is the one time your trip leaves your phone, and it goes wherever you send it, not to us. Anyone who sees it can see roughly where you went.',
       'Before making it, the app finds where you slept and removes that part of your map. It does this every time, and there is no setting to switch it off. If it cannot work out where you were staying, it will not make the video at all rather than risk showing your address.',
       'Everything else on the map is yours to share or not.',
     ],
@@ -150,14 +150,14 @@ const SECTIONS_EN: PolicySection[] = [
     paragraphs: [
       'The map you see is Google\u2019s, the same map used by most apps on an Android phone. It is downloaded a piece at a time as you move around it, so Google can see which part of the island is on your screen.',
       'Google does not see your trip. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. That record is never sent to them or to us.',
-      'This does mean the map needs an internet connection. Recording carries on regardless \u2014 your trip is still being saved with no signal at all, and it will appear on the map once you have one.',
+      'This does mean the map needs an internet connection. Recording carries on regardless: your trip is still being saved with no signal at all, and it will appear on the map once you have one.',
       'Google has its own privacy policy, which covers what they do with those map requests.',
     ],
   },
   {
     heading: 'What the app asks permission for',
     paragraphs: [
-      'Your location. This is the whole app; without it there is no map. You can allow it only while the app is open, and it will still work — you start and stop recording yourself.',
+      'Your location. This is the whole app; without it there is no map. You can allow it only while the app is open, and it will still work: you start and stop recording yourself.',
       'Your location while the app is closed. This is what lets you forget about the app for a week and still get your map. You can say no, and the app keeps working.',
       'Motion and fitness, or physical activity. This is the step counter and the air pressure sensor described above.',
       'Notifications. The app sends two, ever: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.',
@@ -176,7 +176,7 @@ const SECTIONS_EN: PolicySection[] = [
   {
     heading: 'Children',
     paragraphs: [
-      'This app is not aimed at children and we do not knowingly collect anything from them. As with everyone else, nothing is collected by us at all — it stays on the phone.',
+      'This app is not aimed at children and we do not knowingly collect anything from them. As with everyone else, nothing is collected by us at all. It stays on the phone.',
     ],
   },
   {

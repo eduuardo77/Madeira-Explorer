@@ -57,7 +57,7 @@ export const SECTIONS_PT: PolicySection[] = [
     heading: 'Onde é que isso tudo fica guardado',
     paragraphs: [
       'No seu telemóvel, num espaço que só esta aplicação consegue ler.',
-      'A sua viagem é incluída na cópia de segurança normal que o seu telemóvel já faz para o iCloud ou para a Google, se tiver as cópias de segurança ligadas. É isso que protege as suas férias se o telemóvel se perder ou avariar a meio. Essa cópia é sua, na sua própria conta e com a sua própria encriptação — nós não lhe conseguimos chegar, e mais ninguém consegue sem a sua conta.',
+      'A sua viagem é incluída na cópia de segurança normal que o seu telemóvel já faz para o iCloud ou para a Google, se tiver as cópias de segurança ligadas. É isso que protege as suas férias se o telemóvel se perder ou avariar a meio. Essa cópia é sua, na sua própria conta e com a sua própria encriptação. Nós não lhe conseguimos chegar, e mais ninguém consegue sem a sua conta.',
       'Pode desligar isso nas definições do telemóvel, no mesmo sítio onde controla as cópias de segurança de tudo o resto.',
       'O mapa da ilha em si fica de fora da cópia de segurança. É grande, é igual para toda a gente, e a aplicação pode simplesmente voltar a construí-lo.',
     ],
@@ -66,7 +66,7 @@ export const SECTIONS_PT: PolicySection[] = [
     heading: 'Quando partilha a sua viagem',
     paragraphs: [
       'No fim das suas férias, a aplicação pode fazer um pequeno vídeo ou uma imagem do seu mapa, para partilhar se quiser.',
-      'Partilhar é a única altura em que a sua viagem sai do telemóvel, e vai para onde a enviar — não para nós. Quem a vir consegue perceber, por alto, por onde andou.',
+      'Partilhar é a única altura em que a sua viagem sai do telemóvel, e vai para onde a enviar, não para nós. Quem a vir consegue perceber, por alto, por onde andou.',
       'Antes de a fazer, a aplicação descobre onde dormiu e remove essa parte do mapa. Faz isto sempre, e não há nenhuma definição para desligar. Se não conseguir perceber onde estava alojado, não faz o vídeo de todo, em vez de arriscar mostrar a sua morada.',
       'Todo o resto do mapa é seu, para partilhar ou não.',
     ],
@@ -76,14 +76,14 @@ export const SECTIONS_PT: PolicySection[] = [
     paragraphs: [
       'O mapa que vê é da Google, o mesmo mapa usado pela maioria das aplicações num telemóvel Android. É descarregado aos poucos à medida que se desloca por ele, por isso a Google consegue ver que parte da ilha está no seu ecrã.',
       'A Google não vê a sua viagem. A linha que mostra por onde andou é desenhada por esta aplicação, por cima do mapa deles, a partir do registo guardado no seu telemóvel. Esse registo nunca lhes é enviado, nem a nós.',
-      'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma — a sua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiver ligação.',
+      'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma: a sua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiver ligação.',
       'A Google tem a sua própria política de privacidade, que cobre o que fazem com esses pedidos de mapa.',
     ],
   },
   {
     heading: 'O que a aplicação pede permissão para fazer',
     paragraphs: [
-      'A sua localização. É esta a aplicação inteira; sem ela não há mapa. Pode permitir apenas com a aplicação aberta, e continua a funcionar — é você que inicia e para o registo.',
+      'A sua localização. É esta a aplicação inteira; sem ela não há mapa. Pode permitir apenas com a aplicação aberta, e continua a funcionar: é você que inicia e para o registo.',
       'A sua localização com a aplicação fechada. É isto que lhe permite esquecer-se da aplicação durante uma semana e mesmo assim receber o seu mapa. Pode dizer que não, e a aplicação continua a funcionar.',
       'Movimento e atividade física. É o contador de passos e o sensor de pressão do ar descritos acima.',
       'Notificações. A aplicação envia duas, ao todo: uma no primeiro dia para lhe dizer se o registo está a funcionar, e outra no fim para dizer que o seu mapa está pronto.',
@@ -102,7 +102,7 @@ export const SECTIONS_PT: PolicySection[] = [
   {
     heading: 'Crianças',
     paragraphs: [
-      'Esta aplicação não se destina a crianças e não recolhemos conscientemente nada delas. Tal como com toda a gente, não é recolhido absolutamente nada por nós — fica tudo no telemóvel.',
+      'Esta aplicação não se destina a crianças e não recolhemos conscientemente nada delas. Tal como com toda a gente, não é recolhido absolutamente nada por nós. Fica tudo no telemóvel.',
     ],
   },
   {

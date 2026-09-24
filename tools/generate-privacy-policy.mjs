@@ -30,17 +30,20 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import {
-  APP_NAME,
   CONTACT_EMAIL,
   POLICY_VERSION,
   policySections,
 } from '../app/src/legal/privacyPolicy.ts';
+// The app's name moved to `brand.ts` (brand.test.ts keeps it there); this
+// import still pointed at the policy, so the published copy had silently
+// stopped being regenerated since 2026-08-17.
+import { APP_NAME } from '../app/src/brand.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const target = path.resolve(here, '..', 'docs', 'privacy-policy.md');
 
 const lines = [
-  `# ${APP_NAME} — Privacy Policy`,
+  `# ${APP_NAME} Privacy Policy`,
   '',
   `**Last changed:** ${POLICY_VERSION}`,
   '',

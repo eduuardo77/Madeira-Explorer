@@ -135,10 +135,16 @@ but eight (below). N9 is T-197's; N11 is T-222.
       *Apagar tudo* loses its ⚠ emoji (N7): the words and the red carry it.
       `accessibility.test.ts` gains three rules (checked, tap target from styles, label in name),
       each proved against the shape it was written for.
-- [ ] **T-216** **The privacy policy says only what is true (N6).** Plus four stale claims the
-      review missed: "two notifications, ever", "sharing is the one time your trip leaves",
-      a map "left out of the backup" that no longer exists, and a "video" that is not built.
-      ⚠ Controller and contact still wait on T-187; the Portuguese wants the project lead's eye.
+- [~] **T-216** **The privacy policy says only what is true (N6).** ✅ **Text 2026-09-24**, EN and PT,
+      version `2026-09-24`, `docs/privacy-policy.md` regenerated. N6's three: "fica tudo" (twice)
+      and "absolutamente nada" gone; Google "não vê a sua viagem" is now *the app never sends it*,
+      and the policy names the phone's location service as Google's. Plus four stale claims the
+      review missed: "two notifications, ever", "sharing is the one time your trip leaves" (the
+      D-069 walk report can reach us, and now says so), a map "left out of the backup" that
+      D-057 deleted, and a "video" that is not built. Each retired phrase fails
+      `privacyPolicy.test.ts`. `marketing-plan.md` quoted the old wording and follows it.
+      ⚠ **Open:** controller and contact wait on T-187; the Portuguese wants the project lead's
+      eye (T-160b); the walk report may change the Data Safety answer (T-122's "shared or not").
 - [ ] **T-217** **The replay without a stamp (N2).** *Watch* whenever the trip has a trace.
 - [ ] **T-218** **The place card shows the stamp, on the album's dark (N3).**
 - [ ] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
@@ -148,7 +154,8 @@ but eight (below). N9 is T-197's; N11 is T-222.
 - [ ] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**
 - [ ] **T-223** **The home map frames the island and cannot be lost in the ocean (N8)** ⇠ check
       first that `expo-maps` can bound the camera at all.
-- [ ] **T-224** **N12:** *"Vá a um e ele preenche-se sozinho"* reads as the place filling itself.
+- [x] **T-224** **N12:** *"Vá a um e ele preenche-se sozinho"* read as the place filling itself.
+      Now *"Vá a um deles e o carimbo aparece sozinho"*, and the stamp in EN and DE too.
 
 ### Stage 1 — Release hygiene (desk work, small items, done in parallel)
 

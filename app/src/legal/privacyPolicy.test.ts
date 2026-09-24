@@ -245,3 +245,45 @@ test('no dash in the policy a user reads, in any language (2026-09-24)', () => {
     assert.equal(/[—–]/.test(text), false, `a dash in the ${language} policy`);
   }
 });
+
+test('⚠ no claim the app cannot keep, in either language (review N6, T-216)', () => {
+  // Each phrase was in the policy until 2026-09-24 and was false by then: the
+  // position comes from Google Play services, the walk report (D-069) can reach
+  // us, the recording and update notices exist, the island map is no longer a
+  // file, and the video is not built. D-073 already forbade the first of them.
+  const retired: Record<'en' | 'pt', string[]> = {
+    en: [
+      'stays on your phone',
+      'nothing is collected',
+      'does not see your trip',
+      'two, ever',
+      'short video',
+      'left out of the backup',
+      'the one time your trip leaves',
+    ],
+    pt: [
+      'fica tudo',
+      'absolutamente nada',
+      'não vê a sua viagem',
+      'pequeno vídeo',
+      'fica de fora da cópia',
+      'única altura em que a sua viagem sai',
+    ],
+  };
+
+  for (const language of ['en', 'pt'] as const) {
+    const text = policyText(language).toLowerCase();
+    const found = retired[language].filter((phrase) => text.includes(phrase));
+    assert.deepEqual(found, [], `the ${language} policy makes a claim the app cannot keep`);
+  }
+});
+
+test('the policy says where the position comes from, and what a sent recording gives us', () => {
+  const en = policyText('en').toLowerCase();
+  const pt = policyText('pt').toLowerCase();
+
+  assert.ok(en.includes('location service'), 'the location service is not named');
+  assert.ok(pt.includes('serviço de localização'), 'o serviço de localização não é referido');
+  assert.ok(en.includes('send it to us'), 'the walk report is not disclosed');
+  assert.ok(pt.includes('enviá-lo para nós'), 'o envio de um registo não é referido');
+});

@@ -23,9 +23,15 @@ absolute claim was already spent.
 
 **The privacy policy is exact where I was sloppy, and its wording is what the marketing must use:**
 
-> *"Your trip never leaves the phone."*
-> *"Google sees which part of the island you are looking at. It does not see your trip."*
+> *"The app never sends your trip to us."*
+> *"Google sees which part of the island you are looking at. The app never sends your trip to the map."*
 > *"There is no account and no server."*
+
+⚠ **Changed 2026-09-24 (T-216, review N6).** The policy used to say Google *"does not see your
+trip"*, and this section quoted it. The app cannot promise that: on Android the position itself
+comes from Google Play services. It can promise that **it** never sends the trip anywhere. And
+*"your trip never leaves the phone"* was never the policy's wording: sharing and the walk report
+(D-069) both let it leave when the user chooses.
 
 ⚠ **Never write "works offline" or "nothing leaves your phone" in the listing.** Both are false now.
 What is true, and still worth saying loudly: **recording keeps working with no signal** — GPS needs

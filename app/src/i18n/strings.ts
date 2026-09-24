@@ -480,10 +480,12 @@ export const STRINGS = {
     'Ihr Pass bleibt, wie er ist. Die automatische Aufzeichnung wird ausgeschaltet, und Ihre nächste Reise beginnt, wenn Sie wieder aufzeichnen.'
   ),
   'passport.endTrip.confirm': s('End trip', 'Terminar viagem', 'Reise beenden'),
+  // ⚠ T-224 (review N12): the Portuguese said "Vá a um e ele preenche-se
+  // sozinho", which reads as the place filling itself in. It is the stamp.
   'passport.invitation': s(
-    'These are the places. Go to one and it fills in by itself.',
-    'Estes são os lugares. Vá a um e ele preenche-se sozinho.',
-    'Das sind die Orte. Gehen Sie zu einem, und er trägt sich von selbst ein.'
+    'These are the places. Go to one and its stamp fills in by itself.',
+    'Estes são os lugares. Vá a um deles e o carimbo aparece sozinho.',
+    'Das sind die Orte. Gehen Sie zu einem, und sein Stempel erscheint von selbst.'
   ),
   'passport.nothingCurated': s(
     'No places are curated yet, so there is nothing to collect.',
@@ -795,9 +797,9 @@ export const STRINGS = {
   ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
-    'Your trip is never sent to us. There is no account and no server. Your phone’s own backup includes it, if you have backups switched on.',
-    'A sua viagem nunca nos é enviada. Não há conta nem servidor. A cópia de segurança do seu telemóvel inclui-a, se a tiver ligada.',
-    'Ihre Reise wird nie an uns gesendet. Es gibt kein Konto und keinen Server. Die Sicherung Ihres Telefons enthält sie, falls Sie Sicherungen eingeschaltet haben.'
+    'The app never sends your trip to us. There is no account and no server. Your phone’s own backup includes it, if you have backups switched on.',
+    'A aplicação nunca nos envia a sua viagem. Não há conta nem servidor. A cópia de segurança do seu telemóvel inclui-a, se a tiver ligada.',
+    'Die App sendet Ihre Reise nie an uns. Es gibt kein Konto und keinen Server. Die Sicherung Ihres Telefons enthält sie, falls Sie Sicherungen eingeschaltet haben.'
   ),
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
   // T-202: what a store app is expected to show about itself.

@@ -1,6 +1,6 @@
 # Proa Privacy Policy
 
-**Last changed:** 2026-08-14
+**Last changed:** 2026-09-24
 
 <!--
   GENERATED FILE — DO NOT EDIT.
@@ -13,17 +13,19 @@
 
 ## The short version
 
-Proa records where you go while you are on holiday, and shows it back to you as a map. All of that stays on your phone.
+Proa records where you go while you are on holiday, and shows it back to you as a map. It keeps that record on your phone, not on a server.
 
-There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because your trip is never sent to us. We do not know who you are and we cannot find out.
+There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because the app never sends your trip to us. We do not know who you are and we cannot find out.
 
-The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. It does not see your trip, because the app never sends your trip to the map.
+The map you see underneath your trip comes from Google, the same as in most map apps. Google sees which part of the island you are looking at. The app never sends your trip to the map.
 
 Nobody is paying us for your data. There are no adverts and nothing is measuring how you use the app.
 
 ## What the app records
 
 Where your phone was, and when. This is the map of your trip.
+
+Your phone works this out with its own location service. On most Android phones that service comes from Google, and what Google does with it is set by the location settings on your phone, not by this app.
 
 Your step count and the air pressure around you, on phones that can measure them. These help work out where you walked when the satellite signal is blocked, in a tunnel or under trees.
 
@@ -39,23 +41,23 @@ Your trip is included in the ordinary backup your phone already makes to iCloud 
 
 You can turn that off in your phone settings, in the same place you control backups for everything else.
 
-The map of the island itself is left out of the backup. It is large, it is the same for everybody, and the app can simply build it again.
-
 ## When you share your trip
 
-At the end of your holiday the app can make a short video or a picture of your map, for you to share if you want to.
+At the end of your holiday the app can make a picture of your map, for you to share if you want to.
 
-Sharing it is the one time your trip leaves your phone, and it goes wherever you send it, not to us. Anyone who sees it can see roughly where you went.
+Sharing is how your trip leaves your phone, and it goes wherever you send it, not to us. Anyone who sees it can see roughly where you went.
 
-Before making it, the app finds where you slept and removes that part of your map. It does this every time, and there is no setting to switch it off. If it cannot work out where you were staying, it will not make the video at all rather than risk showing your address.
+Before making it, the app finds where you slept and removes that part of your map. It does this every time, and there is no setting to switch it off. If it cannot work out where you were staying, it will not make the picture at all rather than risk showing your address.
 
 Everything else on the map is yours to share or not.
+
+Settings can also prepare one recording for you to send, to help improve how the app recognises places. It tells you what is in it first, and where you slept is removed. If you choose to send it to us, that recording is the only thing we receive.
 
 ## The map itself
 
 The map you see is Google’s, the same map used by most apps on an Android phone. It is downloaded a piece at a time as you move around it, so Google can see which part of the island is on your screen.
 
-Google does not see your trip. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. That record is never sent to them or to us.
+This app does not send your trip to Google. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. The app never sends that record to them or to us.
 
 This does mean the map needs an internet connection. Recording carries on regardless: your trip is still being saved with no signal at all, and it will appear on the map once you have one.
 
@@ -69,7 +71,9 @@ Your location while the app is closed. This is what lets you forget about the ap
 
 Motion and fitness, or physical activity. This is the step counter and the air pressure sensor described above.
 
-Notifications. The app sends two, ever: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.
+Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.
+
+After an update to the app, it may also ask you once to open it, so that recording can carry on.
 
 You can change any of these later in your phone settings, and the app will carry on with whatever you allow.
 
@@ -85,7 +89,7 @@ Removing the app deletes everything too.
 
 ## Children
 
-This app is not aimed at children and we do not knowingly collect anything from them. As with everyone else, nothing is collected by us at all. It stays on the phone.
+This app is not aimed at children and we do not knowingly collect anything from them. The app sends nothing to us from anyone, children included.
 
 ## If this policy changes
 

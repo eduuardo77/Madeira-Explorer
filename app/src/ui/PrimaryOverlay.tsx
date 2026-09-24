@@ -72,9 +72,9 @@ const RECENTRE_MARK_SIZE = 17;
 /**
  * Grows the 40 dp pill to a 60 dp target (D-015).
  *
- * ⚠ 10 dp top and bottom, and no more. The walk button sits directly below with
- * `spacing.sm` between them; a taller slop would overlap the one control on this
- * screen that must never be pressed by accident.
+ * ⚠ 10 dp top and bottom, and no more. The walk button sits below, the pill
+ * centred on the stamp's row (2026-09-24); a taller slop would reach toward the
+ * one control on this screen that must never be pressed by accident.
  */
 const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 16, right: 16 };
 
@@ -281,70 +281,72 @@ export default function PrimaryOverlay({
             in the same column, so it can never cover them. */}
         {bottomSlot}
 
-        {/* ⚠ Re-centre, above the walk button and only when it would move
-            the map (2026-08-28). Compact and quiet: it is a convenience, not one
-            of the screen's three real controls (design brief §3). */}
-        {showRecentre ? (
+        {/* The passport stamp and *Re-centre* share one row, directly above
+            the walk button (the project lead, 2026-09-24: re-centre used to
+            float above the passport, in the middle of the map). The stamp
+            keeps the left edge; re-centre takes the right, so the two stay
+            apart and neither is a mis-tap for the other. */}
+        <View style={styles.row} pointerEvents="box-none">
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('map.a11y.recentre')}
-            onPress={onRecentre}
-            // ⚠ The visible pill is deliberately smaller than the 60 dp D-015
-            // asks for, because the reference app's is and the project lead
-            // asked for theirs: a full-height chrome slab here shouted louder
-            // than the walk button below it, which is the actual primary
-            // action. The *target* is still 60 dp — that is what hitSlop buys,
-            // and `PassportView`'s "See all" does the same thing for the same
-            // reason. ⚠ The workbench cannot see hitSlop (see that file), so
-            // this target can only be checked on a device.
-            hitSlop={RECENTRE_HIT_SLOP}
-            style={({ pressed }) => [
-              styles.recentre,
-              {
-                backgroundColor: chrome.surface,
-                elevation: chrome.elevation,
-                shadowColor: '#000000',
-                shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
-                shadowRadius: chrome.elevation,
-                shadowOffset: { width: 0, height: 1 },
-              },
-              chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
-              pressed && styles.pressed,
-            ]}
+            accessibilityLabel={
+              progress.total === 0
+                ? t('map.a11y.openPassport')
+                : n('passport.a11y.openWithCount', progress.collected, {
+                    collected: progress.collected,
+                    total: progress.total,
+                  })
+            }
+            onPress={onOpenPassport}
+            style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
           >
-            <RecentreMark size={RECENTRE_MARK_SIZE} color={chrome.link} />
-            <Text style={[styles.recentreText, { color: chrome.link }]}>
-              {t('map.recentre')}
-            </Text>
+            {/* The Pressable above says "open your passport, 3 of 80"; StampArt
+                hides itself from screen readers, so it is said once. */}
+            <StampArt
+              placeId={`button-${passportStamp.placeId}`}
+              design={designFor(passportStamp.placeId, passportStamp.category)}
+              name={passportStamp.name}
+              collected={passportStamp.collected}
+              rim={rimFor(tier, mapStyle)}
+              size={STAMP_BUTTON_SIZE * TILT_FIT}
+            />
           </Pressable>
-        ) : null}
 
-
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            progress.total === 0
-              ? t('map.a11y.openPassport')
-              : n('passport.a11y.openWithCount', progress.collected, {
-                  collected: progress.collected,
-                  total: progress.total,
-                })
-          }
-          onPress={onOpenPassport}
-          style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
-        >
-          {/* The Pressable above says "open your passport, 3 of 80"; StampArt
-              hides itself from screen readers, so it is said once. */}
-          <StampArt
-            placeId={`button-${passportStamp.placeId}`}
-            design={designFor(passportStamp.placeId, passportStamp.category)}
-            name={passportStamp.name}
-            collected={passportStamp.collected}
-            rim={rimFor(tier, mapStyle)}
-            size={STAMP_BUTTON_SIZE * TILT_FIT}
-          />
-        </Pressable>
+          {showRecentre ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('map.a11y.recentre')}
+              onPress={onRecentre}
+              // ⚠ The visible pill is deliberately smaller than the 60 dp D-015
+              // asks for, because the reference app's is and the project lead
+              // asked for theirs: a full-height chrome slab here shouted louder
+              // than the walk button below it, which is the actual primary
+              // action. The *target* is still 60 dp — that is what hitSlop buys,
+              // and `PassportView`'s "See all" does the same thing for the same
+              // reason. ⚠ The workbench cannot see hitSlop (see that file), so
+              // this target can only be checked on a device.
+              hitSlop={RECENTRE_HIT_SLOP}
+              style={({ pressed }) => [
+                styles.recentre,
+                {
+                  backgroundColor: chrome.surface,
+                  elevation: chrome.elevation,
+                  shadowColor: '#000000',
+                  shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
+                  shadowRadius: chrome.elevation,
+                  shadowOffset: { width: 0, height: 1 },
+                },
+                chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+                pressed && styles.pressed,
+              ]}
+            >
+              <RecentreMark size={RECENTRE_MARK_SIZE} color={chrome.link} />
+              <Text style={[styles.recentreText, { color: chrome.link }]}>
+                {t('map.recentre')}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
 
         {/* ⚠ SHOWN TO EVERYBODY SINCE 2026-08-28, on the project lead's
             instruction, and styled after the reference app: full width, filled,
@@ -487,8 +489,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     fontWeight: '700',
   },
+  /** The passport stamp on the left, re-centre on the right (2026-09-24). */
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   recentre: {
-    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
@@ -504,9 +511,7 @@ const styles = StyleSheet.create({
   },
 
   stampButton: {
-    // Bottom-left, on the project lead's instruction — see the header. The
-    // recording control sits opposite it.
-    alignSelf: 'flex-start',
+    // Bottom-left, on the project lead's instruction — see the header.
     // ⚠ No fill and no shadow: the stamp is the button (D-083), and its
     // hairline rim is what stands it off either map. Android draws no
     // elevation shadow for a view without a background anyway.

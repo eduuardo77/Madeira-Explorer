@@ -113,7 +113,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-082** | The drawn trace gets **cleanup wired in, an honest line weight, and snapping only to shipped levada courses** — general matching stays deferred. | **Provisional** |
 | **D-083** | The passport button **is your latest visible stamp**, with the rank as a **metal rim and dark hairline**; the count leaves the button. | **Accepted** |
 | **D-084** | **Public v1 ships with Play Billing working**; the closed beta runs unlocked. | **Accepted** |
-| **D-085** | The home map shows **every place faintly** and calls out the **nearest 1–3** — amends D-070. | **Accepted** |
+| **D-085** | ~~The home map shows every place faintly~~ ⚠ **Rings removed 2026-09-24** by the project lead: only collected places are drawn, as D-070 said. | **Reversed** |
 | **D-086** | The icon and brand mark are **drawn in-house from the stamp artwork**, after the trademark search. | **Accepted** |
 | **D-087** | A **walk** is started from the main button and **changes the recorder**; background recording is **automatic recording**, in Settings. After WalkNYC. Pause, and a summary at the end. | **Accepted** |
 | **D-088** | A trip ends at the **airport**, after **three days of silence**, or by the user's **End trip** (passport), which also turns automatic recording off (⚠ that part Provisional). | **Accepted** |

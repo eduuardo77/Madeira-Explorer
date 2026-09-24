@@ -59,7 +59,7 @@ import { buildPlaceCard } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import { isUnlocked } from '../entitlement/entitlementStore';
-import { buttonStamp, type ButtonStamp } from '../passport/passportButton';
+import { buttonStamp, STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import {
@@ -92,7 +92,6 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
-import { buildToCollectMarks } from './placesToCollect';
 import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
@@ -131,11 +130,14 @@ const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as Bounds;
  * control, when shown, adds another 60 and a `spacing.sm` (8) gap. So the real
  * numbers are 92 and 160 — and which one applies depends on whether the user
  * granted Always, which is why this is a function now rather than a constant.
+ *
+ * ⚠ Since 2026-09-24 the passport row is `STAMP_BUTTON_SIZE` tall, not 60, and
+ * *Re-centre* sits in that row rather than above it.
  */
 function cameraPadding(hasRecordingControl: boolean) {
   const bottomChrome = hasRecordingControl
-    ? MIN_TAP_TARGET * 2 + spacing.sm + spacing.xl
-    : MIN_TAP_TARGET + spacing.xl;
+    ? STAMP_BUTTON_SIZE + MIN_TAP_TARGET + spacing.sm + spacing.xl
+    : STAMP_BUTTON_SIZE + spacing.xl;
   return {
     // The settings control plus the status bar it sits below.
     top: MIN_TAP_TARGET + spacing.xl + (StatusBar.currentHeight ?? 0),
@@ -287,21 +289,11 @@ export default function NativeMapScreen({
    * Falls back to the camera's own zoom before the first `onCameraMove` lands,
    * so the marks appear on the first frame rather than after the first pan.
    */
-  /**
-   * ⚠ D-085 (2026-09-23): the places still to collect, as hollow rings, the
-   * nearest three called out. Drawn *under* the collected marks, so a place
-   * is never shown as both. `placesToCollect.ts` holds the rule that they can
-   * never look collected.
+  /*
+   * ⚠ No rings for the places still to collect. D-085 drew all of them as
+   * pale hollow rings (2026-09-23); the project lead saw them on the P30 as
+   * "white dots" and asked for them gone on 2026-09-24 (D-085 amended).
    */
-  const toCollectMarks = buildToCollectMarks({
-    places,
-    collectedIds,
-    zoom: zoom ?? camera?.zoom ?? 0,
-    position: userAt === null ? null : { lat: userAt.latitude, lon: userAt.longitude },
-    faint: PLACE_MARKER_PAINT[styleName].uncollected,
-    collected: PLACE_MARKER_PAINT[styleName].collected,
-  });
-
   const collectedMarks = buildCollectedMarks(
     places,
     collectedIds,
@@ -738,16 +730,15 @@ export default function NativeMapScreen({
         // answer to a direct question, so for those few seconds it wins.
         polylines={[...tracePolylines, ...coursePolylines]}
         markers={marker}
-        // The places already earned (T-112). Circles rather than markers
+        // The places already earned (T-112), and only those. Circles rather than markers
         // because a marker needs an image ref and therefore `expo-image`, which
         // this app does not carry — see `collectedMarks.ts`.
-        circles={[...toCollectMarks, ...collectedMarks]}
+        circles={collectedMarks}
         onCircleClick={(circle) => {
           const place = places.find((candidate) => candidate.id === circle.id);
           if (place !== undefined) {
             // Same route in as the passport's *Show on map* (D-052), so a mark
             // on the map and a stamp in the passport open the identical card.
-            // ⚠ Since D-085 not every drawn place is collected, so it is asked.
             setTappedPlace({ place, collected: collectedIds.has(place.id) });
           }
         }}

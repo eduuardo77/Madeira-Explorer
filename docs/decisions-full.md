@@ -4627,6 +4627,13 @@ larger nearest three. A ring is named by tapping it, which opens the same card. 
 chip answered — an unlabelled ring next to Google's named pin — is accepted as the price of a
 quiet map.
 
+⚠⚠ **The rings are gone too, 2026-09-24, by the project lead**, having seen them on the P30:
+*"on the map there are some white dots which explain the location, I don't like that."* The
+hollow rings had a near-white fill, so on Google's pale map they read as white dots. **The home
+map is back to D-070: only collected places are drawn.** `placesToCollect.ts` and its tests are
+deleted (git has them). The review's P1-1, that a new user sees nothing of the 80 places, is
+open again; Google's own pins for the same places are what a new user sees instead.
+
 ## D-086 — The icon and brand mark are drawn in-house, from the stamp artwork
 
 **Status:** Accepted — the project lead, 2026-09-23 (T-186, option B).

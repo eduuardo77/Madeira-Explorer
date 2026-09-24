@@ -9,7 +9,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on a real phone**
 (the project lead's Huawei P30, Android 10, EMUI): record → stamps → trace on Google Maps → passport
-→ place card → trip end → souvenir still image. **782 tests** (counted 2026-09-24), `tsc` strict
+→ place card → trip end → souvenir still image. **774 tests** (counted 2026-09-24, after the rings went), `tsc` strict
 clean. The **free tier is in** (T-155): stamps 11+ are drawn locked. **A closed-beta build unlocks
 everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
 pay yet**, and ⚠ **the free tier itself is under study: D-089 (Provisional),
@@ -25,8 +25,8 @@ The review (`docs/app-review-2026-09-22.md`, scored 7/20) became the plan. Statu
 
 **Decided:** T-182 (D-084: billing in public v1, beta unlocked, now built), T-183 (D-087: the
 WalkNYC-style outing, pause and summary; all three of its Provisional choices accepted), T-184
-(D-085: faint rings for places to collect; the "nearest" chip was built and then removed on the
-project lead's word), T-185 (D-088: a trip ends at the airport, after 3 days of silence, or by
+(D-085: faint rings for places to collect; the chip and then **the rings themselves were removed
+2026-09-24** on the project lead's word, so the map draws only collected places again), T-185 (D-088: a trip ends at the airport, after 3 days of silence, or by
 *End trip*), T-186 (D-086: icon in-house from the stamp art).
 
 **Done and seen on the P30:** T-189 (no debug route in release), T-190/T-191/T-193/T-194
@@ -81,7 +81,7 @@ lead outdoors.
   file with the Write tool.
 - **Play Protect prompts on every install**, and only the project lead can tap them.
 
-⚠ **The P30 runs a BETA release build (unlocked, D-084) from 2026-09-24 20:29**, with option D, End
+⚠ **The P30 runs a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:48 with the rings removed and the passport row (stamp 108 dp, *Centrar* beside it)**, with option D, End
 trip, the update notice, T-212 and maps-compose 6.12.1 (`pkgFlags` has no `DEBUGGABLE`, so
 performance readings are valid). Its old trip was closed by the *End trip* test and automatic
 recording was switched back on, so a new trip opens at the next fix. The next install also brings
@@ -345,7 +345,7 @@ T-156 waits on T-182, and T-158 is parked until Gate R1.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 782 tests
+cd app && npm test          # 774 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

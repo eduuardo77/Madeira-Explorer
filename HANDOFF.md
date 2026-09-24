@@ -12,7 +12,8 @@ The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **ru
 → place card → trip end → souvenir still image. **782 tests** (counted 2026-09-24), `tsc` strict
 clean. The **free tier is in** (T-155): stamps 11+ are drawn locked. **A closed-beta build unlocks
 everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
-pay yet: T-156 (billing) is next.** `content/pois.json` holds **80 curated places**. The UI speaks
+pay yet**, and ⚠ **the free tier itself is under study: D-089 (Provisional),
+`docs/monetization-study-plan.md`.** Nothing in `app/` changes for monetisation until it is Accepted. `content/pois.json` holds **80 curated places**. The UI speaks
 **English, Portuguese and German**, and **no user-facing text may contain a dash** (— or –): the
 project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolicy.test.ts` enforce
 it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
@@ -53,11 +54,15 @@ for a launch without a `createClassLoader … com.proa` line.
    T-206/T-123), and the Play upload key (blocks T-207 and any real billing test).
 4. **T-203 P2-8:** whether the grey "Passport" placeholder button (D-083) should change. Asked,
    not decided.
+5. **D-089 study:** N (Q2), the watermark A/B (Q5), the price (Q6), and people for Q3/Q4.
 
-**Next for the assistant:** **T-156 Play Billing** (write and unit-test now; a real purchase needs a
-Play test track, so T-187). Then T-197 (memory after sharing: needs a stamp on the phone) and T-196
-(the stall question has one clean observation; the DB-versus-delivered measure needs a field
-build). T-205, one real trip, is the MVP gate and needs the project lead outdoors.
+**Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
+2026-09-24) puts billing *after* the monetisation study. Start with the study questions that need
+nobody (`docs/monetization-study-plan.md` §4): **Q1's desk model, Q4's watermark mock-ups, Q6's
+price check, Q8's billing-library checks** (`expo-iap` recommended). Outside monetisation: T-197
+(memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
+field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
+lead outdoors.
 
 ## Traps found in this session (read before touching the P30)
 

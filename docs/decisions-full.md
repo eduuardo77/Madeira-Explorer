@@ -4776,3 +4776,35 @@ release.**
   not, the model earns nothing.
 - **A geographic gate** (research §14's ✅). It stays the fallback if a count gate reads badly in
   study.
+
+## D-090 — A quiet progress line on the home map, after WalkNYC (amends D-083, D-085)
+
+**Status:** Accepted: the project lead asked for it, 2026-09-24: *"add progress on the home screen
+like WalkNYC, but very subtle."* ⚠ **The drawing itself is Provisional**: the placement, the
+wording, and no percentage are the assistant's choices, and nobody has looked at them on the phone
+yet.
+
+**The problem.** The second review (`docs/app-review-2026-09-24.md`, N1) found the home map at 0
+stamps saying nothing about what there is to collect. D-083 had taken the count off the passport
+button, and D-085's rings came off the map the same day. D-085 wanted the map *"as quiet as
+WalkNYC's"*, but WalkNYC's home is not silent: it keeps *"0 / 86 638 blocks · 0,0%"* and a bar
+above *Start Walk*. Its quiet means no pins, not no progress.
+
+**The decision.**
+- One slim strip directly above *Começar passeio*: *"3 de 80 lugares"* in muted 14 dp type, and a
+  3 dp bar under it that fills with the count.
+- **Shown at 0 / 80**, because that is who it is for.
+- Hidden only when there is nothing to count, or while a place card is open.
+- Not tappable. A lighter shadow than the controls, because it is not one.
+- Hidden from screen readers: the passport button already says the count, and D-083 keeps it said
+  once.
+- `progress/homeProgress.ts` is the pure half. `PrimaryOverlay` draws it and exports its height,
+  which `NativeMapScreen`'s camera padding now includes.
+
+**Rejected.**
+- **The count back on the stamp** (T-075's pill). D-083 took it off on the project lead's word.
+- **A percentage, as WalkNYC shows.** For 3 of 80, *3,8%* is false precision beside a count a
+  person reads at a glance, and the bar already says the proportion.
+- **The strip as a tap target that opens the passport.** It would be a third bottom control and a
+  mis-tap for the walk button, which is the one design brief §3.1 guards.
+- **The rings again.** The project lead removed them the same day.

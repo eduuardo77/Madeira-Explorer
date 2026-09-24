@@ -409,3 +409,26 @@ test('⚠ the re-centre label is readable on its pill, in both map styles', () =
   // the same would pass the loop above for whichever style it copied.
   assert.notEqual(mapChrome.light.link, mapChrome.dark.link);
 });
+
+test('⚠ the home progress line is readable, and its bar is visible, in both map styles', () => {
+  // D-090. "Very subtle" is the brief, and the muted caption and the thin bar
+  // are how it is met. Subtle is allowed to mean quiet. It is not allowed to
+  // mean unreadable outdoors.
+  for (const style of ['light', 'dark'] as const) {
+    const { surface, muted, link, track } = mapChrome[style];
+    const caption = contrastRatio(muted, surface);
+    assert.ok(caption >= BODY, `the progress caption is ${caption.toFixed(2)}:1 on the ${style} strip`);
+    // The fill is the value. It must stand off both the empty track it grows
+    // along and the strip it sits in.
+    for (const [ground, name] of [
+      [track, 'track'],
+      [surface, 'strip'],
+    ] as const) {
+      const ratio = contrastRatio(link, ground);
+      assert.ok(
+        ratio >= BOUNDARY,
+        `the progress fill is ${ratio.toFixed(2)}:1 against the ${style} ${name}`
+      );
+    }
+  }
+});

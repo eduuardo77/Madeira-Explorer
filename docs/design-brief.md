@@ -126,6 +126,11 @@ Three things on the primary screen. That is the whole app.
 └─────────────────────────────────┘
 ```
 
+⚠ **2026-09-24 (D-090): a quiet progress line sits above the outing button**, *3 de 80 lugares*
+and a 3 dp bar, after WalkNYC's *"0 / 86 638 blocks"*. It is the count D-083 took off the stamp
+button, back on the screen but not on the button. It is not a control, and it is the quietest thing
+at the bottom.
+
 ### 3.1 The stamp button, bottom-left
 
 Opens the passport. **It also carries the hero number** — the mark plus `23 / 180`. One element

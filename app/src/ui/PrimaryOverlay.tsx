@@ -22,6 +22,13 @@
  * never a locked one — and `passport/stampRim.ts` draws the rim. The count is
  * still read out by a screen reader here, and still shown in the passport.
  *
+ * ⚠ THE COUNT CAME BACK, OFF THE BUTTON (D-090, 2026-09-24)
+ * --------------------------------------------------------
+ * As a slim strip above the walk button, *"3 de 80 lugares"* and a 3 dp bar,
+ * after the reference app's *"0 / 86 638 blocks"*. The project lead asked for
+ * it *"very subtle"*, so it is the quietest thing at the bottom of the screen.
+ * The button stays a stamp.
+ *
  * ⚠ BOTTOM-**LEFT**, ON THE PROJECT LEAD'S INSTRUCTION (2026-08-12)
  * ----------------------------------------------------------------
  * This used to be bottom-right, and the reason recorded here was thumb reach:
@@ -51,6 +58,7 @@ import { STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton'
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import { rimFor } from '../passport/stampRim';
 import { tierFor } from '../passport/stampTier';
+import { homeProgress } from '../progress/homeProgress';
 import { n, t } from '../i18n';
 import type { PrimaryControl } from '../recording/recorderControls';
 import {
@@ -81,6 +89,18 @@ const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 0, right: 0 };
 
 /** The passport button's box: the stamp, never under the 60 dp target. */
 const STAMP_BOX = Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET);
+
+/** The progress caption's line, fixed so the strip's height is known (D-090). */
+const PROGRESS_LINE = Math.round(fontSize.small * 1.35);
+const PROGRESS_BAR = 3;
+const PROGRESS_GAP = spacing.xs + 2;
+
+/**
+ * How tall the progress strip draws, for `NativeMapScreen`'s camera padding:
+ * the map centres a trace in the part of the screen the chrome leaves free,
+ * and a guessed height is how the framing broke once before (2026-08-17).
+ */
+export const PROGRESS_STRIP_HEIGHT = spacing.sm * 2 + PROGRESS_LINE + PROGRESS_GAP + PROGRESS_BAR;
 
 /** The glyph beside the words on the walk button. */
 const WALK_MARK_SIZE = 22;
@@ -186,6 +206,10 @@ export default function PrimaryOverlay({
 }: PrimaryOverlayProps) {
   // How far into the collection this is (D-078) — the rim round the stamp.
   const tier = tierFor(progress.collected, progress.total);
+
+  // D-090: the one line of progress the reference app keeps above its start
+  // button. Null when there is nothing to count.
+  const strip = homeProgress(progress);
 
   // The floating controls take their colours from the map underneath, not from
   // the app's (dark-only) palette. See `mapChrome` in `theme.ts`.
@@ -362,6 +386,48 @@ export default function PrimaryOverlay({
           <View style={styles.rowMirror} pointerEvents="none" />
         </View>
 
+        {/* D-090 — progress, as the reference app shows it (*"0 / 86 638
+            blocks"* above *Start Walk*), but quieter, on the project lead's
+            word: *"very subtle"*. A muted caption and a 3 dp bar on a slim
+            strip; no percentage, no tap, and a lighter shadow than the
+            controls, because it is not one.
+            ⚠ Hidden from screen readers on purpose: the passport button above
+            already says "3 of 80 places collected", and saying it twice on one
+            swipe is noise (D-083 keeps the count said once).
+            ⚠ Gone while a place card is open, so the card is not pushed any
+            higher up the map by a line the user is not reading then. */}
+        {strip === null || bottomSlot != null ? null : (
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
+            style={[
+              styles.progress,
+              {
+                backgroundColor: chrome.surface,
+                elevation: chrome.elevation === 0 ? 0 : 1,
+                shadowColor: '#000000',
+                shadowOpacity: chrome.elevation === 0 ? 0 : 0.12,
+                shadowRadius: 1,
+                shadowOffset: { width: 0, height: 1 },
+              },
+              chrome.border !== null && { borderWidth: 1, borderColor: chrome.track },
+            ]}
+          >
+            <Text style={[styles.progressText, { color: chrome.muted }]} numberOfLines={1}>
+              {t('map.progress', { collected: strip.collected, total: strip.total })}
+            </Text>
+            <View style={[styles.progressTrack, { backgroundColor: chrome.track }]}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { backgroundColor: chrome.link, width: `${strip.fraction * 100}%` },
+                ]}
+              />
+            </View>
+          </View>
+        )}
+
         {/* ⚠ SHOWN TO EVERYBODY SINCE 2026-08-28, on the project lead's
             instruction, and styled after the reference app: full width, filled,
             glyph beside the words.
@@ -524,6 +590,27 @@ const styles = StyleSheet.create({
   recentreText: {
     fontSize: fontSize.body,
     fontWeight: '600',
+  },
+
+  /** D-090: slim on purpose. The smallest type the app allows, and a 3 dp bar. */
+  progress: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: PROGRESS_GAP,
+    borderRadius: radius.card,
+  },
+  progressText: {
+    fontSize: fontSize.small,
+    lineHeight: PROGRESS_LINE,
+  },
+  progressTrack: {
+    height: PROGRESS_BAR,
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: PROGRESS_BAR,
+    borderRadius: radius.pill,
   },
 
   stampButton: {

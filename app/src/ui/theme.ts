@@ -240,6 +240,14 @@ export const mapChrome = {
      * 1.96:1, which is why this is a per-style value and not one constant.
      */
     link: '#0A5AAE',
+    /**
+     * The progress line's caption (D-090): quieter than `content`, because the
+     * strip is the least important thing at the bottom of the screen. The
+     * page's `textMuted`, 6.5:1 on this white.
+     */
+    muted: '#5C5C63',
+    /** The progress bar's empty track. Decorative: the fill carries the value. */
+    track: '#E5E5EA',
   },
   dark: {
     surface: '#1C1C1E',
@@ -265,6 +273,9 @@ export const mapChrome = {
      * 6.93:1. Held by `contrast.test.ts` in both directions.
      */
     link: '#5AA9FF',
+    /** The progress caption on the near-black strip: the album's muted grey. */
+    muted: '#AEAEB2',
+    track: '#3A3A3C',
   },
 } as const;
 

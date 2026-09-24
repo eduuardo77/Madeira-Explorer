@@ -298,6 +298,14 @@ export const STRINGS = {
   'map.startWalk': s('Start an outing', 'Começar passeio', 'Ausflug starten'),
   'map.stopWalk': s('End outing', 'Terminar passeio', 'Ausflug beenden'),
   'map.recentre': s('Re-center', 'Centrar', 'Zentrieren'),
+  // D-090: the quiet progress line above the outing button. "3 of 80 places"
+  // reads right at every count, so it needs no plural forms, and it matches
+  // the passport rows' own "0 de 19".
+  'map.progress': s(
+    '{collected} of {total} places',
+    '{collected} de {total} lugares',
+    '{collected} von {total} Orten'
+  ),
   'map.a11y.recentre': s(
     'Center the map on where you are',
     'Centrar o mapa onde está',

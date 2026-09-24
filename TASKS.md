@@ -105,6 +105,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ⚠ **Desk half done 2026-09-24:** Q1's model (`tools/stamp-days.mjs`), Q4's mock-ups
       (`preview-film.mjs --watermarks`), Q6's price check and Q8's four checks are written into the
       plan. Waiting on the project lead: N (Q2), A/B (Q5), the price (Q6), people for Q3/Q4.
+- [~] **T-214** **A quiet progress line on the home map (D-090)**, after the second review's N1.
+      ✅ **Code 2026-09-24:** `progress/homeProgress.ts` (4 tests), the strip in `PrimaryOverlay`,
+      `map.progress` in three languages, `mapChrome.muted`/`track` held by `contrast.test.ts`, and the
+      camera padding grown by the strip's exported height. Measured in the workbench: 44 dp, 8 dp
+      from the stamp row and from the walk button, and a fill of 5 px of 324 at 3/180.
+      ⚠ **Not yet judged by eye on the phone.** Subtle enough? Readable on the light map outdoors?
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
       (T-117e). **Start them on day one**: each is small, but they take the longest to come back.

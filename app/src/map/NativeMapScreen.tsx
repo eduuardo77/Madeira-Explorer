@@ -85,7 +85,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
 import { useBackHandler } from '../ui/useBackHandler';
-import PrimaryOverlay, { type MapNotice } from '../ui/PrimaryOverlay';
+import PrimaryOverlay, { PROGRESS_STRIP_HEIGHT, type MapNotice } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
@@ -132,12 +132,15 @@ const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as Bounds;
  * granted Always, which is why this is a function now rather than a constant.
  *
  * ⚠ Since 2026-09-24 the passport row is `STAMP_BUTTON_SIZE` tall, not 60, and
- * *Re-centre* sits in that row rather than above it.
+ * *Re-centre* sits in that row rather than above it. And the progress strip
+ * (D-090) sits between that row and the walk button, with its own `spacing.sm`
+ * gap.
  */
 function cameraPadding(hasRecordingControl: boolean) {
+  const strip = PROGRESS_STRIP_HEIGHT + spacing.sm;
   const bottomChrome = hasRecordingControl
-    ? STAMP_BUTTON_SIZE + MIN_TAP_TARGET + spacing.sm + spacing.xl
-    : STAMP_BUTTON_SIZE + spacing.xl;
+    ? STAMP_BUTTON_SIZE + strip + MIN_TAP_TARGET + spacing.sm + spacing.xl
+    : STAMP_BUTTON_SIZE + strip + spacing.xl;
   return {
     // The settings control plus the status bar it sits below.
     top: MIN_TAP_TARGET + spacing.xl + (StatusBar.currentHeight ?? 0),

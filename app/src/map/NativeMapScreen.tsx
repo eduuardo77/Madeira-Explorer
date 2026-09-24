@@ -42,6 +42,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   Linking,
   PixelRatio,
   StatusBar,
@@ -93,6 +94,7 @@ import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
 import { buildToCollectMarks } from './placesToCollect';
+import { mapMayMount } from './mapMountGate';
 import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
@@ -274,6 +276,25 @@ export default function NativeMapScreen({
    * two places for the same behaviour to drift apart.
    */
   const [tappedPlace, setTappedPlace] = useState<FocusPlace | null>(null);
+  /**
+   * T-177: whether the app has been in the foreground yet. The map is not built
+   * before then, because a map view built with no current Activity can end up
+   * blank for the life of the process (`mapMountGate.ts`).
+   */
+  const [activityReady, setActivityReady] = useState(() =>
+    mapMayMount(false, AppState.currentState)
+  );
+  useEffect(() => {
+    if (activityReady) {
+      return undefined;
+    }
+    // A logcat marker, so a launch loop can see how often this path happens.
+    console.info('T-177 map: waiting for the foreground before building the map');
+    const subscription = AppState.addEventListener('change', (next) => {
+      setActivityReady((already) => mapMayMount(already, next));
+    });
+    return () => subscription.remove();
+  }, [activityReady]);
 
   const darkMap = darkMapPropsFor(styleName, supportsNativeDarkMap);
   const tracePaint = TRACE_PAINT[styleName];
@@ -720,7 +741,7 @@ export default function NativeMapScreen({
     );
   }
 
-  if (!ready) {
+  if (!ready || !activityReady) {
     return (
       <View style={styles.centred}>
         <ActivityIndicator size="large" color={colors.action} />

@@ -4620,6 +4620,13 @@ mine, and marked Provisional. **One line above the controls, *"Mais perto por vi
 Rejected: map labels (they need `expo-image`, a dependency and a network audit, D-043), and
 hiding Google's pin where ours sits (the POI layer is all or nothing).
 
+⚠ **The chip is reversed, 2026-09-24, by the project lead:** *"Remove the 'Mais perto por
+visitar:...' lets keep it simple, get inspired on WalkNYC."* WalkNYC's home map carries no text
+naming a place: the map, the gear and the one primary button. The rings stay, and so do the
+larger nearest three. A ring is named by tapping it, which opens the same card. The problem the
+chip answered — an unlabelled ring next to Google's named pin — is accepted as the price of a
+quiet map.
+
 ## D-086 — The icon and brand mark are drawn in-house, from the stamp artwork
 
 **Status:** Accepted — the project lead, 2026-09-23 (T-186, option B).

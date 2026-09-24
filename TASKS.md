@@ -272,8 +272,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       outing, cleared the pause notice. The project lead's tier was left on *Máximo detalhe*. ⚠ Today the button does nothing when background recording is on (`manualWalk.ts` → `leave-alone`). The home control reads the recorder's real state, the same check `soak-check.sh`
       makes, not `isRecording()` (T-174).
 - [~] **T-199** **The home map shows what there is to collect** ⇠ T-184. ✅ **Code done 2026-09-23,
-      ⚠ the rings not yet judged by eye on the P30; the chip seen 2026-09-24: *"Mais perto por
-      visitar: Praia dos Reis Magos"*.** `map/placesToCollect.ts` (8 tests) draws every uncollected place
+      ⚠ the rings not yet judged by eye on the P30.** ⚠ **The chip is gone (2026-09-24):** seen on the
+      P30 reading *"Mais perto por visitar: Praia dos Reis Magos"*, then removed on the project
+      lead's word, to keep the map as quiet as WalkNYC's (D-085). `map/placesToCollect.ts` (8 tests) draws every uncollected place
       as a hollow ring, with the nearest three (from the last known position) as a larger hollow
       ring in the collected disc's grey. **D-085's rule is kept by construction:** hollow against
       filled, a circle against Google's teardrops, grey against the blue location dot and green
@@ -292,8 +293,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         ours sits, or a one-line *"3 lugares perto de si"* entry into the passport.
       - ⚠ **Not seen:** the island view with all 80 (adb cannot pinch), and the tap to open a
         ring's card (the phone had locked).
-      — ✅ **Answer built 2026-09-23 (D-085 amended, Provisional):** `ui/NearestChip.tsx`, *"Mais perto por
-        visitar: {nome}"*, which opens the place's card. ⚠ Not yet on the device.
+      — ~~Answer built 2026-09-23: `ui/NearestChip.tsx`~~ **Removed 2026-09-24** (see above). A ring
+        is named by tapping it.
 - [x] **T-200** ✅ **Done 2026-09-23, seen in the workbench:** *"Welcome to Proa / Madeira has 80
       places waiting for a stamp in your passport. Go to one, and its stamp appears by itself."*
       The name comes from `brand.ts` and the destination and count from the content pack.

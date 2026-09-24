@@ -91,8 +91,7 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { buildCollectedMarks } from './collectedMarks';
-import { buildToCollectMarks, nearestToCollect } from './placesToCollect';
-import NearestChip from '../ui/NearestChip';
+import { buildToCollectMarks } from './placesToCollect';
 import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
@@ -301,12 +300,6 @@ export default function NativeMapScreen({
     faint: PLACE_MARKER_PAINT[styleName].uncollected,
     collected: PLACE_MARKER_PAINT[styleName].collected,
   });
-
-  const nearest = nearestToCollect(
-    places,
-    collectedIds,
-    userAt === null ? null : { lat: userAt.latitude, lon: userAt.longitude }
-  );
 
   const collectedMarks = buildCollectedMarks(
     places,
@@ -850,18 +843,9 @@ export default function NativeMapScreen({
         progress={progress}
         passportStamp={passportStamp}
         mapStyle={styleName}
-        bottomSlot={
-          card !== null ? (
-            <PlaceCardView card={card} onClose={closeCard} />
-          ) : nearest !== null ? (
-            // D-085: the ring's words. Tapping opens the same card a ring does.
-            <NearestChip
-              name={nearest.name}
-              mapStyle={styleName}
-              onPress={() => setTappedPlace({ place: nearest, collected: false })}
-            />
-          ) : null
-        }
+        // No chip naming the nearest place (removed 2026-09-24, D-085): the
+        // map stays as quiet as WalkNYC's. A ring is named by tapping it.
+        bottomSlot={card !== null ? <PlaceCardView card={card} onClose={closeCard} /> : null}
         onOpenPassport={onOpenPassport}
         onOpenSettings={onOpenSettings}
         isWalking={walkStarted}

@@ -39,6 +39,7 @@ import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
+import { useBackHandler } from './useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 export default function PassportScreen({
@@ -217,6 +218,8 @@ export default function PassportScreen({
     setCard(null);
     setCardPlace(null);
   };
+  // T-211: Back closes an open card before App.tsx's handler leaves the passport.
+  useBackHandler(card !== null, closeCard);
 
   /**
    * The user says they walked it (T-149).

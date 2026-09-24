@@ -56,6 +56,7 @@ import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
+import { useBackHandler } from './useBackHandler';
 import Constants from 'expo-constants';
 import { CONTACT_EMAIL } from '../legal/privacyPolicy';
 import { buildDonation, sendDonation } from '../souvenir/donateWalk';
@@ -234,6 +235,15 @@ export default function SettingsScreen({
       ]);
     })();
   }, [donating]);
+
+  // T-211: Back closes whichever inner screen is open, before App.tsx's handler
+  // leaves Settings. Not while the erase is running or done: those have their
+  // own single way out.
+  useBackHandler(showingLicences || showingPolicy || confirmingErase, () => {
+    setShowingLicences(false);
+    setShowingPolicy(false);
+    setConfirmingErase(false);
+  });
 
   // ⚠ Every hook above this line, none below it. The screens below return
   // early, and a hook after an early return is a different number of hooks

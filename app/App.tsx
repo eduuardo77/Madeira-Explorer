@@ -20,6 +20,8 @@ import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
+import { backTarget, type AppScreen } from './src/navigation/backNavigation';
+import { useBackHandler } from './src/ui/useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
 /**
@@ -54,9 +56,14 @@ LogBox.ignoreLogs([/Failed to load glyph range/]);
  * (CONTEXT §6.4).
  */
 export default function App() {
-  const [screen, setScreen] = useState<
-    'map' | 'passport' | 'replay' | 'settings' | 'debug'
-  >('map');
+  const [screen, setScreen] = useState<AppScreen>('map');
+  // T-211: Back walks the screens instead of leaving the app. Screens with
+  // something open inside them (a card, the licences) register their own,
+  // newer handler, which runs first.
+  const back = backTarget(screen);
+  useBackHandler(back !== null, () => {
+    if (back !== null) setScreen(back);
+  });
   /** null until checked; false once onboarding is behind us. */
   const [onboarding, setOnboarding] = useState<boolean | null>(null);
   /** The Always upgrade or downgrade prompt, when one is due (T-043, T-044). */

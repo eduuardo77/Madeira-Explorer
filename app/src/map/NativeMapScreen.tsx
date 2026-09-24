@@ -84,6 +84,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
+import { useBackHandler } from '../ui/useBackHandler';
 import PrimaryOverlay, { type MapNotice } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
@@ -541,6 +542,8 @@ export default function NativeMapScreen({
     // changes nothing and the card does not come back.
     setTappedPlace(null);
   };
+  // T-211: Back closes an open card rather than leaving the app.
+  useBackHandler(card !== null, closeCard);
 
   /**
    * Keep a rough idea of where the user is, so *Re-centre* can hide when it has

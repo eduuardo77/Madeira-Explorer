@@ -72,7 +72,7 @@ The documents cost more to read than the code does. In order of impact:
 - **Be precise about which half you mean.** The app runs on an emulator and the recorder records
   *there*; it has also run on **real hardware once** (Firebase Test Lab, Pixel 5, 2026-08-19 —
   rendering only, nobody walked anywhere). Battery, background survival and GPS realism are
-  unverified and no emulator can answer them. 766 unit tests and a browser workbench are all the
+  unverified and no emulator can answer them. 768 unit tests and a browser workbench are all the
   verification the *logic* has.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not

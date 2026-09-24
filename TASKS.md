@@ -368,6 +368,24 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 
 - [ ] **T-208** **Re-run the review at each gate**, using the review's §2 method and weights, and
       record the score. No predicted scores.
+- [~] **T-209** ⚠ **Found on the P30 2026-09-24: Settings crashed the app, and took the recorder
+      with it.** Tapping *Licenças de código aberto* closed the app. Logcat: *"Rendered fewer
+      hooks than expected"* in `SettingsScreen`. `donateWalk` (a `useCallback`) had sat below
+      the early-return screens since D-069 (2026-08-16), so **Privacidade, Apagar tudo and
+      Licenças each crashed every release build for five weeks**. It went unseen because a dev
+      build shows a red box, no test renders a component, and there is no ESLint. ✅ Fixed:
+      the hook is moved up, and `hooksOrder.test.ts` guards every component (its fixture test
+      proves it flags the old file at the crash line). ⚠ To see on the P30: all three rows open
+      and close without a crash.
+- [ ] **T-210** ⚠ **An app update stopped the recorder, and nothing restarted it for 22 h** —
+      found on the P30 2026-09-24. The release was installed over the field build at 20:23. The
+      next morning the home map said *Nada registado há 22 h 14 min*, and the foreground service
+      came back only when the app was opened. `expo-task-manager` declares a receiver for
+      `MY_PACKAGE_REPLACED` and `BOOT_COMPLETED`, so either EMUI blocked the broadcast (its
+      app-launch manager) or that receiver does not restart a location task. **Unknown which.**
+      A Play auto-update mid-holiday would do the same, silently. **To measure:** `install -r`
+      the same APK with the app closed and check `dumpsys activity services` a minute later,
+      then repeat with EMUI's launch manager set to manual. Needs a Play Protect tap each time.
 - **Gate R1 — MVP:** P0-1 to P0-5 closed (T-188, T-189, T-182 applied, T-177, T-205), and one
   real trip gave a stamp, a trip end and a souvenir.
 - **Gate R2 — closed beta (T-129):** R1 met; T-193, T-194, T-122, T-206 and T-207 done; the

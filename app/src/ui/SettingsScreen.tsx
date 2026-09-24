@@ -190,6 +190,57 @@ export default function SettingsScreen({
     })();
   }, []);
 
+  /**
+   * Build a walk report and hand it to the share sheet (OD-11, D-069).
+   *
+   * ⚠ **The user is shown what it contains before the sheet opens**, in the
+   * sentence `walkReport.ts` keeps beside the payload — so the description
+   * cannot drift from what is actually in the file.
+   */
+  const donateWalk = useCallback(() => {
+    if (donating) {
+      return;
+    }
+    setDonating(true);
+
+    void (async () => {
+      // The version the rules came from, read from the manifest rather than
+      // typed here — a report claiming the wrong version is worse than one
+      // claiming none.
+      const built = await buildDonation(
+        Constants.expoConfig?.version ?? 'unknown'
+      );
+      if (!built.ok) {
+        setDonating(false);
+        // ⚠ T-190: the translated refusal, never the diary's English `reason`.
+        Alert.alert(t('donate.nothingTitle'), t(REFUSAL_KEYS[built.refusal]));
+        return;
+      }
+
+      Alert.alert(t('donate.confirmTitle'), built.description, [
+        { text: t('donate.notNow'), style: 'cancel', onPress: () => setDonating(false) },
+        {
+          text: t('donate.send'),
+          onPress: () => {
+            void (async () => {
+              const sent = await sendDonation(built.report);
+              setDonating(false);
+              if (!sent.ok) {
+                Alert.alert(t('donate.failedTitle'), t(REFUSAL_KEYS[sent.refusal]));
+              }
+            })();
+          },
+        },
+      ]);
+    })();
+  }, [donating]);
+
+  // ⚠ Every hook above this line, none below it. The screens below return
+  // early, and a hook after an early return is a different number of hooks
+  // from one render to the next: React throws, and in a release build that
+  // kills the process and the recorder with it. `donateWalk` sat below them
+  // from 2026-08-16 to 2026-09-24, so Privacy, Erase and Licences each crashed
+  // the app (found on the P30). `hooksOrder.test.ts` guards it.
   if (erased) {
     return (
       <View style={styles.centre}>
@@ -244,51 +295,6 @@ export default function SettingsScreen({
       </View>
     );
   }
-
-    /**
-   * Build a walk report and hand it to the share sheet (OD-11, D-069).
-   *
-   * ⚠ **The user is shown what it contains before the sheet opens**, in the
-   * sentence `walkReport.ts` keeps beside the payload — so the description
-   * cannot drift from what is actually in the file.
-   */
-  const donateWalk = useCallback(() => {
-    if (donating) {
-      return;
-    }
-    setDonating(true);
-
-    void (async () => {
-      // The version the rules came from, read from the manifest rather than
-      // typed here — a report claiming the wrong version is worse than one
-      // claiming none.
-      const built = await buildDonation(
-        Constants.expoConfig?.version ?? 'unknown'
-      );
-      if (!built.ok) {
-        setDonating(false);
-        // ⚠ T-190: the translated refusal, never the diary's English `reason`.
-        Alert.alert(t('donate.nothingTitle'), t(REFUSAL_KEYS[built.refusal]));
-        return;
-      }
-
-      Alert.alert(t('donate.confirmTitle'), built.description, [
-        { text: t('donate.notNow'), style: 'cancel', onPress: () => setDonating(false) },
-        {
-          text: t('donate.send'),
-          onPress: () => {
-            void (async () => {
-              const sent = await sendDonation(built.report);
-              setDonating(false);
-              if (!sent.ok) {
-                Alert.alert(t('donate.failedTitle'), t(REFUSAL_KEYS[sent.refusal]));
-              }
-            })();
-          },
-        },
-      ]);
-    })();
-  }, [donating]);
 
   return (
     <SettingsView

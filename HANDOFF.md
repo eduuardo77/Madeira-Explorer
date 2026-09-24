@@ -8,7 +8,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on an Android
 emulator**: record → stamps → trace on Google Maps → passport → place card → trip end → souvenir
-still image. **766 tests** (counted 2026-09-24), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
+still image. **768 tests** (counted 2026-09-24), `tsc` strict clean. The **free tier is in** (T-155): the passport shows
 ten stamps plus your first levada, and everything beyond that is drawn locked. **Nothing sets the
 unlock flag yet — T-156 is the money.** `content/pois.json` holds **80 curated places**
 (19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks — 21 added and one cut
@@ -294,7 +294,7 @@ T-156 waits on T-182, and T-158 is parked until Gate R1.
 ## Building and verifying
 
 ```bash
-cd app && npm test          # 766 tests
+cd app && npm test          # 768 tests
 cd app && npx tsc --noEmit  # strict
 
 export ANDROID_HOME=$(pwd)/tools/android-sdk

@@ -518,6 +518,25 @@ On 2026-09-22 a P30 build started while another session was creating `stampRim.t
 timing, not a safeguard. Hermes keeps function names and string literals, so
 `grep -ac <name>` on the bundle is how to check.
 
+## The beta build — every stamp unlocked, 2026-09-24 (D-084)
+
+The closed beta runs **unlocked**: testers see every stamp they earn, and nobody is asked to pay
+before billing exists (T-156). It is a **build-time** switch, which Expo inlines into the bundle:
+
+```bash
+rm -f app/android/app/build/generated/assets/react/release/index.android.bundle       app/android/app/build/intermediates/assets/release/mergeReleaseAssets/index.android.bundle
+cd app/android && EXPO_PUBLIC_PROA_BETA=1 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+⚠ **Delete the bundle first, both ways round.** Gradle does not re-bundle when only an environment
+variable changes, so switching between beta and store without the `rm` ships the previous flavour.
+On the phone, Settings → *Versão* reads **0.1.0 (beta)** on a beta build.
+
+**Verified 2026-09-24:** a beta and a store bundle built from the same commit differ in one Hermes
+opcode (the flag compiled to true or false) plus the header and trailer hashes, and in nothing
+else. `betaBuild.test.ts` fails if any committed file (`app.json`, `eas.json`, `.env.example`,
+`package.json`) sets the variable, because a store build must never unlock by accident.
+
 ## The field build — a release APK we can still read, 2026-09-22
 
 For a phone that is going to record a **real walk**: a release build (bundled JS, minified, no dev

@@ -56,6 +56,7 @@ import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
+import { BETA_BUILD } from '../entitlement/entitlementStore';
 import { useBackHandler } from './useBackHandler';
 import Constants from 'expo-constants';
 import { CONTACT_EMAIL } from '../legal/privacyPolicy';
@@ -336,7 +337,13 @@ export default function SettingsScreen({
       donating={donating}
       onDonateWalk={donateWalk}
       // T-202: the version a support email needs. From the manifest, never typed.
-      version={Constants.expoConfig?.version}
+      version={
+        Constants.expoConfig?.version === undefined
+          ? undefined
+          : BETA_BUILD
+            ? t('settings.about.betaVersion', { version: Constants.expoConfig.version })
+            : Constants.expoConfig.version
+      }
       onContact={
         CONTACT_EMAIL === null
           ? undefined

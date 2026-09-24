@@ -79,6 +79,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       public v1, or a v1 with no lock (then say how early users are grandfathered, since D-075
       never takes a visible stamp away), or dropping the lock idea. *Recommended: run the beta
       unlocked, and ship public v1 with T-156.*
+      — ✅ **Applied 2026-09-24: the beta half was never built.** Every build locked stamp 11
+      onward, testers' included. Now `EXPO_PUBLIC_PROA_BETA=1` at build time unlocks
+      (`entitlement/betaBuild.ts`, read only in `entitlementStore.isUnlocked`), and Settings says
+      *0.1.0 (beta)*. Verified in the bundles: beta and store differ by one opcode.
+      `docs/dev-build.md` has the command and the re-bundle trap.
 - [x] **T-183** ✅ **Decided 2026-09-23 — D-087, after WalkNYC's recorder: pause yes, a short summary when a walk stops.** **Decide what "recording" means** — P1-2. Today the home button says *Começar a
       registar* while background recording is already on. *Recommended: background recording is
       the product. The home control shows the real state, and "Start" appears only when

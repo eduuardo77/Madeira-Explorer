@@ -794,6 +794,9 @@ export const STRINGS = {
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
   // T-202: what a store app is expected to show about itself.
   'settings.about.version': s('Version', 'Versão', 'Version'),
+  // D-084: a closed-beta build runs unlocked; the version row says which build
+  // this is, so a tester's screenshot answers the question.
+  'settings.about.betaVersion': s('{version} (beta)', '{version} (beta)', '{version} (Beta)'),
   // T-202: the app followed the phone's language and nothing else, so a
   // visitor whose phone is in a language this app does not speak got English
   // with no way out, and one who wanted English on a Portuguese phone could not

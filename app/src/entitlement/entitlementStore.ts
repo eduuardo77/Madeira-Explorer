@@ -21,9 +21,17 @@
 
 import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
+import { effectiveUnlocked } from './betaBuild';
+
+/**
+ * A closed-beta build (D-084): `EXPO_PUBLIC_PROA_BETA=1` at build time, inlined
+ * by Expo. Read here and nowhere else, so the one place that decides what
+ * "unlocked" means stays the one place.
+ */
+export const BETA_BUILD = process.env.EXPO_PUBLIC_PROA_BETA === '1';
 
 export async function isUnlocked(): Promise<boolean> {
-  return appStateDao.getFlag(AppStateKey.StampsUnlocked);
+  return effectiveUnlocked(await appStateDao.getFlag(AppStateKey.StampsUnlocked), BETA_BUILD);
 }
 
 /**

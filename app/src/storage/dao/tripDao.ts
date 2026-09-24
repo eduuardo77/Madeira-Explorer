@@ -65,6 +65,23 @@ export async function getOrCreateActiveTrip(): Promise<Trip> {
 }
 
 /**
+ * The trip the screens show: the open one, or else the last one (T-204).
+ *
+ * ⚠ **The passport went blank the moment a trip ended.** The map's progress and
+ * the passport read only the *active* trip, so after an airport end, the
+ * three-day silence or a manual finish they showed 0 / 80 — at exactly the
+ * moment the reveal had just sent the user in to look. The souvenir modules
+ * already fell back to the most recent trip; this names that rule once.
+ *
+ * ⚠ **For showing only.** Anything that *writes* — the recorder, the award
+ * pass, a confirmed stamp — must keep using `getActiveTrip`, or it would write
+ * into a trip that is over.
+ */
+export async function getTripOnShow(): Promise<Trip | null> {
+  return (await getActiveTrip()) ?? (await getMostRecentTrip());
+}
+
+/**
  * The latest trip, ended or not.
  *
  * The souvenir is exported *after* trip end (D-012), when there is no active

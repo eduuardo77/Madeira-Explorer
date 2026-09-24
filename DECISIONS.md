@@ -116,6 +116,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-085** | The home map shows **every place faintly** and calls out the **nearest 1–3** — amends D-070. | **Accepted** |
 | **D-086** | The icon and brand mark are **drawn in-house from the stamp artwork**, after the trademark search. | **Accepted** |
 | **D-087** | A **walk** is started from the main button and **changes the recorder**; background recording is **automatic recording**, in Settings. After WalkNYC. Pause, and a summary at the end. | **Accepted** |
+| **D-088** | A trip ends at the **airport**, after **three days of silence**, or by the user's **End trip** (passport), which also turns automatic recording off (⚠ that part Provisional). | **Accepted** |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

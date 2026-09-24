@@ -357,7 +357,8 @@ export default function NativeMapScreen({
           setPlaces(pack.places);
         }
 
-        const trip = await tripDao.getActiveTrip();
+        // T-204: an ended trip's collected places stay on the map.
+        const trip = await tripDao.getTripOnShow();
         if (trip !== null) {
           const awarded = await stampAwardDao.getAwardedPlaceIds(trip.id);
           if (!cancelled) {

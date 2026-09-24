@@ -233,6 +233,11 @@ export type PassportViewProps = {
    * and after it the invitation has done its job.
    */
   onWatch?: () => void;
+  /**
+   * End the open trip by hand (T-204, D-088). Absent when no trip is open, and
+   * in the workbench. The screen owns the confirmation.
+   */
+  onEndTrip?: () => void;
 };
 
 /**
@@ -428,6 +433,7 @@ export default function PassportView({
   onConfirm,
   onDecline,
   onWatch,
+  onEndTrip,
 }: PassportViewProps) {
   const hasContent = progress.total > 0;
 
@@ -528,6 +534,20 @@ export default function PassportView({
           })}
         </Text>
       ) : null}
+
+      {/* T-204: last on the page and quiet — tinted text, no fill — because it
+          is the least-used control here and the only one that cannot be
+          undone. The confirmation says what it does. */}
+      {onEndTrip === undefined ? null : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('passport.endTrip')}
+          onPress={onEndTrip}
+          style={({ pressed }) => [styles.endTrip, pressed && styles.seeAllPressed]}
+        >
+          <Text style={styles.endTripText}>{t('passport.endTrip')}</Text>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }
@@ -732,5 +752,15 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: fontSize.small,
     textAlign: 'center',
+  },
+  endTrip: {
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  endTripText: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '600',
   },
 });

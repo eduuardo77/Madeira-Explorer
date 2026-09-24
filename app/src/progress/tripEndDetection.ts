@@ -152,6 +152,32 @@ export async function checkTripEnd(
 }
 
 /**
+ * End the open trip because the user said so (T-204, D-088).
+ *
+ * The same closing steps as a detected end — judge first, then close, log and
+ * fold the WAL — but **no reveal notification**: the reveal's one job is to get
+ * somebody to open the app, and they are already in it, looking at the
+ * passport. Stopping the recorder is the caller's (`recording/finishTrip.ts`),
+ * and it must come first, or the next fix would open a new trip at once.
+ */
+export async function endTripByUser(now: number = Date.now()): Promise<boolean> {
+  try {
+    const trip = await tripDao.getActiveTrip();
+    if (trip === null) {
+      return false;
+    }
+    await runAwardPass(now);
+    await tripDao.endTrip(trip.id, 'manual');
+    await recordingEventDao.log('trip_end', 'manual: ended by the user');
+    await truncateWal('trip_end');
+    return true;
+  } catch (error) {
+    await recordingEventDao.logError('trip end (manual)', error);
+    return false;
+  }
+}
+
+/**
  * The reveal (T-102) — the second and last notification of the trip (D-011).
  *
  * The copy has one job: get somebody in a departure lounge to open the app.

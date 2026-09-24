@@ -460,6 +460,18 @@ export const STRINGS = {
   // remember — the same rule `brand.test.ts` enforces for the app's name.
   'common.done': s('Done', 'Concluído', 'Fertig'),
   'common.close': s('Close', 'Fechar', 'Schließen'),
+  'common.cancel': s('Cancel', 'Cancelar', 'Abbrechen'),
+  // T-204, D-088: closing the trip by hand. The body says the one consequence
+  // a user would not guess — automatic recording goes off — and how the next
+  // trip starts.
+  'passport.endTrip': s('End trip', 'Terminar viagem', 'Reise beenden'),
+  'passport.endTrip.title': s('End this trip?', 'Terminar esta viagem?', 'Diese Reise beenden?'),
+  'passport.endTrip.body': s(
+    'Your passport stays as it is. Automatic recording turns off, and your next trip starts the next time you record.',
+    'O seu passaporte fica como está. O registo automático desliga-se, e a próxima viagem começa quando voltar a registar.',
+    'Ihr Pass bleibt, wie er ist. Die automatische Aufzeichnung wird ausgeschaltet, und Ihre nächste Reise beginnt, wenn Sie wieder aufzeichnen.'
+  ),
+  'passport.endTrip.confirm': s('End trip', 'Terminar viagem', 'Reise beenden'),
   'passport.invitation': s(
     'These are the places. Go to one and it fills in by itself.',
     'Estes são os lugares. Vá a um e ele preenche-se sozinho.',

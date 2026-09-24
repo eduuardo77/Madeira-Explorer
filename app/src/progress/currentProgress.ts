@@ -40,7 +40,8 @@ const EMPTY: TripProgress = {
 
 export async function getCurrentProgress(): Promise<TripProgress> {
   const pack = getContentPack();
-  const trip = await tripDao.getActiveTrip();
+  // T-204: after a trip ends, keep showing it (tripDao.getTripOnShow).
+  const trip = await tripDao.getTripOnShow();
 
   // No trip yet: still report the shape of what is collectable, so the
   // primary screen can show `0 / 180` on day one rather than nothing at all.

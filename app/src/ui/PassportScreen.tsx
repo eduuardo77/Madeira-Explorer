@@ -39,6 +39,7 @@ import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
+import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
@@ -77,6 +78,10 @@ export default function PassportScreen({
    */
   const [shareCard, setShareCard] = useState<ShareCard | null>(null);
   const [sharing, setSharing] = useState(false);
+  /** T-204: whether a trip is open, which is when "End trip" is offered. */
+  const [tripOpen, setTripOpen] = useState(false);
+  /** Bumped to read everything again, after a trip is ended here. */
+  const [reloadKey, setReloadKey] = useState(0);
   const shareCardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -89,8 +94,10 @@ export default function PassportScreen({
         // its result carries the walks worth asking about (T-149, D-065).
         const pass = await runAwardPass();
 
-        const [nextProgress, trip] = await Promise.all([
+        // T-204: an ended trip stays on show (tripDao.getTripOnShow).
+        const [nextProgress, trip, active] = await Promise.all([
           getCurrentProgress(),
+          tripDao.getTripOnShow(),
           tripDao.getActiveTrip(),
         ]);
         const nextAwards =
@@ -114,6 +121,7 @@ export default function PassportScreen({
 
         if (!cancelled) {
           setProgress(nextProgress);
+          setTripOpen(active !== null);
           setAwards(nextAwards);
           setStamps(resolveStamps(awardedIds, locked));
           setConfirmation(prompt?.prompt ?? null);
@@ -127,7 +135,23 @@ export default function PassportScreen({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
+
+  /** T-204: confirm, then stop recording and close the trip (finishTrip.ts). */
+  const endTrip = () => {
+    Alert.alert(t('passport.endTrip.title'), t('passport.endTrip.body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('passport.endTrip.confirm'),
+        style: 'destructive',
+        onPress: () => {
+          void finishTrip()
+            .catch((error) => recordingEventDao.logError('end trip', error))
+            .finally(() => setReloadKey((key) => key + 1));
+        },
+      },
+    ]);
+  };
 
   /**
    * A stamp was tapped (T-115).
@@ -301,6 +325,7 @@ export default function PassportScreen({
           onConfirm={confirmWalk}
           onDecline={declineWalk}
           onWatch={onWatch}
+          onEndTrip={tripOpen ? endTrip : undefined}
         />
       )}
 

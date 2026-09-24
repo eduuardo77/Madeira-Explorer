@@ -86,7 +86,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [x] **T-184** ✅ **Decided 2026-09-23: A — D-085.** **Decide whether the home map shows places not yet collected** — P1-1. This
       revisits D-070 (Provisional). *Recommended: faint marks for all 80, with the nearest one to
       three called out.*
-- [ ] **T-185** ⚠ **Still open 2026-09-23: the project lead does not know yet.** Fix T-195 first; it may shrink the question. **Decide how a trip ends when nobody flies home** — P1-7: residents, long stays,
+- [x] **T-185** ✅ **Decided 2026-09-24: both, D-088** (the button plus the three-day silence). ~~Still open 2026-09-23.~~ Fix T-195 first; it may shrink the question. **Decide how a trip ends when nobody flies home** — P1-7: residents, long stays,
       and a phone that is off on the flight. *Recommended: fix T-195 first, then add a manual
       "finish this trip".*
 - [x] **T-186** ✅ **Decided 2026-09-23: B, in-house from the stamp art — D-086.** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
@@ -356,7 +356,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       — **P2-8 is the project lead's call, not a fix:** the grey *"Passport"* placeholder is
       D-083's own choice from three drawn options. The review reads it as a dark blob. That is a
       judgement by eye on the P30, so it is asked, not changed.
-- [ ] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195.
+- [~] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195. ✅ **Code 2026-09-24 (D-088):**
+      *Terminar viagem* at the bottom of the passport, behind a confirmation.
+      `recording/finishTrip.ts` switches automatic recording off **first** and then closes the
+      trip (`endTripByUser`: award pass, `manual`, no reveal). A test guards that order. **Found
+      and fixed with it:** after any end the passport and the map showed 0 / 80, because they
+      read only the open trip; now `tripDao.getTripOnShow`. ⚠ Not yet on the P30.
 
 ### Stage 4 — Proof on a real phone
 

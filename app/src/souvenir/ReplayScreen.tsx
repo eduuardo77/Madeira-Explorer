@@ -101,7 +101,8 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
       try {
         const [plan, trip, preference] = await Promise.all([
           getSouvenirComposition(),
-          tripDao.getActiveTrip(),
+          // T-204: the film of a trip that has ended is the one worth watching.
+          tripDao.getTripOnShow(),
           appStateDao.get(AppStateKey.MapStyle),
         ]);
 

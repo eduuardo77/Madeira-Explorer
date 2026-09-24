@@ -4684,7 +4684,9 @@ in Settings. The button can be the main control because pressing it has a conseq
    is recorded while paused, and the pause ends on its own.
 7. **Stopping a walk shows a short summary.** Here WalkNYC is not followed (it shows nothing).
 
-**Built 2026-09-23 (T-198), with three choices marked ⚠ Provisional for the project lead:**
+**Built 2026-09-23 (T-198). ✅ The three choices below were ACCEPTED 2026-09-24** by the project
+lead (*"I'll take your recommendation on what to show, keep a WalkNYC type mindset"*): the summary
+stays WalkNYC-lean, with time, distance and new stamps and nothing else. The three choices:
 - **The noun.** *Passeio*, as confirmed. English and German say **outing / Ausflug**, not *walk /
   Spaziergang*. Those two are on foot only, and `strings.ts` records why that failed before
   (2026-08-28): most of the places are driven to. *Passeio* covers both.
@@ -4700,3 +4702,32 @@ permission gets the same button, which is their only way to record, as D-008 int
 recording is on: then nobody could say "I'm walking now", and WalkNYC shows it to everyone. One
 single mode (review option A): simpler, but it throws away the only thing the main button can
 usefully do for someone whose recorder is already running.
+
+## D-088 — A trip ends three ways: the airport, three days of silence, or the user's own "End trip"
+
+**2026-09-24. Accepted** (T-185, the project lead: *"T185 I take your recommendation"*). Review P1-7:
+residents, long stays and a phone that is off on the flight never reach a departure geofence.
+
+**Decision.** Both answers, not one:
+- **Silence.** A trip with no evidence for three days ends (`INACTIVITY_END_MS`, `tripEnd.ts`). It
+  existed, but could not fire once recording resumed after a gap. T-195 fixed that
+  (`closeLapsedTrip`).
+- **A button.** *Terminar viagem*, at the bottom of the passport, behind a confirmation. It judges
+  stamps, closes the trip as `manual` and sends **no** reveal notification: the reveal exists to
+  get somebody to open the app, and they are already in it.
+
+⚠ **Provisional (my call inside the decision): "End trip" also turns automatic recording off.**
+The recorder opens a trip on the first in-bounds fix. So ending a trip in the departure lounge
+while recording ran on would open a new, empty trip seconds later, and the finished passport
+would be replaced by 0 / 80. The next trip starts the next time the user records: an outing,
+or automatic recording turned back on in Settings. The confirmation says so.
+
+**Found with it and fixed:** the passport and the map's progress read only the *open* trip, so
+after **any** end (the airport included) they showed 0 / 80. That is exactly when the reveal had
+just sent the user in to look. The screens now show the open trip or else the last one
+(`tripDao.getTripOnShow`). Writers still use the open trip only.
+
+**Rejected.** Only the button: a phone off on the flight never presses it. Only silence: a resident
+waits three days for a souvenir. Ending the trip and leaving the recorder running: it replaces the
+trip the user just finished.
+

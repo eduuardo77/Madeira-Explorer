@@ -25,9 +25,10 @@ it found the reveal notification in English), **T-191**, **T-192**, **T-193**, *
 permissions), and **T-198** (D-087: *Começar passeio* changes the recorder, plus pause and
 summary). Code only: **T-195** (a silent trip can end again), **T-199** (rings for places to
 collect: the rule holds, but an unlabelled ring does not yet sell anything; see the task).
-**T-177 is measured:** 20% of cold starts go wrong, 10% show no map within 45 s. Next: an A/B
-of the launch-time geofence burst. The decisions waiting on the project lead are in T-185, and in
-D-087's three Provisional choices.
+**T-177 was measured** (20% of cold starts went wrong on 2026-09-23) **and its cause found on
+2026-09-24** (see below). **T-185 is decided (D-088)**, and D-087's three choices are accepted.
+Waiting on the project lead: the T-201 veto, T-122's three calls, T-187, and the T-210
+notification.
 **2026-09-24:** T-200 and T-202 are done (T-202 still to be seen on the P30). **T-201's mechanism
 is in** (a `why` line on the card, and a dimmed passport behind it). Its content is
 `docs/why-go-draft.md`, **waiting on the project lead's veto**.

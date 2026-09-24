@@ -157,6 +157,30 @@ export const colors = {
 } as const;
 
 /**
+ * The passport as one dark album (T-203, option D, chosen 2026-09-24).
+ *
+ * The review (P2-6) read dark stamp panels on a light page as two design
+ * languages. The panels had to stay dark (`colors.stampPage`: all thirty
+ * colourways fail on a light ground), so the passport screen joins them: page
+ * and panels are the one album colour, separated by a hairline. The rest of the
+ * app stays light. Every pairing is measured in `contrast.test.ts`.
+ */
+export const album = {
+  background: colors.stampPage,
+  /** The "did you walk it?" card: one step up from the page. */
+  surface: '#2C2C2E',
+  /** Between the page and a stamp panel of the same colour. Decorative. */
+  hairline: '#48484A',
+  text: '#F2F2F7',
+  textMuted: '#AEAEB2',
+  /** Links and plain buttons. `colors.tint` is 2.5:1 here. */
+  tint: '#5AA9FF',
+  /** The filled button: the light blue, with dark ink on it. */
+  action: '#5AA9FF',
+  actionText: '#1C1C1E',
+} as const;
+
+/**
  * The floating controls that sit **on the map**, per map style (T-112).
  *
  * ⚠ WHY THE APP'S PALETTE CANNOT SERVE THIS, FOUND BY LOOKING 2026-08-17

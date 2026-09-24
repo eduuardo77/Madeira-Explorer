@@ -56,6 +56,7 @@ import { deleteAllUserData } from '../storage/database';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
+import { writeUpdateNotice } from '../notify/updateNoticeFile';
 import { BETA_BUILD } from '../entitlement/entitlementStore';
 import { useBackHandler } from './useBackHandler';
 import Constants from 'expo-constants';
@@ -133,6 +134,8 @@ export default function SettingsScreen({
       try {
         await setBackgroundTrackingAllowed(allowed);
         await applyBackgroundTrackingChange(allowed);
+        // T-210: no update message for someone who switched recording off.
+        await writeUpdateNotice();
       } catch (error) {
         await recordingEventDao.logError('background tracking switch', error);
       }
@@ -358,6 +361,8 @@ export default function SettingsScreen({
           // The recorder's ongoing notification is written when its options
           // are applied, so re-apply them for it to speak the new language.
           .then(retuneRecorder)
+          // T-210: the update message in the language just chosen.
+          .then(writeUpdateNotice)
           .catch(() => undefined);
       }}
       pausedUntil={pausedUntil}

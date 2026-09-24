@@ -20,6 +20,7 @@ import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
+import { writeUpdateNotice } from './src/notify/updateNoticeFile';
 import { backTarget, type AppScreen } from './src/navigation/backNavigation';
 import { useBackHandler } from './src/ui/useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
@@ -85,6 +86,8 @@ export default function App() {
         // this effect (onboarding is null until it finishes) and so never
         // renders in the wrong language first.
         await loadLanguageChoice();
+        // T-210: the note the native update receiver reads. Never throws.
+        void writeUpdateNotice();
         const done = await appStateDao.getFlag(
           appStateDao.AppStateKey.OnboardingCompleted
         );

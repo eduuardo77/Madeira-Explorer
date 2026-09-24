@@ -27,7 +27,8 @@ import type { NotificationKind } from './notificationPolicy';
 import { canNotify, parseSent, serialiseSent } from './notificationPolicy';
 
 /** D-087 §5: the channel both trip messages are posted on (Android). Stable: renaming it orphans the user's own setting for it. */
-export const TRIP_CHANNEL_ID = 'trip-messages';
+import { TRIP_CHANNEL_ID } from './tripChannel';
+export { TRIP_CHANNEL_ID };
 
 export type SendResult = {
   sent: boolean;

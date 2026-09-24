@@ -41,7 +41,8 @@ import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
 import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
-import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+import { StatusBar } from 'expo-status-bar';
 
 export default function PassportScreen({
   onClose,
@@ -311,9 +312,12 @@ export default function PassportScreen({
 
   return (
     <View style={styles.root}>
+      {/* T-203: the passport is the dark album, so the status bar goes light
+          while it is on screen; the rest of the app keeps the dark one. */}
+      <StatusBar style="light" />
       {progress === null ? (
         <View style={styles.loading}>
-          <ActivityIndicator size="large" color={colors.action} />
+          <ActivityIndicator size="large" color={album.tint} />
         </View>
       ) : (
         <PassportView
@@ -505,7 +509,7 @@ function earnedStamps(awards: StampAward[]): EarnedStamp[] {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1, backgroundColor: album.background },
   scrim: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: colors.scrim },
   cardHolder: {
     position: 'absolute',
@@ -531,7 +535,7 @@ const styles = StyleSheet.create({
   // hint says why it is off.
   shareDisabled: { opacity: 0.4 },
   shareText: {
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
   },
@@ -545,7 +549,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     // Tinted text with a chevron: the iOS back button, which carries no fill.
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
   },

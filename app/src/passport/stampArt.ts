@@ -598,6 +598,75 @@ export const UNCOLLECTED: Colourway = {
   bandInk: '#C7C7CC',
 };
 
+/**
+ * How much of the place's hue an unvisited stamp keeps (T-203, option D).
+ *
+ * The review (P2-5) found every unvisited stamp the same grey, a row of them
+ * hard to tell apart. The project lead chose, from four drawn and measured
+ * options (`tools/preview-passport-options.mjs`), stamps that keep a hint of
+ * their own colour.
+ */
+export const UNCOLLECTED_HUE = 0.35;
+
+/**
+ * The parts of `UNCOLLECTED` that stay grey, because they carry legibility.
+ * The **border** is the sticker's edge on the page (tinting it measured
+ * 2.30:1); the **band** and its **ink** carry the name; the emblem's **ink**
+ * stays too, because the collected colourways put dark ink on pale paper, the
+ * reverse of these greys, and tinting it measured 1.27:1.
+ */
+const STAYS_GREY: ReadonlySet<keyof Colourway> = new Set(['border', 'band', 'bandInk', 'ink']);
+
+/**
+ * The unvisited palette for one place: the greys of `UNCOLLECTED`, each at its
+ * own lightness, with the place's hue at `UNCOLLECTED_HUE` saturation. Keeping
+ * each grey's lightness is what keeps every contrast where the grey palette has
+ * it; mixing towards the collected colours instead dropped the emblem to
+ * 2.72:1 on the pale ones. `contrast.test.ts` measures every colourway.
+ */
+export function uncollectedFor(colourway: Colourway): Colourway {
+  const out = { ...UNCOLLECTED };
+  for (const key of Object.keys(UNCOLLECTED) as (keyof Colourway)[]) {
+    if (!STAYS_GREY.has(key)) {
+      out[key] = withHue(UNCOLLECTED[key], colourway.accent, UNCOLLECTED_HUE);
+    }
+  }
+  return out;
+}
+
+/** `grey`'s lightness, `source`'s hue, at saturation `saturation`. */
+function withHue(grey: string, source: string, saturation: number): string {
+  const channels = (hex: string) =>
+    [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const [r, g, b] = channels(source);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  let hue = 0;
+  if (delta !== 0) {
+    hue =
+      max === r ? ((g - b) / delta) % 6 : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+    hue *= 60;
+    if (hue < 0) hue += 360;
+  }
+  const [gr, gg, gb] = channels(grey);
+  const lightness = (gr + gg + gb) / 3;
+  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const x = chroma * (1 - Math.abs(((hue / 60) % 2) - 1));
+  const m = lightness - chroma / 2;
+  const [r1, g1, b1] =
+    hue < 60 ? [chroma, x, 0]
+    : hue < 120 ? [x, chroma, 0]
+    : hue < 180 ? [0, chroma, x]
+    : hue < 240 ? [0, x, chroma]
+    : hue < 300 ? [x, 0, chroma]
+    : [chroma, 0, x];
+  return `#${[r1 + m, g1 + m, b1 + m]
+    .map((v) => Math.round(v * 255).toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase()}`;
+}
+
 /** The most characters on one line of the band before it stops being readable. */
 export const MAX_LINE_CHARS = 12;
 
@@ -879,7 +948,7 @@ export function stampElements(
   name: string,
   collected: boolean
 ): StampElement[] {
-  const colours = collected ? design.colourway : UNCOLLECTED;
+  const colours = collected ? design.colourway : uncollectedFor(design.colourway);
   // The sticker drops the word its section heading already carries; the full
   // name is what every other surface shows.
   const lines = wrapLabel(bandLabel(name, design.category));

@@ -837,6 +837,19 @@ export const STRINGS = {
   // D-087 §5: the Android channel both trip messages use. Shown by name in the
   // phone's own notification settings.
   'notify.channel.trip': s('Trip messages', 'Mensagens da viagem', 'Reisenachrichten'),
+  // T-210: after an app update Android does not let the recorder restart from
+  // the background (measured on the P30), so one message asks for one tap.
+  // Posted by native code (UpdateNoticeReceiver), from text the app leaves it.
+  'notify.updated.title': s(
+    'Open {app} to keep recording',
+    'Abra o {app} para continuar a registar',
+    'Öffnen Sie {app}, um weiter aufzuzeichnen'
+  ),
+  'notify.updated.body': s(
+    '{app} was updated. Open it once and your trip keeps recording.',
+    'O {app} foi atualizado. Abra-o uma vez e a sua viagem continua a ser registada.',
+    '{app} wurde aktualisiert. Öffnen Sie die App einmal, dann wird Ihre Reise weiter aufgezeichnet.'
+  ),
   'notify.channel.tripDescription': s(
     'The two messages each trip: one to confirm recording works, one when your map is ready.',
     'As duas mensagens de cada viagem: uma a confirmar que o registo funciona e outra quando o mapa estiver pronto.',

@@ -18,6 +18,7 @@
  */
 
 import { endTripByUser } from '../progress/tripEndDetection';
+import { writeUpdateNotice } from '../notify/updateNoticeFile';
 import { applyBackgroundTrackingChange } from './tripRecording';
 import { setBackgroundTrackingAllowed, setWalkInProgress } from './trackingSettings';
 
@@ -25,5 +26,8 @@ export async function finishTrip(nowMs: number = Date.now()): Promise<boolean> {
   await setWalkInProgress(false, nowMs);
   await setBackgroundTrackingAllowed(false);
   await applyBackgroundTrackingChange(false);
-  return endTripByUser(nowMs);
+  const ended = await endTripByUser(nowMs);
+  // T-210: recording is off now, so no update message either.
+  await writeUpdateNotice();
+  return ended;
 }

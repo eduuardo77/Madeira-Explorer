@@ -106,6 +106,7 @@
       "./plugins/withContentBundleInputs",
       "./plugins/withGoogleMapsApiKey",
       "./plugins/withMapsComposeFix",
+      "./plugins/withUpdateNotice",
       "./plugins/withLatestMapsRenderer",
       "expo-dev-client",
       "expo-asset",

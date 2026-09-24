@@ -59,7 +59,7 @@ import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
 import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
-import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
  * How big a sticker is drawn, in dp.
@@ -554,7 +554,7 @@ export default function PassportView({
 
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: album.background },
   content: {
     padding: spacing.md,
     // Room for the navigation bar the screen draws above this (`‹ Map`).
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   heading: {
-    color: colors.text,
+    color: album.text,
     // The iOS large title. One screen, one name, said once and said big.
     fontSize: fontSize.largeTitle,
     fontWeight: '700',
@@ -576,17 +576,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   heroNumber: {
-    color: colors.text,
+    color: album.text,
     fontSize: fontSize.hero,
     fontWeight: '800',
   },
   heroTotal: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.title,
     fontWeight: '600',
   },
   heroLabel: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.body,
     marginTop: spacing.xs,
   },
@@ -594,13 +594,13 @@ const styles = StyleSheet.create({
   // a section action — not a filled button, which would make the passport's
   // quietest area its loudest.
   heroAction: {
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
     marginTop: spacing.sm,
   },
   heroInvitation: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
     marginTop: spacing.md,
     textAlign: 'center',
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   rowTitle: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -629,13 +629,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   rowCount: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
   },
   seeAll: {
     // Tinted, because it is the only thing in the header you can press.
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.small,
     fontWeight: '600',
   },
@@ -644,20 +644,20 @@ const styles = StyleSheet.create({
   // floating over it — and bordered rather than filled, so it reads as a
   // question rather than as an award already won.
   confirmation: {
-    backgroundColor: colors.surface,
+    backgroundColor: album.surface,
     borderRadius: radius.card,
     borderWidth: 2,
-    borderColor: colors.tint,
+    borderColor: album.tint,
     padding: spacing.md,
     gap: spacing.xs,
   },
   confirmQuestion: {
-    color: colors.text,
+    color: album.text,
     fontSize: fontSize.body,
     fontWeight: '700',
   },
   confirmDetail: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
   },
   // Stacked, never side by side: two 60 dp targets sharing a phone's width is
@@ -671,10 +671,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.control,
-    backgroundColor: colors.action,
+    backgroundColor: album.action,
   },
   confirmYesText: {
-    color: colors.actionText,
+    color: album.actionText,
     fontSize: fontSize.body,
     fontWeight: '700',
   },
@@ -685,12 +685,12 @@ const styles = StyleSheet.create({
   },
   confirmPressed: { opacity: 0.75 },
   confirmNoText: {
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
   },
   rowEmpty: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
   },
   /** Expanded: the wrapped grid, unchanged since T-074. */
@@ -703,14 +703,18 @@ const styles = StyleSheet.create({
     // and every one of them measures below 3:1 on a white card; see the token's
     // own note in `theme.ts`. This is the surface `contrast.test.ts` holds them
     // against, so the two must not drift apart.
-    backgroundColor: colors.stampPage,
+    backgroundColor: album.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: album.hairline,
     borderRadius: radius.card,
     padding: spacing.md,
   },
   /** Collapsed: the same card, holding one scrolling row. */
   stampsStrip: {
     // The same dark album page as the grid above, for the same measured reason.
-    backgroundColor: colors.stampPage,
+    backgroundColor: album.background,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: album.hairline,
     borderRadius: radius.card,
     // Vertical only. The horizontal padding belongs to the content, so that a
     // sticker can scroll all the way to the rounded edge and be clipped by it.
@@ -749,7 +753,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   footnote: {
-    color: colors.textMuted,
+    color: album.textMuted,
     fontSize: fontSize.small,
     textAlign: 'center',
   },
@@ -759,7 +763,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   endTripText: {
-    color: colors.tint,
+    color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
   },

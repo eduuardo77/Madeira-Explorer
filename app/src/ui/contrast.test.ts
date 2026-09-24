@@ -36,10 +36,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { CATEGORIES } from '../content/contentPack.ts';
-import { designFor, UNCOLLECTED } from '../passport/stampArt.ts';
+import { designFor, UNCOLLECTED, uncollectedFor } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
 import { NIGHT_LAND } from '../map/googleNightStyle.ts';
-import { colors, mapChrome } from './theme.ts';
+import { album, colors, mapChrome } from './theme.ts';
 
 /** Body text. Above WCAG's 4.5, because this is read outdoors. */
 const BODY = 5;
@@ -286,14 +286,18 @@ test('an uncollected stamp is dimmer than a collected one, and still legible', (
   //
   // ⚠ These used to be copied literals, which is why the palette could drift
   // out from under them unnoticed. It is imported now.
-  const collected = designFor('somewhere', 'levada');
-
-  const dim = contrastRatio(UNCOLLECTED.ink, UNCOLLECTED.paper);
-  assert.ok(dim >= BODY, `uncollected emblem is ${dim.toFixed(2)}:1`);
-  assert.ok(
-    dim < contrastRatio(collected.colourway.ink, collected.colourway.paper),
-    'uncollected is not actually dimmer than collected'
-  );
+  // ⚠ T-203 (option D): each place's unvisited palette now keeps its hue
+  // (`uncollectedFor`), so this is measured for every colourway, not for the
+  // single grey `UNCOLLECTED` it used to be.
+  for (const { category, colourway } of allColourways()) {
+    const palette = uncollectedFor(colourway);
+    const dim = contrastRatio(palette.ink, palette.paper);
+    assert.ok(dim >= BODY, `${category}: uncollected emblem is ${dim.toFixed(2)}:1`);
+    assert.ok(
+      dim < contrastRatio(colourway.ink, colourway.paper),
+      `${category}: uncollected is not actually dimmer than collected`
+    );
+  }
 });
 
 test('an uncollected sticker is visible as a SHAPE on the page', () => {
@@ -307,15 +311,41 @@ test('an uncollected sticker is visible as a SHAPE on the page', () => {
   // The *border* is what has to clear the bar, not the paper: a die-cut
   // sticker reads by its edge, and keeping the paper muted is the whole point
   // of the uncollected state.
-  const edge = contrastRatio(UNCOLLECTED.border, colors.stampPage);
-  assert.ok(
-    edge >= BOUNDARY,
-    `the uncollected sticker's edge is ${edge.toFixed(2)}:1 on the page`
-  );
-  assert.ok(
-    contrastRatio(UNCOLLECTED.bandInk, UNCOLLECTED.band) >= BAND,
-    'the uncollected name band is not readable'
-  );
+  for (const { category, colourway } of allColourways()) {
+    const palette = uncollectedFor(colourway);
+    const edge = contrastRatio(palette.border, album.background);
+    assert.ok(
+      edge >= BOUNDARY,
+      `${category}: the uncollected sticker's edge is ${edge.toFixed(2)}:1 on the album`
+    );
+    assert.ok(
+      contrastRatio(palette.bandInk, palette.band) >= BAND,
+      `${category}: the uncollected name band is not readable`
+    );
+  }
+  // The grey it is built from still clears the same bars on its own.
+  assert.ok(contrastRatio(UNCOLLECTED.border, colors.stampPage) >= BOUNDARY);
+});
+
+test('⚠ T-203: an unvisited stamp keeps its hue, so a row of them is not one colour', () => {
+  // The review's P2-5. If `uncollectedFor` ever collapsed back to the one grey,
+  // everything above would still pass; this is the test that notices.
+  const papers = new Set(allColourways().map(({ colourway }) => uncollectedFor(colourway).paper));
+  assert.ok(papers.size > 10, `only ${papers.size} distinct unvisited papers`);
+});
+
+test('T-203: everything on the dark passport album is readable', () => {
+  // Option D makes the passport screen one dark album. Its text, links and
+  // button are measured here against both grounds they sit on.
+  for (const ground of [album.background, album.surface]) {
+    for (const [name, ink] of [['text', album.text], ['muted', album.textMuted], ['link', album.tint]] as const) {
+      const ratio = contrastRatio(ink, ground);
+      assert.ok(ratio >= BODY, `${name} on ${ground} is ${ratio.toFixed(2)}:1`);
+    }
+  }
+  assert.ok(contrastRatio(album.actionText, album.action) >= BODY, 'the button label');
+  // The button is a tap target: its fill must stand out from the card it is on.
+  assert.ok(contrastRatio(album.action, album.surface) >= BOUNDARY, 'the button against its card');
 });
 
 /**

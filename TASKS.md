@@ -361,6 +361,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       — **P2-8 is the project lead's call, not a fix:** the grey *"Passport"* placeholder is
       D-083's own choice from three drawn options. The review reads it as a dark blob. That is a
       judgement by eye on the P30, so it is asked, not changed.
+      — **P2-5 / P2-6: four options drawn and measured, for the project lead to pick (2026-09-24).**
+        `node tools/preview-passport-options.mjs` → `tools/out/passport-options.html`, using real
+        places and the shipped drawing. **A** today · **B** unvisited stamps keep their place's hue
+        (at the grey's own lightness) · **C** the whole passport is the dark album · **D** B+C. All four
+        measure an unvisited edge 3.36:1, a name 8.28:1, and an emblem ≥ 5.57:1. Two first tries failed
+        and were fixed before showing: a tinted border (2.30:1) and tinted ink (1.27:1).
 - [~] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195. ✅ **Code 2026-09-24 (D-088):**
       *Terminar viagem* at the bottom of the passport, behind a confirmation.
       `recording/finishTrip.ts` switches automatic recording off **first** and then closes the

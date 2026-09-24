@@ -55,7 +55,15 @@ function attrs(element) {
  * `rimFor`; the viewBox grows by the same pad `StampArt.tsx` uses.
  */
 export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined, rim = null) {
-  const design = designFor(id, category, motif);
+  return stampSvgWithDesign(id, designFor(id, category, motif), name, collected, extraStyle, rim);
+}
+
+/**
+ * The same drawing from a design the caller supplies — for a preview that
+ * compares a *proposed* colourway (T-203) while every shape, emblem and band
+ * still comes from `stampElements`, i.e. from what ships.
+ */
+export function stampSvgWithDesign(id, design, name, collected, extraStyle = '', rim = null) {
   const elements = [
     ...(rim === null ? [] : rimElements(design, rim)),
     ...stampElements(design, name, collected),

@@ -1802,6 +1802,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       cold starts, "60 clean in a row" cannot tell a fix from luck. **The proof targets warm
       starts** (`warmloop.sh`: Back, wait 2–12 s, relaunch, with the recorder keeping the process
       alive).
+      — **Warm starts on the old build: 0 blank in 30** (all 30 in the same process, map in
+      0–1 s). ⚠ So Back-then-relaunch does **not** reproduce it. The stuck launches were into a
+      process that existed with **no Activity ever having run in it**, which Back does not make.
+      The trigger is not reproduced on demand; the gate removes a code path that produces the exact
+      signature, and that is all it can claim. ⚠ **A probe mistake, recorded:** the first old-build
+      run was corrupted by a second loop still driving the phone. `TaskStop` does not kill the
+      child bash script here, so the loops now take a pid lock.
 - [x] ✅ **T-178** **The WAL was 27 MB — over the auto-backup cap — fixed 2026-09-22, and verified
       on the P30** (field build, first launch: WAL 27,027,232 → 78,312 bytes, `integrity_check` ok,
       no row lost). ⇠ T-142, T-174 — `docs/field-notes.md` (evening entry) has the measurements.

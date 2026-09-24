@@ -26,3 +26,14 @@ test('T-210: the native receiver that posts it is part of the build', async () =
   }).expo.plugins;
   assert.ok(plugins.includes('./plugins/withUpdateNotice'));
 });
+
+test('T-210: the app clears the same notification id the receiver posts', async () => {
+  const { readFileSync } = await import('node:fs');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const { UPDATE_NOTICE_ID } = await import('./updateNotice.ts');
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const plugin = readFileSync(path.join(appRoot, 'plugins', 'withUpdateNotice.js'), 'utf8');
+  assert.match(plugin, new RegExp(`NOTIFICATION_ID = ${UPDATE_NOTICE_ID}$`, 'm'));
+});
+

@@ -23,6 +23,16 @@ import { STRINGS } from '../i18n/strings.ts';
 import { translate } from '../i18n/translate.ts';
 import { TRIP_CHANNEL_ID } from './tripChannel.ts';
 
+/**
+ * The notification's Android id. The native receiver posts with this number
+ * (plugins/withUpdateNotice.js; `updateNotice.test.ts` checks they agree), and
+ * the app clears it by it once the user is back in the app.
+ */
+export const UPDATE_NOTICE_ID = 7210;
+
+/** How expo-notifications names a notification it did not post itself. */
+export const UPDATE_NOTICE_IDENTIFIER = `expo-notifications://foreign_notifications?id=${UPDATE_NOTICE_ID}`;
+
 /** In the app's files directory, where the receiver reads it. */
 export const UPDATE_NOTICE_FILE = 'update-notice.json';
 

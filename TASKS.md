@@ -380,13 +380,21 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         link `#5AA9FF`, and a light-blue button with dark ink), with a light status bar.
         `contrast.test.ts` measures every colourway's unvisited palette and every album pairing,
         and fails if unvisited stamps collapse back to one colour. ⚠ The map's passport-button
-        placeholder (D-083) takes the levada hue now, too.
+        placeholder (D-083) takes the levada hue now, too. ✅ **Seen on the P30 (one screenshot):**
+        one dark album with hairline panels and a light status bar. Unvisited viewpoints are warm
+        browns and levadas teal and olive, still muted, with grey bands.
 - [~] **T-204** **Trips that end without a flight home** ⇠ T-185, T-195. ✅ **Code 2026-09-24 (D-088):**
       *Terminar viagem* at the bottom of the passport, behind a confirmation.
       `recording/finishTrip.ts` switches automatic recording off **first** and then closes the
       trip (`endTripByUser`: award pass, `manual`, no reveal). A test guards that order. **Found
       and fixed with it:** after any end the passport and the map showed 0 / 80, because they
-      read only the open trip; now `tripDao.getTripOnShow`. ⚠ Not yet on the P30.
+      read only the open trip; now `tripDao.getTripOnShow`. ✅ **Seen on the P30 2026-09-24** (beta
+      build). The confirmation reads *"Terminar esta viagem? O seu passaporte fica como está. O registo
+      automático desliga-se, e a próxima viagem começa quando voltar a registar."* Confirming closed
+      the trip (the button went), stopped the location requests and removed the recording
+      notification, and Settings' switch read off. Switching it back on restarted the recorder.
+      ⚠ expo-location leaves its service *bound* (not foreground) after the stop; there is no
+      notification and no location request, so it is effectively off.
 
 ### Stage 4 — Proof on a real phone
 
@@ -476,7 +484,22 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
         the app writes (`notify/updateNoticeFile.ts`) at launch, on the recording switch, on a
         language change and on *End trip*: whether automatic recording is on, and the text in the
         user's language. Recording off means no message. It uses the trip channel
-        (`notify/tripChannel.ts`, now the channel's one home). ⚠ Not yet on the P30.
+        (`notify/tripChannel.ts`, now the channel's one home). ✅ **Seen on the P30 2026-09-24:**
+        installing over a running recorder, `Start proc … for broadcast {…UpdateNoticeReceiver}`,
+        then `update notice posted` within 0.2 s: *"Abra o Proa para continuar a registar / O Proa foi
+        atualizado. Abra-o uma vez e a sua viagem continua a ser registada."* The app clears it when it
+        comes to the front (`dismissUpdateNotice`; not yet on the phone).
+- [x] **T-212** ⚠ **Opening the app did not restart a deferred recorder** — found on the P30
+      2026-09-24, while testing T-210. App.tsx synced the recorder once, at mount, with the
+      `AppState` of that moment. T-173's comment said a deferred start is *"retried on the next
+      resume"*, but nothing did it. When an update (or EMUI) had started the process in the
+      background, `AppState` read background at mount, the start deferred, and the recorder's
+      foreground service stayed off through two relaunches, until the Settings switch was flipped.
+      ✅ **Fixed and seen:** App.tsx re-syncs on every transition to `active`
+      (`resumeSync.test.ts` guards the wiring). On the P30, off before opening, and at +10 s the
+      foreground service and *A registar a sua viagem* were back. Each resume re-applies the options,
+      which restarts location updates for a moment. That was accepted, because a recorder that
+      stays off is the unrecoverable loss.
 - **Gate R1 — MVP:** P0-1 to P0-5 closed (T-188, T-189, T-182 applied, T-177, T-205), and one
   real trip gave a stamp, a trip end and a souvenir.
 - **Gate R2 — closed beta (T-129):** R1 met; T-193, T-194, T-122, T-206 and T-207 done; the

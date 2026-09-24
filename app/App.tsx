@@ -20,7 +20,7 @@ import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
-import { writeUpdateNotice } from './src/notify/updateNoticeFile';
+import { dismissUpdateNotice, writeUpdateNotice } from './src/notify/updateNoticeFile';
 import { backTarget, type AppScreen } from './src/navigation/backNavigation';
 import { useBackHandler } from './src/ui/useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
@@ -86,8 +86,10 @@ export default function App() {
         // this effect (onboarding is null until it finishes) and so never
         // renders in the wrong language first.
         await loadLanguageChoice();
-        // T-210: the note the native update receiver reads. Never throws.
+        // T-210: the note the native update receiver reads, and its message
+        // cleared now that the app is open. Neither throws.
         void writeUpdateNotice();
+        void dismissUpdateNotice();
         const done = await appStateDao.getFlag(
           appStateDao.AppStateKey.OnboardingCompleted
         );
@@ -133,6 +135,24 @@ export default function App() {
     void syncRecordingWithPreferences(
       AppState.currentState === 'active' ? 'active' : 'background'
     );
+  }, []);
+
+  // ⚠ T-212: AND AGAIN EVERY TIME THE APP COMES TO THE FRONT. The comment above
+  // promised that a deferred start is "retried on the next resume"; nothing
+  // did it. Found on the P30 2026-09-24: an update had started the process in
+  // the background, so at mount `AppState` said background, the start was
+  // deferred, and the recorder's foreground service never came back, through
+  // two relaunches, until the Settings switch was flipped. Re-asserting on
+  // each resume re-applies the options, which restarts location updates for a
+  // moment; a recorder that stays off is the loss that cannot be recovered.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') {
+        void syncRecordingWithPreferences('active');
+        void dismissUpdateNotice();
+      }
+    });
+    return () => subscription.remove();
   }, []);
 
   if (onboarding === null) {

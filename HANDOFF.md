@@ -42,7 +42,7 @@ triggered when EMUI or Android pre-started the app's process. It is fixed by for
 run force-stop loops on the P30 again:** after hundreds, EMUI's iAware began force-stopping Proa on
 launch (`CrashClean`).
 
-⚠ **The P30 runs the plain RELEASE build from `675ae50` since 2026-09-24 17:23** (maps-compose 6.12.1, T-177) (`pkgFlags`
+⚠ **The P30 runs a BETA release build (unlocked, D-084) from 2026-09-24 20:29**, with option D, End trip, the update notice and T-212 (maps-compose 6.12.1) (`pkgFlags`
 has no `DEBUGGABLE`), so performance readings are valid again. To pull its database, swap in the
 field build first (below). Every install waits on a **Play Protect prompt only the project lead
 can answer**. Backups: `Madeira-fieldwork/p30-2026-09-23/` (before the field build) and

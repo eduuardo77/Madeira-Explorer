@@ -4810,6 +4810,11 @@ button. `contrast.test.ts` still requires the caption at body contrast and the f
 its track and panel; the quietest grey that passes was chosen. Its place, between the stamp row and
 the walk button, was already right.
 
+⚠ **Amended again 2026-09-25, round 2:** the line counts **the municipality started and closest to
+finished** when there is one (*Santana: 1 de 12 lugares*), and the island otherwise
+(`homeProgress`, `suggestNextRegion`). *Centrar* joins its style: flat, the same grey, blue words,
+32 dp seen and 60 dp to tap. Both are the project lead's picks from drawn options.
+
 **Rejected.**
 - **The count back on the stamp** (T-075's pill). D-083 took it off on the project lead's word.
 - **A percentage, as WalkNYC shows.** For 3 of 80, *3,8%* is false precision beside a count a

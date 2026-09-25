@@ -237,7 +237,7 @@ export type PassportViewProps = {
    * ⚠ **Offered with or without a stamp (T-217).** It used to wait for the
    * first stamp, on the belief that before it there was no film; there was, and
    * the second review (N2) found a day walked without reaching a place that
-   * nobody could watch. At zero it sits under the invitation, not instead of it.
+   * nobody could watch.
    */
   onWatch?: () => void;
   /**
@@ -414,8 +414,7 @@ function CategoryRow({
 
       {/* An empty category is its heading and nothing else — no card, no
           reserved space. Five near-identical "no X yet" lines was measured at
-          1.1 screens on day one, and read as five small failures rather than
-          one invitation; the invitation is given once, under the hero. */}
+          1.1 screens on day one, and read as five small failures. */}
       {isEmpty ? null : expanded ? (
         <View style={styles.stampsGrid}>{cells}</View>
       ) : (
@@ -480,9 +479,10 @@ export default function PassportView({
                 (review P2-3). Zero takes the plural in all three languages. */}
             {n('passport.collected', progress.collected)}
           </Text>
-          {progress.collected === 0 ? (
-            <Text style={styles.heroInvitation}>{t('passport.invitation')}</Text>
-          ) : null}
+          {/* ⚠ No invitation line any more (2026-09-25). "Estes são os
+              lugares. Vá a um deles..." sat here at zero stamps; the project
+              lead could not find it and, found, saw no purpose in it, and
+              asked for it gone. The rows below say what there is to collect. */}
           {onWatch === undefined ? null : (
             <Pressable
               accessibilityRole="button"
@@ -613,20 +613,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     marginTop: spacing.xs,
   },
-  // The same slot as `heroInvitation`, in the tinted-word register iOS uses for
-  // a section action — not a filled button, which would make the passport's
-  // quietest area its loudest.
+  // Under the hero, in the tinted-word register iOS uses for a section action,
+  // not a filled button, which would make the passport's quietest area its
+  // loudest.
   heroAction: {
     color: album.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
     marginTop: spacing.sm,
-  },
-  heroInvitation: {
-    color: album.textMuted,
-    fontSize: fontSize.small,
-    marginTop: spacing.md,
-    textAlign: 'center',
   },
   section: {
     gap: spacing.sm,

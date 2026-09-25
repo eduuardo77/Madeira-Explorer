@@ -487,13 +487,6 @@ export const STRINGS = {
     'Ihr Pass bleibt, wie er ist. Die automatische Aufzeichnung wird ausgeschaltet, und Ihre nächste Reise beginnt, wenn Sie wieder aufzeichnen.'
   ),
   'passport.endTrip.confirm': s('End trip', 'Terminar viagem', 'Reise beenden'),
-  // ⚠ T-224 (review N12): the Portuguese said "Vá a um e ele preenche-se
-  // sozinho", which reads as the place filling itself in. It is the stamp.
-  'passport.invitation': s(
-    'These are the places. Go to one and its stamp fills in by itself.',
-    'Estes são os lugares. Vá a um deles e o carimbo aparece sozinho.',
-    'Das sind die Orte. Gehen Sie zu einem, und sein Stempel erscheint von selbst.'
-  ),
   'passport.nothingCurated': s(
     'No places are curated yet, so there is nothing to collect.',
     'Ainda não há lugares selecionados, por isso não há nada para visitar.',
@@ -790,10 +783,12 @@ export const STRINGS = {
     'Registar com a aplicação fechada',
     'Aufzeichnen, wenn die App geschlossen ist'
   ),
+  // The sentence before the three tiers' own lines (2026-09-25, the project
+  // lead: "we need an explanation for each option, just like WalkNYC").
   'settings.recording.explain': s(
-    'Collects your stamps in the background, so you do not have to press Start an outing every time. Saver uses the least battery and draws a rougher line; Precise follows every step and uses the most.',
-    'Recolhe os seus carimbos em segundo plano, sem ter de carregar em Começar passeio. Poupança gasta menos bateria e desenha uma linha mais grosseira; Preciso segue cada passo e gasta mais.',
-    'Sammelt Ihre Stempel im Hintergrund, ohne dass Sie jedes Mal Ausflug starten drücken müssen. Sparen braucht am wenigsten Akku und zeichnet eine gröbere Linie; Genau folgt jedem Schritt und braucht am meisten.'
+    'Collects your stamps in the background, so you do not have to press Start an outing every time.',
+    'Recolhe os seus carimbos em segundo plano, sem ter de carregar em Começar passeio.',
+    'Sammelt Ihre Stempel im Hintergrund, ohne dass Sie jedes Mal Ausflug starten drücken müssen.'
   ),
   // Each tier's line says what it does, spoken as the segment's hint; none
   // quotes a battery figure, because none has been measured (D-041).
@@ -803,9 +798,9 @@ export const STRINGS = {
     'Wenigster Akku. Orte zählen trotzdem; die Linie auf der Karte ist gröber.'
   ),
   'settings.quality.detail.balanced': s(
-    'The usual choice.',
-    'A escolha habitual.',
-    'Die übliche Wahl.'
+    'The usual choice. Enough detail to recognise your route, without following every step.',
+    'A escolha habitual. Detalhe suficiente para reconhecer o caminho, sem seguir cada passo.',
+    'Die übliche Wahl. Genug Detail, um Ihren Weg zu erkennen, ohne jedem Schritt zu folgen.'
   ),
   'settings.quality.detail.best': s(
     'The most faithful line, and by far the most battery.',

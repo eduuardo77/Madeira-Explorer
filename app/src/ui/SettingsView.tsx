@@ -131,7 +131,8 @@ function Group({
   children,
 }: {
   title?: string;
-  footnote?: string | null;
+  /** A sentence, or for automatic recording the explanation of each tier. */
+  footnote?: ReactNode;
   destructive?: boolean;
   children: ReactNode;
 }) {
@@ -149,7 +150,11 @@ function Group({
           </View>
         ))}
       </View>
-      {footnote == null ? null : <Text style={styles.footnote}>{footnote}</Text>}
+      {footnote == null ? null : typeof footnote === 'string' ? (
+        <Text style={styles.footnote}>{footnote}</Text>
+      ) : (
+        footnote
+      )}
     </View>
   );
 }
@@ -271,6 +276,29 @@ const QUALITY_TEXT: Record<TrackingQuality, { short: StringKey; detail: StringKe
   balanced: { short: 'settings.quality.short.balanced', detail: 'settings.quality.detail.balanced' },
   precise: { short: 'settings.quality.short.best', detail: 'settings.quality.detail.best' },
 };
+
+/**
+ * What automatic recording is for, then one line per tier, its name in bold
+ * (2026-09-25). The project lead: *"we need an explanation for each option,
+ * just like WalkNYC, if not you don't know the difference"*. WalkNYC's footnote
+ * names its tiers in its paragraph; this gives each its own line, so the three
+ * can be compared at a glance. The tier lines only show while the tiers do.
+ */
+function RecordingExplanation({ withTiers }: { withTiers: boolean }) {
+  return (
+    <View style={styles.explanation}>
+      <Text style={styles.footnote}>{t('settings.recording.explain')}</Text>
+      {withTiers
+        ? TRACKING_QUALITIES.map((quality) => (
+            <Text key={quality} style={styles.footnote}>
+              <Text style={styles.footnoteStrong}>{t(QUALITY_TEXT[quality].short)}</Text>
+              {`: ${t(QUALITY_TEXT[quality].detail)}`}
+            </Text>
+          ))
+        : null}
+    </View>
+  );
+}
 
 function Segmented({
   value,
@@ -447,9 +475,11 @@ export default function SettingsView({
         <Group
           title={t('settings.section.background')}
           footnote={
-            permission === 'always'
-              ? t('settings.recording.explain')
-              : t('settings.recording.footnoteLimited')
+            permission === 'always' ? (
+              <RecordingExplanation withTiers={recordingInBackground} />
+            ) : (
+              t('settings.recording.footnoteLimited')
+            )
           }
         >
           {permission === 'always' ? null : (
@@ -619,6 +649,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   dangerText: { color: colors.bad },
+  explanation: { gap: spacing.xs },
+  footnoteStrong: { color: colors.text, fontWeight: '700' },
   footnote: {
     color: colors.textMuted,
     fontSize: fontSize.small,

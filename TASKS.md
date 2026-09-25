@@ -166,6 +166,11 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [x] **T-230** **Each recording tier explained; the passport's invitation removed** (2026-09-25,
+      the project lead). Under *Registo automático*: what it is for, then one line per tier with
+      its name in bold, as WalkNYC names its tiers (*"if not you don't know the difference"*);
+      *Equilibrado*'s line now says what it does. The invitation (*"Estes são os lugares..."*) is
+      gone: the project lead could not find it and, found, saw no purpose in it.
 - [ ] **T-229** **Still indoors, GPS drift is drawn as short spikes** (found 2026-09-25 from the
       P30's own data, `docs/field-notes.md`). Trip #30 drew 3 lines whose points reached 109 m from a
       phone that never moved: the project lead's *"random blue lines, not on the street"*. They drift

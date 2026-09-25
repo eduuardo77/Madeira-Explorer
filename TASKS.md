@@ -120,7 +120,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       camera padding grown by the strip's exported height. Measured in the workbench: 44 dp, 8 dp
       from the stamp row and from the walk button, and a fill of 5 px of 324 at 3/180.
       ⚠ **Not yet judged by eye on the phone.** Subtle enough? Readable on the light map outdoors?
-- [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
+- [ ] **T-187** **The project lead's own actions:** ✅ **domain bought 2026-09-25: `bruma.lol`**, for a
+      WalkNYC-style page (walknyc.app) and to host the privacy policy (T-206); a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on ~~"Proa" (D-074)~~ **"Bruma" (D-092,
       2026-09-25)**, ⚠ **done 2026-09-25 and it failed**: a live app *Bruma: Fog of War City Map*
       and EUTM 006378988 BRUMA (details in D-092); Proa screened cleanest of the fallbacks. ✅ **Bruma kept anyway** (the app looks abandoned). **Left:** an
@@ -130,14 +131,17 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ⚠ **The trademark search must finish before the first upload to Play Console** (2026-09-25):
       that upload makes the package name permanent. The listing's display name
       can change later; the package cannot. Monetisation plan, Phase 0 step 0.0.
-- [ ] **T-240** **Rename Proa to Bruma in code and copy (D-092)** ⇠ T-187 (the trademark search
-      first). Added 2026-09-25; nothing done yet, by the project lead's instruction.
-      **Decide first:** the package id (a neutral one is recommended, D-092). Then: `APP_NAME` in
-      `src/brand.ts` and its comment; `app.json` name, slug, scheme, `package`, `bundleIdentifier`;
-      re-restrict the Maps API key to the new package (**forgetting shows as a grey grid**, D-074);
-      `npx expo prebuild --clean`; the `com.proa.madeira` strings in `tools/install-apk.sh` and
-      `tools/lib/uiTree*`; the store copy in `docs/marketing-plan.md` §3 and §4 (still Proa, still
-      "map"); `CLAUDE.md`'s title. `brand.test.ts` will catch any hardcoded old name.
+- [~] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
+      `APP_NAME` is Bruma; `app.json`'s name and the six permission strings; the generated
+      `android/.../strings.xml` `app_name` edited to match (the next prebuild writes the same);
+      `docs/privacy-policy.md` regenerated; `brand.test.ts` now sweeps for *Proa* as well as
+      *Madeira Explorer*, in `src/` and `app.json`. 796 tests pass, typecheck clean.
+      **The package stays `com.proa.madeira`** (project lead): no Maps key change, no prebuild
+      `--clean`, the P30's beta data kept. So do the slug, the scheme and every internal "proa"
+      (`EXPO_PUBLIC_PROA_BETA`, `PROA_UPLOAD_*`, `proaFieldBuild`, the logcat tag): no user reads them.
+      ⚠ **Not yet seen on the phone:** the name under the icon needs a new build.
+      **Left:** the store copy in `docs/marketing-plan.md` §4: the short description is now D-092's
+      draft, but the full description still leads with "map" and says sixty places (there are 80).
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 
@@ -613,7 +617,8 @@ options as language rows; it did not search plural labels). Fixed in the script.
 
 - **T-122 is reopened** (below): its answer, "no data collected", is contradicted by T-117c.
 - [ ] **T-206** **Host the privacy policy and set `CONTACT_EMAIL`** ⇠ T-187. Unblocks T-123 and
-      the Play listing.
+      the Play listing. **The domain exists: `bruma.lol`** (2026-09-25). Still needed: hosting, and an
+      address on it for `CONTACT_EMAIL`; test that mail from it reaches Gmail before relying on it.
 - [ ] **T-207** **Internal testing track and pre-launch report** ⇠ T-117e, T-206, T-189 — D-077.
       Add Google's re-signing SHA-1 to the Maps key *before* reading anything, or every screenshot
       is a grey map. Read crashes, accessibility and screenshots per language.

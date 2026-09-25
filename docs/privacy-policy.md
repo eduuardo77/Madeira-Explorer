@@ -1,4 +1,4 @@
-# Proa Privacy Policy
+# Bruma Privacy Policy
 
 **Last changed:** 2026-09-24
 
@@ -13,7 +13,7 @@
 
 ## The short version
 
-Proa records where you go while you are on holiday, and shows it back to you as a map. It keeps that record on your phone, not on a server.
+Bruma records where you go while you are on holiday, and shows it back to you as a map. It keeps that record on your phone, not on a server.
 
 There is no account, no sign-up and no server behind this app. We have no way to see where you have been, because the app never sends your trip to us. We do not know who you are and we cannot find out.
 

@@ -59,7 +59,14 @@ test('the app name is not hardcoded anywhere outside brand.ts', () => {
   );
 });
 
-test('⚠ the old name is gone from every user-facing string', () => {
+/**
+ * Every name the app has had. Capitalised on purpose: the package
+ * `com.proa.madeira`, the slug and `EXPO_PUBLIC_PROA_BETA` keep "proa" by design
+ * (D-092), and none of them is something a user reads.
+ */
+const OLD_NAMES = [/Madeira Explorer/, /\bProa\b/];
+
+test('⚠ the old names are gone from every user-facing string', () => {
   // Renames leave debris in the places nobody reads. This is the sweep.
   const offenders: string[] = [];
   for (const file of sourceFiles(srcRoot)) {
@@ -71,7 +78,7 @@ test('⚠ the old name is gone from every user-facing string', () => {
       if (trimmed.startsWith('*') || trimmed.startsWith('//') || trimmed.startsWith('/*')) {
         continue;
       }
-      if (line.includes('Madeira Explorer')) {
+      if (OLD_NAMES.some((name) => name.test(line))) {
         offenders.push(`${path.relative(srcRoot, file).replace(/\\/g, '/')}: ${trimmed.slice(0, 60)}`);
       }
     }
@@ -85,7 +92,9 @@ test('⚠ the app config carries the name too — permission dialogs live there'
   // the most user-visible text the app has — the OS permission dialog — and the
   // first version of this test could not see them at all.
   const config = readFileSync(path.join(srcRoot, '..', 'app.json'), 'utf8');
-  assert.ok(!config.includes('Madeira Explorer'), 'app.json still carries the old app name');
+  for (const name of OLD_NAMES) {
+    assert.ok(!name.test(config), `app.json still carries an old app name (${name})`);
+  }
   assert.ok(
     config.includes(`"name": "${APP_NAME}"`),
     `app.json's expo.name should be ${APP_NAME}`

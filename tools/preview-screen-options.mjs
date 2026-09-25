@@ -379,7 +379,7 @@ const board = (heading, question, options) => `<section>
     .map((o) => `<figure>${o.phone}<figcaption><h3>${o.title}</h3><ul>${o.notes.map((n) => `<li>${n}</li>`).join('')}</ul></figcaption></figure>`)
     .join('')}</div></section>`;
 
-const HEAD = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Proa: opções de ecrã</title>
+const HEAD = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Bruma: opções de ecrã</title>
 <style>
   body { margin: 0; padding: 32px; background: #e9e9ee; font-family: Roboto, "Segoe UI", Arial, sans-serif; color: #1c1c1e; }
   h1 { margin: 0 0 4px; font-size: 26px; } .lead { color: #5c5c63; margin: 0 0 24px; max-width: 900px; }
@@ -429,7 +429,7 @@ const HEAD = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>
 </style></head><body>`;
 
 const page = (lead, boards) => `${HEAD}
-<h1>Proa: opções de ecrã</h1>
+<h1>Bruma: opções de ecrã</h1>
 <p class="lead">${lead}</p>
 ${boards}
 </body></html>`;

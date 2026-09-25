@@ -109,17 +109,24 @@ screenshots and both descriptions, but not the title. It had to be decided on pr
 
 ### Short description (80 max) — the most weighted field after the title, and what shows in search
 
-> **Your map of Madeira fills in as you walk. Collect the island's 60 best places.** — 76 characters
+> **Every road you walk or drive is highlighted, so you can see where you've been.** (78 characters)
+> Provisional, D-092 (2026-09-25).
+>
+> ~~Your map of Madeira fills in as you walk. Collect the island's 60 best places.~~ It led with
+> "map" and with the stamps, and the project lead has put *where you have been* first.
 
-Alternatives worth A/B testing (§7):
+Earlier alternatives (§7), from before that framing:
 
 - *"See where you walked in Madeira. Your map fills in. Your trip stays private."* (75)
 - *"Walk Madeira, fill in your own map, and collect the 60 places worth going to."* (76)
 
 ### Full description — the first 167 characters carry the hook, before "Read more"
 
+⚠ **Needs a rewrite (T-240):** the name is updated, but it still leads with "map" and counts sixty
+places; there are 80 (T-066b/c).
+
 ```
-Proa draws the map of your own trip.
+Bruma draws the map of your own trip.
 
 Walk a levada, drive a mountain road, wander into a village — the app records where you
 went and draws it on the map. At the end of the week you have a picture of your holiday

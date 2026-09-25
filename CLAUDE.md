@@ -1,4 +1,7 @@
-# Working on Proa
+# Working on Bruma
+
+**The app was renamed from Proa on 2026-09-25 (D-092).** The package stays `com.proa.madeira` and
+internal identifiers keep "proa" on purpose; the reasons are in `app/src/brand.ts`.
 
 Loaded automatically every session. **Routing and invariants only** — never content that lives
 in another document. If this contradicts a decision, the decision wins and this file is wrong.

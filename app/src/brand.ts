@@ -13,6 +13,23 @@
  * it and neither should depend on the other. `brand.test.ts` fails the build if a
  * user-facing string hardcodes it again.
  *
+ * RENAMED 2026-09-25: **BRUMA** (D-092, supersedes D-074)
+ * ----------------------------------------------------------
+ * **Bruma** is mist, in Portuguese and Spanish. The rules that chose it: it
+ * sounds the same in Portuguese and English, and the name need not explain the
+ * app because the store title's descriptor does. The **Play title is
+ * "Bruma: Madeira Walk Tracker"**, set in Play Console, not here.
+ *
+ * ⚠ **The package stays `com.proa.madeira`**, by the project lead's choice: it
+ * shows only in the Play web address, and changing it would have orphaned the
+ * beta data on the phone and broken the Maps key restriction. For the same
+ * reason the internal identifiers keep "proa": `EXPO_PUBLIC_PROA_BETA`, the
+ * `PROA_UPLOAD_*` signing properties, `proaFieldBuild`, the Expo slug and scheme,
+ * and the "Proa" logcat tag. No user reads them, and renaming them would break
+ * local build setups that already use them.
+ *
+ * What follows is the 2026-08-17 reasoning, kept as history.
+ *
  * NAMING, DECIDED 2026-08-17 (D-074, design brief §7)
  * ---------------------------------------------------
  * **Proa** — the prow of a ship. Short enough for the souvenir watermark, which
@@ -30,4 +47,4 @@
  */
 
 /** The app's name, as a user sees it. */
-export const APP_NAME = 'Proa';
+export const APP_NAME = 'Bruma';

@@ -5002,7 +5002,7 @@ runs on *Bruma*.
 | **On the device**, under the icon | **Bruma** | ✅ any time |
 | **Play title** (30 max) | **Bruma: Madeira Walk Tracker** (27) | ✅ any time |
 | **Play short description** (80 max) | Provisional: *"Every road you walk or drive is highlighted, so you can see where you've been."* (78) | ✅, and A/B testable |
-| **Package id** | **Open.** Decide before the first upload (T-240) | ❌ never, once published |
+| **Package id** | **`com.proa.madeira`, kept** (project lead, 2026-09-25) | ❌ never, once published |
 
 **Why Proa went.** It still felt wrong to the project lead five weeks on. It was chosen by
 elimination (every argument in D-074 is a constraint it passes); a prow faces forward while the app
@@ -5058,8 +5058,9 @@ consonant is "sh" (*Pista*, *Estrada*, *Vista* fail), a final E is silent (*Lume
   *Byways*, *Hairpin*: English only, so they fail rule 4.
 - *Walk Madeira* and any *Levada* or *Vereda* name: WalkMe's ground (marketing plan §2).
 
-**Package id.** Recommended, not decided: a neutral id that does not carry the brand, since the
-brand has now changed once. It is invisible except in the Play web address. Changing it repeats
+**Package id: ✅ kept as `com.proa.madeira`** (project lead, 2026-09-25, at the rename). Now that the
+brand is Bruma, *proa* is a meaningless word in a web address; changing it would have orphaned the
+P30's beta data. (The earlier recommendation was a neutral id that does not carry the brand.) It is invisible except in the Play web address. Changing it repeats
 D-074's two silent consequences: re-restrict the Maps API key (the symptom of forgetting is a grey
 grid) and `npx expo prebuild --clean`.
 

@@ -34,6 +34,13 @@
  * wording lives here, next to the arithmetic, so it cannot be dropped by a
  * later tidy-up of the view.
  *
+ * **3. Only when it is near enough to mean something** (2026-09-25). The
+ * project lead, on the P30: *"A 39 km em linha reta" is a bit useless, Madeira
+ * is full of turns.* A straight line across the island says nothing about the
+ * hour of hairpins between, and the honest qualifier of rule 2 did not make it
+ * useful, only true. Within walking range it is both. Beyond it the card says
+ * nothing, which is what rule 1 already does when it cannot vouch for a number.
+ *
  * Pure: no database, no Expo, no clock of its own — `nowMs` is an argument.
  * Tested in `placeCard.test.ts`.
  */
@@ -57,6 +64,14 @@ import { translate } from '../i18n/translate.ts';
  * shorter would blank the distance during normal operation.
  */
 export const MAX_POSITION_AGE_MS = 30 * 60 * 1000;
+
+/**
+ * Rule 3: the farthest a straight-line distance is shown. ⚠ Not measured: about
+ * half an hour on foot on the flat, which is where "how far is it" still means
+ * "shall I walk over", and a ravine can still make it a lie, which is why rule
+ * 2's qualifier stays.
+ */
+export const MAX_SHOWN_DISTANCE_M = 2000;
 
 /** The recorder's last fix, as much of it as this module needs. */
 export type LastKnownPosition = {
@@ -111,7 +126,7 @@ export type PlaceCard = {
   hasCourse: boolean;
   lat: number;
   lon: number;
-  /** Metres, straight line. Null when rule 1 above withholds it. */
+  /** Metres, straight line. Null when rule 1 or rule 3 above withholds it. */
   distanceM: number | null;
   /** `"3.2 km"`, `"3,2 km"` in Portuguese. Null exactly when `distanceM` is. */
   distanceLabel: string | null;
@@ -220,9 +235,11 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     isUsableCoordinate({ lat, lon }) &&
     isPositionUsable(position, nowMs);
 
-  const metres = measurable
+  const straightLine = measurable
     ? distanceM({ lat: position.lat, lon: position.lon }, { lat, lon })
     : null;
+  const metres =
+    straightLine !== null && straightLine <= MAX_SHOWN_DISTANCE_M ? straightLine : null;
 
   const categoryLabel = translate(STRINGS[CATEGORY_KEYS[category]], language);
   const distanceLabel = metres === null ? null : formatDistance(metres, language);

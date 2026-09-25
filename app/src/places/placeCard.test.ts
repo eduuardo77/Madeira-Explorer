@@ -17,6 +17,7 @@ import {
   formatDistance,
   isPositionUsable,
   MAX_POSITION_AGE_MS,
+  MAX_SHOWN_DISTANCE_M,
   type LastKnownPosition,
   type PlaceCardInput,
 } from './placeCard.ts';
@@ -194,4 +195,20 @@ test('⚠ T-201: a line missing in this language is no line — never another la
   const card = buildPlaceCard(input({ why: { en: 'The view.' }, language: 'pt' }));
   assert.equal(card.whyLine, null);
   assert.equal(buildPlaceCard(input()).whyLine, null);
+});
+
+test('⚠ rule 3: across the island there is no distance, only near by (2026-09-25)', () => {
+  // The P30 showed "A 39 km em linha reta" for Pico do Areeiro: true, and of
+  // no use on a road that doubles back on itself for most of those 39 km.
+  const far = buildPlaceCard(input({ lat: 32.65, lon: -16.5, language: 'pt' }));
+  assert.equal(far.distanceM, null);
+  assert.equal(far.distanceSentence, null);
+
+  // Just inside the limit it still shows, with its qualifier (rule 2).
+  const near = buildPlaceCard(input({ lat: HERE.lat + (MAX_SHOWN_DISTANCE_M - 100) / 111_000 }));
+  assert.ok(near.distanceM !== null && near.distanceM <= MAX_SHOWN_DISTANCE_M);
+  assert.match(near.distanceSentence ?? '', /straight line/);
+
+  const justOver = buildPlaceCard(input({ lat: HERE.lat + (MAX_SHOWN_DISTANCE_M + 100) / 111_000 }));
+  assert.equal(justOver.distanceSentence, null);
 });

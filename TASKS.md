@@ -154,6 +154,13 @@ but eight (below). N9 is T-197's; N11 is T-222.
       fourth sticker began exactly at the card's edge. ✅ `passport/stripLayout.ts`: 96 where the
       cut reads, 84 on the P30, measured from the strip itself. Workbench: 44% of the fourth.
 - [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
+      2026-09-25: three options drawn for the project lead in `tools/out/screen-options.html`
+      (`node tools/preview-screen-options.mjs`): today, all in the brand green, or one white
+      panel at the bottom. The same page asks about the place card and the passport's top, which
+      the project lead also found wanting on the P30. Waiting for the letters.
+- [x] **T-225** **The place card shows a distance only when it is near** (≤ 2 km, `placeCard.ts`
+      rule 3). The project lead on the P30: *"A 39 km em linha reta" is a bit useless, Madeira is
+      full of turns.* The 2 km is a judgement, not a measurement, and rule 2's qualifier stays.
 - [~] **T-221** **Licences: what ships, JavaScript and native (N5).** ✅ Code 2026-09-25. Worse than
       the review said in both directions: of 119 listed, **77 never ship** (`@babel/core`,
       `typescript`, `react-dom`), and **15 that ship were missing** (`@babel/runtime`, `scheduler`,

@@ -166,6 +166,15 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [x] **T-231** **The pause removed; one tier explained at a time; a tidier tier control** (2026-09-25,
+      the project lead). The pause went everywhere it lived (Settings, the map notice, the sink's
+      filter, `trackingSettings`, its tests): the switch already stops recording (D-087 §6
+      reversed). Under the tiers, only the chosen one's line, changing as another is tapped. The
+      control is now a grey track with the chosen tier as a raised white chip, 54 dp drawn and 60 dp
+      to tap. Found on the way: the P30's tier read *Poupança* at 14:27 though it was *Preciso* at
+      11:36, cause unproven; the test scripts' swipes passed over those buttons, so they now run
+      down the page margin, and the tier was left for the project lead to set. The recorder's
+      diary said "tier changed" on a language change; it now says what happened.
 - [x] **T-230** **Each recording tier explained; the passport's invitation removed** (2026-09-25,
       the project lead). Under *Registo automático*: what it is for, then one line per tier with
       its name in bold, as WalkNYC names its tiers (*"if not you don't know the difference"*);

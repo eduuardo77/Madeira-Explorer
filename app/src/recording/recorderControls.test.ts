@@ -11,10 +11,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   effectiveQuality,
-  isPaused,
   primaryControl,
   recorderNotice,
-  shouldStore,
   walkSummary,
   describeWalkSummary,
   formatClock,
@@ -32,7 +30,6 @@ function input(overrides: Partial<ControlInput> = {}): ControlInput {
     permission: 'always',
     automaticAllowed: true,
     walkInProgress: false,
-    pausedUntilTs: null,
     silence: 'receiving',
     nowMs: NOW,
     ...overrides,
@@ -80,22 +77,9 @@ test('⚠⚠ T-174 — a silent recorder is announced, and cannot be dismissed',
   const dead = input({ silence: 'silent' });
   assert.equal(recorderNotice(dead), 'recorder-stopped');
   assert.equal(
-    recorderNotice(dead, new Set(['needs-always', 'paused'] as const)),
+    recorderNotice(dead, new Set(['needs-always'] as const)),
     'recorder-stopped'
   );
-});
-
-test('a pause is shown while it lasts, and ends on its own', () => {
-  const paused = input({ pausedUntilTs: NOW + HOUR });
-  assert.equal(recorderNotice(paused), 'paused');
-  assert.equal(isPaused(NOW + HOUR, NOW + HOUR), false, 'ends exactly at its end');
-  assert.equal(recorderNotice(input({ pausedUntilTs: NOW - 1 })), null, 'a past pause is no pause');
-});
-
-test('nothing is stored while paused; everything is once it ends', () => {
-  assert.equal(shouldStore(NOW + HOUR, NOW), false);
-  assert.equal(shouldStore(NOW + HOUR, NOW + HOUR), true);
-  assert.equal(shouldStore(null, NOW), true);
 });
 
 test('a walk takes the finest setting, and gives the user’s back when it ends', () => {
@@ -175,17 +159,6 @@ test('no stamps and no distance are both said, not left blank', () => {
   assert.deepEqual(described.lines, ['10 min · distance not measured', 'No new stamps on this outing.']);
 });
 
-test('⚠ D-087 — the sink checks the pause on both of its write paths', () => {
-  // A pause the recorder ignores would be a promise broken in silence.
-  const source = readFileSync(path.join(srcRoot, 'recording/recordingSink.ts'), 'utf8');
-  for (const handler of ['async onLocations(', 'async onGeofenceTransition(']) {
-    const body = source.slice(source.indexOf(handler));
-    const check = body.indexOf('shouldStore(');
-    const store = body.indexOf('queue(');
-    assert.ok(check !== -1 && check < store, `${handler} stores before checking the pause`);
-  }
-});
-
 test('⚠ T-198 — a new tier is applied to the running recorder, not only stored', () => {
   // Found on the P30: Preciso -> Equilibrado left the GPS request at +10 s
   // until the app was relaunched. Storing without retuning is the bug.
@@ -196,15 +169,5 @@ test('⚠ T-198 — a new tier is applied to the running recorder, not only stor
   // The call, not the word: the comment above it names the function too, and
   // the first version of this test passed with the call removed.
   assert.match(body, /\.then\(retuneRecorder\)/);
-});
-
-test('⚠ T-198 — starting an outing ends a pause before it starts recording', () => {
-  // Found on the P30: an outing started while paused recorded nothing, because
-  // the sink drops everything until the pause ends.
-  const source = readFileSync(path.join(srcRoot, 'recording/walkSession.ts'), 'utf8');
-  const body = source.slice(source.indexOf('export async function startOuting'));
-  const clear = body.indexOf('setPausedUntil(null)');
-  const start = body.indexOf('startTrip(');
-  assert.ok(clear !== -1 && clear < start);
 });
 

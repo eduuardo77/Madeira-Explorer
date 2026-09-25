@@ -21,6 +21,9 @@ const ADB = path.join(root, 'tools', 'android-sdk', 'platform-tools', 'adb');
 
 export const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** A screen x, in px, inside the page margin: left of every card's content. */
+const MARGIN_X = 20;
+
 /** A connection to one phone, or to the only one attached when `serial` is null. */
 export function device(serial = null) {
   const adb = (...args) =>
@@ -54,8 +57,11 @@ export function device(serial = null) {
         return node;
       }
       if (scroll && swipes < 10) {
-        const [width, height] = size();
-        shell(`input swipe ${width / 2} ${height * 0.75} ${width / 2} ${height * 0.35} 300`);
+        // ⚠ Down the left margin, where no control is: a swipe through the
+        // middle passed over Settings' tier buttons, and a real phone is not
+        // obliged to read every swipe as not a tap (2026-09-25).
+        const [, height] = size();
+        shell(`input swipe ${MARGIN_X} ${height * 0.75} ${MARGIN_X} ${height * 0.35} 300`);
         swipes += 1;
         await pause(400);
       } else {

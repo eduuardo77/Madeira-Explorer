@@ -66,11 +66,9 @@ import {
   endOuting,
   readControlInput,
   restartRecording,
-  resumeRecording,
   startOuting,
 } from '../recording/walkSession';
 import {
-  formatClock,
   formatDuration,
   primaryControl,
   recorderNotice,
@@ -667,13 +665,7 @@ export default function NativeMapScreen({
     })();
   };
   const notice: MapNotice | null =
-    noticeKind === 'paused' && controlInput?.pausedUntilTs != null
-      ? {
-          text: t('notice.paused', { time: formatClock(controlInput.pausedUntilTs) }),
-          actionLabel: t('notice.paused.action'),
-          onAction: act(resumeRecording),
-        }
-      : noticeKind === 'needs-always'
+    noticeKind === 'needs-always'
         ? {
             text: t('notice.needsAlways'),
             actionLabel: t('notice.needsAlways.action'),

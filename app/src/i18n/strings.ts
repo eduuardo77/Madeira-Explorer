@@ -340,12 +340,6 @@ export const STRINGS = {
     'Standort erlauben, damit die App aufzeichnen kann, wo Sie unterwegs sind'
   ),
   // ── D-087 §4: what the map says about automatic recording, only when wrong ──
-  'notice.paused': s(
-    'Recording paused until {time}',
-    'Registo em pausa até às {time}',
-    'Aufzeichnung pausiert bis {time}'
-  ),
-  'notice.paused.action': s('Resume', 'Retomar', 'Fortsetzen'),
   // Names the phone's own words for the setting (teardown item 4).
   'notice.needsAlways': s(
     'Automatic recording needs location set to “Allow all the time”',
@@ -713,16 +707,6 @@ export const STRINGS = {
     'One recording, to help tune the app. You see what it holds before it goes.',
     'Um registo, para ajudar a afinar a aplicação. Vê o que contém antes de o enviar.',
     'Eine Aufzeichnung, um die App zu verbessern. Sie sehen den Inhalt vor dem Senden.'
-  ),
-  // D-087 §6. ⚠ One hour is Provisional: the project lead's own example ("not
-  // the next hour"); the lengths were left open.
-  'settings.pause.hour': s('Pause for an hour', 'Pausar durante uma hora', 'Eine Stunde pausieren'),
-  'settings.pause.resume': s('Resume now', 'Retomar agora', 'Jetzt fortsetzen'),
-  'settings.pause.until': s('Paused until {time}', 'Em pausa até às {time}', 'Pausiert bis {time}'),
-  'settings.pause.footnote': s(
-    'Nothing is recorded while paused, and no stamps are collected. It resumes on its own.',
-    'Durante a pausa nada é registado e não se obtêm carimbos. Retoma sozinho.',
-    'Während der Pause wird nichts aufgezeichnet und es werden keine Stempel gesammelt. Sie endet von selbst.'
   ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),

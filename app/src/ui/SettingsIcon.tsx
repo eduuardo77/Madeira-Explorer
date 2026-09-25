@@ -19,7 +19,6 @@ export type SettingsIconName =
   | 'language'
   | 'recording'
   | 'warning'
-  | 'pause'
   | 'battery'
   | 'privacy'
   | 'licences'
@@ -75,12 +74,6 @@ const GLYPHS: Record<SettingsIconName, (color: string, stroke: Stroke) => ReactE
       <Path d="M12 3.5L21.5 20h-19z" {...s} />
       <Line x1={12} y1={10} x2={12} y2={14} {...s} />
       <Circle cx={12} cy={17} r={1.1} fill={color} />
-    </>
-  ),
-  pause: (color) => (
-    <>
-      <Rect x={6.5} y={5} width={3.8} height={14} rx={1.2} fill={color} />
-      <Rect x={13.7} y={5} width={3.8} height={14} rx={1.2} fill={color} />
     </>
   ),
   battery: (color, s) => (

@@ -43,10 +43,9 @@ import {
   isBackgroundTrackingAllowed,
   setBackgroundTrackingAllowed,
   forgetCachedTrackingSettings,
-  getPausedUntil,
   setTrackingQuality,
 } from '../recording/trackingSettings';
-import { pauseRecording, resumeRecording, retuneRecorder } from '../recording/walkSession';
+import { retuneRecorder } from '../recording/walkSession';
 import { setChosenLanguage } from '../i18n/deviceLocale';
 import { saveLanguageChoice } from '../i18n/languageChoice';
 import { parseLanguageChoice, type Language } from '../i18n/languages';
@@ -90,8 +89,6 @@ export default function SettingsScreen({
   const [donating, setDonating] = useState(false);
   /** T-202: the language chosen here, or null to follow the phone. */
   const [languageChoice, setLanguageChoiceState] = useState<Language | null>(null);
-  /** D-087 §6: when the pause ends, or null. */
-  const [pausedUntil, setPausedUntilState] = useState<number | null>(null);
 
   useEffect(() => {
     void locationProvider
@@ -109,7 +106,6 @@ export default function SettingsScreen({
       .catch(() => undefined);
 
     void getTrackingQuality().then(setQuality).catch(() => undefined);
-    void getPausedUntil().then(setPausedUntilState).catch(() => undefined);
     void appStateDao
       .get(appStateDao.AppStateKey.Language)
       .then((raw) => setLanguageChoiceState(parseLanguageChoice(raw)))
@@ -363,17 +359,6 @@ export default function SettingsScreen({
           .then(retuneRecorder)
           // T-210: the update message in the language just chosen.
           .then(writeUpdateNotice)
-          .catch(() => undefined);
-      }}
-      pausedUntil={pausedUntil}
-      onPause={() => {
-        void pauseRecording(Date.now())
-          .then(setPausedUntilState)
-          .catch(() => undefined);
-      }}
-      onResume={() => {
-        void resumeRecording()
-          .then(() => setPausedUntilState(null))
           .catch(() => undefined);
       }}
       onClose={onClose}

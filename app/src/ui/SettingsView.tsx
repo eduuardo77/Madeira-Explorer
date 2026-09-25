@@ -31,6 +31,9 @@
  *    keeps pass 1's language list and pass 2's rule that location access
  *    shows only when it needs fixing.
  *
+ * 4. The same day: the pause removed (the switch already stops recording), and
+ *    the chosen tier's explanation shown under the control, one at a time.
+ *
  * ⚠ **Rows stay 60 dp** (D-015); the project lead confirmed the height.
  *
  * ERASING IS PERMANENT AND THE COPY HAS TO SAY SO
@@ -52,7 +55,6 @@ import { LANGUAGE_NAMES, LANGUAGES, type Language } from '../i18n/languages';
 import type { StringKey } from '../i18n/strings';
 import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
 import type { PermissionLevel } from '../recording/LocationProvider';
-import { formatClock } from '../recording/recorderControls';
 import { TRACKING_QUALITIES, type TrackingQuality } from '../recording/trackingPreference';
 import BackBar from './BackBar';
 import SettingsIcon, { SETTINGS_ICON_SIZE, type SettingsIconName } from './SettingsIcon';
@@ -109,13 +111,6 @@ export type SettingsViewProps = {
   onDonateWalk?: () => void;
   /** True while the file is being built, so the row can say so. */
   donating?: boolean;
-  /**
-   * The end of the current pause, or null (D-087 §6). Optional so the workbench
-   * can mount the screen with no recorder behind it; absent hides the control.
-   */
-  pausedUntil?: number | null;
-  onPause?: () => void;
-  onResume?: () => void;
   onClose: () => void;
 };
 
@@ -262,7 +257,18 @@ function ToggleRow({
 }
 
 /**
- * The three tiers, three segments wide, outlined like WalkNYC's.
+ * How far the chosen chip sits inside the grey track, in dp. Each segment's
+ * target is grown back by the same amount above and below, so it stays 60 dp
+ * (D-015) while the chip draws smaller than the track around it.
+ */
+const SEGMENT_INSET = 3;
+const SEGMENT_HIT_SLOP = { top: SEGMENT_INSET, bottom: SEGMENT_INSET, left: 0, right: 0 };
+
+/**
+ * The three tiers, three segments wide: a grey track with the chosen tier as a
+ * raised white chip, the platforms' own segmented control. ⚠ Was an outlined
+ * pill with round ends (WalkNYC's) until 2026-09-25; the project lead found it
+ * odd, and asked for it tidier.
  *
  * `short` is the word on the segment and what the screen reader says (review
  * N4, WCAG 2.5.3: a segment reading *Preciso* was once spoken *Máximo
@@ -277,29 +283,6 @@ const QUALITY_TEXT: Record<TrackingQuality, { short: StringKey; detail: StringKe
   precise: { short: 'settings.quality.short.best', detail: 'settings.quality.detail.best' },
 };
 
-/**
- * What automatic recording is for, then one line per tier, its name in bold
- * (2026-09-25). The project lead: *"we need an explanation for each option,
- * just like WalkNYC, if not you don't know the difference"*. WalkNYC's footnote
- * names its tiers in its paragraph; this gives each its own line, so the three
- * can be compared at a glance. The tier lines only show while the tiers do.
- */
-function RecordingExplanation({ withTiers }: { withTiers: boolean }) {
-  return (
-    <View style={styles.explanation}>
-      <Text style={styles.footnote}>{t('settings.recording.explain')}</Text>
-      {withTiers
-        ? TRACKING_QUALITIES.map((quality) => (
-            <Text key={quality} style={styles.footnote}>
-              <Text style={styles.footnoteStrong}>{t(QUALITY_TEXT[quality].short)}</Text>
-              {`: ${t(QUALITY_TEXT[quality].detail)}`}
-            </Text>
-          ))
-        : null}
-    </View>
-  );
-}
-
 function Segmented({
   value,
   onChange,
@@ -309,7 +292,7 @@ function Segmented({
 }) {
   return (
     <View style={styles.segmented} accessibilityRole="radiogroup">
-      {TRACKING_QUALITIES.map((quality, index) => {
+      {TRACKING_QUALITIES.map((quality) => {
         const selected = quality === value;
         return (
           <Pressable
@@ -319,9 +302,9 @@ function Segmented({
             accessibilityLabel={t(QUALITY_TEXT[quality].short)}
             accessibilityHint={t(QUALITY_TEXT[quality].detail)}
             onPress={() => onChange(quality)}
+            hitSlop={SEGMENT_HIT_SLOP}
             style={({ pressed }) => [
               styles.segment,
-              index > 0 && styles.segmentDivided,
               selected && styles.segmentActive,
               pressed && styles.pressed,
             ]}
@@ -423,9 +406,6 @@ export default function SettingsView({
   onEraseRequested,
   onDonateWalk,
   donating,
-  pausedUntil,
-  onPause,
-  onResume,
   version,
   onContact,
   languageChoice,
@@ -436,7 +416,6 @@ export default function SettingsView({
   // has granted Always, and the tier means nothing until the switch is on —
   // so the screen asks the question once and every branch below reads it.
   const recordingInBackground = backgroundTracking && permission === 'always';
-  const paused = pausedUntil != null && pausedUntil > Date.now();
   const [choosingLanguage, setChoosingLanguage] = useState(false);
 
   return (
@@ -475,11 +454,9 @@ export default function SettingsView({
         <Group
           title={t('settings.section.background')}
           footnote={
-            permission === 'always' ? (
-              <RecordingExplanation withTiers={recordingInBackground} />
-            ) : (
-              t('settings.recording.footnoteLimited')
-            )
+            permission === 'always'
+              ? t('settings.recording.explain')
+              : t('settings.recording.footnoteLimited')
           }
         >
           {permission === 'always' ? null : (
@@ -502,32 +479,17 @@ export default function SettingsView({
             // above says where the real gate is.
             disabled={permission !== 'always'}
           />
+          {/* The tiers, and what the chosen one does, in words (D-015): the
+              line changes as another is tapped. The project lead asked for
+              each option explained on its own, not all three at once. */}
           {recordingInBackground ? (
             <View style={styles.segmentRow}>
               <Segmented value={trackingQuality} onChange={onChangeTrackingQuality} />
+              <Text style={styles.rowDetail}>
+                <Text style={styles.detailStrong}>{t(QUALITY_TEXT[trackingQuality].short)}</Text>
+                {`: ${t(QUALITY_TEXT[trackingQuality].detail)}`}
+              </Text>
             </View>
-          ) : null}
-          {/* D-087 §6: the pause lives with the thing it pauses. A pause in the
-              past is no pause, the same rule the sink applies. */}
-          {recordingInBackground && onPause !== undefined && onResume !== undefined ? (
-            paused ? (
-              <ListRow
-                icon="pause"
-                label={t('settings.pause.until', { time: formatClock(pausedUntil ?? 0) })}
-                value={t('settings.pause.resume')}
-                tone="action"
-                onPress={onResume}
-              />
-            ) : (
-              <ListRow
-                icon="pause"
-                label={t('settings.pause.hour')}
-                // What a pause costs: no recording and no stamps (D-087 §6).
-                detail={t('settings.pause.footnote')}
-                tone="action"
-                onPress={onPause}
-              />
-            )
           ) : null}
           {/* Android only. The label says what it achieves; the detail uses the
               phone's own word, so the screen it opens is recognisable. */}
@@ -649,8 +611,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   dangerText: { color: colors.bad },
-  explanation: { gap: spacing.xs },
-  footnoteStrong: { color: colors.text, fontWeight: '700' },
   footnote: {
     color: colors.textMuted,
     fontSize: fontSize.small,
@@ -683,28 +643,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginLeft: SETTINGS_ICON_SIZE + spacing.md,
   },
-  segmentRow: { paddingBottom: spacing.md, paddingLeft: SETTINGS_ICON_SIZE + spacing.md },
-  // Outlined, like WalkNYC's: the chosen tier is the one filled.
+  segmentRow: {
+    paddingBottom: spacing.md,
+    paddingLeft: SETTINGS_ICON_SIZE + spacing.md,
+    gap: spacing.sm,
+  },
   segmented: {
     flexDirection: 'row',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
+    padding: SEGMENT_INSET,
+    borderRadius: radius.control,
+    backgroundColor: colors.surfaceRaised,
   },
   segment: {
     // Equal thirds whatever the word's length in this language.
     flex: 1,
-    minHeight: MIN_TAP_TARGET,
+    minHeight: MIN_TAP_TARGET - 2 * SEGMENT_INSET,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
+    borderRadius: radius.control - SEGMENT_INSET,
   },
-  segmentDivided: { borderLeftWidth: 1, borderLeftColor: colors.border },
-  segmentActive: { backgroundColor: colors.action },
-  segmentText: { color: colors.text, fontSize: fontSize.small, fontWeight: '600', textAlign: 'center' },
-  // ⚠ `actionText` on `action` is a pair `contrast.test.ts` already proves.
-  segmentTextActive: { color: colors.actionText, fontWeight: '700' },
+  // Raised, not filled with colour: the words under the control say which
+  // tier it is, so the chip only has to be findable (D-015).
+  segmentActive: {
+    backgroundColor: colors.surface,
+    elevation: 2,
+    shadowColor: '#000000',
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  segmentText: { color: colors.textMuted, fontSize: fontSize.small, fontWeight: '600', textAlign: 'center' },
+  segmentTextActive: { color: colors.text, fontWeight: '700' },
+  detailStrong: { color: colors.text, fontWeight: '700' },
   radioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

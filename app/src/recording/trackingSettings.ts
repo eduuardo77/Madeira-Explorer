@@ -79,7 +79,6 @@ export async function setBackgroundTrackingAllowed(
 // the way the tier is, and this module is their only writer.
 
 let cachedWalk: boolean | null = null;
-let cachedPausedUntil: number | null | undefined;
 
 /** Whether the user has a walk running. Unreadable is `false` (manualWalk.ts). */
 export async function getWalkInProgress(): Promise<boolean> {
@@ -111,28 +110,6 @@ export async function setWalkInProgress(inProgress: boolean, nowMs: number): Pro
   await appStateDao.set(appStateDao.AppStateKey.WalkStartedTs, inProgress ? String(nowMs) : '');
 }
 
-/** The end of the current pause, or null. A past moment is returned as is; `isPaused` judges it. */
-export async function getPausedUntil(): Promise<number | null> {
-  if (cachedPausedUntil !== undefined) {
-    return cachedPausedUntil;
-  }
-  try {
-    cachedPausedUntil = parseTimestamp(
-      await appStateDao.get(appStateDao.AppStateKey.PausedUntil)
-    );
-  } catch {
-    // ⚠ Unreadable is *not paused*. A broken row must never silently stop the
-    // recorder storing anything (D-010).
-    return null;
-  }
-  return cachedPausedUntil;
-}
-
-export async function setPausedUntil(untilTs: number | null): Promise<void> {
-  cachedPausedUntil = untilTs;
-  await appStateDao.set(appStateDao.AppStateKey.PausedUntil, untilTs === null ? '' : String(untilTs));
-}
-
 function parseTimestamp(raw: string | null): number | null {
   const value = Number((raw ?? '').trim());
   return raw !== null && raw.trim() !== '' && Number.isFinite(value) && value > 0 ? value : null;
@@ -149,6 +126,5 @@ function parseTimestamp(raw: string | null): number | null {
 export function forgetCachedTrackingSettings(): void {
   cachedQuality = null;
   cachedWalk = null;
-  cachedPausedUntil = undefined;
 }
 

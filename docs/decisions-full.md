@@ -4687,7 +4687,11 @@ in Settings. The button can be the main control because pressing it has a conseq
    elapsed time, silent. Automatic recording keeps its own silent notification. D-011's two trip
    messages go on a channel that makes a sound.
 
-6. **Pause: yes.** Automatic recording can be paused for a stretch (*"not the next hour"*). Nothing
+6. ⚠ **Reversed 2026-09-25: no pause.** The project lead: *"what's the purpose of pausing for an
+   hour? Can't you just press the toggle?"* The switch already stops recording; the pause only
+   differed by switching itself back on, and WalkNYC has none. Removed from Settings, the map's
+   notice, the recorder's sink and `trackingSettings`. The original text follows.
+   **Pause: yes.** Automatic recording can be paused for a stretch (*"not the next hour"*). Nothing
    is recorded while paused, and the pause ends on its own.
 7. **Stopping a walk shows a short summary.** Here WalkNYC is not followed (it shows nothing).
 

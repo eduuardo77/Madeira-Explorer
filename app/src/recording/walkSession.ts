@@ -32,17 +32,12 @@ import {
 import { assessSilence } from './recorderSilence';
 import { getCurrentSamplingProfile } from './samplingGate';
 import {
-  getPausedUntil,
   getWalkInProgress,
   getWalkStartedTs,
   isBackgroundTrackingAllowed,
-  setPausedUntil,
   setWalkInProgress,
 } from './trackingSettings';
 import { startTrip, stopTrip, syncRecordingWithPreferences } from './tripRecording';
-
-/** How long "Pause for an hour" pauses. ⚠ Provisional (D-087 left the lengths open). */
-export const PAUSE_MS = 60 * 60 * 1000;
 
 /**
  * Everything `recorderControls` needs, read from evidence (T-174).
@@ -53,12 +48,11 @@ export const PAUSE_MS = 60 * 60 * 1000;
 export async function readControlInput(
   nowMs: number
 ): Promise<{ input: ControlInput; silentForMs: number | null }> {
-  const [permission, automaticAllowed, walkInProgress, pausedUntilTs, isRecording, profile, lastStart, trip] =
+  const [permission, automaticAllowed, walkInProgress, isRecording, profile, lastStart, trip] =
     await Promise.all([
       locationProvider.getPermissionLevel(),
       isBackgroundTrackingAllowed(),
       getWalkInProgress(),
-      getPausedUntil(),
       locationProvider.isRecording(),
       getCurrentSamplingProfile(),
       recordingEventDao.getLastOfKind('start'),
@@ -79,7 +73,6 @@ export async function readControlInput(
       permission,
       automaticAllowed,
       walkInProgress,
-      pausedUntilTs,
       silence: silence.state,
       nowMs,
     },
@@ -126,19 +119,15 @@ async function retune(): Promise<void> {
 export async function retuneRecorder(): Promise<void> {
   if (await locationProvider.isRecording()) {
     await retune();
-    await recordingEventDao.log('outing', 'tier changed: recorder retuned in place');
+    // Called for a tier change and for a language change (the notification's
+    // words), so the diary says what happened, not why: "tier changed" once
+    // made a language test read as a tier change (2026-09-25).
+    await recordingEventDao.log('outing', 'recorder options re-applied in place');
   }
 }
 
 /** The user pressed *Começar passeio*. */
 export async function startOuting(nowMs: number): Promise<void> {
-  // ⚠ Found on the P30, 2026-09-23: an outing started during a pause recorded
-  // nothing, because the sink drops everything until the pause ends. Pressing
-  // *Começar passeio* is an explicit request to record, so it ends the pause.
-  if ((await getPausedUntil()) !== null) {
-    await setPausedUntil(null);
-    await recordingEventDao.log('outing', 'pause ended by starting an outing');
-  }
   const action = actionForStartWalk(await walkState(false));
   // The flag first: `buildOptions` reads it, whichever branch runs below.
   await setWalkInProgress(true, nowMs);
@@ -185,19 +174,6 @@ export async function endOuting(nowMs: number): Promise<{ title: string; lines: 
 
   const names = new Map(getContentPack().places.map((place) => [place.id, place.name]));
   return describeWalkSummary(summary, names, deviceLanguage());
-}
-
-/** Pause automatic recording for `PAUSE_MS` from now. Nothing is stored meanwhile. */
-export async function pauseRecording(nowMs: number): Promise<number> {
-  const until = nowMs + PAUSE_MS;
-  await setPausedUntil(until);
-  await recordingEventDao.log('outing', `paused until ${new Date(until).toISOString()}`);
-  return until;
-}
-
-export async function resumeRecording(): Promise<void> {
-  await setPausedUntil(null);
-  await recordingEventDao.log('outing', 'pause ended by the user');
 }
 
 /**

@@ -35,8 +35,6 @@ import {
   tripHasLapsed,
 } from './recordingAdmission';
 import { checkTripEnd } from '../progress/tripEndDetection';
-import { shouldStore } from './recorderControls';
-import { getPausedUntil } from './trackingSettings';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -155,18 +153,7 @@ async function closeLapsedTrip(incomingTs: number): Promise<void> {
 }
 
 export const databaseSink: RecordingSink = {
-  async onLocations(incoming: LocationSample[]): Promise<void> {
-    // ⚠ D-087 §6 — nothing is stored while the user has paused recording. The
-    // recorder keeps running and what it delivers is dropped here, so the
-    // pause ends by the clock passing it, with nothing that has to wake up.
-    const pausedUntil = await getPausedUntil();
-    const samples = incoming.filter((sample) => shouldStore(pausedUntil, sample.ts));
-    if (samples.length < incoming.length) {
-      await recordingEventDao.log(
-        'batch',
-        `${incoming.length - samples.length} fixes dropped: paused until ${new Date(pausedUntil ?? 0).toISOString()}`
-      );
-    }
+  async onLocations(samples: LocationSample[]): Promise<void> {
     if (samples.length === 0) {
       return;
     }
@@ -231,12 +218,6 @@ export const databaseSink: RecordingSink = {
   },
 
   async onGeofenceTransition(transition: GeofenceTransition): Promise<void> {
-    // D-087 §6: a crossing while paused is not stored either, so no stamp can
-    // come from a stretch the user chose not to record.
-    if (!shouldStore(await getPausedUntil(), transition.ts)) {
-      await recordingEventDao.log('batch', `geofence ${transition.eventType} ${transition.poiId} dropped: paused`);
-      return;
-    }
     await queue(async () => {
       try {
         // ⚠ T-171, same rule: only evidence of *being* somewhere opens a

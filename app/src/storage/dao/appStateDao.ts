@@ -126,14 +126,8 @@ export const AppStateKey = {
    * stops, for its summary. Absent when no walk is running.
    */
   WalkStartedTs: 'walk_started_ts',
-  /**
-   * Automatic recording is paused until this moment, epoch ms (D-087, T-198).
-   *
-   * ⚠ A moment, not a flag: the pause ends by the clock passing it, with nothing
-   * that has to wake up and switch it off. `recordingSink` drops what arrives
-   * before it. Absent, unreadable or in the past means not paused.
-   */
-  PausedUntil: 'paused_until',
+  // `paused_until` was here until 2026-09-25, when the pause was removed
+  // (D-087 §6 amended). A row left on a phone is read by nothing.
   /**
    * The language chosen in Settings (T-202): `en`, `pt`, `de`, or empty to
    * follow the phone. Read by `i18n/languageChoice.ts`.

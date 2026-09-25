@@ -44,10 +44,14 @@ export type PrimaryControl = 'grant-location' | 'start-walk' | 'stop-walk';
 /**
  * The one thing the home screen may say about automatic recording, or null.
  *
- * Only ever about something wrong, or about a pause the user chose (D-087 §4).
- * When recording works, the map says nothing about it, as WalkNYC's does.
+ * Only ever about something wrong (D-087 §4). When recording works, the map
+ * says nothing about it, as WalkNYC's does.
+ *
+ * ⚠ There was a `paused` notice until 2026-09-25, when the project lead removed
+ * the pause (D-087 §6 amended): the Settings switch already stops recording,
+ * and the pause only differed by switching itself back on.
  */
-export type RecorderNotice = 'paused' | 'recorder-stopped' | 'needs-always' | null;
+export type RecorderNotice = 'recorder-stopped' | 'needs-always' | null;
 
 export type ControlInput = {
   permission: PermissionLevel;
@@ -55,16 +59,10 @@ export type ControlInput = {
   automaticAllowed: boolean;
   /** The user pressed *Começar passeio* and has not pressed *Terminar*. */
   walkInProgress: boolean;
-  /** Null when not paused. A pause in the past is no pause. */
-  pausedUntilTs: number | null;
   /** From `recorderSilence`: evidence, not the registration flag (T-174). */
   silence: SilenceState;
   nowMs: number;
 };
-
-export function isPaused(pausedUntilTs: number | null, nowMs: number): boolean {
-  return pausedUntilTs !== null && nowMs < pausedUntilTs;
-}
 
 /**
  * The main button.
@@ -95,9 +93,6 @@ export function recorderNotice(
   input: ControlInput,
   dismissed: ReadonlySet<Exclude<RecorderNotice, null>> = new Set()
 ): RecorderNotice {
-  if (isPaused(input.pausedUntilTs, input.nowMs)) {
-    return 'paused';
-  }
   if (!input.automaticAllowed) {
     // Switched off on purpose. Nothing is wrong, so nothing is said.
     return null;
@@ -125,18 +120,6 @@ export function effectiveQuality(
   walkInProgress: boolean
 ): TrackingQuality {
   return walkInProgress ? 'precise' : userQuality;
-}
-
-/**
- * Stored while paused? No: nothing is (D-087 §6).
- *
- * The recorder keeps running and the sink drops what arrives. A stopped
- * recorder would need something to restart it when the pause ends, and nothing
- * in this app can reliably wake itself in the background at a given time. A
- * recorder that is never stopped needs nothing to resume.
- */
-export function shouldStore(pausedUntilTs: number | null, sampleTs: number): boolean {
-  return !isPaused(pausedUntilTs, sampleTs);
 }
 
 /** What the short summary shows when a walk stops (D-087 §7). */

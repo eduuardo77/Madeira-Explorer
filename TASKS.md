@@ -123,7 +123,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on ~~"Proa" (D-074)~~ **"Bruma" (D-092,
       2026-09-25)**, ⚠ **done 2026-09-25 and it failed**: a live app *Bruma: Fog of War City Map*
-      and EUTM 006378988 BRUMA (details in D-092); Proa screened cleanest of the fallbacks; the upload key (T-117e). **Start them on day one**: each is small, but they
+      and EUTM 006378988 BRUMA (details in D-092); Proa screened cleanest of the fallbacks. ✅ **Bruma kept anyway** (the app looks abandoned). **Left:** an
+      attorney's view on EUTM 006378988, and whether to register Bruma (EUIPO or INPI, D-092); the upload key (T-117e). **Start them on day one**: each is small, but they
       take the longest to come back.
       ⚠ **The trademark search must finish before the first upload to Play Console** (2026-09-25):
       that upload makes the package name permanent. The listing's display name

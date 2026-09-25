@@ -5105,3 +5105,17 @@ an app.
   budget tracker.
 
 **Status:** the name decision is the project lead's to revisit; D-092 stands until they do.
+
+**✅ Kept, 2026-09-25.** Told the app looked abandoned, the project lead asked whether it was a real
+problem; on the corrected reading (above) they chose to **keep Bruma**. Accepted risks: the dormant
+app reviving or reaching Play, and EUTM 006378988. On that mark: it covers class 42 software design
+and class 39 travel arrangement but not class 9, it is over five years old so it must be in genuine
+use to be enforced, and a real-estate holding probably has not used it for either. That is an
+argument to make if challenged, not a certainty, hence the attorney's view (T-187).
+
+**Registering Bruma is optional and still open** (asked the same day). Using an unregistered name is
+lawful; registering buys priority over anyone who files later and standing in a store takedown
+dispute, and it also makes the filing visible to Allegra. Official fees found 2026-09-25: EUIPO
+**EUR 850** for one class online (EUR 50 the second, EUR 150 each after); INPI Portugal about
+**EUR 124** for one class online before its fee update of 2026-07-01, so check the current table.
+The EUIPO SME Fund's 2026 voucher (75% back, up to EUR 700) is **exhausted** for 2026.

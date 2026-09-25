@@ -636,6 +636,37 @@ export const STRINGS = {
     'Publicado sob {license}. O texto completo está em {url}',
     'Veröffentlicht unter {license}. Der vollständige Text steht unter {url}'
   ),
+  // 2026-09-25: the policy opens on five short points, then the full text.
+  // ⚠ Each restates a promise the policy itself makes (privacyPolicy.ts).
+  'privacy.summary.title': s('In short', 'Em resumo', 'Kurz gesagt'),
+  'privacy.summary.local': s(
+    'The app never sends your trip to us. There is no account and no server.',
+    'A aplicação nunca nos envia a sua viagem. Não há conta nem servidor.',
+    'Die App sendet Ihre Reise nie an uns. Es gibt kein Konto und keinen Server.'
+  ),
+  'privacy.summary.map': s(
+    'The map is Google’s, so Google sees which part of the island you are looking at.',
+    'O mapa é da Google, por isso a Google vê que parte da ilha está a ver.',
+    'Die Karte stammt von Google, daher sieht Google, welchen Teil der Insel Sie ansehen.'
+  ),
+  'privacy.summary.backup': s(
+    'Your phone’s own backup may include your trip, under your account.',
+    'A cópia de segurança do seu telemóvel pode incluir a viagem, na sua conta.',
+    'Die Sicherung Ihres Telefons kann Ihre Reise enthalten, in Ihrem Konto.'
+  ),
+  // ⚠ Not "it leaves your phone only when you share it": the backup above is
+  // another way it leaves, and i18n.test.ts's banned claims caught the first draft.
+  'privacy.summary.share': s(
+    'When you share or send your trip, where you slept is removed first.',
+    'Quando partilha ou envia a sua viagem, o sítio onde dormiu é removido antes.',
+    'Wenn Sie Ihre Reise teilen oder senden, wird Ihr Übernachtungsort vorher entfernt.'
+  ),
+  'privacy.summary.erase': s(
+    'You can erase everything the app recorded, in Settings.',
+    'Pode apagar tudo o que a aplicação registou, nas Definições.',
+    'Sie können alles Aufgezeichnete in den Einstellungen löschen.'
+  ),
+  'privacy.fullText': s('The full policy', 'A política completa', 'Die vollständige Erklärung'),
   'licences.a11y.back': s('Back to settings', 'Voltar às definições', 'Zurück zu den Einstellungen'),
   'privacy.a11y.back': s(
     'Back to settings',
@@ -700,11 +731,6 @@ export const STRINGS = {
     'Durante a pausa nada é registado e não se obtêm carimbos. Retoma sozinho.',
     'Während der Pause wird nichts aufgezeichnet und es werden keine Stempel gesammelt. Sie endet von selbst.'
   ),
-  'settings.background.off': s(
-    'Records only during an outing you start on the map.',
-    'Só regista durante um passeio que começar no mapa.',
-    'Zeichnet nur während eines Ausflugs auf, den Sie auf der Karte starten.'
-  ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),
   'settings.appearance.dark': s('Dark', 'Escuro', 'Dunkel'),
@@ -757,15 +783,20 @@ export const STRINGS = {
   // reading English in the one place the app explains what it costs them.
   // ⚠ No percentages, by D-041: they say what each tier *does*, never what it
   // spends, because no battery figure in this project has been measured.
-  // 2026-09-25, automatic recording as one list of modes, after WalkNYC. Each
-  // mode's line says what it does in a sentence; none quotes a battery figure,
-  // because none has been measured (D-041).
-  'settings.recording.off': s('Off', 'Desligado', 'Aus'),
-  'settings.recording.needsPermission': s(
-    'Needs permission',
-    'Precisa de autorização',
-    'Braucht Erlaubnis'
+  // 2026-09-25, after WalkNYC's Passive Capture: the switch, and one sentence
+  // under the tiers saying what automatic recording is for and what they cost.
+  'settings.background.toggle': s(
+    'Record while the app is closed',
+    'Registar com a aplicação fechada',
+    'Aufzeichnen, wenn die App geschlossen ist'
   ),
+  'settings.recording.explain': s(
+    'Collects your stamps in the background, so you do not have to press Start an outing every time. Saver uses the least battery and draws a rougher line; Precise follows every step and uses the most.',
+    'Recolhe os seus carimbos em segundo plano, sem ter de carregar em Começar passeio. Poupança gasta menos bateria e desenha uma linha mais grosseira; Preciso segue cada passo e gasta mais.',
+    'Sammelt Ihre Stempel im Hintergrund, ohne dass Sie jedes Mal Ausflug starten drücken müssen. Sparen braucht am wenigsten Akku und zeichnet eine gröbere Linie; Genau folgt jedem Schritt und braucht am meisten.'
+  ),
+  // Each tier's line says what it does, spoken as the segment's hint; none
+  // quotes a battery figure, because none has been measured (D-041).
   'settings.quality.detail.saver': s(
     'Least battery. Places still count; the line on the map is rougher.',
     'Menos bateria. Os lugares contam na mesma; a linha no mapa fica mais grosseira.',

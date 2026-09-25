@@ -166,6 +166,20 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [x] **T-228** **Settings after WalkNYC, looked at on the P30; privacy summary first; Centrar lower**
+      (2026-09-25). The project lead: T-227's list of modes was *"too simple, only text; bring back
+      the toggle"*, and look at WalkNYC on the phone. Looked (screenshots only): its *Passive
+      Capture* is a toggle with a blue pin and a three-way control under it, one explanation below;
+      each row starts with a small coloured glyph; actions are blue words; headings are in sentence
+      case; a line at the foot names the maker. Settings now does that (`SettingsIcon`,
+      `ListRow` tones link/action/danger, `ToggleRow`, outlined `Segmented`), keeping the language
+      list at the top and location access shown only when it needs fixing. The policy screen opens
+      on five summary points, each a promise the policy makes, then the full text as sections that
+      open on a tap; `BackBar` (*‹ Definições*) replaces the *Concluído* bars. *Centrar* sits lower
+      in the stamp's row. Found on the way: i18n.test's banned claims stopped a summary line saying
+      the trip "leaves your phone only when you share it" (the backup is another way); a long value
+      squeezed "Idioma" to a letter a line; the smoke test tapped off-screen rows at [0,0]. All
+      fixed; smoke test passing on the P30.
 - [x] **T-227** **Automatic recording as one list of modes, after WalkNYC; the progress line names a
       municipality; a quieter Centrar** (2026-09-25, the project lead's picks from
       `tools/out/screen-options-2.html` and their note that location settings still confused).

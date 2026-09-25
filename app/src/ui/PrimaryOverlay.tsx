@@ -88,10 +88,11 @@ const RECENTRE_MARK_SIZE = 15;
  * became 32 dp (2026-09-25).
  *
  * ⚠ It must not reach the walk button, the one control on this screen that
- * must never be pressed by accident. It cannot: the pill is centred in the
- * stamp's 101 dp row, so the grown target ends 80.5 dp down it, and the
- * progress line and a gap lie between that row and the button. Nothing
- * sideways: the pill is already wider than 60 dp, and the stamp is beside it.
+ * must never be pressed by accident. It cannot: the pill sits 16 dp above the
+ * foot of the stamp's 101 dp row (`rowCentre`), so the grown target ends 99 dp
+ * down it, still inside the row, and the progress line and a gap lie between
+ * that row and the button. Nothing sideways: the pill is already wider than
+ * 60 dp, and the stamp is beside it.
  */
 const RECENTRE_HIT_SLOP = {
   top: (MIN_TAP_TARGET - RECENTRE_HEIGHT) / 2,
@@ -591,7 +592,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  rowCentre: { flex: 1, alignItems: 'center' },
+  // ⚠ Low in the row since 2026-09-25 (the project lead: "just lower it a
+  // bit"): level with the lower half of the stamp, closer to the line and the
+  // button it belongs with. See RECENTRE_HIT_SLOP for why the target still
+  // cannot reach the walk button.
+  rowCentre: {
+    flex: 1,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: spacing.md,
+  },
   /** As wide as the stamp, so the middle column is centred on the screen. */
   rowMirror: { width: STAMP_BOX },
   recentre: {

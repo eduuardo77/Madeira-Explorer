@@ -24,6 +24,7 @@ import { useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { t } from '../i18n';
 import LICENCES from '../legal/licences.json';
+import BackBar from './BackBar';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 type Licence = {
@@ -74,6 +75,12 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
 
   return (
     <View style={styles.root}>
+      {/* The way back, at the top, as on Settings and Privacy (2026-09-25). */}
+      <BackBar
+        label={t('settings.title')}
+        accessibilityLabel={t('licences.a11y.back')}
+        onPress={onClose}
+      />
       <SectionList
         sections={sections}
         keyExtractor={(licence) => `${licence.name}@${licence.version}`}
@@ -116,18 +123,6 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
           );
         }}
       />
-
-      <View style={styles.footer}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.done')}
-          accessibilityHint={t('licences.a11y.back')}
-          onPress={onClose}
-          style={({ pressed }) => [styles.done, pressed && styles.pressed]}
-        >
-          <Text style={styles.doneText}>{t('common.done')}</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -135,8 +130,7 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   content: {
-    padding: spacing.md,
-    paddingTop: spacing.xl * 2,
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.xl,
   },
   header: { gap: spacing.lg, marginBottom: spacing.lg },
@@ -146,8 +140,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     paddingHorizontal: spacing.xs,
     paddingTop: spacing.lg,
     paddingBottom: spacing.sm,
@@ -172,14 +164,5 @@ const styles = StyleSheet.create({
     lineHeight: fontSize.small * 1.5,
     paddingVertical: spacing.sm,
   },
-  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
   pressed: { opacity: 0.75 },
-  done: {
-    minHeight: MIN_TAP_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-    backgroundColor: colors.action,
-  },
-  doneText: { color: colors.actionText, fontSize: fontSize.body, fontWeight: '700' },
 });

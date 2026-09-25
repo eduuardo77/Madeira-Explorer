@@ -54,3 +54,11 @@ test('a crash is this app’s only when its process is named', () => {
   assert.match(found[1], /Fatal signal 11/);
   assert.deepEqual(crashLines('', 'com.proa.madeira'), []);
 });
+
+test('a row scrolled out of view is not found, so the caller scrolls to it', () => {
+  const offscreen = parseNodes(
+    '<node text="Licenças" content-desc="" bounds="[0,0][0,0]" /><node text="Idioma" bounds="[0,10][100,70]" />'
+  );
+  assert.equal(findNode(offscreen, 'Licenças'), null);
+  assert.equal(findNode(offscreen, 'Idioma')?.text, 'Idioma');
+});

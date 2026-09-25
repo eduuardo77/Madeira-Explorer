@@ -53,10 +53,21 @@ export function findNode(nodes, label) {
   const hit = (value) =>
     label instanceof RegExp ? label.test(value) : value.trim() === label;
   return (
-    nodes.find((node) => node.bounds !== null && hit(node.desc)) ??
-    nodes.find((node) => node.bounds !== null && hit(node.text)) ??
+    nodes.find((node) => onScreen(node) && hit(node.desc)) ??
+    nodes.find((node) => onScreen(node) && hit(node.text)) ??
     null
   );
+}
+
+/**
+ * ⚠ Android lists a row that has scrolled out of view with bounds
+ * `[0,0][0,0]`. Taken as found, it was tapped at the screen's corner instead of
+ * scrolled to (2026-09-25, Licences below the fold of a longer Settings).
+ */
+function onScreen(node) {
+  if (node.bounds === null) return false;
+  const [left, top, right, bottom] = node.bounds;
+  return right > left && bottom > top;
 }
 
 /** Where to tap: the middle of the node. */

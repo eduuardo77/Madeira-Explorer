@@ -56,6 +56,6 @@ test('⚠ T-189 — Settings shows the technical row only when it is given a rou
   assert.match(source, /onOpenDebug\?: \(\) => void/);
   assert.match(
     source,
-    /onOpenDebug === undefined \? null : \(\s*<ListRow label=\{t\('settings\.about\.technical'\)\}/
+    /onOpenDebug === undefined \? null : \(\s*<ListRow[^>]*label=\{t\('settings\.about\.technical'\)\}/
   );
 });

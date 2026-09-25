@@ -125,12 +125,12 @@ const STEPS = [
   }],
   ['Privacy, and back', async () => {
     await tap(label('settings.about.privacy'), { scroll: true });
-    await tap(label('common.done'));
+    await tap(label('privacy.a11y.back'));
     await reach(label('settings.title'));
   }],
   ['Licences, and back', async () => {
     await tap(label('settings.about.licences'), { scroll: true });
-    await tap(label('common.done'));
+    await tap(label('licences.a11y.back'));
     await reach(label('settings.title'));
   }],
   ['back to the map', () => tap(label('settings.a11y.backToMap')).then(() => reach(MAP))],

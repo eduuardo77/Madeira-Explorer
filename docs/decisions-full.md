@@ -5065,3 +5065,40 @@ grid) and `npx expo prebuild --clean`.
 
 **Revisit if** the trademark search finds a conflict, or the five-person test the project lead
 was offered (hear it once, write it down) shows locals hearing only the footballer.
+
+### ⚠ Trademark and availability search on Bruma, 2026-09-25 (T-187): a blocking conflict
+
+Run the same day the name was chosen, at the project lead's request. **Sources:** TMview (EUIPO,
+INPI Portugal, OEPM, UKIPO, DPMA, WIPO, USPTO and the other EU offices), EUIPO eSearch for the
+detail, the App Store in PT/GB/DE, Google Play, and RDAP for domains. Classes 9 (apps), 39 (travel),
+41 and 42 (software). **A screen, not legal clearance:** TMview is not an official register.
+
+**1. A live app with the same name and the same idea.** *"Bruma: Fog of War City Map"*, App Store,
+by Andrei Fedoseev, released 2026-04-01, Health & Fitness, free with a Pro tier, in EN/FR/DE/PT/RU/ES,
+with its own site (bruma.run). *"Walk to reveal it"*, background tracking, coverage percentages,
+location kept on the device. Not on Play yet, and no registered mark found for it. **This alone
+disqualifies the name**: in search, in reviews and in the press, ours would read as the copy.
+
+**2. An EU word mark BRUMA** (EUTM 006378988), registered 2010, renewed 2017, expires 2027-10-19,
+owned by Allegra Europea Holding S.A. (a Madrid real-estate holding). It covers class 39 *travel
+arrangement* and class 42 *design and development of computer hardware and software*; no class 9.
+Also held as a Spanish and a UK mark. Probably unused for software or travel, which makes it
+vulnerable to a non-use action, but it is a word mark identical to ours on the services nearest
+an app.
+
+**3. Minor:** *Bruma Viajes* and *Viajes Bruma Travel* (Spain, travel agencies); *Kebruma*
+(EU/UK, class 9: GPS apparatus and activity trackers); *Festival Ilhas de Bruma* (PT). In Portugal,
+*Ilhas de Bruma* is the Azores, from the song of that name, so the word leans Azorean.
+
+**Domains:** bruma.app and bruma.com are registered; bruma.pt and getbruma.app were free.
+
+**The fallbacks, screened the same way:**
+- **Proa: the cleanest.** No EU mark. Portugal's PROA is architecture and design (class 42,
+  figurative). Spain's PROA word mark covers software design, owned by the Spanish society of
+  infectious diseases (PROA is their antibiotics programme), which is also why the App Store has
+  PROA medical and education apps. Germany's is M&A consulting. No travel or walking app.
+- **Palmo: weaker.** An EU figurative PALMO in classes 2, 9 and 35 (a Spanish toner supplier; the
+  class 9 heading reads wide), and on the App Store a *Palmo* health and fitness app and a *Palmo*
+  budget tracker.
+
+**Status:** the name decision is the project lead's to revisit; D-092 stands until they do.

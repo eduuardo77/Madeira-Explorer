@@ -166,6 +166,13 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [ ] **T-229** **Still indoors, GPS drift is drawn as short spikes** (found 2026-09-25 from the
+      P30's own data, `docs/field-notes.md`). Trip #30 drew 3 lines whose points reached 109 m from a
+      phone that never moved: the project lead's *"random blue lines, not on the street"*. They drift
+      out slowly, so `rejectSpikes`' 2.5 m/s test passes them. Candidate: while stationary (the
+      collapse's own test), drop an excursion that leaves and returns within minutes without
+      crossing a walking pace. ⚠ Test it on a synthetic fixture shaped like these, never on the
+      real data (D-016), and check it does not eat a real short walk. Affects drawing, not stamps.
 - [x] **T-228** **Settings after WalkNYC, looked at on the P30; privacy summary first; Centrar lower**
       (2026-09-25). The project lead: T-227's list of modes was *"too simple, only text; bring back
       the toggle"*, and look at WalkNYC on the phone. Looked (screenshots only): its *Passive

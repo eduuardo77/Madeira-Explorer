@@ -103,6 +103,31 @@ slightly shorter line than it was.
 
 ---
 
+## 2026-09-25 — Is it capturing? The P30's last four days, and the "random blue lines"
+
+Asked by the project lead before an outing: *"I've had some random blue lines around where I live and
+they are now gone. And those blue lines were just random, not exactly on the street."* Database
+pulled through the field build (`Madeira-fieldwork/p30-2026-09-25/`, SHA-256 alongside, never
+committed), read on the laptop. The phone sat plugged in all week, so this measures a still phone,
+not a moving one.
+
+- **Capture is continuous.** 1,928 / 2,967 / 1,605 / 988 fixes on 22 to 25 September; longest silence
+  on the 25th 27 min (342 min on the 22nd was the dead-recorder era, T-174/T-212). Accuracy p50 4 to
+  7 m, p90 6 to 14 m, 95% or more within 20 m every day. `dumpsys location` shows a 5 s GPS request
+  on Proa's behalf (*Preciso*).
+- **The lines vanished because a trip ended, not because data was lost.** The previous session's
+  *Terminar viagem* test closed trip #30 (6,509 fixes, kept) on 24 September; the map draws the trip
+  on show, #31.
+- **The lines themselves were indoor GPS, drawn.** Still at home, 90% of fixes sit within 3 m, but 7
+  hops of 50 to 109 m out and back. Through the app's own `drawableSegments`, trip #30 drew 3 lines
+  of 23 points, 6 of them 50 to 109 m from the phone: the spikes drift out slowly, so the speed test
+  in `rejectSpikes` (2.5 m/s) passes them. **T-229.** Trip #31, the same phone still, draws nothing.
+- **4 logged errors**, *"Couldn't start the foreground service"* on a background launch sync
+  (24 Sept 14:45 and 14:53, 25 Sept 09:20 twice). No silence around them beyond 27 min: the service
+  was already running, and the error was a redundant start.
+- **After an app update the recorder is off until the app is opened** (seen twice today): Android's
+  rule, T-210's notice says so, T-212 restarts it on open.
+
 ## 2026-09-22 — The first recorded data. A Huawei P30, 22–28 August.
 
 **Who:** the project lead's borrowed Android (CLAUDE.md's loan), found still

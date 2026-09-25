@@ -5076,8 +5076,11 @@ detail, the App Store in PT/GB/DE, Google Play, and RDAP for domains. Classes 9 
 **1. A live app with the same name and the same idea.** *"Bruma: Fog of War City Map"*, App Store,
 by Andrei Fedoseev, released 2026-04-01, Health & Fitness, free with a Pro tier, in EN/FR/DE/PT/RU/ES,
 with its own site (bruma.run). *"Walk to reveal it"*, background tracking, coverage percentages,
-location kept on the device. Not on Play yet, and no registered mark found for it. **This alone
-disqualifies the name**: in search, in reviews and in the press, ours would read as the copy.
+location kept on the device. Not on Play yet, and no registered mark found for it. ~~This alone
+disqualifies the name~~ ⚠ **Overstated, corrected the same day:** it looks close to abandoned. One
+version (1.0.1, 2026-04-04) and no update since, **one rating** across six App Stores, and bruma.run
+answered 502 on 2026-09-25 (its domain is paid to 2027-03). No legal block from it; the risk is a
+name collision if it revives or reaches Play.
 
 **2. An EU word mark BRUMA** (EUTM 006378988), registered 2010, renewed 2017, expires 2027-10-19,
 owned by Allegra Europea Holding S.A. (a Madrid real-estate holding). It covers class 39 *travel

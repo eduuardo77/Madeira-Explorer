@@ -166,6 +166,17 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [x] **T-226** **Settings, compact, and no jump when choosing a language** (2026-09-25, the project
+      lead on the P30: *"whenever you click language the page goes up and down"*, *"the settings take
+      too much space"*). Measured first: after a tap on a language the IDIOMA heading left the screen
+      for over a second, because every paragraph above it re-wrote itself in the new language. Now
+      language is the first row and opens a list (`LanguageSheet`); measured again, the row stays at
+      y=436 throughout. Every control is a plain `ListRow`; location status and its button are one
+      row (*Acesso à localização · Sempre*); the battery row joined the group, titled *Registo
+      automático* per D-087 §1; the Done bar became *‹ Mapa* at the top, as on the passport; one
+      short note per group. The first screenful holds six controls, where it held two. 16 unused
+      strings removed. Seen on the P30, smoke test passing. ⚠ **Rows stay 60 dp (D-015)**: the
+      project lead finds them tall, and that is their call on D-015, asked, not taken.
 - [x] **T-225** **The place card shows a distance only when it is near** (≤ 2 km, `placeCard.ts`
       rule 3). The project lead on the P30: *"A 39 km em linha reta" is a bit useless, Madeira is
       full of turns.* The 2 km is a judgement, not a measurement, and rule 2's qualifier stays.

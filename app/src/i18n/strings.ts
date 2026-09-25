@@ -655,47 +655,33 @@ export const STRINGS = {
 
   // ── Settings (design brief §5) ──────────────────────────────────────────
   'settings.title': s('Settings', 'Definições', 'Einstellungen'),
-  'settings.done': s('Done', 'Concluído', 'Fertig'),
-  'settings.section.recording': s('Recording', 'Registo', 'Aufzeichnung'),
-  'settings.recording.title': s(
-    'Recording your trip',
-    'A registar a sua viagem',
-    'Ihre Reise wird aufgezeichnet'
-  ),
-  'settings.recording.auto': s('Fills in by itself', 'Preenche-se sozinho', 'Füllt sich von selbst'),
-  'settings.recording.footnote': s(
-    'Your map fills in on its own, even when the app is closed.',
-    'O seu mapa preenche-se sozinho, mesmo com a aplicação fechada.',
-    'Ihre Karte füllt sich von selbst, auch wenn die App geschlossen ist.'
-  ),
-  'settings.section.stopping': s(
-    'If recording keeps stopping',
-    'Se o registo continuar a parar',
-    'Wenn die Aufzeichnung immer wieder stoppt'
+  // D-087 §1: background recording has its own name, and it lives here. Since
+  // 2026-09-25 it heads the one group that holds location access, the switch,
+  // the quality, the pause and the battery row.
+  'settings.section.background': s(
+    'Automatic recording',
+    'Registo automático',
+    'Automatische Aufzeichnung'
   ),
   'settings.keepRunning': s(
     'Let {app} keep running',
     'Deixar o {app} continuar',
     '{app} weiterlaufen lassen'
   ),
-  'settings.keepRunning.footnote': s(
-    'Some phones pause apps to save battery, and the map stops filling in. This opens the battery settings: find {app} there and let it run.',
-    'Alguns telemóveis pausam aplicações para poupar bateria, e o mapa deixa de se preencher. Isto abre as definições de bateria: procure o {app} e deixe-o correr.',
-    'Manche Telefone pausieren Apps, um Akku zu sparen. Dann füllt sich die Karte nicht mehr. Dies öffnet die Akku-Einstellungen: Suchen Sie {app} und lassen Sie es laufen.'
+  // 2026-09-25, the compact Settings. One row names location access and opens
+  // the phone's settings for it: T-202 had already renamed the button from
+  // "Open phone settings", which the review could not connect to recording.
+  'settings.location': s('Location access', 'Acesso à localização', 'Standortzugriff'),
+  'settings.back': s('Map', 'Mapa', 'Karte'),
+  'settings.keepRunning.detail': s(
+    'If your phone pauses it to save battery. Opens the battery settings.',
+    'Se o telemóvel a pausar para poupar bateria. Abre as definições de bateria.',
+    'Falls Ihr Telefon sie zum Akkusparen pausiert. Öffnet die Akku-Einstellungen.'
   ),
-  // ⚠ T-202: it said "Open phone settings" beside "Recording your trip", and
-  // the review could not tell why recording would send you there. It is where
-  // location access is changed, so it says that.
-  'settings.openPhoneSettings': s(
-    'Change location access',
-    'Alterar acesso à localização',
-    'Standortzugriff ändern'
-  ),
-  // D-087 §1: background recording has its own name, and it lives here.
-  'settings.section.background': s(
-    'Automatic recording',
-    'Registo automático',
-    'Automatische Aufzeichnung'
+  'settings.help.detail': s(
+    'One recording, to help tune the app. You see what it holds before it goes.',
+    'Um registo, para ajudar a afinar a aplicação. Vê o que contém antes de o enviar.',
+    'Eine Aufzeichnung, um die App zu verbessern. Sie sehen den Inhalt vor dem Senden.'
   ),
   // D-087 §6. ⚠ One hour is Provisional: the project lead's own example ("not
   // the next hour"); the lengths were left open.
@@ -729,11 +715,10 @@ export const STRINGS = {
   'settings.a11y.useDarkMap': s('Use the dark map', 'Usar o mapa escuro', 'Dunkle Karte verwenden'),
   'settings.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
 
-  'settings.permission.always': s(
-    'Fills in by itself',
-    'Preenche-se sozinho',
-    'Füllt sich von selbst'
-  ),
+  // 2026-09-25: the phone's own word, as the value of "Location access". It
+  // said "Fills in by itself", which as a value of a permission read as a
+  // riddle, and its length wrapped the label onto two lines on the P30.
+  'settings.permission.always': s('Always', 'Sempre', 'Immer'),
   'settings.permission.whenInUse': s(
     'Only while the app is open',
     'Só com a aplicação aberta',
@@ -747,25 +732,6 @@ export const STRINGS = {
     'Your map fills in only while the app is open. To let it fill in by itself, set location to “Allow all the time”.',
     'O mapa só se preenche com a aplicação aberta. Para se preencher sozinho, ponha a localização em “Permitir sempre”.',
     'Die Karte füllt sich nur bei geöffneter App. Damit sie sich von selbst füllt, stellen Sie den Standort auf „Immer zulassen“.'
-  ),
-  'settings.background.blocked': s(
-    'This needs location set to “Allow all the time” for {app} (Recording, above). Until then, use Start an outing on the map.',
-    'Precisa da localização do {app} em “Permitir sempre” (Registo, acima). Até lá, use Começar passeio no mapa.',
-    'Dafür braucht {app} den Standort auf „Immer zulassen“ (Aufzeichnung, oben). Bis dahin nutzen Sie Ausflug starten auf der Karte.'
-  ),
-  'settings.background.on': s(
-    'Your map fills in while the app is closed. Turn this off and nothing is recorded unless you start it yourself on the map.',
-    'O seu mapa preenche-se com a aplicação fechada. Desligue isto e nada é registado a não ser que seja você a começar a registar no mapa.',
-    'Ihre Karte füllt sich auch bei geschlossener App. Schalten Sie dies aus, wird nichts aufgezeichnet, außer Sie starten die Aufzeichnung selbst auf der Karte.'
-  ),
-  'settings.section.quality': s('How closely', 'Com que detalhe', 'Wie genau'),
-  'settings.quality.footnote': s(
-    // ⚠ T-191: this used to add that measuring the cost "needs a real phone" —
-    // true, and a sentence telling every user the app had never been measured
-    // on one. The number itself stays unstated until T-054 (D-041).
-    'Each one changes how often the app asks your phone where you are, which is what uses the battery. The more closely it follows you, the more battery it uses.',
-    'Cada opção muda a frequência com que a aplicação pergunta ao telemóvel onde está, e é isso que gasta bateria. Quanto mais de perto o acompanha, mais bateria gasta.',
-    'Jede Stufe ändert, wie oft die App Ihr Telefon nach dem Standort fragt, und genau das verbraucht Akku. Je genauer sie Ihnen folgt, desto mehr Akku braucht sie.'
   ),
   // ⚠ `{collected} of {total}` was written into PassportView as a template
   // literal until 2026-08-28, so the one English word on an otherwise Portuguese
@@ -804,12 +770,6 @@ export const STRINGS = {
     'Pergunta com mais frequência e continua mesmo quando está parado, para que um almoço demorado não seja uma falha na linha. É a que mais bateria gasta, de longe.',
     'Fragt am häufigsten und läuft weiter, auch wenn Sie anhalten. Ein langes Mittagessen wird so keine Lücke in der Linie. Verbraucht mit Abstand am meisten Akku.'
   ),
-  'settings.section.map': s('Map', 'Mapa', 'Karte'),
-  'settings.map.footnote': s(
-    'The map is Google’s and needs a connection to draw. Your trip is recorded either way.',
-    'O mapa é da Google e precisa de ligação para ser desenhado. A viagem é registada na mesma.',
-    'Die Karte stammt von Google und braucht eine Verbindung. Ihre Reise wird trotzdem aufgezeichnet.'
-  ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
     'The app never sends your trip to us. There is no account and no server. Your phone’s own backup includes it, if you have backups switched on.',
@@ -836,14 +796,6 @@ export const STRINGS = {
   'settings.about.contact': s('Contact us', 'Contactar-nos', 'Kontakt'),
   'settings.about.licences': s('Open-source licences', 'Licenças de código aberto', 'Open-Source-Lizenzen'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
-  'settings.section.help': s('Help improve the app', 'Ajudar a melhorar a aplicação', 'Die App verbessern'),
-  'settings.help.footnote': s(
-    // ⚠ T-202: shorter, and the Portuguese no longer says "o identifique a si"
-    // (masculine) or "é você que escolhe" (blunt in pt-PT).
-    'Sends one recording and what the app decided about it, to help tune it. Where you slept is removed; no name, no account. Only if you send it, to wherever you choose.',
-    'Envia um registo e o que a aplicação decidiu sobre ele, para a ajudar a afinar. O sítio onde dormiu é removido; sem nome nem conta. Só é enviado se o enviar, para onde escolher.',
-    'Sendet eine Aufzeichnung und die Entscheidungen der App dazu, damit sie besser wird. Ihr Übernachtungsort wird entfernt; kein Name, kein Konto. Nur wenn Sie sie senden, wohin Sie wollen.'
-  ),
   'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),
   'settings.help.preparing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
   'settings.section.erase': s('Erase', 'Apagar', 'Löschen'),

@@ -17,6 +17,25 @@
  *      2026-09-24; the review (N7) read that as a warning sign pasted on rather
  *      than a designed control, and an emoji draws differently on every skin.
  *
+ * ONE SCREEN'S WORTH, NOT FOUR (2026-09-25)
+ * -----------------------------------------
+ * The project lead on the P30: *"the settings take too much space"*, and the
+ * page jumped whenever a language was picked. The first screenful held two
+ * controls: a large title, a status row that wrapped, each button a grey box in
+ * a white card, a whole section for one button, and a Done bar pinned at the
+ * foot. Now every control is a plain list row with a chevron (`ListRow`), the
+ * location status and its button are one row, the battery row joined
+ * *Registo*, and the way back is *‹ Mapa* at the top, as on the passport.
+ *
+ * ⚠ **Language is first, and one row that opens a list** (`LanguageSheet`).
+ * Four radio rows sat under every other section, so choosing one re-wrote all
+ * the text above it in another language, and the rows slid out from under the
+ * finger: measured on the P30, the IDIOMA heading left the screen for over a
+ * second. With nothing above it, nothing can move it.
+ *
+ * ⚠ **Rows stay 60 dp** (D-015). The project lead finds them tall; that is a
+ * decision about D-015 to put to them, not one to take here.
+ *
  * ERASING IS PERMANENT AND THE COPY HAS TO SAY SO
  * -----------------------------------------------
  * There is no cloud, no account and no restore (D-001) — the very properties
@@ -29,7 +48,9 @@
  * Presentational: props in, pixels out, so the workbench can mount it (D-038).
  */
 
+import { Children, useState, type ReactNode } from 'react';
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -113,68 +134,143 @@ export type SettingsViewProps = {
   onClose: () => void;
 };
 
-function Section({
+/**
+ * One group of rows (D-054's grouped list): an optional heading above the card,
+ * the rows inside it with a hairline between each, and an optional footnote
+ * below. The footnote is one or two sentences, never a paragraph.
+ */
+function Group({
   title,
   footnote,
   destructive,
   children,
 }: {
-  title: string;
-  footnote: string;
+  title?: string;
+  footnote?: string;
   destructive?: boolean;
-  children?: React.ReactNode;
+  children: ReactNode;
 }) {
+  const rows = Children.toArray(children).filter(Boolean);
   return (
-    // iOS grouped-inset list (D-054): the heading sits **above** the card and
-    // the footnote **below** it, both in the page's margin. The card holds
-    // only the controls. It matches the passport, which is the point — two
-    // screens laid out by two different rules is what "generic" looks like.
     <View style={styles.group}>
-      <Text style={[styles.sectionTitle, destructive === true && styles.dangerText]}>
-        {title}
-      </Text>
-      {children === undefined ? null : (
-        <View style={[styles.section, destructive === true && styles.sectionDanger]}>
-          {children}
-        </View>
+      {title === undefined ? null : (
+        <Text style={[styles.sectionTitle, destructive === true && styles.dangerText]}>{title}</Text>
       )}
-      {/* The footnote, not a tooltip. §5: this is what lets the screen grow. */}
-      <Text style={styles.footnote}>{footnote}</Text>
+      <View style={styles.section}>
+        {rows.map((row, index) => (
+          <View key={index}>
+            {index === 0 ? null : <View style={styles.divider} />}
+            {row}
+          </View>
+        ))}
+      </View>
+      {footnote === undefined ? null : <Text style={styles.footnote}>{footnote}</Text>}
     </View>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </View>
-  );
-}
-
-function Action({
+/**
+ * A row: a label, an optional value on the right, an optional line of detail
+ * under the label, and a chevron when it leads somewhere. Without `onPress` it
+ * is information only (the version).
+ */
+function ListRow({
   label,
+  value,
+  detail,
   onPress,
   danger,
 }: {
   label: string;
-  onPress: () => void;
+  value?: string;
+  detail?: string;
+  onPress?: () => void;
   danger?: boolean;
 }) {
+  const body = (
+    <>
+      <View style={styles.rowText}>
+        <Text style={[styles.rowLabel, danger === true && styles.dangerText]}>{label}</Text>
+        {detail === undefined ? null : <Text style={styles.rowDetail}>{detail}</Text>}
+      </View>
+      {value === undefined ? null : <Text style={styles.rowValue}>{value}</Text>}
+      {onPress === undefined || danger === true ? null : (
+        <Text style={styles.chevron} accessibilityElementsHidden importantForAccessibility="no">
+          ›
+        </Text>
+      )}
+    </>
+  );
+  if (onPress === undefined) {
+    return <View style={styles.row}>{body}</View>;
+  }
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={value === undefined ? label : `${label}, ${value}`}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.action,
-        danger === true && styles.actionDanger,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <Text style={[styles.actionText, danger === true && styles.dangerText]}>{label}</Text>
+      {body}
     </Pressable>
+  );
+}
+
+/**
+ * The language list, over the screen (2026-09-25). A sheet rather than rows in
+ * the page, so a choice cannot move anything under the finger; it closes on a
+ * choice, on *Cancelar*, on the backdrop and on Android's Back.
+ *
+ * T-202's radio semantics are kept (T-215): each option says whether it is
+ * `checked`, and *Automático* says which language it resolves to.
+ */
+function LanguageSheet({
+  choice,
+  onChoose,
+  onClose,
+}: {
+  choice: Language | null;
+  onChoose: (language: Language | null) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal transparent animationType="fade" onRequestClose={onClose} visible>
+      <Pressable style={styles.scrim} onPress={onClose} accessible={false} />
+      <View style={styles.sheet}>
+        <Text style={styles.sheetTitle}>{t('settings.section.language')}</Text>
+        <View accessibilityRole="radiogroup">
+          {([null, ...LANGUAGES] as (Language | null)[]).map((option) => {
+            const selected = option === choice;
+            const label =
+              option === null
+                ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
+                : LANGUAGE_NAMES[option];
+            return (
+              <Pressable
+                key={option ?? 'auto'}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selected }}
+                accessibilityLabel={label}
+                onPress={() => onChoose(option)}
+                style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}
+              >
+                <Text style={styles.rowLabel}>{label}</Text>
+                <Text style={styles.tick}>{selected ? '✓' : ''}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={styles.footnote}>{t('settings.language.footnote')}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.cancel')}
+          onPress={onClose}
+          style={({ pressed }) => [styles.radioRow, styles.sheetCancel, pressed && styles.pressed]}
+        >
+          <Text style={styles.sheetCancelText}>{t('common.cancel')}</Text>
+        </Pressable>
+      </View>
+    </Modal>
   );
 }
 
@@ -200,7 +296,7 @@ function Toggle({
 }) {
   return (
     <View style={[styles.row, disabled === true && styles.rowDisabled]}>
-      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={[styles.rowLabel, styles.rowText]}>{label}</Text>
       <Switch
         accessibilityLabel={label}
         value={value}
@@ -350,58 +446,63 @@ export default function SettingsView({
   // has granted Always, and the tier means nothing until the switch is on —
   // so the screen asks the question once and every branch below reads it.
   const recordingInBackground = backgroundTracking && permission === 'always';
+  const [choosingLanguage, setChoosingLanguage] = useState(false);
+  const paused = pausedUntil != null && pausedUntil > Date.now();
 
   return (
     <View style={styles.root}>
+      {/* The way back, where the passport has it (T-211 also wires Back). */}
+      <View style={styles.bar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.a11y.backToMap')}
+          onPress={onClose}
+          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+        >
+          <Text style={styles.backText}>{`‹ ${t('settings.back')}`}</Text>
+        </Pressable>
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.heading}>{t('settings.title')}</Text>
 
-        <Section
-          title={t('settings.section.recording')}
-          footnote={
-            permission === 'always'
-              ? t('settings.recording.footnote')
-              : t('settings.recording.footnoteLimited')
-          }
-        >
-          <Row label={t('settings.recording.title')} value={describePermission(permission)} />
-          <Action label={t('settings.openPhoneSettings')} onPress={onOpenSystemSettings} />
-        </Section>
-
-        {/* Android only. The label says what it achieves, not what Android
-            calls it — "battery optimisation" is the phone's word for it, and
-            the footnote uses that word so the screen it opens is recognisable
-            when the user gets there. */}
-        {onOpenBatterySettings !== null ? (
-          <Section
-            title={t('settings.section.stopping')}
-            footnote={t('settings.keepRunning.footnote', { app: APP_NAME })}
-          >
-            <Action
-              label={t('settings.keepRunning')}
-              onPress={onOpenBatterySettings}
+        {/* First, so choosing one cannot re-flow anything above it. */}
+        {languageChoice === undefined || onChangeLanguage === undefined ? null : (
+          <Group>
+            <ListRow
+              label={t('settings.section.language')}
+              value={
+                languageChoice === null
+                  ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
+                  : LANGUAGE_NAMES[languageChoice]
+              }
+              onPress={() => setChoosingLanguage(true)}
             />
-          </Section>
-        ) : null}
+          </Group>
+        )}
 
-        {/* ⚠ ONE CARD, NOT TWO (2026-08-28, the project lead's instruction).
-            "May the app record?" and "how closely?" were separate sections, and
-            the second appeared out of nowhere when you flipped the first —
-            which reads as a glitch rather than a reveal. In the reference app
-            they point at, consent and cost sit in one card because the second
-            is meaningless without the first. `trackingPreference.ts` still
-            keeps them as two independent stored values; only the presentation
-            is joined. */}
-        <Section
+        {/* ⚠ ONE CARD (2026-08-28, the project lead's instruction): "may the app
+            record" and "how closely" sit together because the second means
+            nothing without the first. Since 2026-09-25 the location status and
+            the battery row live here too, one row each. */}
+        <Group
+          // D-087 §1: the background recorder keeps its own name.
           title={t('settings.section.background')}
+          // With recording on, the quality's own line says what it costs, so
+          // the group needs no second paragraph about battery (2026-09-25).
           footnote={
             permission !== 'always'
-              ? t('settings.background.blocked')
+              ? t('settings.recording.footnoteLimited')
               : recordingInBackground
-                ? t('settings.quality.footnote')
+                ? undefined
                 : t('settings.background.off')
           }
         >
+          <ListRow
+            label={t('settings.location')}
+            value={describePermission(permission)}
+            onPress={onOpenSystemSettings}
+          />
           <Toggle
             label={t('settings.background.toggle')}
             value={recordingInBackground}
@@ -413,38 +514,37 @@ export default function SettingsView({
             disabled={permission !== 'always'}
           />
           {recordingInBackground ? (
-            <>
-              <View style={styles.divider} />
-              <Segmented
-                value={trackingQuality}
-                onChange={onChangeTrackingQuality}
-              />
+            <View style={styles.quality}>
+              <Segmented value={trackingQuality} onChange={onChangeTrackingQuality} />
               {/* The state, in words. Not decoration — see `Segmented`. */}
-              <Text style={styles.segmentDetail}>
-                {t(QUALITY_TEXT[trackingQuality].detail)}
-              </Text>
-              {/* D-087 §6 — the pause lives with the thing it pauses. A pause in
-                  the past is no pause, the same rule the sink applies. */}
-              {onPause === undefined || onResume === undefined ? null : (
-                <>
-                  <View style={styles.divider} />
-                  {pausedUntil != null && pausedUntil > Date.now() ? (
-                    <>
-                      <Row
-                        label={t('settings.pause.until', { time: formatClock(pausedUntil) })}
-                        value=""
-                      />
-                      <Action label={t('settings.pause.resume')} onPress={onResume} />
-                    </>
-                  ) : (
-                    <Action label={t('settings.pause.hour')} onPress={onPause} />
-                  )}
-                  <Text style={styles.segmentDetail}>{t('settings.pause.footnote')}</Text>
-                </>
-              )}
-            </>
+              <Text style={styles.rowDetail}>{t(QUALITY_TEXT[trackingQuality].detail)}</Text>
+            </View>
           ) : null}
-        </Section>
+          {/* D-087 §6: the pause lives with the thing it pauses. A pause in the
+              past is no pause, the same rule the sink applies. */}
+          {recordingInBackground && onPause !== undefined && onResume !== undefined ? (
+            <ListRow
+              label={
+                paused
+                  ? t('settings.pause.until', { time: formatClock(pausedUntil ?? 0) })
+                  : t('settings.pause.hour')
+              }
+              value={paused ? t('settings.pause.resume') : undefined}
+              detail={paused ? undefined : t('settings.pause.footnote')}
+              onPress={paused ? onResume : onPause}
+            />
+          ) : null}
+          {/* Android only. The label says what it achieves, not what Android
+              calls it; the detail uses the phone's word, so the screen it opens
+              is recognisable when the user gets there. */}
+          {onOpenBatterySettings === null ? null : (
+            <ListRow
+              label={t('settings.keepRunning', { app: APP_NAME })}
+              detail={t('settings.keepRunning.detail')}
+              onPress={onOpenBatterySettings}
+            />
+          )}
+        </Group>
 
         {/* ⚠ HIDDEN, NOT DELETED (2026-08-28). The project lead asked for one
             theme, always light, until the app has earned a second one. Light was
@@ -455,7 +555,7 @@ export default function SettingsView({
             `map/mapStylePreference.ts` is the one line that brings it back with
             every stored preference intact. */}
         {MAP_STYLE_CHOICE_ENABLED ? (
-          <Section
+          <Group
             title={t('settings.section.appearance')}
             footnote={t('settings.appearance.footnote')}
           >
@@ -491,156 +591,78 @@ export default function SettingsView({
                 </Pressable>
               ))}
             </View>
-          </Section>
-
+          </Group>
         ) : null}
 
-        {/* ⚠ This section said the opposite until 2026-08-14: *the whole island
-            is already on your phone, so the map works with no signal and uses
-            no data*. That was true of the offline pack and became false the
-            day the app switched to Google's map (D-057), which streams. It is
-            the kind of stale reassurance that is worse than no reassurance,
-            because the user finds out in a laurel forest with no signal.
-
-            The row that reported the pack's size went with it. It was already
-            dead — the caller had been passing `null` — and it implied the map
-            on screen was the one on the phone.
-
-            What replaces it is the distinction that actually matters: the map
-            needs a connection, and the recording does not. If the MapLibre
-            path ever ships again (`map/MapLibreScreen.tsx` is kept), this is
-            one of the places that has to change back. */}
-        <Section
-          title={t('settings.section.map')}
-          footnote={t('settings.map.footnote')}
-        />
-
-        {/* T-202. Radio rows, not the tier's segmented control: four options,
-            and "Automatic" has to say which language it resolves to. */}
-        {languageChoice === undefined || onChangeLanguage === undefined ? null : (
-          <Section
-            title={t('settings.section.language')}
-            footnote={t('settings.language.footnote')}
-          >
-            <View accessibilityRole="radiogroup">
-              {([null, ...LANGUAGES] as (Language | null)[]).map((option) => {
-                const selected = option === languageChoice;
-                const label =
-                  option === null
-                    ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
-                    : LANGUAGE_NAMES[option];
-                return (
-                  <Pressable
-                    key={option ?? 'auto'}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: selected }}
-                    accessibilityLabel={label}
-                    onPress={() => onChangeLanguage(option)}
-                    style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}
-                  >
-                    <Text style={styles.rowLabel}>{label}</Text>
-                    <Text style={styles.rowValue}>{selected ? '✓' : ''}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </Section>
-        )}
-
-        <Section
-          title={t('settings.section.about')}
-          footnote={t('settings.about.footnote')}
-        >
-          <Action label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
-          {onContact === undefined ? null : (
-            <Action label={t('settings.about.contact')} onPress={onContact} />
-          )}
+                <Group title={t('settings.section.about')} footnote={t('settings.about.footnote')}>
+          <ListRow label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
           {onOpenLicences === undefined ? null : (
-            <Action label={t('settings.about.licences')} onPress={onOpenLicences} />
+            <ListRow label={t('settings.about.licences')} onPress={onOpenLicences} />
           )}
-          {version === undefined ? null : (
-            <Row label={t('settings.about.version')} value={version} />
+          {onContact === undefined ? null : (
+            <ListRow label={t('settings.about.contact')} onPress={onContact} />
           )}
-          {onOpenDebug === undefined ? null : (
-            <Action label={t('settings.about.technical')} onPress={onOpenDebug} />
-          )}
-        </Section>
-
-        {/* A rare action, so it lives where rare lives (design brief §3.2) —
-            not on the passport beside the reward (OD-11, D-069). */}
-        {onDonateWalk === undefined ? null : (
-          <Section
-            title={t('settings.section.help')}
-            footnote={
-              t('settings.help.footnote')
-            }
-          >
-            <Action
+          {/* A rare action, so it lives where rare lives (design brief §3.2),
+              not on the passport beside the reward (OD-11, D-069). What it
+              sends is spelled out in the confirmation before anything leaves. */}
+          {onDonateWalk === undefined ? null : (
+            <ListRow
               label={donating === true ? t('settings.help.preparing') : t('settings.help.send')}
+              detail={t('settings.help.detail')}
               onPress={onDonateWalk}
             />
-          </Section>
-        )}
+          )}
+          {version === undefined ? null : (
+            <ListRow label={t('settings.about.version')} value={version} />
+          )}
+          {onOpenDebug === undefined ? null : (
+            <ListRow label={t('settings.about.technical')} onPress={onOpenDebug} />
+          )}
+        </Group>
 
-        {/* Last, its own section, red, with an icon. §5, T-125. */}
-        <Section
-          title={t('settings.section.erase')}
-          destructive
-          footnote={t('settings.erase.footnote')}
-        >
-          <Action
-            label={t('settings.erase.action')}
-            onPress={onEraseRequested}
-            danger
-          />
-        </Section>
+        {/* Last, its own group, in red. §5, T-125. */}
+        <Group title={t('settings.section.erase')} destructive footnote={t('settings.erase.footnote')}>
+          <ListRow label={t('settings.erase.action')} onPress={onEraseRequested} danger />
+        </Group>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('settings.done')}
-          accessibilityHint={t('settings.a11y.backToMap')}
-          onPress={onClose}
-          style={({ pressed }) => [styles.done, pressed && styles.pressed]}
-        >
-          <Text style={styles.doneText}>{t('settings.done')}</Text>
-        </Pressable>
-      </View>
+      {choosingLanguage && languageChoice !== undefined && onChangeLanguage !== undefined ? (
+        <LanguageSheet
+          choice={languageChoice}
+          onChoose={(language) => {
+            setChoosingLanguage(false);
+            onChangeLanguage(language);
+          }}
+          onClose={() => setChoosingLanguage(false)}
+        />
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  bar: { paddingTop: spacing.xl, paddingHorizontal: spacing.sm },
+  back: { minHeight: MIN_TAP_TARGET, justifyContent: 'center', paddingHorizontal: spacing.sm, alignSelf: 'flex-start' },
+  // The passport's back control: tinted text with a chevron, no fill.
+  backText: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
   content: {
-    padding: spacing.md,
-    paddingTop: spacing.xl * 2,
-    // The Done button is pinned below this list, and a scroll that ends level
-    // with it hides its last row behind it.
-    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xl,
     gap: spacing.lg,
   },
   heading: {
     color: colors.text,
-    // The same large title as the passport. Two screens, one rule.
-    fontSize: fontSize.largeTitle,
+    // A title, not the large title: this screen is a list, and the large one
+    // was a sixth of the first screenful (2026-09-25).
+    fontSize: fontSize.title,
     fontWeight: '700',
-    letterSpacing: 0.4,
   },
-  group: {
-    gap: spacing.sm,
-  },
+  group: { gap: spacing.xs },
   section: {
     backgroundColor: colors.surface,
     borderRadius: radius.card,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  sectionDanger: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.bad,
+    paddingHorizontal: spacing.md,
   },
   sectionTitle: {
     color: colors.textMuted,
@@ -657,16 +679,33 @@ const styles = StyleSheet.create({
     lineHeight: fontSize.small * 1.4,
     paddingHorizontal: spacing.xs,
   },
+  // ⚠ Every row is a tap target or sits among them, so every row is 60 dp
+  // (D-015). The language options were once 32 dp, measured from source by
+  // the review (N4).
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    gap: spacing.md,
-    minHeight: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: MIN_TAP_TARGET,
+    paddingVertical: spacing.sm,
   },
-  // ⚠ A row you can press is a tap target, and a tap target is 60 dp (D-015).
-  // The language options used `row`, which is 32 dp because it was drawn for
-  // text that only reads; the review measured them from source (N4).
+  rowText: { flex: 1, gap: 2 },
+  rowLabel: { color: colors.text, fontSize: fontSize.body },
+  rowDetail: {
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+    lineHeight: Math.round(fontSize.small * 1.35),
+  },
+  rowValue: {
+    color: colors.textMuted,
+    fontSize: fontSize.body,
+    textAlign: 'right',
+    flexShrink: 1,
+  },
+  chevron: { color: colors.textMuted, fontSize: fontSize.title, marginLeft: spacing.xs },
+  rowDisabled: { opacity: 0.5 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+  quality: { paddingVertical: spacing.sm, gap: spacing.sm },
   radioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -674,30 +713,22 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     minHeight: MIN_TAP_TARGET,
   },
-  rowLabel: { color: colors.text, fontSize: fontSize.body, flexShrink: 1 },
-  rowValue: {
-    color: colors.textMuted,
-    fontSize: fontSize.body,
-    fontWeight: '600',
-    textAlign: 'right',
-    flexShrink: 1,
-  },
-  action: {
-    minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
+  tick: { color: colors.tint, fontSize: fontSize.body, fontWeight: '700' },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
+  sheet: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.sheet,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.control,
-    // Filled rather than outlined: on iOS a row inside a group is a surface,
-    // not a box drawn on one. The 60 dp target is the height (D-015).
-    backgroundColor: colors.surfaceRaised,
+    paddingTop: spacing.md,
+    gap: spacing.xs,
   },
-  actionDanger: { borderWidth: 2, borderColor: colors.bad },
-  actionText: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
-  rowDisabled: { opacity: 0.5 },
-  // A hairline between the consent switch and the cost dial. They are one card
-  // now (see the section above) but they are still two questions, and without
-  // a rule between them the pill reads as part of the switch's row.
-  divider: { height: 1, backgroundColor: colors.surfaceRaised },
+  sheetTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700', marginBottom: spacing.xs },
+  sheetCancel: { justifyContent: 'center' },
+  sheetCancelText: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
   segmented: {
     flexDirection: 'row',
     borderRadius: radius.control,
@@ -745,17 +776,4 @@ const styles = StyleSheet.create({
   choiceText: { color: colors.textMuted, fontSize: fontSize.body, fontWeight: '700' },
   choiceTextActive: { color: colors.text },
   pressed: { opacity: 0.75 },
-  footer: { padding: spacing.md },
-  done: {
-    minHeight: MIN_TAP_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.control,
-    backgroundColor: colors.action,
-  },
-  doneText: {
-    color: colors.actionText,
-    fontSize: fontSize.body,
-    fontWeight: '700',
-  },
 });

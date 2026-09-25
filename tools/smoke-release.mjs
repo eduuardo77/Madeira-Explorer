@@ -37,29 +37,16 @@
  * stops and says so if it lands there.
  */
 
-import { execFileSync } from 'node:child_process';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import { centre, crashLines, findNode, parseNodes } from './lib/uiTree.mjs';
+import { device, pause } from './lib/device.mjs';
+import { crashLines, findNode } from './lib/uiTree.mjs';
 import { PLURALS, STRINGS } from '../app/src/i18n/strings.ts';
 import { LANGUAGE_NAMES } from '../app/src/i18n/languages.ts';
 
 const PKG = 'com.proa.madeira';
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ADB = path.join(root, 'tools', 'android-sdk', 'platform-tools', 'adb');
 
 const serialAt = process.argv.indexOf('--serial');
 const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
-
-function adb(...args) {
-  return execFileSync(ADB, [...(serial === null ? [] : ['-s', serial]), ...args], {
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-  });
-}
-const shell = (command) => adb('shell', command).trim();
-const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const { adb, shell, screen, reach, tap } = device(serial);
 
 // ---------------------------------------------------------------------------
 // Labels, in the phone's language
@@ -91,54 +78,6 @@ function pattern(...keys) {
 }
 
 // ---------------------------------------------------------------------------
-// The phone
-// ---------------------------------------------------------------------------
-
-async function screen() {
-  // `uiautomator dump` refuses while an animation runs ("could not get idle
-  // state"), so it is retried rather than trusted on the first go.
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      shell('uiautomator dump /sdcard/proa-smoke.xml');
-      return parseNodes(adb('exec-out', 'cat', '/sdcard/proa-smoke.xml'));
-    } catch {
-      await pause(700);
-    }
-  }
-  throw new Error('uiautomator could not read the screen');
-}
-
-/** Wait until `target` is on screen, scrolling down if asked to. */
-async function reach(target, { scroll = false, timeoutMs = 12_000 } = {}) {
-  const until = Date.now() + timeoutMs;
-  for (let swipes = 0; Date.now() < until; ) {
-    const node = findNode(await screen(), target);
-    if (node !== null) {
-      return node;
-    }
-    if (scroll && swipes < 10) {
-      const [width, height] = size;
-      shell(`input swipe ${width / 2} ${height * 0.75} ${width / 2} ${height * 0.35} 300`);
-      swipes += 1;
-      await pause(400);
-    } else {
-      await pause(600);
-    }
-  }
-  throw new Error(`never appeared: ${target}`);
-}
-
-async function tap(target, options) {
-  const node = await reach(target, options);
-  const [x, y] = centre(node);
-  shell(`input tap ${x} ${y}`);
-  await pause(900);
-  return node;
-}
-
-const size = shell('wm size').match(/(\d+)x(\d+)/).slice(1).map(Number);
-
-// ---------------------------------------------------------------------------
 // The run
 // ---------------------------------------------------------------------------
 
@@ -165,13 +104,13 @@ const STEPS = [
     await tap(MAP);
     await reach(label('settings.title'));
   }],
-  ['the language rows say which one is chosen (T-215)', async () => {
-    await reach(label('settings.section.language').toUpperCase(), { scroll: true }).catch(() =>
-      reach(label('settings.section.language'), { scroll: true })
-    );
-    // ⚠ Only the rows named after a language. Settings has other checkable
-    // controls on the same screen (the recording switch, the three quality
-    // options), and the first run counted them all: "8 rows, 3 checked".
+  ['the language list says which one is chosen (T-215)', async () => {
+    // One row that opens a list (2026-09-25); the list is closed with Cancel,
+    // so nothing is chosen.
+    await tap(new RegExp(`^${label('settings.section.language')}, `));
+    await reach(label('common.cancel'));
+    // ⚠ Only the rows named after a language: the first run counted the
+    // recording switch and the quality options too ("8 rows, 3 checked").
     const names = new Set(Object.values(LANGUAGE_NAMES));
     const automatic = pattern('settings.language.auto');
     const rows = (await screen()).filter(
@@ -181,19 +120,20 @@ const STEPS = [
     if (rows.length === 0 || checked.length !== 1) {
       throw new Error(`${rows.length} checkable rows, ${checked.length} checked`);
     }
+    await tap(label('common.cancel'));
     return `${rows.length} radio rows, checked: ${checked[0].desc || checked[0].text}`;
   }],
   ['Privacy, and back', async () => {
     await tap(label('settings.about.privacy'), { scroll: true });
     await tap(label('common.done'));
-    await reach(label('settings.done'));
+    await reach(label('settings.title'));
   }],
   ['Licences, and back', async () => {
     await tap(label('settings.about.licences'), { scroll: true });
     await tap(label('common.done'));
-    await reach(label('settings.done'));
+    await reach(label('settings.title'));
   }],
-  ['back to the map', () => tap(label('settings.done')).then(() => reach(MAP))],
+  ['back to the map', () => tap(label('settings.a11y.backToMap')).then(() => reach(MAP))],
   ['the passport', () =>
     tap(pattern('passport.a11y.openWithCount', 'map.a11y.openPassport')).then(() =>
       reach(label('passport.title'))

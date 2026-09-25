@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { deviceLanguage, t } from '../i18n';
+import { DATE_LOCALES } from '../i18n/languages';
 import type { WalkedEvidence } from '../progress/levadaCoverage';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from '../content/contentPack';
@@ -187,6 +188,16 @@ export default function PassportScreen({
       }
 
       const geofence = representativeGeofence(place);
+      const language = deviceLanguage();
+      // The day it was earned, for the card's status line (option B).
+      const award = awards.find((candidate) => candidate.place_id === place.id);
+      const visitedOn =
+        award === undefined
+          ? null
+          : new Date(award.awarded_ts).toLocaleDateString(DATE_LOCALES[language], {
+              day: 'numeric',
+              month: 'long',
+            });
 
       setCardPlace(place);
       setCardStamp(stamp);
@@ -201,8 +212,9 @@ export default function PassportScreen({
           lon: geofence.lon,
           position,
           nowMs: Date.now(),
-          language: deviceLanguage(),
+          language,
           why: place.why,
+          visitedOn,
         })
       );
     })();
@@ -359,7 +371,6 @@ export default function PassportScreen({
         <View style={styles.cardHolder} pointerEvents="box-none">
           <PlaceCardView
             card={card}
-            palette="album"
             stamp={cardStamp ?? undefined}
             onShowOnMap={
               cardPlace === null || cardStamp === null

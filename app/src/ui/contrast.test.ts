@@ -414,8 +414,10 @@ test('⚠ the home progress line is readable, and its bar is visible, in both ma
   // D-090. "Very subtle" is the brief, and the muted caption and the thin bar
   // are how it is met. Subtle is allowed to mean quiet. It is not allowed to
   // mean unreadable outdoors.
+  // ⚠ Quieter since 2026-09-25 (flat grey panel, grey fill): these are the
+  // floors that stop "quiet" becoming "gone".
   for (const style of ['light', 'dark'] as const) {
-    const { surface, muted, link, track } = mapChrome[style];
+    const { strip: surface, muted, stripFill: link, track } = mapChrome[style];
     const caption = contrastRatio(muted, surface);
     assert.ok(caption >= BODY, `the progress caption is ${caption.toFixed(2)}:1 on the ${style} strip`);
     // The fill is the value. It must stand off both the empty track it grows

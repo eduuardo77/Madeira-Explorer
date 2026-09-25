@@ -28,14 +28,16 @@
  * spelled out, because D-015 forbids meaning carried by appearance alone and
  * because a screen reader gets nothing from a filled circle.
  *
- * THE STAMP, ON THE ALBUM'S OWN DARK (T-218)
- * ------------------------------------------
- * Opened from the passport, the card draws the stamp you tapped beside its name,
- * and takes the album's palette. The second review (N3) found a light sheet over
- * the dark album showing no trace of the sticker that had opened it: the one
- * piece of artwork in the app vanished at the moment you asked about it. Over the
- * map the card stays light and has no stamp, because the map is light and the
- * mark you tapped is still on screen behind it.
+ * THE STAMP, BESIDE THE NAME (T-218, option B)
+ * --------------------------------------------
+ * Opened from the passport, the card draws the stamp you tapped beside its
+ * name, and a status line under it: *Ainda por visitar*, or the day it was
+ * earned. The second review (N3) found the one piece of artwork in the app
+ * vanishing at the moment you asked about it; the project lead chose this
+ * version on 2026-09-25, *"I want the user to look closer to the stamp"*.
+ * ⚠ **White, not the album's dark.** A dark card was built first and the
+ * project lead preferred the white one. Over the map the card has no stamp,
+ * because the mark you tapped is still on screen behind it.
  *
  * Presentational: props in, pixels out, so the workbench (D-038) can mount it
  * without a map, a database or a location.
@@ -46,45 +48,17 @@ import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { PlaceCard } from '../places/placeCard';
 import StampArt from './StampArt';
-import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 import { t } from '../i18n';
-
-/**
- * The card's colours on each surface it opens over. Both sets are pairs
- * `contrast.test.ts` already measures: the app's palette, and the album's text,
- * muted text, link and button on `album.surface`.
- */
-const PALETTES = {
-  light: {
-    sheet: colors.surfaceRaised,
-    grabber: colors.border,
-    text: colors.text,
-    muted: colors.textMuted,
-    tint: colors.tint,
-    action: colors.action,
-    actionText: colors.actionText,
-  },
-  album: {
-    sheet: album.surface,
-    grabber: album.hairline,
-    text: album.text,
-    muted: album.textMuted,
-    tint: album.tint,
-    action: album.action,
-    actionText: album.actionText,
-  },
-} as const;
 
 /** The stamp beside the name, in dp: big enough to read its name band. */
 const CARD_STAMP_SIZE = 88;
 
 export type PlaceCardViewProps = {
   card: PlaceCard;
-  /** Which surface the card opens over (T-218). Light unless it is the album. */
-  palette?: keyof typeof PALETTES;
   /**
-   * The stamp that was tapped, drawn beside the name as the passport draws it.
-   * Absent on the map's card.
+   * The stamp that was tapped, drawn beside the name as the passport draws it,
+   * with the status line under the name. Absent on the map's card.
    */
   stamp?: {
     placeId: string;
@@ -102,41 +76,27 @@ export type PlaceCardViewProps = {
   onClose: () => void;
 };
 
-export default function PlaceCardView({
-  card,
-  palette = 'light',
-  stamp,
-  onShowOnMap,
-  onClose,
-}: PlaceCardViewProps) {
-  const tone = PALETTES[palette];
-  const heading = (
-    <View style={styles.heading}>
-      <Text style={[styles.meta, { color: tone.muted }]}>{card.metaLabel}</Text>
-      {/* No `numberOfLines`: a long Portuguese place name must wrap rather
-          than be cut, and at 2× text scaling most of them will. */}
-      <Text style={[styles.name, { color: tone.text }]}>{card.name}</Text>
-    </View>
-  );
-
+export default function PlaceCardView({ card, stamp, onShowOnMap, onClose }: PlaceCardViewProps) {
   return (
     // ⚠ Not `accessibilityViewIsModal`. The card is deliberately *not* modal —
     // the passport and settings stay reachable while it is open — and marking
     // it modal hides the rest of the screen from a screen reader, which would
     // make that untrue for exactly the users who can least afford it.
-    <View style={[styles.card, { backgroundColor: tone.sheet }]}>
+    <View style={styles.card}>
       {/* The grabber. It is not draggable and does not pretend to be — it is
           the mark that says "this is a sheet over the thing behind it", which
           is how iOS distinguishes a temporary surface from a screen. Hidden
           from screen readers, which get the same information from the fact
           that this is a group with a Close button in it. */}
-      <View
-        style={[styles.grabber, { backgroundColor: tone.grabber }]}
-        accessibilityElementsHidden
-      />
+      <View style={styles.grabber} accessibilityElementsHidden />
 
       {stamp === undefined ? (
-        heading
+        <View style={styles.heading}>
+          <Text style={styles.meta}>{card.metaLabel}</Text>
+          {/* No `numberOfLines`: a long Portuguese place name must wrap rather
+              than be cut, and at 2× text scaling most of them will. */}
+          <Text style={styles.name}>{card.name}</Text>
+        </View>
       ) : (
         <View style={styles.stampRow}>
           {/* Drawn exactly as the passport cell draws it, locked included:
@@ -150,16 +110,20 @@ export default function PlaceCardView({
             collected={stamp.locked === true ? false : stamp.collected}
             size={Math.floor(CARD_STAMP_SIZE * TILT_FIT)}
           />
-          {heading}
+          <View style={styles.heading}>
+            {/* The category alone: whether it is collected is the status line's
+                to say, in words, and saying it twice is noise. */}
+            <Text style={styles.meta}>{card.categoryLabel}</Text>
+            <Text style={styles.name}>{card.name}</Text>
+            <Text style={styles.status}>{card.statusLine}</Text>
+          </View>
         </View>
       )}
 
       {/* T-201: the reason to go (review P1-4). Under the name, because it is
           about the place; above the municipality and the distance, which are
           about getting there. */}
-      {card.whyLine === null ? null : (
-        <Text style={[styles.why, { color: tone.text }]}>{card.whyLine}</Text>
-      )}
+      {card.whyLine === null ? null : <Text style={styles.why}>{card.whyLine}</Text>}
 
       {/* The municipality (T-067, D-027) — *where is this*, which is the one
           question the card could not answer.
@@ -172,14 +136,14 @@ export default function PlaceCardView({
           geography rather than the status, and it sits next to the distance,
           which is the other answer to the same question. */}
       {card.regionLabel === null ? null : (
-        <Text style={[styles.region, { color: tone.text }]}>{card.regionLabel}</Text>
+        <Text style={styles.region}>{card.regionLabel}</Text>
       )}
 
       {card.distanceSentence === null ? null : (
-        // The qualification travels with the number (`placeCard.ts` rule 2).
-        // On this island a straight line and a drive are very different
-        // things, and the card must not be read as the second one.
-        <Text style={[styles.distance, { color: tone.muted }]}>{card.distanceSentence}</Text>
+        // Only when near (`placeCard.ts` rule 3), and the qualification
+        // travels with the number (rule 2): on this island a straight line and
+        // a drive are very different things.
+        <Text style={styles.distance}>{card.distanceSentence}</Text>
       )}
 
       {/* One filled button when there is somewhere to go, and a plain tinted
@@ -195,15 +159,9 @@ export default function PlaceCardView({
               : t('placeCard.a11y.show', { name: card.name })
           }
           onPress={onShowOnMap}
-          style={({ pressed }) => [
-            styles.directions,
-            { backgroundColor: tone.action },
-            pressed && styles.pressed,
-          ]}
+          style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
         >
-          <Text style={[styles.directionsText, { color: tone.actionText }]}>
-            {t('placeCard.showOnMap')}
-          </Text>
+          <Text style={styles.directionsText}>{t('placeCard.showOnMap')}</Text>
         </Pressable>
       )}
 
@@ -213,7 +171,7 @@ export default function PlaceCardView({
         onPress={onClose}
         style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
       >
-        <Text style={[styles.plainButtonText, { color: tone.tint }]}>{t('common.close')}</Text>
+        <Text style={styles.plainButtonText}>{t('common.close')}</Text>
       </Pressable>
     </View>
   );
@@ -226,8 +184,7 @@ const styles = StyleSheet.create({
     // same colour looked like it was *inside* the Levadas card rather than
     // floating over the screen — a screenshot caught that immediately. A
     // sheet has to be a step above whatever it covers.
-    // The fill comes from the palette: `surfaceRaised` over the map, the album's
-    // surface over the passport.
+    backgroundColor: colors.surfaceRaised,
     // A sheet, not a card: iOS rounds these hard, and the radius is most of
     // what says "temporary surface" without drawing a single line.
     borderRadius: radius.sheet,
@@ -248,6 +205,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 5,
     borderRadius: radius.pill,
+    backgroundColor: colors.border,
     marginBottom: spacing.sm,
   },
   stampRow: {
@@ -262,28 +220,38 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
 
   meta: {
+    color: colors.textMuted,
     fontSize: fontSize.small,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   name: {
+    color: colors.text,
     fontSize: fontSize.title,
     fontWeight: '800',
   },
+  status: {
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+  },
   why: {
+    color: colors.text,
     fontSize: fontSize.body,
     lineHeight: fontSize.body * 1.35,
     // Clear of the municipality under it, which is the same size and colour.
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   // Body weight, a step above the distance under it. The municipality is a
   // fact about the place; the distance is a qualified estimate about the
   // reader, and reads as the footnote it is.
   region: {
+    color: colors.text,
     fontSize: fontSize.body,
   },
   distance: {
+    color: colors.textMuted,
     fontSize: fontSize.small,
   },
   directions: {
@@ -292,9 +260,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: radius.control,
+    backgroundColor: colors.action,
     marginTop: spacing.sm,
   },
   directionsText: {
+    color: colors.actionText,
     fontSize: fontSize.body,
     fontWeight: '700',
   },
@@ -307,6 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   plainButtonText: {
+    color: colors.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
   },

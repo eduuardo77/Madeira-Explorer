@@ -4801,6 +4801,15 @@ above *Start Walk*. Its quiet means no pins, not no progress.
 - `progress/homeProgress.ts` is the pure half. `PrimaryOverlay` draws it and exports its height,
   which `NativeMapScreen`'s camera padding now includes.
 
+⚠ **Amended 2026-09-25, the project lead, from drawn options:** *"I want the progress bar to not
+be very visual, maybe make it more opaque just like WalkNYC."* WalkNYC's panel, sampled from the
+review's screenshot, is a flat `#EEEFF2` on a `#F7F5F5` map with no shadow, its track `#E8DEF8`.
+Now: `mapChrome.strip` `#EEEFF2` (1.00:1 against Google's light land), no shadow, the fill grey
+(`stripFill` `#7C7C82`) rather than link blue, so the only coloured thing at the bottom is the walk
+button. `contrast.test.ts` still requires the caption at body contrast and the fill at 3:1 against
+its track and panel; the quietest grey that passes was chosen. Its place, between the stamp row and
+the walk button, was already right.
+
 **Rejected.**
 - **The count back on the stamp** (T-075's pill). D-083 took it off on the project lead's word.
 - **A percentage, as WalkNYC shows.** For 3 of 80, *3,8%* is false precision beside a count a

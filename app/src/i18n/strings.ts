@@ -570,6 +570,12 @@ export const STRINGS = {
     '{distance} entfernt, Luftlinie'
   ),
   'placeCard.showOnMap': s('Show on map', 'Ver no mapa', 'Auf der Karte zeigen'),
+  // 2026-09-25: two dates joined by a word, never a dash (shareCard.formatDateRange).
+  'date.range': s('{start} to {end}', '{start} a {end}', '{start} bis {end}'),
+  // 2026-09-25: the status line under the name on the passport's card.
+  'placeCard.status.notYet': s('Not visited yet', 'Ainda por visitar', 'Noch nicht besucht'),
+  'placeCard.status.visited': s('Visited', 'Já lá esteve', 'Besucht'),
+  'placeCard.status.visitedOn': s('Visited on {date}', 'Visitou a {date}', 'Besucht am {date}'),
   // T-190: the passport's "did you walk it?" question (T-149). It was English on
   // every phone until 2026-09-23. `{name}` is always a levada: only a course can
   // be half-walked.

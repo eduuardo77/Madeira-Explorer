@@ -148,8 +148,11 @@ but eight (below). N9 is T-197's; N11 is T-222.
 - [~] **T-217** **The replay without a stamp (N2).** ✅ Code: *Watch* whenever the trip on show has
       a line's worth of fixes (`composition.mayHaveAFilm`, held to `composeSouvenir`); at zero the
       film ends on its dates, not "0 / 80". ⚠ Still nobody has seen the replay move (OD-12).
-- [~] **T-218** **The place card shows the stamp, on the album's dark (N3).** ✅ Code and workbench:
-      `PlaceCardView` `palette="album"` plus `stamp`, from the passport only.
+- [~] **T-218** **The place card shows the stamp (N3): option B, white (2026-09-25).** The project
+      lead chose B from `tools/out/screen-options.html`: *"I want the user to look closer to the
+      stamp."* White, the stamp beside the name, a status line (*Ainda por visitar* / *Visitou a
+      20 de setembro*), the why-go line when T-201 fills it. The dark album card built first was
+      removed with its palette prop. Dates follow the app's language (`DATE_LOCALES`).
 - [~] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
       fourth sticker began exactly at the card's edge. ✅ `passport/stripLayout.ts`: 96 where the
       cut reads, 84 on the P30, measured from the strip itself. Workbench: 44% of the fourth.
@@ -157,7 +160,12 @@ but eight (below). N9 is T-197's; N11 is T-222.
       2026-09-25: three options drawn for the project lead in `tools/out/screen-options.html`
       (`node tools/preview-screen-options.mjs`): today, all in the brand green, or one white
       panel at the bottom. The same page asks about the place card and the passport's top, which
-      the project lead also found wanting on the P30. Waiting for the letters.
+      the project lead also found wanting on the P30.
+      ✅ **Decided 2026-09-25: A, today's controls.** The progress line stays between the stamp row
+      and *Começar passeio* (my mock drew it above; the app already had it there), and is made
+      quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
+      (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
+      counts but not its *Ver a sua viagem* button. Card: B (T-218).
 - [x] **T-225** **The place card shows a distance only when it is near** (≤ 2 km, `placeCard.ts`
       rule 3). The project lead on the P30: *"A 39 km em linha reta" is a bit useless, Madeira is
       full of turns.* The 2 km is a judgement, not a measurement, and rule 2's qualifier stays.

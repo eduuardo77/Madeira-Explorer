@@ -212,3 +212,19 @@ test('⚠ rule 3: across the island there is no distance, only near by (2026-09-
   const justOver = buildPlaceCard(input({ lat: HERE.lat + (MAX_SHOWN_DISTANCE_M + 100) / 111_000 }));
   assert.equal(justOver.distanceSentence, null);
 });
+
+test('the status line says where the user stands, and never un-collects a stamp', () => {
+  // The project lead's option B, 2026-09-25: under the name on the passport's card.
+  assert.equal(buildPlaceCard(input({ collected: false, language: 'pt' })).statusLine, 'Ainda por visitar');
+  assert.equal(
+    buildPlaceCard(input({ collected: true, visitedOn: '20 de setembro', language: 'pt' })).statusLine,
+    'Visitou a 20 de setembro'
+  );
+  // Collected with no date known still says visited (D-075: never "not yet").
+  assert.equal(buildPlaceCard(input({ collected: true, language: 'pt' })).statusLine, 'Já lá esteve');
+  // A date handed in for a place not collected is ignored rather than shown.
+  assert.equal(
+    buildPlaceCard(input({ collected: false, visitedOn: '20 September' })).statusLine,
+    'Not visited yet'
+  );
+});

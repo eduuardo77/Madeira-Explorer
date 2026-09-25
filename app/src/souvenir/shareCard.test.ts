@@ -177,16 +177,27 @@ test('a date range carries both dates, in the order the reader expects', () => {
   // ⚠ Asserted without assuming where the day goes. The first version of this
   // test expected "12–19 August 2026" and passed only in day-first locales; the
   // code under it produced "12–August 19, 2026" everywhere else.
-  const range = formatDateRange(Date.UTC(2026, 7, 12, 12), Date.UTC(2026, 7, 19, 12));
+  const range = formatDateRange(Date.UTC(2026, 7, 12, 12), Date.UTC(2026, 7, 19, 12), 'en');
   assert.ok(range.includes('12'), range);
   assert.ok(range.includes('19'), range);
   assert.ok(range.includes('2026'), range);
 });
 
+test('⚠ a range is joined by a word in the card’s language, never a dash (2026-09-25)', () => {
+  const from = Date.UTC(2026, 8, 20, 12);
+  const to = Date.UTC(2026, 8, 27, 12);
+  for (const language of ['en', 'pt', 'de'] as const) {
+    assert.equal(/[—–]/.test(formatDateRange(from, to, language)), false, language);
+  }
+  assert.equal(formatDateRange(from, to, 'pt'), '20 de setembro a 27 de setembro de 2026');
+  // The year once, at the end, only when both dates share it.
+  assert.match(formatDateRange(Date.UTC(2026, 11, 30, 12), Date.UTC(2027, 0, 2, 12), 'en'), /2026 to .*2027/);
+});
+
 test('a day trip is one date, not a range of one', () => {
   const morning = Date.UTC(2026, 7, 12, 8);
   const evening = Date.UTC(2026, 7, 12, 20);
-  assert.ok(!formatDateRange(morning, evening).includes('–'));
+  assert.ok(!formatDateRange(morning, evening, 'en').includes(' to '));
 });
 
 test("⚠ T-190 — the count under the number is in the sender's language", () => {

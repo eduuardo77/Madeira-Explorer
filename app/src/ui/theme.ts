@@ -246,8 +246,21 @@ export const mapChrome = {
      * page's `textMuted`, 6.5:1 on this white.
      */
     muted: '#5C5C63',
+    /**
+     * The progress line's panel (D-090, quieter 2026-09-25). WalkNYC's own
+     * `#EEEFF2`, sampled from the review's screenshot: flat, no shadow, and
+     * 1.00:1 against Google's light land, so it sits *in* the map rather than
+     * floating over it. The project lead: *"not very visual, like WalkNYC"*.
+     */
+    strip: '#EEEFF2',
     /** The progress bar's empty track. Decorative: the fill carries the value. */
-    track: '#E5E5EA',
+    track: '#E3E4E8',
+    /**
+     * The bar's fill: grey, not the link blue, so the one coloured object at
+     * the bottom of the map stays the walk button. The quietest grey that still
+     * clears 3:1 on its track (3.26) and its panel (3.61).
+     */
+    stripFill: '#7C7C82',
   },
   dark: {
     surface: '#1C1C1E',
@@ -275,7 +288,11 @@ export const mapChrome = {
     link: '#5AA9FF',
     /** The progress caption on the near-black strip: the album's muted grey. */
     muted: '#AEAEB2',
+    /** One step off the night ground, flat, as on the light map. */
+    strip: '#2C2C2E',
     track: '#3A3A3C',
+    /** 3.48:1 on the track, 4.27:1 on the panel. */
+    stripFill: '#8E8E93',
   },
 } as const;
 

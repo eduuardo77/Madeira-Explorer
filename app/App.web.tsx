@@ -363,7 +363,6 @@ export default function DesignWorkbench() {
                 <View style={styles.passportCard}>
                   <PlaceCardView
                     card={makeCard(passportCard.collected, false, passportCard)}
-                    palette="album"
                     stamp={passportCard}
                     onShowOnMap={() => {
                       setPassportCard(null);

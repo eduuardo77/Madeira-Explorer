@@ -102,6 +102,12 @@ export type PlaceCardInput = {
   language: Language;
   /** The pack's "why go" lines (T-201), if it has any. */
   why?: PlaceWhy;
+  /**
+   * The day the stamp was earned, already written in the card's language
+   * ("20 de setembro"), or null when it is not known. Formatted by the caller,
+   * which owns the clock and the locale.
+   */
+  visitedOn?: string | null;
 };
 
 export type PlaceCard = {
@@ -143,6 +149,13 @@ export type PlaceCard = {
    * no line for this place in this language — never another language's line.
    */
   whyLine: string | null;
+  /**
+   * Where the user stands with this place, under the name on the passport's
+   * card (2026-09-25, the project lead's option B): *Ainda por visitar*, or
+   * *Visitou a 20 de setembro*. A collected stamp is never told it is not
+   * collected, locked or not (D-075).
+   */
+  statusLine: string;
 };
 
 /**
@@ -228,6 +241,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     nowMs,
     language,
     why,
+    visitedOn,
   } = input;
 
   const measurable =
@@ -265,5 +279,10 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
         ? null
         : translate(STRINGS['placeCard.distance'], language, { distance: distanceLabel }),
     whyLine: why?.[language]?.trim() || null,
+    statusLine: !collected
+      ? translate(STRINGS['placeCard.status.notYet'], language)
+      : visitedOn
+        ? translate(STRINGS['placeCard.status.visitedOn'], language, { date: visitedOn })
+        : translate(STRINGS['placeCard.status.visited'], language),
   };
 }

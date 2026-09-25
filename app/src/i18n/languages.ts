@@ -67,6 +67,19 @@ export function languageFor(
  * for "Alemão". The one place in the app where these words may not come from
  * `strings.ts`.
  */
+/**
+ * The locale a date is written in, per app language (2026-09-25).
+ *
+ * ⚠ Not the phone's locale: a user who chose Português in Settings on an
+ * English phone must not get "20 September" beside Portuguese words. European
+ * variants, because the app is used in Madeira by Europeans.
+ */
+export const DATE_LOCALES: Record<Language, string> = {
+  en: 'en-GB',
+  pt: 'pt-PT',
+  de: 'de-DE',
+};
+
 export const LANGUAGE_NAMES: Record<Language, string> = {
   en: 'English',
   pt: 'Português',

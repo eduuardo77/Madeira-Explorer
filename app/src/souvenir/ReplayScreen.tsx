@@ -52,7 +52,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { t } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
 import { darkMapPropsFor } from '../map/darkMode';
 import type { MapStyleName } from '../map/mapStyle';
 import { effectiveMapStyle, parseMapStyle } from '../map/mapStylePreference';
@@ -113,7 +113,7 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         setComposition(plan);
         setStyleName(effectiveMapStyle(parseMapStyle(preference)));
         if (trip !== null) {
-          setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now()));
+          setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now(), deviceLanguage()));
         }
 
         // Autoplay. The user pressed *Watch*; making them press play as well is

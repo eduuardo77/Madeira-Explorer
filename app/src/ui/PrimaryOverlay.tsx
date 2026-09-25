@@ -401,16 +401,13 @@ export default function PrimaryOverlay({
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
+            // ⚠ Flat since 2026-09-25: no shadow and a grey panel, after
+            // WalkNYC's, on the project lead's word (`mapChrome.strip`). The
+            // dark map keeps the hairline, because there the edge is all that
+            // separates a dark panel from dark ground.
             style={[
               styles.progress,
-              {
-                backgroundColor: chrome.surface,
-                elevation: chrome.elevation === 0 ? 0 : 1,
-                shadowColor: '#000000',
-                shadowOpacity: chrome.elevation === 0 ? 0 : 0.12,
-                shadowRadius: 1,
-                shadowOffset: { width: 0, height: 1 },
-              },
+              { backgroundColor: chrome.strip },
               chrome.border !== null && { borderWidth: 1, borderColor: chrome.track },
             ]}
           >
@@ -421,7 +418,7 @@ export default function PrimaryOverlay({
               <View
                 style={[
                   styles.progressFill,
-                  { backgroundColor: chrome.link, width: `${strip.fraction * 100}%` },
+                  { backgroundColor: chrome.stripFill, width: `${strip.fraction * 100}%` },
                 ]}
               />
             </View>

@@ -109,7 +109,7 @@ export async function buildCardForTrip(
       ok: true,
       card: buildShareCard({
         destination: pack.destination ?? t('share.fallbackTitle'),
-        dateRange: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs),
+        dateRange: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs, deviceLanguage()),
         collected: progress.collected,
         total: progress.total,
         strokes,

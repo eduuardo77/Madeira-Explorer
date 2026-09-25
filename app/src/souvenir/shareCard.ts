@@ -41,7 +41,7 @@
 
 /** A point of the trace, in [lon, lat]. */
 import { APP_NAME } from '../brand.ts';
-import type { Language } from '../i18n/languages.ts';
+import { DATE_LOCALES, type Language } from '../i18n/languages.ts';
 import { PLURALS, STRINGS } from '../i18n/strings.ts';
 import { plural, translate } from '../i18n/translate.ts';
 
@@ -318,30 +318,6 @@ export function buildShareCard(input: ShareCardInput): ShareCard {
 }
 
 /**
- * `12–19 August 2026`, or one date when the trip lasted a day.
- *
- * ⚠ **The device's own locale, never a hardcoded format.** The app is English
- * (CONTEXT §1) but a date is not copy, and a visitor reading `08/12` as
- * December is a small betrayal of a souvenir.
- *
- * ⚠ **AND THE OBVIOUS SHORTCUT IS A BUG.** The first version special-cased a
- * trip inside one month by printing the start day, a dash, then the full end
- * date — which reads "12–19 August 2026" only in locales that put the day
- * first. On a month-first device it produced **"12–August 19, 2026"**. A test
- * running under a different locale than the author's caught it.
- *
- * So the range is left to `Intl.DateTimeFormat.formatRange`, which exists for
- * exactly this and knows where the day goes. ⚠ Hermes ships a partial `Intl`,
- * so it is feature-detected rather than assumed, and the fallback spells both
- * dates out in full — longer, and correct everywhere.
- *
- * ⚠ **MEASURED ON THE EMULATOR 2026-08-16: Hermes takes the fallback.** The
- * shared card reads *"August 14, 2026 – August 16, 2026"*, not *"14–16 August"*.
- * The feature detection was not defensive programming, it is the live path — so
- * if the long form is ever judged too heavy for the card, the fix is to write
- * the compact form by hand from the parts, not to reach for `formatRange`.
- */
-/**
  * The shared image's file name: `<APP_NAME>-2026-09-23.png` (T-192).
  *
  * ⚠ The share sheet shows it, and so does whoever receives the image. It was
@@ -355,24 +331,40 @@ export function shareImageFilename(nowMs: number): string {
   return `${APP_NAME}-${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}.png`;
 }
 
-export function formatDateRange(startTs: number, endTs: number): string {
+/**
+ * `14 de agosto a 16 de agosto de 2026`, or one date when the trip lasted a day.
+ *
+ * ⚠ **No dash, 2026-09-25.** This used to join the two dates with an en dash,
+ * and on the phone it always did: Hermes has no `Intl.DateTimeFormat.formatRange`
+ * (measured on the emulator 2026-08-16), so the fallback ran, and `formatRange`
+ * itself writes one too ("14–16 August"). The project lead does not want a dash
+ * in anything a user reads, and this one was on the replay and the shared card.
+ * The join is now a word, in the card's language.
+ *
+ * ⚠ **The app's language, not the phone's locale** (`DATE_LOCALES`), so the
+ * dates match the words around them.
+ *
+ * ⚠ **Why building it from parts is safe here, when it once was not.** The
+ * first version printed the start day, a dash and the full end date, and on a
+ * month-first locale that read "12–August 19, 2026". Every locale in
+ * `DATE_LOCALES` writes the day first, and the start keeps its month, so the
+ * worst case is "14 August to 16 August 2026": longer, and right.
+ */
+export function formatDateRange(startTs: number, endTs: number, language: Language): string {
   const start = new Date(startTs);
   const end = new Date(endTs);
-  const long: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  };
+  const locale = DATE_LOCALES[language];
+  const full: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
 
   if (start.toDateString() === end.toDateString()) {
-    return start.toLocaleDateString(undefined, long);
+    return start.toLocaleDateString(locale, full);
   }
 
-  const formatter = new Intl.DateTimeFormat(undefined, long);
-  if (typeof formatter.formatRange === 'function') {
-    return formatter.formatRange(start, end);
-  }
-  return `${formatter.format(start)} – ${formatter.format(end)}`;
+  const sameYear = start.getFullYear() === end.getFullYear();
+  return translate(STRINGS['date.range'], language, {
+    start: start.toLocaleDateString(locale, sameYear ? { day: 'numeric', month: 'long' } : full),
+    end: end.toLocaleDateString(locale, full),
+  });
 }
 
 /** The largest size at or below `preferred` that keeps the text inside `maxWidth`. */

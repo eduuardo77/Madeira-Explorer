@@ -354,6 +354,14 @@ options as language rows; it did not search plural labels). Fixed in the script.
 - [ ] **T-197** **Memory doubles after sharing** — P2-9. 510 MB PSS against 275 MB at rest. Find
       out what holds the capture and release it. The recorder shares this process, so the
       memory pressure puts it at risk.
+      📏 **Measured on the P30 2026-09-25 (review N9, beta release, `dumpsys meminfo`, PSS MB):**
+      map at rest 300 (native 102, Java 46, graphics 44, code 57) · passport 282 · map 303 ·
+      Settings 231 (native 75, graphics 17) · map 251. **No leak**: it follows the screen and does
+      not creep. About 50 MB is the Google map view (gone on Settings), which WalkNYC pays too; the
+      rest of the gap to WalkNYC's 208 is the React Native and Hermes baseline (native 75 MB with
+      no map), structural rather than a bug. Bundled JSON is ~400 KB in all. The passport builds
+      1,505 native views from 80 SVG stamps, without raising the total. ⚠ Still unmeasured: after
+      sharing, which needs a stamp (the P30 has none).
 
 ### Stage 3 — Product clarity (after the decisions it depends on)
 

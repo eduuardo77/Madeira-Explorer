@@ -420,6 +420,9 @@ test('⚠ the home progress line is readable, and its bar is visible, in both ma
     const { strip: surface, muted, stripFill: link, track } = mapChrome[style];
     const caption = contrastRatio(muted, surface);
     assert.ok(caption >= BODY, `the progress caption is ${caption.toFixed(2)}:1 on the ${style} strip`);
+    // Centrar wears the same flat panel since 2026-09-25, with blue words.
+    const recentre = contrastRatio(mapChrome[style].link, surface);
+    assert.ok(recentre >= BODY, `Centrar's label is ${recentre.toFixed(2)}:1 on the ${style} panel`);
     // The fill is the value. It must stand off both the empty track it grows
     // along and the strip it sits in.
     for (const [ground, name] of [

@@ -59,6 +59,7 @@ import { designFor, TILT_FIT } from '../passport/stampArt';
 import { rimFor } from '../passport/stampRim';
 import { tierFor } from '../passport/stampTier';
 import { homeProgress } from '../progress/homeProgress';
+import { getRegionName } from '../content/regionCatalogue';
 import { n, t } from '../i18n';
 import type { PrimaryControl } from '../recording/recorderControls';
 import {
@@ -74,18 +75,30 @@ import {
 const SETTINGS_MARK_SIZE = 22;
 
 /** The re-centre pill: compact by design, see the hitSlop note at its call site. */
-const RECENTRE_HEIGHT = 40;
-const RECENTRE_MARK_SIZE = 17;
+/**
+ * ⚠ 32 since 2026-09-25, flat and in the progress line's grey: the project lead
+ * found it *"could be more discreet"* and chose option B of
+ * `tools/out/screen-options-2.html`, keeping the blue words.
+ */
+const RECENTRE_HEIGHT = 32;
+const RECENTRE_MARK_SIZE = 15;
 
 /**
- * Grows the 40 dp pill to a 60 dp target (D-015).
+ * Grows the pill to a 60 dp target (D-015): 14 dp top and bottom since it
+ * became 32 dp (2026-09-25).
  *
- * ⚠ 10 dp top and bottom, and no more. The walk button sits below, the pill
- * centred on the stamp's row (2026-09-24); a taller slop would reach toward the
- * one control on this screen that must never be pressed by accident. Nothing
+ * ⚠ It must not reach the walk button, the one control on this screen that
+ * must never be pressed by accident. It cannot: the pill is centred in the
+ * stamp's 101 dp row, so the grown target ends 80.5 dp down it, and the
+ * progress line and a gap lie between that row and the button. Nothing
  * sideways: the pill is already wider than 60 dp, and the stamp is beside it.
  */
-const RECENTRE_HIT_SLOP = { top: 10, bottom: 10, left: 0, right: 0 };
+const RECENTRE_HIT_SLOP = {
+  top: (MIN_TAP_TARGET - RECENTRE_HEIGHT) / 2,
+  bottom: (MIN_TAP_TARGET - RECENTRE_HEIGHT) / 2,
+  left: 0,
+  right: 0,
+};
 
 /** The passport button's box: the stamp, never under the 60 dp target. */
 const STAMP_BOX = Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET);
@@ -209,7 +222,7 @@ export default function PrimaryOverlay({
 
   // D-090: the one line of progress the reference app keeps above its start
   // button. Null when there is nothing to count.
-  const strip = homeProgress(progress);
+  const strip = homeProgress(progress, getRegionName);
 
   // The floating controls take their colours from the map underneath, not from
   // the app's (dark-only) palette. See `mapChrome` in `theme.ts`.
@@ -356,17 +369,13 @@ export default function PrimaryOverlay({
                 // reason. ⚠ The workbench cannot see hitSlop (see that file), so
                 // this target can only be checked on a device.
                 hitSlop={RECENTRE_HIT_SLOP}
+                // Flat, like the progress line under it: no shadow, so it sits in
+                // the map rather than floating over it. The dark map keeps the
+                // hairline, as the line does.
                 style={({ pressed }) => [
                   styles.recentre,
-                  {
-                    backgroundColor: chrome.surface,
-                    elevation: chrome.elevation,
-                    shadowColor: '#000000',
-                    shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
-                    shadowRadius: chrome.elevation,
-                    shadowOffset: { width: 0, height: 1 },
-                  },
-                  chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
+                  { backgroundColor: chrome.strip },
+                  chrome.border !== null && { borderWidth: 1, borderColor: chrome.track },
                   pressed && styles.pressed,
                 ]}
               >
@@ -412,7 +421,13 @@ export default function PrimaryOverlay({
             ]}
           >
             <Text style={[styles.progressText, { color: chrome.muted }]} numberOfLines={1}>
-              {t('map.progress', { collected: strip.collected, total: strip.total })}
+              {strip.region === null
+                ? t('map.progress', { collected: strip.collected, total: strip.total })
+                : t('map.progress.region', {
+                    region: strip.region,
+                    collected: strip.collected,
+                    total: strip.total,
+                  })}
             </Text>
             <View style={[styles.progressTrack, { backgroundColor: chrome.track }]}>
               <View
@@ -589,8 +604,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
   },
+  // Small type, like the progress line's: discreet, in blue (2026-09-25).
   recentreText: {
-    fontSize: fontSize.body,
+    fontSize: fontSize.small,
     fontWeight: '600',
   },
 

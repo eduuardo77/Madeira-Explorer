@@ -306,6 +306,13 @@ export const STRINGS = {
     '{collected} de {total} lugares',
     '{collected} von {total} Orten'
   ),
+  // 2026-09-25, option B: the municipality the user has started and is
+  // closest to finishing, when there is one.
+  'map.progress.region': s(
+    '{region}: {collected} of {total} places',
+    '{region}: {collected} de {total} lugares',
+    '{region}: {collected} von {total} Orten'
+  ),
   'map.a11y.recentre': s(
     'Re-center the map on where you are',
     'Centrar o mapa onde está',
@@ -693,15 +700,10 @@ export const STRINGS = {
     'Durante a pausa nada é registado e não se obtêm carimbos. Retoma sozinho.',
     'Während der Pause wird nichts aufgezeichnet und es werden keine Stempel gesammelt. Sie endet von selbst.'
   ),
-  'settings.background.toggle': s(
-    'Record while the app is closed',
-    'Registar com a aplicação fechada',
-    'Aufzeichnen, wenn die App geschlossen ist'
-  ),
   'settings.background.off': s(
-    'Nothing is recorded while the app is closed. Use Start an outing on the map when you go out.',
-    'Nada é registado com a aplicação fechada. Use Começar passeio no mapa quando sair.',
-    'Bei geschlossener App wird nichts aufgezeichnet. Nutzen Sie Ausflug starten auf der Karte, wenn Sie losziehen.'
+    'Records only during an outing you start on the map.',
+    'Só regista durante um passeio que começar no mapa.',
+    'Zeichnet nur während eines Ausflugs auf, den Sie auf der Karte starten.'
   ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),
@@ -755,20 +757,29 @@ export const STRINGS = {
   // reading English in the one place the app explains what it costs them.
   // ⚠ No percentages, by D-041: they say what each tier *does*, never what it
   // spends, because no battery figure in this project has been measured.
+  // 2026-09-25, automatic recording as one list of modes, after WalkNYC. Each
+  // mode's line says what it does in a sentence; none quotes a battery figure,
+  // because none has been measured (D-041).
+  'settings.recording.off': s('Off', 'Desligado', 'Aus'),
+  'settings.recording.needsPermission': s(
+    'Needs permission',
+    'Precisa de autorização',
+    'Braucht Erlaubnis'
+  ),
   'settings.quality.detail.saver': s(
-    'Asks least often, and lets your phone rest when you are still. Your places still fill in; the line on your map will be rougher.',
-    'Pergunta com menos frequência e deixa o telemóvel descansar quando está parado. Os seus lugares continuam a preencher-se; a linha no mapa fica mais grosseira.',
-    'Fragt am seltensten und lässt Ihr Telefon ruhen, wenn Sie stehen bleiben. Ihre Orte füllen sich weiterhin; die Linie auf der Karte wird gröber.'
+    'Least battery. Places still count; the line on the map is rougher.',
+    'Menos bateria. Os lugares contam na mesma; a linha no mapa fica mais grosseira.',
+    'Wenigster Akku. Orte zählen trotzdem; die Linie auf der Karte ist gröber.'
   ),
   'settings.quality.detail.balanced': s(
-    'The usual choice. Enough detail to recognise where you went, without following every step.',
-    'A escolha habitual. Detalhe suficiente para reconhecer por onde andou, sem seguir cada passo.',
-    'Die übliche Wahl. Genug Detail, um wiederzuerkennen, wo Sie waren, ohne jeden Schritt zu verfolgen.'
+    'The usual choice.',
+    'A escolha habitual.',
+    'Die übliche Wahl.'
   ),
   'settings.quality.detail.best': s(
-    'Asks most often and keeps going even when you stop, so a long lunch is not a gap in the line. Uses the most battery, by some way.',
-    'Pergunta com mais frequência e continua mesmo quando está parado, para que um almoço demorado não seja uma falha na linha. É a que mais bateria gasta, de longe.',
-    'Fragt am häufigsten und läuft weiter, auch wenn Sie anhalten. Ein langes Mittagessen wird so keine Lücke in der Linie. Verbraucht mit Abstand am meisten Akku.'
+    'The most faithful line, and by far the most battery.',
+    'A linha mais fiel, e a que mais bateria gasta, de longe.',
+    'Die genaueste Linie, und mit Abstand der meiste Akku.'
   ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(

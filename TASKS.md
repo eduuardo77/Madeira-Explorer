@@ -166,6 +166,18 @@ but eight (below). N9 is T-197's; N11 is T-222.
       quieter like WalkNYC's: flat `#EEEFF2` panel sampled from WalkNYC, no shadow, grey fill
       (D-090 amended). The passport's top: **A, unchanged**; the project lead liked B's category
       counts but not its *Ver a sua viagem* button. Card: B (T-218).
+- [x] **T-227** **Automatic recording as one list of modes, after WalkNYC; the progress line names a
+      municipality; a quieter Centrar** (2026-09-25, the project lead's picks from
+      `tools/out/screen-options-2.html` and their note that location settings still confused).
+      Settings: a location row, a switch and a three-way control that appeared under it became one
+      row, *Registo automático · Preciso ›*, opening *Desligado · Poupança · Equilibrado · Preciso*,
+      each in one line (WalkNYC's *Passive Capture* is one list too). Location access shows only when
+      it needs fixing, in the page and at the top of the list; the tiers are disabled, not hidden,
+      until then. `LanguageSheet` became `ChoiceSheet`, used by both. Progress line **B**:
+      `homeProgress` counts the municipality started and closest to finished (`suggestNextRegion`,
+      D-027's never-shown "where next"), falls back to the island with no stamp or no name.
+      Centrar **B, blue words**: flat in the line's grey, 32 dp seen, 60 dp to tap, contrast held.
+      Seen on the P30; smoke test passing.
 - [x] **T-226** **Settings, compact, and no jump when choosing a language** (2026-09-25, the project
       lead on the P30: *"whenever you click language the page goes up and down"*, *"the settings take
       too much space"*). Measured first: after a tap on a language the IDIOMA heading left the screen

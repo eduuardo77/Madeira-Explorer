@@ -168,7 +168,7 @@ export function computeTripProgress(
  * Returns null when there is nothing sensible to suggest: no content, nothing
  * started, or everything finished.
  */
-export function suggestNextRegion(progress: TripProgress): RegionProgress | null {
+export function suggestNextRegion(progress: Pick<TripProgress, 'byRegion'>): RegionProgress | null {
   const started = progress.byRegion.filter(
     (region) => region.collected > 0 && region.collected < region.total
   );

@@ -33,6 +33,15 @@
  * finger: measured on the P30, the IDIOMA heading left the screen for over a
  * second. With nothing above it, nothing can move it.
  *
+ * ⚠ **Automatic recording is one row and a list of modes, after WalkNYC**
+ * (2026-09-25). The project lead still found the location settings confusing:
+ * a permission row, an on/off switch and a three-way quality control that
+ * appeared only when the switch was on were three controls for one question.
+ * WalkNYC's *Passive Capture* is one named list of modes. So is ours:
+ * *Desligado · Poupança · Equilibrado · Preciso*, each explained in a line, in
+ * the same sheet as the languages. Location access appears only when it needs
+ * fixing, as WalkNYC's permission repair does.
+ *
  * ⚠ **Rows stay 60 dp** (D-015). The project lead finds them tall; that is a
  * decision about D-015 to put to them, not one to take here.
  *
@@ -54,7 +63,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from 'react-native';
@@ -216,51 +224,72 @@ function ListRow({
   );
 }
 
+/** One option in a `ChoiceSheet`. */
+type Choice = { key: string; label: string; detail?: string; disabled?: boolean };
+
 /**
- * The language list, over the screen (2026-09-25). A sheet rather than rows in
- * the page, so a choice cannot move anything under the finger; it closes on a
- * choice, on *Cancelar*, on the backdrop and on Android's Back.
+ * A short list of options over the screen (2026-09-25): the languages, and the
+ * automatic recording modes. A sheet rather than rows in the page, so a choice
+ * cannot move anything under the finger; it closes on a choice, on *Cancelar*,
+ * on the backdrop and on Android's Back.
  *
- * T-202's radio semantics are kept (T-215): each option says whether it is
- * `checked`, and *Automático* says which language it resolves to.
+ * Radio semantics throughout (T-202, T-215): each option says whether it is
+ * `checked`, and a disabled one says so too. `notice` sits above the options
+ * for the one thing that must be fixed first (location access).
  */
-function LanguageSheet({
-  choice,
+function ChoiceSheet({
+  title,
+  choices,
+  selected,
+  notice,
+  footnote,
   onChoose,
   onClose,
 }: {
-  choice: Language | null;
-  onChoose: (language: Language | null) => void;
+  title: string;
+  choices: Choice[];
+  selected: string;
+  notice?: ReactNode;
+  footnote?: string;
+  onChoose: (key: string) => void;
   onClose: () => void;
 }) {
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose} visible>
       <Pressable style={styles.scrim} onPress={onClose} accessible={false} />
       <View style={styles.sheet}>
-        <Text style={styles.sheetTitle}>{t('settings.section.language')}</Text>
+        <Text style={styles.sheetTitle}>{title}</Text>
+        {notice}
         <View accessibilityRole="radiogroup">
-          {([null, ...LANGUAGES] as (Language | null)[]).map((option) => {
-            const selected = option === choice;
-            const label =
-              option === null
-                ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
-                : LANGUAGE_NAMES[option];
+          {choices.map((choice) => {
+            const checked = choice.key === selected;
             return (
               <Pressable
-                key={option ?? 'auto'}
+                key={choice.key}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: selected }}
-                accessibilityLabel={label}
-                onPress={() => onChoose(option)}
-                style={({ pressed }) => [styles.radioRow, pressed && styles.pressed]}
+                accessibilityState={{ checked, disabled: choice.disabled === true }}
+                accessibilityLabel={choice.label}
+                accessibilityHint={choice.detail}
+                disabled={choice.disabled === true}
+                onPress={() => onChoose(choice.key)}
+                style={({ pressed }) => [
+                  styles.radioRow,
+                  choice.disabled === true && styles.rowDisabled,
+                  pressed && styles.pressed,
+                ]}
               >
-                <Text style={styles.rowLabel}>{label}</Text>
-                <Text style={styles.tick}>{selected ? '✓' : ''}</Text>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowLabel}>{choice.label}</Text>
+                  {choice.detail === undefined ? null : (
+                    <Text style={styles.rowDetail}>{choice.detail}</Text>
+                  )}
+                </View>
+                <Text style={styles.tick}>{checked ? '✓' : ''}</Text>
               </Pressable>
             );
           })}
         </View>
-        <Text style={styles.footnote}>{t('settings.language.footnote')}</Text>
+        {footnote === undefined ? null : <Text style={styles.footnote}>{footnote}</Text>}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.cancel')}
@@ -271,43 +300,6 @@ function LanguageSheet({
         </Pressable>
       </View>
     </Modal>
-  );
-}
-
-/**
- * A labelled switch (T-146).
- *
- * A real `Switch` rather than two buttons, because a switch is *the* iOS
- * settings control and this screen follows iOS conventions (D-054). D-015 is
- * satisfied by the row's own words: the state is never carried by the switch's
- * colour alone — the section footnote below it changes with the state and says
- * in a sentence what is currently true.
- */
-function Toggle({
-  label,
-  value,
-  onChange,
-  disabled,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (next: boolean) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <View style={[styles.row, disabled === true && styles.rowDisabled]}>
-      <Text style={[styles.rowLabel, styles.rowText]}>{label}</Text>
-      <Switch
-        accessibilityLabel={label}
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        // Explicit colours: the platform default is a green that belongs to no
-        // other part of this interface.
-        trackColor={{ false: colors.surfaceRaised, true: colors.action }}
-        thumbColor={colors.actionText}
-      />
-    </View>
   );
 }
 
@@ -345,63 +337,8 @@ const QUALITY_TEXT: Record<TrackingQuality, { short: StringKey; detail: StringKe
   },
 };
 
-/**
- * The three tiers as one pill, three segments wide (2026-08-28).
- *
- * ⚠ **This replaced three stacked cards on the project lead's instruction.**
- * The reference app they pointed at puts this same choice in a segmented
- * control with a single sentence underneath. Three full-width cards, each
- * carrying its own paragraph, had made the most ordinary setting in the app the
- * tallest thing on the screen — the user had to read three paragraphs to make
- * one choice.
- *
- * ⚠ **D-015 is still satisfied, and not by the fill.** The selected segment is
- * tinted, but what actually carries the state is the sentence directly below,
- * which names the chosen tier and says what it does. That is the same argument
- * `Toggle` makes above, and it is the reason the descriptions moved *out* of
- * the segments rather than being deleted with them.
- *
- * ⚠ `numberOfLines={1}` is deliberate. A segment that wraps to two lines makes
- * the pill taller than its neighbours and the row stops reading as one control;
- * `short` exists precisely so nothing has to wrap.
- */
-function Segmented({
-  value,
-  onChange,
-}: {
-  value: TrackingQuality;
-  onChange: (next: TrackingQuality) => void;
-}) {
-  return (
-    <View style={styles.segmented} accessibilityRole="radiogroup">
-      {TRACKING_QUALITIES.map((quality) => {
-        const selected = quality === value;
-        return (
-          <Pressable
-            key={quality}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: selected }}
-            accessibilityLabel={t(QUALITY_TEXT[quality].short)}
-            accessibilityHint={t(QUALITY_TEXT[quality].detail)}
-            onPress={() => onChange(quality)}
-            style={({ pressed }) => [
-              styles.segment,
-              selected && styles.segmentActive,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text
-              numberOfLines={1}
-              style={[styles.segmentText, selected && styles.segmentTextActive]}
-            >
-              {t(QUALITY_TEXT[quality].short)}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
+/** The automatic recording modes, in order: off, then the tiers (D-087). */
+type RecordingMode = 'off' | TrackingQuality;
 
 /** Permission, in the user's words rather than the platform's. */
 function describePermission(permission: PermissionLevel): string {
@@ -446,7 +383,10 @@ export default function SettingsView({
   // has granted Always, and the tier means nothing until the switch is on —
   // so the screen asks the question once and every branch below reads it.
   const recordingInBackground = backgroundTracking && permission === 'always';
-  const [choosingLanguage, setChoosingLanguage] = useState(false);
+  const [sheet, setSheet] = useState<'language' | 'mode' | null>(null);
+  const mode: RecordingMode = recordingInBackground ? trackingQuality : 'off';
+  const modeLabel = (key: RecordingMode) =>
+    key === 'off' ? t('settings.recording.off') : t(QUALITY_TEXT[key].short);
   const paused = pausedUntil != null && pausedUntil > Date.now();
 
   return (
@@ -476,50 +416,30 @@ export default function SettingsView({
                   ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
                   : LANGUAGE_NAMES[languageChoice]
               }
-              onPress={() => setChoosingLanguage(true)}
+              onPress={() => setSheet('language')}
             />
           </Group>
         )}
 
-        {/* ⚠ ONE CARD (2026-08-28, the project lead's instruction): "may the app
-            record" and "how closely" sit together because the second means
-            nothing without the first. Since 2026-09-25 the location status and
-            the battery row live here too, one row each. */}
-        <Group
-          // D-087 §1: the background recorder keeps its own name.
-          title={t('settings.section.background')}
-          // With recording on, the quality's own line says what it costs, so
-          // the group needs no second paragraph about battery (2026-09-25).
-          footnote={
-            permission !== 'always'
-              ? t('settings.recording.footnoteLimited')
-              : recordingInBackground
-                ? undefined
-                : t('settings.background.off')
-          }
-        >
+        {/* ⚠ ONE ROW FOR AUTOMATIC RECORDING (2026-09-25, after WalkNYC): its
+            modes are one list, not a switch and a control that appeared under
+            it. The pause and the battery row stay here, with what they affect.
+            Location access shows only when it needs fixing. */}
+        <Group>
+          {permission === 'always' ? null : (
+            <ListRow
+              label={t('settings.location')}
+              value={describePermission(permission)}
+              detail={t('settings.recording.footnoteLimited')}
+              onPress={onOpenSystemSettings}
+            />
+          )}
           <ListRow
-            label={t('settings.location')}
-            value={describePermission(permission)}
-            onPress={onOpenSystemSettings}
+            // D-087 §1: the background recorder keeps its own name.
+            label={t('settings.section.background')}
+            value={permission === 'always' ? modeLabel(mode) : t('settings.recording.needsPermission')}
+            onPress={() => setSheet('mode')}
           />
-          <Toggle
-            label={t('settings.background.toggle')}
-            value={recordingInBackground}
-            onChange={onChangeBackgroundTracking}
-            // ⚠ Disabled rather than hidden when the permission is missing. A
-            // control that vanishes leaves the user hunting for a setting they
-            // remember seeing; one that is visible and explained tells them
-            // where the real gate is — which is the phone, not this screen.
-            disabled={permission !== 'always'}
-          />
-          {recordingInBackground ? (
-            <View style={styles.quality}>
-              <Segmented value={trackingQuality} onChange={onChangeTrackingQuality} />
-              {/* The state, in words. Not decoration — see `Segmented`. */}
-              <Text style={styles.rowDetail}>{t(QUALITY_TEXT[trackingQuality].detail)}</Text>
-            </View>
-          ) : null}
           {/* D-087 §6: the pause lives with the thing it pauses. A pause in the
               past is no pause, the same rule the sink applies. */}
           {recordingInBackground && onPause !== undefined && onResume !== undefined ? (
@@ -626,14 +546,64 @@ export default function SettingsView({
         </Group>
       </ScrollView>
 
-      {choosingLanguage && languageChoice !== undefined && onChangeLanguage !== undefined ? (
-        <LanguageSheet
-          choice={languageChoice}
-          onChoose={(language) => {
-            setChoosingLanguage(false);
-            onChangeLanguage(language);
+      {sheet === 'language' && languageChoice !== undefined && onChangeLanguage !== undefined ? (
+        <ChoiceSheet
+          title={t('settings.section.language')}
+          choices={([null, ...LANGUAGES] as (Language | null)[]).map((option) => ({
+            key: option ?? 'auto',
+            label:
+              option === null
+                ? t('settings.language.auto', { language: LANGUAGE_NAMES[systemLanguage()] })
+                : LANGUAGE_NAMES[option],
+          }))}
+          selected={languageChoice ?? 'auto'}
+          footnote={t('settings.language.footnote')}
+          onChoose={(key) => {
+            setSheet(null);
+            onChangeLanguage(key === 'auto' ? null : (key as Language));
           }}
-          onClose={() => setChoosingLanguage(false)}
+          onClose={() => setSheet(null)}
+        />
+      ) : null}
+
+      {sheet === 'mode' ? (
+        <ChoiceSheet
+          title={t('settings.section.background')}
+          // Off is always allowed; the others need "Allow all the time", and
+          // the way to it is the first thing in the sheet (disabled, not hidden).
+          choices={(['off', ...TRACKING_QUALITIES] as RecordingMode[]).map((key) => ({
+            key,
+            label: modeLabel(key),
+            detail: key === 'off' ? t('settings.background.off') : t(QUALITY_TEXT[key].detail),
+            disabled: key !== 'off' && permission !== 'always',
+          }))}
+          selected={mode}
+          notice={
+            permission === 'always' ? undefined : (
+              <ListRow
+                label={t('settings.location')}
+                value={describePermission(permission)}
+                detail={t('settings.recording.footnoteLimited')}
+                onPress={() => {
+                  setSheet(null);
+                  onOpenSystemSettings();
+                }}
+              />
+            )
+          }
+          onChoose={(key) => {
+            setSheet(null);
+            const next = key as RecordingMode;
+            if (next === 'off') {
+              onChangeBackgroundTracking(false);
+              return;
+            }
+            onChangeTrackingQuality(next);
+            if (!backgroundTracking) {
+              onChangeBackgroundTracking(true);
+            }
+          }}
+          onClose={() => setSheet(null)}
         />
       ) : null}
     </View>
@@ -705,13 +675,13 @@ const styles = StyleSheet.create({
   chevron: { color: colors.textMuted, fontSize: fontSize.title, marginLeft: spacing.xs },
   rowDisabled: { opacity: 0.5 },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
-  quality: { paddingVertical: spacing.sm, gap: spacing.sm },
   radioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: spacing.md,
     minHeight: MIN_TAP_TARGET,
+    paddingVertical: spacing.xs,
   },
   tick: { color: colors.tint, fontSize: fontSize.body, fontWeight: '700' },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
@@ -729,39 +699,8 @@ const styles = StyleSheet.create({
   sheetTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700', marginBottom: spacing.xs },
   sheetCancel: { justifyContent: 'center' },
   sheetCancelText: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
-  segmented: {
-    flexDirection: 'row',
-    borderRadius: radius.control,
-    // The trough. Each segment paints over it when selected, so `overflow`
-    // is what keeps the tint inside the rounded ends.
-    backgroundColor: colors.surfaceRaised,
-    overflow: 'hidden',
-  },
-  segment: {
-    // Equal thirds regardless of how long the word is in this language.
-    flex: 1,
-    minHeight: MIN_TAP_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-  },
-  segmentActive: { backgroundColor: colors.action },
-  segmentText: {
-    color: colors.textMuted,
-    fontSize: fontSize.small,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  // ⚠ `actionText` on `action` is the pair `contrast.test.ts` already proves
-  // readable — the same one the primary button uses. Do not hand-pick a colour
-  // here; the test only covers the pairs the theme declares.
-  segmentTextActive: { color: colors.actionText },
-  segmentDetail: {
-    color: colors.textMuted,
-    fontSize: fontSize.small,
-    lineHeight: Math.round(fontSize.small * 1.4),
-  },
-  choiceRow: { flexDirection: 'row', gap: spacing.sm },
+  // The hidden light/dark choice (MAP_STYLE_CHOICE_ENABLED): two labelled buttons.
+  choiceRow: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },
   choice: {
     flex: 1,
     minHeight: MIN_TAP_TARGET,

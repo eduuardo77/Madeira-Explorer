@@ -56,6 +56,23 @@ for a launch without a `createClassLoader … com.proa` line.
    not decided.
 5. **D-089 study:** N (Q2), the watermark A/B (Q5), the price (Q6), and people for Q3/Q4.
 
+**The second review (`docs/app-review-2026-09-24.md`, 6.7/20) is now tasks T-214 to T-224**, a
+section of its own in `TASKS.md` with the project lead's answers. Done in code 2026-09-24/25:
+T-215 (accessibility, and 7 more label-in-name failures than the review saw), T-216 (the policy's
+seven untrue claims), T-217 (replay without a stamp), T-218 (stamp on its card, album palette),
+T-219 (row peek, 84 dp on the P30), T-221 (licences from what ships: 286, Android included),
+T-222 (`tools/smoke-release.mjs`), T-223 (zoom floor, *Centrar* from the ocean), T-224.
+⚠ **None of it has been on the phone.** The P30 dropped off adb (Windows saw it as MTP only).
+A beta APK with all of it is built from `57ee305`; the next step is:
+
+```bash
+tools/android-sdk/platform-tools/adb install -r app/android/app/build/outputs/apk/release/app-release.apk
+node tools/smoke-release.mjs
+```
+
+Then look at: the passport's peek, the dark card, *Ver a sua viagem* at 0 stamps, the Licences
+screen. **T-220** (one control language) is a design question and waits on the project lead.
+
 **Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
 2026-09-24) puts billing *after* the monetisation study. ✅ **The study's desk half is done (2026-09-24)**: Q1, Q4, Q6, Q8 are written into
 `docs/monetization-study-plan.md`. The rest waits on the project lead (N, A/B, price, people). Outside monetisation: T-197

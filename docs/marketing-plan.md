@@ -71,9 +71,14 @@ uninstall, which costs ranking on every other term too.
 The differentiator is **not** "trails". It is *a record of your own trip* and *nothing collected*.
 That belongs in the pictures and the first line, not in a keyword list.
 
-## 3. The name: **Proa**
+## 3. The name: ~~**Proa**~~ **Bruma**
 
-✅ **Decided 2026-08-17 (D-074): the app is *Proa*; the listing is *Proa - Madeira*.**
+⚠ **SUPERSEDED 2026-09-25 by D-092: the app is *Bruma*; the Play title is *Bruma: Madeira Walk
+Tracker*.** This section and §4 still describe Proa and lead with "map", which the project lead has
+ruled out: the app is about **where you have been, roads highlighted**. The copy is rewritten under
+T-240. What follows is the 2026-08-17 reasoning, kept as history.
+
+~~✅ **Decided 2026-08-17 (D-074): the app is *Proa*; the listing is *Proa - Madeira*.**~~
 
 Brand plus keyword, so nothing is traded away: **Proa** carries the souvenir watermark — design brief
 §7.2's primary distribution surface — and **Madeira** sits in the title where the search weight is.
@@ -90,7 +95,9 @@ because it is one of the curated 60. D-074 has the full screen.
 
 ### Title (30 max)
 
-> **Proa - Madeira** — 14 characters ✅ **decided 2026-08-17 (D-074)**
+> **Bruma: Madeira Walk Tracker** (27 characters) ✅ **decided 2026-09-25 (D-092)**
+>
+> ~~**Proa - Madeira** — 14 characters, decided 2026-08-17 (D-074)~~
 
 ⚠ **Superseded what this section first said.** It recommended keeping *"Madeira Explorer"* on ASO
 grounds, without having read **design brief §7**, which had argued against that name since August.

@@ -3898,6 +3898,10 @@ assume daily-forever apps. Optimising against D30 here is optimising against hol
 
 ## D-074 — The app is called **Proa**. The store listing is **Proa - Madeira**.
 
+⚠ **SUPERSEDED 2026-09-25 by D-092: the app is Bruma, titled *Bruma: Madeira Walk Tracker*.** Kept
+for its availability screen, the two silent consequences of a package change (both apply again),
+and the `brand.ts` repair.
+
 **Status:** Accepted 2026-08-17 · **Resolves:** design brief §7, open since 2026-08-08 ·
 **Package:** `com.proa.madeira` — ⚠ **permanent once published**
 
@@ -4986,3 +4990,78 @@ none of its upkeep shared).
 
 **Revisit if:** a subscription is ever added, or Play Console shows refund abuse that matters.
 Switching is a code change, not a store change.
+
+## D-092 — The app is called **Bruma**. The Play title is **Bruma: Madeira Walk Tracker**. (Supersedes D-074)
+
+**Status: Accepted 2026-09-25** by the project lead, at the end of a long naming conversation.
+**Not yet in code:** the rename is T-240. **Not yet cleared:** the trademark search (T-187) now
+runs on *Bruma*.
+
+| | Value | Changeable? |
+|---|---|---|
+| **On the device**, under the icon | **Bruma** | ✅ any time |
+| **Play title** (30 max) | **Bruma: Madeira Walk Tracker** (27) | ✅ any time |
+| **Play short description** (80 max) | Provisional: *"Every road you walk or drive is highlighted, so you can see where you've been."* (78) | ✅, and A/B testable |
+| **Package id** | **Open.** Decide before the first upload (T-240) | ❌ never, once published |
+
+**Why Proa went.** It still felt wrong to the project lead five weeks on. It was chosen by
+elimination (every argument in D-074 is a constraint it passes); a prow faces forward while the app
+is about where you have already been; and English readers see "Pro-A".
+
+**What the project lead set, in this order.**
+1. **The core is knowing where you have been on the island, roads highlighted.** Not stamps, not
+   navigation, and not "a map": the title never calls the app a map.
+2. **The perfect name will not come, so the descriptor carries the meaning,** as WalkNYC's
+   *"Track the blocks you've walked"* does. The descriptor must be understood on its own.
+3. **The title says *Madeira*.** The app only works here; a title without it invites an install
+   from Lisbon or Berlin and an uninstall. (Also the search word, as D-074 argued.)
+4. **The name sounds the same in Portuguese and English.** This is what removed *Laurel*: "LOR-ul",
+   "lau-RÉL" and "LAU-rel" are three different words for one app.
+
+**Why this descriptor.** The three finalists were read for a second meaning:
+*Walk & Map Madeira* reads as *walks and maps of Madeira*, a hiking guide, which is WalkMe's
+product; *Track Madeira Walks* reads as *follow the Madeira walks*, the everyday name for the levada
+trails. **Only *Madeira Walk Tracker* has one reading.** It is the least charming and the clearest.
+
+**It lifts design brief §7.2's ban on *Track*/*Tracker*.** Google's background-location review
+judges the prominent disclosure and the demo video, not the name, and "walk tracker" reads as a
+fitness term. The honest cost: this weakens the reasoning that rejected *Rasto* (D-074). The
+difference is that *Rasto* would have been the brand, where *Tracker* sits in a plain descriptor
+behind *Walk*.
+
+**Known weaknesses, accepted knowingly.**
+- **The metaphor is half right.** *Bruma* is mist; the default map is light, with highlighted roads.
+  The fog reading only holds in the dark souvenir style (`mapStylePreference.ts`). The project lead
+  saw this and chose it anyway.
+- **Bruma is also a Portuguese footballer.** Locals may think of him first.
+- **Visitors will not know the word.** That is the descriptor's job.
+- **"Walk" puts the listing next to WalkMe** in *walk madeira* searches, and driving is not in the
+  title. The screenshots must show a record of your own trip, not a trail guide
+  (marketing plan §2); the short description names driving.
+
+**How the name was screened.** Play search only, top results, 2026-09-25: *Bruma* had no app of
+that name. **Not checked:** the App Store, domains, EUIPO/TMview and INPI (T-187). European
+Portuguese sets the pronunciation filter: an initial R is guttural (*Rumo*, *Rota* fail), S before a
+consonant is "sh" (*Pista*, *Estrada*, *Vista* fail), a final E is silent (*Lume* fails).
+
+**Rejected, with the reason** (the valuable part, as in D-074):
+- *Laurel*: pronounced differently in each language; an app already named "Laurel", and Laurel.ai.
+- *Palmo* (*palmo a palmo*, inch by inch): the best meaning, but English speakers drop the L as in "palm".
+- *Poncha*: *Poncha da Madeira* is a PGI since 2014, and a drink's name on an app about roads you drove.
+- *Tinta*: "Tinta: Private AI Journal" exists, and it means paint in Portugal.
+- *Unfog*: "Unfog: a walking fog game" already exists. *Stamped.*, *Waymark*, *Afterglow*,
+  *Rearview*, *Contrail* (a flight tracker), *Inroads* (a credit union), *Volta*, *Wend*,
+  *Meander*, *Rove*, *Yonder*, *Vela*, *Nimbo*, *Odo* (a mileage tracker), *Fita*, *Bota*, *Tela*:
+  taken on Play. *Anda* is Porto's transport app; *Andar*, *Bora!* (bike sharing in Viseu) and
+  *Siga* are taken too.
+- *Every Road*, *Ground Covered*, *Retrace*, *Landfall*, *Firecrest*, *Keepsake*, *Drawn*,
+  *Byways*, *Hairpin*: English only, so they fail rule 4.
+- *Walk Madeira* and any *Levada* or *Vereda* name: WalkMe's ground (marketing plan §2).
+
+**Package id.** Recommended, not decided: a neutral id that does not carry the brand, since the
+brand has now changed once. It is invisible except in the Play web address. Changing it repeats
+D-074's two silent consequences: re-restrict the Maps API key (the symptom of forgetting is a grey
+grid) and `npx expo prebuild --clean`.
+
+**Revisit if** the trademark search finds a conflict, or the five-person test the project lead
+was offered (hear it once, write it down) shows locals hearing only the footballer.

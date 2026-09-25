@@ -121,11 +121,20 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       from the stamp row and from the walk button, and a fill of 5 px of 324 at 3/180.
       ⚠ **Not yet judged by eye on the phone.** Subtle enough? Readable on the light map outdoors?
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
-      `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
-      (T-117e). **Start them on day one**: each is small, but they take the longest to come back.
+      `CONTACT_EMAIL` (D-044); the TMview/INPI search on ~~"Proa" (D-074)~~ **"Bruma" (D-092,
+      2026-09-25)**; the upload key (T-117e). **Start them on day one**: each is small, but they
+      take the longest to come back.
       ⚠ **The trademark search must finish before the first upload to Play Console** (2026-09-25):
-      that upload makes the package name `com.proa.madeira` permanent. The listing's display name
+      that upload makes the package name permanent. The listing's display name
       can change later; the package cannot. Monetisation plan, Phase 0 step 0.0.
+- [ ] **T-240** **Rename Proa to Bruma in code and copy (D-092)** ⇠ T-187 (the trademark search
+      first). Added 2026-09-25; nothing done yet, by the project lead's instruction.
+      **Decide first:** the package id (a neutral one is recommended, D-092). Then: `APP_NAME` in
+      `src/brand.ts` and its comment; `app.json` name, slug, scheme, `package`, `bundleIdentifier`;
+      re-restrict the Maps API key to the new package (**forgetting shows as a grey grid**, D-074);
+      `npx expo prebuild --clean`; the `com.proa.madeira` strings in `tools/install-apk.sh` and
+      `tools/lib/uiTree*`; the store copy in `docs/marketing-plan.md` §3 and §4 (still Proa, still
+      "map"); `CLAUDE.md`'s title. `brand.test.ts` will catch any hardcoded old name.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

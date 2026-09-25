@@ -461,9 +461,13 @@ spike renders the real style (T-025) and a souvenir exists (T-105), there is far
 - **Legible small, in a watermark.** Short. This is the primary distribution surface (D-013).
 - **Spellable by a UK, German or Nordic visitor who heard it once.** Rules out `lh`, `ã`, and
   `-eiro` endings.
-- **No `Track` or `Tracker`.** The app already asks for the hardest permission on mobile and
+- ~~**No `Track` or `Tracker`.** The app already asks for the hardest permission on mobile and
   faces a manual Google Play review (T-123, D-008). A name that sounds like surveillance makes
-  both harder for no gain.
+  both harder for no gain.~~ ⚠ **Lifted 2026-09-25 (D-092)** for the descriptor: the review judges
+  the disclosure and the demo video, not the name, and *Walk Tracker* reads as fitness. Still true
+  for the brand itself.
+- **Same sound in Portuguese and English** (added 2026-09-25, D-092). European Portuguese: an
+  initial R is guttural, S before a consonant is "sh", a final E is silent.
 - **No `Cloud`.** It implies a backend, which is the precise opposite of D-001.
 - **No `Visit`, `Official`, `Guide`.** The cease-and-desist trap in §7.
 - **No `Passport`**, tempting as D-003 makes it — *Madeira Passport* reads as a discount tourist
@@ -490,7 +494,11 @@ explicitly is not (D-013).
 **So: distinctive name, and the App Store subtitle carries the meaning.** The name is what gets
 remembered off a video watermark; the subtitle explains.
 
-### 7.4 ✅ DECIDED 2026-08-17 — **Proa**, store listing **Proa - Madeira** (D-074)
+### 7.4 ~~DECIDED 2026-08-17 — **Proa**, store listing **Proa - Madeira** (D-074)~~
+
+⚠ **SUPERSEDED 2026-09-25 by D-092: the app is *Bruma*, titled *Bruma: Madeira Walk Tracker*.**
+§7.3 is answered the other way too: the name need not describe the app *because a plain descriptor
+does*, which is the WalkNYC pattern after all. The full screen of about forty names is in D-092.
 
 **The name is settled.** `com.proa.madeira` is the package, and it is **permanent once published**.
 The full reasoning, the availability screen and the two silent consequences are in D-074; what

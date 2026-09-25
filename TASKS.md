@@ -100,8 +100,11 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       conversation: the map free and unlimited, **5 stamps + the first levada** free, **€5.99 once**
       for all of Madeira, **set medals** and a **founder stamp** (buyers in the first 3 months, by
       Google's purchase time) paid only, **tilt and shine** on every stamp, the video's limit in v1.1
-      (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. The build waits for the
-      execution plan the project lead will ask for; until then the app keeps D-072's 10.
+      (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. Until the build lands the
+      app keeps D-072's 10.
+      → **The build: `docs/monetization-execution-plan.md` (2026-09-25).** Tasks **T-232 to T-239**
+      and **T-156a to T-156e**, reserved there; each is added here when it starts. Nine open
+      questions (OQ-1 to OQ-9) for the project lead, each with a recommendation.
       *As opened:* **The monetisation study — D-089 (Provisional)** ⇠ nothing; ⚠ must finish before
       D-084's public release. Plan: `docs/monetization-study-plan.md`. The project lead's
       hypothesis, 2026-09-24: very few free stamps, the video free with a huge watermark, the map

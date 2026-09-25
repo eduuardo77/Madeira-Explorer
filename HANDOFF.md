@@ -76,8 +76,9 @@ Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React 
 **Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
 2026-09-24) puts billing *after* the monetisation study. ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
-The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) waits for the
-execution plan. Outside monetisation: T-197
+The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
+**`docs/monetization-execution-plan.md`**: read it whole before starting; its §3 lists the
+project lead's open questions. Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.

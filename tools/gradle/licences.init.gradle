@@ -1,0 +1,75 @@
+// The licence of every Android library in the release build (T-221).
+//
+// Used by `tools/build-licences.mjs`; not part of the app's build. Passed on the
+// command line, so nothing in app/android changes:
+//
+//     ./gradlew --init-script ../../tools/gradle/licences.init.gradle :app:proaLicences -q
+//
+// For each module on :app's releaseRuntimeClasspath it asks Gradle for the
+// module's POM, from whichever repository the build already uses, and prints
+//
+//     LICENCE|group|artifact|version|licence name|licence url
+//
+// A POM without <licenses> defers to its <parent>, as Maven itself does, up to
+// five levels. A module whose licence cannot be found prints an empty name, and
+// the generator refuses to write the file until somebody decides what it is.
+//
+// Why POMs and not a table of "androidx is Apache": only 34 of 237 modules had a
+// POM in the local cache, and a list filled in by rule would be a licence
+// screen stating things nobody checked.
+
+allprojects {
+  if (path != ':app') {
+    return
+  }
+
+  tasks.register('proaLicences') {
+    doLast {
+      def pomOf = { String group, String module, String version ->
+        def result = project.dependencies.createArtifactResolutionQuery()
+          .forModule(group, module, version)
+          .withArtifacts(org.gradle.maven.MavenModule, org.gradle.maven.MavenPomArtifact)
+          .execute()
+        def file = null
+        result.resolvedComponents.each { component ->
+          component.getArtifacts(org.gradle.maven.MavenPomArtifact).each { artifact ->
+            if (artifact instanceof org.gradle.api.artifacts.result.ResolvedArtifactResult) {
+              file = artifact.file
+            }
+          }
+        }
+        return file
+      }
+
+      def licenceOf
+      licenceOf = { String group, String module, String version, int depth ->
+        def file = pomOf(group, module, version)
+        if (file == null || depth > 5) {
+          return ['', '']
+        }
+        def pom = new groovy.xml.XmlSlurper().parse(file)
+        def first = pom.licenses.license.find { true }
+        if (first != null && first.name.text().trim()) {
+          return [first.name.text().trim(), first.url.text().trim()]
+        }
+        if (pom.parent.artifactId.text()) {
+          return licenceOf(pom.parent.groupId.text(), pom.parent.artifactId.text(), pom.parent.version.text(), depth + 1)
+        }
+        return ['', '']
+      }
+
+      def classpath = project.configurations.getByName('releaseRuntimeClasspath')
+      classpath.incoming.resolutionResult.allComponents.each { component ->
+        def id = component.id
+        if (id instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier) {
+          def (name, url) = licenceOf(id.group, id.module, id.version, 0)
+          println "LICENCE|${id.group}|${id.module}|${id.version}|${name}|${url}"
+        } else if (id instanceof org.gradle.api.artifacts.component.ProjectComponentIdentifier && id.projectPath != ':app') {
+          // An npm package with Android code, built from source: its licence is
+          // the package's own, which the generator reads from its folder.
+          println "PROJECT|${id.projectPath}|${project.rootProject.project(id.projectPath).projectDir}"
+        }
+      }
+    }
+  }
+}

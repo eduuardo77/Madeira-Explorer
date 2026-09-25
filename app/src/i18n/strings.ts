@@ -614,6 +614,15 @@ export const STRINGS = {
     'Publicado sob {license}. O pacote não traz ficheiro de licença próprio.',
     'Veröffentlicht unter {license}. Das Paket enthält keine eigene Lizenzdatei.'
   ),
+  // T-221: the list is what ships, in two halves, and a POM often gives only
+  // an address for its licence.
+  'licences.section.js': s('JavaScript', 'JavaScript', 'JavaScript'),
+  'licences.section.android': s('Android', 'Android', 'Android'),
+  'licences.atUrl': s(
+    'Released under {license}. The full text is at {url}',
+    'Publicado sob {license}. O texto completo está em {url}',
+    'Veröffentlicht unter {license}. Der vollständige Text steht unter {url}'
+  ),
   'licences.a11y.back': s('Back to settings', 'Voltar às definições', 'Zurück zu den Einstellungen'),
   'privacy.a11y.back': s(
     'Back to settings',

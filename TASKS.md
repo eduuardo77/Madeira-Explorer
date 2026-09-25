@@ -154,8 +154,23 @@ but eight (below). N9 is T-197's; N11 is T-222.
       fourth sticker began exactly at the card's edge. ✅ `passport/stripLayout.ts`: 96 where the
       cut reads, 84 on the P30, measured from the strip itself. Workbench: 44% of the fourth.
 - [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
-- [ ] **T-221** **Licences: what ships, JavaScript and native (N5).**
-- [ ] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**
+- [~] **T-221** **Licences: what ships, JavaScript and native (N5).** ✅ Code 2026-09-25. Worse than
+      the review said in both directions: of 119 listed, **77 never ship** (`@babel/core`,
+      `typescript`, `react-dom`), and **15 that ship were missing** (`@babel/runtime`, `scheduler`,
+      `promise`). Now `tools/build-licences.mjs` reads the release bundle's source map and, through
+      `tools/gradle/licences.init.gradle` (passed on the command line, the app's build unchanged),
+      each Android module's own POM: **286 packages, 37 JavaScript, 244 Android, 5 both**, every
+      licence named by its POM, none guessed (only 34 of 237 POMs were in the local cache, so a
+      rule table was rejected). One shared copy of the Apache text. `licences.test.ts` holds the
+      lock-file hash, no build-only package, the Android half present. ⚠ Not yet seen on the phone.
+- [~] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**
+      ✅ Written 2026-09-25: `node tools/smoke-release.mjs` taps through map, Settings, Privacy,
+      Licences, passport, a stamp's card and the replay, with the app's own labels in the phone's
+      language, and fails on a crash, a restarted process or a screen that never appears. Never
+      presses anything that changes data. Reads the language radios' `checked` (T-215's evidence).
+      Pure half `tools/lib/uiTree.mjs`, 4 tests (`node --test tools/lib/uiTree.test.mjs`), one of
+      which caught its own first crash reader blaming this app for another's crash.
+      ⚠ **Not yet run on a phone**: the P30 was not reachable over adb this session.
 - [~] **T-223** **The home map cannot be lost in the ocean (N8).** ⚠ **`expo-maps` cannot fence
       the camera**: `latLngBoundsForCameraTarget` is commented out in its `Records.kt`, and its
       minimum zoom defaults to 3, half the planet. ✅ Code (`map/mapFence.ts`, 4 tests): a zoom

@@ -1409,8 +1409,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       argument, tunable against real trips (T-134), never to be defended as measured.
 - [ ] **T-156** **Play Billing, and the privacy claim it costs** ⇠ T-155, T-117
       — **D-089 (2026-09-25):** one non-consumable at **€5.99**, *all of Madeira, forever*; Play's
-      regional conversions; `expo-iap` (study Q8). The purchase time on Google's record also decides
-      the **founder stamp** (first 3 months after the public launch), so it must survive restore.
+      regional conversions. The purchase time on Google's record also decides the **founder stamp**
+      (first 3 months after the public launch), so it must survive restore.
+      — **D-091 (2026-09-25): `expo-iap`, pinned to one version; RevenueCat rejected.** Its tests must
+      prove: `finishTransaction` after granting (or Google refunds in 3 days), *pending* never
+      unlocks, offline says *unlock later* and a stored unlock holds, purchases queried at launch
+      and resume, restore brings back the purchase time.
+      — **The project lead's step:** a **payments profile** in Play Console (bank and tax details)
+      before any purchase can be tested, and license testers for free test purchases.
       — A single non-consumable product. StoreKit 2 can validate on-device via JWS with no server of
       ours, but **Play's `queryPurchasesAsync` makes a network call when its cache expires**.
       — ⚠ **This is the first time the app talks to the network on its own account.** It does **not**

@@ -119,6 +119,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-088** | A trip ends at the **airport**, after **three days of silence**, or by the user's **End trip** (passport), which also turns automatic recording off (⚠ that part Provisional). | **Accepted** |
 | **D-089** | **The free tier:** the map of where you have been **free and unlimited**; **5 stamps + your first levada** free; **one purchase of €5.99** unlocks all of Madeira forever, with **set medals** and a **founder stamp** (first 3 months). **Tilt and shine** on every stamp. The video waits for its export (v1.1): free gets a medium mark and an end card. No subscription. Supersedes T-159. | **Accepted** 2026-09-25 |
 | **D-090** | A **quiet progress line** above the outing button, *3 de 80 lugares* and a 3 dp bar, after WalkNYC's. Shown at zero; not tappable; said once to screen readers (by the passport button). Amends D-083/D-085. | **Accepted** (the drawing Provisional) |
+| **D-091** | **Billing is `expo-iap`**, straight to Google Play Billing from the phone; no server, **no account**. RevenueCat rejected: it contacts a third party at every launch and holds every purchase. We must prove acknowledgement, pending, offline and restore ourselves. | **Accepted** 2026-09-25 |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

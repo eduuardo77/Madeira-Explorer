@@ -4916,3 +4916,52 @@ finished** when there is one (*Santana: 1 de 12 lugares*), and the island otherw
 - **The strip as a tap target that opens the passport.** It would be a third bottom control and a
   mis-tap for the walk button, which is the one design brief §3.1 guards.
 - **The rings again.** The project lead removed them the same day.
+
+## D-091 — Billing is `expo-iap`, on the phone; RevenueCat rejected
+
+**Status: Accepted 2026-09-25** by the project lead. Implements D-089's single purchase and D-084's
+"public v1 ships with billing". Recommended in study Q8 (2026-09-24), checked there, and confirmed in
+conversation after the RevenueCat alternative was laid out in full.
+
+**The decision.** The app talks to **Google Play Billing** directly through `expo-iap`, an
+open-source library with no server of ours or anyone else's in between. Payment, VAT and refunds
+are Google's, as they must be on Play for a digital unlock. The user needs **no account with us**:
+the purchase belongs to the Google account already on the phone, and comes back on reinstall or a
+new phone.
+
+**Checked (study Q8):** validated on Expo SDK 57 / React Native 0.86, which is this app; Play Billing
+Library v9.1 against Google's floor of v8; active releases.
+
+**What the build must prove, because no service does it for us:**
+1. **Acknowledgement.** `finishTransaction` after granting, or Google refunds the purchase after
+   3 days. A bug here silently refunds every sale; it is the line to test hardest.
+2. **Pending purchases** (cash at a shop, slow cards): unlock only when the state is *purchased*.
+3. **Offline.** Buying needs a network; the lock must say *you can unlock this later*, never fail.
+   Once bought, the unlock is stored on the phone and holds offline. Query purchases at launch and
+   on resume to catch one completed while the app was closed.
+4. **Restore**, carrying the purchase time the founder stamp reads (D-089 rule 6).
+5. **One exact version**, pinned and updated deliberately: the library releases often and has
+   changed its API between versions.
+
+**Accepted risks.** A refund may go unnoticed (Google reports refunds to a server, which we do not
+have), and a rooted phone could fake a purchase. Each costs at most one €5.99 unlock. Verify the
+refund behaviour with a test refund once the upload key exists (T-187). A small maintaining team:
+if it is abandoned, `react-native-iap` or RevenueCat are the exits, and buyers keep their unlock
+because it lives in their Google account.
+
+**Rejected: RevenueCat.** A good product and the sensible default for most apps; it would handle
+acknowledgement, refunds, fraud checks and library upgrades for us. Rejected because its strengths
+fall on what Proa does not have (subscriptions, two stores, accounts) and its costs fall on what it
+sells:
+- its library **contacts RevenueCat at every launch and resume**, not only at a purchase, so the
+  app would talk to a third party every time it opens;
+- every buyer's purchase is recorded on their servers, which makes them a data processor to name
+  in the privacy policy and the Data Safety form;
+- setup gives them a Google Cloud service account with access to Play's financial data;
+- dependence on a company's uptime, prices and ownership.
+Its fee (free under $2,500 a month, then 1%) played no part.
+**Also rejected:** writing a native Play Billing module ourselves (the same work as `expo-iap` with
+none of its upkeep shared).
+
+**Revisit if:** a subscription is ever added, or Play Console shows refund abuse that matters.
+Switching is a code change, not a store change.

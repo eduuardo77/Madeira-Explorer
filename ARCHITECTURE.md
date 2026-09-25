@@ -335,6 +335,7 @@ Full reasoning, including rejected alternatives, is in [DECISIONS.md](DECISIONS.
 | Reward backbone | OS geofences with dynamic set management |
 | Framework | **React Native + Expo, TypeScript** (D-023) |
 | Map bindings | `@maplibre/maplibre-react-native` v11 — API mirrors the MapLibre GL JS style spec |
+| Billing | **`expo-iap`** straight to Google Play Billing; no receipt server, no account; RevenueCat rejected (D-091) |
 | Analytics | None |
 | Crash reporting | Local only, uploaded only on explicit user action, if at all |
 

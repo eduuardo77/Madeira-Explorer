@@ -303,7 +303,7 @@ pay"* and *"the video is covered in a watermark"*. Then check that the store lis
 answers each one: what is free is stated in the first line, and the free map is the headline.
 **Output:** the listing's free/paid lines, drafted into `docs/marketing-plan.md`.
 
-### Q8 — Billing library (mostly settled)
+### Q8 — Billing library ✅ Accepted 2026-09-25 as D-091 (`expo-iap`)
 
 Recommendation from 2026-09-24: an **on-device** library (`expo-iap`, or `react-native-iap`), not
 RevenueCat. Why:

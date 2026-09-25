@@ -111,7 +111,8 @@ stands, and it is the one the listing should lead with.
 | Can users request deletion? | ⚠ **Draft: No** | The app's own data is only on the phone and *Apagar tudo* erases it (T-125). But the question is about **collected** data, and the only collected data is the Maps SDK's, held by Google under Google's policy, which the app cannot delete. Saying *Yes* would promise something the app cannot do |
 
 ⚠ **Coming with T-156 (billing):** Play Billing adds **Financial info → Purchase history**. Redo
-this table in the same piece of work.
+this table in the same piece of work. Billing is `expo-iap` (D-091): the purchase goes between the
+phone and Google only, with no third party such as RevenueCat in between.
 
 ⚠ **Keep the in-app policy in step (D-044).** `legal/privacyPolicy.ts` says Google sees which
 part of the island the user is looking at. It does **not** yet say that the map component also

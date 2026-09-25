@@ -1,138 +1,141 @@
 # "Why go" draft: a list to veto, not to approve (T-201)
 
-**For:** the project lead. **Written:** 2026-09-24. **Method:** D-064, the same one used for the
-80 places: I draft, you strike out or rewrite.
+**For:** the project lead. **Rewritten:** 2026-09-25, **facts only**, on their word: *"text like
+'come for sunrise above the clouds' is a no-go"*. **Method:** D-064: I draft, you strike or fix.
 
-**What it is for:** the place card gave no reason to go anywhere (review P1-4). Each place now
-takes **one line**, shown under its name (`content/pois.json` → `why`, in en/pt/de). One line,
-not a description: the card stays short on purpose (`PlaceCardView.tsx`).
+**What it is for:** the place card gave no reason to go anywhere (review P1-4). Each place takes
+**one line** under its name (`content/pois.json` → `why`, in en/pt/de). The card stays short.
 
-**What to do with it:** go down the list and strike, fix or keep each line. **Translations come
-after the veto** (pt and de), so nothing is translated twice. A place whose line you strike just
-shows no line. That is allowed and it is better than filler.
+**The style, now:** what the place is, where it is, and one fact that can be checked: a height, a
+year, a trail number, what is there. **No invitations** (*come*, *look*, *walk*), **no opinions**
+(*quiet*, *calm*, *beautiful*), no *stunning*, *breathtaking*, *hidden gem*. At most about 140
+characters. No dashes in any line.
+
+**Portuguese first**, because it is the language this is judged in; the English beside it is the
+same sentence. German comes after the veto, so nothing is translated twice.
 
 | Mark | Basis | How much to trust it |
 |---|---|---|
-| `[k]` | My own knowledge from training data, **not checked here** | Likely right for famous places, and you have been there |
-| `⚠` | I am unsure of the fact itself | **Check these first** |
+| `[k]` | My own knowledge from training data, **not checked here** | Likely right for well-known facts |
+| `⚠` | I am unsure of the fact itself (usually a number or a date) | **Check these first** |
 
-⚠ **No numbers on purpose,** except the two heights that are the whole point of their places.
-Walk length, time and difficulty (the review's "practical information") are **not** in this
-draft. Guessing them would break the project's first honesty rule. The PR routes have official
-figures from IFCN (the regional parks service), and taking them from there is a separate step,
-in TASKS T-201.
+⚠ **Trail numbers (PR) are from `docs/levada-routes-draft.md`** (OpenStreetMap), not from the
+parks service (IFCN). Walk lengths and times are left out on purpose: the official figures are a
+separate step in T-201, and a guessed number breaks the project's first honesty rule.
 
-Rule for every line: at most 140 characters, concrete, no *stunning*, *breathtaking* or *hidden
-gem*.
+A place whose line you strike shows no line. That is allowed, and better than filler.
 
 ---
 
-## Viewpoints (19)
+## Miradouros (19)
 
-| Place | Line | |
-|---|---|---|
-| Pico do Areeiro | The island's third-highest peak, and the start of the ridge path to Pico Ruivo. Come for sunrise above the clouds. | `[k]` |
-| Fanal | Old laurel trees, twisted and moss-covered, on an open meadow that disappears into the fog most afternoons. | `[k]` |
-| Achada do Teixeira | The short way up to Pico Ruivo starts here, beside the basalt pillar locals call *Homem em Pé*. | `[k]` |
-| Bica da Cana | On the edge of the Paul da Serra plateau, looking down over the island's north and south valleys at once. | `[k]` ⚠ |
-| Chão dos Terreiros | A grassy summit with the central peaks and the Curral das Freiras valley laid out below. | `[k]` ⚠ |
-| Miradouro da Rocha do Navio | A sheer drop to a fajã at sea level, with a cable car down to it. | `[k]` |
-| Pico dos Barcelos | The whole of Funchal in one view, from the harbour up to the hills. | `[k]` |
-| Pico do Facho | Above Machico, looking down on the bay and the airport runway built out on columns. | `[k]` |
-| Pico Grande | A crag of a peak in the middle of the island, seen from everywhere and quieter than its neighbours. | ⚠ I have little to go on |
-| Pico Guindaste | A glass-floored platform over the north-coast cliffs, facing Penha d'Águia. | `[k]` ⚠ is the glass floor here? |
-| Ponta do Rosto | The eastern end, where the north and south coasts meet in red and ochre cliffs. | `[k]` |
-| Ponta do Garajau | The Cristo Rei statue on a cliff above a marine reserve. | `[k]` |
-| Ponta de São Lourenço | The island's bare eastern tip: volcanic ridges, no trees, sea on both sides. | `[k]` |
-| Balcões | A flat, short walk from Ribeiro Frio to a balcony over the laurel valleys and the central peaks. | `[k]` |
-| Pico Ruivo | The highest point on the island. | `[k]` |
-| Eira do Serrado | Look straight down into Curral das Freiras, a village at the bottom of a valley walled in by mountains. | `[k]` |
-| Boca da Encumeada | The pass in the middle of the island: on a clear day, the north and south coasts from one spot. | `[k]` |
-| Véu da Noiva | A waterfall that drops off the north-coast cliffs straight into the sea. | `[k]` |
-| Ilhéus da Ribeira da Janela | Sea stacks off the mouth of the Janela river, one of them pierced through. | `[k]` ⚠ the hole |
+| Lugar | Português | English | |
+|---|---|---|---|
+| Pico do Areeiro | Terceiro pico mais alto da ilha, com 1818 m. Início do PR1 até ao Pico Ruivo. | The island's third-highest peak, 1818 m. Start of the PR1 trail to Pico Ruivo. | `[k]` |
+| Fanal | Pastagem com tis centenários, dentro da Laurissilva, Património Mundial da UNESCO. | Pasture with centuries-old til trees, inside the Laurisilva, a UNESCO World Heritage Site. | `[k]` |
+| Achada do Teixeira | Início do PR1.2 até ao Pico Ruivo. Junto ao parque está o Homem em Pé, uma coluna de basalto. | Start of the PR1.2 trail to Pico Ruivo. By the car park stands the Homem em Pé, a basalt column. | `[k]` |
+| Bica da Cana | Miradouro a cerca de 1620 m, na orla do planalto do Paul da Serra. | Viewpoint at about 1620 m, on the edge of the Paul da Serra plateau. | `[k]` ⚠ height |
+| Chão dos Terreiros | Cume de cerca de 1436 m, acima do Curral das Freiras. | A summit of about 1436 m, above Curral das Freiras. | `[k]` ⚠ height |
+| Miradouro da Rocha do Navio | Sobre a Reserva Natural da Rocha do Navio, em Santana, com teleférico até à fajã. | Over the Rocha do Navio Nature Reserve in Santana, with a cable car down to the fajã. | `[k]` |
+| Pico dos Barcelos | Miradouro sobre o Funchal, do porto até às serras. | Viewpoint over Funchal, from the harbour to the hills. | `[k]` |
+| Pico do Facho | Miradouro sobre Machico. O nome vem das fogueiras de vigia acesas no cimo. | Viewpoint over Machico. The name comes from the watch fires once lit on top. | `[k]` ⚠ the name |
+| Pico Grande | Pico de cerca de 1654 m no centro da ilha, entre a Encumeada e o Curral das Freiras. | A peak of about 1654 m in the centre of the island, between Encumeada and Curral das Freiras. | `[k]` ⚠ height |
+| Pico Guindaste | Miradouro com plataforma de vidro na costa norte, virado para a Penha d'Águia. | Viewpoint with a glass platform on the north coast, facing Penha d'Águia. | `[k]` ⚠ the glass |
+| Ponta do Rosto | Miradouro no início da península de São Lourenço, onde se veem as costas norte e sul. | Viewpoint at the start of the São Lourenço peninsula, over both the north and south coasts. | `[k]` |
+| Ponta do Garajau | Estátua do Cristo Rei, de 1927, sobre a Reserva Natural do Garajau. | The Cristo Rei statue, from 1927, above the Garajau Nature Reserve. | `[k]` |
+| Ponta de São Lourenço | Extremo leste da ilha e reserva natural, percorrido pelo PR8. | The island's eastern tip and a nature reserve, crossed by the PR8 trail. | `[k]` |
+| Balcões | Miradouro no fim do PR11, que parte do Ribeiro Frio. | Viewpoint at the end of the PR11 trail from Ribeiro Frio. | `[k]` |
+| Pico Ruivo | O ponto mais alto da ilha, com 1862 m. | The highest point on the island, 1862 m. | `[k]` |
+| Eira do Serrado | Miradouro a cerca de 1094 m sobre o Curral das Freiras. | Viewpoint at about 1094 m over Curral das Freiras. | `[k]` ⚠ height |
+| Boca da Encumeada | Passagem a 1007 m entre São Vicente e a Serra de Água, com vista para as duas costas. | A pass at 1007 m between São Vicente and Serra de Água, with both coasts in view. | `[k]` |
+| Véu da Noiva | Cascata que cai da falésia no mar, entre São Vicente e o Seixal. | A waterfall dropping off the cliff into the sea, between São Vicente and Seixal. | `[k]` |
+| Ilhéus da Ribeira da Janela | Ilhéus na foz da Ribeira da Janela; um deles tem uma abertura, a "janela" do nome. | Sea stacks at the mouth of the Ribeira da Janela; one has an opening, the "window" of its name. | `[k]` ⚠ the name |
 
 ## Levadas (18)
 
-| Place | Line | |
-|---|---|---|
-| Levada do Furado | From Ribeiro Frio to Portela through old laurel forest, with some narrow cliffside stretches. | `[k]` |
-| Levada das 25 Fontes | Through the Rabaçal woods to a pool fed by dozens of small springs down the rock. | `[k]` |
-| Levada do Norte | One of the longest channels on the island, carrying water along the south-west slopes. | `[k]` ⚠ |
-| Levada Nova da Calheta | ⚠ I have nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
-| Levada da Ribeira da Janela | Tunnels and a deep gorge in the wild north-west. | `[k]` ⚠ |
-| Levada do Castelejo | Along the valley above Porto da Cruz, with Penha d'Águia in view. | `[k]` ⚠ |
-| Levada das Faias | ⚠ I have nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
-| Levada do Caldeirão Verde | From Queimadas through tunnels to a waterfall pouring into a green pool. | `[k]` |
-| Levada dos Cedros | Through the Fanal laurel forest, among some of the oldest trees on the island. | `[k]` |
-| Levada do Rei | A quiet north-coast walk above São Jorge that ends at a waterfall in the laurel forest. | `[k]` |
-| Levada da Rocha Vermelha | Below the Rabaçal walks, along a steep valley wall. | `[k]` ⚠ |
-| Levada do Risco | A short, easy walk from Rabaçal to a high waterfall. | `[k]` |
-| Levada do Alecrim | From Rabaçal up to the small lagoon of Lagoa do Vento. | `[k]` ⚠ |
-| Levada do Moinho | Through forest above Ribeira da Cruz in the north-west, past an old water mill. | `[k]` ⚠ the mill |
-| Levada Fajã do Rodrigues | A rough walk into a gorge above São Vicente, through dark tunnels. | `[k]` ⚠ |
-| Levada do Barreiro | ⚠ I have nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
-| Levada dos Tornos | Along the hills above Funchal, with the city and the sea below. | `[k]` |
-| Levada do Caniçal | Flat and open, along the east-end slopes towards Caniçal. | `[k]` |
+| Lugar | Português | English | |
+|---|---|---|---|
+| Levada do Furado | PR10, do Ribeiro Frio à Portela, pela Laurissilva. | PR10, from Ribeiro Frio to Portela, through the Laurisilva. | `[k]` |
+| Levada das 25 Fontes | PR6, a partir do Rabaçal. Termina numa lagoa alimentada por nascentes na rocha. | PR6, from Rabaçal. It ends at a pool fed by springs in the rock. | `[k]` |
+| Levada do Norte | Levada de rega da costa sul, entre a Serra de Água e o Estreito de Câmara de Lobos. | An irrigation channel on the south side, between Serra de Água and Estreito de Câmara de Lobos. | `[k]` ⚠ |
+| Levada Nova da Calheta | Sem facto que eu confirme. Risque ou diga-me como é. | Nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
+| Levada da Ribeira da Janela | Levada no vale da Ribeira da Janela, no noroeste, com túneis. | A levada in the Ribeira da Janela valley in the north-west, with tunnels. | `[k]` ⚠ |
+| Levada do Castelejo | Levada no vale acima do Porto da Cruz, com a Penha d'Águia à vista. | A levada in the valley above Porto da Cruz, with Penha d'Águia in view. | `[k]` ⚠ |
+| Levada das Faias | Sem facto que eu confirme. Risque ou diga-me como é. | Nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
+| Levada do Caldeirão Verde | PR9, das Queimadas ao Caldeirão Verde, uma cascata que cai numa lagoa. | PR9, from Queimadas to Caldeirão Verde, a waterfall that falls into a pool. | `[k]` |
+| Levada dos Cedros | PR14, pela Laurissilva do Fanal. | PR14, through the Laurisilva of Fanal. | `[k]` |
+| Levada do Rei | PR18, de São Jorge até à nascente do Ribeiro Bonito, na Laurissilva. | PR18, from São Jorge to the source of the Ribeiro Bonito, in the Laurisilva. | `[k]` |
+| Levada da Rocha Vermelha | A partir do Rabaçal, abaixo das levadas do Risco e das 25 Fontes. | From Rabaçal, below the Risco and 25 Fontes levadas. | `[k]` ⚠ |
+| Levada do Risco | PR6.1, do Rabaçal à Cascata do Risco. | PR6.1, from Rabaçal to the Risco waterfall. | `[k]` |
+| Levada do Alecrim | PR6.2, do Rabaçal à Lagoa do Vento. | PR6.2, from Rabaçal to Lagoa do Vento. | `[k]` |
+| Levada do Moinho | PR7, na Ribeira da Cruz, no noroeste da ilha. | PR7, in Ribeira da Cruz, in the north-west of the island. | `[k]` |
+| Levada Fajã do Rodrigues | PR16, perto de São Vicente, com túneis. | PR16, near São Vicente, with tunnels. | `[k]` |
+| Levada do Barreiro | Sem facto que eu confirme. Risque ou diga-me como é. | Nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
+| Levada dos Tornos | Levada inaugurada em 1966 que abastece o Funchal, passando pelo Monte e pela Camacha. | A levada opened in 1966 that supplies Funchal, passing Monte and Camacha. | `[k]` ⚠ year |
+| Levada do Caniçal | Levada plana na encosta leste, até ao túnel do Caniçal. | A level levada on the eastern slopes, as far as the Caniçal tunnel. | `[k]` ⚠ |
 
-## Villages (19)
+## Aldeias (19)
 
-| Place | Line | |
-|---|---|---|
-| Porto Moniz | The far north-west corner, where the sea fills pools in the black lava rock. | `[k]` |
-| Câmara de Lobos | A fishing harbour of painted boats, which Churchill came to paint. | `[k]` |
-| Camacha | The wicker village, on a green above the south coast. | `[k]` |
-| Caniçal | The old whaling port, now home to a museum about it. | `[k]` |
-| Santa Cruz | A seaside town with an old parish church and a promenade by the water. | `[k]` ⚠ thin |
-| São Vicente | A north-coast village of white houses, with a chapel built into a rock at the river mouth. | `[k]` |
-| Ribeira Brava | A south-coast town at the foot of a long valley, with a tiled church spire. | `[k]` |
-| Ponta do Sol | A small town on the sunny south coast, with a pier and an old centre. | `[k]` |
-| Calheta | A marina and a sheltered beach, and an old sugar-cane mill still at work. | `[k]` ⚠ the mill |
-| Achada do Marques | ⚠ I have nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
-| Chão da Ribeira | A valley floor inland from Seixal, under steep wooded walls. | `[k]` ⚠ thin |
-| Machico | Where the first settlers landed, and the island's second town. | `[k]` |
-| Curral das Freiras | A village at the bottom of a valley walled in by mountains, known for its chestnuts. | `[k]` |
-| Monte | The hillside church above Funchal, and the wicker toboggan ride back down. | `[k]` |
-| Seixal | Black sand, natural pools and vineyards on the cliff terraces. | `[k]` |
-| Santana | The village of the triangular thatched houses. | `[k]` |
-| Porto da Cruz | Under the Penha d'Águia rock, with a rum distillery that still runs on steam. | `[k]` ⚠ steam |
-| Jardim do Mar | A cobbled village on a ledge above the sea, known for its surf. | `[k]` |
-| Paul do Mar | A fishing village at the foot of the cliffs on the south-west coast. | `[k]` |
+| Lugar | Português | English | |
+|---|---|---|---|
+| Porto Moniz | Vila no extremo noroeste, com piscinas naturais na rocha vulcânica. | A town at the north-west tip, with natural pools in the volcanic rock. | `[k]` |
+| Câmara de Lobos | Vila piscatória que Winston Churchill pintou em 1950. | A fishing town that Winston Churchill painted in 1950. | `[k]` |
+| Camacha | Vila do vime. Em 1875 jogou-se aqui o primeiro jogo de futebol em Portugal. | The wicker village. Portugal's first football match was played here in 1875. | `[k]` ⚠ 1875 |
+| Caniçal | Antigo porto baleeiro, com o Museu da Baleia. | A former whaling port, with the Whale Museum. | `[k]` |
+| Santa Cruz | Cidade na costa leste, junto ao aeroporto, com igreja matriz do século XVI. | A town on the east coast, beside the airport, with a 16th-century parish church. | `[k]` ⚠ century |
+| São Vicente | Vila da costa norte com uma capela escavada numa rocha, na foz da ribeira. | A north-coast town with a chapel carved into a rock at the river mouth. | `[k]` |
+| Ribeira Brava | Vila da costa sul na foz da ribeira do mesmo nome, com a Igreja de São Bento. | A south-coast town at the mouth of the river of the same name, with the Church of São Bento. | `[k]` |
+| Ponta do Sol | Vila da costa sul com cais e centro histórico. | A south-coast town with a pier and a historic centre. | `[k]` |
+| Calheta | Vila com marina, praia de areia trazida de fora e um engenho de cana-de-açúcar em funcionamento. | A town with a marina, a beach of imported sand and a working sugar-cane mill. | `[k]` |
+| Achada do Marques | Sem facto que eu confirme. Risque ou diga-me como é. | Nothing I would stand behind. Strike, or tell me what it is like. | ⚠ |
+| Chão da Ribeira | Vale interior acima do Seixal, com encostas de Laurissilva. | An inland valley above Seixal, with slopes of Laurisilva. | `[k]` ⚠ |
+| Machico | Onde desembarcaram os primeiros povoadores, em 1419. Segunda cidade da ilha. | Where the first settlers landed, in 1419. The island's second town. | `[k]` ⚠ 1419 |
+| Curral das Freiras | Aldeia no fundo de um vale cercado de montanhas, com festa da castanha em novembro. | A village at the bottom of a valley ringed by mountains, with a chestnut festival in November. | `[k]` |
+| Monte | Igreja de Nossa Senhora do Monte e partida dos carros de cesto até ao Funchal. | The Church of Nossa Senhora do Monte, and the start of the wicker toboggans down to Funchal. | `[k]` |
+| Seixal | Aldeia da costa norte com praia de areia preta, piscinas naturais e vinha em socalcos. | A north-coast village with a black-sand beach, natural pools and terraced vineyards. | `[k]` |
+| Santana | Vila das casas de colmo triangulares. | The village of triangular thatched houses. | `[k]` |
+| Porto da Cruz | Vila sob a Penha d'Águia, com um engenho de aguardente de cana movido a vapor. | A village under Penha d'Águia, with a steam-driven sugar-cane rum mill. | `[k]` ⚠ steam |
+| Jardim do Mar | Aldeia numa fajã da costa sudoeste, conhecida pelo surf. | A village on a coastal ledge in the south-west, known for surfing. | `[k]` |
+| Paul do Mar | Aldeia piscatória no sopé das falésias do sudoeste. | A fishing village at the foot of the south-west cliffs. | `[k]` |
 
-## Beaches (8)
+## Praias (8)
 
-| Place | Line | |
-|---|---|---|
-| Praia do Porto do Seixal | Black sand under green cliffs on the north coast. | `[k]` |
-| Praia da Calheta | A sheltered, golden-sand beach in the calm of a marina. | `[k]` |
-| Praia Formosa | The island's largest natural beach, with a promenade to Câmara de Lobos. | `[k]` |
-| Praia dos Reis Magos | A pebble shore with clear water for snorkelling. | `[k]` ⚠ |
-| Prainha | A small cove of dark, natural volcanic sand near the eastern tip. | `[k]` |
-| Cais do Sardinha | A small quay where the São Lourenço walk ends, with clear water to swim in. | `[k]` |
-| Praia da Baía d'Abra | A bay on the São Lourenço peninsula, under bare, coloured cliffs. | `[k]` |
-| Fajã dos Padres | A farm on a ledge at sea level, reached by a lift down the cliff. | `[k]` |
+| Lugar | Português | English | |
+|---|---|---|---|
+| Praia do Porto do Seixal | Praia de areia preta na costa norte. | A black-sand beach on the north coast. | `[k]` |
+| Praia da Calheta | Praia de areia amarela, trazida de fora, protegida por quebra-mares. | A beach of imported golden sand, sheltered by breakwaters. | `[k]` |
+| Praia Formosa | A maior praia natural da ilha, a oeste do Funchal. | The island's largest natural beach, west of Funchal. | `[k]` |
+| Praia dos Reis Magos | Praia de calhau no Caniço, junto a um passeio marítimo. | A pebble beach in Caniço, beside a seafront promenade. | `[k]` ⚠ |
+| Prainha | Praia de areia escura natural, perto do Caniçal. | A beach of natural dark sand, near Caniçal. | `[k]` |
+| Cais do Sardinha | Cais no fim do PR8, na Ponta de São Lourenço. | A quay at the end of the PR8 trail, on Ponta de São Lourenço. | `[k]` |
+| Praia da Baía d'Abra | Baía na península de São Lourenço, junto ao PR8. | A bay on the São Lourenço peninsula, beside the PR8 trail. | `[k]` |
+| Fajã dos Padres | Fajã agrícola ao nível do mar, com acesso por elevador desde a falésia. | A farmed ledge at sea level, reached by a lift down the cliff. | `[k]` |
 
-## Landmarks (16)
+## Monumentos (16)
 
-| Place | Line | |
-|---|---|---|
-| Jardim Tropical Monte Palace | A hillside garden of old tiles, koi ponds and tropical plants. | `[k]` |
-| Cabo Girão | A glass platform on one of the highest sea cliffs in Europe. | `[k]` |
-| Fortaleza do Pico | A 17th-century fort above Funchal, with views over the city. | `[k]` ⚠ century |
-| Forte de São Tiago | A yellow fort on the old town's seafront. | `[k]` |
-| Forte de São João Baptista | A small fort by the Porto Moniz pools, now the island's aquarium. | `[k]` ⚠ |
-| Teatro Municipal Baltazar Dias | Funchal's 19th-century theatre, still in use. | `[k]` |
-| Parque Temático da Madeira | A park in Santana about the island's history, with thatched houses. | `[k]` |
-| Quinta da Boa Vista | An old estate above Funchal known for its orchids. | `[k]` ⚠ |
-| Piscinas Naturais do Porto Moniz | Seawater pools in the lava rock, refilled by the Atlantic. | `[k]` |
-| Grutas e Centro do Vulcanismo | Walk inside lava tubes, then find out how the island was made. | `[k]` |
-| Jardim Botânico da Madeira | Gardens above Funchal, with plants from the island and the rest of the world. | `[k]` |
-| Sé do Funchal | The 15th-century cathedral, with a carved wooden ceiling. | `[k]` |
-| Mercado dos Lavradores | Funchal's market: fruit, flowers, and the fish hall in the morning. | `[k]` |
-| Farol da Ponta do Pargo | A lighthouse on a high cliff at the western end, facing the sunset. | `[k]` |
-| Museu CR7 | Cristiano Ronaldo's trophies, in the town he grew up in. | `[k]` |
-| Teleférico das Achadas da Cruz | A very steep cable car down to farmed plots at the foot of the cliff. | `[k]` |
+| Lugar | Português | English | |
+|---|---|---|---|
+| Jardim Tropical Monte Palace | Jardim no Monte com painéis de azulejo, lagos e uma coleção de minerais. | A garden in Monte with tile panels, ponds and a mineral collection. | `[k]` |
+| Cabo Girão | Falésia de 580 m com uma plataforma de vidro no topo. | A 580 m sea cliff with a glass platform on top. | `[k]` |
+| Fortaleza do Pico | Forte do século XVII sobre o Funchal. | A 17th-century fort above Funchal. | `[k]` |
+| Forte de São Tiago | Forte amarelo do século XVII na Zona Velha do Funchal. | A yellow 17th-century fort in Funchal's old town. | `[k]` |
+| Forte de São João Baptista | Forte junto às piscinas do Porto Moniz; hoje é o Aquário da Madeira. | A fort beside the Porto Moniz pools; today the Madeira Aquarium. | `[k]` ⚠ |
+| Teatro Municipal Baltazar Dias | Teatro municipal do Funchal, inaugurado em 1888. | Funchal's municipal theatre, opened in 1888. | `[k]` |
+| Parque Temático da Madeira | Parque em Santana sobre a história e a cultura da ilha. | A park in Santana about the island's history and culture. | `[k]` |
+| Quinta da Boa Vista | Quinta no Funchal conhecida pela coleção de orquídeas. | An estate in Funchal known for its orchid collection. | `[k]` ⚠ still open? |
+| Piscinas Naturais do Porto Moniz | Piscinas de água do mar formadas na lava. | Seawater pools formed in the lava. | `[k]` |
+| Grutas e Centro do Vulcanismo | Tubos de lava visitáveis em São Vicente, com um centro sobre vulcanismo. | Lava tubes open to visitors in São Vicente, with a centre on volcanism. | `[k]` |
+| Jardim Botânico da Madeira | Jardim botânico no Funchal, aberto em 1960, com plantas da ilha e do mundo. | A botanical garden in Funchal, opened in 1960, with plants from the island and the world. | `[k]` |
+| Sé do Funchal | Catedral do fim do século XV, com teto de madeira trabalhada. | A late 15th-century cathedral with a carved wooden ceiling. | `[k]` |
+| Mercado dos Lavradores | Mercado do Funchal, de 1940, com fruta, flores e peixe. | Funchal's market, from 1940, with fruit, flowers and fish. | `[k]` |
+| Farol da Ponta do Pargo | Farol de 1922 numa falésia do extremo oeste. | A lighthouse from 1922 on a cliff at the western end. | `[k]` |
+| Museu CR7 | Museu com os troféus de Cristiano Ronaldo, no Funchal, onde nasceu. | A museum of Cristiano Ronaldo's trophies, in Funchal, where he was born. | `[k]` |
+| Teleférico das Achadas da Cruz | Teleférico que desce a falésia até à fajã da Quebrada Nova. | A cable car down the cliff to the Quebrada Nova fajã. | `[k]` ⚠ name |
 
 ---
 
 **Four places have no line:** Levada Nova da Calheta, Levada das Faias, Levada do Barreiro and
 Achada do Marques. Either tell me what they are like, or leave them without one.
+
+**After your veto:** I write the kept lines into `content/pois.json` (`why.pt`, `why.en`), add the
+German, and they appear on each stamp's card.

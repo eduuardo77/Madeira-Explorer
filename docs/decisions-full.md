@@ -5113,7 +5113,7 @@ and class 39 travel arrangement but not class 9, it is over five years old so it
 use to be enforced, and a real-estate holding probably has not used it for either. That is an
 argument to make if challenged, not a certainty, hence the attorney's view (T-187).
 
-**Registering Bruma is optional and still open** (asked the same day). Using an unregistered name is
+**Registering Bruma: ✅ decided 2026-09-25, not now.** The project lead will not register it before launch; revisit once real downloads show the name is worth protecting. (The question as it was put:) Using an unregistered name is
 lawful; registering buys priority over anyone who files later and standing in a store takedown
 dispute, and it also makes the filing visible to Allegra. Official fees found 2026-09-25: EUIPO
 **EUR 850** for one class online (EUR 50 the second, EUR 150 each after); INPI Portugal about

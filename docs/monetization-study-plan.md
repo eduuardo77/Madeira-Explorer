@@ -1,5 +1,35 @@
 # Monetisation study plan — 2026-09-24
 
+## ✅ Outcome, 2026-09-25: D-089 Accepted
+
+The project lead settled every open question in one conversation. Full rules and every rejected
+alternative: `docs/decisions-full.md`, **D-089 FINAL**.
+
+| | Free | Paid, €5.99 once, all of Madeira forever |
+|---|---|---|
+| Map of where you have been, recorder, trips | ✅ Unlimited, forever | same |
+| Stamps | **First 5**, any kind, **plus the first levada** whenever it comes | All of them |
+| Stamps past the allowance | Earned, counted, **locked** (D-075, now Accepted) | Shown |
+| Set medals (a municipality, all levadas) | Progress shown | ✅ |
+| Founder stamp | | ✅ for buyers in the first 3 months after launch |
+| Tilt and shine on stamps | ✅ | ✅ (real 3D inspect is the long-term goal) |
+| In-app replay, still share image | ✅ | same |
+| Exported video (v1.1, with T-105b-v2) | Medium mark + 2 s end card | Small mark, no end card |
+
+**How each question ended:** Q1 desk model done (T-205 still confirms it). Q2: **N = 5**, first
+levada kept. Q3: storyboard review **dropped** by the project lead; the wording is T-157's. Q4:
+**medium** mark plus end card, not huge; the "would you post it" survey moves with the video. Q5:
+**path A**. Q6: **€5.99, one product**, Play's regional prices. Q7: the listing lines are redrafted
+in `docs/marketing-plan.md` §4. Q8: `expo-iap`. Q9: still follows the billing build. Q10: not done;
+modelled numbers would change no decision.
+
+**Not a monthly subscription**, **no tip jar, no second product**. Rare stamp variants, a printable
+poster and hotel codes are later ideas, not v1.
+
+*Everything below is the study as written, kept for its reasoning.*
+
+---
+
 **What this is.** The plan for settling how Proa makes money **before the first public release**.
 It is a plan, not a decision. The decision it leads to is **D-089 (Provisional)**, and nothing in
 the app changes until the study below is done.

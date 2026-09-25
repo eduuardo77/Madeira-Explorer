@@ -96,7 +96,13 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       "finish this trip".*
 - [x] **T-186** ✅ **Decided 2026-09-23: B, in-house from the stamp art — D-086.** **Decide who draws the icon and brand mark** — P0-1. *Recommended: a paid
       designer. The project has nobody to judge artwork.*
-- [ ] **T-213** **The monetisation study — D-089 (Provisional)** ⇠ nothing; ⚠ must finish before
+- [x] **T-213** ✅ **Finished 2026-09-25: D-089 Accepted.** The project lead settled it in
+      conversation: the map free and unlimited, **5 stamps + the first levada** free, **€5.99 once**
+      for all of Madeira, **set medals** and a **founder stamp** (buyers in the first 3 months, by
+      Google's purchase time) paid only, **tilt and shine** on every stamp, the video's limit in v1.1
+      (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. The build waits for the
+      execution plan the project lead will ask for; until then the app keeps D-072's 10.
+      *As opened:* **The monetisation study — D-089 (Provisional)** ⇠ nothing; ⚠ must finish before
       D-084's public release. Plan: `docs/monetization-study-plan.md`. The project lead's
       hypothesis, 2026-09-24: very few free stamps, the video free with a huge watermark, the map
       unlimited. Desk work first (Q1 itinerary model, Q4 watermark mock-ups, Q6 price, Q8 library
@@ -1362,7 +1368,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       marker is Google's default red pin — louder than the trace and somebody else's app.
 - [x] **T-155** ✅ **The free tier, 2026-08-18.** ⇠ T-071, T-074 → T-156 owns the *unlock*
       — `entitlement/freeTier.ts` is the arithmetic (pure, 12 tests): first ten earned, plus the
-      first levada whenever it arrives, at most eleven. `entitlement/entitlementStore.ts` is the
+      first levada whenever it arrives, at most eleven. ⚠ **D-089 (2026-09-25) moves the allowance to
+      five**: at most six, still with the first levada. `entitlement/entitlementStore.ts` is the
       one flag it reads, and **nothing sets it yet** — T-156 puts Play Billing behind it. The
       passport applies the result in exactly one place, after the award pass has already run.
       — **"The user's own choice of which ten" resolved as: the first ten they earn.** The other
@@ -1401,6 +1408,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — ⚠ **Numbers are guesses.** Ten and €4.99 are the same class as D-068's 45 minutes: set by
       argument, tunable against real trips (T-134), never to be defended as measured.
 - [ ] **T-156** **Play Billing, and the privacy claim it costs** ⇠ T-155, T-117
+      — **D-089 (2026-09-25):** one non-consumable at **€5.99**, *all of Madeira, forever*; Play's
+      regional conversions; `expo-iap` (study Q8). The purchase time on Google's record also decides
+      the **founder stamp** (first 3 months after the public launch), so it must survive restore.
       — A single non-consumable product. StoreKit 2 can validate on-device via JWS with no server of
       ours, but **Play's `queryPurchasesAsync` makes a network call when its cache expires**.
       — ⚠ **This is the first time the app talks to the network on its own account.** It does **not**
@@ -1667,6 +1677,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       system is not top priority. Monetising the passport promotes it whether or not the priority
       list says so. **Revisit D-071 when this starts.**
 - [x] **T-159** ✅ **DECIDED 2026-08-17: the timelapse video is FREE** ⇠ T-105b-v2, D-072
+      — ⚠ **Superseded 2026-09-25 by D-089 rule 8**, before any video shipped, so nothing is taken
+      away: the exported video stays free, with a **medium mark in the lower third and a 2 second
+      "Made with Proa" end card**; paid gets the small mark and no end card. The in-app replay is
+      never marked. Arrives with T-105b-v2, not in v1.
       — The project lead: *"The timelapse video is free, but in the future I might impose some
       limitation on it to make people buy."*
       — **This keeps D-013 intact.** The souvenir is the distribution strategy; charging for it
@@ -2448,6 +2462,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       — Also where the *look* is decided: whether the finale shows a denominator (D-042 carries
       both numbers deliberately), and whether the guessed durations survive being watched.
 - [ ] **T-106** Watermark ⇠ T-105b
+      — **Specified by D-089 rule 8 (2026-09-25).** Free: a medium mark in the lower third (5.2% of
+      the frame in `preview-film.mjs --watermarks`) plus a 2 second *Made with Proa* end card.
+      Paid: the small mark (0.9%, bottom right), no end card. Google's attribution clear of both.
+      Exported file only; the in-app replay is never marked.
 - [x] **T-107** Still-image export ⇠ T-105b
       — Done 2026-08-16 as part of T-105d, and **verified on the emulator**: the card is drawn
       by `react-native-svg` and photographed by `react-native-view-shot` into a PNG. Checkbox

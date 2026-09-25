@@ -142,16 +142,19 @@ When you leave the island, the app puts your week together: the line you walked,
 places you collected, the dates. Share it or keep it.
 
 FREE TO START
-The map, the recording and your trace are free forever. Your first ten stamps are free,
-and your first levada is always free. If you want the rest of the island, one payment of
-EUR 4.99 unlocks it — no subscription, ever.
+The map, the recording and your trace are free forever, with no limit. Your first five
+stamps are free, and your first levada is always free. One payment of EUR 5.99 unlocks
+all of Madeira, forever: every stamp, and a medal for each set you complete. No
+subscription, ever.
 
 Made in Madeira.
 ```
 
 ⚠ **The last paragraph is a compliance surface, not just copy.** Google requires the free/paid
 boundary to be stated accurately, and it must match what T-155 actually builds. If the numbers
-change, this changes.
+change, this changes. *Redrafted 2026-09-25 for D-089 (5 + first levada, EUR 5.99). During the
+founder window, the first 3 months after launch, a line may add that buyers also get a founder
+stamp nobody can earn later; it comes out the day the window closes.*
 
 ## 5. Screenshots — where the converting happens
 

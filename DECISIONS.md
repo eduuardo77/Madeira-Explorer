@@ -100,10 +100,10 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
 | **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. ⚠ *Amended by D-085.* | Provisional |
 | **D-071** | The map is the product. ⚠ **Partly reversed 2026-08-17: stamps are a priority again** (D-072 made them the revenue). | **Superseded in part** |
-| **D-072** | **Free on Play. Trace always free; 10 stamps + your first levada free; €4.99 unlocks the rest.** | **Accepted** |
+| **D-072** | **Free on Play. Trace always free; ~~10~~ stamps + your first levada free; ~~€4.99~~ unlocks the rest.** ⚠ *Allowance and price superseded by D-089.* | **Superseded in part** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 | **D-074** | The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`. | **Accepted** |
-| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Provisional** |
+| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Accepted** (2026-09-25, with D-089) |
 | **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
 | **D-077** | Real-device verification comes from **Play's pre-launch report and Firebase Test Lab**, not from owning a phone. | **Provisional** |
 | **D-078** | Stamps are **collectibles with a rank** — bronze/silver/gold/platinum by *how many* you have, shown on the passport button. | **Accepted** |
@@ -117,7 +117,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-086** | The icon and brand mark are **drawn in-house from the stamp artwork**, after the trademark search. | **Accepted** |
 | **D-087** | A **walk** is started from the main button and **changes the recorder**; background recording is **automatic recording**, in Settings. After WalkNYC. Pause, and a summary at the end. | **Accepted** |
 | **D-088** | A trip ends at the **airport**, after **three days of silence**, or by the user's **End trip** (passport), which also turns automatic recording off (⚠ that part Provisional). | **Accepted** |
-| **D-089** | **Under study:** a *very small* stamp allowance, the exported video free but **heavily watermarked**, the map of where you have been **unlimited**. Plan in `docs/monetization-study-plan.md`; D-072/T-159 stand until accepted. | **Provisional** |
+| **D-089** | **The free tier:** the map of where you have been **free and unlimited**; **5 stamps + your first levada** free; **one purchase of €5.99** unlocks all of Madeira forever, with **set medals** and a **founder stamp** (first 3 months). **Tilt and shine** on every stamp. The video waits for its export (v1.1): free gets a medium mark and an end card. No subscription. Supersedes T-159. | **Accepted** 2026-09-25 |
 | **D-090** | A **quiet progress line** above the outing button, *3 de 80 lugares* and a 3 dp bar, after WalkNYC's. Shown at zero; not tappable; said once to screen readers (by the passport button). Amends D-083/D-085. | **Accepted** (the drawing Provisional) |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old

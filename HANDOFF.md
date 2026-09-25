@@ -12,8 +12,9 @@ The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **ru
 → place card → trip end → souvenir still image. **774 tests** (counted 2026-09-24, after the rings went), `tsc` strict
 clean. The **free tier is in** (T-155): stamps 11+ are drawn locked. **A closed-beta build unlocks
 everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
-pay yet**, and ⚠ **the free tier itself is under study: D-089 (Provisional),
-`docs/monetization-study-plan.md`.** Nothing in `app/` changes for monetisation until it is Accepted. `content/pois.json` holds **80 curated places**. The UI speaks
+pay yet.** ⚠ **The free tier was settled 2026-09-25: D-089 Accepted** (5 stamps + first levada free,
+€5.99 once, set medals, a founder stamp, tilt and shine; the map unlimited). The app still has
+D-072's 10; the change waits for the execution plan the project lead will ask for. `content/pois.json` holds **80 curated places**. The UI speaks
 **English, Portuguese and German**, and **no user-facing text may contain a dash** (— or –): the
 project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolicy.test.ts` enforce
 it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
@@ -73,8 +74,9 @@ says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
 **Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
-2026-09-24) puts billing *after* the monetisation study. ✅ **The study's desk half is done (2026-09-24)**: Q1, Q4, Q6, Q8 are written into
-`docs/monetization-study-plan.md`. The rest waits on the project lead (N, A/B, price, people). Outside monetisation: T-197
+2026-09-24) puts billing *after* the monetisation study. ✅ **The study is finished (2026-09-25): D-089
+Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. The build (allowance,
+billing T-156, set medals, founder stamp, tilt and shine) waits for the execution plan. Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.
@@ -110,12 +112,12 @@ integrity ok).
 |---|---|
 | **D-070** | The map shows **only collected places**, tappable, drawn as the app's own ring-and-disc marks. Map chrome inverts with the map style. ⚠ **Amended 2026-08-19: Google's POI pins are back ON** — the project lead settled the question the switch was left open for. Safe now only because T-153 gave the app its own marks; **watch a collected mark against Google's pins at street zoom.** |
 | **D-071** | ⚠ **Reversed twice in one day.** The map is the product — but **stamps are a priority again**, because D-072 makes them the revenue. |
-| **D-072** | **Free on Play.** Trace and recorder free forever; **10 stamps + your first levada free**; **€4.99** unlocks the rest; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** |
+| **D-072** | **Free on Play.** Trace and recorder free forever; earned stamps always kept. Break-even is **$25**. ⚠ **One-way: Play forbids free→paid.** ⚠ **Allowance and price superseded by D-089 (2026-09-25): 5 stamps + your first levada free, €5.99 once.** |
 | **D-073** | Marketing is **ASO on one free listing**. ⚠ Never claim *"works offline"* or *"nothing leaves your phone"* — both false since D-057. |
 | **D-074** | The app is **Proa**, the listing is **Proa - Madeira**, the package is **permanent**. |
 | **D-077** | ⚠ **Provisional, 2026-08-18.** Real-device verification is **Play's pre-launch report + Firebase Test Lab**, not owning a phone. Free, real hardware, **nothing added to the app**. The *"buy an Android"* line in this file was never checked. |
 | **D-076** | **The souvenir film IS the map, played back** — Google's own basemap, camera following the walk, trace growing behind it. ⚠ Recording it means recording Google's map: allowed for a user's own holiday, attribution must stay visible. |
-| **D-075** | ⚠ **Provisional, 2026-08-18.** A stamp you earned but have not paid to see is **locked** — padlock, muted drawing, *"collected — unlock to see this stamp"* — and **never** "not collected". The hero and the row counts keep counting what was earned. One boolean overrules it. |
+| **D-075** | ✅ **Accepted 2026-09-25 with D-089.** A stamp you earned but have not paid to see is **locked** — padlock, muted drawing, *"collected — unlock to see this stamp"* — and **never** "not collected". The hero and the row counts keep counting what was earned. One boolean overrules it. |
 
 **Research written today:** [`docs/monetization-options.md`](docs/monetization-options.md) (three
 parts, 14 options costed) and [`docs/marketing-plan.md`](docs/marketing-plan.md) (the store listing

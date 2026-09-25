@@ -571,6 +571,10 @@ batch.
 > **Free on Google Play. The trace and the recorder are free forever. The first levada is free.
 > Ten stamps free. Then €4.99 unlocks the rest, and every stamp already earned stays earned.**
 
+⚠ **Revised 2026-09-25 by D-089 (Accepted):** **five** stamps free plus the first levada, and
+**€5.99 once** for all of Madeira, with set medals and a founder stamp on the paid side. The map
+stays free and unlimited. The exported video (v1.1) is free with a medium mark and an end card.
+
 **Break-even is $25** — Play charges that once and nothing annually, the Maps SDK is free, there are
 no servers, and Apple's $99/yr only applies once iOS ships. Six sales cover it.
 

@@ -6,6 +6,11 @@ break even and finally see some online money."* And: *"think like a premium app.
 
 Everything below is sourced. Where a number is a guess it says so.
 
+⚠ **Outcome, 2026-09-25: D-089 Accepted.** Free on Play, the map unlimited, 5 stamps plus the first
+levada free, **€5.99 once** for all of Madeira. This document is the research behind it; the
+decision is in `docs/decisions-full.md` and the study that led there in
+`docs/monetization-study-plan.md`.
+
 ---
 
 ## 1. The finding that changes the question

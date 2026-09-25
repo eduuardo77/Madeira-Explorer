@@ -3703,6 +3703,10 @@ paid-up-front entry is the better plan. This turns on their stated ordering, not
 
 ### D-072 FINAL — **Accepted 2026-08-17** by the project lead, after a long debate
 
+⚠ **Superseded in part by D-089, 2026-09-25:** five stamps free instead of ten, and **€5.99**
+instead of €4.99. The first-levada guarantee, the ungated recorder and awards, and free on Play all
+stand.
+
 > **Free on Google Play. The trace and the recorder are free forever. The first levada is free.
 > Ten stamps free. Then €4.99 unlocks the rest, and every stamp already earned stays earned.**
 
@@ -3982,7 +3986,7 @@ promise.
 
 ## D-075 — A stamp you earned but have not paid to see is **locked**, never "not collected"
 
-**Status: Provisional.** Raised and implemented 2026-08-18 (T-155). It is the one judgement call
+**Status: Accepted 2026-09-25**, with D-089 (its rule 4). *Before that:* **Provisional.** Raised and implemented 2026-08-18 (T-155). It is the one judgement call
 D-072 left open, it changes what the free user's passport *says*, and the project lead should
 either confirm it or overrule it with one boolean.
 
@@ -4743,11 +4747,16 @@ waits three days for a souvenir. Ending the trip and leaving the recorder runnin
 trip the user just finished.
 
 
-## D-089 — Free tier under study: very few stamps, a heavily watermarked video, the map unlimited
+## D-089 — The free tier: the map unlimited, five stamps plus the first levada, €5.99 once
 
-**Status: Provisional**, 2026-09-24. This is the project lead's working hypothesis, and it is being
-studied, not built. **The full plan is in `docs/monetization-study-plan.md`.** D-072 and T-159 stay
-in force until this entry is Accepted.
+**Status: Accepted 2026-09-25** by the project lead. **Read "D-089 FINAL" at the end of this entry
+first**; the text between here and there is the Provisional hypothesis of 2026-09-24, kept because
+the final version answers it point by point. It **supersedes D-072 in part** (the allowance and the
+price) and **supersedes T-159** (the video is no longer entirely free). The study behind it is
+`docs/monetization-study-plan.md`.
+
+*As written on 2026-09-24:* **Status: Provisional.** This is the project lead's working hypothesis,
+and it is being studied, not built. D-072 and T-159 stay in force until this entry is Accepted.
 
 **The direction, in the project lead's words:** *"Very limited stamp collection and a timelapse with
 huge watermarks. For the map walked/been places I would keep it unlimited."*
@@ -4780,6 +4789,87 @@ release.**
   not, the model earns nothing.
 - **A geographic gate** (research §14's ✅). It stays the fallback if a count gate reads badly in
   study.
+
+### D-089 FINAL — Accepted 2026-09-25 by the project lead
+
+> **Free on Google Play. The map of where you have been is free, unlimited, forever. The first five
+> stamps are free, plus your first levada whenever it comes. One purchase of €5.99 unlocks all of
+> Madeira, forever.**
+
+Settled in one conversation, point by point. The project lead's own reading of the risk, recorded
+because it shapes the rest: *the stamps on their own are a weak selling point.* That is why the
+stamps get a finish and sets (rules 6 and 7) and why the video carries a limit once it exists
+(rule 8). D-071's lesson applies again: the boundary moved, so the stamps' quality is on the
+critical path.
+
+#### The rules
+
+1. **Free forever, unlimited:** the recorder, trips, the map of where you have been, the in-app
+   replay (never marked), the still share image (small brand mark, D-013's free advert), all 80
+   places visible with what waits there, and everything about the user's own data and settings.
+2. **Five stamps free**: the first five earned, of any kind. `FREE_STAMP_ALLOWANCE` goes from 10
+   to 5.
+3. **The first levada is still free, whenever it comes** (kept from D-072). So a free user sees at
+   most six stamps, one of them a levada. The Q1 model shows the first levada comes on day 3 to 6,
+   after the lock: a finished stamp arriving late in the trip, the one that took the most effort,
+   and a reminder of what the paid passport looks like.
+4. **Past the allowance a stamp is earned, counted and locked** (D-075, Accepted with this entry).
+   Geofences and awards stay ungated (T-155's rule).
+5. **One non-consumable product, €5.99, "all of Madeira, forever".** Worded as *all of Madeira*,
+   not *everything*: a second region (research §16) would be a new product. The price can be
+   changed in Play Console at any time, in either direction, and only affects future buyers.
+   Regional prices: Play's own conversions.
+6. **Paid adds, beyond the stamps:**
+   - **Set medals.** Finish a set (every place in a municipality; all the levadas) and earn a
+     medal. Paid only; a free user sees the progress towards it. The sets come from `content/`
+     (D-017).
+   - **The founder stamp.** Anyone who buys within **the first three months after the public
+     launch** gets a stamp nobody can earn afterwards. Judged by the **purchase time on Google's
+     purchase record**, which the app reads on the phone and which comes back on restore, never by
+     the device clock.
+7. **Tilt and shine, for every stamp, free and paid alike.** The stamp moves slightly with the
+   phone's motion sensor and a metallic sheen crosses it. The free five get the full finish, so
+   stamp six is felt. **Real 3D inspect is the long-term goal** (the project lead's reference: the
+   medal inspect in CS2), not v1.
+8. **The video is not in v1 (study Q5, path A).** v1 sells stamps; the video limit arrives with
+   the export (T-105b-v2), which is additive because no one ever had a clean exported video. When
+   it exists: **free** carries a **medium mark in the lower third** (5.2% of the frame in the
+   mock-ups) plus a **2 second "Made with Proa" end card**; **paid** carries the small mark (0.9%)
+   and no end card. Google's attribution stays visible in both. The project lead's test: *good
+   enough to post online, but with an annoying watermark.*
+9. **After the public release the allowance can only go up.** Five to eight is a gift; five to
+   three is the rug pull. Starting at the low end is what keeps every later adjustment generous.
+
+**In v1:** rules 1 to 7. **In v1.1:** rule 8.
+
+#### Rejected, and why
+
+- **A monthly subscription.** The app is used for one week of one holiday: a tourist either
+  cancels after the trip or forgets and asks for a refund. komoot's move to a subscription is the
+  category's warning. It also needs renewal state that "bought or not" does not.
+- **€4.99.** Chosen in August to protect installs on a *paid* listing; under freemium the install
+  is free at any price. **€7.99** was defensible, but at launch the app has no reviews against an
+  incumbent at 4.8 stars. Revisit once reviews exist.
+- **Three free stamps** (locks nearly everyone before the first evening), **one per category**
+  (locks sooner in practice: the second viewpoint of the first morning), **keeping ten** (a
+  hire-car visitor meets it on day 2 to 4, a hiker on day 4, most of the way through the trip).
+- **Dropping the first-levada guarantee.** Recommended in the conversation, then reversed by the
+  same reasoning: at five the original D-072 argument is stronger, not weaker, and it was already
+  built and tested.
+- **A huge watermark** (14.3%, tilted across the centre). The project lead's first idea; it risks
+  people not posting at all, which stops D-013's distribution.
+- **Showing the stamps in the paid video.** It would widen the gap between the two videos, but it
+  adds work to the riskiest open spike, and the marks already separate them.
+- **Rare stamp variants** (sunrise at Pico do Areeiro, a levada walked end to end). Complexity not
+  needed now. Skipped, not ruled out.
+- **A printable poster file.** Later, when the app is stable. **Hotel promo codes:** not now.
+- **A tip jar, or a second product:** no. One honest price.
+- **The study's storyboard review of the paywall moment** (Q3) was dropped by the project lead.
+
+#### Still open, for the execution plan
+
+Whether set medals and the founder stamp count towards the rank (D-078) and the *de 80* line
+(D-090); where the medals are shown; the exact wording of the lock and the offer (T-157).
 
 ## D-090 — A quiet progress line on the home map, after WalkNYC (amends D-083, D-085)
 

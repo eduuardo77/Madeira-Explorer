@@ -42,7 +42,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { centre, crashLines, findNode, parseNodes } from './lib/uiTree.mjs';
-import { STRINGS } from '../app/src/i18n/strings.ts';
+import { PLURALS, STRINGS } from '../app/src/i18n/strings.ts';
+import { LANGUAGE_NAMES } from '../app/src/i18n/languages.ts';
 
 const PKG = 'com.proa.madeira';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -77,8 +78,9 @@ function label(key, values = {}) {
 /** A catalogue string as a pattern, each placeholder matching anything. */
 function pattern(...keys) {
   const forms = keys.flatMap((key) => {
-    const phrase = STRINGS[key];
-    return 'one' in phrase ? [phrase.one, phrase.other] : [phrase];
+    // Counted phrases ("1 lugar", "3 lugares") live in their own catalogue.
+    const plural = PLURALS[key];
+    return plural !== undefined ? [plural.one, plural.other] : [STRINGS[key]];
   });
   const escaped = forms.map((phrase) =>
     (phrase[language] ?? phrase.en)
@@ -159,12 +161,22 @@ const STEPS = [
     }
     await reach(MAP);
   }],
-  ['Settings', () => tap(MAP).then(() => reach(label('settings.title')))],
+  ['Settings', async () => {
+    await tap(MAP);
+    await reach(label('settings.title'));
+  }],
   ['the language rows say which one is chosen (T-215)', async () => {
     await reach(label('settings.section.language').toUpperCase(), { scroll: true }).catch(() =>
       reach(label('settings.section.language'), { scroll: true })
     );
-    const rows = (await screen()).filter((node) => node.checkable);
+    // ⚠ Only the rows named after a language. Settings has other checkable
+    // controls on the same screen (the recording switch, the three quality
+    // options), and the first run counted them all: "8 rows, 3 checked".
+    const names = new Set(Object.values(LANGUAGE_NAMES));
+    const automatic = pattern('settings.language.auto');
+    const rows = (await screen()).filter(
+      (node) => node.checkable && (names.has(node.desc) || automatic.test(node.desc))
+    );
     const checked = rows.filter((node) => node.checked);
     if (rows.length === 0 || checked.length !== 1) {
       throw new Error(`${rows.length} checkable rows, ${checked.length} checked`);
@@ -194,7 +206,7 @@ const STEPS = [
   }],
   ['the replay, if it is offered (T-217)', async () => {
     const watch = findNode(await screen(), label('replay.watch'));
-    if (watch === null) return 'not offered: the trip on show has no trace';
+    if (watch === null) return 'not offered: nothing drawable in the trip on show';
     await tap(label('replay.watch'));
     await reach(label('replay.close'), { timeoutMs: 20_000 });
     await tap(label('replay.close'));
@@ -213,7 +225,9 @@ console.log(`Smoke test: ${PKG} on ${serial ?? 'the attached phone'}, labels in 
 for (const [name, step] of STEPS) {
   let note = '';
   try {
-    note = (await step()) ?? '';
+    // A step may return a sentence worth printing; anything else is not a note.
+    const result = await step();
+    note = typeof result === 'string' ? result : '';
     const now = shell(`pidof ${PKG}`);
     if (pid !== null && now !== pid) {
       throw new Error(`the process changed from ${pid} to ${now || 'none'}: it died and restarted`);

@@ -60,8 +60,12 @@ const NOTHING: ExportableTrace = {
  * reveal the full trace eventually exists (it should be possible; it is the
  * user's own data), it belongs at the call site with its own confirmation, not
  * as a flag threaded through here where it could default wrong.
+ *
+ * `quiet` skips the diary line for a caller that only asks whether there is
+ * anything to show (the passport's *Watch* offer, T-217), which would
+ * otherwise write one on every visit. Masking is the same either way.
  */
-export async function getExportableTrace(): Promise<ExportableTrace> {
+export async function getExportableTrace({ quiet = false }: { quiet?: boolean } = {}): Promise<ExportableTrace> {
   try {
     const trip = await tripDao.getActiveTrip();
     // Note: at export time the trip is usually already ended (T-099), so fall
@@ -80,10 +84,12 @@ export async function getExportableTrace(): Promise<ExportableTrace> {
     const hadOvernightData = hasOvernightFixes(fixes);
     const masked = maskTrace(fixes, accommodation, hadOvernightData);
 
-    await recordingEventDao.log(
-      'export',
-      `${masked.fixes.length} of ${fixes.length} fixes: ${masked.reason}`
-    );
+    if (!quiet) {
+      await recordingEventDao.log(
+        'export',
+        `${masked.fixes.length} of ${fixes.length} fixes: ${masked.reason}`
+      );
+    }
 
     return {
       fixes: masked.fixes,

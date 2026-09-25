@@ -36,7 +36,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
 import ShareCardView from '../souvenir/ShareCardView';
-import { mayHaveAFilm } from '../souvenir/composition';
+import { getSouvenirComposition } from '../souvenir/souvenirPlan';
 import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
@@ -86,7 +86,15 @@ export default function PassportScreen({
   const [sharing, setSharing] = useState(false);
   /** T-204: whether a trip is open, which is when "End trip" is offered. */
   const [tripOpen, setTripOpen] = useState(false);
-  /** T-217: whether the trip on show has a trace to replay, stamps or not. */
+  /**
+   * T-217: whether there is a film to watch, stamps or not.
+   *
+   * ⚠ **Asked of the planner, not of a fix count** (found on the P30,
+   * 2026-09-25). The first version offered *Watch* whenever the trip had two
+   * fixes, and on the project lead's phone it opened "nothing to watch": the
+   * trip was mostly at home, and D-040's masking removes where you sleep, so
+   * nothing drawable was left. A resident is exactly that case.
+   */
   const [canWatch, setCanWatch] = useState(false);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
@@ -114,7 +122,6 @@ export default function PassportScreen({
           trip === null
             ? new Set<string>()
             : await stampAwardDao.getAwardedPlaceIds(trip.id);
-        const recordedFixes = trip === null ? 0 : await rawFixDao.countFixes(trip.id);
 
         const prompt = await resolvePrompt(pass.awaitingConfirmation, awardedIds);
 
@@ -131,11 +138,17 @@ export default function PassportScreen({
         if (!cancelled) {
           setProgress(nextProgress);
           setTripOpen(active !== null);
-          setCanWatch(mayHaveAFilm(recordedFixes));
           setAwards(nextAwards);
           setStamps(resolveStamps(awardedIds, locked));
           setConfirmation(prompt?.prompt ?? null);
           setConfirmationEvidence(prompt?.evidence ?? '');
+        }
+
+        // After the page is on screen: this reads and masks the whole trace,
+        // and nobody should wait for it to see their stamps.
+        const film = await getSouvenirComposition({ quiet: true });
+        if (!cancelled) {
+          setCanWatch(film.renderable);
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);

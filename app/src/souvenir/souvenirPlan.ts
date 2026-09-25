@@ -31,10 +31,13 @@ import { getExportableTrace } from './exportTrace';
  * Never throws: this is called from the reveal (T-102), which the user reaches
  * at the airport with their phone at 4% — a failure here must degrade to an
  * honest "no video" rather than to a crash on the best moment in the product.
+ *
+ * `quiet`: plan without writing to the diary, for the passport's question
+ * "is there a film to offer" (T-217), asked on every visit.
  */
-export async function getSouvenirComposition(): Promise<Composition> {
+export async function getSouvenirComposition({ quiet = false }: { quiet?: boolean } = {}): Promise<Composition> {
   try {
-    const trace = await getExportableTrace();
+    const trace = await getExportableTrace({ quiet });
     if (!trace.safeToShare) {
       // Already the right answer, and `composeSouvenir` would reach it too.
       // Returning early keeps the reason exactly as the export phrased it.
@@ -63,6 +66,9 @@ export async function getSouvenirComposition(): Promise<Composition> {
       gapThresholdMs: GAP_THRESHOLD_MS,
     });
 
+    if (quiet) {
+      return composition;
+    }
     await recordingEventDao.log(
       'export',
       composition.renderable

@@ -185,7 +185,7 @@ but eight (below). N9 is T-197's; N11 is T-222.
       presses anything that changes data. Reads the language radios' `checked` (T-215's evidence).
       Pure half `tools/lib/uiTree.mjs`, 4 tests (`node --test tools/lib/uiTree.test.mjs`), one of
       which caught its own first crash reader blaming this app for another's crash.
-      ⚠ **Not yet run on a phone**: the P30 was not reachable over adb this session.
+      ✅ **Run on the P30 2026-09-25: passes** (see the evidence note above Stage 1).
 - [~] **T-223** **The home map cannot be lost in the ocean (N8).** ⚠ **`expo-maps` cannot fence
       the camera**: `latLngBoundsForCameraTarget` is commented out in its `Records.kt`, and its
       minimum zoom defaults to 3, half the planet. ✅ Code (`map/mapFence.ts`, 4 tests): a zoom
@@ -195,6 +195,22 @@ but eight (below). N9 is T-197's; N11 is T-222.
       the island is 0.63° wide and 0.29° tall, and `fitBounds` already fills the width.
 - [x] **T-224** **N12:** *"Vá a um e ele preenche-se sozinho"* read as the place filling itself.
       Now *"Vá a um deles e o carimbo aparece sozinho"*, and the stamp in EN and DE too.
+
+**✅ Seen on the P30, 2026-09-25 10:12 to 10:40** (beta release from `27d6a43` plus the fix below,
+installed over the old one, data kept; recorder back in the foreground after the update):
+`node tools/smoke-release.mjs` passes every step: map, Settings, Privacy, Licences, passport, a
+stamp's card, back. From `uiautomator`: language rows and quality options **180 px = 60 dp**, both
+report `checked` (T-215); passport cells **84 dp**, the fourth showing **36 dp of 84** at the edge
+(T-219); the invitation reads *"Vá a um deles e o carimbo aparece sozinho"* (T-224); the card reads
+*MIRADOURO / Pico do Areeiro / Ainda por visitar / Santana* with no distance (T-218, T-225); the
+progress line sits between the stamp and *Começar passeio* (D-090).
+⚠ **Found there, fixed the same hour (T-217):** *Ver a sua viagem* was offered at 0 stamps and
+opened *"Ainda não há nada para ver"*. The offer counted fixes; the project lead's trip is mostly
+at home, and D-040 masks where you sleep, so nothing drawable was left. The passport now asks
+`getSouvenirComposition({ quiet: true })` after the page shows; on the P30 it is correctly not
+offered (checked again after 6 s, so not a race). Not yet seen: a film actually moving (OD-12).
+⚠ The smoke test's first two runs failed on the test, not the app (it counted the quality
+options as language rows; it did not search plural labels). Fixed in the script.
 
 ### Stage 1 — Release hygiene (desk work, small items, done in parallel)
 

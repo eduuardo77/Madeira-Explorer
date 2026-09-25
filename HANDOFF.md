@@ -62,16 +62,15 @@ T-215 (accessibility, and 7 more label-in-name failures than the review saw), T-
 seven untrue claims), T-217 (replay without a stamp), T-218 (stamp on its card, album palette),
 T-219 (row peek, 84 dp on the P30), T-221 (licences from what ships: 286, Android included),
 T-222 (`tools/smoke-release.mjs`), T-223 (zoom floor, *Centrar* from the ocean), T-224.
-⚠ **None of it has been on the phone.** The P30 dropped off adb (Windows saw it as MTP only).
-A beta APK with all of it is built from `57ee305`; the next step is:
-
-```bash
-tools/android-sdk/platform-tools/adb install -r app/android/app/build/outputs/apk/release/app-release.apk
-node tools/smoke-release.mjs
-```
-
-Then look at: the passport's peek, the dark card, *Ver a sua viagem* at 0 stamps, the Licences
-screen. **T-220** (one control language) is a design question and waits on the project lead.
+✅ **All of it is on the P30 since 2026-09-25** (beta release, data kept), with T-225 (card
+distance only within 2 km), T-226 (compact Settings; language first, no jump), the project lead's
+picks from `tools/out/screen-options.html` (card B, passport top A, map A with a flat WalkNYC-style
+progress line) and a fix found on the phone (*Ver a sua viagem* now asks the film planner).
+**Before handing any build to anyone:** `node tools/smoke-release.mjs` (every screen, crash check).
+Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativo* is on).
+**Waiting on the project lead:** round 2, `tools/out/screen-options-2.html` (what the progress line
+says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
+Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
 **Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
 2026-09-24) puts billing *after* the monetisation study. ✅ **The study's desk half is done (2026-09-24)**: Q1, Q4, Q6, Q8 are written into

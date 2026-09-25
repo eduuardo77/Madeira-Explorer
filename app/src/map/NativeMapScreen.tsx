@@ -88,6 +88,8 @@ import { useBackHandler } from '../ui/useBackHandler';
 import PrimaryOverlay, { PROGRESS_STRIP_HEIGHT, type MapNotice } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
+import { isOffArchipelago, recentreTarget, zoomFloor } from './mapFence';
+import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
@@ -303,6 +305,8 @@ export default function NativeMapScreen({
     zoom ?? camera?.zoom ?? 0,
     PLACE_MARKER_PAINT[styleName].collected
   );
+
+  const minZoom = zoomFloor(ARCHIPELAGO_BOUNDS, { width, height });
 
   const frame = (bounds: Bounds): CameraFit | null =>
     fitBounds(bounds, {
@@ -595,11 +599,17 @@ export default function NativeMapScreen({
    * threshold about 15% tighter than the north–south one — harmless for a
    * visibility rule, and wrong only if this ever becomes a measurement.
    */
-  const showRecentre =
+  const wanderedOffUser =
     userAt !== null &&
     cameraCentre !== null &&
     (Math.abs(cameraCentre.latitude - userAt.latitude) > RECENTRE_SHOW_DEGREES ||
       Math.abs(cameraCentre.longitude - userAt.longitude) > RECENTRE_SHOW_DEGREES);
+  // T-223 (review N8): out at sea it is offered with or without a position,
+  // because it is the only way back and nothing else on screen says where the
+  // islands went.
+  const showRecentre =
+    wanderedOffUser ||
+    (cameraCentre !== null && isOffArchipelago(cameraCentre, ARCHIPELAGO_BOUNDS));
 
   /** Re-read the recorder's state now, after something the user did. */
   const rereadControl = async () => {
@@ -692,15 +702,19 @@ export default function NativeMapScreen({
     void (async () => {
       try {
         const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
-        if (fix === null) {
+        const user = fix === null ? null : { latitude: fix.lat, longitude: fix.lon };
+        // T-223: off the islands, or with no position, it brings the islands
+        // back rather than doing nothing.
+        const target: CameraFit | null =
+          user !== null && recentreTarget(user, ARCHIPELAGO_BOUNDS) === 'user'
+            ? { coordinates: user, zoom: RECENTRE_ZOOM }
+            : frame(HOME_BOUNDS);
+        if (target === null) {
           return;
         }
         cameraHeldByFocus.current = true;
-        setCamera({
-          coordinates: { latitude: fix.lat, longitude: fix.lon },
-          zoom: RECENTRE_ZOOM,
-        });
-        setCameraCentre({ latitude: fix.lat, longitude: fix.lon });
+        setCamera(target);
+        setCameraCentre(target.coordinates);
       } catch (error) {
         await recordingEventDao.logError('recentre', error);
       }
@@ -787,6 +801,9 @@ export default function NativeMapScreen({
           // ⚠ Google's own re-centre button stays off below; ours is a
           // labelled control, because D-015 forbids an icon alone.
           isMyLocationEnabled: true,
+          // T-223: no further out than the archipelago and a margin. The
+          // default is 3, half the planet (`mapFence.ts`).
+          minZoomPreference: minZoom ?? undefined,
           isTrafficEnabled: false,
           isBuildingEnabled: false,
           selectionEnabled: false,

@@ -156,8 +156,13 @@ but eight (below). N9 is T-197's; N11 is T-222.
 - [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
 - [ ] **T-221** **Licences: what ships, JavaScript and native (N5).**
 - [ ] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**
-- [ ] **T-223** **The home map frames the island and cannot be lost in the ocean (N8)** ⇠ check
-      first that `expo-maps` can bound the camera at all.
+- [~] **T-223** **The home map cannot be lost in the ocean (N8).** ⚠ **`expo-maps` cannot fence
+      the camera**: `latLngBoundsForCameraTarget` is commented out in its `Records.kt`, and its
+      minimum zoom defaults to 3, half the planet. ✅ Code (`map/mapFence.ts`, 4 tests): a zoom
+      floor at the archipelago plus half a level, and *Centrar* offered whenever the map's centre
+      leaves the archipelago, going to the islands when the user is not on them. Nothing snaps
+      back on its own. ⚠ The review's other half, the island in 40% of the screen, is geometry:
+      the island is 0.63° wide and 0.29° tall, and `fitBounds` already fills the width.
 - [x] **T-224** **N12:** *"Vá a um e ele preenche-se sozinho"* read as the place filling itself.
       Now *"Vá a um deles e o carimbo aparece sozinho"*, and the stamp in EN and DE too.
 

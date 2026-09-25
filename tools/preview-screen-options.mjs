@@ -10,6 +10,12 @@
  *   2. The top of the passport: *still needs some work*.
  *   3. T-220, one control language on the map: *I need some visual reference*.
  *
+ * Round 2 (→ `tools/out/screen-options-2.html`), after the project lead chose A
+ * for the map with a quieter progress line: *"we could explore different
+ * information to present instead of 0 of 80 places"*, and *Centrar* *"could be
+ * more discreet"*. Every progress option is a number the app can already
+ * compute; none is invented for the drawing.
+ *
  * Every stamp comes from `stampElements` (via svg-render.mjs), every colour and
  * size from `theme.ts` and the screens' own constants, so option A is today's
  * screen and the others differ only where they say they do. Nothing here
@@ -250,6 +256,90 @@ const MAP_C = `<div class="phone map">${GROUND}
     <div class="walk" style="background:${green};box-shadow:none">${PLAY('#fff')} Começar passeio</div>
   </div></div>`;
 
+/** The flat progress line as it ships since D-090 was amended (2026-09-25). */
+function quietLine(caption, fraction) {
+  return `<div class="progress" style="background:${white.strip}"><div style="color:${white.muted}">${caption}</div>${
+    fraction === null ? '' : bar(fraction, white.stripFill, white.track)
+  }</div>`;
+}
+
+const CENTRAR = {
+  today: `<div class="pill" style="background:${white.surface};color:${white.link};height:40px;${shadow}">${RECENTRE(white.link)} Centrar</div>`,
+  quiet: `<div class="pill small" style="background:${white.strip};color:${white.muted};height:32px">${RECENTRE(white.muted, 14)} Centrar</div>`,
+};
+
+function home({ caption, fraction, centrar = 'today' }) {
+  const middle =
+    centrar === 'corner'
+      ? `<div class="centre"></div><div class="pill small" style="background:${white.surface};color:${white.muted};height:36px;${shadow}">${RECENTRE(white.muted, 14)} Centrar</div>`
+      : `<div class="centre">${CENTRAR[centrar]}</div><div style="width:101px"></div>`;
+  return `<div class="phone map">${GROUND}
+  <div class="gear" style="background:${white.surface};${shadow}">${SETTINGS(white.content)}</div>
+  <div class="bottom">
+    <div class="stamprowmap">${passportStamp}${middle}</div>
+    ${quietLine(caption, fraction)}
+    <div class="walk" style="background:${green}">${PLAY('#fff')} Começar passeio</div>
+  </div></div>`;
+}
+
+const LINE_OPTIONS = [
+  {
+    title: 'A. Hoje: o total',
+    phone: home({ caption: '3 de 80 lugares', fraction: 3 / 80 }),
+    notes: ['Diz quanto falta na ilha toda. Com 80 lugares, a barra quase não mexe durante dias.'],
+  },
+  {
+    title: 'B. A região para acabar',
+    phone: home({ caption: 'Santana: 1 de 12 lugares', fraction: 1 / 12 }),
+    notes: [
+      'O município que já começou e está mais perto de acabar. É o que a WalkNYC faz com os bairros, e o que a decisão D-027 pedia para o mapa.',
+      'Já calculado pela aplicação (<code>suggestNextRegion</code>), nunca foi mostrado.',
+      'A barra mexe a sério: um lugar em doze.',
+      'Sem nenhum carimbo ainda, mostra o total, como A.',
+    ],
+  },
+  {
+    title: 'C. A categoria que mais colecciona',
+    phone: home({ caption: 'Miradouros: 3 de 19', fraction: 3 / 19 }),
+    notes: [
+      'Segue o que a pessoa gosta de fazer: quem anda em levadas vê levadas.',
+      'Mais simples que B, mas não diz onde ir.',
+    ],
+  },
+  {
+    title: 'D. O lugar mais perto por visitar',
+    phone: home({ caption: 'Mais perto: Fanal, a 1,4 km', fraction: null }),
+    notes: [
+      'Só aparece a menos de 2 km, como no cartão; longe, mostra o total.',
+      '⚠ É parecido com o aviso "Mais perto por visitar" que retirou a 24 de setembro.',
+    ],
+  },
+];
+
+const CENTRAR_OPTIONS = [
+  {
+    title: 'A. Hoje',
+    phone: home({ caption: 'Santana: 1 de 12 lugares', fraction: 1 / 12, centrar: 'today' }),
+    notes: ['Branco com sombra e texto azul: o segundo objeto mais visível no fundo do ecrã.'],
+  },
+  {
+    title: 'B. Mais discreto, no mesmo sítio',
+    phone: home({ caption: 'Santana: 1 de 12 lugares', fraction: 1 / 12, centrar: 'quiet' }),
+    notes: [
+      'Plano, cinzento, sem sombra, da mesma família da linha de progresso.',
+      'Mais pequeno à vista; a área de toque continua a ter 60 dp.',
+    ],
+  },
+  {
+    title: 'C. Pequeno, à direita',
+    phone: home({ caption: 'Santana: 1 de 12 lugares', fraction: 1 / 12, centrar: 'corner' }),
+    notes: [
+      'Onde a maioria das aplicações de mapas o põe.',
+      'Sai do meio, e o carimbo fica sozinho à esquerda.',
+    ],
+  },
+];
+
 const MAP_OPTIONS = [
   {
     title: 'A. Hoje: quatro estilos',
@@ -289,7 +379,7 @@ const board = (heading, question, options) => `<section>
     .map((o) => `<figure>${o.phone}<figcaption><h3>${o.title}</h3><ul>${o.notes.map((n) => `<li>${n}</li>`).join('')}</ul></figcaption></figure>`)
     .join('')}</div></section>`;
 
-const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Proa: opções de ecrã</title>
+const HEAD = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Proa: opções de ecrã</title>
 <style>
   body { margin: 0; padding: 32px; background: #e9e9ee; font-family: Roboto, "Segoe UI", Arial, sans-serif; color: #1c1c1e; }
   h1 { margin: 0 0 4px; font-size: 26px; } .lead { color: #5c5c63; margin: 0 0 24px; max-width: 900px; }
@@ -330,20 +420,42 @@ const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>
   .bottom { position: absolute; left: 16px; right: 16px; bottom: 32px; display: flex; flex-direction: column; gap: 8px; }
   .progress { border-radius: 16px; padding: 8px 16px; font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
   .stamprowmap { display: flex; align-items: center; } .centre { flex: 1; display: flex; justify-content: center; }
+  .pill.small { font-size: 14px; padding: 0 12px; }
   .pill { display: flex; align-items: center; gap: 4px; padding: 0 16px; border-radius: 30px; font-size: 17px; font-weight: 600; }
   .pill.floating { position: absolute; right: 16px; bottom: 236px; }
   .walk { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 60px; border-radius: 30px; color: #fff; font-size: 17px; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
   .panel { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 24px 24px 0 0; padding: 12px 16px 32px; box-shadow: 0 -2px 12px rgba(0,0,0,.15); display: flex; flex-direction: column; gap: 10px; }
   .panelrow { display: flex; align-items: center; gap: 12px; } .panelinfo { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-</style></head><body>
-<h1>Proa: opções para três ecrãs</h1>
-<p class="lead">Desenhado com os carimbos, cores e tamanhos reais da aplicação. A de cada quadro é o que está hoje no telemóvel; as outras mudam só o que dizem. Diga a letra que prefere em cada um, ou o que misturar.</p>
-${board('1. O cartão de um carimbo', '"A 39 km em linha reta" não ajuda numa ilha cheia de curvas, e a informação podia estar melhor apresentada.', CARD_OPTIONS)}
-${board('2. O topo do passaporte', 'A informação podia estar melhor apresentada.', TOP_OPTIONS)}
-${board('3. Os botões do mapa (T-220)', 'Uma só linguagem para os controlos. O fundo é simulado: o mapa real é o da Google.', MAP_OPTIONS)}
+</style></head><body>`;
+
+const page = (lead, boards) => `${HEAD}
+<h1>Proa: opções de ecrã</h1>
+<p class="lead">${lead}</p>
+${boards}
 </body></html>`;
 
-const out = path.join(here, 'out', 'screen-options.html');
-mkdirSync(path.dirname(out), { recursive: true });
-writeFileSync(out, html, 'utf8');
-console.log(`Wrote ${path.relative(path.join(here, '..'), out)}`);
+const PAGES = [
+  [
+    'screen-options.html',
+    page(
+      'Desenhado com os carimbos, cores e tamanhos reais da aplicação. A de cada quadro é o que está hoje no telemóvel; as outras mudam só o que dizem. Diga a letra que prefere em cada um, ou o que misturar.',
+      board('1. O cartão de um carimbo', '"A 39 km em linha reta" não ajuda numa ilha cheia de curvas, e a informação podia estar melhor apresentada.', CARD_OPTIONS) +
+        board('2. O topo do passaporte', 'A informação podia estar melhor apresentada.', TOP_OPTIONS) +
+        board('3. Os botões do mapa (T-220)', 'Uma só linguagem para os controlos. O fundo é simulado: o mapa real é o da Google.', MAP_OPTIONS)
+    ),
+  ],
+  [
+    'screen-options-2.html',
+    page(
+      'Segunda ronda, sobre o ecrã do mapa que escolheu (A, com a linha de progresso mais discreta). Os números são exemplos com 3 carimbos; todos são coisas que a aplicação já sabe calcular. O fundo é simulado.',
+      board('4. O que diz a linha de progresso', 'Algo mais útil que "0 de 80 lugares".', LINE_OPTIONS) +
+        board('5. O botão Centrar', 'Mais discreto, sem deixar de se encontrar.', CENTRAR_OPTIONS)
+    ),
+  ],
+];
+
+mkdirSync(path.join(here, 'out'), { recursive: true });
+for (const [name, html] of PAGES) {
+  writeFileSync(path.join(here, 'out', name), html, 'utf8');
+  console.log(`Wrote tools/out/${name}`);
+}

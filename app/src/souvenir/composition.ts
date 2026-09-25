@@ -281,6 +281,29 @@ export type SouvenirInput = {
 };
 
 /**
+ * The fewest recorded fixes that can make a film: one line needs two points
+ * (`splitIntoSegments` drops a segment of one).
+ */
+export const MIN_FIXES_FOR_A_FILM = 2;
+
+/**
+ * Whether the passport offers *Watch your trip*, from a count the database can
+ * give without reading the trace (T-217).
+ *
+ * ⚠ **Not gated on a stamp any more.** The second review (N2) found the film
+ * hidden until the first stamp, so a day walked without reaching one of the 80
+ * places could not be watched at all, though a film of it plans perfectly well.
+ * The project lead: the trip history *is* the replay. So the offer follows the
+ * trace, not the stamps.
+ *
+ * A necessary condition, not a promise: masking (D-040) can still withhold the
+ * trace, and the replay then says so in words rather than drawing nothing.
+ */
+export function mayHaveAFilm(recordedFixes: number): boolean {
+  return recordedFixes >= MIN_FIXES_FOR_A_FILM;
+}
+
+/**
  * Plan the film.
  *
  * Returns `renderable: false` — never a partial or empty film — when the trace

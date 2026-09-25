@@ -32,8 +32,10 @@ import {
   MAX_DRAW_MS,
   MIN_CUE_GAP_MS,
   MIN_DRAW_MS,
+  MIN_FIXES_FOR_A_FILM,
   MIN_SPAN_DEG,
   composeSouvenir,
+  mayHaveAFilm,
   type Composition,
   type DrawScene,
   type FinaleScene,
@@ -420,3 +422,37 @@ test('the first and last recorded moment reach the finale unformatted', () => {
 function safe(fixes: TraceFix[]): SouvenirInput['trace'] {
   return { fixes, safeToShare: true, reason: 'nothing to mask' };
 }
+
+// ---------------------------------------------------------------------------
+// The passport's offer (T-217, review N2)
+// ---------------------------------------------------------------------------
+
+test('a day with no stamp still makes a film', () => {
+  // The review's case: walked all day, reached none of the places.
+  const composition = film(composeSouvenir(input({ stamps: [] })));
+  const finale = composition.scenes.find((scene) => scene.kind === 'finale') as FinaleScene;
+  assert.equal(finale.collected, 0);
+});
+
+test('the offer agrees with the planner at its edge', () => {
+  // The passport decides from a count, without reading the trace; this is
+  // what keeps that count honest if the planner's minimum ever moves.
+  const below = MIN_FIXES_FOR_A_FILM - 1;
+  assert.equal(mayHaveAFilm(below), false);
+  assert.equal(
+    composeSouvenir(input({ trace: { fixes: walk(below), safeToShare: true, reason: '' } }))
+      .renderable,
+    false
+  );
+
+  assert.equal(mayHaveAFilm(MIN_FIXES_FOR_A_FILM), true);
+  film(
+    composeSouvenir(
+      input({ trace: { fixes: walk(MIN_FIXES_FOR_A_FILM), safeToShare: true, reason: '' } })
+    )
+  );
+});
+
+test('nothing recorded is no offer', () => {
+  assert.equal(mayHaveAFilm(0), false);
+});

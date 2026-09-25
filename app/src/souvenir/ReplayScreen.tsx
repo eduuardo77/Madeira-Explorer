@@ -338,10 +338,15 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
           style={[styles.hero, { opacity: Math.min(1, frame.sceneProgress * 4) }]}
           pointerEvents="none"
         >
-          <Text style={styles.heroNumber}>
-            {frame.hero.collected}
-            <Text style={styles.heroTotal}> / {frame.hero.total}</Text>
-          </Text>
+          {/* T-217: a day with no stamp ends on its dates, not on "0 / 80".
+              The film is offered without a stamp now, and a zero as the last
+              frame of somebody's walk reads as a verdict on it. */}
+          {frame.hero.collected === 0 ? null : (
+            <Text style={styles.heroNumber}>
+              {frame.hero.collected}
+              <Text style={styles.heroTotal}> / {frame.hero.total}</Text>
+            </Text>
+          )}
           {caption === '' ? null : <Text style={styles.heroCaption}>{caption}</Text>}
         </View>
       )}

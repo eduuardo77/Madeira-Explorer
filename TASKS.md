@@ -145,10 +145,14 @@ but eight (below). N9 is T-197's; N11 is T-222.
       `privacyPolicy.test.ts`. `marketing-plan.md` quoted the old wording and follows it.
       ⚠ **Open:** controller and contact wait on T-187; the Portuguese wants the project lead's
       eye (T-160b); the walk report may change the Data Safety answer (T-122's "shared or not").
-- [ ] **T-217** **The replay without a stamp (N2).** *Watch* whenever the trip has a trace.
-- [ ] **T-218** **The place card shows the stamp, on the album's dark (N3).**
-- [ ] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
-      fourth sticker began exactly at the card's edge.
+- [~] **T-217** **The replay without a stamp (N2).** ✅ Code: *Watch* whenever the trip on show has
+      a line's worth of fixes (`composition.mayHaveAFilm`, held to `composeSouvenir`); at zero the
+      film ends on its dates, not "0 / 80". ⚠ Still nobody has seen the replay move (OD-12).
+- [~] **T-218** **The place card shows the stamp, on the album's dark (N3).** ✅ Code and workbench:
+      `PlaceCardView` `palette="album"` plus `stamp`, from the passport only.
+- [~] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
+      fourth sticker began exactly at the card's edge. ✅ `passport/stripLayout.ts`: 96 where the
+      cut reads, 84 on the P30, measured from the strip itself. Workbench: 44% of the fourth.
 - [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
 - [ ] **T-221** **Licences: what ships, JavaScript and native (N5).**
 - [ ] **T-222** **Every screen of a release build opened before it reaches a phone (N11).**

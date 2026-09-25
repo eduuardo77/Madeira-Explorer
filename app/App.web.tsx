@@ -43,6 +43,7 @@ import SettingsView from './src/ui/SettingsView';
 import PrimaryOverlay from './src/ui/PrimaryOverlay';
 import { buttonStamp } from './src/passport/passportButton';
 import { colors, fontSize, spacing } from './src/ui/theme';
+import type { Language } from './src/i18n/languages';
 
 /**
  * A believable content pack shape, without any content.
@@ -226,12 +227,17 @@ const SCREENS: { id: Screen; label: string }[] = [
  * recording: no recent fix, so no number (`placeCard.ts` rule 1). It is worth
  * looking at, because it is the layout with a line missing.
  */
-function makeCard(collected: boolean, distance: boolean) {
+function makeCard(
+  collected: boolean,
+  distance: boolean,
+  // T-218: the passport's card is for the stamp that was tapped.
+  stamp?: PassportStamp
+) {
   const now = Date.now();
   return buildPlaceCard({
-    placeId: 'place-1',
-    name: collected ? 'Long Canal Trail' : 'Miradouro Grande',
-    category: collected ? 'levada' : 'viewpoint',
+    placeId: stamp?.placeId ?? 'place-1',
+    name: stamp?.name ?? (collected ? 'Long Canal Trail' : 'Miradouro Grande'),
+    category: stamp?.category ?? (collected ? 'levada' : 'viewpoint'),
     collected,
     // Invented, like every other string here: the workbench judges the layout
     // and must not become a second content pack (D-017, D-038).
@@ -256,6 +262,10 @@ function makeCard(collected: boolean, distance: boolean) {
 export default function DesignWorkbench() {
   const [scenario, setScenario] = useState<number>(1);
   const [screen, setScreen] = useState<Screen>('passport');
+  /** The stamp tapped on the passport, whose card opens over it (T-218). */
+  const [passportCard, setPassportCard] = useState<PassportStamp | null>(null);
+  /** Settings' language rows (T-202), so their size can be judged (T-215). */
+  const [language, setLanguage] = useState<Language | null>(null);
 
   const showsCard = screen === 'place-card' || screen === 'place-card-collected';
   const collected = SCENARIOS[scenario].collected;
@@ -321,31 +331,49 @@ export default function DesignWorkbench() {
               onSkip={() => undefined}
             />
           ) : screen === 'passport' || screen === 'passport-confirm' ? (
-            <PassportView
-              progress={progress}
-              awards={awards}
-              stamps={stamps}
-              onSelectStamp={() => setScreen('place-card-collected')}
-              // Under the hero, opposite the invitation it replaces (T-105e).
-              // ⚠ There is nowhere for it to go here: the replay is the real
-              // Google map now (D-076), and the workbench has no map.
-              onWatch={() => undefined}
-              // The question D-065 leaves the app holding, at the length it
-              // actually renders — a real levada name and a real evidence
-              // string, invented rather than imported (D-017, D-038).
-              confirmation={
-                screen === 'passport-confirm'
-                  ? {
-                      placeId: 'long-canal-trail',
-                      question: 'Did you walk the Long Canal Trail?',
-                      detail:
-                        'Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure.',
-                      confirmLabel: 'I walked it',
-                      declineLabel: 'Not this time',
-                    }
-                  : undefined
-              }
-            />
+            <View style={styles.fill}>
+              <PassportView
+                progress={progress}
+                awards={awards}
+                stamps={stamps}
+                onSelectStamp={setPassportCard}
+                // Under the hero, and under the invitation at zero (T-217).
+                // ⚠ There is nowhere for it to go here: the replay is the real
+                // Google map now (D-076), and the workbench has no map.
+                onWatch={() => undefined}
+                // The question D-065 leaves the app holding, at the length it
+                // actually renders — a real levada name and a real evidence
+                // string, invented rather than imported (D-017, D-038).
+                confirmation={
+                  screen === 'passport-confirm'
+                    ? {
+                        placeId: 'long-canal-trail',
+                        question: 'Did you walk the Long Canal Trail?',
+                        detail:
+                          'Walked 2.1 km of 5.0 km (42%) — enough to ask, not enough for the app to be sure.',
+                        confirmLabel: 'I walked it',
+                        declineLabel: 'Not this time',
+                      }
+                    : undefined
+                }
+              />
+              {/* T-218: the card the passport opens, over the passport, as
+                  PassportScreen draws it. */}
+              {passportCard === null ? null : (
+                <View style={styles.passportCard}>
+                  <PlaceCardView
+                    card={makeCard(passportCard.collected, false, passportCard)}
+                    palette="album"
+                    stamp={passportCard}
+                    onShowOnMap={() => {
+                      setPassportCard(null);
+                      setScreen('primary');
+                    }}
+                    onClose={() => setPassportCard(null)}
+                  />
+                </View>
+              )}
+            </View>
           ) : screen === 'privacy' ? (
             <PrivacyPolicyView onClose={() => setScreen('settings')} />
           ) : screen === 'settings' ? (
@@ -364,6 +392,8 @@ export default function DesignWorkbench() {
               onOpenPrivacyPolicy={() => setScreen('privacy')}
               onOpenDebug={() => undefined}
               onEraseRequested={() => undefined}
+              languageChoice={language}
+              onChangeLanguage={setLanguage}
               onClose={() => undefined}
             />
           ) : (
@@ -454,6 +484,9 @@ export default function DesignWorkbench() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#0a0e12' },
+  fill: { flex: 1 },
+  // Where PassportScreen holds its card (`cardHolder`).
+  passportCard: { position: 'absolute', left: spacing.md, right: spacing.md, bottom: spacing.xl },
   bar: {
     padding: spacing.md,
     gap: spacing.sm,

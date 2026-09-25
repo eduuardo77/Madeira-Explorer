@@ -35,6 +35,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
 import ShareCardView from '../souvenir/ShareCardView';
+import { mayHaveAFilm } from '../souvenir/composition';
 import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
@@ -65,8 +66,11 @@ export default function PassportScreen({
   /** The tapped stamp's card, or null — which is nearly always. */
   const [card, setCard] = useState<PlaceCard | null>(null);
   const [cardPlace, setCardPlace] = useState<Place | null>(null);
-  /** Whether the tapped place is collected — the map needs it for the marker. */
-  const [cardCollected, setCardCollected] = useState(false);
+  /**
+   * The tapped stamp: drawn on the card (T-218), and whether it is collected,
+   * which the map needs for the marker.
+   */
+  const [cardStamp, setCardStamp] = useState<PassportStamp | null>(null);
   /** The one walk the app wants settled (T-149), or null — which is usually. */
   const [confirmation, setConfirmation] = useState<ConfirmationPrompt | null>(null);
   const [confirmationEvidence, setConfirmationEvidence] = useState('');
@@ -81,6 +85,8 @@ export default function PassportScreen({
   const [sharing, setSharing] = useState(false);
   /** T-204: whether a trip is open, which is when "End trip" is offered. */
   const [tripOpen, setTripOpen] = useState(false);
+  /** T-217: whether the trip on show has a trace to replay, stamps or not. */
+  const [canWatch, setCanWatch] = useState(false);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
   const shareCardRef = useRef<View>(null);
@@ -107,6 +113,7 @@ export default function PassportScreen({
           trip === null
             ? new Set<string>()
             : await stampAwardDao.getAwardedPlaceIds(trip.id);
+        const recordedFixes = trip === null ? 0 : await rawFixDao.countFixes(trip.id);
 
         const prompt = await resolvePrompt(pass.awaitingConfirmation, awardedIds);
 
@@ -123,6 +130,7 @@ export default function PassportScreen({
         if (!cancelled) {
           setProgress(nextProgress);
           setTripOpen(active !== null);
+          setCanWatch(mayHaveAFilm(recordedFixes));
           setAwards(nextAwards);
           setStamps(resolveStamps(awardedIds, locked));
           setConfirmation(prompt?.prompt ?? null);
@@ -181,7 +189,7 @@ export default function PassportScreen({
       const geofence = representativeGeofence(place);
 
       setCardPlace(place);
-      setCardCollected(stamp.collected);
+      setCardStamp(stamp);
       setCard(
         buildPlaceCard({
           placeId: place.id,
@@ -242,6 +250,7 @@ export default function PassportScreen({
   const closeCard = () => {
     setCard(null);
     setCardPlace(null);
+    setCardStamp(null);
   };
   // T-211: Back closes an open card before App.tsx's handler leaves the passport.
   useBackHandler(card !== null, closeCard);
@@ -328,7 +337,7 @@ export default function PassportScreen({
           confirmation={confirmation ?? undefined}
           onConfirm={confirmWalk}
           onDecline={declineWalk}
-          onWatch={onWatch}
+          onWatch={canWatch ? onWatch : undefined}
           onEndTrip={tripOpen ? endTrip : undefined}
         />
       )}
@@ -350,10 +359,12 @@ export default function PassportScreen({
         <View style={styles.cardHolder} pointerEvents="box-none">
           <PlaceCardView
             card={card}
+            palette="album"
+            stamp={cardStamp ?? undefined}
             onShowOnMap={
-              cardPlace === null
+              cardPlace === null || cardStamp === null
                 ? undefined
-                : () => onShowOnMap(cardPlace, cardCollected)
+                : () => onShowOnMap(cardPlace, cardStamp.collected)
             }
             onClose={closeCard}
           />

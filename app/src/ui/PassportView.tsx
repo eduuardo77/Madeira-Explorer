@@ -49,10 +49,18 @@
  */
 
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
+import { stripStampSize, type StripGeometry } from '../passport/stripLayout';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
@@ -62,25 +70,24 @@ import type { StringKey } from '../i18n/strings';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
- * How big a sticker is drawn, in dp.
+ * The strip a row scrolls in, for `stripStampSize` (T-219): its visible width,
+ * the content's leading padding, and the gap between stickers (the same numbers
+ * as `stripContent` and its `gap`).
  *
- * ⚠ **Raised from 62 on 2026-08-13, after somebody finally looked at it.** The
- * old number came from T-081's density measurement, which asked *does it still
- * fit* and got a yes. A screenshot of the real screen answered a question the
- * measurement never asked: at 62 dp the stamps are postage stamps in a mostly
- * empty card, their names are unreadable, and the artwork — the one thing in
- * this app that is not a rectangle, and the entire reward (D-046) — reads as
- * an icon rather than as something earned.
- *
- * 96 is still three across on a 360 dp phone, which was the constraint the old
- * number was protecting. D-049 cut the canvas to ~80 places, so the worst row
- * is now around 20 stamps rather than 40 — the scroll this was guarding
- * against got shorter at the same time as the reason to grow got clearer.
+ * ⚠ **The width is the strip's own, measured, not the window's.** The first
+ * version took the window and subtracted the page padding, and the workbench
+ * showed it wrong twice over: the screen sits in a fixed 390 dp frame whatever
+ * the window, and on the web a vertical scrollbar takes 15 dp of that. Until
+ * the strip has been laid out, the window less the page padding is the
+ * estimate, and on a phone the two agree.
  */
-const STAMP_SIZE = 96;
-
-/** The drawing, shrunk so its tilted corners stay inside the cell. */
-const STAMP_DRAW_SIZE = Math.floor(STAMP_SIZE * TILT_FIT);
+function stripGeometry(measuredStrip: number | null, windowWidth: number): StripGeometry {
+  return {
+    stripWidth: measuredStrip ?? windowWidth - 2 * spacing.md,
+    leading: spacing.md,
+    gap: spacing.sm,
+  };
+}
 
 /**
  * The padlock, in dp.
@@ -125,8 +132,8 @@ const categoryLabel = (category: Category): string =>
 /**
  * How many stickers a row may hold before *See all* is worth offering.
  *
- * Three fit across a 360 dp phone at `STAMP_SIZE`, so four is the first count
- * that genuinely scrolls. Below that the strip already shows everything and the
+ * Three fit across a 360 dp phone at the strip's sticker size, so four is the
+ * first count that genuinely scrolls. Below that the strip already shows everything and the
  * button would expand a row into the identical row.
  *
  * ⚠ A constant rather than a measurement. `onLayout` would be exact and would
@@ -224,13 +231,13 @@ export type PassportViewProps = {
   onConfirm?: (placeId: string) => void;
   onDecline?: (placeId: string) => void;
   /**
-   * Watch the trip back (T-105e, OD-12). Absent in the workbench.
+   * Watch the trip back (T-105e, OD-12). Absent when the trip has no trace to
+   * play, and in the workbench.
    *
-   * ⚠ **Under the hero, and only once there is something to watch.** That slot
-   * already holds the app's one invitation — *"go to one and it fills in by
-   * itself"* — which shows at zero collected and nothing else does. The two are
-   * mutually exclusive by construction: before the first stamp there is no film,
-   * and after it the invitation has done its job.
+   * ⚠ **Offered with or without a stamp (T-217).** It used to wait for the
+   * first stamp, on the belief that before it there was no film; there was, and
+   * the second review (N2) found a day walked without reaching a place that
+   * nobody could watch. At zero it sits under the invitation, not instead of it.
    */
   onWatch?: () => void;
   /**
@@ -280,12 +287,18 @@ function CategoryRow({
   collected,
   total,
   stamps,
+  stampSize,
+  onStripWidth,
   onSelectStamp,
 }: {
   category: Category;
   collected: number;
   total: number;
   stamps: PassportStamp[];
+  /** The sticker's cell, in dp (`stripLayout.ts`). */
+  stampSize: number;
+  /** The strip's measured width, which `stampSize` is computed from. */
+  onStripWidth: (width: number) => void;
   onSelectStamp?: (stamp: PassportStamp) => void;
 }) {
 
@@ -321,8 +334,8 @@ function CategoryRow({
     const locked = stamp.locked === true;
 
     return (
-      // The cell is 96 dp, well over D-015's 60 — which is why the sticker
-      // itself is the tap target rather than a button beside it.
+      // The cell is at least 76 dp, well over D-015's 60, which is why the
+      // sticker itself is the tap target rather than a button beside it.
       <Pressable
         key={stamp.placeId}
         accessibilityRole="button"
@@ -338,6 +351,7 @@ function CategoryRow({
         }
         style={({ pressed }) => [
           styles.stampCell,
+          { width: stampSize, height: stampSize },
           pressed && styles.stampCellPressed,
         ]}
       >
@@ -348,7 +362,8 @@ function CategoryRow({
           collected={locked ? false : stamp.collected}
           // The cell's Pressable above says "locked" in the user's language; the
           // sticker itself is hidden from screen readers (StampArt).
-          size={STAMP_DRAW_SIZE}
+          // Shrunk so the tilted corners stay inside the cell.
+          size={Math.floor(stampSize * TILT_FIT)}
         />
         {locked ? <LockBadge /> : null}
       </Pressable>
@@ -407,6 +422,7 @@ function CategoryRow({
         <View style={styles.stampsStrip}>
           <ScrollView
             horizontal
+            onLayout={(event) => onStripWidth(event.nativeEvent.layout.width)}
             // The bar would sit across the bottom of the stickers, and the
             // half-visible sticker at the edge already says "there is more".
             showsHorizontalScrollIndicator={false}
@@ -436,6 +452,10 @@ export default function PassportView({
   onEndTrip,
 }: PassportViewProps) {
   const hasContent = progress.total > 0;
+  // Every row's strip is the same width, so whichever reports last is right.
+  // Setting the same number again does not re-render.
+  const [stripWidth, setStripWidth] = useState<number | null>(null);
+  const stampSize = stripStampSize(stripGeometry(stripWidth, useWindowDimensions().width));
 
   return (
     <ScrollView
@@ -462,7 +482,8 @@ export default function PassportView({
           </Text>
           {progress.collected === 0 ? (
             <Text style={styles.heroInvitation}>{t('passport.invitation')}</Text>
-          ) : onWatch === undefined ? null : (
+          ) : null}
+          {onWatch === undefined ? null : (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('replay.watch')}
@@ -518,6 +539,8 @@ export default function PassportView({
           stamps={(stamps ?? []).filter(
             (stamp) => stamp.category === row.category
           )}
+          stampSize={stampSize}
+          onStripWidth={setStripWidth}
           onSelectStamp={onSelectStamp}
         />
       ))}
@@ -729,8 +752,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   stampCell: {
-    width: STAMP_SIZE,
-    height: STAMP_SIZE,
     minWidth: MIN_TAP_TARGET,
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',

@@ -4866,10 +4866,31 @@ critical path.
 - **A tip jar, or a second product:** no. One honest price.
 - **The study's storyboard review of the paywall moment** (Q3) was dropped by the project lead.
 
-#### Still open, for the execution plan
+#### Answered 2026-09-25, for the execution plan
 
-Whether set medals and the founder stamp count towards the rank (D-078) and the *de 80* line
-(D-090); where the medals are shown; the exact wording of the lock and the offer (T-157).
+The plan (`docs/monetization-execution-plan.md` §3) put nine questions, each with a recommendation;
+the project lead accepted all nine:
+- **OQ-1** Rank thresholds stay 1 / 10 / 25 / all; the rank counts what was collected, locked
+  included, so it needs no link to the allowance.
+- **OQ-2** Medals and the founder stamp do **not** count towards the rank or the *de 80* line;
+  they have their own section in the passport.
+- **OQ-3** One seal per municipality with **at least 3 places** (9 today), plus an **all
+  levadas** medal. More category medals may be added later as content.
+- **OQ-4** Tilt and shine on the **place card's stamp** and the **unlock screen's hero stamp**;
+  the passport grid gets a static sheen.
+- **OQ-5** Promo codes and testers' purchases count for the founder stamp, including those before
+  launch: *bought before the window closes*.
+- **OQ-6** The store listing says *one payment* without a number; Play shows the price.
+- **OQ-7** *Apagar tudo* also erases the local copy of the unlock; it comes back from Google at the
+  next launch online.
+- **OQ-8** The project lead reads the Portuguese of the lock, offer and pending text aloud before
+  it ships.
+- **OQ-9** Medal and founder art drawn in-house from the stamp system, approved by eye through the
+  preview renderer.
+
+**"Ruled out" is not "never"** (the project lead, same day): a subscription, ads, accounts and the
+rest are a firm no today and can be reopened by a new decision. Rule 9 is the exception, because
+it is a promise to existing users.
 
 ## D-090 — A quiet progress line on the home map, after WalkNYC (amends D-083, D-085)
 

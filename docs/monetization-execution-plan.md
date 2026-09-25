@@ -26,8 +26,8 @@ Then, in order:
    (CLAUDE.md, "Keep sessions cheap").
 2. **Look up, do not read:** `grep -A60 "^## D-089" docs/decisions-full.md` and
    `grep -A50 "^## D-091" docs/decisions-full.md` for the decisions in full.
-3. **Check §3 (decisions still open).** A phase that needs an open decision does not start until
-   the project lead has answered it. Each one has a recommendation, so the question is quick.
+3. **Read §3 (the project lead's decisions).** All nine were answered on 2026-09-25 by accepting
+   the recommendation, so §3's recommendation column is the decision.
 4. **Work one task at a time,** in the order of §5, and finish it by the definition of done (§1.3)
    before starting the next.
 
@@ -111,10 +111,18 @@ Screenshots only where the question is visual (artwork, the sheen, layout), and 
   for now).
 - **iOS.** No Mac.
 
-### 2.3 Never
+### 2.3 Ruled out for now
 
-A subscription, ads, accounts, a server of ours, a third party between the phone and Google (D-091),
-any limit on the map, taking away anything given free after the public release (D-089 rule 9).
+**Not "never".** The project lead, 2026-09-25: these are a firm no today, but the future may
+change them. Each can be reopened, **by a new decision that records why**, not by drifting into
+the code: a subscription, ads, user accounts, a server of ours, a third party between the phone and
+Google (D-091), any limit on the map.
+
+**The one that is a commitment rather than a preference:** nothing given free after the public
+release is taken away from the people who already had it (D-089 rule 9). A future change of model
+can add a paid thing or change what *new* users get, but it cannot remove something from existing
+users without breaking a promise they relied on. That is why the free allowance may go up and not
+down.
 
 ### 2.4 A parking rule this plan overrides, stated so nobody trips on it
 
@@ -124,11 +132,11 @@ are therefore unparked **for this plan only**. Other parked items stay parked.
 
 ---
 
-## 3. Decisions still open, each with a recommendation
+## 3. Decisions for the project lead, each with a recommendation
 
-The project lead answers these. **The phase that needs each one does not start until it is
-answered.** Record each answer in D-089's text under "Still open" (tier 1: writing down what the
-project lead decided).
+✅ **All nine answered 2026-09-25: the project lead accepted every recommendation below.** The
+"Recommendation" column is therefore the decision, and D-089's text records it. The column
+"Needed by" stays to show which phase each one shapes.
 
 | ID | Question | Recommendation | Needed by |
 |---|---|---|---|
@@ -336,6 +344,7 @@ account owner, and several involve bank and tax details that the assistant must 
 
 | Step | What | Notes |
 |---|---|---|
+| 0.0 | **The name, cleared** (T-187: the TMview and INPI search on "Proa", D-074) | ⚠ **Must be done before step 0.3.** The first upload to Play Console makes the package name `com.proa.madeira` permanent, forever. The display name on the listing can change later, the package cannot. Nothing else in this plan depends on the name: it lives in `app/src/brand.ts`, and the product ID (§4.2) deliberately does not contain it. |
 | 0.1 | **Upload key** (already T-187 / T-117e) | Blocks every real purchase test. |
 | 0.2 | **Payments profile** in Play Console | Bank account and tax details for payouts. Required before any product can be sold or tested. |
 | 0.3 | **Upload a store build to the internal testing track** | ⚠ Play Console only lets you create in-app products once a build containing the billing library has been uploaded. So this follows T-156b. Check Google's current wording when you get there. |
@@ -437,8 +446,7 @@ account owner, and several involve bank and tax details that the assistant must 
 
 - **New:** `entitlement/founder.ts`: `isFounder(purchaseTimeMs, window)`, with `window.start`
   possibly null. Tests: null start means nobody; the last millisecond inside the window; the
-  first millisecond after it; a purchase before the start counts (OQ-5), and if the project lead
-  answers OQ-5 the other way, the test changes with the answer. **Pin it with a test either way.**
+  first millisecond after it; a purchase before the start counts (OQ-5). **Pin each with a test.**
 - **Content:** `founderWindow` in `destination` (§4.2), validated.
 - **Release guard:** `tools/smoke-release.mjs` fails a release build with a null start.
 - **Art:** `passport/medalArt.ts` (shared with medals), approved by eye through the preview

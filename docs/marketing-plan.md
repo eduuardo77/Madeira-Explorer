@@ -143,16 +143,17 @@ places you collected, the dates. Share it or keep it.
 
 FREE TO START
 The map, the recording and your trace are free forever, with no limit. Your first five
-stamps are free, and your first levada is always free. One payment of EUR 5.99 unlocks
-all of Madeira, forever: every stamp, and a medal for each set you complete. No
-subscription, ever.
+stamps are free, and your first levada is always free. One payment unlocks all of
+Madeira, forever: every stamp, and a medal for each set you complete. No subscription.
 
 Made in Madeira.
 ```
 
 ⚠ **The last paragraph is a compliance surface, not just copy.** Google requires the free/paid
 boundary to be stated accurately, and it must match what T-155 actually builds. If the numbers
-change, this changes. *Redrafted 2026-09-25 for D-089 (5 + first levada, EUR 5.99). During the
+change, this changes. *Redrafted 2026-09-25 for D-089 (5 + first levada). No price in the text (OQ-6): Play shows each
+buyer the price in their own currency. "No subscription" without "ever": ruled out today, not
+promised for all time. During the
 founder window, the first 3 months after launch, a line may add that buyers also get a founder
 stamp nobody can earn later; it comes out the day the window closes.*
 

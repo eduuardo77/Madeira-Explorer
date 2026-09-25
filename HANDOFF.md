@@ -77,8 +77,9 @@ Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React 
 2026-09-24) puts billing *after* the monetisation study. ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
-**`docs/monetization-execution-plan.md`**: read it whole before starting; its §3 lists the
-project lead's open questions. Outside monetisation: T-197
+**`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are
+all answered (2026-09-25). ⚠ The "Proa" trademark search (T-187) must finish before the first
+Play upload, which fixes the package name forever. Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.

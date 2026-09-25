@@ -103,8 +103,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. Until the build lands the
       app keeps D-072's 10.
       → **The build: `docs/monetization-execution-plan.md` (2026-09-25).** Tasks **T-232 to T-239**
-      and **T-156a to T-156e**, reserved there; each is added here when it starts. Nine open
-      questions (OQ-1 to OQ-9) for the project lead, each with a recommendation.
+      and **T-156a to T-156e**, reserved there; each is added here when it starts. Its nine
+      questions (OQ-1 to OQ-9) were **all answered 2026-09-25**: every recommendation accepted.
       *As opened:* **The monetisation study — D-089 (Provisional)** ⇠ nothing; ⚠ must finish before
       D-084's public release. Plan: `docs/monetization-study-plan.md`. The project lead's
       hypothesis, 2026-09-24: very few free stamps, the video free with a huge watermark, the map
@@ -123,6 +123,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 - [ ] **T-187** **The project lead's own actions:** a domain to host the privacy policy, and
       `CONTACT_EMAIL` (D-044); the TMview/INPI search on "Proa" (D-074); the upload key
       (T-117e). **Start them on day one**: each is small, but they take the longest to come back.
+      ⚠ **The trademark search must finish before the first upload to Play Console** (2026-09-25):
+      that upload makes the package name `com.proa.madeira` permanent. The listing's display name
+      can change later; the package cannot. Monetisation plan, Phase 0 step 0.0.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

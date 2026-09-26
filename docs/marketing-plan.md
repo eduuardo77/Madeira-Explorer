@@ -183,6 +183,93 @@ promised for all time. During the
 founder window, the first 3 months after launch, a line may add that buyers also get a founder
 stamp nobody can earn later; it comes out the day the window closes.*
 
+### The Portuguese (Portugal) and German listings
+
+**Translated 2026-09-26 from the approved English, Provisional.** The project lead asked for
+**European Portuguese**: *telemóvel*, *ecrã*, *definições*, *partilhar*, *registar*; formal address
+without *você*, as the app itself writes. The words match the app's own: *carimbo*/*Stempel*,
+*passaporte*/*Reisepass*, *passeio*/*Ausflug*, *registo automático*/*automatische Aufzeichnung*,
+and the app is *o Bruma*, as in the privacy policy. ⚠ **Nobody on the project speaks German**
+(`strings.ts` says the same of the app's `de`), so the German is unreviewed.
+
+**The titles are adapted, not literal.** "Walk Tracker" has no natural short form in either
+language, and a literal one read like a trail guide, the misreading the English was chosen to avoid.
+
+| | Portuguese (Portugal) | German |
+|---|---|---|
+| **Title** (30) | **Bruma: Madeira, onde já esteve** (30). *"Madeira, where you have been"*; *já esteve* is the app's own word for a collected place. Literal fallback: *Bruma: Registo de passeios* (26), which drops Madeira | **Bruma: Ihre Wege auf Madeira** (28). *"Your routes on Madeira"* |
+| **Short** (80) | **Cada estrada que faz a pé ou de carro na Madeira, destacada. Veja onde esteve.** (78) | **Jede Straße auf Madeira, zu Fuß oder im Auto, markiert. Sehen Sie, wo Sie waren.** (80) |
+| **Full** (4,000) | 2,371 characters, below | 2,632 characters, below |
+
+The FREE TO START paragraph is the compliance surface in both: no price, "no subscription"
+(*Sem subscrição*, *Kein Abo*) without "ever".
+
+```
+O Bruma destaca cada estrada e trilho que percorre na Madeira, para saber sempre por onde já passou. Faça uma levada ou suba uma estrada de montanha de carro: tudo aparece.
+
+AS SUAS ESTRADAS, DESTACADAS
+Cada estrada, caminho e levada que percorre fica desenhado sobre o mapa, à medida que avança. Ao fim de poucos dias vê de relance que cantos da ilha já conhece e quais ainda lhe faltam.
+
+REGISTA NO SEU BOLSO
+Ligue o registo automático uma vez e o Bruma continua a registar com a aplicação fechada. Prefere decidir? Carregue no botão para começar e terminar um passeio. Também funciona se só permitir a localização com a aplicação aberta. O GPS só é usado enquanto regista, e escolhe com que frequência o faz.
+
+SEM REDE, CONTINUA A REGISTAR
+O registo não precisa de dados móveis. Continua debaixo da Laurissilva e no fundo dos vales, e a viagem aparece no mapa quando voltar a ter rede. O mapa, esse, precisa de ligação para carregar.
+
+A SUA VIAGEM FICA NO SEU TELEMÓVEL
+Não há conta, nem inscrição, nem servidor por trás do Bruma. A sua viagem nunca nos é enviada, por isso não temos nada seu para ver, vender ou perder. Sem anúncios, e nada a medir a forma como usa a aplicação. O mapa por baixo é da Google, que vê que parte da ilha está no seu ecrã, nunca a sua viagem.
+
+80 LUGARES QUE VALEM A VISITA
+19 miradouros, 18 levadas, 19 aldeias, 8 praias e 16 monumentos, escolhidos um a um. Quando chega a um, ganha o seu carimbo. O passaporte mostra o que já encontrou e o que ainda falta.
+
+A SUA VIAGEM, NUMA IMAGEM
+No fim das férias, o Bruma faz uma imagem das suas estradas para partilhar, se quiser. O sítio onde dormiu é encontrado e retirado primeiro, sempre, para que a sua morada nunca vá junto.
+
+GRÁTIS PARA COMEÇAR
+As estradas destacadas e o registo são grátis para sempre, sem limite. Os primeiros cinco carimbos são grátis, e a primeira levada é sempre grátis. Um único pagamento desbloqueia toda a Madeira, para sempre: todos os carimbos, e uma medalha por cada conjunto que completar. Sem subscrição.
+
+APAGUE QUANDO QUISER
+Um botão nas Definições apaga tudo, de imediato. Desinstalar a aplicação também apaga tudo.
+
+O QUE O BRUMA NÃO É
+O Bruma não dá indicações nem planeia percursos. Regista por onde passou e mostra-lho. Para indicações passo a passo nos trilhos, use também uma aplicação de caminhadas.
+
+Em português, inglês e alemão. Feito na Madeira.
+```
+
+```
+Bruma markiert jede Straße und jeden Weg, den Sie auf Madeira zurücklegen, damit Sie immer wissen, wo Sie schon waren. Eine Levada zu Fuß oder eine Bergstraße mit dem Auto: beides erscheint.
+
+IHRE WEGE, MARKIERT
+Jede Straße, jeder Pfad und jede Levada, die Sie zurücklegen, wird unterwegs auf der Karte eingezeichnet. Nach ein paar Tagen sehen Sie auf einen Blick, welche Ecken der Insel Sie kennen und welche noch nicht.
+
+ZEICHNET IN DER TASCHE AUF
+Schalten Sie die automatische Aufzeichnung einmal ein, und Bruma zeichnet weiter auf, auch wenn die App geschlossen ist. Lieber selbst entscheiden? Starten und beenden Sie einen Ausflug per Knopfdruck. Es funktioniert auch, wenn Sie den Standort nur bei geöffneter App erlauben. GPS wird nur während der Aufzeichnung genutzt, und Sie wählen, wie oft aufgezeichnet wird.
+
+KEIN EMPFANG, TROTZDEM AUFZEICHNUNG
+Die Aufzeichnung braucht keine mobilen Daten. Sie läuft im Lorbeerwald und tief in den Tälern weiter, und Ihre Reise erscheint auf der Karte, sobald Sie wieder online sind. Die Karte selbst braucht zum Laden eine Verbindung.
+
+IHRE REISE BLEIBT AUF IHREM HANDY
+Kein Konto, keine Anmeldung und kein Server hinter Bruma. Ihre Reise wird nie an uns gesendet, also gibt es nichts von Ihnen, das wir sehen, verkaufen oder verlieren könnten. Keine Werbung und keine Nutzungsanalyse. Die Karte darunter stammt von Google. Google sieht, welcher Teil der Insel auf Ihrem Bildschirm ist, aber nie Ihre Reise.
+
+80 ORTE, DIE SICH LOHNEN
+19 Aussichtspunkte, 18 Levadas, 19 Dörfer, 8 Strände und 16 Sehenswürdigkeiten, einzeln ausgewählt. Erreichen Sie einen Ort, erhalten Sie seinen Stempel. Ihr Reisepass zeigt, was Sie gefunden haben und was noch auf Sie wartet.
+
+IHRE REISE ALS BILD
+Am Ende Ihres Urlaubs erstellt Bruma ein Bild Ihrer Wege zum Teilen. Wo Sie übernachtet haben, wird vorher erkannt und entfernt, jedes Mal, damit Ihre Adresse nie mitgeht.
+
+KOSTENLOS ZUM START
+Die markierten Wege und die Aufzeichnung sind für immer kostenlos und unbegrenzt. Ihre ersten fünf Stempel sind kostenlos, und Ihre erste Levada ist immer kostenlos. Eine einmalige Zahlung schaltet ganz Madeira frei, für immer: jeden Stempel und eine Medaille für jedes Set, das Sie vervollständigen. Kein Abo.
+
+JEDERZEIT LÖSCHEN
+Ein Knopf in den Einstellungen löscht alles, sofort. Wenn Sie die App entfernen, wird ebenfalls alles gelöscht.
+
+WAS BRUMA NICHT IST
+Bruma gibt keine Wegbeschreibungen und plant keine Routen. Es zeichnet auf, wo Sie waren, und zeigt es Ihnen. Für eine Wegführung auf Wanderwegen nutzen Sie zusätzlich eine Wander-App.
+
+Auf Englisch, Portugiesisch und Deutsch. Gemacht auf Madeira.
+```
+
 ## 5. Screenshots — where the converting happens
 
 The first two are what appear in search results; most people never swipe.

@@ -141,7 +141,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       (`EXPO_PUBLIC_PROA_BETA`, `PROA_UPLOAD_*`, `proaFieldBuild`, the logcat tag): no user reads them.
       ⚠ **Not yet seen on the phone:** the name under the icon needs a new build.
       ✅ **Store copy 2026-09-26:** title, short description (chosen) and full description (approved
-      as is "for now") in `docs/marketing-plan.md` §4. Portuguese (Portugal) and German listings translated 2026-09-26, Provisional (the German unreviewed:
+      as is "for now") in `docs/marketing-plan.md` §4. Portuguese (Portugal) listing ✅ approved 2026-09-26; German translated, Provisional (unreviewed:
       nobody on the project speaks it).
 
 ### ⚠⚠ Found 2026-09-26: the recorder stalls and says nothing

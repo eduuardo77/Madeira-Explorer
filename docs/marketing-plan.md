@@ -185,7 +185,7 @@ stamp nobody can earn later; it comes out the day the window closes.*
 
 ### The Portuguese (Portugal) and German listings
 
-**Translated 2026-09-26 from the approved English, Provisional.** The project lead asked for
+**Translated 2026-09-26 from the approved English.** ✅ **Portuguese approved as is by the project lead the same day.** German Provisional. The project lead asked for
 **European Portuguese**: *telemóvel*, *ecrã*, *definições*, *partilhar*, *registar*; formal address
 without *você*, as the app itself writes. The words match the app's own: *carimbo*/*Stempel*,
 *passaporte*/*Reisepass*, *passeio*/*Ausflug*, *registo automático*/*automatische Aufzeichnung*,

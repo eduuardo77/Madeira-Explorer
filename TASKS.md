@@ -128,9 +128,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       attorney's view on EUTM 006378988 (recommended, not required). **Not registering Bruma** for now
       (project lead, 2026-09-25; revisit after launch, D-092); the upload key (T-117e). **Start them on day one**: each is small, but they
       take the longest to come back.
-      ⚠ **The trademark search must finish before the first upload to Play Console** (2026-09-25):
-      that upload makes the package name permanent. The listing's display name
-      can change later; the package cannot. Monetisation plan, Phase 0 step 0.0.
+      ✅ **Satisfied 2026-09-25: the search is done and Bruma is kept (D-092).** It had to precede
+      the first upload to Play Console, which makes the package name (`com.proa.madeira`, kept)
+      permanent. Monetisation plan, Phase 0 step 0.0.
 - [~] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
       `APP_NAME` is Bruma; `app.json`'s name and the six permission strings; the generated
       `android/.../strings.xml` `app_name` edited to match (the next prebuild writes the same);
@@ -1708,7 +1708,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [x] **T-159** ✅ **DECIDED 2026-08-17: the timelapse video is FREE** ⇠ T-105b-v2, D-072
       — ⚠ **Superseded 2026-09-25 by D-089 rule 8**, before any video shipped, so nothing is taken
       away: the exported video stays free, with a **medium mark in the lower third and a 2 second
-      "Made with Proa" end card**; paid gets the small mark and no end card. The in-app replay is
+      "Made with Bruma" end card** (the name from `brand.ts`, D-092); paid gets the small mark and no end card. The in-app replay is
       never marked. Arrives with T-105b-v2, not in v1.
       — The project lead: *"The timelapse video is free, but in the future I might impose some
       limitation on it to make people buy."*
@@ -2492,7 +2492,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       both numbers deliberately), and whether the guessed durations survive being watched.
 - [ ] **T-106** Watermark ⇠ T-105b
       — **Specified by D-089 rule 8 (2026-09-25).** Free: a medium mark in the lower third (5.2% of
-      the frame in `preview-film.mjs --watermarks`) plus a 2 second *Made with Proa* end card.
+      the frame in `preview-film.mjs --watermarks`) plus a 2 second *Made with Bruma* end card (the name from `brand.ts`, never a literal).
       Paid: the small mark (0.9%, bottom right), no end card. Google's attribution clear of both.
       Exported file only; the in-app replay is never marked.
 - [x] **T-107** Still-image export ⇠ T-105b

@@ -8,6 +8,11 @@ D-091, the decision wins and this file is wrong. Say so and fix the file.
 **Who it is for:** a fresh chat session starting the work cold, and the project lead reviewing it.
 Read §0 first.
 
+**The app is Bruma** (*Bruma: Madeira Walk Tracker*, D-092, renamed from Proa on 2026-09-25). The
+package stays `com.proa.madeira` and internal identifiers keep "proa" on purpose (`app/src/brand.ts`
+says why). Any user-facing mention of the name, such as the video's end card, comes from
+`brand.ts`, never a literal.
+
 ---
 
 ## 0. How to use this document
@@ -344,7 +349,7 @@ account owner, and several involve bank and tax details that the assistant must 
 
 | Step | What | Notes |
 |---|---|---|
-| 0.0 | **The name, cleared** (T-187: the TMview and INPI search on "Proa", D-074) | ⚠ **Must be done before step 0.3.** The first upload to Play Console makes the package name `com.proa.madeira` permanent, forever. The display name on the listing can change later, the package cannot. Nothing else in this plan depends on the name: it lives in `app/src/brand.ts`, and the product ID (§4.2) deliberately does not contain it. |
+| 0.0 | ✅ **The name, cleared** (T-187, D-092) | **Done 2026-09-25:** the trademark search on "Bruma" is done and the name is kept. It had to precede step 0.3, because the first upload to Play Console makes the package name `com.proa.madeira` permanent. Nothing else in this plan depends on the name: it lives in `app/src/brand.ts`, and the product ID (§4.2) deliberately does not contain it. |
 | 0.1 | **Upload key** (already T-187 / T-117e) | Blocks every real purchase test. |
 | 0.2 | **Payments profile** in Play Console | Bank account and tax details for payouts. Required before any product can be sold or tested. |
 | 0.3 | **Upload a store build to the internal testing track** | ⚠ Play Console only lets you create in-app products once a build containing the billing library has been uploaded. So this follows T-156b. Check Google's current wording when you get there. |

@@ -4838,7 +4838,7 @@ critical path.
 8. **The video is not in v1 (study Q5, path A).** v1 sells stamps; the video limit arrives with
    the export (T-105b-v2), which is additive because no one ever had a clean exported video. When
    it exists: **free** carries a **medium mark in the lower third** (5.2% of the frame in the
-   mock-ups) plus a **2 second "Made with Proa" end card**; **paid** carries the small mark (0.9%)
+   mock-ups) plus a **2 second "Made with Bruma" end card** (the app's name from `brand.ts`; *Proa* when written, renamed by D-092); **paid** carries the small mark (0.9%)
    and no end card. Google's attribution stays visible in both. The project lead's test: *good
    enough to post online, but with an annoying watermark.*
 9. **After the public release the allowance can only go up.** Five to eight is a gift; five to

@@ -73,14 +73,14 @@ Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativ
 says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
-**Next for the assistant:** ⚠ **not T-156 yet.** D-089 (written in a parallel session on
-2026-09-24) puts billing *after* the monetisation study. ✅ **The study is finished (2026-09-25): D-089
+**Next for the assistant: the monetisation build, starting at Phase 1 (T-232) of
+`docs/monetization-execution-plan.md`** (the project lead, 2026-09-26). ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are
 all answered (2026-09-25). ⚠ **The app is renamed Bruma, titled *Bruma: Madeira Walk Tracker*
-(D-092, 2026-09-25); renamed in code the same day (T-240), package kept as `com.proa.madeira`; the name under the icon needs a new build. Domain: `bruma.lol` (T-206).** The trademark search (T-187), now on "Bruma", must
-finish before the first Play upload, which fixes the package name forever. Outside monetisation: T-197
+(D-092, 2026-09-25); renamed in code the same day (T-240), package kept as `com.proa.madeira`; the name under the icon needs a new build. Domain: `bruma.lol` (T-206).** ✅ The trademark search (T-187) is done and Bruma is kept
+(D-092), so nothing about the name blocks the first Play upload; that upload fixes `com.proa.madeira` forever. Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.

@@ -36,15 +36,17 @@ export type Tier = (typeof TIERS)[number];
 /**
  * How many collected places each rank asks for.
  *
- * ⚠⚠ **THESE ARE SET BY ARGUMENT, NOT MEASURED** — the same class of number as
- * D-072's ten stamps and D-068's forty-five minutes. Tunable against real trips
- * (T-134); never to be defended as anything but a judgement.
+ * ⚠⚠ **THESE ARE SET BY ARGUMENT, NOT MEASURED**, the same class of number as
+ * D-089's five free stamps and D-068's forty-five minutes. Tunable against real
+ * trips (T-134); never to be defended as anything but a judgement.
  *
- * **Why ten for silver, specifically.** It is exactly where the free tier ends
- * (D-072). A visitor who never pays reaches **silver** and can see gold above
- * them — which is honest about what buying gets you, rather than a rank
- * invented to sit just out of reach. ⚠ If the free allowance ever moves, this
- * should move with it and the reason should move too.
+ * **Why ten for silver, and why it is not tied to the free allowance (OQ-1).**
+ * The rank counts what you **collected**, locked stamps included (D-075), not
+ * what you paid to see, so it needs no link to the allowance. It used to sit
+ * exactly where D-072's ten free stamps ended; when D-089 cut the allowance to
+ * five, the rank stayed. Moving silver to five would only make the one reward a
+ * free user sees arrive at the same moment stamps start to lock.
+ * `stampTier.test.ts` fails if silver and the allowance ever coincide again.
  *
  * ⚠ **Bronze is the first stamp, deliberately.** The rank appears the moment you
  * have been anywhere, because the button's job on day one is to say *"there is

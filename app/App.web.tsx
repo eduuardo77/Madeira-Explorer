@@ -147,7 +147,8 @@ function makeStamps(
   // 23 stamps land in Viewpoints, no levada is ever earned and the guarantee
   // never fires. So one levada is collected here and stamped **late** — the
   // driving day, then a walk on day four, which is the exact shape the
-  // exemption exists to rescue. Expect **eleven** visible, one of them a levada.
+  // exemption exists to rescue. Expect **six** visible, one of them a levada
+  // (D-089: five plus the first levada, T-232).
   const firstUncollectedLevada = stamps.some(
     (stamp) => stamp.category === 'levada' && stamp.collected
   )
@@ -179,7 +180,7 @@ const SCENARIOS = [
   { label: '0 stamps — day one', collected: 0 },
   { label: '3 stamps — T-081 low', collected: 3 },
   { label: '23 stamps — mid-trip', collected: 23 },
-  // ⚠ The screen a non-paying user actually sees once they pass ten (D-072).
+  // ⚠ The screen a non-paying user actually sees once they pass five (D-089).
   // Look at whether the padlock reads at 96 dp, and whether a locked sticker
   // is still clearly *different* from one that was never collected — if those
   // two states look the same, the app is telling people they did not go.

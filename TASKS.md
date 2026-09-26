@@ -100,8 +100,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       conversation: the map free and unlimited, **5 stamps + the first levada** free, **€5.99 once**
       for all of Madeira, **set medals** and a **founder stamp** (buyers in the first 3 months, by
       Google's purchase time) paid only, **tilt and shine** on every stamp, the video's limit in v1.1
-      (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. Until the build lands the
-      app keeps D-072's 10.
+      (medium mark + 2 s end card on free). Storyboard review (Q3) dropped. ✅ The app has the new
+      allowance since T-232 (2026-09-26).
       → **The build: `docs/monetization-execution-plan.md` (2026-09-25).** Tasks **T-232 to T-239**
       and **T-156a to T-156e**, reserved there; each is added here when it starts. Its nine
       questions (OQ-1 to OQ-9) were **all answered 2026-09-25**: every recommendation accepted.
@@ -142,6 +142,40 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ⚠ **Not yet seen on the phone:** the name under the icon needs a new build.
       **Left:** the store copy in `docs/marketing-plan.md` §4: the short description is now D-092's
       draft, but the full description still leads with "map" and says sixty places (there are 80).
+
+### The monetisation build (`docs/monetization-execution-plan.md`, D-089, D-091)
+
+Tasks T-232 to T-239 and T-156a to T-156e, added here as each starts. The plan's §1.3 is this
+section's definition of done.
+
+- [~] **T-232** **Free allowance 10 → 5, plus the first levada** (D-089 rules 2, 3; OQ-1).
+      ✅ **Code 2026-09-26:** `FREE_STAMP_ALLOWANCE = 5`, at most 6 shown. Comments that stated ten,
+      eleven or €4.99 corrected in `freeTier.ts`, `passportButton.ts`, `PassportView.tsx` and the
+      workbench; the price now appears nowhere in `app/` (a Play Console setting). **OQ-1:** rank
+      thresholds kept at 1/10/25/all; `stampTier.ts`'s silver reason rewritten (the rank counts what
+      was collected, locked included, so it has no link to the allowance).
+      **Tests (797):** 7 in `freeTier.test.ts` fail against 10 (checked before the change): the
+      fifth shows and the sixth locks, a levada earned third leaves the sixth locked, never more than
+      six, ties at the 5/6 boundary, the constant. *"A levada earned sixth is shown"* passes under
+      both and is a spec, not a guard. `stampTier.test.ts` fails if silver and the allowance
+      coincide (it did at 10). `tripProgress.ts` joins the modules forbidden to import
+      `entitlement/`, because the rank reads its count and must keep counting locked stamps.
+      **Workbench:** "23 stamps, free tier" shows 6 of 24 earned, 18 locked (was 11).
+      **P30, partial:** a store field build (no beta flag) is installed and reads *Bruma · Versão
+      0.1.0*, no "(beta)"; `smoke-release.mjs` passes every screen. ⚠ **The phone has 0 stamp
+      awards on any trip**, so awards against shown stamps would read 0 against 0 under either
+      allowance: the locking itself is **not yet seen on a device**. Needs 7+ awards on the P30
+      (a drive past seven places, or the project lead's consent to a probe database: backed up,
+      8 synthetic awards, restored), or an emulator replay.
+- [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
+      (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
+      `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like
+      `docs/privacy-policy.md`, so web and app cannot disagree. The script also fails on any dash in
+      a page (probe checked). Preview: the `site` entry in `.claude/launch.json`. Claims checked
+      against the policy: no battery number (D-041), no offline map claim (D-073).
+      **Left:** real screenshots (the slots are placeholders; the P30's trace is the project lead's
+      real movements, so ask before using it); a contact once `CONTACT_EMAIL` exists (T-206); the
+      real icon (T-188); hosting and DNS for `bruma.lol`.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

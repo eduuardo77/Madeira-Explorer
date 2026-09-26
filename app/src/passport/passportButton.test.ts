@@ -52,8 +52,8 @@ test('the button shows the most recent stamp, collected', () => {
 });
 
 test('⚠ a locked stamp is never the one on the button', () => {
-  // Twelve viewpoints, unpaid: the eleventh and twelfth are locked. Showing the
-  // twelfth would give away the artwork the unlock sells (D-072, D-075).
+  // Two viewpoints past the allowance, unpaid: both are locked. Showing the
+  // last would give away the artwork the unlock sells (D-089, D-075).
   const pack = places(FREE_STAMP_ALLOWANCE + 2);
   const stamp = buttonStamp(awardsFor(pack), pack, false, 'Passport');
   assert.equal(stamp.placeId, `viewpoint-${FREE_STAMP_ALLOWANCE - 1}`);
@@ -66,7 +66,8 @@ test('once unlocked, the latest stamp is shown whatever its number', () => {
 });
 
 test('the free levada counts as visible, so it can be the latest', () => {
-  // Ten viewpoints then a levada, unpaid: the levada is the guaranteed extra.
+  // A full allowance of viewpoints then a levada, unpaid: the levada is the
+  // guaranteed extra.
   const pack = [...places(FREE_STAMP_ALLOWANCE), ...places(1, 'levada')];
   const stamp = buttonStamp(awardsFor(pack), pack, false, 'Passport');
   assert.equal(stamp.placeId, 'levada-0');

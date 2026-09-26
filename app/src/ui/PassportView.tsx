@@ -190,7 +190,7 @@ export type PassportStamp = {
   /** False draws the muted design (`stampArt.ts`); the cell says "not collected yet". */
   collected: boolean;
   /**
-   * Earned, kept forever, and behind the €4.99 unlock (T-155, D-072).
+   * Earned, kept forever, and behind the unlock (T-155, D-089).
    *
    * ⚠ **A third state, and it had to be.** The cheap implementation of a free
    * tier is to draw an earned-but-unpaid stamp as *not collected*, and that is

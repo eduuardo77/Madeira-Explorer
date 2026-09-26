@@ -8,10 +8,10 @@
  *
  * ⚠⚠ "CAN SEE" IS THE WHOLE POINT OF THIS FILE
  * --------------------------------------------
- * The eleventh stamp onwards is locked until the user pays (D-072, D-075): the
- * passport draws it muted, with a padlock, and withholds the artwork. If the
- * button simply showed the latest *earned* stamp, the map screen would hand
- * over, full colour, exactly the artwork €4.99 is for — on the one screen the
+ * Stamps past the free allowance are locked until the user pays (D-089, D-075):
+ * the passport draws them muted, with a padlock, and withholds the artwork. If
+ * the button simply showed the latest *earned* stamp, the map screen would hand
+ * over, full colour, exactly the artwork the unlock is for, on the one screen the
  * user looks at most. So the latest stamp is taken from `visibleStamps`, the
  * same arithmetic the passport uses, and never from the award table directly.
  *

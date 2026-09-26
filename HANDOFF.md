@@ -10,11 +10,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 The app is **Proa** (`com.proa.madeira`). The whole v1 chain is written and **runs on a real phone**
 (the project lead's Huawei P30, Android 10, EMUI): record → stamps → trace on Google Maps → passport
 → place card → trip end → souvenir still image. **774 tests** (counted 2026-09-24, after the rings went), `tsc` strict
-clean. The **free tier is in** (T-155): stamps 11+ are drawn locked. **A closed-beta build unlocks
+clean. The **free tier is in** (T-155, T-232): past the first 5 (plus the first levada), stamps are drawn locked. **A closed-beta build unlocks
 everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
 pay yet.** ⚠ **The free tier was settled 2026-09-25: D-089 Accepted** (5 stamps + first levada free,
-€5.99 once, set medals, a founder stamp, tilt and shine; the map unlimited). The app still has
-D-072's 10; the change waits for the execution plan the project lead will ask for. `content/pois.json` holds **80 curated places**. The UI speaks
+€5.99 once, set medals, a founder stamp, tilt and shine; the map unlimited). **The app has D-089's
+allowance since T-232 (2026-09-26): 5 stamps plus the first levada, at most 6 shown**, tested and
+seen in the workbench, not yet seen locking on the phone (it has no awards). `content/pois.json` holds **80 curated places**. The UI speaks
 **English, Portuguese and German**, and **no user-facing text may contain a dash** (— or –): the
 project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolicy.test.ts` enforce
 it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
@@ -73,8 +74,9 @@ Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativ
 says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
-**Next for the assistant: the monetisation build, starting at Phase 1 (T-232) of
-`docs/monetization-execution-plan.md`** (the project lead, 2026-09-26). ✅ **The study is finished (2026-09-25): D-089
+**Next for the assistant: the monetisation build, Phase 2 (T-156a) of
+`docs/monetization-execution-plan.md`**; Phase 1 (T-232) is in code and waits only on device
+evidence (`TASKS.md`). ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are
@@ -102,7 +104,10 @@ lead outdoors.
   file with the Write tool.
 - **Play Protect prompts on every install**, and only the project lead can tap them.
 
-⚠ **The P30 runs a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:52 with the rings removed and the passport row (stamp 101 dp, *Centrar* centred beside it)**, with option D, End
+⚠⚠ **Since 2026-09-26 15:44 the P30 runs a STORE field build (T-232): not beta, so stamps past the
+free allowance lock, and nobody can pay yet.** Debuggable, so `run-as` works; performance readings
+are not valid on it. The beta APK it replaced is not in the repo; rebuild it with the beta recipe in
+`docs/dev-build.md`. *Before that:* **the P30 ran a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:52 with the rings removed and the passport row (stamp 101 dp, *Centrar* centred beside it)**, with option D, End
 trip, the update notice, T-212 and maps-compose 6.12.1 (`pkgFlags` has no `DEBUGGABLE`, so
 performance readings are valid). Its old trip was closed by the *End trip* test and automatic
 recording was switched back on, so a new trip opens at the next fix. The next install also brings

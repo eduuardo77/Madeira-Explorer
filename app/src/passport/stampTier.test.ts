@@ -17,6 +17,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { FREE_STAMP_ALLOWANCE } from '../entitlement/freeTier.ts';
 import { contrastRatio } from '../ui/contrast.ts';
 import { colors, mapButton } from '../ui/theme.ts';
 import {
@@ -40,13 +41,19 @@ test('the first stamp is bronze — the button should say something is in here',
   assert.equal(tierFor(9, TOTAL), 'bronze');
 });
 
-test('silver lands exactly where the free tier ends', () => {
-  // D-072 gives ten stamps free. A visitor who never pays reaches silver and
-  // can see gold above them — honest about what buying gets you, rather than a
-  // rank invented to sit just out of reach.
+test('silver at ten', () => {
   assert.equal(TIER_THRESHOLDS.silver, 10);
   assert.equal(tierFor(10, TOTAL), 'silver');
   assert.equal(tierFor(24, TOTAL), 'silver');
+});
+
+test('silver does not arrive with the lock (OQ-1)', () => {
+  // The rank counts what was collected, locked stamps included, so it needs no
+  // link to the allowance. Put silver on the allowance and the one reward a
+  // free user sees coincides with the moment stamps start to lock. If the
+  // allowance is ever raised to meet it (D-089 rule 9 allows up, never down),
+  // revisit OQ-1 rather than silence this.
+  assert.notEqual(TIER_THRESHOLDS.silver, FREE_STAMP_ALLOWANCE);
 });
 
 test('gold at twenty-five, and it is not platinum', () => {

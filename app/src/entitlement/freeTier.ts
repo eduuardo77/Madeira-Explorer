@@ -1,52 +1,54 @@
 /**
- * Who may see which stamp, before anybody has paid (T-155, D-072).
+ * Who may see which stamp, before anybody has paid (T-155, D-072, D-089).
  *
  * ⚠⚠ THIS MODULE GATES A DISPLAY. IT MUST NEVER GATE AN AWARD.
  * ------------------------------------------------------------
- * D-072 promises that a user who buys in month three receives every stamp they
+ * The promise is that a user who buys in month three receives every stamp they
  * earned in months one and two. That promise is only true if the app keeps
- * monitoring **all sixty** geofences and keeps **writing** awards the whole time
- * they are unpaid. The obvious optimisation — *why watch 60 places for a user
- * who can see 11?* — breaks it **silently**: no crash, no failing test, no error
+ * monitoring **every** geofence and keeps **writing** awards the whole time
+ * they are unpaid. The obvious optimisation (*why watch every place for a user
+ * who can see six?*) breaks it **silently**: no crash, no failing test, no error
  * in the log, and the user simply receives less than they paid for.
  *
  * That is the T-145 shape, which cost this project a session: 399 passing tests
  * could not see that nothing had ever started geofence monitoring. So the rule
- * is enforced by the build rather than by memory — `freeTier.test.ts` fails if
- * `geofenceSelection`, `geofenceManager`, `stampAwards` or `stampRules` so much
- * as imports this file.
+ * is enforced by the build rather than by memory: `freeTier.test.ts` fails if
+ * `geofenceSelection`, `geofenceManager`, `stampAwards`, `stampRules` or
+ * `tripProgress` so much as imports this file.
  *
- * THE RULES, WHICH ARE EXACT (D-072)
- * ----------------------------------
+ * THE RULES, WHICH ARE EXACT (D-089 rules 2 and 3)
+ * ------------------------------------------------
  * - Recording, the trace and the souvenir are free forever and are not this
  *   module's business.
- * - **Ten stamps are free.** Which ten is the *user's* choice in the only sense
- *   that matters: they chose by going there. The app never picks a favoured ten
- *   places, and it never asks the user to nominate ten out of their own
- *   holiday — being asked which memories to keep is a worse screen than a
- *   paywall. So the free ten are simply the first ten earned.
- * - **The first levada stamp is always shown, in addition to the ten**, whenever
- *   it is earned — even if it arrives at 10/10. So the free tier is at most
- *   **eleven** visible stamps, one of them guaranteed to be a levada.
+ * - **Five stamps are free.** Which five is the *user's* choice in the only
+ *   sense that matters: they chose by going there. The app never picks a
+ *   favoured five places, and it never asks the user to nominate five out of
+ *   their own holiday; being asked which memories to keep is a worse screen
+ *   than a paywall. So the free five are simply the first five earned.
+ * - **The first levada stamp is always shown, in addition to the five**,
+ *   whenever it is earned, even if it arrives at 5/5. So the free tier is at
+ *   most **six** visible stamps, one of them guaranteed to be a levada.
  *
- * **Why the levada is guaranteed:** 16 of the 60 places are viewpoints and many
- * of those are roadside, so a visitor can collect ten in one driving day and
- * meet the paywall **having never walked a levada**. They would be paying under
+ * **Why the levada is guaranteed:** 19 of the 80 places are viewpoints and many
+ * of those are roadside, so a visitor can collect five in one driving morning
+ * and meet the lock **having never walked a levada**. They would be paying under
  * pressure rather than out of delight, and judging a hiking app they never hiked
- * with.
+ * with. At five that is more likely than it was at ten, not less.
  *
- * ⚠ **Ten is a guess, and so is €4.99.** Same class as D-068's 45 minutes: set
- * by argument, tunable against real trips (T-134), never to be defended as
- * measured.
+ * ⚠ **Five is a judgement, and so is the price.** D-089 set both by argument
+ * after a study without field data; tunable against real trips, never to be
+ * defended as measured. ⚠ **After the public release the allowance may go up and
+ * never down** (D-089 rule 9): lowering it would take something from people who
+ * already had it. The price is a Play Console setting and appears nowhere here.
  *
- * Pure — no database, no clock, no i18n (CONTEXT §6). `entitlementStore.ts` is
+ * Pure: no database, no clock, no i18n (CONTEXT §6). `entitlementStore.ts` is
  * the impure half.
  */
 
 import type { Category } from '../content/contentPack.ts';
 
-/** How many stamps a user who has not paid may see. ⚠ A guess (above). */
-export const FREE_STAMP_ALLOWANCE = 10;
+/** How many stamps a user who has not paid may see. ⚠ A judgement (above). */
+export const FREE_STAMP_ALLOWANCE = 5;
 
 /**
  * The one category the free tier will not let a user miss.
@@ -69,7 +71,7 @@ export type StampVisibility = {
   /** Place ids whose stamp may be drawn, earliest earned first. */
   visible: string[];
   /**
-   * Earned, kept forever, and not drawn yet — the ones €4.99 reveals.
+   * Earned, kept forever, and not drawn yet: the ones the unlock reveals.
    *
    * ⚠ **Never call this "not collected".** The user stood there. What is
    * withheld is the artwork, not the fact of the visit, and the passport must
@@ -85,7 +87,7 @@ export type StampVisibility = {
  *
  * The tie-break is not cosmetic. Two stamps can share a timestamp — the award
  * pass writes a whole trip's worth in one go, and `Date.now()` is coarser than
- * that loop is fast — and without a deterministic order the tenth and eleventh
+ * that loop is fast — and without a deterministic order the fifth and sixth
  * stamps could swap on every render, so a stamp would appear and disappear as
  * the user watched.
  */
@@ -100,7 +102,7 @@ function inEarnedOrder(earned: readonly EarnedStamp[]): EarnedStamp[] {
  * Which of the earned stamps may be shown.
  *
  * `unlocked` is the whole of the entitlement: one non-consumable product, no
- * tiers, no subscription (D-072).
+ * tiers, no subscription (D-089 rule 5).
  */
 export function visibleStamps(
   earned: readonly EarnedStamp[],
@@ -118,9 +120,9 @@ export function visibleStamps(
 
   const shown = new Set(free.map((stamp) => stamp.placeId));
 
-  // The guarantee only ever *adds*. If a levada is already among the free ten
-  // the user has had the experience the exemption exists to protect, and an
-  // eleventh stamp would be a reward for having walked one early.
+  // The guarantee only ever *adds*. If a levada is already among the free five
+  // the user has had the experience the exemption exists to protect, and a
+  // sixth stamp would be a reward for having walked one early.
   if (!free.some((stamp) => stamp.category === GUARANTEED_CATEGORY)) {
     const firstLevada = beyond.find((stamp) => stamp.category === GUARANTEED_CATEGORY);
     if (firstLevada !== undefined) {

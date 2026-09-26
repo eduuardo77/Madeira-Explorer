@@ -1651,3 +1651,20 @@ profile, `samplingPolicy.ts`) and delivers them together, so a two-minute backgr
 one delivery is normal. The proof of the background path is a batch arriving while the app
 stays in the background (10 fixes at 19:17:59). Held fixes live in the process's memory until
 the batch is sent.
+
+### T-232 — the allowance at five, and a count that nearly lied
+
+The change is one constant; the notes are about proving it. **The P30 had no awards**, so
+"awards against shown stamps" read 0 against 0 under either allowance and would have proved
+nothing. A probe database (backed up with SHA-256, 8 synthetic awards, restored after) gave a
+number that moves with the rule.
+
+⚠ **The first count was wrong, and looked plausible:** 5 shown, 0 locked. Passport rows scroll
+**sideways** (T-219), and a vertical scroll never brings the right-hand cells on screen, so three
+stamps were simply not counted. Swiping each row that holds an earned stamp gave the true 6 and
+2. **Any `uiautomator` count of the passport must swipe the rows**, or it undercounts silently.
+
+Two guards were added that do not fail on a revert of the constant but pin the reason for it:
+`stampTier.test.ts` fails if silver lands on the allowance (OQ-1), and `tripProgress.ts` may not
+import `entitlement/`, because the rank and the *8 de 80* line count locked stamps too (D-075).
+

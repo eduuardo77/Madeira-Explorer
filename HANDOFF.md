@@ -14,8 +14,8 @@ clean. The **free tier is in** (T-155, T-232): past the first 5 (plus the first 
 everything** (`EXPO_PUBLIC_PROA_BETA=1`, D-084; `docs/dev-build.md`). **Nothing lets a store user
 pay yet.** ⚠ **The free tier was settled 2026-09-25: D-089 Accepted** (5 stamps + first levada free,
 €5.99 once, set medals, a founder stamp, tilt and shine; the map unlimited). **The app has D-089's
-allowance since T-232 (2026-09-26): 5 stamps plus the first levada, at most 6 shown**, tested and
-seen in the workbench, not yet seen locking on the phone (it has no awards). `content/pois.json` holds **80 curated places**. The UI speaks
+allowance since T-232 (2026-09-26): 5 stamps plus the first levada, at most 6 shown**, tested,
+and seen on the P30 with a probe database (6 shown, 2 locked, then the real data restored). `content/pois.json` holds **80 curated places**. The UI speaks
 **English, Portuguese and German**, and **no user-facing text may contain a dash** (— or –): the
 project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolicy.test.ts` enforce
 it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
@@ -75,8 +75,7 @@ says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
 **Next for the assistant: the monetisation build, Phase 2 (T-156a) of
-`docs/monetization-execution-plan.md`**; Phase 1 (T-232) is in code and waits only on device
-evidence (`TASKS.md`). ✅ **The study is finished (2026-09-25): D-089
+`docs/monetization-execution-plan.md`**; Phase 1 (T-232) is done. ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are

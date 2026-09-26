@@ -172,7 +172,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
 Tasks T-232 to T-239 and T-156a to T-156e, added here as each starts. The plan's §1.3 is this
 section's definition of done.
 
-- [~] **T-232** **Free allowance 10 → 5, plus the first levada** (D-089 rules 2, 3; OQ-1).
+- [x] **T-232** ✅ **Seen on the P30 2026-09-26.** **Free allowance 10 → 5, plus the first levada** (D-089 rules 2, 3; OQ-1).
       ✅ **Code 2026-09-26:** `FREE_STAMP_ALLOWANCE = 5`, at most 6 shown. Comments that stated ten,
       eleven or €4.99 corrected in `freeTier.ts`, `passportButton.ts`, `PassportView.tsx` and the
       workbench; the price now appears nowhere in `app/` (a Play Console setting). **OQ-1:** rank
@@ -185,12 +185,13 @@ section's definition of done.
       coincide (it did at 10). `tripProgress.ts` joins the modules forbidden to import
       `entitlement/`, because the rank reads its count and must keep counting locked stamps.
       **Workbench:** "23 stamps, free tier" shows 6 of 24 earned, 18 locked (was 11).
-      **P30, partial:** a store field build (no beta flag) is installed and reads *Bruma · Versão
-      0.1.0*, no "(beta)"; `smoke-release.mjs` passes every screen. ⚠ **The phone has 0 stamp
-      awards on any trip**, so awards against shown stamps would read 0 against 0 under either
-      allowance: the locking itself is **not yet seen on a device**. Needs 7+ awards on the P30
-      (a drive past seven places, or the project lead's consent to a probe database: backed up,
-      8 synthetic awards, restored), or an emulator replay.
+      **P30:** a store field build (no beta flag) reads *Bruma · Versão 0.1.0*, no "(beta)";
+      `smoke-release.mjs` passes every screen. The phone had no awards, so with the project lead's
+      consent its database was backed up (SHA-256), given 8 synthetic awards (7 viewpoints, then a
+      levada) and read through `uiautomator`, swiping each row sideways: **6 shown** (the first 5
+      viewpoints and the levada), **2 locked** (the 6th and 7th, labelled *já lá esteve*), and the
+      passport button reads *8 de 80*. The original was restored and its checksums matched.
+      Post-mortem: `docs/task-notes.md`.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

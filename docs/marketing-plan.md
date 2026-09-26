@@ -110,60 +110,78 @@ screenshots and both descriptions, but not the title. It had to be decided on pr
 ### Short description (80 max) — the most weighted field after the title, and what shows in search
 
 > **Every road you walk or drive is highlighted, so you can see where you've been.** (78 characters)
-> Provisional, D-092 (2026-09-25).
+> Provisional, D-092 (2026-09-25). ⚠ **The project lead wants it reworded (2026-09-26).** Candidates,
+> for veto:
+>
+> 1. *"Every road you walk or drive in Madeira, highlighted. See where you've been."* (76) Recommended:
+>    says Madeira, both ways of travelling, and the purpose.
+> 2. *"Know where you've been in Madeira: every road you travel, highlighted."* (70)
+> 3. *"Walk or drive Madeira and see every road you've been on light up."* (65)
+> 4. *"Track the roads you walk and drive in Madeira. Your trip stays on your phone."* (77) Trades
+>    the highlight for privacy.
 >
 > ~~Your map of Madeira fills in as you walk. Collect the island's 60 best places.~~ It led with
 > "map" and with the stamps, and the project lead has put *where you have been* first.
 
-Earlier alternatives (§7), from before that framing:
-
-- *"See where you walked in Madeira. Your map fills in. Your trip stays private."* (75)
-- *"Walk Madeira, fill in your own map, and collect the 60 places worth going to."* (76)
-
 ### Full description — the first 167 characters carry the hook, before "Read more"
 
-⚠ **Needs a rewrite (T-240):** the name is updated, but it still leads with "map" and counts sixty
-places; there are 80 (T-066b/c).
+**Rewritten 2026-09-26 for D-092, Provisional until the project lead vetoes it.** 2,300 characters
+of 4,000, no dashes. Leads with *where you have been*, not "map"; the stamps come fifth; 80 places
+with today's counts. Every claim checked against the privacy policy: no battery figure (D-041), the
+map is not claimed offline (D-073). **"What Bruma is not"** is there for marketing plan §2: someone
+who installs expecting directions uninstalls, and uninstalls cost ranking. The August draft is in
+git history.
 
 ```
-Bruma draws the map of your own trip.
+Bruma highlights every road and trail you travel in Madeira, so you always know where you've
+been. Walk a levada or drive a mountain road: both show up.
 
-Walk a levada, drive a mountain road, wander into a village — the app records where you
-went and draws it on the map. At the end of the week you have a picture of your holiday
-that nobody else has: your Madeira, not a guidebook's.
+YOUR ROADS, HIGHLIGHTED
+Every road, path and levada you travel is drawn over the map as you go. After a few days you
+can see at a glance which corners of the island you know, and which you have not seen yet.
 
-SIXTY PLACES WORTH GOING TO
-Sixteen viewpoints, eleven levadas, sixteen villages, seven beaches, ten landmarks —
-chosen one at a time, with no filler. Reach one and you collect its stamp. The passport
-shows all sixty, so you always know what is left to find.
+RECORDS IN YOUR POCKET
+Turn on automatic recording once and Bruma keeps recording while the app is closed. Prefer to
+be in charge? Press the button to start and stop a walk yourself. It works fine if you only
+allow location while the app is open. GPS is used only while recording, and you choose how
+often it records.
 
-IT FILLS ITSELF IN
-Give it permission once and it records while it sits in your pocket. Prefer to keep
-location off? There is a Start walk button, and the app works fully without background
-tracking.
+NO SIGNAL, STILL RECORDING
+Recording needs no mobile data. It carries on under the laurel forest and deep in the valleys,
+and your trip appears on the map once you are back online. The map itself needs a connection
+to load.
 
-NO SIGNAL, NO PROBLEM
-Recording does not need a network. The trip is captured under laurel canopy and deep in
-the valleys, where phone signal is not.
+YOUR TRIP STAYS ON YOUR PHONE
+There is no account, no sign-up and no server behind Bruma. Your trip is never sent to us, so
+there is nothing of yours for us to see, sell or lose. No ads, and nothing measuring how you
+use the app. The map underneath comes from Google, which sees which part of the island is on
+your screen, never your trip.
 
-YOUR TRIP NEVER LEAVES YOUR PHONE
-No account. No sign-up. No analytics. No advertising. The record of where you went is
-kept on your phone and stays there. The map underneath is Google's, the same one most
-apps use, so Google sees which part of the island is on your screen — never your trip.
+80 PLACES WORTH GOING TO
+19 viewpoints, 18 levadas, 19 villages, 8 beaches and 16 landmarks, chosen one at a time.
+Reach one and you collect its stamp. Your passport shows what you have found and what is
+still out there.
 
-A SOUVENIR AT THE END
-When you leave the island, the app puts your week together: the line you walked, the
-places you collected, the dates. Share it or keep it.
+YOUR TRIP, AS A PICTURE
+At the end of your holiday, Bruma makes a picture of your roads for you to share. Where you
+slept is found and removed first, every time, so your address never goes with it.
 
 FREE TO START
-The map, the recording and your trace are free forever, with no limit. Your first five
-stamps are free, and your first levada is always free. One payment unlocks all of
-Madeira, forever: every stamp, and a medal for each set you complete. No subscription.
+The highlighted roads and the recording are free forever, with no limit. Your first five
+stamps are free, and your first levada is always free. One payment unlocks all of Madeira,
+forever: every stamp, and a medal for each set you complete. No subscription.
 
-Made in Madeira.
+DELETE IT ANYTIME
+One button in Settings erases everything, at once. Removing the app deletes it all too.
+
+WHAT BRUMA IS NOT
+Bruma does not give directions or plan routes. It records where you have been and shows it
+back to you. For turn-by-turn trail directions, use a hiking app alongside it.
+
+In English, Portuguese and German. Made in Madeira.
 ```
 
-⚠ **The last paragraph is a compliance surface, not just copy.** Google requires the free/paid
+⚠ **The FREE TO START paragraph is a compliance surface, not just copy** (kept word for word in the 2026-09-26 rewrite, bar "the highlighted roads" for "the map"). Google requires the free/paid
 boundary to be stated accurately, and it must match what T-155 actually builds. If the numbers
 change, this changes. *Redrafted 2026-09-25 for D-089 (5 + first levada). No price in the text (OQ-6): Play shows each
 buyer the price in their own currency. "No subscription" without "ever": ruled out today, not

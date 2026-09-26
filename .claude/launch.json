@@ -4,8 +4,25 @@
     {
       "name": "workbench",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "app", "run", "web"],
+      "runtimeArgs": [
+        "--prefix",
+        "app",
+        "run",
+        "web"
+      ],
       "port": 8081
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8090",
+        "--directory",
+        "site"
+      ],
+      "port": 8090
     }
   ]
 }

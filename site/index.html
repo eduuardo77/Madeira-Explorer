@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bruma: Madeira Walk Tracker</title>
+<meta name="description" content="Bruma highlights every road and trail you travel in Madeira, so you can see where you have been. No account, and your trip never leaves your phone.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="icon.png">
+</head>
+<body>
+<!--
+  bruma.lol (T-241), laid out after walknyc.app.
+  Every claim here must match the app and its privacy policy. The rules that
+  bite: no battery number until one is measured (D-041, D-060); never claim the
+  map works offline (D-073); no dash characters in anything a user reads.
+  `node tools/build-site.mjs` rebuilds privacy.html and checks this file.
+-->
+<main>
+  <header>
+    <h1>Bruma</h1>
+    <p class="tagline">Track every road you walk and drive in Madeira</p>
+    <p class="intro">Made in Madeira. Bruma highlights every road and trail you travel, so you can see how much of the island you have really been to. No account, and your trip never leaves your phone.</p>
+    <div class="stores">
+      <span class="store" aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .5.5.8 1 .6l15.6-9.2c.4-.3.4-.9 0-1.2L5 2.2c-.5-.2-1 .1-1 .6z"/></svg>
+        Google Play <small>coming soon</small>
+      </span>
+    </div>
+  </header>
+
+  <!-- Screens: replace each placeholder's text with <img src="screenshots/1-map.png" alt="..."> -->
+  <div class="shots" role="list" aria-label="Screens from the app">
+    <div class="shot" role="listitem">Your roads, highlighted</div>
+    <div class="shot" role="listitem">A walk, as you took it</div>
+    <div class="shot" role="listitem">The passport</div>
+    <div class="shot" role="listitem">A place and its stamp</div>
+    <div class="shot" role="listitem">Your trip, as a picture</div>
+  </div>
+
+  <section aria-labelledby="highlights">
+    <h2 id="highlights">Highlights</h2>
+    <div class="highlights">
+      <div>
+        <h3>Your roads, highlighted</h3>
+        <p>Every road and levada you travel is drawn on the map. Walk a levada or drive a mountain road: both count.</p>
+      </div>
+      <div>
+        <h3>Records in your pocket</h3>
+        <p>Turn on automatic recording once and Bruma keeps going while the app is closed. Prefer to be in charge? Start and stop a walk yourself.</p>
+      </div>
+      <div>
+        <h3>Privacy</h3>
+        <p>Your trip stays on your phone. There is no account and no server behind the app, so there is nothing of yours for us to see.</p>
+      </div>
+      <div>
+        <h3>No signal, still recording</h3>
+        <p>Recording carries on under the laurel forest and deep in the valleys. The map itself needs a connection, and your trip appears on it once you have one.</p>
+      </div>
+      <div>
+        <h3>80 places worth going to</h3>
+        <p>Viewpoints, levadas, villages, beaches and landmarks, chosen one at a time. Reach one and you collect its stamp.</p>
+      </div>
+      <div>
+        <h3>Your trip, as a picture</h3>
+        <p>At the end, Bruma makes a picture of your map to share. Where you slept is removed first, every time.</p>
+      </div>
+      <div>
+        <h3>Price</h3>
+        <p>The map is free, with no limit. Five stamps and your first levada are free too. One payment of &euro;5.99 unlocks all of Madeira for good. No subscription, no ads.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="faq">
+    <h2 id="faq">FAQ</h2>
+    <details>
+      <summary>Will it drain my battery?</summary>
+      <p>Bruma only uses GPS while it is recording, and you choose how often it records in Settings. We have not yet measured battery use on enough phones to give you an honest number, so we will not print one.</p>
+    </details>
+    <details>
+      <summary>Do I have to start a walk, or does it record automatically?</summary>
+      <p>Either. Press the button to start and stop a walk yourself, or turn on automatic recording in Settings and forget about it.</p>
+    </details>
+    <details>
+      <summary>Does driving count?</summary>
+      <p>Yes. Most of the island is reached by car, so roads you drive are highlighted too, not only the ones you walk.</p>
+    </details>
+    <details>
+      <summary>What data leaves my phone?</summary>
+      <p>Nothing from your trip, unless you share the picture yourself. The map underneath comes from Google, so Google sees which part of the island is on your screen, never your trip. If you choose to send us one recording from Settings to help improve the app, that is the only thing we receive. Read the <a href="privacy.html">privacy policy</a>.</p>
+    </details>
+    <details>
+      <summary>Does it work without mobile data?</summary>
+      <p>Recording does, with no signal at all. The map needs a connection to load, and your trip appears on it once you are back online.</p>
+    </details>
+    <details>
+      <summary>How do I delete everything?</summary>
+      <p>Settings has a button that erases everything the app has recorded, at once. Removing the app deletes everything too. There is no account, so there is nothing for us to delete.</p>
+    </details>
+    <details>
+      <summary>Is there an iPhone version?</summary>
+      <p>Not yet. Bruma is coming to Android first.</p>
+    </details>
+  </section>
+
+  <section aria-labelledby="about">
+    <h2 id="about">About</h2>
+    <p>Bruma is made in Madeira. Feedback, bug reports and ideas are very welcome.</p>
+    <!-- Add the contact address here once CONTACT_EMAIL exists (T-206). -->
+  </section>
+</main>
+
+<footer>
+  <span>&copy; 2026 Bruma</span>
+  <a href="privacy.html">Privacy</a>
+</footer>
+</body>
+</html>

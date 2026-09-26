@@ -119,7 +119,7 @@ screenshots and both descriptions, but not the title. It had to be decided on pr
 
 ### Full description — the first 167 characters carry the hook, before "Read more"
 
-**Rewritten 2026-09-26 for D-092, Provisional until the project lead vetoes it.** 2,300 characters
+**Rewritten 2026-09-26 for D-092. ✅ Approved as is by the project lead the same day ("for now").** 2,300 characters
 of 4,000, no dashes. Leads with *where you have been*, not "map"; the stamps come fifth; 80 places
 with today's counts. Every claim checked against the privacy policy: no battery figure (D-041), the
 map is not claimed offline (D-073). **"What Bruma is not"** is there for marketing plan §2: someone

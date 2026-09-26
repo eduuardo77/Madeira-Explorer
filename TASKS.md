@@ -131,7 +131,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ✅ **Satisfied 2026-09-25: the search is done and Bruma is kept (D-092).** It had to precede
       the first upload to Play Console, which makes the package name (`com.proa.madeira`, kept)
       permanent. Monetisation plan, Phase 0 step 0.0.
-- [~] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
+- [x] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
       `APP_NAME` is Bruma; `app.json`'s name and the six permission strings; the generated
       `android/.../strings.xml` `app_name` edited to match (the next prebuild writes the same);
       `docs/privacy-policy.md` regenerated; `brand.test.ts` now sweeps for *Proa* as well as
@@ -140,8 +140,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       `--clean`, the P30's beta data kept. So do the slug, the scheme and every internal "proa"
       (`EXPO_PUBLIC_PROA_BETA`, `PROA_UPLOAD_*`, `proaFieldBuild`, the logcat tag): no user reads them.
       ⚠ **Not yet seen on the phone:** the name under the icon needs a new build.
-      **Left:** the store copy in `docs/marketing-plan.md` §4: the short description is now D-092's
-      draft, but the full description still leads with "map" and says sixty places (there are 80).
+      ✅ **Store copy 2026-09-26:** title, short description (chosen) and full description (approved
+      as is "for now") in `docs/marketing-plan.md` §4. **Left:** the Portuguese and German listings.
 
 ### ⚠⚠ Found 2026-09-26: the recorder stalls and says nothing
 

@@ -167,9 +167,25 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       pure; `checkTripEnd(now, { foldWal: false })`). `queuedBatch.test.ts` runs the real serial
       queue with a fold that queues like `truncateWal`: the two stall tests **timed out on the old
       order** and pass on the new, a probe proves the timeout detects a stall, and a source check
-      fails if the sink folds inside the queue again (watched failing). **805 tests.**
+      fails if the sink folds inside the queue again (watched failing). **806 tests.**
       ⚠ **Not induced on the P30:** it needs a trip silent past the lapse rule. No `trip_end`
       row has ever come from this path on the phone.
+
+- [~] **T-244** **The map draws lines where nobody went** (the project lead, again, 2026-09-26).
+      Measured on the P30's real fixes (`docs/field-notes.md`, 2026-09-26): **(1)** a phone
+      lying still for days drew 0.8 km and 0.3 km of lines out of GPS drift that wanders 20 to
+      110 m smoothly over minutes at ±5 m, which no position-only rule can tell from slow walking;
+      **(2)** holes the recorder did not admit to were bridged by straight strokes of 4.0 and
+      3.2 km. ✅ **(2) fixed:** `MAX_DRAWN_STEP_M = 500` in `traceGeoJson.ts` (the driving
+      profile's honest step is about 420 m). Two tests fail without it; four fixtures that used
+      kilometre steps for convenience now move like a walk or a drive. ⚠ **A trade-off, pinned by
+      a test:** a drive the recorder starved (points kilometres apart) is now a gap, not two
+      straight chords; a normally sampled drive is still one line. **809 tests.**
+      ⚠ A first attempt at (1), absorbing lone strays into a stop, passed its own tests and
+      changed nothing on the real data (the strays are not lone): reverted, not committed.
+      **Open, the project lead's call:** (1) and *"only the real streets"* are both answered by
+      snapping to roads, which D-032 defers and D-082 (Provisional) declines.
+      **(3) not measurable yet:** no real outing on Madeira is recorded; the next one is.
 
 ### The monetisation build (`docs/monetization-execution-plan.md`, D-089, D-091)
 

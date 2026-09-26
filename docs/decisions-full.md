@@ -4531,6 +4531,14 @@ again. Tiers 2 and 3 are untouched and still Provisional.
 D-015/D-026 and wants the project lead's eye. Tier 3 needs both a fixture and an explicit decision,
 because it edges the boundary D-032 drew.
 
+
+**Measured 2026-09-26 (T-244), and it changes the weight of this decision.** On the P30's real
+fixes the lines the project lead objects to are **not** mostly what tiers 0 to 2 address: they
+are GPS drift around a resting phone (smooth, well-reported, indistinguishable from slow walking
+by position) and straight strokes across unadmitted holes (the second now fixed). Levada snapping
+(tier 2) helps neither. The request, restated on 2026-09-26, is still *only the real streets*.
+`docs/field-notes.md` has the numbers.
+
 ## D-083 — The passport button is a stamp, and the count leaves it
 
 **Status:** Accepted — the project lead, 2026-09-22, chosen from drawn options.

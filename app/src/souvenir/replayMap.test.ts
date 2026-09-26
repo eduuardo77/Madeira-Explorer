@@ -242,12 +242,14 @@ test('the camera actually travels — including on a trace of five vertices', ()
   // Every test passed. Nothing looked wrong. It was only found by measuring how
   // far the camera moved and getting **zero metres** — which is the project's
   // own rule about suspecting a result that does not move.
+  // Five vertices about 450 m apart (T-244: no stroke longer than
+  // MAX_DRAWN_STEP_M is drawn), 1.8 km along the seafront.
   const sparse: TraceFix[] = [
     { ts: T0, lat: 32.6400, lon: -16.9400, accuracy_m: 10 },
-    { ts: T0 + 600_000, lat: 32.6430, lon: -16.9300, accuracy_m: 10 },
-    { ts: T0 + 1_200_000, lat: 32.6455, lon: -16.9180, accuracy_m: 10 },
-    { ts: T0 + 1_800_000, lat: 32.6470, lon: -16.9050, accuracy_m: 10 },
-    { ts: T0 + 2_400_000, lat: 32.6490, lon: -16.8900, accuracy_m: 10 },
+    { ts: T0 + 360_000, lat: 32.6412, lon: -16.9355, accuracy_m: 10 },
+    { ts: T0 + 720_000, lat: 32.6425, lon: -16.9310, accuracy_m: 10 },
+    { ts: T0 + 1_080_000, lat: 32.6436, lon: -16.9265, accuracy_m: 10 },
+    { ts: T0 + 1_440_000, lat: 32.6448, lon: -16.9220, accuracy_m: 10 },
   ];
 
   const f = film(composeSouvenir(input({ trace: { fixes: sparse, safeToShare: true, reason: 'ok' } })));

@@ -341,3 +341,30 @@ library's calls and with the held ones, on throwaway databases, at concurrency 8
 **0 released-object rejections in ~45,000 bare statements**, every checkpoint clean. ⚠ **Read that
 as an inert probe, not an absent bug** — August produced two in six days of ordinary use, and
 upstream needed a blocked modules queue to make it fire on demand.
+
+## 2026-09-26 — Why the map draws lines where nobody went (T-244)
+
+Asked by the project lead, again: *the highlighted lines are random and not on the street.*
+Measured with the map's own `drawableSegments` over the P30's real fixes (copies outside the
+repository; distances only).
+
+**1. Lines around a phone that did not move.** The P30 lay on a desk from 22 to 25 September.
+90% of its fixes sat within 1 to 3 m of where it lay, and the map still drew **0.8 km of lines**
+(22 to 23 Sep, 4,340 fixes) and **0.3 km** (24 to 25 Sep): 18 and 7 vertices, up to 109 m out.
+The cleanup collapses the honest cluster to one point and keeps the rest. **The rest is not a
+few lone spikes** (the first hypothesis, and wrong): sampled every 7 to 12 s, the position drifts
+out 20 to 110 m **smoothly over several minutes** and back, at ±5 m reported accuracy. By position
+alone that is indistinguishable from walking slowly, so no geometric rule can remove it without
+also removing real slow movement. Either indoor multipath drift, or the phone was carried: unknown.
+
+**2. Straight lines across holes.** On the August loan trips (not on Madeira) a 4.0 km jump in
+2.3 minutes and a 3.2 km one in 5 minutes were drawn as single strokes: under the 30-minute gap
+rule and under `MAX_DRAWN_SPEED_MPS`. **Fixed (T-244):** `MAX_DRAWN_STEP_M = 500` breaks the line
+there. On those trips the longest stroke fell from 4,084 m to 862 m; what remains over 500 m is
+simplified straight stretches, each within 16 m of recorded fixes.
+
+**3. Whether dense fixes sit on the street: not measurable yet.** No real movement on Madeira
+has ever been recorded on this phone; the one drive (26 Sep) was lost to T-242. The offline road
+geometry is ready for the question (`app/assets/map/madeira.pmtiles`, `roads` layer, read
+locally), so the next recorded outing answers it without sending a coordinate anywhere.
+

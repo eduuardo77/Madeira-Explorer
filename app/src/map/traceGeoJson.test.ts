@@ -137,10 +137,12 @@ test('two singletons separated by a gap produce nothing rather than nonsense', (
 // ---------------------------------------------------------------------------
 
 test('the camera frames what was walked, not the whole island', () => {
-  const trace = buildTrace(
-    [fix(0, 32.64, -16.91), fix(1, 32.65, -16.90), fix(2, 32.66, -16.89)],
-    GAP_MS
+  // A walk sampled every half minute, about 280 m a step (T-244: no stroke
+  // longer than MAX_DRAWN_STEP_M is drawn, so the fixture moves like a walk).
+  const walk = Array.from({ length: 11 }, (_, i) =>
+    fix(i * 0.5, 32.64 + 0.002 * i, -16.91 + 0.002 * i)
   );
+  const trace = buildTrace(walk, GAP_MS);
   const bounds = traceBounds(trace);
 
   assert.ok(bounds !== null);
@@ -180,10 +182,12 @@ test('the bounds are in MapLibre order: west, south, east, north', () => {
   // width of the island — and covering that in a minute is the impossible
   // movement `MAX_DRAWN_SPEED_MPS` now breaks the line for. At 20 minutes it
   // is a drive, which is a stroke this app is glad to draw.
-  const trace = buildTrace(
-    [fix(0, 32.60, -17.20), fix(20, 32.80, -16.70)],
-    GAP_MS
+  // T-244: and sampled like one, every 12 s and about 430 m, since a single
+  // 55 km stroke is now a hole rather than a line.
+  const drive = Array.from({ length: 121 }, (_, i) =>
+    fix(i * 0.2, 32.6 + (0.2 * i) / 120, -17.2 + (0.5 * i) / 120)
   );
+  const trace = buildTrace(drive, GAP_MS);
   const [west, south, east, north] = traceBounds(trace)!;
 
   assert.ok(west < east, 'west is not west of east');
@@ -237,14 +241,28 @@ test('⚠ a teleport between geofence tests is not a route', () => {
 
 test('a drive between two levadas is still one line', () => {
   // The gate must not become a smoother. This is 12 km of VR1 in ten minutes
-  // — 20 m/s, entirely ordinary — and deleting it would delete real movement.
+  // (20 m/s, entirely ordinary), sampled the way the driving profile samples:
+  // every 15 s, 300 m apart. Deleting it would delete real movement.
+  const drive = Array.from({ length: 41 }, (_, i) =>
+    fix(i * 0.25, 32.65 + (0.03 * i) / 40, -16.91 + (0.13 * i) / 40)
+  );
+  const trace = buildTrace(drive, GAP_MS);
+
+  assert.equal(trace.features.length, 1);
+});
+
+test('⚠ the same drive recorded as three fixes is not drawn as two straight chords (T-244)', () => {
+  // ⚠ The trade-off, pinned. This test used to require one line here: two 6 km
+  // straight strokes across the mountains, which is exactly what the project
+  // lead kept reporting as "random lines, not on the street". A drive the
+  // recorder starved is now left as a gap. Both points are still stored, and a
+  // properly sampled drive (above) is still one line.
   const trace = buildTrace(
     [fix(0, 32.65, -16.91), fix(10, 32.68, -16.78), fix(20, 32.70, -16.65)],
     GAP_MS
   );
 
-  assert.equal(trace.features.length, 1);
-  assert.equal(trace.features[0].geometry.coordinates.length, 3);
+  assert.equal(trace.features.length, 0);
 });
 
 test('GPS jitter at a standstill never breaks the line', () => {
@@ -332,4 +350,28 @@ test('a fix too vague to place is never drawn, however alone it is', () => {
     fix(2, 32.736, -16.884, NEVER_DRAWN_ACCURACY_M + 1),
   ];
   assert.equal(buildTrace(useless, GAP_MS).features.length, 0);
+});
+
+/**
+ * T-244: holes the recorder did not admit to. On the loan phone in August a
+ * 4.0 km jump in 2.3 minutes (29 m/s, under MAX_DRAWN_SPEED_MPS) and a 3.2 km
+ * one in 5 minutes were each drawn as one straight line across the ground.
+ */
+test('⚠ a jump of kilometres is a break, not a straight line (T-244)', () => {
+  const east = (m: number) => -16.9 + m / 93_800;
+  const trace = buildTrace(
+    [fix(0, 32.65, east(0)), fix(0.25, 32.65, east(100)), fix(2.55, 32.65, east(4100)), fix(2.8, 32.65, east(4200))],
+    GAP_MS
+  );
+  assert.equal(trace.features.length, 2, 'the 4 km hole was bridged by a straight line');
+});
+
+test('an ordinary driving step is still drawn', () => {
+  // The driving profile samples every 15 s; at 100 km/h that is about 420 m.
+  const east = (m: number) => -16.9 + m / 93_800;
+  const trace = buildTrace(
+    [fix(0, 32.65, east(0)), fix(0.25, 32.651, east(420)), fix(0.5, 32.65, east(840))],
+    GAP_MS
+  );
+  assert.equal(trace.features.length, 1);
 });

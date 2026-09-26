@@ -136,6 +136,20 @@ export const MAX_DRAWN_SPEED_MPS = 55;
  */
 const MIN_JUMP_FOR_SPEED_CHECK_M = 250;
 
+/**
+ * The longest straight line the map will draw between two fixes, in metres (T-244).
+ *
+ * ⚠⚠ **Measured, and this is why it exists.** On the loan phone in August a
+ * 4.0 km jump in 2.3 minutes and a 3.2 km one in 5 minutes were each drawn as a
+ * single straight stroke across the ground: under the gap rule's 30 minutes and
+ * under `MAX_DRAWN_SPEED_MPS`, so nothing broke them. A car in a tunnel or a
+ * phone the OS starved of fixes both look like that, and neither is a line the
+ * user travelled. The recorder's densest honest step is the driving profile's
+ * 15 s at 100 km/h, about 420 m, so anything longer is a hole and the line
+ * breaks there instead. ⚠ Set from the sampling profiles, not from a field walk.
+ */
+export const MAX_DRAWN_STEP_M = 500;
+
 export type TraceFeature = {
   type: 'Feature';
   properties: Record<string, never>;
@@ -280,6 +294,12 @@ function breaksHere(
   );
   if (jumpM < MIN_JUMP_FOR_SPEED_CHECK_M) {
     return false;
+  }
+
+  // Rule 2 (T-244): a hole the recorder did not admit to. Never bridged by a
+  // straight line, however plausible the speed.
+  if (jumpM > MAX_DRAWN_STEP_M) {
+    return true;
   }
 
   // ⚠ Two fixes at the same instant that are far apart cannot be reconciled —

@@ -310,7 +310,7 @@ test('the strokes fill the draw scene from its first moment to its last', () => 
 
 test('coordinates are [lon, lat], matching the map layer', () => {
   const draw = drawScene(
-    composeSouvenir(input({ trace: safe([fix(0, 32.65, -16.9), fix(1, 32.66, -16.91)]) }))
+    composeSouvenir(input({ trace: safe([fix(0, 32.65, -16.9), fix(1, 32.652, -16.902)]) }))
   );
 
   assert.deepEqual(draw.segments[0].coordinates[0], [-16.9, 32.65]);

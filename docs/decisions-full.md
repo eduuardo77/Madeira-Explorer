@@ -5001,7 +5001,7 @@ runs on *Bruma*.
 |---|---|---|
 | **On the device**, under the icon | **Bruma** | ✅ any time |
 | **Play title** (30 max) | **Bruma: Madeira Walk Tracker** (27) | ✅ any time |
-| **Play short description** (80 max) | Provisional: *"Every road you walk or drive is highlighted, so you can see where you've been."* (78) | ✅, and A/B testable |
+| **Play short description** (80 max) | ✅ *"Every road you walk or drive in Madeira, highlighted. See where you've been."* (76), chosen 2026-09-26 | ✅, and A/B testable |
 | **Package id** | **`com.proa.madeira`, kept** (project lead, 2026-09-25) | ❌ never, once published |
 
 **Why Proa went.** It still felt wrong to the project lead five weeks on. It was chosen by

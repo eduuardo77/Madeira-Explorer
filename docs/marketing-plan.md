@@ -109,16 +109,10 @@ screenshots and both descriptions, but not the title. It had to be decided on pr
 
 ### Short description (80 max) — the most weighted field after the title, and what shows in search
 
-> **Every road you walk or drive is highlighted, so you can see where you've been.** (78 characters)
-> Provisional, D-092 (2026-09-25). ⚠ **The project lead wants it reworded (2026-09-26).** Candidates,
-> for veto:
->
-> 1. *"Every road you walk or drive in Madeira, highlighted. See where you've been."* (76) Recommended:
->    says Madeira, both ways of travelling, and the purpose.
-> 2. *"Know where you've been in Madeira: every road you travel, highlighted."* (70)
-> 3. *"Walk or drive Madeira and see every road you've been on light up."* (65)
-> 4. *"Track the roads you walk and drive in Madeira. Your trip stays on your phone."* (77) Trades
->    the highlight for privacy.
+> **Every road you walk or drive in Madeira, highlighted. See where you've been.** (76 characters)
+> ✅ **Chosen by the project lead, 2026-09-26** (candidate 1 of 4). It replaced D-092's first draft,
+> *"Every road you walk or drive is highlighted, so you can see where you've been."*, which did not
+> say Madeira.
 >
 > ~~Your map of Madeira fills in as you walk. Collect the island's 60 best places.~~ It led with
 > "map" and with the stamps, and the project lead has put *where you have been* first.

@@ -143,6 +143,36 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       **Left:** the store copy in `docs/marketing-plan.md` §4: the short description is now D-092's
       draft, but the full description still leads with "map" and says sixty places (there are 80).
 
+### ⚠⚠ Found 2026-09-26: the recorder stalls and says nothing
+
+- [ ] **T-242** **Every background location and geofence delivery hangs, silently, after a
+      relaunch in the same process.** Found when the project lead drove to Praia dos Reis Magos
+      and back (16:00 to 18:05, *Começar* pressed) and the app recorded **nothing**: no fix, no
+      geofence event, no stamp. **Not mobile data** (the phone has no SIM, but fused fixes were
+      being produced indoors at the time of the check) and **not today's store build**: the
+      last fix before today is **2026-09-25 14:31:02**, minutes after the beta build was installed,
+      and nothing was written for 25 hours. A fresh process wrote 5 fixes today (15:43 to 15:46),
+      then stalled the same way.
+      **Evidence (P30, 18:19 to 18:34):** the foreground service alive 2 h 46 min, the OS's GPS
+      request active for the app, `TaskService` logged **63 deliveries handed to JavaScript and 0
+      `Finished task`**, 120 task jobs pending, no `batch` and no `error` row in
+      `recording_event`, while UI writes (*outing started* 16:00, *ended* 18:05) succeeded. So the
+      database works and the JS task handlers never complete. Process 4599 started 15:46:12 and
+      logged "recording re-asserted on launch" 8 times: the app was reopened repeatedly within one
+      process. On 2026-09-25 the stall also followed several relaunches and a burst of *recorder
+      options re-applied in place*. The log saved: scratchpad `stall-2026-09-26/`.
+      **Not yet known:** what the first stuck delivery waits on. Candidates: an event emitted to a
+      JS listener that is gone (expo-task-manager drops those on purpose, `TaskManagerModule.kt`),
+      or one queued job that never settles, leaving every later one behind it in
+      `recordingQueue`. **Next:** reproduce with `adb logcat` running from process start, relaunch
+      in the same process, find the first delivery with no `Finished task`.
+      **Found reading, separate, latent:** `closeLapsedTrip` runs inside `recordingQueue` and calls
+      `checkTripEnd`, which calls `truncateWal`, which waits on `recordingQueue`: a deadlock
+      whenever a trip lapses inside a batch. `recordingSink.ts` says "cannot deadlock";
+      `database.ts` says never call `truncateWal` from inside the queue. Not today's cause (no
+      `trip_end` row), but it would stall the recorder the same way. Needs its own test.
+      ⚠ **T-174's lesson again:** the app said it was recording the whole time.
+
 ### The monetisation build (`docs/monetization-execution-plan.md`, D-089, D-091)
 
 Tasks T-232 to T-239 and T-156a to T-156e, added here as each starts. The plan's §1.3 is this

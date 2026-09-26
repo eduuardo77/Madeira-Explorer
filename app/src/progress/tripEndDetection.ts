@@ -55,9 +55,14 @@ const NOT_ENDED: TripEndDecision = {
  *
  * Never throws. Returns the decision so the debug screen can show what it
  * would do without anybody having to fly home.
+ *
+ * ⚠ `foldWal: false` is for a caller **inside `recordingQueue`** (T-243). The
+ * fold takes that queue, so from inside it the queue would wait for itself;
+ * such a caller folds after leaving the queue (`recording/queuedBatch.ts`).
  */
 export async function checkTripEnd(
-  now: number = Date.now()
+  now: number = Date.now(),
+  options: { foldWal?: boolean } = {}
 ): Promise<TripEndDecision> {
   try {
     const trip = await tripDao.getActiveTrip();
@@ -143,7 +148,9 @@ export async function checkTripEnd(
     // T-178: fold the trip into the database file and cut the WAL back, so the
     // copy auto-backup takes is small and complete. After the reveal, which is
     // the moment that matters and must not wait on disk I/O. Never throws.
-    await truncateWal('trip_end');
+    if (options.foldWal !== false) {
+      await truncateWal('trip_end');
+    }
     return decision;
   } catch (error) {
     await recordingEventDao.logError('trip end', error);

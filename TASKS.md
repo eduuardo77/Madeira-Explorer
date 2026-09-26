@@ -144,7 +144,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       as is "for now") in `docs/marketing-plan.md` §4. Portuguese (Portugal) listing ✅ approved 2026-09-26; German translated, Provisional (unreviewed:
       nobody on the project speaks it).
 
-### ⚠⚠ Found 2026-09-26: the recorder stalled and said nothing (T-242 fixed, T-243 open)
+### ⚠⚠ Found 2026-09-26: the recorder stalled and said nothing (T-242 and T-243 fixed)
 
 - [x] **T-242** ✅ **Fixed 2026-09-26, seen on the P30.** **The recorder stopped after a cold start
       with deliveries waiting, and said nothing.** Found when the project lead drove to Praia dos
@@ -160,12 +160,16 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       with a backlog, which died within 20 s before, saved fixes for 2.5 min on screen; a batch of
       10 arrived at 19:17:59 with the app in the background during an outing. **801 tests.**
       Post-mortem: `docs/task-notes.md`.
-- [ ] **T-243** **A trip that lapses inside a batch would deadlock the recorder** ⇠ found in T-242.
-      `recordingSink.closeLapsedTrip` runs inside `recordingQueue` and calls `checkTripEnd`, which
-      calls `truncateWal`, which waits on `recordingQueue`: the queue waits for itself and every
-      later batch stalls silently. `recordingSink.ts` says "cannot deadlock"; `database.ts` says
-      never call `truncateWal` from inside the queue. Not T-242's cause (no `trip_end` row). Fix
-      with a test that runs a lapsed batch through the real queue and times out on a stall.
+- [x] **T-243** ✅ **Fixed 2026-09-26, in Node only.** **A trip that lapsed inside a batch would
+      have deadlocked the recorder.** `closeLapsedTrip` ran inside `recordingQueue`, and closing a
+      trip folds the WAL through `recordingQueue`: the queue waited for itself. Now the lapse is
+      decided inside the queue and the fold runs after it lets go (`recording/queuedBatch.ts`,
+      pure; `checkTripEnd(now, { foldWal: false })`). `queuedBatch.test.ts` runs the real serial
+      queue with a fold that queues like `truncateWal`: the two stall tests **timed out on the old
+      order** and pass on the new, a probe proves the timeout detects a stall, and a source check
+      fails if the sink folds inside the queue again (watched failing). **805 tests.**
+      ⚠ **Not induced on the P30:** it needs a trip silent past the lapse rule. No `trip_end`
+      row has ever come from this path on the phone.
 
 ### The monetisation build (`docs/monetization-execution-plan.md`, D-089, D-091)
 

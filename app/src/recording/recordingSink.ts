@@ -41,6 +41,8 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as sensorSampleDao from '../storage/dao/sensorSampleDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { recordingQueue } from '../storage/recordingQueue';
+import { truncateWal } from '../storage/database';
+import { runQueuedBatch } from './queuedBatch';
 import type { RawFixInput } from '../storage/types';
 import type {
   GeofenceTransition,
@@ -124,33 +126,43 @@ const queue = recordingQueue;
  * still open after 25 days: `recordingAdmission.tripHasLapsed` has the story.
  *
  * `checkTripEnd` does the ending, so a lapsed trip is closed exactly the way a
- * launch would close it: the award pass, the reveal (D-011 counts per trip), the
- * WAL truncate, and an end dated to the last fix. It takes no queue of its own,
- * so calling it from inside this one cannot deadlock.
+ * launch would close it: the award pass, the reveal (D-011 counts per trip) and
+ * an end dated to the last fix.
+ *
+ * ⚠⚠ **Except the WAL fold (T-243).** This runs inside `recordingQueue` and the
+ * fold takes that queue too, so folding here made the queue wait for itself:
+ * the batch never finished and every later one stalled behind it, silently.
+ * The header used to say "cannot deadlock". So `foldWal: false`, and
+ * `runQueuedBatch` folds after the queue lets go. Returns whether a trip ended.
  *
  * ⚠ **Never throws.** A failure here must not cost the batch behind it (D-010):
  * the worst case is the old behaviour, the evidence joining the old trip.
  */
-async function closeLapsedTrip(incomingTs: number): Promise<void> {
+async function closeLapsedTrip(incomingTs: number): Promise<boolean> {
   try {
     const open = await tripDao.getActiveTrip();
     if (open === null) {
-      return;
+      return false;
     }
     const lastFix = await rawFixDao.getLastFix(open.id);
     const lastFixTs = lastFix?.ts ?? null;
     if (!tripHasLapsed({ startedTs: open.started_ts, lastFixTs }, incomingTs)) {
-      return;
+      return false;
     }
     await recordingEventDao.log(
       'trip_end',
       `lapsed: trip ${open.id} silent since ${new Date(lastFixTs ?? open.started_ts).toISOString()}`
     );
-    await checkTripEnd(incomingTs);
+    const decision = await checkTripEnd(incomingTs, { foldWal: false });
+    return decision.ended;
   } catch (error) {
     await recordingEventDao.logError('closeLapsedTrip', error);
+    return false;
   }
 }
+
+/** The WAL fold after a lapsed trip, outside the queue (T-243). Never throws. */
+const foldAfterLapse = () => truncateWal('trip_end');
 
 export const databaseSink: RecordingSink = {
   async onLocations(samples: LocationSample[]): Promise<void> {
@@ -158,111 +170,120 @@ export const databaseSink: RecordingSink = {
       return;
     }
 
-    await queue(async () => {
-      try {
-        // ⚠⚠ T-171 — AN OUT-OF-BOUNDS FIX MAY EXTEND A TRIP AND MAY NOT OPEN
-        // ONE. Measured on real hardware: once the phone left the archipelago,
-        // every batch created a trip that `checkTripEnd` immediately and
-        // correctly ended, thirty times in six days. `recordingAdmission.ts`
-        // has the cycle written out.
-        //
-        // The fix is *only* about creating. These samples are still stored
-        // whenever a trip is open, because a fix outside the bounds is the
-        // evidence that ends the trip honestly — refusing to store it would
-        // trade a loop for a holiday that never finishes.
-        //
-        // ⚠ T-195 — but not in a trip that already lapsed. Asked with the
-        // batch's earliest time, because that is when the silence ended.
-        await closeLapsedTrip(Math.min(...samples.map((sample) => sample.ts)));
-        const trip = batchMayStartTrip(samples, ARCHIPELAGO_BOUNDS)
-          ? await tripDao.getOrCreateActiveTrip()
-          : await tripDao.getActiveTrip();
+    // ⚠ T-195 — the lapse check comes first, and not in a trip that already
+    // lapsed. Asked with the batch's earliest time, because that is when the
+    // silence ended. T-243: through `runQueuedBatch`, never a bare `queue`.
+    await runQueuedBatch({
+      queue,
+      closeLapsedTrip: () =>
+        closeLapsedTrip(Math.min(...samples.map((sample) => sample.ts))),
+      foldWal: foldAfterLapse,
+      record: async () => {
+        try {
+          // ⚠⚠ T-171 — AN OUT-OF-BOUNDS FIX MAY EXTEND A TRIP AND MAY NOT OPEN
+          // ONE. Measured on real hardware: once the phone left the archipelago,
+          // every batch created a trip that `checkTripEnd` immediately and
+          // correctly ended, thirty times in six days. `recordingAdmission.ts`
+          // has the cycle written out.
+          //
+          // The fix is *only* about creating. These samples are still stored
+          // whenever a trip is open, because a fix outside the bounds is the
+          // evidence that ends the trip honestly — refusing to store it would
+          // trade a loop for a holiday that never finishes.
+          const trip = batchMayStartTrip(samples, ARCHIPELAGO_BOUNDS)
+            ? await tripDao.getOrCreateActiveTrip()
+            : await tripDao.getActiveTrip();
 
-        if (trip === null) {
-          // Nowhere to put them, and nothing worth opening a holiday for.
-          await recordingEventDao.log(
-            'batch',
-            `${samples.length} fixes outside the archipelago, no trip open`
-          );
-          return;
+          if (trip === null) {
+            // Nowhere to put them, and nothing worth opening a holiday for.
+            await recordingEventDao.log(
+              'batch',
+              `${samples.length} fixes outside the archipelago, no trip open`
+            );
+            return;
+          }
+
+          const rows: RawFixInput[] = samples.map((sample) => ({
+            trip_id: trip.id,
+            ts: sample.ts,
+            lat: sample.lat,
+            lon: sample.lon,
+            accuracy_m: sample.accuracyM,
+            speed_mps: sample.speedMps,
+            bearing_deg: sample.bearingDeg,
+            altitude_m: sample.altitudeM,
+            activity_type: sample.activityType,
+            source: sample.source,
+          }));
+
+          // Fixes first, sensors second. If the process is killed between the
+          // two, we would rather have the trace without the barometer than the
+          // other way round.
+          const inserted = await rawFixDao.insertFixes(rows);
+
+          // ⚠ `captureSensorsFor(trip.id, trip.started_ts, samples.at(-1).ts)`
+          // used to run here and does not in v1 (D-050). Nothing in v1 reads the
+          // barometer or the pedometer back, and their consumers moved to v2 with
+          // D-032. Re-enabling is exactly this one call — see the note on the
+          // function itself for why it was kept.
+          await recordingEventDao.log('batch', `${inserted} fixes`);
+        } catch (error) {
+          await recordingEventDao.logError('onLocations', error);
         }
-
-        const rows: RawFixInput[] = samples.map((sample) => ({
-          trip_id: trip.id,
-          ts: sample.ts,
-          lat: sample.lat,
-          lon: sample.lon,
-          accuracy_m: sample.accuracyM,
-          speed_mps: sample.speedMps,
-          bearing_deg: sample.bearingDeg,
-          altitude_m: sample.altitudeM,
-          activity_type: sample.activityType,
-          source: sample.source,
-        }));
-
-        // Fixes first, sensors second. If the process is killed between the
-        // two, we would rather have the trace without the barometer than the
-        // other way round.
-        const inserted = await rawFixDao.insertFixes(rows);
-
-        // ⚠ `captureSensorsFor(trip.id, trip.started_ts, samples.at(-1).ts)`
-        // used to run here and does not in v1 (D-050). Nothing in v1 reads the
-        // barometer or the pedometer back, and their consumers moved to v2 with
-        // D-032. Re-enabling is exactly this one call — see the note on the
-        // function itself for why it was kept.
-        await recordingEventDao.log('batch', `${inserted} fixes`);
-      } catch (error) {
-        await recordingEventDao.logError('onLocations', error);
-      }
+      },
     });
   },
 
   async onGeofenceTransition(transition: GeofenceTransition): Promise<void> {
-    await queue(async () => {
-      try {
-        // ⚠ T-171, same rule: only evidence of *being* somewhere opens a
-        // holiday. An exit is not that, and on this hardware it is usually not
-        // evidence of anything — see below.
-        // ⚠ T-195: and a crossing after a long silence must not join the
-        // lapsed trip either, or a stamp would be filed in the wrong holiday.
-        await closeLapsedTrip(transition.ts);
-        const trip = transitionMayStartTrip(transition.eventType)
-          ? await tripDao.getOrCreateActiveTrip()
-          : await tripDao.getActiveTrip();
+    await runQueuedBatch({
+      queue,
+      // ⚠ T-195: a crossing after a long silence must not join the lapsed
+      // trip either, or a stamp would be filed in the wrong holiday.
+      closeLapsedTrip: () => closeLapsedTrip(transition.ts),
+      foldWal: foldAfterLapse,
+      record: async () => {
+        try {
+          // ⚠ T-171, same rule: only evidence of *being* somewhere opens a
+          // holiday. An exit is not that, and on this hardware it is usually not
+          // evidence of anything — see below.
+          const trip = transitionMayStartTrip(transition.eventType)
+            ? await tripDao.getOrCreateActiveTrip()
+            : await tripDao.getActiveTrip();
 
-        if (trip === null) {
-          return;
+          if (trip === null) {
+            return;
+          }
+
+          // ⚠⚠ T-172 — THE REGISTRATION BURST. All 2,699 crossings on the P30
+          // were exits, arriving 83 to a single timestamp: every monitored region
+          // reporting EXIT as the set is registered, because the phone is inside
+          // none of them. You cannot leave somewhere you were never recorded
+          // entering, and `stampRules` pairs an exit with its enter — so an
+          // unpaired one was never going to award anything, and dropping it costs
+          // nothing real.
+          const hasPriorEnter =
+            transition.eventType !== 'exit' ||
+            (await geofenceEventDao.hasEnterInTrip(trip.id, transition.poiId));
+
+          if (!shouldRecordTransition(transition.eventType, hasPriorEnter)) {
+            return;
+          }
+
+          await geofenceEventDao.insertEvent({
+            trip_id: trip.id,
+            poi_id: transition.poiId,
+            ts: transition.ts,
+            event_type: transition.eventType,
+            accuracy_m: transition.accuracyM,
+          });
+          await recordingEventDao.log(
+            'batch',
+            `geofence ${transition.eventType} ${transition.poiId}`
+          );
+        } catch (error) {
+          await recordingEventDao.logError('onGeofenceTransition', error);
         }
-
-        // ⚠⚠ T-172 — THE REGISTRATION BURST. All 2,699 crossings on the P30
-        // were exits, arriving 83 to a single timestamp: every monitored region
-        // reporting EXIT as the set is registered, because the phone is inside
-        // none of them. You cannot leave somewhere you were never recorded
-        // entering, and `stampRules` pairs an exit with its enter — so an
-        // unpaired one was never going to award anything, and dropping it costs
-        // nothing real.
-        const hasPriorEnter =
-          transition.eventType !== 'exit' ||
-          (await geofenceEventDao.hasEnterInTrip(trip.id, transition.poiId));
-
-        if (!shouldRecordTransition(transition.eventType, hasPriorEnter)) {
-          return;
-        }
-
-        await geofenceEventDao.insertEvent({
-          trip_id: trip.id,
-          poi_id: transition.poiId,
-          ts: transition.ts,
-          event_type: transition.eventType,
-          accuracy_m: transition.accuracyM,
-        });
-        await recordingEventDao.log(
-          'batch',
-          `geofence ${transition.eventType} ${transition.poiId}`
-        );
-      } catch (error) {
-        await recordingEventDao.logError('onGeofenceTransition', error);
-      }
+      },
     });
   },
 

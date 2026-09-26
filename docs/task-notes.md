@@ -1612,3 +1612,42 @@ grep -A30 "^### T-052a" docs/task-notes.md
   byte-identical**, which is the only evidence worth having that a shared numerical routine is
   the same routine. Its unused `escapeRegex` went with the move — dead since the name matching
   stopped being Overpass's job.
+
+### T-242 — the recorder stopped after a cold start, and nothing said so
+
+**What the user saw:** a drive to Praia dos Reis Magos and back, *Começar passeio* on, and no
+trace, no stamp. The first guess (no SIM, so no GPS) was wrong, and so was the second (the app
+being reopened in one process). Both were ruled out by measurement, not argument.
+
+**How it was found, in the order that worked:**
+1. `raw_fix` and `recording_event`: the last fix before the trip was **25 Sep 14:31**; no `batch`
+   and no `error` row since. UI writes in the same hours succeeded, so the database was fine.
+2. `TaskService`'s own log: **63 deliveries, 0 `Finished task`**. The recorder service was
+   foreground and the OS's GPS request active, so fixes existed and were being handed over.
+3. A clean restart with `adb logcat` running from the start: healthy for about 20 seconds, then
+   the same silence, **before** any relaunch. That killed the relaunch theory.
+4. A temporary `console.warn` at the first line of each task function: after the stall,
+   JavaScript was alive (it kept driving the status bar) and **no task function was ever
+   called**. Nothing in the app's queue or database was hung.
+5. Reading expo-task-manager with that in hand: when the process starts with deliveries waiting,
+   `TaskService` asks the headless loader to start the app and the task manager registers as
+   headless. When the backlog drains, `invalidateAppRecord` runs two seconds later and removes
+   that registration, although the JS instance is the screen's and stays alive. Every later
+   delivery is parked for a registration that never comes back.
+
+**The fix is upstream's.** expo-task-manager 58.0.8 changes exactly those two places; 57.0.20
+does not. Adopting SDK 58 mid-release was the rejected alternative; the backport is two lines
+and a patch file.
+
+**⚠ The trap that nearly shipped a non-fix:** Expo modules come as **prebuilt AARs**
+(`node_modules/<module>/local-maven-repo/`). Patching the Java source changed nothing in the APK,
+and a test reading the source passed anyway. Found only because the compiled class was not where
+a compile would put it. It now builds from source (`buildFromSource`: `expo-task-manager` and
+its dependency `unimodules-app-loader`), and `javap` on the compiled `TaskService.class` showed
+the fix. `taskServicePatch.test.ts` checks the setting as well as the source.
+
+**Also learned, not a bug:** in the background expo-location **batches** fixes (3 to 15 min by
+profile, `samplingPolicy.ts`) and delivers them together, so a two-minute background window with
+one delivery is normal. The proof of the background path is a batch arriving while the app
+stays in the background (10 fixes at 19:17:59). Held fixes live in the process's memory until
+the batch is sent.

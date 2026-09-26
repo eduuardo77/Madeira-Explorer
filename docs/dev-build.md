@@ -496,6 +496,22 @@ produced it**, and take a backup before rebuilding over a known-good APK.
 ⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
 these docs is a **manual rename**, not something the build produces.
 
+## ⚠ Two Expo modules are compiled from source — T-242, 2026-09-26
+
+`app/package.json` lists `expo-task-manager` and `unimodules-app-loader` under
+`expo.autolinking.android.buildFromSource`. Every other Expo module comes as a prebuilt AAR from
+its `local-maven-repo/`. These two are compiled because `app/patches/expo-task-manager+57.0.9.patch`
+fixes a bug in the task service that silently stopped the recorder, and a patch to a prebuilt
+module's source never reaches the APK. `npm install` applies the patch (`postinstall`).
+To check a build really has it:
+
+```bash
+javap -c -p $(find app/node_modules/expo-task-manager/android/build -name TaskService.class) | grep -A8 "void invalidateAppRecord"
+```
+
+It must call `invalidateApp` and **not** touch `sHeadlessTaskManagers`. Delete the patch and both
+entries when the app moves to SDK 58, which carries the fix itself.
+
 ## ⚠ Content changes need the bundle rebuilt — T-180, 2026-09-22
 
 The JS imports `content/pois.json`, `levadas.json` and `regions.json`, which live **outside

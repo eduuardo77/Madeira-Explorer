@@ -104,8 +104,9 @@ lead outdoors.
   file with the Write tool.
 - **Play Protect prompts on every install**, and only the project lead can tap them.
 
-⚠⚠ **Since 2026-09-26 15:44 the P30 runs a STORE field build (T-232): not beta, so stamps past the
-free allowance lock, and nobody can pay yet.** Debuggable, so `run-as` works; performance readings
+⚠⚠ **Since 2026-09-26 19:07 the P30 runs a STORE field build with the T-242 fix: not beta, so
+stamps past the free allowance lock, and nobody can pay yet.** ⚠ **The recorder recorded nothing
+from 2026-09-25 14:31 to 2026-09-26 19:07 (T-242).** Debuggable, so `run-as` works; performance readings
 are not valid on it. The beta APK it replaced is not in the repo; rebuild it with the beta recipe in
 `docs/dev-build.md`. *Before that:* **the P30 ran a BETA release build (unlocked, D-084), reinstalled 2026-09-24 20:52 with the rings removed and the passport row (stamp 101 dp, *Centrar* centred beside it)**, with option D, End
 trip, the update notice, T-212 and maps-compose 6.12.1 (`pkgFlags` has no `DEBUGGABLE`, so
@@ -305,6 +306,13 @@ T-156 waits on T-182, and T-158 is parked until Gate R1.
 3. **T-161/T-162** — ship the listing; screenshots from a **real** trip.
 
 ## Traps. Each cost a session, and none was visible from the tests
+
+- ⚠⚠ **T-242 — the recorder went silent after a cold start with deliveries waiting.**
+  expo-task-manager 57 dropped its own registration; fixed with upstream's 58.0.8 change in
+  `app/patches/`. **Expo modules ship prebuilt AARs:** a patch to their source does nothing
+  unless the module is in `package.json`'s `expo.autolinking.android.buildFromSource`. Check the
+  compiled class (`javap`), not the source. **Before trusting the recorder, count `Handling`
+  against `Finished task` in `adb logcat -s TaskService`.**
 
 - ⚠⚠ **The map drew the UNCLEANED trace for a month — T-167, ✅ fixed 2026-09-22.**
   `NativeMapScreen` called `splitIntoSegments` (raw) while `traceCleanup.ts` reached the souvenir

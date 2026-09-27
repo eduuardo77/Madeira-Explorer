@@ -1,0 +1,26 @@
+diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
+index 82450b6..2caf28b 100644
+--- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
++++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
+@@ -24,6 +24,8 @@ import com.google.android.gms.maps.LocationSource
+ import com.google.android.gms.maps.model.BitmapDescriptor
+ import com.google.android.gms.maps.model.BitmapDescriptorFactory
+ import com.google.android.gms.maps.model.CameraPosition
++import com.google.android.gms.maps.model.JointType
++import com.google.android.gms.maps.model.RoundCap
+ import com.google.android.gms.maps.model.LatLng
+ import com.google.maps.android.compose.CameraMoveStartedReason
+ import com.google.maps.android.compose.CameraPositionState
+@@ -160,6 +162,12 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+           color = Color(polyline.color),
+           geodesic = polyline.geodesic,
+           width = polyline.width,
++          // Bruma (D-093): round joints and ends. The default mitred joint
++          // turns a sharp bend into a long spike (T-168), and a butt end makes
++          // a lit street stop square in the middle of a junction.
++          jointType = JointType.ROUND,
++          startCap = RoundCap(),
++          endCap = RoundCap(),
+           clickable = true,
+           onClick = {
+             onPolylineClick(

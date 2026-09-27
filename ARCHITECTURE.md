@@ -163,6 +163,15 @@ Evaluate geofence_event dwell + speed → award stamps
 Recompute region_progress
 ```
 
+⚠ **As built, 2026-09-27 (D-093, `app/src/matching/`).** Matching runs when the map opens, not in
+a background burst: on the P30 it costs about a millisecond a moving fix, and only what is new since
+the last visit is matched (`matched_chain`, `match_progress`, derived and regenerable). The movement
+bouts come from the receiver's reported speed (`motionGate.ts`); gaps are bridged by the shortest
+plausible route, which is how tunnels light; there is no barometer term and no separate levada
+corridor (levada paths and channels are in the network). The spatial index is a grid over typed
+arrays, not an R-tree. `visited_segment` below was not built as such: the map derives what to draw
+from the kept chains.
+
 ### 3.3 The reveal (once, at trip end)
 
 ```

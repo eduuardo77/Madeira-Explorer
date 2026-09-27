@@ -188,4 +188,43 @@ export const MIGRATIONS: Migration[] = [
       `CREATE INDEX idx_stamp_award_trip ON stamp_award(trip_id, awarded_ts);`,
     ],
   },
+  {
+    id: 3,
+    name: 'matched_chain',
+    statements: [
+      // ---------------------------------------------------------------------
+      // matched_chain — the roads a trip travelled, as the map draws them
+      // (D-093, T-245).
+      //
+      // DERIVED, not captured: reproducible from `raw_fix` plus
+      // `content/roads.json`, and wiped and rebuilt whenever `version` (the
+      // network's and the matcher's) no longer matches. Kept only so the map
+      // does not rematch a whole holiday every time Android restarts the app:
+      // matching costs about a millisecond a moving fix on the P30.
+      // `matching/chainStore.ts` decides which rows are final.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE matched_chain (
+         id          INTEGER PRIMARY KEY AUTOINCREMENT,
+         trip_id     INTEGER NOT NULL REFERENCES trip(id),
+         version     TEXT    NOT NULL,
+         first_ts    INTEGER NOT NULL,
+         last_ts     INTEGER NOT NULL,
+         -- 0..1, how close the fixes sat to the roads. Stored, never shown,
+         -- so the thresholds can be retuned against real trips.
+         confidence  REAL    NOT NULL,
+         -- JSON: [[edge, from, to], ...] and [[ts, atM], ...].
+         pieces      TEXT    NOT NULL,
+         anchors     TEXT    NOT NULL
+       );`,
+      `CREATE INDEX idx_matched_chain_trip ON matched_chain(trip_id, first_ts);`,
+      // Where the trip's matching may resume without changing the result
+      // (`matching/chainStore.ts`). Derived like the chains, and replaced
+      // with them.
+      `CREATE TABLE match_progress (
+         trip_id    INTEGER PRIMARY KEY REFERENCES trip(id),
+         version    TEXT    NOT NULL,
+         resume_ts  INTEGER NOT NULL
+       );`,
+    ],
+  },
 ];

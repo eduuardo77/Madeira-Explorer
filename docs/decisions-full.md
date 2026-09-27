@@ -1268,7 +1268,7 @@ are retained (D-010) precisely so matching can be improved later without re-coll
 
 ## D-032 — v1 ships without map matching. Draw the raw trace. Spend the effort on the UI.
 
-**Status:** Accepted — decided by the project lead 2026-08-08. **This is a scope decision and it
+**Status:** Accepted — decided by the project lead 2026-08-08. ⚠ **Matching is back in (D-093, 2026-09-27)**, at the project lead's request; the rest of this scope stands. **This is a scope decision and it
 supersedes the sequencing, not the architecture.**
 
 **Decision:** **Phase 4 (map matching) is deferred out of v1 entirely.** v1 draws the **raw GPS
@@ -4465,7 +4465,7 @@ trade rather than changing it.
 
 ## D-082 — The trace is cleaned, weighted honestly, and snapped only to levadas we ship
 
-**Status:** ⚠ **Provisional** — recommended 2026-09-22, not confirmed by the project lead.
+**Status:** **Superseded by D-093** (2026-09-27): the map now lights matched roads and paths. ⚠ **Provisional** — recommended 2026-09-22, not confirmed by the project lead.
 Research and costing: [`docs/trace-fidelity.md`](trace-fidelity.md).
 
 **What prompted it:** the project lead, looking at the running app — *"sometimes the app makes
@@ -5128,3 +5128,120 @@ dispute, and it also makes the filing visible to Allegra. Official fees found 20
 **EUR 850** for one class online (EUR 50 the second, EUR 150 each after); INPI Portugal about
 **EUR 124** for one class online before its fee update of 2026-07-01, so check the current table.
 The EUIPO SME Fund's 2026 voucher (75% back, up to EUR 700) is **exhausted** for 2026.
+
+## D-093 — The map lights the roads and paths travelled, matched on the phone (supersedes D-082; reverses D-032's deferral of matching)
+
+**Status:** **Accepted**, the direction: the project lead, 2026-09-27, chosen from the options put
+to them (*"Roads and paths travelled"*, and *"Roads, paths and levadas"* for the network). ⚠ **Every
+threshold is Provisional:** tuned on synthetic trips over the real network and on the P30's desk
+data, never on a real outing on Madeira (T-246 is that outing).
+
+**What prompted it.** Asked three times: *"I want the app to only highlight the real roads which you
+can see on Google Maps"* (2026-09-22); *"the highlighted lines are just random and not on the
+street"* (2026-09-26). The store listing promises it. `docs/map-lines-problem.md` measured why the
+GPS line could not: a phone at rest drifts smoothly 20 to 110 m along lines nobody walked (0.8 km
+drawn in one night on the desk), holes are bridged by chords, and a line of fixes is at best as close
+to the street as the GPS was. The lead pointed at **WalkNYC**, which is this product for New York:
+it ships NYC's streets as 86,638 blocks (an 11.6 MB asset) and, from its matcher's defaults, lights a
+block once four fixes lie within 20 m of it and cover 40% of it, on the phone, with a motion gate and
+a transit filter.
+
+**Decision.**
+
+1. **The map draws roads, not fixes.** The trip's fixes are matched to OpenStreetMap's road and path
+   network and what is drawn is the road's own shape, only the stretches travelled. Nothing is drawn
+   where the phone lay still or no road or path matched (a beach, a square): that is the honesty
+   contract, in place of D-032's *"the phone's positions"*.
+2. **The network ships as content** (`content/roads.json`, D-017): every road, service road, track,
+   footway, path, steps and levada channel of the archipelago, 59,216 edges, 6,539 km, 2.7 MB (1.5 MB
+   compressed). Built by `tools/build-roads.mjs` from the dated Portugal extract already on disk,
+   with a dependency-free PBF reader (checked against the Overpass survey of the same date: 50,943
+   highway ways against 50,946, 604 tunnels exactly). Left out on purpose: separately mapped
+   **sidewalks and crossings** (a walk along a street lights the street Google draws), parking
+   aisles and driveways, areas, private service roads, levada channels inside tunnels.
+3. **Matching runs on the phone, offline, from the raw rows** (D-010 untouched): a hidden Markov model
+   (Newson and Krumm 2009) with routes between fixes by bounded Dijkstra, so a tunnel is lit from a
+   fix at each portal. Four rules on top of the textbook, each added because a measurement or a
+   drawing showed the need:
+   - **A motion gate from the receiver's own speed** (`motionGate.ts`). GNSS speed is Doppler, not
+     derived from positions, and multipath barely moves it: on the desk, drift 20 to 40 m out had a
+     median reported speed of 0.14 m/s. The gate takes the median over ±30 s, so a lone wild value
+     (measured: 1 to 9 m/s, one at a time) cannot move it. ⚠ Android writes **exactly 0 for "no
+     speed"** (243 such fixes, all network, ±12 m or worse): those are not votes.
+   - **Routes bounded by the reported speed** (1.5 × the fastest nearby, plus 2 m/s): without it a
+     wild fix was reached by a detour out along a side street and back.
+   - **A fix that is the only evidence for a 40 m detour is dropped, on foot only.** Tried on drives
+     too, it cost automatic drives a third of their length, even scaled to distance.
+   - **Motorway and trunk carriageways are one-way.** The VR1 is two one-way roads 15 to 30 m apart;
+     undirected, a drive lit the opposite one (precision 92% before, 99.8% after). Streets stay
+     two-way: people walk them both ways.
+4. **Exports are clipped at the mask circle, geometrically.** The share card and the film are built
+   from the masked export trace and then cut exactly where they cross `MASK_RADIUS_M`, because the
+   matcher would otherwise route a gap along the very street the mask hides. A test proves the
+   unclipped route does cross the circle and the clipped one does not. (The old straight line had a
+   small version of the same leak: a chord across the circle.)
+5. **Round joints and caps** (`app/patches/expo-maps+57.0.1.patch`; expo-maps is now built from
+   source so the patch compiles in). Closes T-168's miter-spike question at the root.
+
+**Measured on synthetic trips over the real network** (`node tools/eval-matching.mjs`, 16 seeds,
+time-correlated GPS error with outliers; recall = the true route lit, precision = lit road that is
+right): Funchal outing walk 97.8% / 99.5%; automatic 30 s walk 83.8% / 94.7%; noisy old town 85.3% /
+91.5%; town drive 96.7% / 98.8%; automatic drive 92.7% / 96.3%; VR1 with tunnels, no fix underground,
+97.9% / 99.8%; levada under canopy 98.6% / 98.1%. **On the P30's real desk data the map lights 11 m
+and 0 m where the old line drew 0.8 km and 0.3 km.** ⚠ These say the matcher does what it was built
+to do on a model of GPS error. They do not say what Madeira's GPS does.
+
+**On the P30, same day** (field build, a probe database of four synthetic trips over real streets
+added to the phone's real desk trip, then the real database restored byte for byte):
+- **The lines sit on Google's streets at street zoom** in central Funchal (Rua do Pina, Via 25 de
+  Abril, Rua João de Deus): OSM's and Google's geometry agree within a few pixels there.
+- ⚠ **Tunnels drawn at full strength read as random lines** (straight strokes under Funchal where
+  Google shows no street). **They are drawn faded now**, the core colour at about a third opacity, as
+  Google draws its own. A straight line that remained is real: *Caminho do Comboio*, the old Monte
+  railway, a residential street.
+- **Cost, measured:** the network decode is about 800 ms of work (1,241 ms before it was rewritten
+  for Hermes), now in 12 ms slices so the screen keeps answering; matching was 1.6 ms a moving fix in
+  one block, now about 0.9 ms and sliced. **Chains are kept in `matched_chain`** so a cold start
+  matches only what is new: second cold open, 4 chains reused and 1 rematched in 67 ms, the same
+  37.7 km lit. Resuming is exact, not approximate: it restarts only where the matcher itself started
+  a chain at least a minute before the newest fix (`chainStore.ts`); a test matches a day visit by
+  visit against all at once. The first rule tried (keep all but the last chain) was wrong and that
+  test caught it.
+- `tools/smoke-release.mjs`: every screen opened, the replay included, nothing crashed.
+
+**Alternatives rejected.**
+- *Keep the GPS line and tidy harder* (direction A of the brief). No position-only rule separates
+  drift from a slow walk, and the lead asked for streets, not a tidier line.
+- *Google Roads API.* Sends the trace to Google (D-001, CONTEXT §2.5), costs per call, needs the
+  network, and snaps to roads only: a levada walk would be drawn on the ER-101.
+- *Snap only to the shipped levada courses* (D-082 tier 3). Does nothing for streets or drift.
+- *WalkNYC's rule as it is* (whole block lit from 40% coverage). Right for Manhattan's short
+  straight blocks; Madeira's edges run to kilometres of mountain road, where a whole edge lit from
+  40% claims road nobody drove, and a coverage count cannot bridge a tunnel. The stretch travelled
+  is drawn instead.
+- *`ACTIVITY_RECOGNITION` for the motion gate* (direction B). A new permission prompt and a privacy
+  line, when the speed already on every fix does the job.
+- *A SQLite R-tree* (ARCHITECTURE §4). A 100 m grid over typed arrays is enough at this size and
+  needs no schema.
+- *Overpass for the network*, as `build-levadas.mjs` does. It changes under you and depends on a
+  shared service; the extract on disk is dated and reproducible.
+
+**Still open.**
+- ⚠ **The field outing (T-246):** a walk in town (once as an outing, once on automatic recording)
+  and a drive through a VR1 tunnel. It answers whether dense fixes sit on the street, and tunes every
+  threshold.
+- **Automatic recording samples a walk every 30 s at balanced accuracy**, the matcher's weakest case.
+  An outing records at 10 s. Whether automatic recording should sample denser is T-034a's question,
+  now with a reason.
+- **Stacked roads** (VR1 over ER-101) rely on route continuity alone; no barometer is captured.
+- **The film and the share card draw tunnels at full strength**: only the map fades them so far.
+- **A cold start still spends about 1.4 s preparing the network** before the first line appears
+  (sliced, so the map answers meanwhile). Keeping the decoded arrays on disk would remove it.
+- **ODbL.** The app now credits OpenStreetMap (Licences). Shipping a derived database also asks that
+  it, or the means to rebuild it, be offered under the ODbL; the build tool and the dated extract are
+  the means. How to publish them is the project lead's call.
+
+**Supersedes** D-082 (cleanup is no longer what the map draws, the line-weight question dissolves on
+road geometry, and levadas are in the network). **Reverses D-032 in part:** its v1 scope stands
+except that matching is in, as the lead asked. D-002's *"highlighted roads are decoration"* has not
+described the product since D-071; this makes the code agree.

@@ -171,7 +171,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ⚠ **Not induced on the P30:** it needs a trip silent past the lapse rule. No `trip_end`
       row has ever come from this path on the phone.
 
-- [~] **T-244** **The map draws lines where nobody went** (the project lead, again, 2026-09-26).
+- [x] **T-244** ✅ *(superseded by T-245, D-093)* **The map draws lines where nobody went** (the project lead, again, 2026-09-26).
       Measured on the P30's real fixes (`docs/field-notes.md`, 2026-09-26): **(1)** a phone
       lying still for days drew 0.8 km and 0.3 km of lines out of GPS drift that wanders 20 to
       110 m smoothly over minutes at ±5 m, which no position-only rule can tell from slow walking;
@@ -186,6 +186,39 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       **Open, the project lead's call:** (1) and *"only the real streets"* are both answered by
       snapping to roads, which D-032 defers and D-082 (Provisional) declines.
       **(3) not measurable yet:** no real outing on Madeira is recorded; the next one is.
+
+### ⚠⚠ 2026-09-27: the map lights roads, not GPS positions (D-093)
+
+- [x] **T-245** ✅ **The map draws the roads and paths travelled, matched on the phone** (D-093,
+      the project lead's choice 2026-09-27, after WalkNYC). `content/roads.json` (59,216 edges,
+      6,539 km, 2.7 MB) from `tools/build-roads.mjs` over the local Portugal extract;
+      `app/src/matching/`: graph and grid, bounded Dijkstra, a motion gate from the receiver's
+      speed, a hidden Markov matcher, spur trimming and stitching, timed paths and the mask clip.
+      The map, the share card and the film all draw roads; exports are cut at the mask circle.
+      expo-maps patched for round joints and caps and built from source. OSM credited in
+      Licences. **860 tests.** Measured: `node tools/eval-matching.mjs` (numbers in D-093); the
+      desk's drift lights 11 m and 0 m where the old line drew 0.8 km and 0.3 km.
+      ✅ **Seen on the P30** with a probe database (four synthetic trips over real streets, then
+      the real database restored byte for byte): lines on Google's streets at street zoom;
+      **tunnels now drawn faded** after they read as random lines; network and matching run in
+      12 ms slices; chains kept in `matched_chain` + `match_progress` (migration 3), so a second
+      cold open rematched 1 chain in 67 ms. `smoke-release.mjs`: every screen, replay included.
+      ⚠ **Found along the way:** Android writes speed **exactly 0** for "no speed" (243 network
+      fixes), which a naive gate would read as standing still; the old export drew a **chord across
+      the mask circle** whenever a gap was short; the first decode blocked the P30's JavaScript
+      thread for **1,241 ms** (now sliced, see D-093).
+- [ ] **T-246** ⚠ **The field outing that tunes D-093** ⇠ T-245 ⚠ **the project lead, outdoors**
+      — On the P30 with the T-245 build: **(1)** a 20 to 30 minute walk in Funchal as an outing
+      (*Começar passeio*); **(2)** a similar walk with automatic recording only; **(3)** a drive
+      that goes through at least one VR1 tunnel. Then pull the database (field build, `run-as`)
+      and run `node tools/eval-matching.mjs --db <copy> --svg <outside the repo>`.
+      — **What it answers:** how far dense fixes sit from the mapped street (the brief's cause 3);
+      whether OSM's geometry sits on Google's roads at street zoom; every threshold in
+      `mapMatch.ts` and `motionGate.ts`, all of which say *NOT TUNED*.
+      — ⚠ Automatic recording samples every 30 s at balanced accuracy, the matcher's weakest case
+      on synthetic trips; if (2) is poor, T-034a (denser sampling while moving) is the lever.
+- [x] **T-244** ✅ **Superseded by T-245.** The map no longer draws fixes, so neither the drift nor
+      the chords can reach it. `MAX_DRAWN_STEP_M` stays for the film's fallback path.
 
 ### The monetisation build (`docs/monetization-execution-plan.md`, D-089, D-091)
 
@@ -1951,7 +1984,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       exception too, so a later tidy-up cannot quietly "fix" it.
       — **644 tests, `tsc` strict clean.** ⚠ Causes B, C and D from
       `docs/trace-fidelity.md` are untouched: T-168, T-169, T-170.
-- [ ] **T-168** **Settle what the renderer will actually draw — one emulator session** ⇠ T-167
+- [x] **T-168** ✅ *(2026-09-27, T-245: expo-maps patched to round joints and caps; the miter question is gone rather than measured)* **Settle what the renderer will actually draw — one emulator session** ⇠ T-167
       — ⚠ **`expo-maps@57.0.1` passes only `points`, `color`, `geodesic`, `width` to the polyline**
       (`GoogleMapsView.kt:158`). No `pattern`, no `jointType`, no caps, no `zIndex`. **So the
       dashed bridge recorded in `traceGeoJson.ts:112` is not buildable**, and joints take the Maps
@@ -1967,7 +2000,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       up at once** — highest value-per-minute test in this area.
       — ✅ **Alpha is available**: `CircleRecord`'s default colour is `0x7F0000FF`, so translucent
       strokes need no new capability.
-- [ ] **T-169** **Judge the trace's weight — band or hairline** ⇠ T-168, D-082 ⚠ **the project lead's eye**
+- [x] **T-169** *(superseded by D-093: the line is road geometry now, so it claims no GPS precision)* **Judge the trace's weight — band or hairline** ⇠ T-168, D-082 ⚠ **the project lead's eye**
       — **The argument:** a 4 pt hairline is a *claim of precision*. GPS gives ±5–20 m open-sky and
       worse under canopy, so every metre of ordinary error is drawn as a visible mistake. A wider,
       softer, translucent band says *you were along here* and the same error falls inside the mark
@@ -1976,7 +2009,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       design-brief §2.3. Those are about **weight and contrast, not sharpness**, and a 12 pt band at
       40% alpha can be heavier than a 4 pt hairline — but this is judged by eye, so it goes to the
       workbench, not into `app/`.
-- [ ] **T-170** ⚠ **Snap the trace to the levada courses we already ship** ⇠ T-018, T-021, D-082
+- [x] **T-170** *(superseded by D-093: levada paths and channels are in the matched network)* ⚠ **Snap the trace to the levada courses we already ship** ⇠ T-018, T-021, D-082
       — ⭐ **The Proa-shaped answer to *"only highlight the real roads"*.** D-002 curated the canvas;
       this curates the **graph**. `content/levadas.json` already holds eleven real OSM courses on
       the device — so **no import, no R-tree, no new storage**, against T-082's ~51,000 ways.

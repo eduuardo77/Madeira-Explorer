@@ -49,6 +49,12 @@ export type TracePaint = {
   /** The trace itself — the one saturated, heavy thing on the map (D-032). */
   coreColor: string;
   coreWidth: number;
+  /**
+   * The same line through a tunnel (D-093): the core colour at about a third
+   * opacity, `#RRGGBBAA`. Google fades its own tunnels; a full-strength line
+   * over blocks with no street drawn read as a line in a random place.
+   */
+  tunnelColor: string;
 };
 
 export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
@@ -76,6 +82,7 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     casingWidth: 8,
     coreColor: '#0A5FCC',
     coreWidth: 4,
+    tunnelColor: '#0A5FCC59',
   },
 
   /**
@@ -93,5 +100,6 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     // trace, lifted for the opposite background.
     coreColor: '#64B5F6',
     coreWidth: 4,
+    tunnelColor: '#64B5F659',
   },
 };

@@ -21,6 +21,22 @@ project lead finds it reads as AI-written, and `i18n.test.ts` plus `privacyPolic
 it. ⚠ **Battery, overnight survival and GPS under canopy are still unmeasured**, and **nobody has
 completed a real trip** (T-205).
 
+## ⚠⚠ 2026-09-27: the map lights roads, not GPS positions (D-093, T-245)
+
+The project lead chose WalkNYC's model: **the map draws the roads and paths travelled**, matched on
+the phone against OSM's network (`content/roads.json`, `tools/build-roads.mjs`, `app/src/matching/`).
+Nothing is drawn where the phone lay still or no road matched; tunnels are drawn faded; exports
+(share card, film) are built from the masked trace and clipped at the mask circle. Chains are kept
+in `matched_chain` / `match_progress` (migration 3). **860 tests.** Read D-093 before touching any
+of it; `node tools/eval-matching.mjs` is the quality check (`--db <copy> --svg <outside repo>` for a
+real trip).
+
+**On the P30 since 2026-09-27 16:28: a STORE field build with T-245** (debuggable, `run-as` works),
+the real database restored after a probe. ⚠ **Next is T-246, the project lead's outing** (a town walk
+as an outing, one on automatic recording, a drive through a VR1 tunnel), then pull and tune: every
+threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks on each install:
+*Não enviar* lets it through (can be tapped over adb).
+
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 
 The review (`docs/app-review-2026-09-22.md`, scored 7/20) became the plan. Status on 2026-09-24:

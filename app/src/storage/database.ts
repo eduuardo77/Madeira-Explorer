@@ -364,6 +364,8 @@ export async function deleteAllUserData(): Promise<void> {
     await db.execAsync('DELETE FROM sensor_sample;');
     await db.execAsync('DELETE FROM geofence_event;');
     await db.execAsync('DELETE FROM stamp_award;');
+    await db.execAsync('DELETE FROM matched_chain;');
+    await db.execAsync('DELETE FROM match_progress;');
     await db.execAsync('DELETE FROM recording_event;');
     await db.execAsync('DELETE FROM trip;');
     await db.execAsync('DELETE FROM app_state;');

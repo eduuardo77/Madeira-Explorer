@@ -1,6 +1,6 @@
 /**
- * The map draws the *cleaned* trace, and a test that fails the build if it stops
- * (T-167, D-082).
+ * What the map draws, and a test that fails the build if it changes by accident
+ * (T-167, D-082; since 2026-09-27, D-093: the roads travelled, not the fixes).
  *
  *     cd app && npm test
  *
@@ -107,50 +107,54 @@ test('the two functions genuinely differ, so the source check below is not guard
 });
 
 /**
- * ⚠⚠ THE ONE THAT MATTERS.
+ * ⚠⚠ THE ONE THAT MATTERS, AMENDED BY D-093 (2026-09-27).
  *
  * Everything above passes whether or not the screen calls the right function.
- * This is the only assertion that would have caught the bug.
+ * This is the only kind of assertion that would have caught T-167. Since
+ * D-093 the map draws **the roads travelled**, matched to the shipped network,
+ * not the fixes at all, cleaned or raw: the cleaned GPS line is what the
+ * project lead kept objecting to (`docs/map-lines-problem.md`).
  */
-test('NativeMapScreen draws the cleaned trace', () => {
-  const source = readFileSync(
-    path.join(srcRoot, 'map/NativeMapScreen.tsx'),
-    'utf8'
-  );
+test('NativeMapScreen draws the matched roads, not the fixes', () => {
+  const source = codeOnly(readFileSync(path.join(srcRoot, 'map/NativeMapScreen.tsx'), 'utf8'));
 
   assert.ok(
-    /drawableSegments\(/.test(source),
-    'NativeMapScreen must build its trace with drawableSegments — see T-167.'
+    /roadLinesFor\(/.test(source),
+    'NativeMapScreen must build its lines with roadLinesFor (D-093).'
   );
-
-  // Comments explain the rule and must not trip it, so only real calls count.
-  const calls = source
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('*') && !line.trim().startsWith('//'))
-    .filter((line) => /splitIntoSegments\s*\(/.test(line));
-
-  assert.deepEqual(
-    calls,
-    [],
-    'NativeMapScreen calls splitIntoSegments. That is the RAW trace: spikes under ' +
-      '250 m, the scribble where somebody stood still, and every jitter vertex are ' +
-      'drawn in full. Use drawableSegments — see T-167 and D-082.'
-  );
-});
-
-test('the souvenir card draws the cleaned trace too', () => {
-  const source = readFileSync(path.join(srcRoot, 'souvenir/shareTrip.ts'), 'utf8');
   assert.ok(
-    /drawableSegments\(/.test(source),
-    'shareTrip must build its strokes with drawableSegments.'
+    !/drawableSegments\s*\(|splitIntoSegments\s*\(|buildTrace\s*\(/.test(source),
+    'NativeMapScreen draws GPS fixes again. The map draws the roads travelled ' +
+      '(D-093): fixes joined by lines drift where the phone lay still and cut ' +
+      'corners the street does not.'
   );
 });
 
 /**
- * The deliberate exception, asserted so that a later sweep does not "tidy" it
- * into the rule and quietly break the film's timing.
+ * The share card and the film leave the phone. They must use the export path
+ * (masked fixes, then cut at the mask circle: `matching/roadTrace.ts` says why
+ * masking fixes is no longer enough), never the map's private lines.
  */
-test('the film composition still uses the raw splitter, on purpose', () => {
+test('the share card and the film draw roads from the masked export only', () => {
+  for (const file of ['souvenir/shareTrip.ts', 'souvenir/souvenirPlan.ts']) {
+    const source = codeOnly(readFileSync(path.join(srcRoot, file), 'utf8'));
+    assert.ok(
+      /exportRoadSegments\(\s*trace\.fixes,\s*trace\.accommodation,\s*MASK_RADIUS_M\s*\)/.test(source),
+      `${file} must draw exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M).`
+    );
+    assert.ok(
+      !/roadLinesFor\s*\(|rawFixDao/.test(source),
+      `${file} reaches the unmasked trace. Exports go through getExportableTrace only (D-040).`
+    );
+  }
+});
+
+/**
+ * The film's own fallback, asserted so that a later sweep does not "tidy" it
+ * away: with no roads given, composition still paces the film by the fixes'
+ * own timestamps.
+ */
+test('the film composition keeps the raw splitter as its fallback, on purpose', () => {
   const source = readFileSync(
     path.join(srcRoot, 'souvenir/composition.ts'),
     'utf8'
@@ -158,8 +162,16 @@ test('the film composition still uses the raw splitter, on purpose', () => {
 
   assert.ok(
     /splitIntoSegments\(/.test(source),
-    'composition.ts paces the film by the fixes\' own timestamps and must NOT be ' +
-      'switched to drawableSegments — cleaning first moved a stamp cue to the start ' +
-      'of the draw. See the header of drawableSegments in traceGeoJson.ts.'
+    "composition.ts paces the film by the fixes' own timestamps when it is not " +
+      'given roads, and must NOT be switched to drawableSegments: cleaning first ' +
+      'moved a stamp cue to the start of the draw.'
   );
 });
+
+/** Source without comments, so the rules above can be explained in comments. */
+function codeOnly(source: string): string {
+  return source
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('*') && !line.trim().startsWith('//'))
+    .join('\n');
+}

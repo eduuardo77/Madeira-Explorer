@@ -45,6 +45,7 @@
     "autolinking": {
       "android": {
         "buildFromSource": [
+          "expo-maps",
           "expo-task-manager",
           "unimodules-app-loader"
         ]

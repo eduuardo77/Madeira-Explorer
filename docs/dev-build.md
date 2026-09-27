@@ -496,7 +496,12 @@ produced it**, and take a backup before rebuilding over a known-good APK.
 ⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
 these docs is a **manual rename**, not something the build produces.
 
-## ⚠ Two Expo modules are compiled from source — T-242, 2026-09-26
+## ⚠ Three Expo modules are compiled from source — T-242, 2026-09-26; expo-maps since T-245
+
+⚠ **Since 2026-09-27 `expo-maps` is compiled from source too**, for
+`app/patches/expo-maps+57.0.1.patch`: round joints and caps on every polyline (D-093, T-168). To
+check a build has it: `javap -c -p` on `GoogleMapsView$Content$8.class` under
+`app/node_modules/expo-maps/android/build` must mention `RoundCap`.
 
 `app/package.json` lists `expo-task-manager` and `unimodules-app-loader` under
 `expo.autolinking.android.buildFromSource`. Every other Expo module comes as a prebuilt AAR from

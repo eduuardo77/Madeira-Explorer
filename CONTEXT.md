@@ -64,6 +64,11 @@ completely. This is what makes the system degrade gracefully instead of catastro
 **Implication:** never let road coverage become the headline metric, and never let a matching
 improvement be prioritised over stamp reliability.
 
+⚠ **Since D-071 and D-093 the lit roads are not decoration: they are the product's core value**
+(*where you have been*), and since 2026-09-27 the map draws the roads and paths matched on the
+phone (`app/src/matching/`). What still holds from this section: **stamps never depend on
+matching.** The award pass reads geofences and fixes, not matched roads, and must stay that way.
+
 ### 2.2 Geofences are the backbone.
 
 OS geofences are handled by the location coprocessor at near-zero battery cost, survive app

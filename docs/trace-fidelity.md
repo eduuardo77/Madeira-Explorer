@@ -1,6 +1,8 @@
 # Why the drawn trace looks wrong, and what a proper fix is
 
 **Written:** 2026-09-22. **Status:** research, feeding **D-082 (Provisional)**.
+⚠ **Superseded 2026-09-27 by D-093:** the map now draws roads and paths matched on the phone, not
+the cleaned trace. This file stays as the record of why the GPS line could not do it.
 **Prompted by:** the project lead, looking at the running app — *"sometimes the app makes lines in
 random places which looks a bit odd. I want the app to only highlight the real roads."*
 

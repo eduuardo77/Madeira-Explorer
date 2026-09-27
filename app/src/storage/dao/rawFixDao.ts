@@ -116,15 +116,20 @@ export async function getMovementWindow(
  */
 export async function getTraceFixes(
   tripId: number
-): Promise<{ ts: number; lat: number; lon: number; accuracy_m: number | null }[]> {
+): Promise<
+  { ts: number; lat: number; lon: number; accuracy_m: number | null; speed_mps: number | null }[]
+> {
   const db = await getDatabase();
+  // `speed_mps` since D-093: the road matcher tells a phone at rest from one
+  // moving by the speed the receiver measured, not by the positions.
   return db.getAllAsync<{
     ts: number;
     lat: number;
     lon: number;
     accuracy_m: number | null;
+    speed_mps: number | null;
   }>(
-    `SELECT ts, lat, lon, accuracy_m
+    `SELECT ts, lat, lon, accuracy_m, speed_mps
        FROM raw_fix
       WHERE trip_id = ?
       ORDER BY ts;`,

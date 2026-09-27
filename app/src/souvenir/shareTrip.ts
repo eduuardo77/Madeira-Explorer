@@ -24,13 +24,13 @@ import type { View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { getContentPack } from '../content/poiCatalogue';
-import { drawableSegments } from '../map/traceGeoJson';
+import { exportRoadSegments } from '../matching/roadNetwork';
 import { getCurrentProgress } from '../progress/currentProgress';
-import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { deviceLanguage, t } from '../i18n';
+import { MASK_RADIUS_M } from './accommodation';
 import { getExportableTrace, type ExportRefusal } from './exportTrace';
 import {
   buildShareCard,
@@ -101,8 +101,11 @@ export async function buildCardForTrip(
         return place === undefined ? [] : [place.name];
       });
 
-    const strokes: CardPoint[][] = drawableSegments(trace.fixes, GAP_THRESHOLD_MS).map(
-      (segment) => segment.fixes.map((fix): CardPoint => [fix.lon, fix.lat])
+    // The roads travelled, as on the map (D-093), but from the masked trace
+    // only and cut at the mask circle: this image leaves the phone.
+    const roads = await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M);
+    const strokes: CardPoint[][] = roads.map((segment) =>
+      segment.fixes.map((fix): CardPoint => [fix.lon, fix.lat])
     );
 
     return {

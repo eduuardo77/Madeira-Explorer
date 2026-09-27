@@ -278,6 +278,13 @@ export type SouvenirInput = {
   totalPlaces: number;
   /** Where the recorder considers a silence a genuine break. */
   gapThresholdMs: number;
+  /**
+   * The roads travelled, timed and already masked (D-093,
+   * `matching/roadNetwork.ts#exportRoadSegments`). When given, the film draws
+   * these instead of the fixes joined by straight lines; the fixes are still
+   * what `safeToShare` vouches for, and these were built from them.
+   */
+  roads?: TraceSegment[];
 };
 
 /**
@@ -294,7 +301,10 @@ export function composeSouvenir(input: SouvenirInput): Composition {
     return { renderable: false, reason: input.trace.reason };
   }
 
-  const segments = splitIntoSegments(input.trace.fixes, input.gapThresholdMs);
+  const segments =
+    input.roads !== undefined
+      ? input.roads
+      : splitIntoSegments(input.trace.fixes, input.gapThresholdMs);
   if (segments.length === 0) {
     return { renderable: false, reason: 'nothing drawable in the trace' };
   }

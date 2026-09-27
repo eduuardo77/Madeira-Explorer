@@ -609,6 +609,13 @@ export const STRINGS = {
     'O {app} é feito com {count} pacotes de código aberto, listados abaixo com as suas licenças. O Google Maps e os serviços Google Play são usados nos termos da própria Google.',
     '{app} nutzt {count} Open-Source-Pakete, unten mit ihren Lizenzen aufgeführt. Google Maps und die Google Play-Dienste werden zu Googles eigenen Bedingungen verwendet.'
   ),
+  // D-093: the roads the map lights up, the levada courses and the regions
+  // are OpenStreetMap data, which the ODbL asks to be credited.
+  'licences.osm': s(
+    'Roads, paths, levadas and regions: © OpenStreetMap contributors, under the Open Database License (ODbL).',
+    'Estradas, caminhos, levadas e regiões: © colaboradores do OpenStreetMap, sob a Open Database License (ODbL).',
+    'Straßen, Wege, Levadas und Regionen: © OpenStreetMap-Mitwirkende, unter der Open Database License (ODbL).'
+  ),
   'licences.noText': s(
     'Released under {license}. The package ships no licence file of its own.',
     'Publicado sob {license}. O pacote não traz ficheiro de licença próprio.',

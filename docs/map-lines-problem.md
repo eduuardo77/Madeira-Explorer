@@ -1,5 +1,9 @@
 # The highlighted lines on the map: the problem, for a fresh look
 
+⚠ **Answered the same day: D-093.** The project lead chose *roads and paths travelled* (WalkNYC's
+model); it is built (T-245), seen on the P30 with a probe database, and waits on one real outing to
+tune (T-246). Everything below is the brief as it was written.
+
 **Written 2026-09-27** at the project lead's request, to open the question in a new chat. It
 collects what is known, what was measured, what is fixed, and what is still open. It is a brief
 for research, not a decision. Nothing here changes the app.

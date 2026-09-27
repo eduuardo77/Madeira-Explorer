@@ -91,6 +91,7 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
           <View style={styles.header}>
             <Text style={styles.heading}>{t('licences.title')}</Text>
             <Text style={styles.note}>{t('licences.note', { count: OPEN_SOURCE_COUNT })}</Text>
+            <Text style={styles.note}>{t('licences.osm')}</Text>
           </View>
         }
         renderSectionHeader={({ section }) => (

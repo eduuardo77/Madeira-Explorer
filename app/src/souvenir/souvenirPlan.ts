@@ -23,6 +23,8 @@ import * as tripDao from '../storage/dao/tripDao';
 import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import type { Composition, SouvenirStamp } from './composition';
 import { composeSouvenir } from './composition';
+import { exportRoadSegments } from '../matching/roadNetwork';
+import { MASK_RADIUS_M } from './accommodation';
 import { getExportableTrace } from './exportTrace';
 
 /**
@@ -64,6 +66,9 @@ export async function getSouvenirComposition({ quiet = false }: { quiet?: boolea
       // The same threshold the map and the health check use, so a gap the app
       // has already told the user about is the same gap the video shows.
       gapThresholdMs: GAP_THRESHOLD_MS,
+      // The roads, as the map draws them (D-093): from the masked trace, cut
+      // at the mask circle, because the film is made to be posted.
+      roads: await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M),
     });
 
     if (quiet) {

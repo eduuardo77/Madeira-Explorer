@@ -46,6 +46,8 @@ export type OvernightFix = {
   lat: number;
   lon: number;
   accuracy_m: number | null;
+  /** Carried through masking for the road matcher's motion gate (D-093). */
+  speed_mps?: number | null;
 };
 
 /**

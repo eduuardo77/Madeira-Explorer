@@ -60,7 +60,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-029** | OSM alone is sufficient for levadas. Select by name and relation, never by tag. | Provisional |
 | **D-030** | Protomaps basemap schema, extracted from their hosted planet build. | Provisional |
 | **D-031** | No backend. Re-examined against the competition, and reaffirmed. | Accepted |
-| **D-032** | v1 ships without map matching. Draw the raw trace. Spend the effort on the UI. | Accepted |
+| **D-032** | v1 ships without map matching. Draw the raw trace. Spend the effort on the UI. | Accepted; ⚠ **matching is back in since D-093** |
 | **D-033** | The dynamic geofence window: nearest-by-edge-distance, plus an exit-only anchor. | Provisional |
 | **D-034** | The content pack: one JSON file, compiled in, validated twice. | Provisional |
 | **D-035** | Terrain ships as raw elevation, shaded at render time. AWS Terrain Tiles, z12 ceiling. | Provisional |
@@ -110,7 +110,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-079** | A stamp is a picture **of its place**, not of its category. Glyphs in `app/`, the assignment in `content/`. | **Provisional** |
 | **D-080** | The app is **light**; the passport's album page stays **dark**, because all thirty colourways fail on a light card. | **Accepted** |
 | **D-081** | The **pedometer waits for v2** — expo-sensors cannot read Android step history — and `ACTIVITY_RECOGNITION` is stripped meanwhile. | **Accepted** |
-| **D-082** | The drawn trace gets **cleanup wired in, an honest line weight, and snapping only to shipped levada courses** — general matching stays deferred. | **Provisional** |
+| **D-082** | The drawn trace gets **cleanup wired in, an honest line weight, and snapping only to shipped levada courses** — general matching stays deferred. | **Superseded** by D-093 |
 | **D-083** | The passport button **is your latest visible stamp**, with the rank as a **metal rim and dark hairline**; the count leaves the button. | **Accepted** |
 | **D-084** | **Public v1 ships with Play Billing working**; the closed beta runs unlocked. | **Accepted** |
 | **D-085** | ~~The home map shows every place faintly~~ ⚠ **Rings removed 2026-09-24** by the project lead: only collected places are drawn, as D-070 said. | **Reversed** |
@@ -121,6 +121,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-090** | A **quiet progress line** above the outing button, *3 de 80 lugares* and a 3 dp bar, after WalkNYC's. Shown at zero; not tappable; said once to screen readers (by the passport button). Amends D-083/D-085. | **Accepted** (the drawing Provisional) |
 | **D-091** | **Billing is `expo-iap`**, straight to Google Play Billing from the phone; no server, **no account**. RevenueCat rejected: it contacts a third party at every launch and holds every purchase. We must prove acknowledgement, pending, offline and restore ourselves. | **Accepted** 2026-09-25 |
 | **D-092** | The app is **Bruma**; the Play title is **Bruma: Madeira Walk Tracker**. Same sound in Portuguese and English; the descriptor carries the meaning and must be understood alone. Lifts §7.2's ban on *Track*. Package stays `com.proa.madeira`. Supersedes D-074. | **Accepted** 2026-09-25 (renamed in code 2026-09-25, T-240). ✅ **Kept after the same day's trademark search** (a near-abandoned app named *Bruma*; EU word mark BRUMA in software and travel, probably unused there). An attorney's view on that mark before the first upload (T-187). |
+| **D-093** | **The map lights the roads and paths travelled**, matched on the phone against OSM's network shipped as `content/roads.json`; nothing where the phone lay still or no road matched. Motion gate from the receiver's speed; exports clipped at the mask circle. Supersedes D-082; reverses D-032's deferral of matching. | **Accepted** 2026-09-27 (the direction; every threshold Provisional until the field outing, T-246) |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

@@ -368,3 +368,33 @@ has ever been recorded on this phone; the one drive (26 Sep) was lost to T-242. 
 geometry is ready for the question (`app/assets/map/madeira.pmtiles`, `roads` layer, read
 locally), so the next recorded outing answers it without sending a coordinate anywhere.
 
+
+## 2026-09-27 — The P30's own speed tells rest from movement; matching on the phone (D-093)
+
+Measured on copies of the P30's database outside the repository (distances and speeds only), and on
+the phone itself with a probe database (synthetic trips over real streets added to the real desk
+trip, then the original restored byte for byte).
+
+**1. The receiver's speed separates desk drift from walking.** While the phone lay on the desk and
+its position wandered 20 to 40 m out, the speed it reported had a median of **0.14 m/s** (90th
+percentile 0.37), where the positions implied up to 6 m/s. A few drift fixes reported 1 to 9 m/s,
+one at a time. GNSS speed comes from the Doppler shift, not from positions, so multipath barely
+touches it. This is what `matching/motionGate.ts` stands on, and why the desk now lights **11 m and
+0 m** where the old line drew 0.8 km and 0.3 km.
+
+**2. Android writes exactly 0 for "no speed".** All 243 fixes with a speed of exactly 0 had bearing 0
+and came from the network, at ±12 m or worse (±43 m on average). A GNSS fix at rest reports a small
+non-zero speed (0.04 m/s typically). Read as votes, those zeros would call a walk on wifi fixes
+standing still.
+
+**3. Still no real movement on Madeira.** Since the recorder fix (T-242) every fix on the P30 is the
+phone on the desk. Whether dense fixes sit on the street is still T-246's question.
+
+**4. OSM sits on Google's streets in central Funchal**, seen at street zoom on the P30 with matched
+synthetic walks: Rua do Pina, Via 25 de Abril, Rua João de Deus, within a few pixels. Tunnels under
+the city, drawn at full strength, looked like lines in random places; they are faded now.
+
+**5. What matching costs on the P30 (Hermes).** Decoding the network: 1,241 ms in one block as first
+written, about 800 ms after rewriting for an interpreter, now spread in 12 ms slices (1.4 s wall).
+Matching: 1.6 ms a moving fix in one block at first, about 0.9 ms after, sliced. A second cold open
+reused 4 chains from `matched_chain` and rematched 1 (118 fixes) in 67 ms.

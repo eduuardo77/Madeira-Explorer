@@ -75,7 +75,6 @@ import {
   type ControlInput,
   type RecorderNotice,
 } from '../recording/recorderControls';
-import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
@@ -96,7 +95,8 @@ import { representativeGeofence } from './placeMarkers';
 import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
-import { drawableSegments, traceBounds } from './traceGeoJson';
+import { traceBounds } from './traceGeoJson';
+import { networkTimings, roadLinesFor } from '../matching/roadNetwork';
 import { TRACE_PAINT } from './traceStyle';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -375,28 +375,38 @@ export default function NativeMapScreen({
           }
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
-            // The same gap rule as before: where the recorder admits silence,
-            // the drawing breaks rather than bridging it (ARCHITECTURE §10).
+            // ⚠ **The roads travelled, not the GPS positions (D-093).** The
+            // phone's fixes are matched to the shipped network and what is
+            // drawn is the road's own shape, so the line sits on the street
+            // Google draws, and nothing is drawn where the phone lay still or
+            // no road matched. `traceDrawn.test.ts` fails the build if this
+            // screen goes back to drawing fixes.
             //
-            // ⚠ **`drawableSegments`, never `splitIntoSegments` — T-167.** The
-            // raw splitter applies the accuracy filter and the two break rules
-            // and stops there, so spikes under 250 m, the scribble where
-            // somebody stood still, and every jitter vertex were all drawn in
-            // full. This screen called it for a month: it was written (Aug 14)
-            // before `traceCleanup.ts` existed (Aug 16), the cleanup was wired
-            // into `buildTrace`, and the only caller of *that* is the retired
-            // MapLibre screen in `app/attic/`. So the souvenir and every
-            // preview tool drew the cleaned trace and the phone did not.
-            // `traceDrawn.test.ts` fails the build if this comes unwired again.
-            const segments = drawableSegments(fixes, GAP_THRESHOLD_MS);
+            // ⚠ T-167's lesson still applies: this is the call that decides
+            // what the user sees, and a preview tool drawing something else
+            // proves nothing about it.
+            const roads = await roadLinesFor(trip.id, fixes);
+            if (roads.fresh) {
+              // The on-device record of what matching costs: the network's
+              // decode the first time, then what each visit matched (D-093).
+              const network = networkTimings();
+              await recordingEventDao.log(
+                'map',
+                `roads: kept ${roads.keptChains} chains, matched ${roads.newChains} ` +
+                  `(${JSON.stringify(roads.stats)}) in ${roads.elapsedMs} ms, ` + // i18n-exempt: diary line, continued
+                  `${Math.round(roads.lengthM)} m lit, ${roads.lines.length} lines; ` + // i18n-exempt: diary line, continued
+                  `network ${JSON.stringify(network)}` // i18n-exempt: diary line, continued
+              );
+            }
             setTracePolylines(
-              segments.map((segment, index) => ({
+              roads.lines.map((line, index) => ({
                 id: `trace-${index}`,
-                coordinates: segment.fixes.map((fix) => ({
-                  latitude: fix.lat,
-                  longitude: fix.lon,
+                coordinates: line.points.map(([lat, lon]) => ({
+                  latitude: lat,
+                  longitude: lon,
                 })),
-                color: tracePaint.coreColor,
+                // Underground stretches faded, as Google draws its tunnels.
+                color: line.tunnel ? tracePaint.tunnelColor : tracePaint.coreColor,
                 width: px(tracePaint.coreWidth),
               }))
             );

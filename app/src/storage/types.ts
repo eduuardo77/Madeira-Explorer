@@ -92,7 +92,14 @@ export type RecordingEventKind =
    * past SQLite's autocheckpoint, or the checkpoint was refused (T-178).
    * Routine checkpoints write nothing — `storage/walPolicy.ts` decides.
    */
-  | 'wal_checkpoint';
+  | 'wal_checkpoint'
+  /**
+   * The map matched the trip to the road network (D-093): how many fixes,
+   * how much was lit, how long it took. Written only when matching actually
+   * ran, not on a cached answer, so it is the on-device timing record the
+   * matcher's performance is judged by.
+   */
+  | 'map';
 
 export type Trip = {
   id: number;

@@ -44,6 +44,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     alignSelf: 'flex-start',
   },
-  text: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
+  // D-095: the label size, as every control's since the map was measured
+  // against WalkNYC's. The target is the 60 dp row, not the words.
+  text: { color: colors.tint, fontSize: fontSize.label, fontWeight: '600' },
   pressed: { opacity: 0.75 },
 });

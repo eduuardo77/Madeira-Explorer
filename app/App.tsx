@@ -9,7 +9,7 @@ import MapScreen, { type FocusPlace } from './src/map/NativeMapScreen';
 import OnboardingFlow, {
   pendingPermissionPrompt,
 } from './src/onboarding/OnboardingFlow';
-import type { OnboardingScreen } from './src/onboarding/OnboardingView';
+import { needsAndroidDisclosure, type OnboardingScreen } from './src/onboarding/OnboardingView';
 import { syncRecordingWithPreferences } from './src/recording/tripRecording';
 import { checkTripEnd } from './src/progress/tripEndDetection';
 import * as appStateDao from './src/storage/dao/appStateDao';
@@ -190,6 +190,12 @@ export default function App() {
           onFocusHandled={() => setFocusPlace(null)}
           onOpenPassport={() => setScreen('passport')}
           onOpenSettings={() => setScreen('settings')}
+          // D-095: the notice's tap. The same screens the day-2 offer uses,
+          // disclosure first on Android (T-121); the map is mounted again
+          // when they finish and reads the new permission.
+          onAskAlways={() =>
+            setPrompt(needsAndroidDisclosure() ? 'android-disclosure' : 'always-upgrade')
+          }
         />
       ) : screen === 'passport' ? (
         <PassportScreen

@@ -327,6 +327,16 @@ export const mapButton = {
 } as const;
 
 
+/**
+ * The map's warning banner (D-095): WalkNYC's amber, measured off the P30's
+ * screenshot, with near-black ink at 9.7:1. The same on both maps: it is a
+ * warning, not chrome, so it does not follow the ground the way `mapChrome` does.
+ */
+export const warningBanner = {
+  fill: '#FFB300',
+  ink: '#1A1A1A',
+} as const;
+
 /** Minimum tap target, in dp. D-015: 60, not 44. */
 export const MIN_TAP_TARGET = 60;
 
@@ -345,6 +355,12 @@ export const spacing = {
  */
 export const fontSize = {
   small: 14,
+  /**
+   * A control's label and a banner's title (D-095, 2026-09-27): WalkNYC's
+   * *Start Walk*, measured off the P30 at the same scale as ours. Body at 17 in
+   * bold made the walk button the loudest thing on the map.
+   */
+  label: 16,
   /** iOS's own body size, which this already was. */
   body: 17,
   title: 22,

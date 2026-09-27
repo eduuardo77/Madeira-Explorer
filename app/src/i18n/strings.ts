@@ -360,14 +360,27 @@ export const STRINGS = {
     'Permitir a localização, para a aplicação poder registar por onde anda',
     'Standort erlauben, damit die App aufzeichnen kann, wo Sie unterwegs sind'
   ),
-  // ── D-087 §4: what the map says about automatic recording, only when wrong ──
-  // Names the phone's own words for the setting (teardown item 4).
+  // ── D-087 §4, D-095: what the map says about automatic recording ──
+  // D-095: in WalkNYC's shape, the consequence first and then what a tap does.
+  // The second line names the phone's own words for the setting (teardown
+  // item 4); the tap goes through the disclosure to that choice (T-121).
   'notice.needsAlways': s(
-    'Automatic recording needs location set to “Allow all the time”',
-    'O registo automático precisa da localização em “Permitir sempre”',
-    'Die automatische Aufzeichnung braucht den Standort auf „Immer zulassen“'
+    'Automatic recording is off',
+    'O registo automático está desligado',
+    'Die automatische Aufzeichnung ist aus'
   ),
-  'notice.needsAlways.action': s('Open phone settings', 'Abrir definições do telemóvel', 'Telefoneinstellungen öffnen'),
+  'notice.needsAlways.action': s(
+    'Tap to choose “Allow all the time”',
+    'Toque para escolher “Permitir sempre”',
+    'Tippen, um „Immer zulassen“ zu wählen'
+  ),
+  // D-095 (option 6B): said while automatic recording is working, where the
+  // progress line sits, so nobody wonders whether they must start an outing.
+  'map.status.automatic': s(
+    'Recording automatically',
+    'A registar automaticamente',
+    'Automatische Aufzeichnung läuft'
+  ),
   // ⚠ Says what was measured — nothing arrived — and not that the recorder is
   // dead, which the app cannot see (recorderSilence.ts). Not dismissible (T-174).
   'notice.silent': s(
@@ -375,7 +388,11 @@ export const STRINGS = {
     'Nada registado há {duration}',
     'Seit {duration} nichts aufgezeichnet'
   ),
-  'notice.silent.action': s('Restart recording', 'Reiniciar o registo', 'Aufzeichnung neu starten'),
+  'notice.silent.action': s(
+    'Tap to restart recording',
+    'Toque para reiniciar o registo',
+    'Tippen, um die Aufzeichnung neu zu starten'
+  ),
   'notice.a11y.dismiss': s('Dismiss', 'Fechar', 'Schließen'),
   // ── D-087 §7: the short summary when an outing ends ──
   'walk.summary.title': s('Outing ended', 'Passeio terminado', 'Ausflug beendet'),

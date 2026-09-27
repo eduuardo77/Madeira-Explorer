@@ -35,7 +35,13 @@ real trip).
 "Physical activity" permission, asked after location; weights, never filters. **The ask is on the
 P30's screen, for the project lead to answer.** Then check `activity_event` fills in the background.
 
-**On the P30 since 2026-09-27 20:24: a STORE field build with T-245 and T-247** (debuggable, `run-as` works),
+⚠ **D-095 (same day): the map says when automatic recording works** (a status line in the progress
+line's place), warns in WalkNYC's amber banner when it does not, and its controls and Settings are
+drawn at WalkNYC's size with the 60 dp targets kept by hitSlop. The banner's tap is untried on a
+phone without "all the time". Type stops at 14 sp (D-015); WalkNYC's is 12, and lowering the floor
+is the lead's call.
+
+**On the P30 since 2026-09-27 22:14: a STORE field build with D-095** (debuggable, `run-as` works),
 the real database restored after a probe. ⚠ **Next is T-246, the project lead's outing** (a town walk
 as an outing, one on automatic recording, a drive through a VR1 tunnel), then pull and tune: every
 threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks on each install:

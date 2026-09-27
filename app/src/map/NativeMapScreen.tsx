@@ -42,7 +42,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Linking,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -72,6 +71,7 @@ import {
   formatDuration,
   primaryControl,
   recorderNotice,
+  recordingStatus,
   type ControlInput,
   type RecorderNotice,
 } from '../recording/recorderControls';
@@ -82,7 +82,11 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import PlaceCardView from '../ui/PlaceCardView';
 import { useBackHandler } from '../ui/useBackHandler';
-import PrimaryOverlay, { PROGRESS_STRIP_HEIGHT, type MapNotice } from '../ui/PrimaryOverlay';
+import PrimaryOverlay, {
+  PROGRESS_STRIP_HEIGHT,
+  WALK_HEIGHT,
+  type MapNotice,
+} from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { isOffArchipelago, recentreTarget, zoomFloor } from './mapFence';
@@ -135,11 +139,14 @@ const HOME_BOUNDS = lightTemplate.metadata['madeira:home'] as Bounds;
  * *Re-centre* sits in that row rather than above it. And the progress strip
  * (D-090) sits between that row and the walk button, with its own `spacing.sm`
  * gap.
+ *
+ * ⚠ Since D-095 the walk button draws `WALK_HEIGHT` (52), its target still 60.
+ * The framing wants what is drawn.
  */
 function cameraPadding(hasRecordingControl: boolean) {
   const strip = PROGRESS_STRIP_HEIGHT + spacing.sm;
   const bottomChrome = hasRecordingControl
-    ? STAMP_BUTTON_SIZE + strip + MIN_TAP_TARGET + spacing.sm + spacing.xl
+    ? STAMP_BUTTON_SIZE + strip + WALK_HEIGHT + spacing.sm + spacing.xl
     : STAMP_BUTTON_SIZE + strip + spacing.xl;
   return {
     // The settings control plus the status bar it sits below.
@@ -205,11 +212,17 @@ export default function NativeMapScreen({
   onFocusHandled,
   onOpenPassport,
   onOpenSettings,
+  onAskAlways,
 }: {
   focusPlace: FocusPlace | null;
   onFocusHandled: () => void;
   onOpenPassport: () => void;
   onOpenSettings: () => void;
+  /**
+   * D-095: the notice's tap. The app shows the prominent disclosure and then
+   * the phone's own choice (T-121): Play forbids going straight to the ask.
+   */
+  onAskAlways: () => void;
 }) {
   const { width, height } = useWindowDimensions();
 
@@ -679,7 +692,10 @@ export default function NativeMapScreen({
         ? {
             text: t('notice.needsAlways'),
             actionLabel: t('notice.needsAlways.action'),
-            onAction: act(() => Linking.openSettings()),
+            // D-095, option 8C: to the choice itself, through the disclosure,
+            // where WalkNYC's opens the app's info page and leaves the user to
+            // find Permissions, Location, Allow all the time.
+            onAction: onAskAlways,
             onDismiss: dismiss('needs-always'),
           }
         : noticeKind === 'recorder-stopped'
@@ -868,6 +884,7 @@ export default function NativeMapScreen({
         isWalking={walkStarted}
         control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}
         notice={notice}
+        status={controlInput === null ? null : recordingStatus(controlInput)}
         onToggleRecording={toggleRecording}
         showRecentre={showRecentre}
         onRecentre={recentre}

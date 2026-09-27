@@ -197,7 +197,13 @@ function ListRow({
         <Text style={[styles.rowLabel, { color: TONE_INK[tone] }]}>{label}</Text>
         {detail === undefined ? null : <Text style={styles.rowDetail}>{detail}</Text>}
       </View>
-      {value === undefined ? null : <Text style={styles.rowValue}>{value}</Text>}
+      {/* One line (D-095): "Automático (Português)" wrapped to two at 17 sp
+          and made the first row the tallest on the screen. */}
+      {value === undefined ? null : (
+        <Text style={styles.rowValue} numberOfLines={1} adjustsFontSizeToFit>
+          {value}
+        </Text>
+      )}
       {onPress === undefined || tone !== 'link' ? null : (
         <Text style={styles.chevron} accessibilityElementsHidden importantForAccessibility="no">
           ›
@@ -262,7 +268,18 @@ function ToggleRow({
  * (D-015) while the chip draws smaller than the track around it.
  */
 const SEGMENT_INSET = 3;
-const SEGMENT_HIT_SLOP = { top: SEGMENT_INSET, bottom: SEGMENT_INSET, left: 0, right: 0 };
+/**
+ * The chip as drawn (D-095, 2026-09-27): 44 dp, a 50 dp track. It was the
+ * full 60 less the inset, the tallest control on the screen for a choice made
+ * once. The target is still 60: hitSlop makes up the rest above and below.
+ */
+const SEGMENT_HEIGHT = 44;
+const SEGMENT_HIT_SLOP = {
+  top: (MIN_TAP_TARGET - SEGMENT_HEIGHT) / 2,
+  bottom: (MIN_TAP_TARGET - SEGMENT_HEIGHT) / 2,
+  left: 0,
+  right: 0,
+};
 
 /**
  * The three tiers, three segments wide: a grey track with the chosen tier as a
@@ -627,15 +644,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   rowText: { flex: 1, gap: 2 },
-  rowLabel: { color: colors.text, fontSize: fontSize.body },
+  // D-095: 16, WalkNYC's row size, measured off the P30. 17 read as large
+  // print beside theirs.
+  rowLabel: { color: colors.text, fontSize: fontSize.label },
   rowDetail: {
     color: colors.textMuted,
     fontSize: fontSize.small,
     lineHeight: Math.round(fontSize.small * 1.35),
   },
   rowTextBeside: { flex: 0, flexShrink: 0 },
-  rowValue: { flex: 1, color: colors.textMuted, fontSize: fontSize.body, textAlign: 'right' },
-  chevron: { color: colors.textMuted, fontSize: fontSize.title, marginLeft: spacing.xs },
+  rowValue: { flex: 1, color: colors.textMuted, fontSize: fontSize.small, textAlign: 'right' },
+  chevron: { color: colors.textMuted, fontSize: fontSize.body, marginLeft: spacing.xs },
   rowDisabled: { opacity: 0.5 },
   // Under the label, not under the glyph: the hairline starts where words do.
   divider: {
@@ -657,7 +676,7 @@ const styles = StyleSheet.create({
   segment: {
     // Equal thirds whatever the word's length in this language.
     flex: 1,
-    minHeight: MIN_TAP_TARGET - 2 * SEGMENT_INSET,
+    minHeight: SEGMENT_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
@@ -683,7 +702,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     minHeight: MIN_TAP_TARGET,
   },
-  tick: { color: colors.tint, fontSize: fontSize.body, fontWeight: '700' },
+  tick: { color: colors.tint, fontSize: fontSize.label, fontWeight: '700' },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
   sheet: {
     position: 'absolute',
@@ -698,7 +717,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700', marginBottom: spacing.xs },
   sheetCancel: { justifyContent: 'center' },
-  sheetCancelText: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
+  sheetCancelText: { color: colors.tint, fontSize: fontSize.label, fontWeight: '600' },
   colophon: { color: colors.textMuted, fontSize: fontSize.small, textAlign: 'center' },
   // The hidden light/dark choice (MAP_STYLE_CHOICE_ENABLED): two labelled buttons.
   choiceRow: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },
@@ -713,7 +732,7 @@ const styles = StyleSheet.create({
   // ⚠ The tick in the label carries the state as well — D-015 forbids hue
   // alone, and a "selected" that is only a border colour is exactly that.
   choiceActive: { borderWidth: 2, borderColor: colors.action },
-  choiceText: { color: colors.textMuted, fontSize: fontSize.body, fontWeight: '700' },
+  choiceText: { color: colors.textMuted, fontSize: fontSize.label, fontWeight: '700' },
   choiceTextActive: { color: colors.text },
   pressed: { opacity: 0.75 },
 });

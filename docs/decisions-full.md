@@ -4698,7 +4698,7 @@ in Settings. The button can be the main control because pressing it has a conseq
 3. **One button, three states, read from the real recorder** (not `isRecording()`, T-174):
    no location permission → *Permitir localização* · idle → *Começar passeio*, green · walking →
    *Terminar passeio*, red.
-4. **Automatic recording speaks only when something is wrong.** Missing background permission, or
+4. ⚠ **Amended 2026-09-27 by D-095:** a status line now says when it works, and the notice is WalkNYC's amber banner. **Automatic recording speaks only when something is wrong.** Missing background permission, or
    a recorder found dead, shows a **dismissible** banner naming the exact OS wording (teardown
    item 4). When it works, the map adds nothing, as WalkNYC's does.
 5. **Two notification channels** (teardown item 3). A walk shows *"Proa · Passeio em curso"* with
@@ -5319,3 +5319,48 @@ town, which speed cannot disprove.
 **Still open.** Whether the transitions arrive reliably on EMUI with the app in the background (the
 first real check is the P30 after the lead grants it); the label's lag measured on a real drive;
 the German copy (T-160a).
+
+---
+
+## D-095 — The map says when automatic recording works, warns in WalkNYC's banner when it does not, and its controls are drawn at WalkNYC's size
+
+**Status:** **Accepted**, the project lead, 2026-09-27: *"7A and 6B with the rework 8C"*, then *"re-work
+the size of things too … WalkNYC size gives a more clever feel"*, and the same for Settings (*"not
+the icon, but the text and figures"*). Chosen from drawn options (`tools/out/screen-options-3.html`
+and `-4.html`). Amends **D-087 §4** and **D-090**.
+
+**What prompted it.** With automatic recording running, the lead asked *"do I need to click
+Começar passeio?"* and found the screen *"a bit confusing"*. D-087 §4 had the map speak about
+automatic recording only when something was wrong, as WalkNYC's does, so when it worked nothing
+answered the question. WalkNYC has the same blind spot (teardown item 17).
+
+**Decision.**
+1. **A status line when it works (6B).** *"● A registar automaticamente"* takes the progress
+   line's place while automatic recording is allowed, has "all the time", and fixes are arriving
+   (`recordingStatus`, `recorderControls.ts`; evidence only, T-174). The button is unchanged. The
+   count stays in the passport and on the passport button's spoken label. A test holds that the
+   status line and a notice are never shown together.
+2. **The notice in WalkNYC's shape (7A with 8C).** Amber `#FFB300` with near-black ink (9.7:1), a
+   warning sign, full width under the settings control. The consequence first, *"O registo
+   automático está desligado"*, then *"Toque para escolher “Permitir sempre”"*. The tap goes
+   **through Play's prominent disclosure to the phone's own choice** (T-121: a direct ask is not
+   allowed), where WalkNYC's opens the app info page and leaves Permissions, Location, Allow all
+   the time to find. If the phone will no longer ask, the tap opens the app's settings page.
+   *"Nada registado há …"* takes the same banner, with *"Toque para reiniciar o registo"*.
+3. **Sizes measured against WalkNYC on the P30, targets unchanged.** Walk button 60 → 52 dp drawn
+   (theirs 53), label 17 bold → 16 semibold (theirs 16); settings circle 60 → 44 dp (theirs 40);
+   progress line 41 → 37 dp. Settings: row labels 17 → 16, the language value on one line at 14,
+   the tier chooser 54 → 44 dp, icons 24 → 22. **Every tap target stays 60 dp** through hitSlop
+   (D-015), as *Centrar* already did. New token `fontSize.label` = 16.
+
+**Not done, and why.** WalkNYC's small type is about 12 sp (the progress line, the banner's
+second line, Settings' footnotes). Ours stops at **14**, the floor `accessibility.test.ts` holds for
+an older reader outdoors (D-015, CONTEXT §6.5). Going below it would reverse part of D-015 and is
+the lead's call, not made here.
+
+**Rejected.** 6C (a secondary *Começar passeio* explaining itself) and 6D (no button, automatic
+walks): D waits on T-246's measurement of how much of a walk's start automatic recording misses.
+8A and 8B wordings: A named the cause, not the consequence; B's tap did no more than WalkNYC's.
+
+**Still open.** The notice's tap is untried on a phone without "all the time" (the P30 has it); the
+lead's outing (T-246) decides whether 6D becomes possible.

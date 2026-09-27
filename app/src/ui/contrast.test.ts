@@ -39,7 +39,7 @@ import { CATEGORIES } from '../content/contentPack.ts';
 import { designFor, UNCOLLECTED, uncollectedFor } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
 import { NIGHT_LAND } from '../map/googleNightStyle.ts';
-import { album, colors, mapChrome } from './theme.ts';
+import { album, colors, mapChrome, warningBanner } from './theme.ts';
 
 /** Body text. Above WCAG's 4.5, because this is read outdoors. */
 const BODY = 5;
@@ -436,4 +436,16 @@ test('⚠ the home progress line is readable, and its bar is visible, in both ma
       );
     }
   }
+});
+
+test('⚠ D-095 — the map’s warning banner is readable, and stands off both maps', () => {
+  // WalkNYC's amber with near-black ink: well past the 5:1 outdoor floor.
+  assert.ok(contrastRatio(warningBanner.ink, warningBanner.fill) >= 7);
+  // The warning sign's cut-out is the fill itself, so the sign is the ink's.
+  // Against Google's light land and our night land it must still be found.
+  assert.ok(contrastRatio(warningBanner.fill, NIGHT_LAND) >= 3, 'lost on the night map');
+  assert.ok(
+    contrastRatio(warningBanner.fill, mapChrome.light.strip) >= 1.5,
+    'the banner is the same tone as the light chrome'
+  );
 });

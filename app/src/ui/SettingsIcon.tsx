@@ -27,8 +27,8 @@ export type SettingsIconName =
   | 'technical'
   | 'erase';
 
-/** Drawn square, in dp. */
-export const SETTINGS_ICON_SIZE = 24;
+/** Drawn square, in dp. 22 since D-095: at 24 the glyphs outweighed 16 sp rows. */
+export const SETTINGS_ICON_SIZE = 22;
 
 export default function SettingsIcon({ name, color }: { name: SettingsIconName; color: string }) {
   const stroke = { stroke: color, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none' } as const;

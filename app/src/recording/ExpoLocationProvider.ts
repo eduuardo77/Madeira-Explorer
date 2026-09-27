@@ -7,7 +7,7 @@
  */
 
 import * as Location from 'expo-location';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { APP_NAME } from '../brand';
 import { t } from '../i18n';
@@ -155,7 +155,16 @@ export class ExpoLocationProvider implements LocationProvider {
     // On iOS this is the escalation that shows the user a map of everywhere we
     // have tracked them, which is why it is timed for ~day 2 rather than
     // onboarding (D-008).
-    await Location.requestBackgroundPermissionsAsync();
+    // ⚠ D-095: a phone that will no longer ask (refused twice, or "don't ask
+    // again") returns at once and shows nothing, and the map's notice promised
+    // the choice. Then the app's settings page is the only way left, and it is
+    // where WalkNYC's banner always goes.
+    const before = await Location.getBackgroundPermissionsAsync();
+    if (before.status !== 'granted' && !before.canAskAgain) {
+      await Linking.openSettings();
+    } else {
+      await Location.requestBackgroundPermissionsAsync();
+    }
     const level = await this.getPermissionLevel();
     await recordingEventDao.log('permission_change', `always -> ${level}`);
     return level;

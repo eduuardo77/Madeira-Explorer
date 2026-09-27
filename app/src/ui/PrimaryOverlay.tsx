@@ -29,6 +29,18 @@
  * it *"very subtle"*, so it is the quietest thing at the bottom of the screen.
  * The button stays a stamp.
  *
+ * ⚠ SMALLER, AFTER WALKNYC, AND THE SAME TARGETS (D-095, 2026-09-27)
+ * -----------------------------------------------------------------
+ * The project lead found the notice, the walk button and the progress line
+ * *"a bit big compared to WalkNYC"*, whose sizes *"give a more clever feel"*.
+ * Both apps were measured on the P30 at the same moment: WalkNYC's button is
+ * 53 dp and 16 sp, its settings control 40 dp, its banner full width at about
+ * 15 and 12 sp. Ours were 60 dp and 17 sp bold, and a 60 dp gear.
+ * The visible controls now come close to those; **the targets do not shrink**:
+ * each keeps 60 dp through hitSlop (D-015), as *Centrar* already did. The type
+ * stops at 14 sp, the floor `accessibility.test.ts` holds for an older reader
+ * outdoors (CONTEXT §6.5), where WalkNYC goes to 12.
+ *
  * ⚠ BOTTOM-**LEFT**, ON THE PROJECT LEAD'S INSTRUCTION (2026-08-12)
  * ----------------------------------------------------------------
  * This used to be bottom-right, and the reason recorded here was thumb reach:
@@ -53,6 +65,7 @@ import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import RecentreMark from './RecentreMark';
 import WalkMark from './WalkMark';
+import WarningMark from './WarningMark';
 import StampArt from './StampArt';
 import { STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
 import { designFor, TILT_FIT } from '../passport/stampArt';
@@ -61,7 +74,7 @@ import { tierFor } from '../passport/stampTier';
 import { homeProgress } from '../progress/homeProgress';
 import { getRegionName } from '../content/regionCatalogue';
 import { n, t } from '../i18n';
-import type { PrimaryControl } from '../recording/recorderControls';
+import type { PrimaryControl, RecordingStatus } from '../recording/recorderControls';
 import {
   colors,
   fontSize,
@@ -69,10 +82,19 @@ import {
   MIN_TAP_TARGET,
   radius,
   spacing,
+  warningBanner,
 } from './theme';
 
 /** The settings mark, a little smaller: it is the quietest control here. */
-const SETTINGS_MARK_SIZE = 22;
+const SETTINGS_MARK_SIZE = 20;
+
+/**
+ * The settings circle as drawn (D-095): 44 dp, WalkNYC's is 40. It was 60, the
+ * target, and a 60 dp disc was the biggest object at the top of the map for
+ * the control used least.
+ */
+export const GEAR_SIZE = 44;
+const GEAR_HIT_SLOP = (MIN_TAP_TARGET - GEAR_SIZE) / 2;
 
 /** The re-centre pill: compact by design, see the hitSlop note at its call site. */
 /**
@@ -107,17 +129,38 @@ const STAMP_BOX = Math.max(STAMP_BUTTON_SIZE, MIN_TAP_TARGET);
 /** The progress caption's line, fixed so the strip's height is known (D-090). */
 const PROGRESS_LINE = Math.round(fontSize.small * 1.35);
 const PROGRESS_BAR = 3;
-const PROGRESS_GAP = spacing.xs + 2;
+const PROGRESS_GAP = spacing.xs;
+/** 6 dp above and below since D-095; it was 8, and the strip 41 dp to WalkNYC's 42. */
+const PROGRESS_PAD = spacing.xs + 2;
 
 /**
  * How tall the progress strip draws, for `NativeMapScreen`'s camera padding:
  * the map centres a trace in the part of the screen the chrome leaves free,
  * and a guessed height is how the framing broke once before (2026-08-17).
  */
-export const PROGRESS_STRIP_HEIGHT = spacing.sm * 2 + PROGRESS_LINE + PROGRESS_GAP + PROGRESS_BAR;
+export const PROGRESS_STRIP_HEIGHT = PROGRESS_PAD * 2 + PROGRESS_LINE + PROGRESS_GAP + PROGRESS_BAR;
+
+/** The status line's dot (D-095). */
+const STATUS_DOT = 8;
 
 /** The glyph beside the words on the walk button. */
-const WALK_MARK_SIZE = 22;
+const WALK_MARK_SIZE = 18;
+
+/**
+ * The walk button as drawn (D-095): 52 dp, WalkNYC's is 53. The target stays
+ * 60 through hitSlop, 4 dp above and below, which lands in the 8 dp gaps: the
+ * progress line above takes no touches, and the screen edge is below.
+ */
+export const WALK_HEIGHT = 52;
+const WALK_HIT_SLOP = {
+  top: (MIN_TAP_TARGET - WALK_HEIGHT) / 2,
+  bottom: (MIN_TAP_TARGET - WALK_HEIGHT) / 2,
+  left: 0,
+  right: 0,
+};
+
+/** The notice's warning sign (D-095). */
+const WARNING_MARK_SIZE = 22;
 
 /**
  * The ink on the walk button, both states.
@@ -173,6 +216,11 @@ export type PrimaryOverlayProps = {
    * ever about something wrong, or a pause the user chose.
    */
   notice: MapNotice | null;
+  /**
+   * D-095 (option 6B): automatic recording is working, said in the progress
+   * line's place. Null shows the progress line.
+   */
+  status: RecordingStatus;
   /** Offered only when the map has actually wandered off the user. */
   showRecentre: boolean;
   onRecentre: () => void;
@@ -211,6 +259,7 @@ export default function PrimaryOverlay({
   isWalking,
   control,
   notice,
+  status,
   showRecentre,
   onRecentre,
   bottomSlot,
@@ -237,6 +286,8 @@ export default function PrimaryOverlay({
         accessibilityRole="button"
         accessibilityLabel={t('map.a11y.settings')}
         onPress={onOpenSettings}
+        // Drawn at 44 dp, touched at 60 (D-095, D-015).
+        hitSlop={GEAR_HIT_SLOP}
         style={({ pressed }) => [
           styles.gear,
           // ⚠ Chrome follows the map, not the app (`theme.ts` → `mapChrome`).
@@ -265,33 +316,31 @@ export default function PrimaryOverlay({
         <SettingsMark size={SETTINGS_MARK_SIZE} color={chrome.content} />
       </Pressable>
 
-      {/* D-087 §4 — automatic recording speaks only when something is wrong.
-          Beside the settings control, because it is about a setting, and
-          nowhere near the two primary controls at the bottom. The words carry
-          the state (D-015); the whole card is the action. */}
+      {/* D-087 §4 — automatic recording speaks up when something is wrong.
+          ⚠ D-095: WalkNYC's banner, which the project lead chose over ours:
+          amber, a warning sign, full width under the settings control, the
+          consequence in the title and what a tap does below it. Ours was a
+          white card beside the gear and read as one more control. The whole
+          banner is the action; the × is its own target. */}
       {notice === null ? null : (
-        <View
-          style={[
-            styles.notice,
-            {
-              backgroundColor: chrome.surface,
-              elevation: chrome.elevation,
-              shadowColor: '#000000',
-              shadowOpacity: chrome.elevation === 0 ? 0 : 0.18,
-              shadowRadius: chrome.elevation,
-              shadowOffset: { width: 0, height: 1 },
-            },
-            chrome.border !== null && { borderWidth: 1, borderColor: chrome.border },
-          ]}
-        >
+        <View style={[styles.notice, { backgroundColor: warningBanner.fill }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${notice.text}. ${notice.actionLabel}`}
             onPress={notice.onAction}
             style={({ pressed }) => [styles.noticeBody, pressed && styles.pressed]}
           >
-            <Text style={[styles.noticeText, { color: chrome.content }]}>{notice.text}</Text>
-            <Text style={[styles.noticeAction, { color: chrome.link }]}>{notice.actionLabel}</Text>
+            <WarningMark
+              size={WARNING_MARK_SIZE}
+              color={warningBanner.ink}
+              cutout={warningBanner.fill}
+            />
+            <View style={styles.noticeWords}>
+              <Text style={[styles.noticeText, { color: warningBanner.ink }]}>{notice.text}</Text>
+              <Text style={[styles.noticeAction, { color: warningBanner.ink }]}>
+                {notice.actionLabel}
+              </Text>
+            </View>
           </Pressable>
           {notice.onDismiss === undefined ? null : (
             <Pressable
@@ -301,7 +350,7 @@ export default function PrimaryOverlay({
               hitSlop={NOTICE_DISMISS_HIT_SLOP}
               style={({ pressed }) => [styles.noticeDismiss, pressed && styles.pressed]}
             >
-              <Text style={[styles.noticeDismissText, { color: chrome.content }]}>×</Text>
+              <Text style={[styles.noticeDismissText, { color: warningBanner.ink }]}>×</Text>
             </Pressable>
           )}
         </View>
@@ -406,7 +455,30 @@ export default function PrimaryOverlay({
             swipe is noise (D-083 keeps the count said once).
             ⚠ Gone while a place card is open, so the card is not pushed any
             higher up the map by a line the user is not reading then. */}
-        {strip === null || bottomSlot != null ? null : (
+        {/* D-095 (option 6B): while automatic recording works, the line says
+            so instead, because the screen did not and the project lead, with
+            it running, asked whether they had to start an outing. Read out by
+            a screen reader, unlike the count: it is said nowhere else. Same
+            height as the progress line, so the map's framing does not move
+            when one replaces the other. */}
+        {status === null || bottomSlot != null ? null : (
+          <View
+            accessibilityRole="text"
+            style={[
+              styles.progress,
+              styles.status,
+              { backgroundColor: chrome.strip },
+              chrome.border !== null && { borderWidth: 1, borderColor: chrome.track },
+            ]}
+          >
+            <View style={[styles.statusDot, { backgroundColor: colors.good }]} />
+            <Text style={[styles.statusText, { color: chrome.content }]} numberOfLines={1}>
+              {t('map.status.automatic')}
+            </Text>
+          </View>
+        )}
+
+        {status !== null || strip === null || bottomSlot != null ? null : (
           <View
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
@@ -468,6 +540,8 @@ export default function PrimaryOverlay({
                 : t('map.a11y.startRecording')
           }
           onPress={onToggleRecording}
+          // Drawn at 52 dp, touched at 60 (D-095, D-015).
+          hitSlop={WALK_HIT_SLOP}
           style={({ pressed }) => [
             styles.walk,
             {
@@ -506,10 +580,11 @@ const styles = StyleSheet.create({
 
   gear: {
     position: 'absolute',
-    top: spacing.xl + spacing.md,
-    left: spacing.md,
-    width: MIN_TAP_TARGET,
-    height: MIN_TAP_TARGET,
+    // The circle's centre stays where the 60 dp one's was.
+    top: spacing.xl + spacing.md + GEAR_HIT_SLOP,
+    left: spacing.md + GEAR_HIT_SLOP,
+    width: GEAR_SIZE,
+    height: GEAR_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
     // A circle, like every floating control in Apple Maps (D-054). No border:
@@ -521,34 +596,43 @@ const styles = StyleSheet.create({
   },
   notice: {
     position: 'absolute',
-    top: spacing.xl + spacing.md,
-    left: spacing.md + MIN_TAP_TARGET + spacing.sm,
+    // Under the settings control, full width, as WalkNYC's (D-095).
+    top: spacing.xl + spacing.md + MIN_TAP_TARGET + spacing.xs,
+    left: spacing.md,
     right: spacing.md,
-    minHeight: MIN_TAP_TARGET,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.card,
     paddingLeft: spacing.md,
+    elevation: 3,
+    shadowColor: '#000000',
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
   },
   noticeBody: {
     flex: 1,
-    // The banner is 60 dp, but a pressable only reaches as far as its own box:
-    // this one sized itself to its text, so one short line left a target
-    // under D-015's floor inside a banner that looked big enough.
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md - spacing.xs,
+    // A pressable only reaches as far as its own box, so the target is held
+    // here, not by the banner (D-015).
     minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md - spacing.xs,
+  },
+  noticeWords: {
+    flex: 1,
     gap: 2,
   },
   noticeText: {
-    fontSize: fontSize.body,
+    fontSize: fontSize.label,
     fontWeight: '600',
   },
   noticeAction: {
-    fontSize: fontSize.body,
+    fontSize: fontSize.small,
   },
   noticeDismiss: {
-    width: 36,
+    width: 40,
     height: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
@@ -571,7 +655,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    minHeight: MIN_TAP_TARGET,
+    // Drawn height; the target is 60 through hitSlop (D-095).
+    height: WALK_HEIGHT,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.pill,
     // A filled colour on a pale map needs the same separation the white
@@ -584,8 +669,8 @@ const styles = StyleSheet.create({
   },
   walkText: {
     color: WALK_INK,
-    fontSize: fontSize.body,
-    fontWeight: '700',
+    fontSize: fontSize.label,
+    fontWeight: '600',
   },
   /** The passport stamp on the left, re-centre centred (2026-09-24). */
   row: {
@@ -624,9 +709,26 @@ const styles = StyleSheet.create({
   /** D-090: slim on purpose. The smallest type the app allows, and a 3 dp bar. */
   progress: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: PROGRESS_PAD,
     gap: PROGRESS_GAP,
     borderRadius: radius.card,
+  },
+  /** The status line in the progress line's box, a row instead (D-095). */
+  status: {
+    height: PROGRESS_STRIP_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  statusDot: {
+    width: STATUS_DOT,
+    height: STATUS_DOT,
+    borderRadius: radius.pill,
+  },
+  statusText: {
+    flex: 1,
+    fontSize: fontSize.small,
+    fontWeight: '600',
   },
   progressText: {
     fontSize: fontSize.small,

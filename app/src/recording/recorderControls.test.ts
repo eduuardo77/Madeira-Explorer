@@ -13,6 +13,7 @@ import {
   effectiveQuality,
   primaryControl,
   recorderNotice,
+  recordingStatus,
   walkSummary,
   describeWalkSummary,
   formatClock,
@@ -56,9 +57,42 @@ test('⚠ P1-2 — the button never says "start" about the recorder that is alre
   assert.equal(recorderNotice(running), null);
 });
 
-test('when automatic recording works, the home screen says nothing about it', () => {
+test('when automatic recording works, no notice is shown about it', () => {
   assert.equal(recorderNotice(input()), null);
   assert.equal(recorderNotice(input({ silence: 'warming_up' })), null);
+});
+
+test('D-095 — while automatic recording works, the status line says so', () => {
+  // The question it answers: "do I need to click Começar passeio?"
+  assert.equal(recordingStatus(input()), 'automatic');
+  assert.equal(recordingStatus(input({ silence: 'warming_up' })), 'automatic');
+  // A walk does not stop it being true.
+  assert.equal(recordingStatus(input({ walkInProgress: true })), 'automatic');
+});
+
+test('⚠ D-095 — the status line never claims a recorder there is no evidence for', () => {
+  // T-174: the flag outlived a dead service. Only arriving fixes count.
+  assert.equal(recordingStatus(input({ silence: 'silent' })), null);
+  assert.equal(recordingStatus(input({ silence: 'not_recording' })), null);
+  assert.equal(recordingStatus(input({ automaticAllowed: false })), null);
+  assert.equal(recordingStatus(input({ permission: 'while_using' })), null);
+});
+
+test('⚠ D-095 — the status line and a notice are never both shown', () => {
+  const states: ControlInput[] = [];
+  for (const permission of ['always', 'while_using', 'denied', 'undetermined'] as const) {
+    for (const silence of ['not_recording', 'warming_up', 'receiving', 'silent'] as const) {
+      for (const automaticAllowed of [true, false]) {
+        states.push(input({ permission, silence, automaticAllowed }));
+      }
+    }
+  }
+  for (const state of states) {
+    assert.ok(
+      recordingStatus(state) === null || recorderNotice(state) === null,
+      JSON.stringify(state)
+    );
+  }
 });
 
 test('switched off on purpose is not a problem, so it is not announced', () => {

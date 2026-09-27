@@ -44,8 +44,8 @@ export type PrimaryControl = 'grant-location' | 'start-walk' | 'stop-walk';
 /**
  * The one thing the home screen may say about automatic recording, or null.
  *
- * Only ever about something wrong (D-087 §4). When recording works, the map
- * says nothing about it, as WalkNYC's does.
+ * Only ever about something wrong (D-087 §4). When recording works, the
+ * *notice* says nothing; since D-095 the status line does (`recordingStatus`).
  *
  * ⚠ There was a `paused` notice until 2026-09-25, when the project lead removed
  * the pause (D-087 §6 amended): the Settings switch already stops recording,
@@ -104,6 +104,29 @@ export function recorderNotice(
     return 'recorder-stopped';
   }
   return null;
+}
+
+/**
+ * What the status line says, or null for the progress line (D-095, option 6B).
+ *
+ * ⚠ **This is where D-087 §4 was wrong, and WalkNYC with it.** The map said
+ * nothing while automatic recording worked, so the project lead, with it
+ * running, asked *"do I need to click Começar passeio?"* (2026-09-27). Nothing
+ * on screen answered. Now the line above the button does, in the progress
+ * line's place.
+ *
+ * Only on evidence that it is working (T-174): `receiving`, or `warming_up`
+ * just after it started. A recorder that is `not_recording` although allowed
+ * says nothing here, and `silent` is the notice's to say. Never while a notice
+ * is due: the two would contradict each other.
+ */
+export type RecordingStatus = 'automatic' | null;
+
+export function recordingStatus(input: ControlInput): RecordingStatus {
+  if (!input.automaticAllowed || input.permission !== 'always') {
+    return null;
+  }
+  return input.silence === 'receiving' || input.silence === 'warming_up' ? 'automatic' : null;
 }
 
 /**

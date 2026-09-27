@@ -86,6 +86,11 @@ export const MAX_TRUSTED_ACCURACY_M = 100;
 export type MovementSample = Coordinate & {
   ts: number;
   accuracyM: number | null;
+  /**
+   * What the phone's motion sensors said at this fix (D-094), when the
+   * permission was given: `driving` switches to the driving rate at once.
+   */
+  activity?: string;
 };
 
 /**
@@ -219,14 +224,22 @@ export function decideProfile(
   if (maxDisplacementM > MOVING_THRESHOLD_M) {
     // ⚠ Vehicle *rate*, not vehicle *classification*. See VEHICLE_SPEED_MPS.
     const fastest = fastestSustainedSpeedMps(inWindow);
+    // D-094: the motion sensors *can* classify, which speed cannot on this
+    // island (D-028): a car crawling through Funchal at walking pace never
+    // proves 25 km/h, and was sampled at the walking rate, 30 s apart, which
+    // is the matcher's weakest case and misses tunnel portals. The label is
+    // only ever a reason for the denser rate, never for a sparser one.
+    const inVehicle = newest.activity === 'driving';
     const profile: SamplingProfile =
-      fastest >= VEHICLE_SPEED_MPS ? 'driving' : MOVING_PROFILE;
+      fastest >= VEHICLE_SPEED_MPS || inVehicle ? 'driving' : MOVING_PROFILE;
 
     return {
       profile,
       reason:
         profile === 'driving'
-          ? `moved ${Math.round(maxDisplacementM)} m at up to ${Math.round(fastest * 3.6)} km/h`
+          ? inVehicle && fastest < VEHICLE_SPEED_MPS
+            ? `moved ${Math.round(maxDisplacementM)} m, in a vehicle by the motion sensors`
+            : `moved ${Math.round(maxDisplacementM)} m at up to ${Math.round(fastest * 3.6)} km/h`
           : `moved ${Math.round(maxDisplacementM)} m`,
       changed: current !== profile,
     };

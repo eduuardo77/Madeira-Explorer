@@ -297,25 +297,25 @@ test('a tunnel in the roads is drawn faded in the replay, the rest at full stren
     composeSouvenir(
       input({
         roads: [
-          { fixes: road, tunnel: false },
-          { fixes: underground, tunnel: true },
-          { fixes: after, tunnel: false },
+          { fixes: road, faded: false },
+          { fixes: underground, faded: true },
+          { fixes: after, faded: false },
         ],
       })
     )
   );
   const frame = frameAt(f, f.durationMs);
-  assert.deepEqual(frame.tunnels, [false, true, false]);
+  assert.deepEqual(frame.faded, [false, true, false]);
   const { polylines } = replayMapFrame(frame, OPTIONS);
   const paint = TRACE_PAINT.light;
   assert.deepEqual(
     polylines.map((line) => line.color),
-    [paint.coreColor, paint.tunnelColor, paint.coreColor]
+    [paint.coreColor, paint.fadedColor, paint.coreColor]
   );
 });
 
 test('GPS strokes, with no tunnel flag, are drawn at full strength', () => {
   const f = film(composeSouvenir(input()));
   const frame = frameAt(f, f.durationMs);
-  assert.ok(frame.tunnels.every((tunnel) => tunnel === false));
+  assert.ok(frame.faded.every((faded) => faded === false));
 });

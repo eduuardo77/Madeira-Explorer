@@ -90,11 +90,11 @@ export type Frame = {
    */
   strokes: [number, number][][];
   /**
-   * For each stroke, at the same index: whether it runs through a tunnel, and
-   * so is drawn faded (D-093). Parallel rather than folded into `strokes` so
+   * For each stroke, at the same index: whether it runs through a tunnel or on
+   * a cable car, and so is drawn faded (D-093). Parallel rather than folded into `strokes` so
    * that everything reading strokes as lines stays as it is.
    */
-  tunnels: boolean[];
+  faded: boolean[];
   /** Landed, in the order they were collected. */
   stamps: LandedStamp[];
   hero: Hero | null;
@@ -261,12 +261,12 @@ export function frameAt(film: Film, atMs: number): Frame {
   // finale the whole trace stays on screen — that is the picture being framed —
   // and reading only the active scene would blank the map for the closing shot.
   const strokes: [number, number][][] = [];
-  const tunnels: boolean[] = [];
+  const faded: boolean[] = [];
   for (const segment of film.scenes.flatMap((each) => (each.kind === 'draw' ? each.segments : []))) {
     const stroke = partialStroke(segment, at);
     if (stroke !== null) {
       strokes.push(stroke);
-      tunnels.push(segment.tunnel);
+      faded.push(segment.faded);
     }
   }
 
@@ -287,7 +287,7 @@ export function frameAt(film: Film, atMs: number): Frame {
     sceneProgress,
     bounds,
     strokes,
-    tunnels,
+    faded,
     stamps,
     hero:
       scene.kind === 'finale'

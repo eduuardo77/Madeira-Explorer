@@ -146,6 +146,13 @@ the *user's* backup under the *user's* account; the developer cannot reach it, s
 collection by either definition. The privacy policy discloses it to the user anyway, in its own
 section, because the user can reach it and may want to turn it off.
 
+**Physical activity (D-094, 2026-09-27).** Android's activity transitions (still, walking, in a
+vehicle) are stored on the phone and read by the road matcher; nothing sends them anywhere. Play's
+definition of *collected* is data transmitted off the device, so this is **not collected** and
+nothing is declared. The permission itself is visible to the user and a reviewer, so the privacy
+policy says what it is for, in the section on what the app asks for. ⚠ If a reviewer asks, the
+answer is that section and this paragraph.
+
 **Firebase Cloud Messaging in the Android build (D-043).** It ships inside
 `expo-notifications`, is never asked for a push token, and has no configuration to register
 with. It collects nothing, so there is nothing to declare — but see the risk below. ✅ **Observed 2026-09-24:** every launch on the P30

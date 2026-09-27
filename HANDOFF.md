@@ -31,7 +31,11 @@ in `matched_chain` / `match_progress` (migration 3). **860 tests.** Read D-093 b
 of it; `node tools/eval-matching.mjs` is the quality check (`--db <copy> --svg <outside repo>` for a
 real trip).
 
-**On the P30 since 2026-09-27 16:28: a STORE field build with T-245** (debuggable, `run-as` works),
+⚠ **D-094 (same day): the motion sensors as a second witness, and the cable cars.** Optional
+"Physical activity" permission, asked after location; weights, never filters. **The ask is on the
+P30's screen, for the project lead to answer.** Then check `activity_event` fills in the background.
+
+**On the P30 since 2026-09-27 20:24: a STORE field build with T-245 and T-247** (debuggable, `run-as` works),
 the real database restored after a probe. ⚠ **Next is T-246, the project lead's outing** (a town walk
 as an outing, one on automatic recording, a drive through a VR1 tunnel), then pull and tune: every
 threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks on each install:

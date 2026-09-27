@@ -170,6 +170,8 @@ export function sampleTrip(graph, pointAt, steps, random, options) {
       lon: lon + dx / (111_320 * Math.cos((lat * Math.PI) / 180)),
       accuracy_m: options.accuracyM,
       speed_mps: Math.max(0.05, options.speedMps + 0.2 * gaussian(random)),
+      // What the phone's motion sensors would say, when the scenario says (D-094).
+      activity: options.activity ?? 'unknown',
     });
   }
   return { fixes, lengthM: length };

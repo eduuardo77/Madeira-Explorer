@@ -25,6 +25,23 @@ import OnboardingView, {
   type OnboardingScreen,
 } from './OnboardingView';
 import { nextOnboardingStep } from './permissionPolicy';
+import {
+  activityAvailable,
+  activityPermitted,
+  requestActivityPermission,
+} from '../recording/activityRecognition';
+
+/**
+ * The "Physical activity" ask is due (D-094): Android, available, not granted,
+ * never asked. Android cannot say whether a permission was asked, so the app
+ * remembers that it asked.
+ */
+async function activityAskable(): Promise<boolean> {
+  if (Platform.OS !== 'android' || !activityAvailable() || activityPermitted()) {
+    return false;
+  }
+  return (await appStateDao.get(appStateDao.AppStateKey.ActivityAskedTs)) === null;
+}
 
 export default function OnboardingFlow({
   initialScreen,
@@ -52,12 +69,13 @@ export default function OnboardingFlow({
 
   /** Work out where the user is in the sequence and show that screen. */
   const advance = useCallback(async () => {
-    const [location, notifications, completed, keepRunningSeen] =
+    const [location, notifications, completed, keepRunningSeen, askActivity] =
       await Promise.all([
         locationProvider.getPermissionLevel(),
         Notifications.getPermissionsAsync().then((s) => s.status),
         appStateDao.getFlag(appStateDao.AppStateKey.OnboardingCompleted),
         appStateDao.getFlag(appStateDao.AppStateKey.KeepRunningSeen),
+        activityAskable(),
       ]);
 
     const step = nextOnboardingStep({
@@ -73,6 +91,7 @@ export default function OnboardingFlow({
       // `Platform` breaks every Node test (CLAUDE.md).
       android: Platform.OS === 'android',
       keepRunningSeen,
+      activityAskable: askActivity,
     });
 
     if (step === 'complete') {
@@ -82,8 +101,8 @@ export default function OnboardingFlow({
     // `welcome` and `location` are two screens over one policy step: the
     // policy cares whether location has been answered, the user needs to be
     // told what the app is before being asked for anything.
-    if (step === 'keep-running') {
-      setScreen('keep-running');
+    if (step === 'keep-running' || step === 'activity') {
+      setScreen(step);
       return;
     }
     setScreen(step === 'welcome' ? 'welcome' : 'notifications');
@@ -112,6 +131,17 @@ export default function OnboardingFlow({
             // While-Using only. Always is a later, separate conversation
             // (T-043) — asking for it now is what gets it denied (D-008).
             await locationProvider.requestWhileUsingPermission();
+            break;
+          case 'activity':
+            // Marked asked first: the system dialog is a moment this
+            // component may not survive, and asking twice is nagging.
+            await appStateDao.set(appStateDao.AppStateKey.ActivityAskedTs, String(Date.now()));
+            await requestActivityPermission();
+            if (initialScreen === 'activity') {
+              // The one-time ask for somebody past onboarding (below).
+              onFinished();
+              return;
+            }
             break;
           case 'notifications':
             await Notifications.requestPermissionsAsync();
@@ -151,10 +181,20 @@ export default function OnboardingFlow({
         await advance();
       }
     })();
-  }, [screen, advance, onFinished]);
+  }, [screen, advance, onFinished, initialScreen]);
 
   const handleSkip = useCallback(() => {
     void (async () => {
+      if (screen === 'activity') {
+        // "Not now" is an answer: never asked again (D-008).
+        await appStateDao.set(appStateDao.AppStateKey.ActivityAskedTs, String(Date.now()));
+        if (initialScreen === 'activity') {
+          onFinished();
+          return;
+        }
+        await advance();
+        return;
+      }
       if (screen === 'always-upgrade' || screen === 'downgrade' || screen === 'android-disclosure') {
         // Declining the upgrade is recorded so it is never asked twice.
         await appStateDao.set(
@@ -182,7 +222,7 @@ export default function OnboardingFlow({
       }
       await finish();
     })();
-  }, [screen, finish, onFinished]);
+  }, [screen, finish, onFinished, initialScreen, advance]);
 
   if (screen === null) {
     return null;
@@ -225,6 +265,12 @@ export async function pendingPermissionPrompt(
 
     if (detectDowngrade(previous, location)) {
       return 'downgrade';
+    }
+
+    // D-094: somebody who finished onboarding before the activity ask existed
+    // is asked once, the same screen, the next time they open the app.
+    if (await activityAskable()) {
+      return 'activity';
     }
 
     const installedRaw = await appStateDao.get(appStateDao.AppStateKey.InstalledTs);

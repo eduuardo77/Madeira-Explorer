@@ -45,7 +45,8 @@
  *   edgeKind      one character per edge, `m` motorway or trunk, `p` primary
  *                 to tertiary, `r` residential, unclassified or service,
  *                 `t` track, `f` footway, path, steps, cycleway, `l` levada
- *                 channel. Upper case when the edge is a tunnel.
+ *                 channel, `a` aerial lift (a cable car). Upper case when the
+ *                 edge is a tunnel.
  *   edgeGeometry  one Google encoded polyline per edge, both ends included
  *   edgeOneway    one character per edge: `0` either way, `f` only from the
  *                 edge's first point to its last, `r` only the other way.
@@ -95,6 +96,15 @@ const KIND = {
 
 const LEVADA_WATERWAYS = new Set(['canal', 'drain', 'ditch']);
 
+/**
+ * Aerial lifts that carry people (D-094): Funchal to Monte, Monte to the
+ * Botanical Garden, Garajau, Achadas da Cruz, the fajãs. The Monte cable car
+ * crosses the city at walking-to-cycling speed, and without the cable in the
+ * network the ride matched the streets underneath it. With it, the ride
+ * follows the cable, and the map draws it faded, like a tunnel.
+ */
+const AERIALWAYS = new Set(['cable_car', 'gondola', 'mixed_lift']);
+
 /** `f`, `r` or `0`: see the file header. */
 export function onewayOf(tags, kind) {
   if (kind.toLowerCase() !== 'm') {
@@ -136,6 +146,9 @@ export function kindOf(tags) {
       }
     }
     return isTunnel(tags) ? kind.toUpperCase() : kind;
+  }
+  if (AERIALWAYS.has(tags.aerialway)) {
+    return 'a';
   }
   if (
     LEVADA_WATERWAYS.has(tags.waterway) &&

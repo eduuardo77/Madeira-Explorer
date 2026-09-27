@@ -57,17 +57,18 @@
 import { distanceM } from '../recording/distance.ts';
 import { MOTION_WINDOW_S, movingMask, speedCeiling } from './motionGate.ts';
 import type { GateFix } from './motionGate.ts';
-import { nearbyEdges } from './roadGraph.ts';
+import { KIND_COUNT, KIND_INDEX, nearbyEdges } from './roadGraph.ts';
 import type { Candidate, RoadGraph } from './roadGraph.ts';
 import { createScratch, distancesFrom, routeBetween } from './roadRouting.ts';
-import type { EdgePiece, RouteScratch } from './roadRouting.ts';
+import type { EdgePiece, KindCosts, RouteScratch } from './roadRouting.ts';
+import type { Activity } from '../recording/activityTimeline.ts';
 
 /**
  * Bumped whenever a change here, or in anything it calls, would match the same
  * fixes differently. Chains kept by `chainStore.ts` under another version are
  * dropped and the trip rematched.
  */
-export const MATCHER_VERSION = 1;
+export const MATCHER_VERSION = 2;
 
 /** What the matcher needs of a fix: a subset of the `raw_fix` row. */
 export type MatchFix = GateFix & {
@@ -209,6 +210,77 @@ export const DETOUR_WALKING_MAX_MPS = 3;
 /** How many times matching is rerun with the wild fixes it found removed. */
 export const OUTLIER_PASSES = 3;
 
+/**
+ * What a metre of each kind of way costs, by what the phone's motion sensors
+ * said the user was doing (D-094). A cost, never a ban.
+ *
+ * ⚠ **Why not a filter.** "A car cannot be on a footway" is true, and a filter
+ * would enforce it perfectly, until the label is wrong: Android's lags a change
+ * by up to a minute, and can miss one. A filter then deletes a real journey; a
+ * cost only makes the wrong way dearer, and enough evidence still wins.
+ *
+ * ⚠ NOT TUNED. Six times dearer is strong enough to choose the road beside a
+ * levada over the levada path for a car, and weak enough that a car label on a
+ * walk up a levada (a missed transition) still follows the levada when that is
+ * the only way the fixes fit.
+ *
+ * ⚠ **Aerial lifts cost a metre for everyone.** A cable car ride reads as
+ * *in a vehicle*, or as *still* on a smooth one, and must still match the cable.
+ */
+export const MODE_COSTS: Partial<Record<Activity, Float64Array>> = {
+  driving: costs({ f: 6, l: 6 }),
+  walking: costs({ m: 6 }),
+  running: costs({ m: 6 }),
+  cycling: costs({ m: 6 }),
+};
+
+/**
+ * A walking or running label is ignored where the receiver measured more than
+ * this nearby, m/s: 25 km/h, the recorder's own "vehicle rate"
+ * (`movementPolicy.VEHICLE_SPEED_MPS`). Nobody walks that fast, so the label is
+ * the wrong one, and on the VR1 a wrong *walking* label made the carriageway
+ * dear. A wrong *driving* label cannot be disproved this way (Funchal's traffic
+ * crawls), which is why every mode is a cost and never a ban.
+ */
+export const FOOT_MAX_MPS = 7;
+
+/** The label as the matcher trusts it: see `FOOT_MAX_MPS`. */
+export function effectiveActivity(
+  activity: Activity | null | undefined,
+  ceiling: number | null
+): Activity {
+  const label = activity ?? 'unknown';
+  if ((label === 'walking' || label === 'running') && ceiling !== null && ceiling > FOOT_MAX_MPS) {
+    return 'unknown';
+  }
+  return label;
+}
+
+/** A candidate on a way its mode makes dear starts this much less likely. */
+export const MODE_EMISSION_PENALTY = 1.5;
+
+function costs(dear: Partial<Record<keyof typeof KIND_INDEX, number>>): Float64Array {
+  const table = new Float64Array(KIND_COUNT).fill(1);
+  for (const [kind, cost] of Object.entries(dear)) {
+    table[KIND_INDEX[kind as keyof typeof KIND_INDEX]] = cost as number;
+  }
+  return table;
+}
+
+/**
+ * The costs for a step between two fixes: those of the mode both agree on, or
+ * of the one that has a mode when the other has none. Two different modes (the
+ * car park, where a drive becomes a walk) cost nothing extra at all.
+ */
+export function stepCosts(a: Activity | null | undefined, b: Activity | null | undefined): KindCosts {
+  const first = a === null || a === undefined ? undefined : MODE_COSTS[a];
+  const second = b === null || b === undefined ? undefined : MODE_COSTS[b];
+  if (first !== undefined && second !== undefined) {
+    return first === second ? first : null;
+  }
+  return first ?? second ?? null;
+}
+
 /** A travelled stretch: one unbroken chain of matched fixes. */
 export type MatchedChain = {
   /** The route travelled, in order. Consecutive pieces on one edge are merged. */
@@ -248,6 +320,8 @@ type Layer = {
   back: Int32Array;
   /** The route limit used to reach this layer, for rebuilding the route. */
   limitM: number;
+  /** The costs used to reach this layer, for rebuilding the same route. */
+  costs: KindCosts;
 };
 
 /** The sigma a fix is judged by, metres. */
@@ -489,7 +563,12 @@ function* matchPass(
       continue;
     }
 
-    const emission = candidates.map((c) => emissionLog(c.distance, sigma));
+    const own = MODE_COSTS[effectiveActivity(fix.activity, ceiling)];
+    const emission = candidates.map(
+      (c) =>
+        emissionLog(c.distance, sigma) -
+        (own !== undefined && own[graph.kindIndex[c.edge]] > 1 ? MODE_EMISSION_PENALTY : 0)
+    );
 
     const previous = layers.length > 0 ? layers[layers.length - 1] : null;
     if (previous === null || fix.ts - previous.fix.ts > MAX_BRIDGE_S * 1000) {
@@ -534,6 +613,7 @@ function firstLayer(
     score: Float64Array.from(emission),
     back: new Int32Array(candidates.length).fill(-1),
     limitM: 0,
+    costs: null,
   };
 }
 
@@ -570,6 +650,10 @@ function step(
   const score = new Float64Array(candidates.length).fill(-Infinity);
   const back = new Int32Array(candidates.length).fill(-1);
   const targets = candidates.map((c) => ({ edge: c.edge, offset: c.offset }));
+  const costs = stepCosts(
+    effectiveActivity(previous.fix.activity, previous.ceiling),
+    effectiveActivity(fix.activity, ceiling)
+  );
 
   for (let i = 0; i < previous.candidates.length; i += 1) {
     if (previous.score[i] === -Infinity) {
@@ -581,10 +665,13 @@ function step(
       scratch,
       { edge: from.edge, offset: from.offset },
       targets,
-      limitM
+      limitM,
+      costs
     );
+    // `routes` are costs; whether a route was possible at all was decided in
+    // real metres inside the search (`RouteScratch.len`).
     for (let j = 0; j < candidates.length; j += 1) {
-      if (!Number.isFinite(routes[j]) || routes[j] > limitM) {
+      if (!Number.isFinite(routes[j])) {
         continue;
       }
       const value = previous.score[i] + transitionLog(routes[j], straight);
@@ -616,7 +703,7 @@ function step(
     score[j] -= best;
   }
 
-  return { fix, ceiling, candidates, score, back, limitM };
+  return { fix, ceiling, candidates, score, back, limitM, costs };
 }
 
 /** The most likely sequence, as the route it travelled. */
@@ -655,7 +742,9 @@ function* backtrack(
       scratch,
       { edge: chosen[k - 1].edge, offset: chosen[k - 1].offset },
       { edge: chosen[k].edge, offset: chosen[k].offset },
-      layers[k].limitM
+      layers[k].limitM,
+      undefined,
+      layers[k].costs
     );
     if (route === null) {
       // Viterbi found a route within this limit a moment ago; the same search

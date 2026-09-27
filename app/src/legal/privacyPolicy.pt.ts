@@ -49,7 +49,7 @@ export const SECTIONS_PT: PolicySection[] = [
     paragraphs: [
       'Onde o seu telemóvel esteve, e quando. É este o mapa da sua viagem.',
       'O telemóvel calcula isso com o seu próprio serviço de localização. Na maioria dos telemóveis Android esse serviço é da Google, e o que a Google faz com ele depende das definições de localização do seu telemóvel, não desta aplicação.',
-      'O número de passos e a pressão do ar à sua volta, nos telemóveis que os conseguem medir. Ajudam a perceber por onde caminhou quando o sinal de satélite está bloqueado, num túnel ou debaixo de árvores.',
+      'O que os sensores de movimento do telemóvel dizem que está a fazer, se o permitir: parado, a andar, a correr, de bicicleta ou num veículo. Ajuda a desenhar a estrada certa, a rua e não o caminho ao lado quando vai de carro, e a distinguir um telemóvel pousado de um em movimento.',
       'Quais dos lugares da aplicação já alcançou, e quando juntou cada carimbo.',
       'Um pequeno diário sobre se o registo esteve a funcionar, para que a aplicação lhe possa dizer se parou.',
     ],
@@ -86,7 +86,7 @@ export const SECTIONS_PT: PolicySection[] = [
     paragraphs: [
       'A sua localização. É esta a aplicação inteira; sem ela não há mapa. Pode permitir apenas com a aplicação aberta, e continua a funcionar: é você que inicia e para o registo.',
       'A sua localização com a aplicação fechada. É isto que lhe permite esquecer-se da aplicação durante uma semana e mesmo assim receber o seu mapa. Pode dizer que não, e a aplicação continua a funcionar.',
-      'Movimento e atividade física. É o contador de passos e o sensor de pressão do ar descritos acima.',
+      'Atividade física. É a leitura dos sensores de movimento do telemóvel descrita acima. Pode dizer que não, e a aplicação continua a funcionar.',
       'Notificações. Enquanto regista, o telemóvel mostra que está a registar, como o Android exige. Além disso, a aplicação envia no máximo duas por viagem: uma no primeiro dia para lhe dizer se o registo está a funcionar, e outra no fim para dizer que o seu mapa está pronto.',
       'Depois de uma atualização da aplicação, pode também pedir-lhe uma vez que a abra, para que o registo continue.',
       'Pode mudar qualquer uma destas mais tarde nas definições do telemóvel, e a aplicação continua com aquilo que permitir.',

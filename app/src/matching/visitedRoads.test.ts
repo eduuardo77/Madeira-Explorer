@@ -149,5 +149,5 @@ test('a tunnel is its own line, marked, even where it meets the road end to end'
   ]);
   const lines = visitedLines(net.graph, visited);
   assert.equal(lines.length, 3);
-  assert.deepEqual(lines.map((l) => l.tunnel).sort(), [false, false, true]);
+  assert.deepEqual(lines.map((l) => l.faded).sort(), [false, false, true]);
 });

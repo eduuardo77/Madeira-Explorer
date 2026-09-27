@@ -188,8 +188,8 @@ export type DrawnSegment = {
   endMs: number;
   /** [lon, lat] pairs — GeoJSON's order, the reverse of ours. */
   coordinates: [number, number][];
-  /** Through a tunnel: drawn faded (D-093). */
-  tunnel: boolean;
+  /** Through a tunnel or on a cable car: drawn faded (D-093). */
+  faded: boolean;
 };
 
 export type EstablishScene = {
@@ -420,7 +420,7 @@ function timeSegments(
       coordinates: segment.fixes.map(
         (fix): [number, number] => [fix.lon, fix.lat]
       ),
-      tunnel: segment.tunnel === true,
+      faded: segment.faded === true,
     });
     index = lastIndex + 1;
   }

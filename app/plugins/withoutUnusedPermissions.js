@@ -63,6 +63,13 @@ const DEV_CLIENT = [
 /**
  * Permissions a *product* dependency declares that v1 cannot use (2026-08-28).
  *
+ * ⚠⚠ **EMPTY SINCE 2026-09-27: `ACTIVITY_RECOGNITION` CAME BACK (D-094).** The
+ * condition below was met: the road matcher reads it (the motion gate, the
+ * mode of travel, and the recorder's driving rate), and the privacy policy and
+ * the Data Safety answer now say what it is for. It is asked for in onboarding,
+ * optional, and the app works without it. The history is kept because the
+ * reasoning still applies to anything that wants to join this list.
+ *
  * ⚠ `ACTIVITY_RECOGNITION` comes from **expo-sensors**, which the app depends on
  * for the barometer. Android shows it to the user as **"Physical activity"**,
  * sitting in the permission list directly beside "location, all the time", in an
@@ -81,7 +88,7 @@ const DEV_CLIENT = [
  * sensor-only levada fallback is the consumer — and it comes back with a Data
  * Safety declaration that can say what it is for.
  */
-const UNUSED_BY_V1 = ['android.permission.ACTIVITY_RECOGNITION'];
+const UNUSED_BY_V1 = [];
 
 /**
  * Permissions a dependency declares for a feature this app never calls (T-194).

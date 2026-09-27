@@ -30,6 +30,9 @@ const NEEDED = [
   // The Google basemap loads over the network (D-057).
   'android.permission.INTERNET',
   'android.permission.ACCESS_NETWORK_STATE',
+  // "Physical activity": the road matcher's second witness (D-094).
+  'android.permission.ACTIVITY_RECOGNITION',
+  'com.google.android.gms.permission.ACTIVITY_RECOGNITION',
 ];
 
 test('⚠ T-194 — nothing the recorder, the map or a notification needs is stripped', () => {

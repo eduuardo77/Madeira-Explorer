@@ -102,8 +102,8 @@ export function replayMapFrame(
   const polylines = frame.strokes.map((stroke, index) => ({
     id: `replay-trace-${index}`,
     coordinates: stroke.map(([longitude, latitude]) => ({ latitude, longitude })),
-    // Underground stretches faded, as on the map and as Google draws them.
-    color: frame.tunnels[index] === true ? paint.tunnelColor : paint.coreColor,
+    // Tunnels and cable cars faded, as on the map and as Google draws tunnels.
+    color: frame.faded[index] === true ? paint.fadedColor : paint.coreColor,
     width: paint.coreWidth * options.pixelRatio,
   }));
 

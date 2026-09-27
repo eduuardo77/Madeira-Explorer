@@ -496,6 +496,15 @@ produced it**, and take a backup before rebuilding over a known-good APK.
 ⚠ Related: gradle emits `app-release.apk`. The `proa-arm64-release.apk` name used elsewhere in
 these docs is a **manual rename**, not something the build produces.
 
+## ⚠ A local module, and a manifest that must be regenerated (D-094, 2026-09-27)
+
+`app/modules/activity-transitions` is a local Expo module (Kotlin), found by autolinking from
+`modules/`. ⚠ **After changing `plugins/withoutUnusedPermissions.js`, regenerate the release
+manifest** or the old strip list ships: `android/` is generated and not committed, and the file is
+only rewritten at prebuild. `node -e "require('./plugins/withoutUnusedPermissions').writeReleaseManifest('android')"`
+from `app/`, then check the APK: `aapt dump permissions app-release.apk` must list
+`android.permission.ACTIVITY_RECOGNITION`.
+
 ## ⚠ Three Expo modules are compiled from source — T-242, 2026-09-26; expo-maps since T-245
 
 ⚠ **Since 2026-09-27 `expo-maps` is compiled from source too**, for

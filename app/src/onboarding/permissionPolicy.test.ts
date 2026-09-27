@@ -40,6 +40,7 @@ function onboarding(overrides: Partial<OnboardingState> = {}): OnboardingState {
     // asserted on its own below.
     android: false,
     keepRunningSeen: false,
+    activityAskable: false,
     ...overrides,
   };
 }
@@ -265,4 +266,22 @@ test('⚠ nothing about the new step can gate the user (D-008)', () => {
     nextOnboardingStep({ ...refusedEverything, keepRunningSeen: true }),
     'complete'
   );
+});
+
+/** D-094: physical activity, right after location, once. */
+test('the activity ask comes after location and before notifications, when it is due', () => {
+  const due = { android: true, activityAskable: true };
+  assert.equal(nextOnboardingStep(onboarding(due)), 'welcome', 'nothing before location');
+  assert.equal(nextOnboardingStep(onboarding({ ...due, location: 'while_using' })), 'activity');
+  assert.equal(nextOnboardingStep(onboarding({ ...due, location: 'denied' })), 'activity', 'a refusal of location still reaches it');
+  assert.equal(
+    nextOnboardingStep(onboarding({ android: true, location: 'while_using', activityAskable: false })),
+    'notifications',
+    'asked once, or not available: straight on'
+  );
+});
+
+test('the activity ask never blocks the end of onboarding', () => {
+  const answered = onboarding({ android: true, location: 'while_using', notifications: 'granted', keepRunningSeen: true });
+  assert.equal(nextOnboardingStep(answered), 'complete');
 });

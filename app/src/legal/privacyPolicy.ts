@@ -78,7 +78,7 @@
  * The date this text last changed, in ISO form. Shown to the user, and the
  * thing a returning reader checks first.
  */
-export const POLICY_VERSION = '2026-09-24';
+export const POLICY_VERSION = '2026-09-27';
 
 /**
  * The app's name as it appears to the user.
@@ -135,7 +135,7 @@ const SECTIONS_EN: PolicySection[] = [
     paragraphs: [
       'Where your phone was, and when. This is the map of your trip.',
       'Your phone works this out with its own location service. On most Android phones that service comes from Google, and what Google does with it is set by the location settings on your phone, not by this app.',
-      'Your step count and the air pressure around you, on phones that can measure them. These help work out where you walked when the satellite signal is blocked, in a tunnel or under trees.',
+      'What your phone\u2019s motion sensors say you are doing, if you allow it: still, walking, running, cycling or in a vehicle. This helps draw the right road, the street rather than the path beside it when you drive, and tells a phone lying still from one on the move.',
       'Which of the places in the app you have reached, and when you collected each stamp.',
       'A short diary of whether recording was working, so the app can tell you if it stopped.',
     ],
@@ -172,7 +172,7 @@ const SECTIONS_EN: PolicySection[] = [
     paragraphs: [
       'Your location. This is the whole app; without it there is no map. You can allow it only while the app is open, and it will still work: you start and stop recording yourself.',
       'Your location while the app is closed. This is what lets you forget about the app for a week and still get your map. You can say no, and the app keeps working.',
-      'Motion and fitness, or physical activity. This is the step counter and the air pressure sensor described above.',
+      'Physical activity. This is the reading from your phone\u2019s motion sensors described above. You can say no, and the app keeps working.',
       'Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.',
       'After an update to the app, it may also ask you once to open it, so that recording can carry on.',
       'You can change any of these later in your phone settings, and the app will carry on with whatever you allow.',

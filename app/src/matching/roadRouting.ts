@@ -49,6 +49,13 @@ function alongEdge(graph: RoadGraph, edge: number, from: number, to: number): nu
   return backwards > ONEWAY_JITTER_M ? Infinity : Math.abs(to - from);
 }
 
+/**
+ * What a metre of each kind of edge costs, indexed by `KIND_INDEX` (D-094), or
+ * null for a metre everywhere. Only the matcher uses it, to make a footway dear
+ * for a car and the VR1 dear on foot without forbidding either.
+ */
+export type KindCosts = Float64Array | null;
+
 /** A point on the network. */
 export type NetworkPoint = { edge: number; offset: number };
 
@@ -60,7 +67,14 @@ export type EdgePiece = { edge: number; from: number; to: number };
  * allocate arrays the size of the island.
  */
 export type RouteScratch = {
+  /** What reaching each node cost (metres times the kind's cost). */
   dist: Float64Array;
+  /**
+   * How many real metres the cheapest way to each node is. The search is
+   * ordered by cost but bounded by metres: a dear road must stay possible,
+   * only less likely, or a wrong activity label deletes a journey (D-094).
+   */
+  len: Float64Array;
   /** The edge each node was reached by, or -1 at a seed. */
   via: Int32Array;
   /** Which search last wrote this node; anything else reads as unreached. */
@@ -69,32 +83,52 @@ export type RouteScratch = {
   wanted: Int32Array;
   search: number;
   heap: MinHeap;
+  /** The costs of the last search, read by the functions that finish it. */
+  costs: KindCosts;
+  /** Real metres to each target of the last `distancesFrom`, beside its costs. */
+  lengths: number[];
 };
 
 export function createScratch(graph: RoadGraph): RouteScratch {
   return {
     dist: new Float64Array(graph.nodeCount),
+    len: new Float64Array(graph.nodeCount),
     via: new Int32Array(graph.nodeCount),
     stamp: new Int32Array(graph.nodeCount),
     wanted: new Int32Array(graph.nodeCount),
     search: 0,
     heap: new MinHeap(),
+    costs: null,
+    lengths: [],
   };
 }
 
 /**
  * Shortest distances from `source` to each target, along the network, or
- * `Infinity` where no route is within `limitM`.
+ * `Infinity` where no route is within `limitM` real metres.
+ *
+ * With `costs`, the answer is the **cost** of the cheapest route (metres times
+ * the cost of each edge's kind), and `scratch.lengths` holds its real length
+ * beside it. Without, both are metres.
  */
 export function distancesFrom(
   graph: RoadGraph,
   scratch: RouteScratch,
   source: NetworkPoint,
   targets: readonly NetworkPoint[],
-  limitM: number
+  limitM: number,
+  costs: KindCosts = null
 ): number[] {
-  search(graph, scratch, source, limitM, targets);
-  return targets.map((target) => distanceTo(graph, scratch, source, target));
+  search(graph, scratch, source, limitM, targets, undefined, costs);
+  const out: number[] = new Array(targets.length);
+  scratch.lengths = new Array(targets.length);
+  for (let t = 0; t < targets.length; t += 1) {
+    const entry = distanceTo(graph, scratch, source, targets[t]);
+    const within = entry.length <= limitM;
+    out[t] = within ? entry.cost : Infinity;
+    scratch.lengths[t] = within ? entry.length : Infinity;
+  }
+  return out;
 }
 
 /**
@@ -107,21 +141,23 @@ export function routeBetween(
   source: NetworkPoint,
   target: NetworkPoint,
   limitM: number,
-  allowed?: (edge: number) => boolean
+  allowed?: (edge: number) => boolean,
+  costs: KindCosts = null
 ): EdgePiece[] | null {
-  search(graph, scratch, source, limitM, [target], allowed);
+  search(graph, scratch, source, limitM, [target], allowed, costs);
   const through = bestEntry(graph, scratch, target);
-  const direct =
+  const directLength =
     source.edge === target.edge
       ? alongEdge(graph, source.edge, source.offset, target.offset)
       : Infinity;
+  const direct = directLength * costOf(scratch, graph, source.edge);
 
   if (direct <= through.distance) {
-    return direct <= limitM
+    return directLength <= limitM
       ? [{ edge: source.edge, from: source.offset, to: target.offset }]
       : null;
   }
-  if (!Number.isFinite(through.distance) || through.distance > limitM) {
+  if (!Number.isFinite(through.distance) || through.length > limitM) {
     return null;
   }
 
@@ -163,12 +199,21 @@ function distanceTo(
   scratch: RouteScratch,
   source: NetworkPoint,
   target: NetworkPoint
-): number {
-  const through = bestEntry(graph, scratch, target).distance;
+): { cost: number; length: number } {
+  const through = bestEntry(graph, scratch, target);
   if (source.edge === target.edge) {
-    return Math.min(through, alongEdge(graph, source.edge, source.offset, target.offset));
+    const length = alongEdge(graph, source.edge, source.offset, target.offset);
+    const cost = length * costOf(scratch, graph, source.edge);
+    if (cost <= through.distance) {
+      return { cost, length };
+    }
   }
-  return through;
+  return { cost: through.distance, length: through.length };
+}
+
+/** What a metre of this edge costs in the current search. */
+function costOf(scratch: RouteScratch, graph: RoadGraph, edge: number): number {
+  return scratch.costs === null ? 1 : scratch.costs[graph.kindIndex[edge]];
 }
 
 /** The cheaper of entering the target's edge from either end. */
@@ -176,16 +221,24 @@ function bestEntry(
   graph: RoadGraph,
   scratch: RouteScratch,
   target: NetworkPoint
-): { distance: number; node: number } {
+): { distance: number; length: number; node: number } {
   const from = graph.edgeFrom[target.edge];
   const to = graph.edgeTo[target.edge];
+  const cost = costOf(scratch, graph, target.edge);
+  const tail = graph.edgeLength[target.edge] - target.offset;
   const viaFrom = canLeave(graph, target.edge, from)
-    ? reached(scratch, from) + target.offset
+    ? reached(scratch, from) + target.offset * cost
     : Infinity;
   const viaTo = canLeave(graph, target.edge, to)
-    ? reached(scratch, to) + (graph.edgeLength[target.edge] - target.offset)
+    ? reached(scratch, to) + tail * cost
     : Infinity;
-  return viaFrom <= viaTo ? { distance: viaFrom, node: from } : { distance: viaTo, node: to };
+  return viaFrom <= viaTo
+    ? { distance: viaFrom, length: lengthTo(scratch, from) + target.offset, node: from }
+    : { distance: viaTo, length: lengthTo(scratch, to) + tail, node: to };
+}
+
+function lengthTo(scratch: RouteScratch, node: number): number {
+  return scratch.stamp[node] === scratch.search ? scratch.len[node] : Infinity;
 }
 
 function reached(scratch: RouteScratch, node: number): number {
@@ -202,12 +255,15 @@ function search(
   source: NetworkPoint,
   limitM: number,
   targets: readonly NetworkPoint[],
-  allowed?: (edge: number) => boolean
+  allowed?: (edge: number) => boolean,
+  costs: KindCosts = null
 ): void {
   scratch.search += 1;
+  scratch.costs = costs;
   const id = scratch.search;
   const heap = scratch.heap;
   heap.clear();
+  const kindIndex = graph.kindIndex;
 
   // Leaving the source edge towards its first point means travelling it
   // backwards, which a one-way carriageway only allows as GPS jitter.
@@ -215,24 +271,29 @@ function search(
   // times a trip, and on Hermes a call is most of the cost of a small body.)
   const sourceFrom = graph.edgeFrom[source.edge];
   const sourceTo = graph.edgeTo[source.edge];
-  const toFrom = source.offset;
-  const toTo = graph.edgeLength[source.edge] - source.offset;
+  const sourceCost = costs === null ? 1 : costs[kindIndex[source.edge]];
+  const lenFrom = source.offset;
+  const lenTo = graph.edgeLength[source.edge] - source.offset;
+  const toFrom = lenFrom * sourceCost;
+  const toTo = lenTo * sourceCost;
   if (
-    toFrom <= limitM &&
+    lenFrom <= limitM &&
     (canLeave(graph, source.edge, sourceTo) || source.offset <= ONEWAY_JITTER_M)
   ) {
     scratch.stamp[sourceFrom] = id;
     scratch.dist[sourceFrom] = toFrom;
+    scratch.len[sourceFrom] = lenFrom;
     scratch.via[sourceFrom] = -1;
     heap.push(sourceFrom, toFrom);
   }
   if (
-    toTo <= limitM &&
-    (canLeave(graph, source.edge, sourceFrom) || toTo <= ONEWAY_JITTER_M) &&
+    lenTo <= limitM &&
+    (canLeave(graph, source.edge, sourceFrom) || lenTo <= ONEWAY_JITTER_M) &&
     (scratch.stamp[sourceTo] !== id || toTo < scratch.dist[sourceTo])
   ) {
     scratch.stamp[sourceTo] = id;
     scratch.dist[sourceTo] = toTo;
+    scratch.len[sourceTo] = lenTo;
     scratch.via[sourceTo] = -1;
     heap.push(sourceTo, toTo);
   }
@@ -278,13 +339,17 @@ function search(
         continue;
       }
       const next = graph.edgeFrom[edge] === node ? graph.edgeTo[edge] : graph.edgeFrom[edge];
-      const candidate = distance + graph.edgeLength[edge];
-      if (candidate > limitM) {
+      const edgeLength = graph.edgeLength[edge];
+      // Bounded by real metres, ordered by cost: see `RouteScratch.len`.
+      const length = scratch.len[node] + edgeLength;
+      if (length > limitM) {
         continue;
       }
+      const candidate = distance + edgeLength * (costs === null ? 1 : costs[kindIndex[edge]]);
       if (scratch.stamp[next] !== id || candidate < scratch.dist[next]) {
         scratch.stamp[next] = id;
         scratch.dist[next] = candidate;
+        scratch.len[next] = length;
         scratch.via[next] = edge;
         heap.push(next, candidate);
       }

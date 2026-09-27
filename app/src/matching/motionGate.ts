@@ -31,12 +31,21 @@
  * that window instead. That is weaker, since it is the positions judging
  * themselves, and it is the fallback, not the rule.
  *
+ * AND THE MOTION SENSORS, WHEN THEY ARE ALLOWED (D-094)
+ * ----------------------------------------------------
+ * Android's activity label (`recording/activityTimeline.ts`) is a second,
+ * independent witness: it knows *still* without GPS. It vetoes a slow median
+ * speed, and decides alone when a fix has no speed at all, which is common on
+ * automatic recording's balanced accuracy. It never overrules a speed the
+ * receiver clearly measures, because the label lags.
+ *
  * ⚠ **Every threshold here is set from one phone on one desk and has not seen
  * a real walk** (the lead's outing, T-245, tunes them). Pure. Tested in
  * `motionGate.test.ts`.
  */
 
 import { distanceM } from '../recording/distance.ts';
+import type { Activity } from '../recording/activityTimeline.ts';
 
 /** What the gate needs of a fix. */
 export type GateFix = {
@@ -44,7 +53,25 @@ export type GateFix = {
   lat: number;
   lon: number;
   speed_mps?: number | null;
+  /**
+   * What the phone's motion sensors said the user was doing (D-094), when the
+   * permission was given. `unknown` or absent otherwise.
+   */
+  activity?: Activity | null;
 };
+
+/**
+ * With the motion sensors saying *still*, the receiver's median speed must
+ * reach this for the fix to count as moving anyway, m/s.
+ *
+ * ⚠ NOT TUNED. Android's label lags a change by up to a minute or so: a car
+ * pulling away from a light is still labelled *still* for a while, and the
+ * receiver's Doppler speed is the faster witness there. 2 m/s is above
+ * anything the desk's drift produced as a median and below any car in motion.
+ */
+export const STILL_OVERRIDE_MPS = 2;
+
+const MOVING_ACTIVITIES = new Set<Activity>(['walking', 'running', 'cycling', 'driving']);
 
 /**
  * Median reported speed at or above which the phone is moving, m/s.
@@ -106,8 +133,26 @@ export function movingMask(fixes: readonly GateFix[]): boolean[] {
       }
     }
 
+    const activity = fixes[i].activity ?? 'unknown';
+
     if (speeds.length >= MIN_SPEED_VOTES) {
-      mask[i] = median(speeds) >= MOVING_MIN_MPS;
+      const typical = median(speeds);
+      // D-094: the motion sensors are a second witness. *Still* vetoes a slow
+      // median, which is where drift lives; it cannot veto a car the receiver
+      // clearly measures moving.
+      mask[i] =
+        activity === 'still' ? typical >= STILL_OVERRIDE_MPS : typical >= MOVING_MIN_MPS;
+      continue;
+    }
+
+    // No speeds to vote. The motion sensors decide when they have an answer;
+    // only without one do the positions judge themselves.
+    if (activity === 'still') {
+      mask[i] = false;
+      continue;
+    }
+    if (MOVING_ACTIVITIES.has(activity)) {
+      mask[i] = true;
       continue;
     }
 

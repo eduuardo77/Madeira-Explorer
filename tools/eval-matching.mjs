@@ -77,6 +77,16 @@ const SCENARIOS = [
 ];
 
 const SEEDS = Number(arg('--seeds', '8'));
+// `--activity on|off|wrong` (D-094): label fixes with the mode the scenario
+// moves in, leave them unknown, or swap walking and driving to see what a wrong
+// label costs.
+const ACTIVITY = arg('--activity', 'on');
+function labelFor(scenario) {
+  const mode = scenario.driven ? 'driving' : 'walking';
+  if (ACTIVITY === 'off') return 'unknown';
+  if (ACTIVITY === 'wrong') return mode === 'driving' ? 'walking' : 'driving';
+  return mode;
+}
 // `--draw <scenario number> --out <dir>`: one SVG per seed, truth in green.
 const DRAW = arg('--draw', null);
 const DRAW_DIR = arg('--out', null);
@@ -97,7 +107,7 @@ for (const scenario of SCENARIOS) {
     const steps = scenario.driven
       ? drivenRoute(graph, routing, startEdge, scenario.lengthM, random, scenario.kinds)
       : randomRoute(graph, startEdge, scenario.lengthM, random, scenario.kinds);
-    const trip = sampleTrip(graph, pointAt, steps, random, scenario);
+    const trip = sampleTrip(graph, pointAt, steps, random, { ...scenario, activity: labelFor(scenario) });
     if (trip.fixes.length < 10) {
       // The generator gave up early (a dead-end start). Not a matching result.
       continue;
@@ -215,7 +225,7 @@ function drawSvg(trips) {
   for (const t of trips) {
     for (const line of t.lines) {
       const d = line.points.map(([la, lo], i) => `${i === 0 ? 'M' : 'L'}${x(lo)},${y(la)}`).join('');
-      parts.push(`<path d="${d}" fill="none" stroke="#0A5FCC" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="${line.tunnel ? 0.35 : 0.85}"/>`);
+      parts.push(`<path d="${d}" fill="none" stroke="#0A5FCC" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="${line.faded ? 0.35 : 0.85}"/>`);
     }
     for (const f of t.fixes) {
       parts.push(`<circle cx="${x(f.lon)}" cy="${y(f.lat)}" r="2.2" fill="${f.speed_mps > 0.5 ? '#d33' : '#999'}"/>`);

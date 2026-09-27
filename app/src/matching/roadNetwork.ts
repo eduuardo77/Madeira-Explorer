@@ -21,7 +21,9 @@
  */
 
 import type { TraceSegment } from '../map/traceGeoJson';
+import * as activityEventDao from '../storage/dao/activityEventDao';
 import * as matchedChainDao from '../storage/dao/matchedChainDao';
+import { activitiesAt } from '../recording/activityTimeline';
 import { chainVersion, fromStored, keptBefore, resumeFrom, toStored } from './chainStore';
 import { matchTraceInSteps, MOTION_CONTEXT_MS } from './mapMatch';
 import type { MatchedChain, MatchFix, MatchStats } from './mapMatch';
@@ -118,7 +120,7 @@ async function runInSlices<Y, R>(
 }
 
 export type RoadLines = {
-  /** [lat, lon] points, each line following the roads; tunnels apart. */
+  /** [lat, lon] points, each line following the roads; faded ones apart. */
   lines: VisitedLine[];
   /** Each travelled stretch counted once, metres. */
   lengthM: number;
@@ -167,7 +169,7 @@ export async function roadLinesFor(
 
   // The minute before the resume point is context for the motion gate, not
   // matched again.
-  const subset = fixes.filter((fix) => fix.ts >= fromTs - MOTION_CONTEXT_MS);
+  const subset = await withActivities(fixes.filter((fix) => fix.ts >= fromTs - MOTION_CONTEXT_MS));
   const run = await runInSlices(matchTraceInSteps(network, subset, { fromTs }));
   const fresh = run.value.chains;
   await matchedChainDao.saveFrom(
@@ -196,6 +198,36 @@ export async function roadLinesFor(
 let exportCached: { key: string; value: TraceSegment[] } | null = null;
 
 /**
+ * The fixes, each labelled with what the phone's motion sensors said at the
+ * time (D-094), from the stored transitions. Labelled here, at match time, and
+ * not trusted from `raw_fix.activity_type`, because a transition can reach the
+ * app after the fixes it applies to were stored. No transitions (no
+ * permission, another platform): every label is `unknown` and matching is as
+ * it was before D-094.
+ */
+async function withActivities(fixes: readonly MatchFix[]): Promise<MatchFix[]> {
+  if (fixes.length === 0) {
+    return [];
+  }
+  try {
+    let first = Infinity;
+    let last = -Infinity;
+    for (const fix of fixes) {
+      first = Math.min(first, fix.ts);
+      last = Math.max(last, fix.ts);
+    }
+    const events = await activityEventDao.getEventsFor(first, last);
+    if (events.length === 0) {
+      return [...fixes];
+    }
+    const labels = activitiesAt(events, fixes.map((fix) => fix.ts));
+    return fixes.map((fix, i) => ({ ...fix, activity: labels[i] }));
+  } catch {
+    return [...fixes];
+  }
+}
+
+/**
  * The roads travelled, as timed strokes safe to leave the phone.
  *
  * `fixes` must already be the masked export trace (`getExportableTrace`);
@@ -214,11 +246,11 @@ export async function exportRoadSegments(
   if (exportCached !== null && exportCached.key === key) {
     return exportCached.value;
   }
-  const { value } = await runInSlices(matchTraceInSteps(network, fixes));
+  const { value } = await runInSlices(matchTraceInSteps(network, await withActivities(fixes)));
   const chains = value.chains;
   const segments: TraceSegment[] = [];
   for (const chain of chains) {
-    // Run by run, so the film can fade what ran through tunnels.
+    // Run by run, so the film can fade tunnels and cable cars.
     for (const run of chainTimedRuns(network, chain)) {
       const pieces: TimedPoint[][] =
         mask === null ? [run.points] : clipOutsideCircle(run.points, mask, maskRadiusM);
@@ -231,7 +263,7 @@ export async function exportRoadSegments(
               lon: point.lon,
               accuracy_m: null,
             })),
-            tunnel: run.tunnel,
+            faded: run.faded,
           });
         }
       }

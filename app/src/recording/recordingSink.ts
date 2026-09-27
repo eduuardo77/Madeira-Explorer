@@ -35,6 +35,7 @@ import {
   tripHasLapsed,
 } from './recordingAdmission';
 import { checkTripEnd } from '../progress/tripEndDetection';
+import * as activityEventDao from '../storage/dao/activityEventDao';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -50,6 +51,8 @@ import type {
   RecordingSink,
 } from './LocationProvider';
 import { getStepsBetween, readBarometerOnce } from './sensors';
+import { drainActivityEvents, ensureActivityUpdates } from './activityRecognition';
+import { activitiesAt, type Activity } from './activityTimeline';
 
 /**
  * ⚠ **NOT CALLED IN v1, ON PURPOSE (D-050). Deliberately kept, not deleted.**
@@ -203,7 +206,11 @@ export const databaseSink: RecordingSink = {
             return;
           }
 
-          const rows: RawFixInput[] = samples.map((sample) => ({
+          // D-094: what the user was doing at each fix, from the phone's
+          // motion sensors. Fenced off: nothing in it may cost a fix.
+          const activities = await labelActivities(samples.map((sample) => sample.ts));
+
+          const rows: RawFixInput[] = samples.map((sample, index) => ({
             trip_id: trip.id,
             ts: sample.ts,
             lat: sample.lat,
@@ -212,7 +219,7 @@ export const databaseSink: RecordingSink = {
             speed_mps: sample.speedMps,
             bearing_deg: sample.bearingDeg,
             altitude_m: sample.altitudeM,
-            activity_type: sample.activityType,
+            activity_type: activities?.[index] ?? sample.activityType,
             source: sample.source,
           }));
 
@@ -295,3 +302,29 @@ export const databaseSink: RecordingSink = {
     });
   },
 };
+
+/**
+ * Store the activity transitions queued since the last batch, and the activity
+ * at each of `times` (D-094). Null when anything goes wrong: the fixes are
+ * then stored as they came, labelled `unknown`.
+ *
+ * Also registers for transitions once per process, which is how registration
+ * comes back after a reboot or an update without the app being opened.
+ */
+async function labelActivities(times: number[]): Promise<Activity[] | null> {
+  try {
+    await ensureActivityUpdates();
+    const drained = drainActivityEvents();
+    await activityEventDao.insertEvents(drained);
+    if (times.length === 0) {
+      return [];
+    }
+    const from = Math.min(...times);
+    const to = Math.max(...times);
+    const events = await activityEventDao.getEventsFor(from, to);
+    return activitiesAt(events, times);
+  } catch (error) {
+    await recordingEventDao.logError('activity labels', error);
+    return null;
+  }
+}

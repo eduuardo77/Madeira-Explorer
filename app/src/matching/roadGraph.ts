@@ -51,7 +51,14 @@ export type RoadFile = {
  * unclassified or service, `t` track, `f` footway, path, steps or cycleway,
  * `l` levada channel. The build tool says which OSM tags map to which.
  */
-export type EdgeKind = 'm' | 'p' | 'r' | 't' | 'f' | 'l';
+export type EdgeKind = 'm' | 'p' | 'r' | 't' | 'f' | 'l' | 'a';
+
+/**
+ * The index of each kind in `RoadGraph.kindIndex` and in cost tables: `a` is an
+ * aerial lift (a cable car), the island's other way of crossing a valley.
+ */
+export const KIND_INDEX: Record<EdgeKind, number> = { m: 0, p: 1, r: 2, t: 3, f: 4, l: 5, a: 6 };
+export const KIND_COUNT = 7;
 
 export type RoadGraph = {
   version: string;
@@ -62,6 +69,11 @@ export type RoadGraph = {
   /** Metres from the edge's first point to its last, along it. */
   edgeLength: Float64Array;
   edgeKindCodes: string;
+  /**
+   * Each edge's kind as a small number, for cost tables indexed by kind
+   * (`KIND_INDEX`): cheaper in a search's inner loop than reading a string.
+   */
+  kindIndex: Uint8Array;
   /** `0`, `f` or `r` per edge; see `RoadFile.edgeOneway`. */
   edgeOneway: string;
   /** Points of edge e are `pointStart[e]` up to, not including, `pointStart[e + 1]`. */
@@ -271,6 +283,12 @@ export function* decodeRoadGraphInSteps(
   }
   yield 'junctions';
 
+  const kindIndex = new Uint8Array(edgeCount);
+  for (let e = 0; e < edgeCount; e += 1) {
+    const kind = KIND_INDEX[file.edgeKind[e].toLowerCase() as EdgeKind];
+    kindIndex[e] = kind === undefined ? KIND_INDEX.r : kind;
+  }
+
   const grid = yield* buildGrid(lat, lon, pointStart, pointEdge);
 
   return {
@@ -281,6 +299,7 @@ export function* decodeRoadGraphInSteps(
     edgeTo,
     edgeLength,
     edgeKindCodes: file.edgeKind,
+    kindIndex,
     edgeOneway:
       file.edgeOneway !== undefined && file.edgeOneway.length === edgeCount
         ? file.edgeOneway
@@ -534,6 +553,15 @@ export function pointAt(
 /** The kind of an edge, ignoring whether it is a tunnel. */
 export function edgeKind(graph: RoadGraph, edge: number): EdgeKind {
   return graph.edgeKindCodes[edge].toLowerCase() as EdgeKind;
+}
+
+/**
+ * Drawn faded rather than at full strength: underground (a tunnel) or
+ * overhead (an aerial lift). Neither is a street the map shows, and a bright
+ * line over blocks with no street reads as a line in a random place (D-093).
+ */
+export function isFaded(graph: RoadGraph, edge: number): boolean {
+  return isTunnel(graph, edge) || graph.kindIndex[edge] === KIND_INDEX.a;
 }
 
 export function isTunnel(graph: RoadGraph, edge: number): boolean {

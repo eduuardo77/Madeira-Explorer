@@ -24,7 +24,7 @@
  */
 
 import type { MatchedChain } from './mapMatch.ts';
-import { edgeSlice, isTunnel } from './roadGraph.ts';
+import { edgeSlice, isFaded } from './roadGraph.ts';
 import type { RoadGraph } from './roadGraph.ts';
 import type { EdgePiece } from './roadRouting.ts';
 
@@ -171,7 +171,8 @@ export function visitedEdges(graph: RoadGraph, chains: readonly MatchedChain[]):
 }
 
 /**
- * A line to draw, and whether it runs underground.
+ * A line to draw, and whether it is drawn faded: underground (a tunnel) or
+ * overhead (a cable car, since D-094).
  *
  * ⚠ **Tunnels are their own lines (seen on the P30, 2026-09-27).** Drawn like
  * the rest, a drive through Funchal's tunnels was a bright straight stroke
@@ -180,7 +181,7 @@ export function visitedEdges(graph: RoadGraph, chains: readonly MatchedChain[]):
  * faded; the map does the same (`traceStyle.ts`), and says the true thing:
  * you went through there, underneath.
  */
-export type VisitedLine = { points: [number, number][]; tunnel: boolean };
+export type VisitedLine = { points: [number, number][]; faded: boolean };
 
 /** Total length travelled, counting each stretch once, metres. */
 export function visitedLengthM(visited: Visited): number {
@@ -244,7 +245,7 @@ export function visitedLines(graph: RoadGraph, visited: Visited): VisitedLine[] 
     if (other === piece) {
       return -1;
     }
-    return isTunnel(graph, pieces[other].edge) === isTunnel(graph, pieces[piece].edge) ? other : -1;
+    return isFaded(graph, pieces[other].edge) === isFaded(graph, pieces[piece].edge) ? other : -1;
   };
 
   const used = new Uint8Array(pieces.length);
@@ -253,7 +254,7 @@ export function visitedLines(graph: RoadGraph, visited: Visited): VisitedLine[] 
   /** Follow joins from `start`, travelling it low to high when `forward`. */
   const walk = (start: number, startForward: boolean): VisitedLine => {
     const points: [number, number][] = [];
-    const tunnel = isTunnel(graph, pieces[start].edge);
+    const faded = isFaded(graph, pieces[start].edge);
     let piece = start;
     let forward = startForward;
     for (;;) {
@@ -265,11 +266,11 @@ export function visitedLines(graph: RoadGraph, visited: Visited): VisitedLine[] 
       );
       const exit = forward ? p.highNode : p.lowNode;
       if (exit < 0) {
-        return { points, tunnel };
+        return { points, faded };
       }
       const next = partner(exit, piece);
       if (next < 0 || used[next] === 1) {
-        return { points, tunnel };
+        return { points, faded };
       }
       piece = next;
       // Enter the next piece through the junction just left.

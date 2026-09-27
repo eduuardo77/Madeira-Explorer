@@ -2347,7 +2347,9 @@ small and the answer is more places, not a bigger denominator.
 
 ## D-050 — v1 stops recording barometer and pedometer data.
 
-**Status:** Accepted — decided by the project lead 2026-08-12, in answer to OD-9.
+**Status:** Accepted — decided by the project lead 2026-08-12, in answer to OD-9. ⚠ **Its premise
+changed on 2026-09-27:** D-093 brought matching into v1, so the consumers are back. **D-094** records
+Android's activity transitions; the barometer and the step counter are still off.
 
 **Decision:** `captureSensorsFor` is no longer called from `recordingSink.onLocations`. The
 `sensor_sample` table, its DAO, `sensors.ts` and the capture function itself are all **kept**.
@@ -5246,3 +5248,74 @@ added to the phone's real desk trip, then the real database restored byte for by
 road geometry, and levadas are in the network). **Reverses D-032 in part:** its v1 scope stands
 except that matching is in, as the lead asked. D-002's *"highlighted roads are decoration"* has not
 described the product since D-071; this makes the code agree.
+
+## D-094 — The phone's motion sensors are a second witness for the map, and the island's cable cars are in the network
+
+**Status:** **Accepted**, the direction: the project lead, 2026-09-27 (*"Yes, all three uses"*, asked in
+onboarding after location), with the standing instruction that **WalkNYC is the minimum, not the
+model**, and that Madeira's quirks need flexibility. ⚠ Every number below is Provisional until the
+field outing (T-246).
+
+**What prompted it.** The lead pointed out that WalkNYC requests and uses physical activity data as a
+redundancy. D-050 had switched our sensor capture off because *"nothing in v1 reads it"*, and
+`withoutUnusedPermissions.js` stripped `ACTIVITY_RECOGNITION` *"until v2 has something that reads
+it"*. D-093 made v1 that consumer.
+
+**Decision.**
+
+1. **Android's Activity Transition API**, through a local Expo module (`app/modules/activity-transitions`):
+   still, walking, running, cycling, in a vehicle, entered or exited. Transitions, not a stream: the
+   low-power motion sensors report changes and wake nobody between them. A receiver queues them to a
+   file whether or not JavaScript runs; the recorder drains them into `activity_event` (migration 4,
+   in erase-all) and labels each fix's `activity_type`. The matcher relabels from the stored events at
+   match time, because a transition can arrive after the fixes it applies to.
+2. **Three uses, each a weight and never a filter:**
+   - *Motion gate* (`motionGate.ts`): **still** vetoes a slow median speed (drift) unless the receiver
+     clearly measures motion (≥ 2 m/s: the label lags a car pulling away); with no speed at all, a
+     moving label decides before the positions do.
+   - *Mode-aware matching* (`mapMatch.ts`): footways, steps and levada paths cost 6× for a car; the
+     VR1 and trunk roads cost 6× on foot. A candidate of the wrong kind starts 1.5 log-units less
+     likely. A walking label is ignored where the receiver measured over 25 km/h.
+   - *Recorder*: **in a vehicle** switches automatic recording to the driving rate at once, instead
+     of waiting to prove 25 km/h, which Funchal's traffic never does. Only ever denser, never sparser.
+3. **Aerial lifts are in the network** (kind `a`, 7 km, 11 edges: Monte, the Botanical Garden,
+   Garajau, the fajãs), drawn faded like tunnels. The Monte cable car crosses Funchal at about 5 m/s;
+   without the cable, a ride matched **2.2 km of streets under it**; with it, the 3.1 km cable.
+   "Tunnel" became **"faded"** in the code: underground or overhead.
+4. **The permission is optional and asked once**: in onboarding right after location, and once on
+   the next open for anyone past onboarding. "Not now" is an answer. The privacy policy says what it
+   is for (and lost an untrue sentence: it claimed the app records step count and air pressure, which
+   D-050 had stopped).
+
+**Measured (synthetic trips over the real network, 16 seeds; recall / precision):**
+
+| | labels off | labels right | labels **wrong** |
+|---|---|---|---|
+| automatic drive (30 s) | 92.7 / 96.3 | **94.3 / 97.5** | 92.7 / 96.3 |
+| town drive (15 s) | 96.7 / 98.8 | 96.9 / 99.1 | 96.7 / 98.8 |
+| VR1 with tunnels | 97.9 / 99.8 | 97.9 / 99.8 | 97.9 / 99.8 |
+| levada under canopy | 98.5 / 98.1 | 98.5 / 98.1 | 98.2 / 95.5 |
+| old town walk, noisy | 85.3 / 91.5 | 85.3 / 91.5 | 76.7 / 85.6 |
+
+⚠ **The wrong-label column is why the design is what it is.** The first version multiplied the cost
+into the distance and then checked plausibility (*could you have got there in that time?*) against
+that cost, so a dear road became an impossible one: a VR1 drive labelled *walking* lit **0%**, a levada
+labelled *driving* 24%. The search is now ordered by cost but bounded by real metres; the rescued
+figures are the ones in the table. What still costs is a *driving* label on a walk through the old
+town, which speed cannot disprove.
+
+**Alternatives rejected.**
+- *A hard mode filter* ("a car is never on a footway"). Perfect until the label is wrong, and then it
+  deletes a journey.
+- *A periodic activity stream.* A wake-up every interval for a signal that changes a few times a day.
+- *The step counter as well.* Same permission, and the levada-under-canopy fallback it would feed
+  (ARCHITECTURE §8.4) is real; but reading Android's cumulative counter across suspended batches needs
+  more native work. Next, if the outing shows canopy gaps (T-248).
+- *Writing to SQLite from the receiver.* expo-sqlite owns the connection; the file queue is the
+  pattern T-210 already uses.
+- *Ferries in the network.* OSM's ferry lines are approximate and a ship's fixes sit far from them;
+  nothing would match.
+
+**Still open.** Whether the transitions arrive reliably on EMUI with the app in the background (the
+first real check is the P30 after the lead grants it); the label's lag measured on a real drive;
+the German copy (T-160a).

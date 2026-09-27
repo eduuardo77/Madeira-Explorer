@@ -48,6 +48,13 @@ export const AppStateKey = {
    * and D-041 keeps the reported one null on purpose.
    */
   TrackingQuality: 'tracking_quality',
+  /**
+   * When the "Physical activity" permission was asked for, if ever (D-094).
+   * Android cannot say whether a permission has been asked, only whether it
+   * is granted, and the ask is made once: in onboarding, or once afterwards
+   * for somebody who finished onboarding before it existed.
+   */
+  ActivityAskedTs: 'activity_asked_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
   /**

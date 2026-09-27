@@ -89,6 +89,27 @@ export const STRINGS = {
   'onboarding.action.skip': s('Skip for now', 'Agora não', 'Später'),
   'onboarding.action.notNow': s('Not now', 'Agora não', 'Jetzt nicht'),
 
+  // ── Onboarding: physical activity (D-094) ───────────────────────────────
+  // Android's "Physical activity". Optional (D-008): the map works without it.
+  // What it buys, in the user's terms: the right road, and no lines drawn
+  // while the phone lies still. The privacy policy says the same.
+  'onboarding.activity.title': s(
+    'Walking, or in a car?',
+    'A pé ou de carro?',
+    'Zu Fuß oder im Auto?'
+  ),
+  'onboarding.activity.body1': s(
+    'Your phone can tell whether you are walking, in a car, or keeping still. With that, {app} lights the street you drove along rather than the path beside it, and draws nothing while your phone sits on a table.',
+    'O seu telemóvel sabe dizer se está a andar, num carro ou parado. Com isso, o {app} ilumina a rua por onde conduziu e não o caminho ao lado, e não desenha nada enquanto o telemóvel está pousado numa mesa.',
+    'Ihr Telefon erkennt, ob Sie gehen, fahren oder stillstehen. Damit leuchtet {app} die Straße auf, die Sie gefahren sind, statt des Wegs daneben, und zeichnet nichts, während Ihr Telefon auf dem Tisch liegt.'
+  ),
+  'onboarding.activity.body2': s(
+    'It stays on your phone, like the rest of your trip. You can say no, and the map still works.',
+    'Fica no seu telemóvel, como o resto da viagem. Pode dizer que não, e o mapa continua a funcionar.',
+    'Es bleibt auf Ihrem Telefon, wie der Rest Ihrer Reise. Sie können ablehnen, und die Karte funktioniert trotzdem.'
+  ),
+  'onboarding.activity.allow': s('Allow', 'Permitir', 'Erlauben'),
+
   // ── Onboarding: notifications (D-011 — exactly two per trip) ────────────
   'onboarding.messages.title': s(
     'Two messages. That is all.',

@@ -227,4 +227,26 @@ export const MIGRATIONS: Migration[] = [
        );`,
     ],
   },
+  {
+    id: 4,
+    name: 'activity_event',
+    statements: [
+      // ---------------------------------------------------------------------
+      // activity_event — Android's activity transitions, as delivered (D-094).
+      //
+      // CAPTURED, like raw_fix: still / walking / running / cycling /
+      // driving, entered or exited, at a moment. Not tied to a trip, because
+      // the phone reports them whether or not one is open. Fixes are labelled
+      // from these when they are stored and again when they are matched, since
+      // a transition can arrive after the fixes it applies to.
+      // ---------------------------------------------------------------------
+      `CREATE TABLE activity_event (
+         id          INTEGER PRIMARY KEY AUTOINCREMENT,
+         ts          INTEGER NOT NULL,
+         activity    TEXT    NOT NULL,
+         transition  TEXT    NOT NULL
+       );`,
+      `CREATE INDEX idx_activity_event_ts ON activity_event(ts);`,
+    ],
+  },
 ];

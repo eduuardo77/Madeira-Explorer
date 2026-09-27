@@ -25,13 +25,13 @@
  */
 
 import type { MatchedChain } from './mapMatch.ts';
-import { edgeSlice, isTunnel } from './roadGraph.ts';
+import { edgeSlice, isFaded } from './roadGraph.ts';
 import type { RoadGraph } from './roadGraph.ts';
 
 export type TimedPoint = { lat: number; lon: number; ts: number };
 
-/** A stretch of a chain's route that is all underground or all not. */
-export type TimedRun = { points: TimedPoint[]; tunnel: boolean };
+/** A stretch of a chain's route that is all faded (tunnel, cable car) or all not. */
+export type TimedRun = { points: TimedPoint[]; faded: boolean };
 
 /** A chain's route as points, each with the time it was reached. */
 export function chainTimedPath(graph: RoadGraph, chain: MatchedChain): TimedPoint[] {
@@ -74,11 +74,11 @@ export function chainTimedRuns(graph: RoadGraph, chain: MatchedChain): TimedRun[
   };
 
   for (const piece of chain.pieces) {
-    const tunnel = isTunnel(graph, piece.edge);
+    const faded = isFaded(graph, piece.edge);
     const previous = runs[runs.length - 1];
-    if (previous === undefined || previous.tunnel !== tunnel) {
+    if (previous === undefined || previous.faded !== faded) {
       const boundary = previous?.points[previous.points.length - 1];
-      runs.push({ points: boundary === undefined ? [] : [boundary], tunnel });
+      runs.push({ points: boundary === undefined ? [] : [boundary], faded });
     }
     const run = runs[runs.length - 1];
     const slice = edgeSlice(graph, piece.edge, piece.from, piece.to);

@@ -88,7 +88,7 @@ export async function getMovementWindow(
   sinceTs: number,
   limit: number
 ): Promise<
-  { ts: number; lat: number; lon: number; accuracyM: number | null }[]
+  { ts: number; lat: number; lon: number; accuracyM: number | null; activity: string }[]
 > {
   const db = await getDatabase();
   return db.getAllAsync<{
@@ -96,8 +96,9 @@ export async function getMovementWindow(
     lat: number;
     lon: number;
     accuracyM: number | null;
+    activity: string;
   }>(
-    `SELECT ts, lat, lon, accuracy_m AS accuracyM
+    `SELECT ts, lat, lon, accuracy_m AS accuracyM, activity_type AS activity
        FROM raw_fix
       WHERE trip_id = ? AND ts >= ?
       ORDER BY ts DESC

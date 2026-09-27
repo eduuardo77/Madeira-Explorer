@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { matchTrace, MIN_CHAIN_FIXES } from './mapMatch.ts';
+import { effectiveActivity, matchTrace, MIN_CHAIN_FIXES, stepCosts } from './mapMatch.ts';
 import { decodeRoadGraph, pointAt, type RoadFile } from './roadGraph.ts';
 import * as routing from './roadRouting.ts';
 import { fixAt, grid, litOn, litTotal, network } from './testNetwork.ts';
@@ -209,4 +209,77 @@ test('the VR1 with its tunnels, no fix underground: lit end to end, on the right
   // carriageways bought: 92% without them.
   assert.ok(recall > 0.93, `recall ${recall}`);
   assert.ok(precision > 0.97, `precision ${precision}`);
+});
+
+/**
+ * ⚠ A Madeira quirk (D-094). The Monte cable car crosses Funchal at about
+ * 5 m/s, a smooth ride the motion sensors may call *still*. Before aerial lifts
+ * were in the network the ride matched the streets underneath it.
+ */
+test('the Monte cable car lights the cable, not the streets under it', () => {
+  const cable = [189, 190];
+  for (const edge of cable) {
+    assert.equal(graph.edgeKindCodes[edge], 'a', 'edges 189 and 190 are the Funchal to Monte cable car');
+  }
+  const steps = cable.map((edge) => ({ edge, forward: true }));
+  const random = rng(31);
+  const trip = sampleTrip(graph, pointAt, steps, random, {
+    speedMps: 4.5, intervalS: 10, sigmaM: 6, correlationS: 60, outlierRate: 0, accuracyM: 6, activity: 'still',
+  });
+  const { chains } = matchTrace(graph, trip.fixes);
+  const visited = visitedEdges(graph, chains);
+  const onCable = litOn(visited, cable);
+  const total = litTotal(visited);
+  assert.ok(onCable > 2500, `${Math.round(onCable)} m of the 3.1 km cable lit`);
+  assert.ok(total - onCable < 100, `${Math.round(total - onCable)} m of street lit under the cable`);
+});
+
+/**
+ * D-094: the activity makes a way dear, never impossible. A road with a
+ * footway 12 m beside it, the promenade's shape.
+ */
+function promenade() {
+  return network(
+    { a: [0, 0], b: [400, 0], c: [0, 12], d: [400, 12], e: [-50, 6], f: [450, 6] },
+    [
+      { from: 'a', to: 'b' },
+      { from: 'c', to: 'd', kind: 'f' },
+      { from: 'e', to: 'a' },
+      { from: 'e', to: 'c', kind: 'f' },
+      { from: 'b', to: 'f' },
+      { from: 'd', to: 'f', kind: 'f' },
+    ]
+  );
+}
+
+test('in a car, fixes between a road and a footway light the road', () => {
+  const net = promenade();
+  // 8 m from the road, 4 m from the footway: by position alone, the footway.
+  const fixes = Array.from({ length: 12 }, (_, i) => ({ ...fixAt(i * 3, 20 + i * 30, 8, 10), activity: 'driving' as const }));
+  const visited = visitedEdges(net.graph, matchTrace(net.graph, fixes).chains);
+  assert.ok(litOn(visited, [net.edge('a', 'b')]) > 300, 'the road');
+  assert.ok(litOn(visited, [net.edge('c', 'd')]) < 20, 'not the footway');
+});
+
+test('a wrong driving label on a walk along the footway still lights the footway', () => {
+  // The fixes sit on the footway, well away from the road: the label is wrong
+  // (a missed transition) and the evidence must win.
+  const net = network(
+    { a: [0, 0], b: [400, 0], c: [0, 60], d: [400, 60] },
+    [
+      { from: 'a', to: 'b' },
+      { from: 'c', to: 'd', kind: 'f' },
+    ]
+  );
+  const fixes = Array.from({ length: 25 }, (_, i) => ({ ...fixAt(i * 10, 20 + i * 14, 60, 1.4), activity: 'driving' as const }));
+  const visited = visitedEdges(net.graph, matchTrace(net.graph, fixes).chains);
+  assert.ok(litOn(visited, [net.edge('c', 'd')]) > 300, 'the footway, despite the label');
+});
+
+test('a walking label at driving speed is not trusted', () => {
+  assert.equal(effectiveActivity('walking', 20), 'unknown');
+  assert.equal(effectiveActivity('walking', 1.5), 'walking');
+  assert.equal(effectiveActivity('driving', 1.5), 'driving', 'a car can crawl');
+  assert.equal(stepCosts('driving', 'walking'), null, 'the car park: nothing dear');
+  assert.equal(stepCosts('driving', 'unknown'), stepCosts('driving', 'driving'));
 });

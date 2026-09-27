@@ -240,3 +240,21 @@ test('a stop in the middle does not hide the drive that surrounds it', () => {
   const droveThenStopped = [fix(10, 0), fix(8, 0), fix(6, 2000), fix(0, 2000)];
   assert.ok(fastestSustainedSpeedMps(droveThenStopped) >= VEHICLE_SPEED_MPS);
 });
+
+/** D-094: a car crawling through Funchal, as the motion sensors see it. */
+test('in a vehicle by the motion sensors: the driving rate, even at walking pace', () => {
+  const now = 1_800_000_000_000;
+  const crawl = Array.from({ length: 10 }, (_, i) => ({
+    lat: 32.65,
+    lon: -16.91 + (i * 20) / 93_800,
+    ts: now - (9 - i) * 60_000,
+    accuracyM: 8,
+    activity: 'driving',
+  }));
+  const decision = decideProfile('walking', crawl, now);
+  assert.equal(decision.profile, 'driving');
+  assert.match(decision.reason, /vehicle/);
+
+  const walk = crawl.map((sample) => ({ ...sample, activity: 'walking' }));
+  assert.equal(decideProfile('walking', walk, now).profile, 'walking', 'the same crawl on foot stays on the walking rate');
+});

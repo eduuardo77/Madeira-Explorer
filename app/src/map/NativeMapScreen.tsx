@@ -405,8 +405,8 @@ export default function NativeMapScreen({
                   latitude: lat,
                   longitude: lon,
                 })),
-                // Underground stretches faded, as Google draws its tunnels.
-                color: line.tunnel ? tracePaint.tunnelColor : tracePaint.coreColor,
+                // Tunnels and cable cars faded, as Google draws its tunnels.
+                color: line.faded ? tracePaint.fadedColor : tracePaint.coreColor,
                 width: px(tracePaint.coreWidth),
               }))
             );

@@ -19,6 +19,10 @@
  * ------------
  *   1. Welcome — what this does, in one sentence.
  *   2. Location — why, then the system dialog. While-Using only.
+ *   2a. Physical activity (Android, D-094) — why, then the system dialog.
+ *      Right after location because it serves the same map; with its own
+ *      screen in front, so it is never a second dialog on the heels of the
+ *      first.
  *   3. Notifications — explained separately, because D-011 spends exactly two
  *      of them and the day-1 check (T-049) is useless without permission.
  *   4. Done. The map appears and the app goes quiet.
@@ -47,6 +51,7 @@ export type NotificationPermission = 'granted' | 'denied' | 'undetermined';
 export type OnboardingStep =
   | 'welcome'
   | 'location'
+  | 'activity'
   | 'notifications'
   | 'keep-running'
   | 'complete';
@@ -109,6 +114,12 @@ export type OnboardingState = {
   android: boolean;
   /** Whether the keep-running screen has already been shown once. */
   keepRunningSeen: boolean;
+  /**
+   * The "Physical activity" ask is due (D-094): Android, the phone can report
+   * activities, not granted, and never asked. Worked out by the caller, which
+   * can read the platform and the native module; this module cannot.
+   */
+  activityAskable: boolean;
 };
 
 /**
@@ -126,8 +137,12 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
   if (state.location === 'undetermined') {
     return 'welcome';
   }
-  // Location has been answered — either way. Notifications are asked next,
-  // and only if the OS has not already decided.
+  // Location has been answered, either way. Physical activity next (D-094),
+  // once, where the phone can report it.
+  if (state.activityAskable) {
+    return 'activity';
+  }
+  // Notifications are asked next, and only if the OS has not already decided.
   if (state.notifications === 'undetermined') {
     return 'notifications';
   }

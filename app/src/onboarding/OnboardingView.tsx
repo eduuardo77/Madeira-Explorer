@@ -36,6 +36,7 @@ import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
 export type OnboardingScreen =
   | 'welcome'
   | 'location'
+  | 'activity'
   | 'notifications'
   | 'keep-running'
   | 'always-upgrade'
@@ -92,6 +93,16 @@ function copyFor(screen: OnboardingScreen): Copy {
         note: t('onboarding.messages.note'),
         continueLabel: t('onboarding.messages.allow'),
         skipLabel: t('onboarding.messages.deny'),
+      };
+
+    case 'activity':
+      // D-094. Android only, optional, once. The skip is "Not now" like every
+      // other optional ask, and it is a real answer: never asked again.
+      return {
+        title: t('onboarding.activity.title'),
+        body: [t('onboarding.activity.body1'), t('onboarding.activity.body2')],
+        continueLabel: t('onboarding.activity.allow'),
+        skipLabel: t('onboarding.action.notNow'),
       };
 
     case 'keep-running':

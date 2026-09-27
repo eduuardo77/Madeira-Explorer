@@ -134,7 +134,7 @@ export function filmFrameSvg(frame, width, height, options = {}) {
         })
         .join(' ');
       // Tunnels faded, as the app's replay draws them (D-093).
-      const opacity = frame.tunnels?.[index] === true ? ' stroke-opacity="0.35"' : '';
+      const opacity = frame.faded?.[index] === true ? ' stroke-opacity="0.35"' : '';
       return `<path d="${d}" fill="none" stroke="${trace}"${opacity} stroke-width="${strokeWidth.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`;
     })
     .join('');

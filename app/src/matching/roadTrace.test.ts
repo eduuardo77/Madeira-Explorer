@@ -132,7 +132,7 @@ test('timed runs split where the route goes underground, sharing the portal poin
   const { chains } = matchTrace(net.graph, fixes);
   assert.equal(chains.length, 1);
   const runs = chainTimedRuns(net.graph, chains[0]);
-  assert.deepEqual(runs.map((run) => run.tunnel), [false, true, false]);
+  assert.deepEqual(runs.map((run) => run.faded), [false, true, false]);
   for (let i = 1; i < runs.length; i += 1) {
     const end = runs[i - 1].points[runs[i - 1].points.length - 1];
     assert.deepEqual(runs[i].points[0], end, 'the next run starts where the last ended');

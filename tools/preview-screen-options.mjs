@@ -21,6 +21,12 @@
  * screen and the others differ only where they say they do. Nothing here
  * changes the app.
  *
+ * Round 3 (→ `tools/out/screen-options-3.html`, 2026-09-27), after the project
+ * lead asked *"do I need to click Começar passeio?"* with automatic recording
+ * running, and found it confusing *"from a user standpoint"*. The screen says
+ * nothing about recording while it works, and WalkNYC has the same blind spot
+ * (teardown item 17). Each idea is drawn with automatic recording on and off.
+ *
  * ⚠ The map in the third board is a stand-in: the real one is Google's and a
  * Node script has no tiles. Judge the controls against each other, not against
  * the ground.
@@ -370,6 +376,102 @@ const MAP_OPTIONS = [
 ];
 
 // ---------------------------------------------------------------------------
+// 6 and 7. Automatic recording, on and off (round 3)
+// ---------------------------------------------------------------------------
+
+const dot = (fill) => `<span style="display:inline-block;width:10px;height:10px;border-radius:5px;background:${fill};margin-right:8px;flex:none"></span>`;
+
+/** One line that always says what recording is doing, in the progress line's style. */
+function statusLine(state) {
+  if (state === 'on') {
+    return `<div class="progress" style="background:${white.strip};flex-direction:row;align-items:center;color:${white.content};font-size:15px;font-weight:600">${dot(colors.good)}A registar automaticamente</div>`;
+  }
+  if (state === 'walking') {
+    return `<div class="progress" style="background:${white.strip};flex-direction:row;align-items:center;color:${white.content};font-size:15px;font-weight:600">${dot(colors.good)}A andar há 12 min, 1,1 km<span style="flex:1"></span><span style="color:${white.muted};font-weight:400;font-size:14px">mais detalhe</span></div>`;
+  }
+  return `<div class="progress" style="background:${white.strip};flex-direction:row;align-items:center;gap:0;color:${white.content};font-size:15px;font-weight:600">${dot(colors.warn)}<span style="flex:1">Registo automático desligado<br><span style="color:${white.muted};font-weight:400;font-size:13px">Só regista durante um passeio</span></span><span style="color:${white.link};font-size:15px">Ligar</span></div>`;
+}
+
+/** Today's notice at the top, beside the gear (D-087 §4). */
+const TOP_NOTICE = `<div style="position:absolute;top:48px;left:84px;right:16px;min-height:60px;border-radius:16px;background:${white.surface};${shadow}padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:15px">
+  <div style="flex:1"><div style="color:${white.content};font-weight:600">O registo automático precisa da localização em “Permitir sempre”</div><div style="color:${white.link}">Abrir definições do telemóvel</div></div><div style="color:${white.content};font-size:22px">×</div></div>`;
+
+const BUTTON = {
+  primary: `<div class="walk" style="background:${green}">${PLAY('#fff')} Começar passeio</div>`,
+  secondary: `<div class="walk" style="background:${white.surface};color:${green};border:2px solid ${green};flex-direction:column;gap:0;${shadow}"><span style="display:flex;align-items:center;gap:6px">${PLAY(green)} Começar passeio</span><span style="font-size:13px;font-weight:400;color:${white.muted}">mais detalhe e um resumo no fim</span></div>`,
+  none: '',
+};
+
+function home3({ status, button, notice = false }) {
+  return `<div class="phone map">${GROUND}
+  <div class="gear" style="background:${white.surface};${shadow}">${SETTINGS(white.content)}</div>
+  ${notice ? TOP_NOTICE : ''}
+  <div class="bottom">
+    <div class="stamprowmap">${passportStamp}<div class="centre">${CENTRAR.today}</div><div style="width:101px"></div></div>
+    ${status === null ? quietLine('3 de 80 lugares', 3 / 80) : statusLine(status)}
+    ${BUTTON[button]}
+  </div></div>`;
+}
+
+const ON_OPTIONS = [
+  {
+    title: 'A. Hoje',
+    phone: home3({ status: null, button: 'primary' }),
+    notes: [
+      'Nada diz que o registo automático está a funcionar. O maior objeto do ecrã é "Começar passeio", e parece obrigatório.',
+      'É onde a pergunta "tenho de carregar?" nasceu. A WalkNYC tem o mesmo ponto cego quando o registo automático funciona.',
+    ],
+  },
+  {
+    title: 'B. Uma linha que diz o que está a acontecer',
+    phone: home3({ status: 'on', button: 'primary' }),
+    notes: [
+      'A linha verde substitui a linha de progresso: "A registar automaticamente". O botão fica igual.',
+      'A menor mudança. O botão continua a ser o objeto maior, mas já não parece obrigatório.',
+      'O progresso (3 de 80) continua no passaporte.',
+    ],
+  },
+  {
+    title: 'C. A linha, e o botão diz o que acrescenta',
+    phone: home3({ status: 'on', button: 'secondary' }),
+    notes: [
+      'A mesma linha, e o passeio passa a botão secundário, branco, com o que dá: mais detalhe e um resumo no fim.',
+      'Lê-se como uma opção, não como um interruptor. Quem não tem o registo automático vê o botão verde (quadro 7).',
+    ],
+  },
+  {
+    title: 'D. Sem botão: os passeios são automáticos',
+    phone: home3({ status: 'walking', button: 'none' }),
+    notes: [
+      'Desenhado a meio de um passeio. A aplicação percebe que começou a andar (D-094), regista com mais detalhe e mostra o resumo no fim, sem nada para carregar.',
+      'Parado, a linha diz só "A registar automaticamente".',
+      '⚠ Depende de uma medição: quanto do início de um passeio o registo automático perde (T-246). A WalkNYC admite perder "os primeiros 2 ou 3 quarteirões".',
+      '⚠ Reverte parte da D-087. O custo em bateria de mais detalhe a andar não está medido (T-054).',
+    ],
+  },
+];
+
+const OFF_OPTIONS = [
+  {
+    title: 'A. Hoje',
+    phone: home3({ status: null, button: 'primary', notice: true }),
+    notes: [
+      'O aviso no topo, como a WalkNYC. Pode ser fechado; volta enquanto a localização não estiver em "Permitir sempre".',
+      'Depois de fechado, o ecrã fica igual ao de quem tem tudo ligado.',
+    ],
+  },
+  {
+    title: 'B, C e D. A mesma linha, a dizer que está desligado',
+    phone: home3({ status: 'off', button: 'primary' }),
+    notes: [
+      'Nas três ideias, sem registo automático o ecrã fica assim: a linha fica âmbar, diz o que isso quer dizer e tem "Ligar".',
+      'O botão verde volta a ser o principal, porque aqui é mesmo preciso. É a razão da WalkNYC que se mantém.',
+      'Um só sítio para o estado, ligado ou desligado. O aviso do topo deixa de ser preciso, e nada fica escondido depois de fechado.',
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
 // The page
 // ---------------------------------------------------------------------------
 
@@ -442,6 +544,14 @@ const PAGES = [
       board('1. O cartão de um carimbo', '"A 39 km em linha reta" não ajuda numa ilha cheia de curvas, e a informação podia estar melhor apresentada.', CARD_OPTIONS) +
         board('2. O topo do passaporte', 'A informação podia estar melhor apresentada.', TOP_OPTIONS) +
         board('3. Os botões do mapa (T-220)', 'Uma só linguagem para os controlos. O fundo é simulado: o mapa real é o da Google.', MAP_OPTIONS)
+    ),
+  ],
+  [
+    'screen-options-3.html',
+    page(
+      'Terceira ronda: o botão "Começar passeio" com o registo automático ligado. Cada ideia está desenhada com o registo automático ligado (quadro 6) e desligado (quadro 7). O fundo é simulado. Diga a letra que prefere, ou o que misturar.',
+      board('6. Com o registo automático ligado', '"Tenho de carregar em Começar passeio?" O ecrã não diz que já está a registar.', ON_OPTIONS) +
+        board('7. Com o registo automático desligado', 'Sem "Permitir sempre", o botão é mesmo preciso: é aqui que ele deve mandar.', OFF_OPTIONS)
     ),
   ],
   [

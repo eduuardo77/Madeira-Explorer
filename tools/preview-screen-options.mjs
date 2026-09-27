@@ -27,6 +27,12 @@
  * nothing about recording while it works, and WalkNYC has the same blind spot
  * (teardown item 17). Each idea is drawn with automatic recording on and off.
  *
+ * Round 4 (→ `tools/out/screen-options-4.html`, 2026-09-27): board 7's A, the
+ * notice when automatic recording is off, redrawn *"more like WalkNYC's one"*
+ * after the project lead looked at WalkNYC's orange box again. Its shape is
+ * copied (amber, a warning sign, full width under the gear, "Toque para"); the
+ * wording varies.
+ *
  * ⚠ The map in the third board is a stand-in: the real one is Google's and a
  * Node script has no tiles. Judge the controls against each other, not against
  * the ground.
@@ -472,6 +478,64 @@ const OFF_OPTIONS = [
 ];
 
 // ---------------------------------------------------------------------------
+// 8. The notice when automatic recording is off, WalkNYC's shape (round 4)
+// ---------------------------------------------------------------------------
+
+// WalkNYC's amber, measured off the P30's screenshot; #1A1A1A on it is about 10:1.
+const AMBER = '#FFB300';
+const WARNING = `<svg viewBox="0 0 24 24" width="28" height="28" style="flex:none"><path d="M12 2.5 L23 21.5 L1 21.5 Z" fill="#1A1A1A"/><rect x="11" y="9" width="2" height="7" fill="${AMBER}"/><rect x="11" y="17.5" width="2" height="2" fill="${AMBER}"/></svg>`;
+
+const amberNotice = (title, line) => `<div style="position:absolute;top:120px;left:16px;right:16px;border-radius:16px;background:${AMBER};${shadow}padding:12px 12px 12px 14px;display:flex;align-items:center;gap:12px;color:#1A1A1A">
+  ${WARNING}<div style="flex:1"><div style="font-size:17px;font-weight:600;line-height:1.25">${title}</div><div style="font-size:15px;margin-top:2px;line-height:1.3">${line}</div></div><div style="font-size:26px;padding:0 4px">×</div></div>`;
+
+function home4(noticeHtml) {
+  return `<div class="phone map">${GROUND}
+  <div class="gear" style="background:${white.surface};${shadow}">${SETTINGS(white.content)}</div>
+  ${noticeHtml}
+  <div class="bottom">
+    <div class="stamprowmap">${passportStamp}<div class="centre">${CENTRAR.today}</div><div style="width:101px"></div></div>
+    ${quietLine('3 de 80 lugares', 3 / 80)}
+    ${BUTTON.primary}
+  </div></div>`;
+}
+
+const NOTICE_OPTIONS = [
+  {
+    title: 'Hoje',
+    phone: home3({ status: null, button: 'primary', notice: true }),
+    notes: [
+      'Branco, ao lado da engrenagem, e o título comprido.',
+      'Parece um cartão como os outros: não se lê como um problema.',
+    ],
+  },
+  {
+    title: 'A. Como a WalkNYC',
+    phone: home4(amberNotice('O registo automático precisa da localização', 'Toque para pôr a localização em “Permitir sempre” nas definições')),
+    notes: [
+      'A mesma forma e a mesma ordem: o título diz o que falta, a segunda linha diz o que fazer.',
+      'A WalkNYC diz "background location". Aqui fica só "localização", e o nome do botão do telemóvel, "Permitir sempre".',
+    ],
+  },
+  {
+    title: 'B. Diz o que se perde',
+    phone: home4(amberNotice('O registo automático está desligado', 'Toque para pôr a localização em “Permitir sempre”')),
+    notes: [
+      'O título diz a consequência, não a causa. Quem lê percebe logo que o mapa não se está a preencher sozinho.',
+      'O título é mais curto que o de hoje.',
+    ],
+  },
+  {
+    title: 'C. Um toque, sem procurar nas definições',
+    phone: home4(amberNotice('O registo automático está desligado', 'Toque para escolher “Permitir sempre”')),
+    notes: [
+      'O texto de B, e o toque faz mais do que na WalkNYC: em vez de abrir as informações da aplicação (onde ainda falta Permissões, Localização, Permitir sempre), pede a permissão diretamente.',
+      'No P30 (Android 10) aparece o diálogo do sistema com "Permitir sempre". Nos Android mais recentes abre logo a página de localização da Bruma.',
+      '⚠ Ainda não experimentado no P30.',
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
 // The page
 // ---------------------------------------------------------------------------
 
@@ -544,6 +608,13 @@ const PAGES = [
       board('1. O cartão de um carimbo', '"A 39 km em linha reta" não ajuda numa ilha cheia de curvas, e a informação podia estar melhor apresentada.', CARD_OPTIONS) +
         board('2. O topo do passaporte', 'A informação podia estar melhor apresentada.', TOP_OPTIONS) +
         board('3. Os botões do mapa (T-220)', 'Uma só linguagem para os controlos. O fundo é simulado: o mapa real é o da Google.', MAP_OPTIONS)
+    ),
+  ],
+  [
+    'screen-options-4.html',
+    page(
+      'Quarta ronda: o aviso do quadro 7 (A), com a forma do aviso laranja da WalkNYC. O fundo é simulado. Diga a letra que prefere, ou o que misturar.',
+      board('8. O aviso com o registo automático desligado', 'Mais parecido com o da WalkNYC: cor de aviso, um sinal, e o que fazer.', NOTICE_OPTIONS)
     ),
   ],
   [

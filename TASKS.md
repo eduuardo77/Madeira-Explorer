@@ -215,6 +215,10 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       — **What it answers:** how far dense fixes sit from the mapped street (the brief's cause 3);
       whether OSM's geometry sits on Google's roads at street zoom; every threshold in
       `mapMatch.ts` and `motionGate.ts`, all of which say *NOT TUNED*.
+      — **Also measure the start latency of automatic recording:** on walk (2), how many metres
+      from the door to the first fix? The stationary profile samples every 5 minutes or 100 m, and
+      WalkNYC admits its passive capture misses *"the first 2-3 blocks"* (teardown item 17). This
+      number decides whether the *Começar passeio* question (asked 2026-09-27) needs the button.
       — ⚠ Automatic recording samples every 30 s at balanced accuracy, the matcher's weakest case
       on synthetic trips; if (2) is poor, T-034a (denser sampling while moving) is the lever.
 - [x] **T-247** ✅ **The motion sensors as a second witness, and the cable cars** (D-094, 2026-09-27).

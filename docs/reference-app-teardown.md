@@ -543,6 +543,56 @@ word is *"Começar a registar"* (`strings.ts:264`), although the code comment ab
 
 ---
 
+### 17. Why WalkNYC keeps a *Start Walk* button beside background recording — **evidence**, 2026-09-27
+
+Asked by the project lead after finding Bruma's own button confusing (*"do I need to click Começar
+passeio?"*), before deciding anything about it. Gathered from WalkNYC's settings on the P30, its
+website, its store listings and press.
+
+**1. The button came first; passive capture was added on top.** App Store version history: 1.0.0 on
+11 May 2026; **1.0.1 on 27 May: *"WalkNYC marks off the blocks you walk without you having to open
+the app"***. The button is the original product. Their own settings describe background recording
+as the thing that removes it: *"Always Gathering records your location in the background to mark
+off your blocks, so you don't have to press Start Walk every time."*
+
+**2. It is the fallback when the permissions are refused.** *"Grant background location and
+physical activity permission to enable always-on tracking."* Without both, the button is the only
+way to record. On the P30 WalkNYC has physical activity but not background location, so there it
+is a button-only app (the orange banner, item 11).
+
+**3. Passive capture misses the start of a walk, and they say so.** GPS is off until the pedometer
+detects walking (*"GPS only turns on when your pedometer detects you're walking"*, their site and
+store listing), and *"Battery Saver may miss the first 2-3 blocks of your walks"*. The button turns
+GPS on from the first step, at 1 s (item 16).
+
+**4. Its scoring wants dense fixes.** A block counts from four fixes within 20 m covering 40% of it
+(read from the app's matcher defaults, 2026-09-27). 1 s GPS guarantees that; passive sampling may not.
+
+**5. A walk is a thing to share.** 1.0.2 (30 May): *"Now you can share your completed walks."* The
+button gives a walk its start and end.
+
+**What transfers to Bruma, and what does not.**
+- **2 transfers entirely.** D-008 makes Bruma fully usable on While-Using, and there a button is the
+  only way to record. Whatever the main screen becomes, a user without background recording needs it.
+- **3 transfers, and Bruma has the same gap, unmeasured.** Automatic recording drops to the
+  stationary profile at rest (a fix every 5 minutes or 100 m, `samplingPolicy.ts`), so the first
+  stretch of a walk can be missed until movement is noticed. **How much is T-246's to measure**
+  (the automatic-recording walk). D-094's transitions could close it: *walking entered* could wake
+  the recorder at once, which WalkNYC's pedometer gate does not do.
+- **4 does not transfer the same way.** Bruma's matcher routes between sparse fixes (D-093) rather
+  than counting fixes per block, so it needs density less.
+- **1 and 5 are WalkNYC's history and product, not constraints.** Bruma was passive-first from D-008;
+  its unit is the trip, and the walk summary (D-087) is the walk-shaped thing.
+
+**What this does not settle.** Whether Bruma's main screen should keep *Começar passeio* while
+automatic recording runs. That is the project lead's decision (D-087 stands until then).
+
+Sources: [walknyc.app](https://walknyc.app/); [App Store listing and version
+history](https://apps.apple.com/us/app/walknyc-walk-every-block/id6758922428); [NY Groove
+interview](https://nygroove.nyc/walk-nyc-app/); WalkNYC's settings screen on the P30.
+
+---
+
 ## Not worth taking
 
 - **Six system dialogs in one minute** — decomposed at the top of this file. Four of the six are OS

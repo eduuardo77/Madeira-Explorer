@@ -63,18 +63,35 @@ class ActivityTransitionsModule : Module() {
      * rejects, when it cannot: no permission, no Play services.
      */
     AsyncFunction("start") { promise: Promise ->
-      if (!hasPermission(context)) {
+      val ctx = context
+      if (!hasPermission(ctx)) {
+        TransitionQueue.noteRegistration(ctx, false, "no permission")
         promise.resolve(false)
         return@AsyncFunction
       }
       try {
-        ActivityRecognition.getClient(context)
-          .requestActivityTransitionUpdates(request(), pendingIntent(context))
-          .addOnSuccessListener { promise.resolve(true) }
-          .addOnFailureListener { promise.resolve(false) }
+        ActivityRecognition.getClient(ctx)
+          .requestActivityTransitionUpdates(request(), pendingIntent(ctx))
+          .addOnSuccessListener {
+            TransitionQueue.noteRegistration(ctx, true, "")
+            promise.resolve(true)
+          }
+          .addOnFailureListener { error ->
+            TransitionQueue.noteRegistration(ctx, false, error.toString())
+            promise.resolve(false)
+          }
       } catch (error: SecurityException) {
+        TransitionQueue.noteRegistration(ctx, false, error.toString())
         promise.resolve(false)
       }
+    }
+
+    /**
+     * What has happened since install: deliveries, events, drains,
+     * registrations. Never emptied by a drain (see TransitionQueue).
+     */
+    Function("diagnostics") {
+      TransitionQueue.stats(context)
     }
 
     AsyncFunction("stop") { promise: Promise ->

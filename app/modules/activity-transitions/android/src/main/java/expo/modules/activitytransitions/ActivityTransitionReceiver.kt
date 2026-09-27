@@ -16,8 +16,16 @@ import org.json.JSONObject
  */
 class ActivityTransitionReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
-    if (!ActivityTransitionResult.hasResult(intent)) return
-    val result = ActivityTransitionResult.extractResult(intent) ?: return
+    if (!ActivityTransitionResult.hasResult(intent)) {
+      TransitionQueue.noteDelivery(context, hadResult = false, events = 0)
+      return
+    }
+    val result = ActivityTransitionResult.extractResult(intent)
+    if (result == null) {
+      TransitionQueue.noteDelivery(context, hadResult = false, events = 0)
+      return
+    }
+    TransitionQueue.noteDelivery(context, hadResult = true, events = result.transitionEvents.size)
     try {
       // Events carry boot-relative time; the database keeps wall-clock epoch
       // milliseconds, like every fix.

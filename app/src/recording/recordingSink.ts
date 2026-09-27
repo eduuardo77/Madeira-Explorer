@@ -316,6 +316,12 @@ async function labelActivities(times: number[]): Promise<Activity[] | null> {
     await ensureActivityUpdates();
     const drained = drainActivityEvents();
     await activityEventDao.insertEvents(drained);
+    if (drained.length > 0) {
+      await recordingEventDao.log(
+        'activity',
+        drained.map((event) => `${event.activity} ${event.transition}`).join(', ')
+      );
+    }
     if (times.length === 0) {
       return [];
     }

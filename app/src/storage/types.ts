@@ -99,7 +99,13 @@ export type RecordingEventKind =
    * ran, not on a cached answer, so it is the on-device timing record the
    * matcher's performance is judged by.
    */
-  | 'map';
+  | 'map'
+  /**
+   * Android's activity transitions (D-094): registration refused or granted
+   * once per process, and each batch of transitions drained into
+   * `activity_event`. Diary only.
+   */
+  | 'activity';
 
 export type Trip = {
   id: number;

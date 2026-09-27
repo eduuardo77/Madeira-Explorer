@@ -15,6 +15,7 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo';
 
+import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { parseEvent, type ActivityEvent } from './activityTimeline';
 
 type NativeActivityTransitions = {
@@ -23,6 +24,7 @@ type NativeActivityTransitions = {
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
   drain(): unknown[];
+  diagnostics?(): Record<string, unknown>;
 };
 
 const native: NativeActivityTransitions | null =
@@ -89,7 +91,30 @@ export async function ensureActivityUpdates(): Promise<boolean> {
   } catch {
     started = false;
   }
+  // Whether the phone agreed to report transitions, written when the answer
+  // changes: a refusal is retried every batch and must not flood the diary.
+  // The native side keeps the same fact across processes (`activityDiagnostics`).
+  if (lastLogged !== started) {
+    lastLogged = started;
+    const detail = started ? 'transitions registered' : 'transitions refused'; // i18n-exempt: written to the recording diary, never shown on a screen
+    await recordingEventDao.log('activity', detail);
+  }
   return started;
+}
+
+let lastLogged: boolean | null = null;
+
+/**
+ * What the native side has seen since install: deliveries, the events in
+ * them, drains, registrations. For the diary and for a field check; null
+ * when there is no native side.
+ */
+export function activityDiagnostics(): Record<string, unknown> | null {
+  try {
+    return native?.diagnostics?.() ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Every transition queued since the last drain; the queue is then empty. */

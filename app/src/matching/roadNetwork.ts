@@ -27,7 +27,7 @@ import { matchTraceInSteps, MOTION_CONTEXT_MS } from './mapMatch';
 import type { MatchedChain, MatchFix, MatchStats } from './mapMatch';
 import { decodeRoadGraphInSteps } from './roadGraph';
 import type { DecodePhase, RoadFile, RoadGraph } from './roadGraph';
-import { chainTimedPath, clipOutsideCircle } from './roadTrace';
+import { chainTimedRuns, clipOutsideCircle } from './roadTrace';
 import type { TimedPoint } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
 import type { VisitedLine } from './visitedRoads';
@@ -218,19 +218,22 @@ export async function exportRoadSegments(
   const chains = value.chains;
   const segments: TraceSegment[] = [];
   for (const chain of chains) {
-    const path = chainTimedPath(network, chain);
-    const pieces: TimedPoint[][] =
-      mask === null ? [path] : clipOutsideCircle(path, mask, maskRadiusM);
-    for (const piece of pieces) {
-      if (piece.length >= 2) {
-        segments.push({
-          fixes: piece.map((point) => ({
-            ts: point.ts,
-            lat: point.lat,
-            lon: point.lon,
-            accuracy_m: null,
-          })),
-        });
+    // Run by run, so the film can fade what ran through tunnels.
+    for (const run of chainTimedRuns(network, chain)) {
+      const pieces: TimedPoint[][] =
+        mask === null ? [run.points] : clipOutsideCircle(run.points, mask, maskRadiusM);
+      for (const piece of pieces) {
+        if (piece.length >= 2) {
+          segments.push({
+            fixes: piece.map((point) => ({
+              ts: point.ts,
+              lat: point.lat,
+              lon: point.lon,
+              accuracy_m: null,
+            })),
+            tunnel: run.tunnel,
+          });
+        }
       }
     }
   }

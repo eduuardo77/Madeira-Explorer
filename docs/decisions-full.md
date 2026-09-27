@@ -5234,7 +5234,8 @@ added to the phone's real desk trip, then the real database restored byte for by
   An outing records at 10 s. Whether automatic recording should sample denser is T-034a's question,
   now with a reason.
 - **Stacked roads** (VR1 over ER-101) rely on route continuity alone; no barometer is captured.
-- **The film and the share card draw tunnels at full strength**: only the map fades them so far.
+- **The share card draws tunnels at full strength.** The map and, since the same day, the film fade
+  them (the flag travels `TraceSegment.tunnel` → `DrawnSegment.tunnel` → `Frame.tunnels`).
 - **A cold start still spends about 1.4 s preparing the network** before the first line appears
   (sliced, so the map answers meanwhile). Keeping the decoded arrays on disk would remove it.
 - **ODbL.** The app now credits OpenStreetMap (Licences). Shipping a derived database also asks that

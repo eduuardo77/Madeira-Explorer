@@ -284,3 +284,38 @@ test('which instruction is due, and nothing before the first', () => {
     previous = due;
   }
 });
+
+/**
+ * D-093: the film draws matched roads, and a tunnel faded, as the map does.
+ * From roads in to polyline colours out, through composition and playback.
+ */
+test('a tunnel in the roads is drawn faded in the replay, the rest at full strength', () => {
+  const road = walk(30);
+  const underground = walk(12, 29).map((fix) => ({ ...fix, lat: fix.lat + 0.03 }));
+  const after = walk(20, 40).map((fix) => ({ ...fix, lat: fix.lat + 0.03 }));
+  const f = film(
+    composeSouvenir(
+      input({
+        roads: [
+          { fixes: road, tunnel: false },
+          { fixes: underground, tunnel: true },
+          { fixes: after, tunnel: false },
+        ],
+      })
+    )
+  );
+  const frame = frameAt(f, f.durationMs);
+  assert.deepEqual(frame.tunnels, [false, true, false]);
+  const { polylines } = replayMapFrame(frame, OPTIONS);
+  const paint = TRACE_PAINT.light;
+  assert.deepEqual(
+    polylines.map((line) => line.color),
+    [paint.coreColor, paint.tunnelColor, paint.coreColor]
+  );
+});
+
+test('GPS strokes, with no tunnel flag, are drawn at full strength', () => {
+  const f = film(composeSouvenir(input()));
+  const frame = frameAt(f, f.durationMs);
+  assert.ok(frame.tunnels.every((tunnel) => tunnel === false));
+});

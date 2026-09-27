@@ -25,14 +25,37 @@
  */
 
 import type { MatchedChain } from './mapMatch.ts';
-import { edgeSlice } from './roadGraph.ts';
+import { edgeSlice, isTunnel } from './roadGraph.ts';
 import type { RoadGraph } from './roadGraph.ts';
 
 export type TimedPoint = { lat: number; lon: number; ts: number };
 
+/** A stretch of a chain's route that is all underground or all not. */
+export type TimedRun = { points: TimedPoint[]; tunnel: boolean };
+
 /** A chain's route as points, each with the time it was reached. */
 export function chainTimedPath(graph: RoadGraph, chain: MatchedChain): TimedPoint[] {
   const points: TimedPoint[] = [];
+  for (const run of chainTimedRuns(graph, chain)) {
+    for (const point of run.points) {
+      const last = points[points.length - 1];
+      if (last !== undefined && last.lat === point.lat && last.lon === point.lon) {
+        continue;
+      }
+      points.push(point);
+    }
+  }
+  return points;
+}
+
+/**
+ * A chain's route as timed runs, a new one wherever it goes into a tunnel or
+ * comes out. Neighbouring runs share their boundary point, so drawn one after
+ * the other the line stays continuous; the film fades the underground ones,
+ * as the map does (D-093).
+ */
+export function chainTimedRuns(graph: RoadGraph, chain: MatchedChain): TimedRun[] {
+  const runs: TimedRun[] = [];
   const anchors = chain.anchors;
   let atM = 0;
   let anchor = 0;
@@ -51,20 +74,27 @@ export function chainTimedPath(graph: RoadGraph, chain: MatchedChain): TimedPoin
   };
 
   for (const piece of chain.pieces) {
+    const tunnel = isTunnel(graph, piece.edge);
+    const previous = runs[runs.length - 1];
+    if (previous === undefined || previous.tunnel !== tunnel) {
+      const boundary = previous?.points[previous.points.length - 1];
+      runs.push({ points: boundary === undefined ? [] : [boundary], tunnel });
+    }
+    const run = runs[runs.length - 1];
     const slice = edgeSlice(graph, piece.edge, piece.from, piece.to);
     for (let i = 0; i < slice.length; i += 1) {
       if (i > 0) {
         atM += metres(slice[i - 1], slice[i]);
       }
       const [lat, lon] = slice[i];
-      const last = points[points.length - 1];
+      const last = run.points[run.points.length - 1];
       if (last !== undefined && last.lat === lat && last.lon === lon) {
         continue;
       }
-      points.push({ lat, lon, ts: timeAt(atM) });
+      run.points.push({ lat, lon, ts: timeAt(atM) });
     }
   }
-  return points;
+  return runs.filter((each) => each.points.length >= 2);
 }
 
 function metres(a: [number, number], b: [number, number]): number {

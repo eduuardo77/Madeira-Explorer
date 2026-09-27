@@ -126,14 +126,16 @@ export function filmFrameSvg(frame, width, height, options = {}) {
   const strokeWidth = Math.max(1.5, width / 180);
 
   const paths = frame.strokes
-    .map((stroke) => {
+    .map((stroke, index) => {
       const d = stroke
         .map(([lon, lat], i) => {
           const [x, y] = toPixel(lon, lat);
           return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
         })
         .join(' ');
-      return `<path d="${d}" fill="none" stroke="${trace}" stroke-width="${strokeWidth.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+      // Tunnels faded, as the app's replay draws them (D-093).
+      const opacity = frame.tunnels?.[index] === true ? ' stroke-opacity="0.35"' : '';
+      return `<path d="${d}" fill="none" stroke="${trace}"${opacity} stroke-width="${strokeWidth.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`;
     })
     .join('');
 

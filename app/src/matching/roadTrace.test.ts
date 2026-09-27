@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { matchTrace } from './mapMatch.ts';
-import { chainTimedPath, clipOutsideCircle, type TimedPoint } from './roadTrace.ts';
+import { chainTimedPath, chainTimedRuns, clipOutsideCircle, type TimedPoint } from './roadTrace.ts';
 import { at, fixAt, network } from './testNetwork.ts';
 
 function metresFrom(point: { lat: number; lon: number }, centre: { lat: number; lon: number }): number {
@@ -113,3 +113,32 @@ function densify(line: TimedPoint[]): TimedPoint[] {
   }
   return out;
 }
+
+test('timed runs split where the route goes underground, sharing the portal point', () => {
+  const net = network(
+    { w: [0, 0], p1: [300, 0], p2: [700, 0], e: [1000, 0] },
+    [
+      { from: 'w', to: 'p1', kind: 'm' },
+      { from: 'p1', to: 'p2', kind: 'M' },
+      { from: 'p2', to: 'e', kind: 'm' },
+    ]
+  );
+  const fixes = [];
+  for (let t = 0; t <= 45; t += 5) {
+    const east = 20 + t * 20;
+    if (east > 320 && east < 680) continue; // no fixes underground
+    fixes.push(fixAt(t, east, 2, 20));
+  }
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.equal(chains.length, 1);
+  const runs = chainTimedRuns(net.graph, chains[0]);
+  assert.deepEqual(runs.map((run) => run.tunnel), [false, true, false]);
+  for (let i = 1; i < runs.length; i += 1) {
+    const end = runs[i - 1].points[runs[i - 1].points.length - 1];
+    assert.deepEqual(runs[i].points[0], end, 'the next run starts where the last ended');
+  }
+  const all = runs.flatMap((run) => run.points);
+  for (let i = 1; i < all.length; i += 1) {
+    assert.ok(all[i].ts >= all[i - 1].ts, 'time never runs backwards across a portal');
+  }
+});

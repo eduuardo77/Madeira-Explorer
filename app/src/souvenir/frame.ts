@@ -89,6 +89,12 @@ export type Frame = {
    * the thing ARCHITECTURE §10 forbids the app to draw.
    */
   strokes: [number, number][][];
+  /**
+   * For each stroke, at the same index: whether it runs through a tunnel, and
+   * so is drawn faded (D-093). Parallel rather than folded into `strokes` so
+   * that everything reading strokes as lines stays as it is.
+   */
+  tunnels: boolean[];
   /** Landed, in the order they were collected. */
   stamps: LandedStamp[];
   hero: Hero | null;
@@ -254,10 +260,15 @@ export function frameAt(film: Film, atMs: number): Frame {
   // ⚠ Strokes come from every draw scene, not only the current one. During the
   // finale the whole trace stays on screen — that is the picture being framed —
   // and reading only the active scene would blank the map for the closing shot.
-  const strokes = film.scenes
-    .flatMap((each) => (each.kind === 'draw' ? each.segments : []))
-    .map((segment) => partialStroke(segment, at))
-    .filter((stroke): stroke is [number, number][] => stroke !== null);
+  const strokes: [number, number][][] = [];
+  const tunnels: boolean[] = [];
+  for (const segment of film.scenes.flatMap((each) => (each.kind === 'draw' ? each.segments : []))) {
+    const stroke = partialStroke(segment, at);
+    if (stroke !== null) {
+      strokes.push(stroke);
+      tunnels.push(segment.tunnel);
+    }
+  }
 
   const stamps: LandedStamp[] = allCues(film)
     .filter((cue) => cue.atMs <= at)
@@ -276,6 +287,7 @@ export function frameAt(film: Film, atMs: number): Frame {
     sceneProgress,
     bounds,
     strokes,
+    tunnels,
     stamps,
     hero:
       scene.kind === 'finale'

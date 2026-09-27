@@ -172,6 +172,11 @@ export type TraceCollection = {
  */
 export type TraceSegment = {
   fixes: TraceFix[];
+  /**
+   * Underground, when the segment is a matched road through a tunnel
+   * (D-093). Drawn faded, as Google draws its tunnels. Absent for GPS strokes.
+   */
+  tunnel?: boolean;
 };
 
 /**

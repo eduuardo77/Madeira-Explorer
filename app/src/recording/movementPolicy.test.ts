@@ -97,9 +97,8 @@ test('ten minutes of stillness drops to the cheap profile', () => {
 
   assert.equal(decision.profile, 'stationary');
   assert.equal(decision.changed, true);
-  // 10, not 12: only fixes inside the window are considered, so that is the
-  // most history the reason can ever claim.
-  assert.match(decision.reason, /within \d+ m for 10 min/);
+  // Up to 12: the window and the fix just before it (STATIONARY_EDGE_MS).
+  assert.match(decision.reason, /within \d+ m for 12 min/);
 });
 
 test('a short pause does NOT drop to the cheap profile', () => {
@@ -118,6 +117,18 @@ test('the window must be exactly covered, not nearly', () => {
 
   const justEnough = decideProfile('walking', stillFor(10), NOW);
   assert.equal(justEnough.profile, 'stationary');
+});
+
+test('⚠ real fixes, never exactly on the minute, still reach the cheap profile', () => {
+  // A fix every 11 s, so none lands exactly on the window edge, as real fixes
+  // never do. On 2026-10-04 the P30 lay still for 40 minutes, a fix every ~10 s,
+  // and the gate never left the moving profile.
+  const samples: MovementSample[] = [];
+  for (let s = 7; s <= 12 * 60; s += 11) {
+    samples.push({ ...fix(0, (s % 3) * 2), ts: NOW - s * 1000 });
+  }
+  const decision = decideProfile('walking', samples, NOW);
+  assert.equal(decision.profile, 'stationary');
 });
 
 test('fixes older than the window do not count towards covering it', () => {

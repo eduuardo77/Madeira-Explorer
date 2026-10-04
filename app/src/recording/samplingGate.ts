@@ -21,19 +21,21 @@ import type { MovementSample } from './movementPolicy';
 import {
   decideProfile,
   MOVING_PROFILE,
+  STATIONARY_EDGE_MS,
   STATIONARY_WINDOW_MS,
 } from './movementPolicy';
 import { SAMPLING_PROFILES } from './samplingPolicy';
 
 /**
- * How many recent fixes to look at.
+ * How many recent fixes to look at: enough to span the window and its edge
+ * (twelve minutes) at a fix every two seconds, and still a bounded query.
  *
- * The window is ten minutes. On the moving profile that is at most ~20 fixes;
- * on the stationary profile, two or three. Forty is comfortably more than
- * enough and bounds the query, which matters because this runs on every wake-up
- * and the OS is timing us.
+ * ⚠ It was forty, on the belief that the moving profile gives ~20 fixes in ten
+ * minutes. The P30 delivers one every ten seconds on the precise tier, so forty
+ * reached back under seven minutes and the window could never be covered
+ * (2026-10-04). Four short columns a row: a few hundred rows cost nothing.
  */
-const WINDOW_FIX_LIMIT = 40;
+const WINDOW_FIX_LIMIT = 400;
 
 /**
  * The profile we believe the provider is currently using.
@@ -105,7 +107,7 @@ export async function applySamplingGate(now: number): Promise<void> {
     // and are discarded in JavaScript.
     const samples: MovementSample[] = await rawFixDao.getMovementWindow(
       trip.id,
-      now - STATIONARY_WINDOW_MS,
+      now - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS,
       WINDOW_FIX_LIMIT
     );
 
@@ -120,7 +122,16 @@ export async function applySamplingGate(now: number): Promise<void> {
     // and applies it again — harmless. The other order could leave the stored
     // profile permanently disagreeing with the OS.
     await writeCurrentProfile(decision.profile);
-    await locationProvider.setSamplingProfile(decision.profile);
+    try {
+      await locationProvider.setSamplingProfile(decision.profile);
+    } catch (error) {
+      // ⚠ Refused, so the OS is still on `current`: say so, or the gate sees
+      // "no change" from now on and never retries. Found 2026-10-04: a refusal
+      // at 12:13 on a ride left the stored profile disagreeing with the OS
+      // until the app was next opened.
+      await writeCurrentProfile(current);
+      throw error;
+    }
 
     await recordingEventDao.log(
       'start',

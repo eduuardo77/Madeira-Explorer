@@ -512,6 +512,15 @@ from `app/`, then check the APK: `aapt dump permissions app-release.apk` must li
 check a build has it: `javap -c -p` on `GoogleMapsView$Content$8.class` under
 `app/node_modules/expo-maps/android/build` must mention `RoundCap`.
 
+⚠ **Since 2026-10-04 `expo-location` is compiled from source too**, for
+`app/patches/expo-location+57.0.9.patch`: `startLocationUpdatesAsync` refused *any* call from the
+background when a foreground service was configured, even one that only changes an already running
+task's options, so the sampling gate could never change profile from a background batch (seen on a
+ride: *"Foreground service cannot be started when the application is in the background"*). The patch
+refuses only a task that is not yet running. To check a build has it: the class under
+`app/node_modules/expo-location/android/build` that mentions `ForegroundServiceStartNotAllowedException`
+must also mention `taskHasConsumerOfClass`.
+
 `app/package.json` lists `expo-task-manager` and `unimodules-app-loader` under
 `expo.autolinking.android.buildFromSource`. Every other Expo module comes as a prebuilt AAR from
 its `local-maven-repo/`. These two are compiled because `app/patches/expo-task-manager+57.0.9.patch`

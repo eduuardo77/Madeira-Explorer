@@ -63,6 +63,19 @@ current state at once. No stamp at Reis Magos was correct: 70 s parked, the rule
 **Unproven until the next ride:** whether the replay then says *driving* (or *cycling*) on a
 motorbike. And the map's status line now says the road travelled since midnight (*"20 km hoje"*,
 a trip meter: a road ridden twice counts twice, so it exceeds the lit 14 km).
+✅ **The 12:13 refusal, fixed the same day:** expo-location refused every `startLocationUpdatesAsync`
+from the background when a foreground service is configured, even one that only changes a running
+task's options, so the sampling gate could never change profile from a batch. Patched to refuse only
+a task not yet running (`patches/expo-location+57.0.9.patch`, now built from source,
+`docs/dev-build.md`); a refused change now restores the stored profile. ⚠ **And found while
+proving it: the gate could never reach the cheap `stationary` profile on a phone.** Coverage was
+measured from the oldest fix inside the 10 minute window, always a few seconds short, and the query
+took only 40 fixes (under 7 minutes at the P30's 10 s). The tests passed only because their fixes sat
+exactly on the minute. Fixed with `STATIONARY_EDGE_MS` and a 400 row limit: the P30 went
+*walking -> stationary* at 14:34 after lying still, its foreground service still up. Until then a
+still phone took a GPS fix every 10 s indefinitely. ⚠ **Unproven: a change made while backgrounded**
+(the 14:34 one happened with the app in front). The next walk with the app closed should log
+*stationary -> walking* and no *sampling gate* error.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

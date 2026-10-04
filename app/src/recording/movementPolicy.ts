@@ -71,6 +71,19 @@ export const MOVING_THRESHOLD_M = 100;
 export const STATIONARY_WINDOW_MS = 10 * 60 * 1000;
 
 /**
+ * How far before the window a fix may lie and still prove it was covered.
+ *
+ * ⚠ Found 2026-10-04: without it the cheap profile was unreachable on a phone.
+ * Coverage was measured from the oldest fix *inside* the window, which is
+ * always a few seconds younger than the window itself, so real stillness fell
+ * short every time; only the tests' fixes, exactly on the minute, reached it.
+ * The fix just before the window closes the gap. Two minutes, because the
+ * gate runs only on the moving profiles, which sample far more often than
+ * that; a lone fix from hours ago still proves nothing.
+ */
+export const STATIONARY_EDGE_MS = 2 * 60 * 1000;
+
+/**
  * Fixes less accurate than this are ignored when measuring displacement.
  *
  * A fix with a ±150 m accuracy radius cannot answer a question about a 100 m
@@ -205,7 +218,7 @@ export function decideProfile(
     }
   }
 
-  const windowStart = newest.ts - STATIONARY_WINDOW_MS;
+  const windowStart = newest.ts - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS;
   const inWindow = trusted.filter((sample) => sample.ts >= windowStart);
 
   let maxDisplacementM = 0;

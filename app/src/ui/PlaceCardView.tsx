@@ -73,10 +73,21 @@ export type PlaceCardViewProps = {
    * would mean nothing.
    */
   onShowOnMap?: () => void;
+  /**
+   * Open the unlock sheet (T-156d). Present only for a locked stamp, and only
+   * where something can be bought: never in a beta build.
+   */
+  onUnlock?: () => void;
   onClose: () => void;
 };
 
-export default function PlaceCardView({ card, stamp, onShowOnMap, onClose }: PlaceCardViewProps) {
+export default function PlaceCardView({
+  card,
+  stamp,
+  onShowOnMap,
+  onUnlock,
+  onClose,
+}: PlaceCardViewProps) {
   return (
     // ⚠ Not `accessibilityViewIsModal`. The card is deliberately *not* modal —
     // the passport and settings stay reachable while it is open — and marking
@@ -162,6 +173,18 @@ export default function PlaceCardView({ card, stamp, onShowOnMap, onClose }: Pla
           style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
         >
           <Text style={styles.directionsText}>{t('placeCard.showOnMap')}</Text>
+        </Pressable>
+      )}
+
+      {/* Tinted text, not a filled button: the card is about the place, and the
+          offer is there for whoever wants it, never pushed (T-157). */}
+      {onUnlock === undefined ? null : (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onUnlock}
+          style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.plainButtonText}>{t('placeCard.unlock')}</Text>
         </Pressable>
       )}
 

@@ -1,0 +1,138 @@
+/**
+ * The offer to unlock the passport (T-156d, D-089).
+ *
+ * Opened from a locked stamp's card, and later from Settings (T-156e). Never
+ * opened by the app on its own: no notification, no banner, no timer (T-157,
+ * the project lead's rule against nagging).
+ *
+ * What it says in each state is `entitlement/unlockSheet.ts`, tested in Node;
+ * how it looks is `UnlockSheetView`, which the workbench draws in every state.
+ * This file only moves between states: it asks `billingSync` for the price,
+ * starts a purchase or a restore, and listens for what Google says.
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { Modal, StyleSheet, View } from 'react-native';
+import {
+  buyPassport,
+  passportPrice,
+  restorePurchases,
+  subscribe,
+} from '../entitlement/billingSync';
+import { isUnlocked } from '../entitlement/entitlementStore';
+import { stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
+import { deviceLanguage } from '../i18n';
+import type { PassportStamp } from './PassportView';
+import { colors, spacing } from './theme';
+import UnlockSheetView from './UnlockSheetView';
+
+export default function UnlockSheet({
+  stamp,
+  collected,
+  waiting,
+  onClose,
+  onUnlocked,
+}: {
+  /** The locked stamp that was tapped, drawn as the passport draws it. */
+  stamp: PassportStamp | null;
+  collected: number;
+  waiting: number;
+  onClose: () => void;
+  /** The passport is unlocked: redraw what was waiting. */
+  onUnlocked: () => void;
+}) {
+  const [state, setState] = useState<UnlockState>({ kind: 'offer', price: null });
+  /** Google's last price, so a cancelled purchase returns to the same offer. */
+  const price = useRef<string | null>(null);
+
+  useEffect(() => {
+    let open = true;
+    const unsubscribe = subscribe((event) => {
+      if (!open) return;
+      if (event.kind === 'unlocked') {
+        setState({ kind: 'unlocked' });
+        onUnlocked();
+      } else if (event.kind === 'pending') {
+        setState({ kind: 'pending' });
+      } else {
+        setState(stateAfterFailure(event.failure, price.current));
+        if (event.failure === 'alreadyOwned') void restore();
+      }
+    });
+    void (async () => {
+      const answer = await passportPrice();
+      if (!open) return;
+      if ('price' in answer) {
+        price.current = answer.price;
+        setState({ kind: 'offer', price: answer.price });
+      } else if (answer.failure !== 'failed') {
+        setState(stateAfterFailure(answer.failure, null));
+      }
+      // A failed price lookup leaves the offer without a price; Buy still works.
+    })();
+    return () => {
+      open = false;
+      unsubscribe();
+    };
+    // Once per opening; the callbacks are the screen's and do not change meaning.
+  }, []);
+
+  const buy = () => {
+    setState({ kind: 'working' });
+    void (async () => {
+      const failure = await buyPassport();
+      // Success arrives through `subscribe`, as Google's sheet closes.
+      if (failure !== null) setState(stateAfterFailure(failure, price.current));
+    })();
+  };
+
+  const restore = async () => {
+    setState({ kind: 'working' });
+    const failure = await restorePurchases();
+    if (failure !== null) {
+      setState(stateAfterFailure(failure, price.current));
+    } else if (await isUnlocked()) {
+      setState({ kind: 'unlocked' });
+      onUnlocked();
+    } else {
+      setState((current) =>
+        current.kind === 'pending' ? current : { kind: 'nothingToRestore', price: price.current }
+      );
+    }
+  };
+
+  const model = unlockSheetModel({
+    state,
+    collected,
+    waiting,
+    // Each turns on in the commit that builds it (T-235, T-233).
+    offers: { medals: false, founder: false },
+    language: deviceLanguage(),
+  });
+
+  return (
+    <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <View style={styles.scrim}>
+        <UnlockSheetView
+          model={model}
+          stamp={stamp}
+          unlocked={state.kind === 'unlocked'}
+          working={state.kind === 'working'}
+          onBuy={buy}
+          onRestore={() => void restore()}
+          onClose={onClose}
+        />
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  scrim: {
+    flex: 1,
+    backgroundColor: colors.scrim,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+});

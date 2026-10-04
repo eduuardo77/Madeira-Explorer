@@ -17,7 +17,7 @@ import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
-import { isUnlocked } from '../entitlement/entitlementStore';
+import { BETA_BUILD, isUnlocked } from '../entitlement/entitlementStore';
 import { visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
@@ -41,6 +41,7 @@ import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
+import UnlockSheet from './UnlockSheet';
 import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
@@ -98,6 +99,11 @@ export default function PassportScreen({
   const [canWatch, setCanWatch] = useState(false);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
+  /**
+   * The unlock sheet, opened from a locked stamp's card (T-156d), with the
+   * stamp it was opened from. Null when closed, which is nearly always.
+   */
+  const [unlockFrom, setUnlockFrom] = useState<PassportStamp | null>(null);
   const shareCardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -390,9 +396,27 @@ export default function PassportScreen({
                 ? undefined
                 : () => onShowOnMap(cardPlace, cardStamp.collected)
             }
+            onUnlock={
+              cardStamp?.locked === true && !BETA_BUILD
+                ? () => {
+                    setUnlockFrom(cardStamp);
+                    closeCard();
+                  }
+                : undefined
+            }
             onClose={closeCard}
           />
         </View>
+      )}
+      {unlockFrom === null ? null : (
+        <UnlockSheet
+          stamp={unlockFrom}
+          collected={stamps.filter((stamp) => stamp.collected).length}
+          waiting={stamps.filter((stamp) => stamp.locked === true).length}
+          onClose={() => setUnlockFrom(null)}
+          // Read everything again: the stamps that were waiting are now shown.
+          onUnlocked={() => setReloadKey((key) => key + 1)}
+        />
       )}
 
       {/* The card being photographed. Off-screen rather than hidden: a view

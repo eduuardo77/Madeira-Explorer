@@ -324,6 +324,23 @@ section's definition of done.
       `AppState` turning active), harmless because they are serialised. **To move the P30 to the
       upload key** it was uninstalled after a pull; the database went back through `run-as` before
       first launch (checksum matched) and the recorder restarted on its own.
+- [~] **T-156d** ✅ **Code, tests and workbench 2026-10-04.** ⚠ **Waiting on OQ-8** (the project lead
+      reads the Portuguese aloud) **and on the sheet being seen on a phone.** **The unlock sheet.**
+      `entitlement/unlockSheet.ts` (pure) decides text and buttons for each state: offer (Google's
+      price or none), working, pending, offline, unavailable, failed, unlocked, nothing to restore;
+      `stateAfterFailure` maps the store's outcomes. `ui/UnlockSheetView.tsx` draws it,
+      `ui/UnlockSheet.tsx` holds the state and talks to `billingSync`. **Entry point: a tinted
+      *Unlock to see this stamp* on a locked stamp's place card**, never in a beta build; the
+      Settings row is T-156e. **Not done, on purpose:** T-157's one-time passport line (its own notes
+      lean towards no prose, the locks already say it; the project lead's call). Medals and the
+      founder line are off until T-235 and T-233 exist, so the sheet never offers what the app does
+      not have. The hero stamp is drawn muted until paid; whether to show it in full as a teaser
+      is open. **Found while writing it:** cancelling Google's sheet arrives while the sheet says
+      *waiting*, and the first version stayed waiting forever; a test now holds the return to the
+      offer. **Tests (958).** **Workbench:** eight `Unlock:` screens; at 375 px the card is 340
+      wide with nothing overflowing and every button 60 dp tall; a locked stamp's card opens it.
+      **P30:** the build runs, map and passport render, no crash; the real data has no locked stamp,
+      so the sheet itself has not been reached on a phone.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

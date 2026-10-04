@@ -37,6 +37,8 @@ import OnboardingView, {
 import PassportView, { type PassportStamp } from './src/ui/PassportView';
 import { visibleStamps } from './src/entitlement/freeTier';
 import PlaceCardView from './src/ui/PlaceCardView';
+import UnlockSheetView from './src/ui/UnlockSheetView';
+import { unlockSheetModel, type UnlockState } from './src/entitlement/unlockSheet';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
@@ -199,7 +201,23 @@ type Screen =
   | 'settings'
   | 'privacy'
   | 'passport-confirm'
+  | `unlock:${UnlockState['kind']}`
   | `onboarding:${OnboardingScreen}`;
+
+/**
+ * The unlock sheet in each state (T-156d). The price is a placeholder in the
+ * workbench's own words, never a real one: only Google's is ever shown.
+ */
+const UNLOCK_STATES: Record<UnlockState['kind'], UnlockState> = {
+  offer: { kind: 'offer', price: '0,00 € (workbench)' },
+  working: { kind: 'working' },
+  pending: { kind: 'pending' },
+  offline: { kind: 'offline' },
+  unavailable: { kind: 'unavailable' },
+  failed: { kind: 'failed' },
+  unlocked: { kind: 'unlocked' },
+  nothingToRestore: { kind: 'nothingToRestore', price: '0,00 € (workbench)' },
+};
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
@@ -211,6 +229,10 @@ const SCREENS: { id: Screen; label: string }[] = [
   { id: 'place-card', label: 'Place card (T-115)' },
   { id: 'place-card-collected', label: 'Place card — collected, no fix' },
   { id: 'settings', label: 'Settings (T-141/T-125)' },
+  ...(Object.keys(UNLOCK_STATES) as UnlockState['kind'][]).map((kind) => ({
+    id: `unlock:${kind}` as Screen,
+    label: `Unlock: ${kind} (T-156d)`,
+  })),
   { id: 'privacy', label: 'Privacy policy (T-124)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
@@ -369,10 +391,36 @@ export default function DesignWorkbench() {
                       setPassportCard(null);
                       setScreen('primary');
                     }}
+                    onUnlock={
+                      passportCard.locked === true
+                        ? () => {
+                            setPassportCard(null);
+                            setScreen('unlock:offer');
+                          }
+                        : undefined
+                    }
                     onClose={() => setPassportCard(null)}
                   />
                 </View>
               )}
+            </View>
+          ) : screen.startsWith('unlock:') ? (
+            <View style={styles.unlockStage}>
+              <UnlockSheetView
+                model={unlockSheetModel({
+                  state: UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
+                  collected: stamps.filter((stamp) => stamp.collected).length,
+                  waiting: stamps.filter((stamp) => stamp.locked === true).length,
+                  offers: { medals: false, founder: false },
+                  language: deviceLanguage(),
+                })}
+                stamp={stamps.find((stamp) => stamp.locked === true) ?? null}
+                unlocked={screen === 'unlock:unlocked'}
+                working={screen === 'unlock:working'}
+                onBuy={() => setScreen('unlock:working')}
+                onRestore={() => setScreen('unlock:nothingToRestore')}
+                onClose={() => setScreen('passport')}
+              />
             </View>
           ) : screen === 'privacy' ? (
             <PrivacyPolicyView onClose={() => setScreen('settings')} />
@@ -487,6 +535,12 @@ export default function DesignWorkbench() {
 }
 
 const styles = StyleSheet.create({
+  // The sheet over the scrim colour it sits on in the app.
+  unlockStage: {
+    backgroundColor: colors.scrim,
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
   root: { flex: 1, backgroundColor: '#0a0e12' },
   fill: { flex: 1 },
   // Where PassportScreen holds its card (`cardHolder`).

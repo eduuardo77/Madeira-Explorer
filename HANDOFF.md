@@ -177,8 +177,8 @@ Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativ
 says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
-**Next for the assistant: the monetisation build, Phase 2, T-156d (the unlock sheet) of
-`docs/monetization-execution-plan.md`**; Phase 0, Phase 1, T-156a, T-156b and T-156c are done, T-156c seen on the P30. ⚠ The next build on the P30 is signed with the upload key and needs an uninstall: its database is backed up in `Madeira-fieldwork/p30-2026-10-04/`; restore it through `run-as` on a field build. Phase 0 is done up to the first upload (app created, upload key, payments, testers; 2026-10-04). ✅ **The study is finished (2026-09-25): D-089
+**Next for the assistant: the monetisation build, Phase 2, T-156e (Restore in Settings) of
+`docs/monetization-execution-plan.md`**; Phase 0, Phase 1, T-156a to T-156c are done. T-156d (the unlock sheet) is built and waits on the project lead reading its Portuguese (OQ-8) and on being seen on a phone with a locked stamp. ⚠ The next build on the P30 is signed with the upload key and needs an uninstall: its database is backed up in `Madeira-fieldwork/p30-2026-10-04/`; restore it through `run-as` on a field build. Phase 0 is done up to the first upload (app created, upload key, payments, testers; 2026-10-04). ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are

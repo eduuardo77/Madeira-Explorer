@@ -2725,7 +2725,14 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       plugin rather than a hand edit, because `android/` is generated and `npx expo prebuild` would
       silently put the permission back. **Verified by rebuilding and dumping the APK: all three
       gone.**
-- [~] **T-117e** **Release signing — the wiring is done, the key is the project lead's to make.**
+- [x] **T-117e** **Release signing — the wiring is done, the key is the project lead's to make.**
+      ✅ **Key made 2026-10-04** by the project lead: `C:/Users/eduar/keys/bruma-upload.jks`, alias
+      `bruma-upload`, RSA 4096, valid to 2054, backed up by them; the four properties are in
+      `~/.gradle/gradle.properties`. **Verified:** `bundleRelease` printed *upload key*, and
+      `keytool -printcert -jarfile` on the AAB shows that certificate, upload SHA-1
+      `87:5F:7F:68:94:C1:7D:87:A8:B4:FF:9B:82:BA:D4:19:6C:CC:47:61`. ⚠ The comment below and the
+      plugin's say a lost password means never updating; under Play App Signing a lost upload key
+      can be reset through Play support, so it costs days, not the app.
       — ⚠⚠ **The template signed release with the PUBLIC Android debug key**, its own *"Caution!"*
       comment still attached. **That key is not weak, it is public**: `CN=Android Debug`, alias
       `androiddebugkey`, password `android`, issued 2013, identical on every machine with an

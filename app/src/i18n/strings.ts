@@ -954,6 +954,20 @@ export const STRINGS = {
   ),
   // 2026-10-04: a copy of the trip in a file, as WalkNYC's Backup and Restore.
   'settings.section.data': s('Data', 'Dados', 'Daten'),
+  // T-156e: the passport group. The rows open the unlock sheet; its own words
+  // are `unlock.*`. Written without a pronoun, so neither register clashes.
+  'settings.section.passport': s('Passport', 'Passaporte', 'Reisepass'),
+  'settings.passport.unlock': s('Unlock the passport', 'Desbloquear o passaporte', 'Reisepass freischalten'),
+  'settings.passport.footnote.locked': s(
+    'One payment shows every stamp, with no subscription. A purchase made on another phone comes back with Recover purchase.',
+    'Um único pagamento mostra todos os carimbos, sem subscrição. Uma compra feita noutro telemóvel volta com Recuperar compra.',
+    'Eine einmalige Zahlung zeigt alle Stempel, ohne Abo. Ein Kauf auf einem anderen Telefon kommt mit Kauf wiederherstellen zurück.'
+  ),
+  'settings.passport.footnote.unlocked': s(
+    'The passport is unlocked. Every stamp is shown.',
+    'O passaporte está desbloqueado. Todos os carimbos estão à vista.',
+    'Der Reisepass ist freigeschaltet. Alle Stempel sind sichtbar.'
+  ),
   'settings.backup.save': s('Save a copy of my trip', 'Guardar uma cópia da viagem', 'Eine Kopie meiner Reise speichern'),
   'settings.backup.restore': s('Restore from a copy', 'Restaurar a partir de uma cópia', 'Aus einer Kopie wiederherstellen'),
   'settings.backup.footnote': s(

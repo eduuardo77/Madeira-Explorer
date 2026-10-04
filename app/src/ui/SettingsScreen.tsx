@@ -58,7 +58,10 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
 import { writeUpdateNotice } from '../notify/updateNoticeFile';
-import { BETA_BUILD } from '../entitlement/entitlementStore';
+import { BETA_BUILD, isUnlocked } from '../entitlement/entitlementStore';
+import { passportSettings, type PassportSettings } from '../entitlement/settingsPassport';
+import { earnedStamps } from '../progress/stampAnnouncer';
+import UnlockSheet from './UnlockSheet';
 import { useBackHandler } from './useBackHandler';
 import Constants from 'expo-constants';
 import { CONTACT_EMAIL } from '../legal/privacyPolicy';
@@ -93,6 +96,32 @@ export default function SettingsScreen({
   const [backupBusy, setBackupBusy] = useState(false);
   /** T-202: the language chosen here, or null to follow the phone. */
   const [languageChoice, setLanguageChoiceState] = useState<Language | null>(null);
+  /** T-156e: which passport rows to show; null hides the group. */
+  const [passport, setPassport] = useState<PassportSettings | null>(null);
+  /** The unlock sheet, when a passport row opened it, with the counts it says. */
+  const [unlockSheet, setUnlockSheet] = useState<{
+    restore: boolean;
+    collected: number;
+    waiting: number;
+  } | null>(null);
+
+  const readPassport = useCallback(() => {
+    void isUnlocked()
+      .then((unlocked) => setPassport(passportSettings({ unlocked, beta: BETA_BUILD })))
+      .catch(() => undefined);
+  }, []);
+
+  /** Count what is collected and what is waiting, then open the sheet. */
+  const openUnlockSheet = (restore: boolean) => {
+    void (async () => {
+      const stamps = await earnedStamps().catch(() => null);
+      setUnlockSheet({
+        restore,
+        collected: stamps?.earned.length ?? 0,
+        waiting: stamps?.locked.size ?? 0,
+      });
+    })();
+  };
 
   useEffect(() => {
     void locationProvider
@@ -110,6 +139,7 @@ export default function SettingsScreen({
       .catch(() => undefined);
 
     void getTrackingQuality().then(setQuality).catch(() => undefined);
+    readPassport();
     void appStateDao
       .get(appStateDao.AppStateKey.Language)
       .then((raw) => setLanguageChoiceState(parseLanguageChoice(raw)))
@@ -378,65 +408,83 @@ export default function SettingsScreen({
   }
 
   return (
-    <SettingsView
-      permission={permission}
-      mapStyle={mapStyle}
-      onChangeMapStyle={changeMapStyle}
-      backgroundTracking={backgroundTracking}
-      onChangeBackgroundTracking={changeBackgroundTracking}
-      trackingQuality={trackingQuality}
-      onChangeTrackingQuality={changeTrackingQuality}
-      onOpenSystemSettings={() => {
-        void Linking.openSettings().catch(() => undefined);
-      }}
-      // Android only (T-046). Null on iOS removes the whole section rather
-      // than showing a control that cannot do anything there.
-      onOpenBatterySettings={
-        isBatteryExemptionAvailable()
-          ? () => {
-              void openBatteryOptimisationSettings();
-            }
-          : null
-      }
-      // Shown in the app rather than opened in a browser: this app makes no
-      // network requests (D-001), and the reader may well have no signal.
-      onOpenPrivacyPolicy={() => setShowingPolicy(true)}
-      onOpenLicences={() => setShowingLicences(true)}
-      onOpenDebug={onOpenDebug}
-      onEraseRequested={() => setConfirmingErase(true)}
-      onSaveBackup={saveBackup}
-      onRestoreBackup={restoreBackup}
-      backupBusy={backupBusy}
-      donating={donating}
-      onDonateWalk={donateWalk}
-      // T-202: the version a support email needs. From the manifest, never typed.
-      version={
-        Constants.expoConfig?.version === undefined
-          ? undefined
-          : BETA_BUILD
-            ? t('settings.about.betaVersion', { version: Constants.expoConfig.version })
-            : Constants.expoConfig.version
-      }
-      onContact={
-        CONTACT_EMAIL === null
-          ? undefined
-          : () => {
-              void Linking.openURL(`mailto:${CONTACT_EMAIL}`).catch(() => undefined);
-            }
-      }
-      languageChoice={languageChoice}
-      onChangeLanguage={(language) => {
-        setLanguageChoiceState(language);
-        void saveLanguageChoice(language)
-          // The recorder's ongoing notification is written when its options
-          // are applied, so re-apply them for it to speak the new language.
-          .then(retuneRecorder)
-          // T-210: the update message in the language just chosen.
-          .then(writeUpdateNotice)
-          .catch(() => undefined);
-      }}
-      onClose={onClose}
-    />
+    <>
+      <SettingsView
+        permission={permission}
+        passport={passport}
+        onUnlockPassport={() => openUnlockSheet(false)}
+        onRecoverPurchase={() => openUnlockSheet(true)}
+        mapStyle={mapStyle}
+        onChangeMapStyle={changeMapStyle}
+        backgroundTracking={backgroundTracking}
+        onChangeBackgroundTracking={changeBackgroundTracking}
+        trackingQuality={trackingQuality}
+        onChangeTrackingQuality={changeTrackingQuality}
+        onOpenSystemSettings={() => {
+          void Linking.openSettings().catch(() => undefined);
+        }}
+        // Android only (T-046). Null on iOS removes the whole section rather
+        // than showing a control that cannot do anything there.
+        onOpenBatterySettings={
+          isBatteryExemptionAvailable()
+            ? () => {
+                void openBatteryOptimisationSettings();
+              }
+            : null
+        }
+        // Shown in the app rather than opened in a browser: this app makes no
+        // network requests (D-001), and the reader may well have no signal.
+        onOpenPrivacyPolicy={() => setShowingPolicy(true)}
+        onOpenLicences={() => setShowingLicences(true)}
+        onOpenDebug={onOpenDebug}
+        onEraseRequested={() => setConfirmingErase(true)}
+        onSaveBackup={saveBackup}
+        onRestoreBackup={restoreBackup}
+        backupBusy={backupBusy}
+        donating={donating}
+        onDonateWalk={donateWalk}
+        // T-202: the version a support email needs. From the manifest, never typed.
+        version={
+          Constants.expoConfig?.version === undefined
+            ? undefined
+            : BETA_BUILD
+              ? t('settings.about.betaVersion', { version: Constants.expoConfig.version })
+              : Constants.expoConfig.version
+        }
+        onContact={
+          CONTACT_EMAIL === null
+            ? undefined
+            : () => {
+                void Linking.openURL(`mailto:${CONTACT_EMAIL}`).catch(() => undefined);
+              }
+        }
+        languageChoice={languageChoice}
+        onChangeLanguage={(language) => {
+          setLanguageChoiceState(language);
+          void saveLanguageChoice(language)
+            // The recorder's ongoing notification is written when its options
+            // are applied, so re-apply them for it to speak the new language.
+            .then(retuneRecorder)
+            // T-210: the update message in the language just chosen.
+            .then(writeUpdateNotice)
+            .catch(() => undefined);
+        }}
+        onClose={onClose}
+      />
+      {unlockSheet === null ? null : (
+        <UnlockSheet
+          stamp={null}
+          collected={unlockSheet.collected}
+          waiting={unlockSheet.waiting}
+          startWithRestore={unlockSheet.restore}
+          onClose={() => {
+            setUnlockSheet(null);
+            readPassport();
+          }}
+          onUnlocked={readPassport}
+        />
+      )}
+    </>
   );
 }
 

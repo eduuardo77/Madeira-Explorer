@@ -47,7 +47,11 @@ export type StampPopup = {
 
 type Earned = { placeId: string; name: string; category: Category; awardedTs: number };
 
-async function earnedStamps(): Promise<{ earned: Earned[]; locked: Set<string> } | null> {
+/**
+ * The stamps of the trip on show, and which the free tier withholds. Also
+ * what Settings counts for the unlock sheet (T-156e). Null with no trip.
+ */
+export async function earnedStamps(): Promise<{ earned: Earned[]; locked: Set<string> } | null> {
   const trip = await tripDao.getTripOnShow();
   if (trip === null) {
     return null;

@@ -56,6 +56,7 @@ import type { StringKey } from '../i18n/strings';
 import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { TRACKING_QUALITIES, type TrackingQuality } from '../recording/trackingPreference';
+import type { PassportSettings } from '../entitlement/settingsPassport';
 import BackBar from './BackBar';
 import SettingsIcon, { SETTINGS_ICON_SIZE, type SettingsIconName } from './SettingsIcon';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
@@ -93,6 +94,13 @@ export type SettingsViewProps = {
    * Save the trip to a file, and restore it from one (2026-10-04). Absent
    * hides the Data group (the workbench). Restore asks first, in the screen.
    */
+  /**
+   * The passport rows (T-156e), from `passportSettings`. Absent or null hides
+   * the group: a beta build, and the workbench unless it passes them.
+   */
+  passport?: PassportSettings | null;
+  onUnlockPassport?: () => void;
+  onRecoverPurchase?: () => void;
   onSaveBackup?: () => void;
   onRestoreBackup?: () => void;
   /** A save or restore is running; its row says so and does not run twice. */
@@ -429,6 +437,9 @@ export default function SettingsView({
   onOpenLicences,
   onOpenDebug,
   onEraseRequested,
+  passport,
+  onUnlockPassport,
+  onRecoverPurchase,
   onSaveBackup,
   onRestoreBackup,
   backupBusy,
@@ -564,6 +575,39 @@ export default function SettingsView({
             </View>
           </Group>
         ) : null}
+
+        {/* T-156e: the passport, above Data. The offer is a row like any other
+            here, never a banner (T-157). */}
+        {passport == null ? null : (
+          <Group
+            title={t('settings.section.passport')}
+            footnote={t(
+              passport.footnote === 'locked'
+                ? 'settings.passport.footnote.locked'
+                : 'settings.passport.footnote.unlocked'
+            )}
+          >
+            {passport.rows.map((row) =>
+              row === 'unlock' ? (
+                <ListRow
+                  key={row}
+                  icon="unlock"
+                  label={t('settings.passport.unlock')}
+                  tone="action"
+                  onPress={onUnlockPassport}
+                />
+              ) : (
+                <ListRow
+                  key={row}
+                  icon="recover"
+                  label={t('unlock.restore')}
+                  tone="action"
+                  onPress={onRecoverPurchase}
+                />
+              )
+            )}
+          </Group>
+        )}
 
         {/* 2026-10-04: WalkNYC's Data group. Above About, so a user worried
             about an uninstall finds it without scrolling to the bottom. */}

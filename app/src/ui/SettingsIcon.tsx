@@ -27,6 +27,8 @@ export type SettingsIconName =
   | 'technical'
   | 'backup'
   | 'restore'
+  | 'unlock'
+  | 'recover'
   | 'erase';
 
 /** Drawn square, in dp. 22 since D-095: at 24 the glyphs outweighed 16 sp rows. */
@@ -120,6 +122,19 @@ const GLYPHS: Record<SettingsIconName, (color: string, stroke: Stroke) => ReactE
     <>
       <Path d="M5 13v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6" {...s} />
       <Path d="M12 3.5V15M7.5 10.5L12 15l4.5-4.5" {...s} />
+    </>
+  ),
+  // T-156e: an open padlock, and a circle that comes back round.
+  unlock: (_, s) => (
+    <>
+      <Rect x={5} y={10.5} width={14} height={10} rx={2} {...s} />
+      <Path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.7" {...s} />
+    </>
+  ),
+  recover: (_, s) => (
+    <>
+      <Path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" {...s} />
+      <Path d="M19.5 3.5v4h-4" {...s} />
     </>
   ),
   erase: (color) => (

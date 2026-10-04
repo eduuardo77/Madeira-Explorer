@@ -32,6 +32,7 @@ export default function UnlockSheet({
   waiting,
   onClose,
   onUnlocked,
+  startWithRestore = false,
 }: {
   /** The locked stamp that was tapped, drawn as the passport draws it. */
   stamp: PassportStamp | null;
@@ -40,6 +41,8 @@ export default function UnlockSheet({
   onClose: () => void;
   /** The passport is unlocked: redraw what was waiting. */
   onUnlocked: () => void;
+  /** Settings' *Recover purchase* (T-156e): ask Google at once, on opening. */
+  startWithRestore?: boolean;
 }) {
   const [state, setState] = useState<UnlockState>({ kind: 'offer' });
   /** Google's price, kept through every state once it has answered. */
@@ -59,6 +62,7 @@ export default function UnlockSheet({
         if (event.failure === 'alreadyOwned') void restore();
       }
     });
+    if (startWithRestore) void restore();
     void (async () => {
       const answer = await passportPrice();
       if (!open) return;

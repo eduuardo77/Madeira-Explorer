@@ -364,6 +364,18 @@ section's definition of done.
       P30 has two Google accounts and the app has no installer (sideloaded by `adb`), so Play may be
       choosing an account that is not the opted-in tester, or the rollout has not propagated yet.
       **Left:** a purchase that reaches Google's payment sheet.
+- [x] **T-156e** ✅ **Seen on the P30 2026-10-04.** **The passport in Settings.** A *Passaporte* group
+      above Data: *Desbloquear o passaporte* while locked, *Recuperar compra* always (a purchase
+      from another phone, or after erase-all, OQ-7); none in a beta build. The rule is
+      `entitlement/settingsPassport.ts` (pure, 3 tests). Both rows open the unlock sheet; *Recuperar
+      compra* opens it already asking Google (`startWithRestore`). The counts come from
+      `stampAnnouncer.earnedStamps`, now exported rather than copied. Two new glyphs, an open
+      padlock and a circle coming round. The footnotes avoid a pronoun, so neither register (the
+      sheet's "tu", Settings' formal) clashes. **Also the way into the sheet with no locked stamp**,
+      which a Play-installed build needs: its database cannot be probed. **P30:** the group and its
+      footnote read as written; *Recuperar compra* answered *O Google Play não encontrou nenhuma
+      compra nesta conta* with the price on Buy. **Version code 2** (`app.json` and the generated
+      `build.gradle`), for the AAB that carries this, the sheet and the trip backup to Play.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

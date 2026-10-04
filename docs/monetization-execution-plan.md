@@ -352,10 +352,10 @@ account owner, and several involve bank and tax details that the assistant must 
 | 0.0 | ✅ **The name, cleared** (T-187, D-092) | **Done 2026-09-25:** the trademark search on "Bruma" is done and the name is kept. It had to precede creating the app in Play Console, which fixed the package name `com.proa.madeira` (step 0.0a). Nothing else in this plan depends on the name: it lives in `app/src/brand.ts`, and the product ID (§4.2) deliberately does not contain it. |
 | 0.0a | ✅ **The app, created in Play Console** | **Done 2026-10-04** by the project lead: *Bruma: Madeira Walk Tracker*, free, package `com.proa.madeira`. ⚠ Play Console now asks for the package name **when the app is created**, not at the first upload, so the package was fixed on this date. |
 | 0.1 | **Upload key** (already T-187 / T-117e) | Blocks every real purchase test. |
-| 0.2 | **Payments profile** in Play Console | Bank account and tax details for payouts. Required before any product can be sold or tested. |
+| 0.2 | ✅ **Payments profile** in Play Console (done 2026-10-04: it already existed, Bruma is the project lead's second app) | Bank account and tax details for payouts. Required before any product can be sold or tested. |
 | 0.3 | **Upload a store build to the internal testing track** | ⚠ Play Console only lets you create in-app products once a build containing the billing library has been uploaded. So this follows T-156b. Check Google's current wording when you get there. |
 | 0.4 | **Create the product** | One-time product, the ID agreed in §4.2 (permanent), price €5.99, Play's regional conversions (D-089). Title and description in EN, PT, DE, no dashes. |
-| 0.5 | **License testers** | Add the project lead's Gmail (and any tester's) under License testing. Test purchases then cost nothing and offer Google's **test cards**: always approves, always declines, and slow cards that approve or decline after a few minutes (the pending case). |
+| 0.5 | ✅ **License testers** (2026-10-04: set at account level from the project lead's first app; confirm their Gmail is listed before the first test purchase) | Add the project lead's Gmail (and any tester's) under License testing. Test purchases then cost nothing and offer Google's **test cards**: always approves, always declines, and slow cards that approve or decline after a few minutes (the pending case). |
 | 0.6 | **Promo codes** (optional, later) | For friends and hotel partners. |
 
 ### Phase 1: the allowance

@@ -134,6 +134,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ✅ **App created in Play Console 2026-10-04** (project lead): *Bruma: Madeira Walk Tracker*,
       free, `com.proa.madeira`. Play Console asked for the package name at creation, not at the
       first upload as the docs had assumed, so it is permanent from that date.
+      ✅ **First AAB uploaded to internal testing and `passport_madeira` active, 2026-10-04**
+      (monetisation plan steps 0.3, 0.4). ⚠ **Open:** Google's app signing SHA-1 is not yet on the
+      Maps key, so a build installed from Play shows a grey map until it is (T-207).
 - [x] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
       `APP_NAME` is Bruma; `app.json`'s name and the six permission strings; the generated
       `android/.../strings.xml` `app_name` edited to match (the next prebuild writes the same);

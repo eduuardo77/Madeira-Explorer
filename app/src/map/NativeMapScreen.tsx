@@ -98,9 +98,7 @@ import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
-import { buildCollectedMarks } from './collectedMarks';
 import { representativeGeofence } from './placeMarkers';
-import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { traceBounds } from './traceGeoJson';
@@ -280,57 +278,26 @@ export default function NativeMapScreen({
   /** The user's own position, for the same question. */
   const [userAt, setUserAt] =
     useState<{ latitude: number; longitude: number } | null>(null);
-  /**
-   * Which places have actually been awarded, and the live zoom needed to size
-   * their marks (T-112). Zoom comes from `onCameraMove` because the user's own
-   * pans and pinches change it and nothing else tells us.
-   */
-  const [collectedIds, setCollectedIds] = useState<ReadonlySet<string>>(new Set());
-  const [places, setPlaces] = useState<readonly Place[]>([]);
-  const [zoom, setZoom] = useState<number | null>(null);
-  /**
-   * A place tapped on the map, as opposed to one arriving from the passport.
-   *
-   * ⚠ Kept separate from the `focusPlace` **prop** and merged below rather than
-   * duplicating the focus effect. That effect flies the camera, draws the
-   * course, sets the marker and builds the card; a second copy of it would be
-   * two places for the same behaviour to drift apart.
-   */
-  const [tappedPlace, setTappedPlace] = useState<FocusPlace | null>(null);
 
   const darkMap = darkMapPropsFor(styleName, supportsNativeDarkMap);
   const tracePaint = TRACE_PAINT[styleName];
   const coursePaint = COURSE_PAINT[styleName];
 
-  /**
-   * The marks for places already earned.
-   *
-   * ⚠ Only ever the **collected** ones — `collectedMarks.ts` explains why that
-   * is not the all-places layer the project lead deleted in D-052 revised.
-   * Falls back to the camera's own zoom before the first `onCameraMove` lands,
-   * so the marks appear on the first frame rather than after the first pan.
-   */
-  /*
-   * ⚠ No rings for the places still to collect. D-085 drew all of them as
-   * pale hollow rings (2026-09-23); the project lead saw them on the P30 as
-   * "white dots" and asked for them gone on 2026-09-24 (D-085 amended).
-   */
-  const collectedMarks = buildCollectedMarks(
-    places,
-    collectedIds,
-    zoom ?? camera?.zoom ?? 0,
-    PLACE_MARKER_PAINT[styleName].collected
-  );
 
   const minZoom = zoomFloor(ARCHIPELAGO_BOUNDS, { width, height });
 
-  const frame = (bounds: Bounds): CameraFit | null =>
+  /**
+   * `bottom` for the lit roads: a wide, shallow trace rests just above the
+   * controls instead of floating in the upper half (2026-10-04, `cameraFit.ts`).
+   */
+  const frame = (bounds: Bounds, align: 'centre' | 'bottom' = 'centre'): CameraFit | null =>
     fitBounds(bounds, {
       width,
       height,
       // ⚠ Always true since 2026-08-28: the walk button is no longer
       // conditional, so the bottom of the map is always spoken for.
       padding: cameraPadding(true),
+      align,
     });
 
   /**
@@ -390,20 +357,11 @@ export default function NativeMapScreen({
           setSilentForMs(control.silentForMs);
         }
 
-        // The places, and which of them have been earned. Both are needed to
-        // mark the collected ones on the map (T-112).
         const pack = getContentPack();
-        if (!cancelled) {
-          setPlaces(pack.places);
-        }
 
-        // T-204: an ended trip's collected places stay on the map.
+        // T-204: an ended trip's roads and passport button stay on the map.
         const trip = await tripDao.getTripOnShow();
         if (trip !== null) {
-          const awarded = await stampAwardDao.getAwardedPlaceIds(trip.id);
-          if (!cancelled) {
-            setCollectedIds(awarded);
-          }
           // ⚠ Through the free tier, like the passport: the button must never
           // show a stamp the passport is withholding (passportButton.ts).
           const awards = await stampAwardDao.getAwards(trip.id);
@@ -477,7 +435,7 @@ export default function NativeMapScreen({
             });
             const latched = resumeCount === 0 && cameraHeldByFocus.current;
             if (!cancelled && points !== null && !latched) {
-              const fit = frame(traceBoundsOf(points));
+              const fit = frame(traceBoundsOf(points), 'bottom');
               if (fit !== null) {
                 setCamera(fit);
                 setCameraCentre(fit.coordinates);
@@ -520,16 +478,16 @@ export default function NativeMapScreen({
       )
     );
 
-    setCamera(frame(drawn.length > 0 ? traceBoundsOf(drawn) : HOME_BOUNDS));
+    setCamera(drawn.length > 0 ? frame(traceBoundsOf(drawn), 'bottom') : frame(HOME_BOUNDS));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, tracePolylines]);
 
   /**
-   * Somebody asked for a place — the passport via the prop (T-115, D-052,
-   * D-055), or a tap on one of the collected marks (T-112). One effect, either
-   * way, so the two entry points cannot drift.
+   * Somebody asked for a place: the passport, via the prop (T-115, D-052,
+   * D-055). A tap on a collected mark (T-112) was the other way in, until the
+   * marks were removed on 2026-10-04.
    */
-  const requestedPlace = focusPlace ?? tappedPlace;
+  const requestedPlace = focusPlace;
 
   useEffect(() => {
     if (requestedPlace === null || !ready) {
@@ -622,10 +580,6 @@ export default function NativeMapScreen({
     setCard(null);
     setMarker([]);
     setCoursePolylines([]);
-    // ⚠ Must clear too, or the same mark can never be tapped twice: the effect
-    // is keyed on `requestedPlace`, so leaving it set means the second tap
-    // changes nothing and the card does not come back.
-    setTappedPlace(null);
   };
   // T-211: Back closes an open card rather than leaving the app.
   useBackHandler(card !== null, closeCard);
@@ -837,23 +791,10 @@ export default function NativeMapScreen({
         // answer to a direct question, so for those few seconds it wins.
         polylines={[...tracePolylines, ...coursePolylines]}
         markers={marker}
-        // The places already earned (T-112), and only those. Circles rather than markers
-        // because a marker needs an image ref and therefore `expo-image`, which
-        // this app does not carry — see `collectedMarks.ts`.
-        circles={collectedMarks}
-        onCircleClick={(circle) => {
-          const place = places.find((candidate) => candidate.id === circle.id);
-          if (place !== undefined) {
-            // Same route in as the passport's *Show on map* (D-052), so a mark
-            // on the map and a stamp in the passport open the identical card.
-            setTappedPlace({ place, collected: collectedIds.has(place.id) });
-          }
-        }}
-        // ⚠ The only source of the user's own zoom. Without it the marks keep
-        // the size they had when the camera was last set by the app, and a
-        // pinch makes them grow or shrink with the ground.
+        // ⚠ No marks for collected places since 2026-10-04: the project lead
+        // asked for the dark dots at their stamps' places to go. The passport
+        // and its *Ver no mapa* are the way to a place now. T-112 drew them.
         onCameraMove={(event) => {
-          setZoom(event.zoom);
           // Where we are looking, so *Re-centre* knows whether it has a job.
           // ⚠ expo-maps types both halves as optional, so a partial coordinate is
           // dropped rather than coerced — a centre with one axis missing would

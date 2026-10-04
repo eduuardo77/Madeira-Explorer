@@ -107,3 +107,21 @@ test('a levada-sized box lands at a zoom you can walk from', () => {
 
   assert.ok(fit.zoom > 11 && fit.zoom < 15, `zoom ${fit.zoom} is not walkable`);
 });
+
+test('aligned to the bottom, a wide shallow box rests on the bottom padding (2026-10-04)', () => {
+  // The coastal walk: 15 km wide, 2 km tall, on a phone with a tall stack of
+  // controls at the bottom.
+  const box: [number, number, number, number] = [-16.98, 32.64, -16.83, 32.66];
+  const viewport = { width: 400, height: 800, padding: { top: 100, bottom: 330, left: 24, right: 24 } };
+  const merc = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+  const screenY = (fit: { coordinates: { latitude: number }; zoom: number }, lat: number) =>
+    viewport.height / 2 -
+    ((merc(lat) - merc(fit.coordinates.latitude)) * 256 * Math.pow(2, fit.zoom)) / (2 * Math.PI);
+
+  const centred = fitBounds(box, viewport)!;
+  const low = fitBounds(box, { ...viewport, align: 'bottom' })!;
+  assert.equal(low.zoom, centred.zoom, 'the same zoom, only placed lower');
+  assert.ok(Math.abs(screenY(low, 32.64) - (800 - 330)) < 1, `south edge at ${screenY(low, 32.64)}`);
+  assert.ok(screenY(low, 32.66) > screenY(centred, 32.66) + 50, 'visibly lower than centred');
+  assert.ok(screenY(low, 32.66) >= 100, 'still below the top padding');
+});

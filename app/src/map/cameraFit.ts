@@ -58,6 +58,14 @@ export type Viewport = {
   width: number;
   height: number;
   padding?: { top?: number; right?: number; bottom?: number; left?: number };
+  /**
+   * Where a box shorter than the usable area sits in it: the middle (the
+   * default), or its foot. ⚠ `bottom` since 2026-10-04 for the lit roads: the
+   * bottom padding is large (stamp, status line, walk button), so a wide,
+   * shallow trace such as a coastal walk floated in the upper half with sea
+   * below it, and the project lead asked for it lower.
+   */
+  align?: 'centre' | 'bottom';
 };
 
 /** The tile size every Web Mercator map is defined against. */
@@ -138,7 +146,12 @@ export function fitBounds(
   // Undo the Mercator to get a latitude back, then shift for the padding: the
   // offset is in points, converted to Mercator units at the chosen zoom.
   const worldPoints = TILE_SIZE * Math.pow(2, zoom);
-  const verticalOffsetPoints = (top - bottom) / 2;
+  // A box shorter than the usable area leaves slack; `bottom` spends it above
+  // the box, so the box rests on the bottom padding instead of floating.
+  const boxHeightPoints = (ySpan * worldPoints) / (2 * Math.PI);
+  const slackPoints = Math.max(0, usableHeight - boxHeightPoints);
+  const verticalOffsetPoints =
+    (top - bottom) / 2 + (viewport.align === 'bottom' ? slackPoints / 2 : 0);
   const yCentreShifted =
     yCentre + (verticalOffsetPoints * (2 * Math.PI)) / worldPoints;
   const horizontalOffsetPoints = (left - right) / 2;

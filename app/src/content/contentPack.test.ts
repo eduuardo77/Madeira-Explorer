@@ -365,6 +365,34 @@ test('a destination is trimmed, so stray whitespace never reaches the copy', () 
   assert.equal(pack.destination, 'Madeira');
 });
 
+test('T-156b: the pack names the product that unlocks it', () => {
+  // D-017: the app must not know which store product unlocks which region.
+  const { pack, problems } = parseContentPack({
+    formatVersion: 1,
+    productId: 'passport_madeira',
+    places: [],
+  });
+  assert.equal(pack.productId, 'passport_madeira');
+  assert.deepEqual(problems, []);
+});
+
+test('T-156b: a pack with no product is valid and simply sells nothing', () => {
+  assert.equal(parseContentPack({ formatVersion: 1, places: [] }).pack.productId, null);
+});
+
+test('T-156b: a product ID Google would refuse is reported, not passed to the store', () => {
+  // Play's rule: start with a lowercase letter or digit, then only lowercase
+  // letters, digits, underscores and full stops.
+  for (const bad of [42, '', 'Passport_Madeira', '_passport', 'passport-madeira', 'passport madeira']) {
+    const result = parseContentPack({ formatVersion: 1, productId: bad, places: [] });
+    assert.equal(result.pack.productId, null, `${JSON.stringify(bad)} leaked through`);
+    assert.ok(
+      result.problems.some((problem) => problem.where === 'productId'),
+      `${JSON.stringify(bad)} was dropped without a word`
+    );
+  }
+});
+
 test('T-201: a "why go" line is read per language and trimmed', () => {
   const { pack: parsed, problems } = parseContentPack(
     pack([placeRow({ why: { en: '  The view.  ', pt: 'A vista.' } })])

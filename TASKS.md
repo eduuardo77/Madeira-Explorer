@@ -278,6 +278,27 @@ section's definition of done.
       kept** (zero would make that buyer a founder, T-233). **12 tests**, including one that fails
       on any runtime import. Nothing a user sees, so no P30 evidence is owed. The product ID is
       still to be chosen with the project lead (§4.2, permanent), before T-156b.
+- [~] **T-156b** ✅ **Code and tests 2026-10-04; not yet run on a phone.** **The store adapter**
+      (plan §5 Phase 2, D-091). `expo-iap` **5.8.2**, exact. `entitlement/storeBilling.ts` is the
+      only importer: connect, price, owned purchases, start a purchase, acknowledge, listen.
+      `billingOutcomes.ts` (pure) maps the library's error codes to the closed outcome set of §4.3
+      and its purchases to `StorePurchase`; `storeBilling.web.ts` scripts the store for the
+      workbench, and the compiler checks it matches the real one. **Product ID `passport_madeira`**
+      (chosen with the project lead, permanent) is a top level `productId` in `content/pois.json`,
+      not inside `destination` as §4.2 sketched: `destination` is already a string the reveal
+      reads. The validator fails a pack without one. **Tests (920):** codes to outcomes; an absent
+      acknowledgement reads as unacknowledged; only one file imports the library; acknowledge is
+      non-consumable; no verification service is called. The last three were proved by breaking
+      the code on purpose. `BILLING` in the release APK, read with `aapt`.
+      **Found along the way:** `billing-unavailable` is ambiguous (no Play Store, an old one, or a
+      country Play does not sell in), so T-156d must not say the phone has no Google Play.
+      Google's billing library brings its logging transport (`docs/dependency-audit.md`),
+      unmeasured. `tools/build-licences.mjs` crashed on T-247's local module (no `package.json`);
+      it now skips the app's own modules, and the list is regenerated (287 packages).
+      **Left:** nothing calls the adapter until T-156c, so it has not run on a device. A release
+      signed with the upload key cannot install over the P30's debug-signed build; **the P30's
+      database was pulled first** (`Madeira-fieldwork/p30-2026-10-04/`, 16,267 fixes, SHA-256,
+      integrity ok) so the uninstall that switch needs loses nothing.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

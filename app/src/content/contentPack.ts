@@ -134,6 +134,15 @@ export type ContentPack = {
    * add a literal for it; the same field now serves both.
    */
   destination: string | null;
+  /**
+   * The Play product that unlocks this pack's passport (T-156b, D-089), or null
+   * when the pack sells nothing. Content rather than code because a second
+   * region would be a second product (D-017).
+   *
+   * ⚠ **A Play product ID is permanent:** it cannot be renamed, and a deleted one
+   * cannot be reused. Change it here only together with Play Console.
+   */
+  productId: string | null;
   places: Place[];
   /** Optional: a pack with none simply never ends a trip by airport. */
   departurePoints: DeparturePoint[];
@@ -232,6 +241,7 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
     pack: {
       formatVersion: SUPPORTED_FORMAT_VERSION,
       destination: parseDestination(root.destination, problems),
+      productId: parseProductId(root.productId, problems),
       places,
       departurePoints,
     },
@@ -262,6 +272,24 @@ function parseDestination(
     return null;
   }
   return raw.trim();
+}
+
+/** Play's rule for a product ID: a lowercase letter or digit, then those, `_` or `.`. */
+const PRODUCT_ID = /^[a-z0-9][a-z0-9_.]*$/;
+
+/** Absent sells nothing; present but invalid is reported, like the destination. */
+function parseProductId(raw: unknown, problems: ContentProblem[]): string | null {
+  if (raw === undefined || raw === null) {
+    return null;
+  }
+  if (typeof raw !== 'string' || !PRODUCT_ID.test(raw)) {
+    problems.push({
+      where: 'productId',
+      problem: 'must be lowercase letters, digits, "_" or ".", starting with a letter or digit',
+    });
+    return null;
+  }
+  return raw;
 }
 
 /**

@@ -159,6 +159,9 @@ const unnamed = [];
 for (const line of printed.split(/\r?\n/)) {
   const [kind, ...fields] = line.trim().split('|');
   if (kind === 'PROJECT') {
+    // The app's own native modules (`app/modules/`, T-247) are this project's
+    // code, not a licence to list, and have no package.json to read one from.
+    if (!/[\\/]node_modules[\\/]/.test(fields[1])) continue;
     // `.../node_modules/react-native-svg/android` → the package folder.
     add(npmEntry(path.dirname(fields[1]), 'android'));
   } else if (kind === 'LICENCE') {

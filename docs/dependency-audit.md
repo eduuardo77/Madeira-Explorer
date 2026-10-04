@@ -204,3 +204,33 @@ already says exactly that.
 `getExportableTrace()`, so accommodation masking is applied before any pixel is drawn (D-016,
 D-040). A capture library that photographed the *map screen* instead would bypass that entirely,
 which is why the card is drawn from data rather than screenshotted from the UI.
+
+## `expo-iap` 5.8.2: added 2026-10-04 (T-156b, D-091)
+
+**Why it exists:** the one purchase (D-089), straight to Google Play with no server (D-091).
+Pinned to the exact version: it releases often and has renamed functions between versions.
+**Only `entitlement/storeBilling.ts` imports it**, and a test holds that.
+
+**What it brings in, read from Gradle's `releaseRuntimeClasspath`:** `io.github.hyochan.openiap:
+openiap-google:3.6.2`, which brings Google's `com.android.billingclient:billing:9.1.0`. One new
+permission, `com.android.vending.BILLING` (now in `releasePermissions.test.ts`'s `NEEDED`). The
+store flavour resolves to Play (`openiap: store=play (source=default)` in the build log); the
+Amazon and Meta Horizon flavours are not linked.
+
+**Network behaviour, the question D-043 exists to ask:**
+
+| Endpoint found in the code | When it is contacted | In this app |
+|---|---|---|
+| Google Play, through the Play Store app on the phone | Every billing call | **Yes**, and it is the point |
+| `kit.openiap.dev` (IAPKit, the library author's verification service) | Only if `verifyPurchaseWithProvider` or `kitApi` is called | **Never.** A test fails if `storeBilling.ts` mentions either |
+| `androidpublisher.googleapis.com` | Server-side verification helpers | **Never called** |
+| `graph.oculus.com` | The Meta Horizon flavour | **Not linked** |
+
+⚠ **Found, and not yet measured:** Google's billing library depends on
+`com.google.android.datatransport:transport-backend-cct`, Google's logging transport. It was
+already in the APK through `firebase-messaging` (Finding 1); billing is a second path to it. Whether
+the billing library sends anything through it, and what, is **unmeasured**. The on-device network
+audit in Phase 6 (T-238) must answer it before the privacy policy describes billing.
+
+**Analytics:** none found in the JavaScript. The library prints one console line after the first
+purchase in a debug build only, asking for a GitHub star; it sends nothing.

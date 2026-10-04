@@ -320,6 +320,13 @@ async function main() {
     );
   }
 
+  // The product that unlocks the passport (T-156b, D-089). Absent means the
+  // app offers nothing to buy, which for this pack would be a release with no
+  // way to pay: an error, not a warning.
+  if (parsed.pack.productId === null) {
+    error('productId', 'not set - the passport could never be unlocked (D-089)');
+  }
+
   // Every levada should have a course to draw (D-055). A missing one is not a
   // broken pack — the card still works, it just shows a marker and no walk —
   // but it is invisible in the app and obvious here, which is the right place

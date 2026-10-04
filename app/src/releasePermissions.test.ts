@@ -33,6 +33,9 @@ const NEEDED = [
   // "Physical activity": the road matcher's second witness (D-094).
   'android.permission.ACTIVITY_RECOGNITION',
   'com.google.android.gms.permission.ACTIVITY_RECOGNITION',
+  // The one purchase, through Google Play (D-089, D-091). Stripped, the unlock
+  // sheet would open and nothing could be bought.
+  'com.android.vending.BILLING',
 ];
 
 test('⚠ T-194 — nothing the recorder, the map or a notification needs is stripped', () => {

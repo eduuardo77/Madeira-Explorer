@@ -1,6 +1,7 @@
 {
   "formatVersion": 1,
   "destination": "Madeira",
+  "productId": "passport_madeira",
   "places": [
     {
       "id": "pico-do-areeiro",

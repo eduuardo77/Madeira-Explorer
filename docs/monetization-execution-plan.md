@@ -195,8 +195,8 @@ Read this table before touching anything. "Pure" means testable in Node with no 
 The app must not know it is on Madeira. Three things added by this plan are about *this*
 destination, so they live in content:
 
-1. **The product ID.** In the pack's `destination` block (for example `"productId":
-   "passport_madeira"`). ⚠ **A Play product ID is permanent**: it cannot be renamed, and a deleted
+1. **The product ID.** ✅ **`passport_madeira`, chosen 2026-10-04.** A top level `"productId"` in
+   `content/pois.json` (T-156b), not inside `destination`, which is already a string. ⚠ **A Play product ID is permanent**: it cannot be renamed, and a deleted
    ID cannot be reused. Choose it once, with the project lead, before creating it in Play Console.
    It names the region because a second region would be a second product (D-089 rule 5).
 2. **The founder window.** Also in `destination`: `"founderWindow": { "start": null, "months": 3 }`.
@@ -292,9 +292,9 @@ exist precisely to catch a new permission:
 
 - `app/plugins/withoutUnusedPermissions.js` strips permissions the app does not need. Check it does
   **not** strip BILLING.
-- `app/src/releasePermissions.test.ts` holds the list of permissions the release build is allowed
-  (`NEEDED`). **It will fail when BILLING appears. That is correct.** Add BILLING to the list with
-  a one-line reason (D-091), in the same commit that adds the library.
+- `app/src/releasePermissions.test.ts` holds the permissions the release build must **keep**
+  (`NEEDED`). ⚠ Corrected 2026-10-04: it does not fail when a new permission appears, it fails when
+  a needed one is stripped. BILLING is now in `NEEDED`, and the APK's list was read with `aapt`.
 
 ### 4.6 The beta build
 

@@ -139,8 +139,8 @@ Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativ
 says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
-**Next for the assistant: the monetisation build, Phase 2 (T-156a) of
-`docs/monetization-execution-plan.md`**; Phase 1 (T-232) is done. ✅ **The study is finished (2026-09-25): D-089
+**Next for the assistant: the monetisation build, Phase 2, T-156b (the store adapter) of
+`docs/monetization-execution-plan.md`**; Phase 1 (T-232) and T-156a are done. Phase 0 is done up to the first upload (app created, upload key, payments, testers; 2026-10-04). ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are

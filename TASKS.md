@@ -268,6 +268,16 @@ section's definition of done.
       viewpoints and the levada), **2 locked** (the 6th and 7th, labelled *já lá esteve*), and the
       passport button reads *8 de 80*. The original was restored and its checksums matched.
       Post-mortem: `docs/task-notes.md`.
+- [x] **T-156a** ✅ **Tested 2026-10-04.** **Purchase rules, pure** (plan §5 Phase 2, D-091).
+      `entitlement/purchaseRules.ts`: `decidePurchases(purchases, productId)` returns unlocked,
+      pending, the purchases to acknowledge and the earliest purchase time. **Not the obvious
+      shape:** it is generic over the adapter's own purchase type, so `toAcknowledge` hands back the
+      adapter's objects, token included, without this module ever seeing a token (§1.1: never log
+      one). Two rules the plan did not spell out: `pending` is reported only while nothing has
+      unlocked, and a purchase time that is missing, zero or not finite unlocks but is **not
+      kept** (zero would make that buyer a founder, T-233). **12 tests**, including one that fails
+      on any runtime import. Nothing a user sees, so no P30 evidence is owed. The product ID is
+      still to be chosen with the project lead (§4.2, permanent), before T-156b.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

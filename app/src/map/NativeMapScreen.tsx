@@ -104,7 +104,8 @@ import { PLACE_MARKER_PAINT } from './placeStyle';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { traceBounds } from './traceGeoJson';
-import { networkTimings, roadLinesFor } from '../matching/roadNetwork';
+import { networkTimings, roadLinesFor, routeSince } from '../matching/roadNetwork';
+import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -455,6 +456,37 @@ export default function NativeMapScreen({
                 width: px(tracePaint.coreWidth),
               }))
             );
+
+            // The roads lit since the user last looked, with where they are
+            // now (`returnFraming.ts`, the project lead's pick, 2026-10-04).
+            // ⚠ At mount a passport focus may be on its way and wins; on a
+            // return to the app nothing is pending, so the latch is not asked.
+            const seenRaw = await appStateDao.get(appStateDao.AppStateKey.MapSeenUntilTs);
+            const seenTs = seenRaw === null || !Number.isFinite(Number(seenRaw)) ? null : Number(seenRaw);
+            const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
+            const user =
+              fix !== null &&
+              recentreTarget({ latitude: fix.lat, longitude: fix.lon }, ARCHIPELAGO_BOUNDS) === 'user'
+                ? ([fix.lon, fix.lat] as [number, number])
+                : null;
+            const points = returnFraming({
+              seenTs,
+              latestTs: roads.latestTs,
+              newRoute: seenTs === null ? [] : await routeSince(seenTs),
+              user,
+            });
+            const latched = resumeCount === 0 && cameraHeldByFocus.current;
+            if (!cancelled && points !== null && !latched) {
+              const fit = frame(traceBoundsOf(points));
+              if (fit !== null) {
+                setCamera(fit);
+                setCameraCentre(fit.coordinates);
+              }
+            }
+            const nextSeen = nextSeenTs(seenTs, roads.latestTs);
+            if (nextSeen !== null && nextSeen !== seenTs) {
+              await appStateDao.set(appStateDao.AppStateKey.MapSeenUntilTs, String(nextSeen));
+            }
           }
         }
       } catch (error) {

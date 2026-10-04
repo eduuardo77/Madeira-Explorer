@@ -130,6 +130,55 @@ export function travelledSinceM(
   return total;
 }
 
+/**
+ * The route the chains travelled after `sinceTs`, as `[lon, lat]` points for
+ * framing the camera on what is new (the map, 2026-10-04). Empty when nothing
+ * was travelled since.
+ */
+export function pointsSince(
+  graph: RoadGraph,
+  chains: readonly MatchedChain[],
+  sinceTs: number
+): [number, number][] {
+  const out: [number, number][] = [];
+  for (const chain of chains) {
+    const anchors = chain.anchors;
+    if (anchors.length === 0 || anchors[anchors.length - 1].ts <= sinceTs) {
+      continue;
+    }
+    const path = chainTimedPath(graph, chain);
+    path.forEach((point, i) => {
+      const previous = path[i - 1];
+      if (point.ts <= sinceTs) {
+        return;
+      }
+      // Where the new stretch begins, between two shape points: a straight
+      // road has only its two ends, and framing needs the stretch, not a dot.
+      if (previous !== undefined && previous.ts <= sinceTs && point.ts > previous.ts) {
+        const t = (sinceTs - previous.ts) / (point.ts - previous.ts);
+        out.push([
+          previous.lon + (point.lon - previous.lon) * t,
+          previous.lat + (point.lat - previous.lat) * t,
+        ]);
+      }
+      out.push([point.lon, point.lat]);
+    });
+  }
+  return out;
+}
+
+/** The time of the last fix any chain matched, or null with no chains. */
+export function latestMatchedTs(chains: readonly MatchedChain[]): number | null {
+  let latest: number | null = null;
+  for (const chain of chains) {
+    const last = chain.anchors[chain.anchors.length - 1];
+    if (last !== undefined && (latest === null || last.ts > latest)) {
+      latest = last.ts;
+    }
+  }
+  return latest;
+}
+
 function metres(a: [number, number], b: [number, number]): number {
   const x = (b[1] - a[1]) * 111_320 * Math.cos((a[0] * Math.PI) / 180);
   const y = (b[0] - a[0]) * 110_540;

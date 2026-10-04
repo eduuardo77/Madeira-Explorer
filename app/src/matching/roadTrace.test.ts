@@ -12,6 +12,8 @@ import {
   chainTimedPath,
   chainTimedRuns,
   clipOutsideCircle,
+  latestMatchedTs,
+  pointsSince,
   travelledSinceM,
   type TimedPoint,
 } from './roadTrace.ts';
@@ -169,4 +171,15 @@ test('a road driven twice counts twice: a trip meter, not the lit length', () =>
   const { chains } = matchTrace(net.graph, [...out, ...back]);
   const total = travelledSinceM(net.graph, chains, 0);
   assert.ok(total > 600, `there and back, got ${total}`);
+});
+
+test('the route since a moment is what the camera frames on return, and nothing when nothing is new', () => {
+  const net = network({ a: [0, 0], b: [400, 0] }, [{ from: 'a', to: 'b' }]);
+  const fixes = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5));
+  const { chains } = matchTrace(net.graph, fixes);
+  const latest = latestMatchedTs(chains);
+  assert.equal(latest, fixes[10].ts);
+  assert.ok(pointsSince(net.graph, chains, fixes[5].ts).length >= 2, 'the second half');
+  assert.deepEqual(pointsSince(net.graph, chains, latest!), []);
+  assert.equal(latestMatchedTs([]), null);
 });

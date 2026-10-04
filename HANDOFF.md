@@ -103,6 +103,12 @@ then **98.6% after keeping parking aisles in the network** (`build-roads.mjs`: t
 car crossed an aisle, so the first and last 100 m lit nothing). The P30's fixes sat a median 3.2 m
 (p90 6.4 m) from the iPhone at the same second. The importer (`tools/lib/sensorLogger.mjs`) read
 its first real export without a change. The trace stays out of `tools/fixtures/` (it reaches home).
+✅ **The map frames what is new, with the user (same evening, the lead's pick of three):** on open
+or on return, roads lit since the map was last shown are framed together with the user's position
+(`map/returnFraming.ts`, `map_seen_until_ts`); nothing new leaves the camera alone (WalkNYC keeps
+it too, teardown item 18). Proven on the P30 by a probe: the marker set back to 15:52 in a copy of
+the database, the app opened on the promenade walk and the drive home with the blue dot in Caniço.
+Backup of the real database before the probe: the session scratchpad, `backup-1950/`.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

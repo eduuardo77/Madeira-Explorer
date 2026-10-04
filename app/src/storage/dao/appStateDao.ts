@@ -157,6 +157,12 @@ export const AppStateKey = {
   StampsNotified: 'stamps_notified',
   /** The stamps already shown in the map's pop-up (D-096), same shape and seeding. */
   StampsShown: 'stamps_shown',
+  /**
+   * The latest lit fix the map has shown the user, epoch ms (2026-10-04). On
+   * the next showing, anything lit after it is framed with the user's position
+   * (`returnFraming.ts`). Absent until the map has first been seen.
+   */
+  MapSeenUntilTs: 'map_seen_until_ts',
 } as const;
 
 export type AppStateKeyName =

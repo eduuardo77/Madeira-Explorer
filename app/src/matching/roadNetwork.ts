@@ -29,7 +29,13 @@ import { matchTraceInSteps, MOTION_CONTEXT_MS } from './mapMatch';
 import type { MatchedChain, MatchFix, MatchStats } from './mapMatch';
 import { decodeRoadGraphInSteps } from './roadGraph';
 import type { DecodePhase, RoadFile, RoadGraph } from './roadGraph';
-import { chainTimedRuns, clipOutsideCircle, travelledSinceM } from './roadTrace';
+import {
+  chainTimedRuns,
+  clipOutsideCircle,
+  latestMatchedTs,
+  pointsSince,
+  travelledSinceM,
+} from './roadTrace';
 import type { TimedPoint } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
 import type { VisitedLine } from './visitedRoads';
@@ -126,6 +132,8 @@ export type RoadLines = {
   lengthM: number;
   /** Metres travelled along the roads since local midnight, as a trip meter counts. */
   todayM: number;
+  /** The last fix any lit road was matched from, or null with nothing lit. */
+  latestTs: number | null;
   /** Of what was matched this time. */
   stats: MatchStats;
   /** Chains reused from `matched_chain`, and chains matched now. */
@@ -193,6 +201,7 @@ export async function roadLinesFor(
     lines: visitedLines(network, visited),
     lengthM: visitedLengthM(visited),
     todayM: travelledSinceM(network, chains, startOfToday()),
+    latestTs: latestMatchedTs(chains),
     stats: run.value.stats,
     keptChains: kept.length,
     newChains: fresh.length,
@@ -201,6 +210,17 @@ export async function roadLinesFor(
   };
   cached = { key, value, chains, day: startOfToday() };
   return value;
+}
+
+/**
+ * The route lit after `sinceTs`, `[lon, lat]`, from the last `roadLinesFor`
+ * answer: what the map frames when it is shown again (`returnFraming.ts`).
+ */
+export async function routeSince(sinceTs: number): Promise<[number, number][]> {
+  if (cached === null) {
+    return [];
+  }
+  return pointsSince(await loadRoadGraph(), cached.chains, sinceTs);
 }
 
 /** Local midnight, on the phone's clock. */

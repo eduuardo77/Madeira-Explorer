@@ -51,8 +51,12 @@ threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks
 (about 250 moving fixes, 3 to 5 m, up to 68 km/h) but the map lit nothing, because the map screen
 matched roads only when mounted and the app had been opened before leaving. Fixed: it reloads on
 every return to the front. Field build on the P30 since 13:12; 14 km lit. Still to look at from that
-ride: the motion sensors called the motorbike *walking* the whole way, and the sampling gate's
-restart at 12:13 was refused (*foreground service from background*).
+ride: the sampling gate's restart at 12:13 was refused (*foreground service from background*).
+The *walking* on every ride fix is a stale label, not a classification: Android delivered no
+transition at all during the ride (`files/activity-transitions-stats.json`: 4 deliveries since
+2026-09-27, each one the replay on registration). Same as T-247's first walk. Candidate fix:
+re-register (or use `requestActivityUpdates`) while moving, since a registration replays the
+current state at once. No stamp at Reis Magos was correct: 70 s parked, the rule wants 180 s.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

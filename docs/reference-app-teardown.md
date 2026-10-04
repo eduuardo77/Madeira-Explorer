@@ -593,6 +593,23 @@ interview](https://nygroove.nyc/walk-nyc-app/); WalkNYC's settings screen on the
 
 ---
 
+### 18. Where WalkNYC's map opens, and what it does on return — **evidence**, 2026-10-04
+
+Asked by the project lead (*"isn't it preferable to have your current location showing?"*). On the
+P30, in Caniço, far outside WalkNYC's coverage:
+
+| Step | What the map showed |
+|---|---|
+| Cold start | **Midtown Manhattan**, a fixed view, not the user; *Re-center* offered |
+| Panned to Jersey City, Home, back after 20 s | **The same Jersey City view**: no jump on return |
+| Force-stopped, cold start again | **Midtown again**: the panned view is not remembered |
+| *Re-center* | **The user's own position**, street zoom, blue dot; the chip then disappears |
+
+So: a fixed opening view, the view kept on return, and the user's position only on request.
+⚠ **Not settled:** whether it opens on the user *inside* New York. From Madeira it cannot open on
+a position outside its map, so Midtown may be its out-of-area fallback rather than its rule. Ask
+someone in New York, or mock a location there, before quoting it as "WalkNYC never opens on you".
+
 ## Not worth taking
 
 - **Six system dialogs in one minute** — decomposed at the top of this file. Four of the six are OS

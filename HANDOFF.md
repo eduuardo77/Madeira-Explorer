@@ -76,6 +76,15 @@ exactly on the minute. Fixed with `STATIONARY_EDGE_MS` and a 400 row limit: the 
 still phone took a GPS fix every 10 s indefinitely. ⚠ **Unproven: a change made while backgrounded**
 (the 14:34 one happened with the app in front). The next walk with the app closed should log
 *stationary -> walking* and no *sampling gate* error.
+✅ **Proven the same afternoon (drive to Praia Formosa, promenade walk to Câmara de Lobos and back,
+15:30 to 18:08):** three profile changes from the background (*stationary -> driving* 15:34,
+*driving -> walking* 16:01, *walking -> driving* 17:50), zero errors; the motion sensors read
+driving, walking, still, walking, driving at the right times (76 deliveries); low power while
+parked (2 fixes per 10 min); Câmara de Lobos stamped; 44.6 km lit, *"59 km hoje"*. Each replayed
+event was stored twice, 1 ms apart (wall clock converted at delivery): fixed with
+`REPLAY_JITTER_MS`. ⚠ **For the project lead (content, D-064):** no Praia Formosa stamp. They parked
+and walked along the beach but never came within 225 m of its single point (radius 250 m), which
+sits at the beach's east end. A second geofence along the beach, or a moved point, is their call.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

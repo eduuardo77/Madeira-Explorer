@@ -52,7 +52,7 @@ import type {
 } from './LocationProvider';
 import { getStepsBetween, readBarometerOnce } from './sensors';
 import { drainActivityEvents, ensureActivityUpdates } from './activityRecognition';
-import { activitiesAt, unseenEvents, type Activity } from './activityTimeline';
+import { activitiesAt, REPLAY_JITTER_MS, unseenEvents, type Activity } from './activityTimeline';
 
 /**
  * ⚠ **NOT CALLED IN v1, ON PURPOSE (D-050). Deliberately kept, not deleted.**
@@ -323,8 +323,8 @@ async function labelActivities(times: number[]): Promise<Activity[] | null> {
         : unseenEvents(
             drained,
             await activityEventDao.getEventsFor(
-              Math.min(...drained.map((event) => event.ts)),
-              Math.max(...drained.map((event) => event.ts)),
+              Math.min(...drained.map((event) => event.ts)) - REPLAY_JITTER_MS,
+              Math.max(...drained.map((event) => event.ts)) + REPLAY_JITTER_MS,
               0
             )
           );

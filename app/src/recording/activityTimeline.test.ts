@@ -71,3 +71,15 @@ test('a replayed event is stored once, however often registration repeats it', (
   assert.deepEqual(unseenEvents(drained, stored), [enter(900, 'driving')]);
   assert.deepEqual(unseenEvents([], stored), []);
 });
+
+test('a replay a millisecond off is still the same event, as the P30 delivers them', () => {
+  // Real ids 6 and 7, 2026-10-04: one drive, stored twice.
+  const stored = [enter(1_791_124_332_428, 'driving')];
+  assert.deepEqual(unseenEvents([enter(1_791_124_332_429, 'driving')], stored), []);
+  assert.deepEqual(
+    unseenEvents([enter(1_791_124_332_429, 'driving'), enter(1_791_124_332_430, 'driving')], []),
+    [enter(1_791_124_332_429, 'driving')]
+  );
+  // A real change minutes later is kept.
+  assert.equal(unseenEvents([enter(1_791_124_332_428 + 60_000, 'driving')], stored).length, 1);
+});

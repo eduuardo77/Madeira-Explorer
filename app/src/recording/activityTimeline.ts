@@ -122,17 +122,30 @@ export function registrationDue(lastRegisteredMs: number | null, nowMs: number):
   return lastRegisteredMs === null || nowMs - lastRegisteredMs >= ACTIVITY_REFRESH_MS;
 }
 
+/**
+ * How far apart two copies of one replayed event may land. Play services
+ * gives the time as elapsed realtime and the native side converts it to the
+ * wall clock at delivery, so each replay comes back a millisecond or so off:
+ * on the P30 2026-10-04 every event was stored twice, 1 ms apart.
+ */
+export const REPLAY_JITTER_MS = 2_000;
+
 /** The events not already in `stored`, the same event replayed being dropped. */
 export function unseenEvents(
   drained: readonly ActivityEvent[],
   stored: readonly ActivityEvent[]
 ): ActivityEvent[] {
-  const key = (event: ActivityEvent) => `${event.ts}:${event.activity}:${event.transition}`;
-  const seen = new Set(stored.map(key));
+  const seen: ActivityEvent[] = [...stored];
   const out: ActivityEvent[] = [];
   for (const event of drained) {
-    if (!seen.has(key(event))) {
-      seen.add(key(event));
+    const repeat = seen.some(
+      (other) =>
+        other.activity === event.activity &&
+        other.transition === event.transition &&
+        Math.abs(other.ts - event.ts) <= REPLAY_JITTER_MS
+    );
+    if (!repeat) {
+      seen.push(event);
       out.push(event);
     }
   }

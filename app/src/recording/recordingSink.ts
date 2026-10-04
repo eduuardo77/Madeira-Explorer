@@ -52,7 +52,7 @@ import type {
 } from './LocationProvider';
 import { getStepsBetween, readBarometerOnce } from './sensors';
 import { drainActivityEvents, ensureActivityUpdates } from './activityRecognition';
-import { activitiesAt, type Activity } from './activityTimeline';
+import { activitiesAt, unseenEvents, type Activity } from './activityTimeline';
 
 /**
  * ⚠ **NOT CALLED IN v1, ON PURPOSE (D-050). Deliberately kept, not deleted.**
@@ -314,12 +314,25 @@ export const databaseSink: RecordingSink = {
 async function labelActivities(times: number[]): Promise<Activity[] | null> {
   try {
     await ensureActivityUpdates();
+    // Each re-registration replays the current activity (activityTimeline.ts,
+    // ACTIVITY_REFRESH_MS), so most drains repeat an event already stored.
     const drained = drainActivityEvents();
-    await activityEventDao.insertEvents(drained);
-    if (drained.length > 0) {
+    const fresh =
+      drained.length === 0
+        ? []
+        : unseenEvents(
+            drained,
+            await activityEventDao.getEventsFor(
+              Math.min(...drained.map((event) => event.ts)),
+              Math.max(...drained.map((event) => event.ts)),
+              0
+            )
+          );
+    await activityEventDao.insertEvents(fresh);
+    if (fresh.length > 0) {
       await recordingEventDao.log(
         'activity',
-        drained.map((event) => `${event.activity} ${event.transition}`).join(', ')
+        fresh.map((event) => `${event.activity} ${event.transition}`).join(', ')
       );
     }
     if (times.length === 0) {

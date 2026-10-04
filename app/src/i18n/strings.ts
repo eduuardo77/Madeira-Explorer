@@ -381,6 +381,10 @@ export const STRINGS = {
     'A registar automaticamente',
     'Automatische Aufzeichnung läuft'
   ),
+  // Beside it: the road travelled since midnight, so a working recorder shows
+  // its work (the project lead, 2026-10-04: "still a bit unsure if the app is
+  // recording"). {distance} is formatDistance's, e.g. "14 km".
+  'map.status.today': s('{distance} today', '{distance} hoje', 'heute {distance}'),
   // ⚠ Says what was measured — nothing arrived — and not that the recorder is
   // dead, which the app cannot see (recorderSilence.ts). Not dismissible (T-174).
   'notice.silent': s(

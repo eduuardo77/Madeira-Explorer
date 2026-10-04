@@ -16,7 +16,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo';
 
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
-import { parseEvent, type ActivityEvent } from './activityTimeline';
+import { parseEvent, registrationDue, type ActivityEvent } from './activityTimeline';
 
 type NativeActivityTransitions = {
   isAvailable(): boolean;
@@ -73,24 +73,36 @@ export async function requestActivityPermission(): Promise<boolean> {
 }
 
 let started = false;
+let registeredMs: number | null = null;
 
 /**
- * Register for transitions, once per process. Registration does not survive a
- * reboot or an update, so every process registers again; Play services
- * replaces the earlier request rather than adding one.
+ * Register for transitions, and again every `ACTIVITY_REFRESH_MS`.
+ * Registration does not survive a reboot or an update, so every process
+ * registers again; Play services replaces the earlier request rather than
+ * adding one.
+ *
+ * ⚠ **Again, and not once, since 2026-10-04:** on the P30 live transitions
+ * never arrive, and each registration is what makes Play services say the
+ * current activity (`registrationDue`). Removed first, so the request is new
+ * rather than an unchanged one Play services might leave alone. The replay
+ * lands in the queue a few milliseconds later and the next batch drains it.
  */
-export async function ensureActivityUpdates(): Promise<boolean> {
-  if (started) {
+export async function ensureActivityUpdates(nowMs: number = Date.now()): Promise<boolean> {
+  if (started && !registrationDue(registeredMs, nowMs)) {
     return true;
   }
   if (!activityAvailable() || !activityPermitted() || native === null) {
     return false;
   }
   try {
+    if (started) {
+      await native.stop();
+    }
     started = await native.start();
   } catch {
     started = false;
   }
+  registeredMs = started ? nowMs : null;
   // Whether the phone agreed to report transitions, written when the answer
   // changes: a refusal is retried every batch and must not flood the diary.
   // The native side keeps the same fact across processes (`activityDiagnostics`).

@@ -7,7 +7,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { activitiesAt, activityAfter, parseEvent, type ActivityEvent } from './activityTimeline.ts';
+import {
+  ACTIVITY_REFRESH_MS,
+  activitiesAt,
+  activityAfter,
+  parseEvent,
+  registrationDue,
+  unseenEvents,
+  type ActivityEvent,
+} from './activityTimeline.ts';
 
 const enter = (ts: number, activity: ActivityEvent['activity']): ActivityEvent => ({ ts, activity, transition: 'enter' });
 const exit = (ts: number, activity: ActivityEvent['activity']): ActivityEvent => ({ ts, activity, transition: 'exit' });
@@ -49,4 +57,17 @@ test('a queued event is read only when it is whole', () => {
   assert.equal(parseEvent({ ts: 'x', activity: 'walking', transition: 'enter' }), null);
   assert.equal(parseEvent({ ts: 5, activity: 'walking', transition: 'sideways' }), null);
   assert.equal(parseEvent(null), null);
+});
+
+test('registration is due at first, then every two minutes, not between', () => {
+  assert.equal(registrationDue(null, 0), true);
+  assert.equal(registrationDue(1_000, 1_000 + ACTIVITY_REFRESH_MS - 1), false);
+  assert.equal(registrationDue(1_000, 1_000 + ACTIVITY_REFRESH_MS), true);
+});
+
+test('a replayed event is stored once, however often registration repeats it', () => {
+  const stored = [enter(100, 'walking')];
+  const drained = [enter(100, 'walking'), enter(100, 'walking'), enter(900, 'driving')];
+  assert.deepEqual(unseenEvents(drained, stored), [enter(900, 'driving')]);
+  assert.deepEqual(unseenEvents([], stored), []);
 });

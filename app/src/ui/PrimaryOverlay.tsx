@@ -221,6 +221,11 @@ export type PrimaryOverlayProps = {
    * line's place. Null shows the progress line.
    */
   status: RecordingStatus;
+  /**
+   * The road travelled today, formatted, beside the status; null says
+   * nothing (under 100 m, or not yet matched).
+   */
+  travelledToday: string | null;
   /** Offered only when the map has actually wandered off the user. */
   showRecentre: boolean;
   onRecentre: () => void;
@@ -260,6 +265,7 @@ export default function PrimaryOverlay({
   control,
   notice,
   status,
+  travelledToday,
   showRecentre,
   onRecentre,
   bottomSlot,
@@ -475,6 +481,11 @@ export default function PrimaryOverlay({
             <Text style={[styles.statusText, { color: chrome.content }]} numberOfLines={1}>
               {t('map.status.automatic')}
             </Text>
+            {travelledToday === null ? null : (
+              <Text style={[styles.statusToday, { color: chrome.muted }]} numberOfLines={1}>
+                {t('map.status.today', { distance: travelledToday })}
+              </Text>
+            )}
           </View>
         )}
 
@@ -729,6 +740,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: fontSize.small,
     fontWeight: '600',
+  },
+  statusToday: {
+    fontSize: fontSize.small,
   },
   progressText: {
     fontSize: fontSize.small,

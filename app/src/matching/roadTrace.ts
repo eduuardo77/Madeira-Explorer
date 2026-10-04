@@ -97,6 +97,39 @@ export function chainTimedRuns(graph: RoadGraph, chain: MatchedChain): TimedRun[
   return runs.filter((each) => each.points.length >= 2);
 }
 
+/**
+ * How far the chains went along their roads after `sinceTs`, in metres: the
+ * map's *"14 km today"*. A road driven twice counts twice, as a trip meter
+ * does, which is why this is not the lit length. A stretch that straddles
+ * `sinceTs` counts its share by time. Tunnels count: the user went through.
+ */
+export function travelledSinceM(
+  graph: RoadGraph,
+  chains: readonly MatchedChain[],
+  sinceTs: number
+): number {
+  let total = 0;
+  for (const chain of chains) {
+    const anchors = chain.anchors;
+    if (anchors.length === 0 || anchors[anchors.length - 1].ts <= sinceTs) {
+      continue;
+    }
+    for (const run of chainTimedRuns(graph, chain)) {
+      for (let i = 1; i < run.points.length; i += 1) {
+        const a = run.points[i - 1];
+        const b = run.points[i];
+        if (b.ts <= sinceTs) {
+          continue;
+        }
+        const length = metres([a.lat, a.lon], [b.lat, b.lon]);
+        const share = a.ts >= sinceTs || b.ts <= a.ts ? 1 : (b.ts - sinceTs) / (b.ts - a.ts);
+        total += length * share;
+      }
+    }
+  }
+  return total;
+}
+
 function metres(a: [number, number], b: [number, number]): number {
   const x = (b[1] - a[1]) * 111_320 * Math.cos((a[0] * Math.PI) / 180);
   const y = (b[0] - a[0]) * 110_540;

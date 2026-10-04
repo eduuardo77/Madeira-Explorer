@@ -55,7 +55,7 @@ import { getLevadaCourse } from '../content/levadaCourses';
 import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
 import type { PlaceCard } from '../places/placeCard';
-import { buildPlaceCard } from '../places/placeCard';
+import { buildPlaceCard, formatDistance } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import { isUnlocked } from '../entitlement/entitlementStore';
@@ -337,6 +337,8 @@ export default function NativeMapScreen({
    * lit nothing. Mounting is not the same as being looked at.
    */
   const [resumeCount, setResumeCount] = useState(0);
+  /** "14 km", for the status line; null below 100 m, which is matching noise. */
+  const [travelledToday, setTravelledToday] = useState<string | null>(null);
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (next) => {
       if (next === 'active') {
@@ -429,6 +431,9 @@ export default function NativeMapScreen({
                   `network ${JSON.stringify(network)}` // i18n-exempt: diary line, continued
               );
             }
+            setTravelledToday(
+              roads.todayM >= 100 ? formatDistance(roads.todayM, deviceLanguage()) : null
+            );
             setTracePolylines(
               roads.lines.map((line, index) => ({
                 id: `trace-${index}`,
@@ -903,6 +908,7 @@ export default function NativeMapScreen({
         control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}
         notice={notice}
         status={controlInput === null ? null : recordingStatus(controlInput)}
+        travelledToday={travelledToday}
         onToggleRecording={toggleRecording}
         showRecentre={showRecentre}
         onRecentre={recentre}

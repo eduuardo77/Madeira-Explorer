@@ -452,6 +452,7 @@ export default function DesignWorkbench() {
                 // D-095: the status line where automatic recording works, the
                 // progress line where it does not.
                 status={screen === 'primary' ? 'automatic' : null}
+                travelledToday={progress.collected === 0 ? null : '14 km'}
                 showRecentre={showsCard}
                 onRecentre={() => undefined}
                 // Worst case on purpose: both bottom controls present *and* a

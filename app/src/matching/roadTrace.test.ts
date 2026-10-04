@@ -8,7 +8,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { matchTrace } from './mapMatch.ts';
-import { chainTimedPath, chainTimedRuns, clipOutsideCircle, type TimedPoint } from './roadTrace.ts';
+import {
+  chainTimedPath,
+  chainTimedRuns,
+  clipOutsideCircle,
+  travelledSinceM,
+  type TimedPoint,
+} from './roadTrace.ts';
 import { at, fixAt, network } from './testNetwork.ts';
 
 function metresFrom(point: { lat: number; lon: number }, centre: { lat: number; lon: number }): number {
@@ -141,4 +147,26 @@ test('timed runs split where the route goes underground, sharing the portal poin
   for (let i = 1; i < all.length; i += 1) {
     assert.ok(all[i].ts >= all[i - 1].ts, 'time never runs backwards across a portal');
   }
+});
+
+test('the distance travelled since a moment counts only the road after it', () => {
+  const net = network({ a: [0, 0], b: [400, 0] }, [{ from: 'a', to: 'b' }]);
+  // 20 m to 370 m east along the road, 35 m every 10 s.
+  const fixes = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5));
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.equal(chains.length, 1);
+  const whole = travelledSinceM(net.graph, chains, 0);
+  assert.ok(Math.abs(whole - 350) < 15, `the whole drive, got ${whole}`);
+  const half = travelledSinceM(net.graph, chains, fixes[5].ts);
+  assert.ok(Math.abs(half - 175) < 15, `the second half, got ${half}`);
+  assert.equal(travelledSinceM(net.graph, chains, fixes[10].ts + 1), 0);
+});
+
+test('a road driven twice counts twice: a trip meter, not the lit length', () => {
+  const net = network({ a: [0, 0], b: [400, 0] }, [{ from: 'a', to: 'b' }]);
+  const out = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5));
+  const back = Array.from({ length: 11 }, (_, i) => fixAt(110 + i * 10, 370 - i * 35, 1, 3.5));
+  const { chains } = matchTrace(net.graph, [...out, ...back]);
+  const total = travelledSinceM(net.graph, chains, 0);
+  assert.ok(total > 600, `there and back, got ${total}`);
 });

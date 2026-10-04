@@ -57,6 +57,12 @@ transition at all during the ride (`files/activity-transitions-stats.json`: 4 de
 2026-09-27, each one the replay on registration). Same as T-247's first walk. Candidate fix:
 re-register (or use `requestActivityUpdates`) while moving, since a registration replays the
 current state at once. No stamp at Reis Magos was correct: 70 s parked, the rule wants 180 s.
+✅ **Built the same day (field build on the P30 since 13:30):** the recorder re-registers every
+2 minutes (`ACTIVITY_REFRESH_MS`, removed then added) and stores each replayed event once
+(`unseenEvents`); labels are applied at match time, so a late replay still labels its fixes.
+**Unproven until the next ride:** whether the replay then says *driving* (or *cycling*) on a
+motorbike. And the map's status line now says the road travelled since midnight (*"20 km hoje"*,
+a trip meter: a road ridden twice counts twice, so it exceeds the lit 14 km).
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

@@ -29,7 +29,7 @@ import { matchTraceInSteps, MOTION_CONTEXT_MS } from './mapMatch';
 import type { MatchedChain, MatchFix, MatchStats } from './mapMatch';
 import { decodeRoadGraphInSteps } from './roadGraph';
 import type { DecodePhase, RoadFile, RoadGraph } from './roadGraph';
-import { chainTimedRuns, clipOutsideCircle } from './roadTrace';
+import { chainTimedRuns, clipOutsideCircle, travelledSinceM } from './roadTrace';
 import type { TimedPoint } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
 import type { VisitedLine } from './visitedRoads';
@@ -124,6 +124,8 @@ export type RoadLines = {
   lines: VisitedLine[];
   /** Each travelled stretch counted once, metres. */
   lengthM: number;
+  /** Metres travelled along the roads since local midnight, as a trip meter counts. */
+  todayM: number;
   /** Of what was matched this time. */
   stats: MatchStats;
   /** Chains reused from `matched_chain`, and chains matched now. */
@@ -140,7 +142,7 @@ export type RoadLines = {
  * with no new fixes costs nothing; one new fix rematches the trip, which is
  * the simple and safe choice while a trip is thousands of fixes, not millions.
  */
-let cached: { key: string; value: RoadLines } | null = null;
+let cached: { key: string; value: RoadLines; chains: MatchedChain[]; day: number } | null = null;
 
 function keyOf(network: RoadGraph, fixes: readonly MatchFix[]): string {
   const first = fixes[0]?.ts ?? 0;
@@ -160,7 +162,12 @@ export async function roadLinesFor(
   const network = await loadRoadGraph();
   const key = `${tripId}:${keyOf(network, fixes)}`;
   if (cached !== null && cached.key === key) {
-    return { ...cached.value, fresh: false };
+    // ⚠ The day can change with no new fix: "today" is recounted, not cached.
+    const todayM =
+      cached.day === startOfToday()
+        ? cached.value.todayM
+        : travelledSinceM(network, cached.chains, startOfToday());
+    return { ...cached.value, todayM, fresh: false };
   }
 
   const version = chainVersion(network.version);
@@ -185,14 +192,22 @@ export async function roadLinesFor(
   const value: RoadLines = {
     lines: visitedLines(network, visited),
     lengthM: visitedLengthM(visited),
+    todayM: travelledSinceM(network, chains, startOfToday()),
     stats: run.value.stats,
     keptChains: kept.length,
     newChains: fresh.length,
     elapsedMs: run.busyMs,
     fresh: true,
   };
-  cached = { key, value };
+  cached = { key, value, chains, day: startOfToday() };
   return value;
+}
+
+/** Local midnight, on the phone's clock. */
+function startOfToday(): number {
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+  return day.getTime();
 }
 
 let exportCached: { key: string; value: TraceSegment[] } | null = null;

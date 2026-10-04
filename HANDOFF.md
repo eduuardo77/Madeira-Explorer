@@ -41,8 +41,13 @@ drawn at WalkNYC's size with the 60 dp targets kept by hitSlop. The banner's tap
 phone without "all the time". Type stops at 14 sp (D-015); WalkNYC's is 12, and lowering the floor
 is the lead's call.
 
-**On the P30 since 2026-09-27 22:14: a STORE field build with D-095** (debuggable, `run-as` works),
-the real database restored after a probe. ⚠ **Next is T-246, the project lead's outing** (a town walk
+**On the P30 since 2026-10-04 22:07: a STORE field build SIGNED WITH THE UPLOAD KEY** (debuggable,
+`run-as` works), with billing sync (T-156c). ⚠ **The debug-key builds can no longer `install -r` over
+it**: build release builds as before (the upload key is configured), or uninstall after pulling the
+database. The real database was restored into it (checksums matched; backups in
+`Madeira-fieldwork/p30-2026-10-04*`) and the four location and activity permissions re-granted
+with `pm grant`. The project lead allows installing on it at any time; pull the database first
+whenever an install needs an uninstall. ⚠ **Next is T-246, the project lead's outing** (a town walk
 as an outing, one on automatic recording, a drive through a VR1 tunnel), then pull and tune: every
 threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks on each install:
 *Não enviar* lets it through (can be tapped over adb).
@@ -172,8 +177,8 @@ Drive the phone with `tools/lib/device.mjs`; the screen must be on (*Manter ativ
 says; a quieter *Centrar*), and whether Settings rows may drop below D-015's 60 dp.
 Memory (N9) measured: no leak; the gap to WalkNYC is the map view and the React Native baseline.
 
-**Next for the assistant: the monetisation build, Phase 2, T-156c (billing sync) of
-`docs/monetization-execution-plan.md`**; Phase 1 (T-232), T-156a and T-156b (code, not yet on a phone) are done. ⚠ The next build on the P30 is signed with the upload key and needs an uninstall: its database is backed up in `Madeira-fieldwork/p30-2026-10-04/`; restore it through `run-as` on a field build. Phase 0 is done up to the first upload (app created, upload key, payments, testers; 2026-10-04). ✅ **The study is finished (2026-09-25): D-089
+**Next for the assistant: the monetisation build, Phase 2, T-156d (the unlock sheet) of
+`docs/monetization-execution-plan.md`**; Phase 0, Phase 1, T-156a, T-156b and T-156c are done, T-156c seen on the P30. ⚠ The next build on the P30 is signed with the upload key and needs an uninstall: its database is backed up in `Madeira-fieldwork/p30-2026-10-04/`; restore it through `run-as` on a field build. Phase 0 is done up to the first upload (app created, upload key, payments, testers; 2026-10-04). ✅ **The study is finished (2026-09-25): D-089
 Accepted**, the outcome at the top of `docs/monetization-study-plan.md`. Billing is **`expo-iap`, D-091** (RevenueCat rejected).
 The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) is planned in
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are

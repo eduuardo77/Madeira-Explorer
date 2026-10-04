@@ -107,7 +107,14 @@ export type RecordingEventKind =
    * once per process, and each batch of transitions drained into
    * `activity_event`. Diary only.
    */
-  | 'activity';
+  | 'activity'
+  /**
+   * What Google Play answered when asked what the account owns (T-156c): a
+   * count and the decision, never a token or an order ID. Without it a query
+   * on resume leaves no trace anywhere, and "did the app check?" cannot be
+   * answered on the phone.
+   */
+  | 'billing';
 
 export type Trip = {
   id: number;

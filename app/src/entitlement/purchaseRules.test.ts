@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { decidePurchases, type StorePurchase } from './purchaseRules.ts';
+import { decidePurchases, mergeEntitlement, type StorePurchase } from './purchaseRules.ts';
 
 const OURS = 'passport_test';
 const DAY = 86_400_000;
@@ -134,4 +134,45 @@ test('pure: imports nothing but types', () => {
   for (const line of imports) {
     assert.match(line, /^import type /, `purchaseRules.ts has a runtime import: ${line}`);
   }
+});
+
+// ---------------------------------------------------------------------------
+// What is stored after an answer (T-156c)
+// ---------------------------------------------------------------------------
+
+const LOCKED = { unlocked: false, purchaseTimeMs: null };
+
+test('⚠ an empty or failed answer never locks a passport that was unlocked', () => {
+  // An empty list is as likely to be a phone that cannot reach Google as a
+  // refund, and only a refund may take the passport away (D-091).
+  const stored = { unlocked: true, purchaseTimeMs: 3 * DAY };
+  assert.deepEqual(mergeEntitlement(stored, decidePurchases([], OURS)), stored);
+  assert.deepEqual(
+    mergeEntitlement(stored, decidePurchases([purchase({ state: 'pending' })], OURS)),
+    stored
+  );
+});
+
+test('a purchase unlocks a locked passport and keeps its time', () => {
+  assert.deepEqual(mergeEntitlement(LOCKED, decidePurchases([purchase()], OURS)), {
+    unlocked: true,
+    purchaseTimeMs: 10 * DAY,
+  });
+});
+
+test('the earliest purchase time survives a later answer', () => {
+  // The founder stamp reads it (T-233); a restore must not move it later.
+  const stored = { unlocked: true, purchaseTimeMs: 3 * DAY };
+  assert.equal(mergeEntitlement(stored, decidePurchases([purchase()], OURS)).purchaseTimeMs, 3 * DAY);
+  const earlier = decidePurchases([purchase({ purchaseTimeMs: 1 * DAY })], OURS);
+  assert.equal(mergeEntitlement(stored, earlier).purchaseTimeMs, 1 * DAY);
+});
+
+test('a time learned later fills one that was missing', () => {
+  const stored = { unlocked: true, purchaseTimeMs: null };
+  assert.equal(mergeEntitlement(stored, decidePurchases([purchase()], OURS)).purchaseTimeMs, 10 * DAY);
+});
+
+test('a pending purchase stores nothing', () => {
+  assert.deepEqual(mergeEntitlement(LOCKED, decidePurchases([purchase({ state: 'pending' })], OURS)), LOCKED);
 });

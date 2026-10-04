@@ -116,6 +116,14 @@ export const AppStateKey = {
    */
   StampsUnlocked: 'stamps_unlocked',
   /**
+   * JSON `{ "purchaseTimeMs": number | null }`: when the passport was bought,
+   * as Google reported it (T-156c, plan §4.4). For the founder stamp, offline.
+   *
+   * ⚠ **Nothing else about the purchase is kept**: no token, no order ID, no
+   * account, no price. The app does not need them, so it does not hold them.
+   */
+  PurchaseRecord: 'purchase_record',
+  /**
    * Whether the user pressed *Start walk* and has not pressed *Stop* (2026-08-28).
    *
    * ⚠ **Not "is the recorder running".** The recorder starts by itself on launch

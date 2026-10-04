@@ -14,6 +14,7 @@ import { syncRecordingWithPreferences } from './src/recording/tripRecording';
 import { checkTripEnd } from './src/progress/tripEndDetection';
 import * as appStateDao from './src/storage/dao/appStateDao';
 import { runHealthCheck } from './src/recording/healthCheck';
+import { startBillingSync } from './src/entitlement/billingSync';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
@@ -136,6 +137,11 @@ export default function App() {
       AppState.currentState === 'active' ? 'active' : 'background'
     );
   }, []);
+
+  // Google Play's answer on what this account owns, at launch and on every
+  // return to the front (T-156c). Nothing in a beta build or for a pack that
+  // sells nothing; offline it changes nothing and tries again on resume.
+  useEffect(() => startBillingSync(), []);
 
   // ⚠ T-212: AND AGAIN EVERY TIME THE APP COMES TO THE FRONT. The comment above
   // promised that a deferred start is "retried on the next resume"; nothing

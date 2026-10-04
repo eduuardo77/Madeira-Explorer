@@ -21,8 +21,8 @@
  *   that buyer a founder, and "now" would make them not one.
  * - **An empty list means locked here, and nothing more.** ⚠ It must never
  *   re-lock a passport that was unlocked: an empty answer is as likely to be a
- *   phone that cannot reach Google as a refund. `entitlementStore` holds that
- *   rule (T-156c), because only it knows what was stored before.
+ *   phone that cannot reach Google as a refund. `mergeEntitlement` holds that
+ *   rule, and `entitlementStore` applies it to what was stored (T-156c).
  *
  * ⚠ **No purchase token passes through here.** `decidePurchases` is generic so
  * the adapter gets its own objects back in `toAcknowledge`, token included,
@@ -75,4 +75,30 @@ export function decidePurchases<P extends StorePurchase>(
 /** A finite time after 1970. Zero is excluded: it is what a missing field becomes. */
 function isRealMoment(ms: number): boolean {
   return Number.isFinite(ms) && ms > 0;
+}
+
+/** What the phone keeps between launches (plan §4.4). */
+export interface Entitlement {
+  unlocked: boolean;
+  purchaseTimeMs: number | null;
+}
+
+/**
+ * What to store after an answer from Google (T-156c).
+ *
+ * ⚠ **Never a lock over an unlock.** Only a refund may take the passport away,
+ * and without a server the app cannot see one (D-091's accepted risk).
+ * The earliest purchase time is kept, so a restore never moves it later.
+ */
+export function mergeEntitlement(
+  stored: Entitlement,
+  decision: PurchaseDecision<StorePurchase>
+): Entitlement {
+  const times = [stored.purchaseTimeMs, decision.purchaseTimeMs].filter(
+    (t): t is number => t !== null
+  );
+  return {
+    unlocked: stored.unlocked || decision.unlocked,
+    purchaseTimeMs: times.length > 0 ? Math.min(...times) : null,
+  };
 }

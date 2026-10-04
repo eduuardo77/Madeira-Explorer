@@ -305,6 +305,25 @@ section's definition of done.
       signed with the upload key cannot install over the P30's debug-signed build; **the P30's
       database was pulled first** (`Madeira-fieldwork/p30-2026-10-04/`, 16,267 fixes, SHA-256,
       integrity ok) so the uninstall that switch needs loses nothing.
+- [x] **T-156c** ✅ **Seen on the P30 2026-10-04.** **Billing sync and the lifecycle.**
+      `billingSync.ts`, started once from `App.tsx`: connects, asks Google what the account owns at
+      launch and on every return to the front, listens while open, and offers `buyPassport`,
+      `restorePurchases`, `passportPrice` and `subscribe` to T-156d/e. Does nothing in a beta build
+      or for a pack with no `productId`. **The order (save, then acknowledge) is a pure module,
+      `purchaseFlow.ts`**, with injected store and database, so a Node test holds it: saved before
+      acknowledged, nothing acknowledged if the save fails, a failed acknowledgement retried by the
+      next query. `mergeEntitlement` (pure) is the never-relock rule and keeps the earliest purchase
+      time; `entitlementStore.recordStoreAnswer` applies it and stores `purchase_record` (time only).
+      `setUnlocked` is gone: nothing called it, and it bypassed the rule. Answers are serialised, and
+      a failed call drops the connection so the next one reconnects. **OQ-7 was already true:**
+      erase-all clears the whole `app_state` table. **Tests (943).**
+      **P30:** `billing` diary lines (a new kind: counts only, never a token) read `owned 0, unlocked
+      false, pending false` 3 s after launch and again after each return to the front; the Play
+      Store logged the connection. **Found:** a resume query never left a trace, so "did it check?"
+      was unanswerable until the diary line existed. Launch produces two queries (mount, and
+      `AppState` turning active), harmless because they are serialised. **To move the P30 to the
+      upload key** it was uninstalled after a pull; the database went back through `run-as` before
+      first launch (checksum matched) and the recorder restarted on its own.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

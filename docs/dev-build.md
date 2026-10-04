@@ -121,6 +121,8 @@ installed app is **not** the debug one above and **not** your upload key.
     `75:05:0C:DB:E2:85:A8:C7:03:F0:39:1D:20:E5:F2:19:B5:C2:15:FC`
   - The project lead's **upload** key, for a build signed here and installed by cable (the P30's
     field builds from now on): `87:5F:7F:68:94:C1:7D:87:A8:B4:FF:9B:82:BA:D4:19:6C:CC:47:61`
+  - ✅ **Both added to the Maps key 2026-10-04**, beside the debug entry, which stays until the
+    public release (T-137).
   - ⚠ In Play Console the app signing SHA-1 is behind a copy button; the only one printed as text
     on that page is the upload key's. Easy to copy the wrong one.
 

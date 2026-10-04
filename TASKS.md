@@ -137,6 +137,9 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ✅ **First AAB uploaded to internal testing and `passport_madeira` active, 2026-10-04**
       (monetisation plan steps 0.3, 0.4). ⚠ **Open:** Google's app signing SHA-1 is not yet on the
       Maps key, so a build installed from Play shows a grey map until it is (T-207).
+      ✅ **Fixed the same day:** the Maps key now carries three SHA-1s for `com.proa.madeira`:
+      debug, Google's app signing and the upload key (project lead). Not yet seen: no Play install
+      or upload-key build has drawn the map.
 - [x] **T-240** **Rename Proa to Bruma in code and copy (D-092)**. ✅ **Code 2026-09-25:**
       `APP_NAME` is Bruma; `app.json`'s name and the six permission strings; the generated
       `android/.../strings.xml` `app_name` edited to match (the next prebuild writes the same);
@@ -2922,6 +2925,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-136** Verify at least half of beta testers share their souvenir unprompted (this is
       the distribution hypothesis under test — D-013) ⇠ T-132
 - [ ] **T-137** Submit to both stores ⇠ T-133, T-134
+      ⚠ **Before the public release: take the debug SHA-1 (`5E:8F:16:...:F6:25`) off the Maps key.**
+      It is the React Native template key, identical on every machine, so package plus that SHA-1
+      lets anyone who lifts the key out of the APK spend its quota. Kept until then because the
+      emulator and dev builds use it (`docs/dev-build.md`).
 - [ ] **T-138** Launch ⇠ T-137
 
 **Milestone M7 — Launched** ⇠ T-138

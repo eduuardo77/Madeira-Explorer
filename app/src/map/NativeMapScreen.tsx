@@ -42,6 +42,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -328,6 +329,23 @@ export default function NativeMapScreen({
       padding: cameraPadding(true),
     });
 
+  /**
+   * ⚠ Counts the returns to the front, so the load below runs again on each.
+   * Found 2026-10-04 on the P30 after a motorcycle ride: the map was opened
+   * before leaving, the process stayed alive, and on coming back the screen
+   * was never mounted again, so 240 good fixes (14 km of road on the desk)
+   * lit nothing. Mounting is not the same as being looked at.
+   */
+  const [resumeCount, setResumeCount] = useState(0);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') {
+        setResumeCount((count) => count + 1);
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -442,7 +460,7 @@ export default function NativeMapScreen({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resumeCount]);
 
   /** Frame what was walked, or the island on day one (D-053). */
   useEffect(() => {

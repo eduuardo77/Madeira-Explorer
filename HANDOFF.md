@@ -47,6 +47,13 @@ as an outing, one on automatic recording, a drive through a VR1 tunnel), then pu
 threshold in `mapMatch.ts` and `motionGate.ts` says NOT TUNED. Play Protect asks on each install:
 *Não enviar* lets it through (can be tapped over adb).
 
+⚠ **2026-10-04, the project lead's first motorcycle ride (12:06 to 12:55, Caniço):** recorded well
+(about 250 moving fixes, 3 to 5 m, up to 68 km/h) but the map lit nothing, because the map screen
+matched roads only when mounted and the app had been opened before leaving. Fixed: it reloads on
+every return to the front. Field build on the P30 since 13:12; 14 km lit. Still to look at from that
+ride: the motion sensors called the motorbike *walking* the whole way, and the sampling gate's
+restart at 12:13 was refused (*foreground service from background*).
+
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 
 The review (`docs/app-review-2026-09-22.md`, scored 7/20) became the plan. Status on 2026-09-24:

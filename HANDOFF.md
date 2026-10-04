@@ -137,7 +137,7 @@ The build (allowance, billing T-156, set medals, founder stamp, tilt and shine) 
 **`docs/monetization-execution-plan.md`**: read it whole before starting. Its nine questions are
 all answered (2026-09-25). ⚠ **The app is renamed Bruma, titled *Bruma: Madeira Walk Tracker*
 (D-092, 2026-09-25); renamed in code the same day (T-240), package kept as `com.proa.madeira`; the name under the icon needs a new build. Domain: `bruma.lol` (T-206).** ✅ The trademark search (T-187) is done and Bruma is kept
-(D-092), so nothing about the name blocks the first Play upload; that upload fixes `com.proa.madeira` forever. Outside monetisation: T-197
+(D-092), so nothing about the name blocks the first Play upload. ✅ **The app exists in Play Console (2026-10-04, free), and `com.proa.madeira` is fixed for good:** Play asked for it at creation. Outside monetisation: T-197
 (memory after sharing: needs a stamp on the phone) and T-196 (the DB-versus-delivered measure needs a
 field build). T-205, one real trip, is the MVP gate, confirms the study's Q1, and needs the project
 lead outdoors.

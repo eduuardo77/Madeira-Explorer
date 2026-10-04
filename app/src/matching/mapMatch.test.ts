@@ -17,7 +17,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { effectiveActivity, HOP_MAX_M, matchTrace, MIN_CHAIN_FIXES, stepCosts } from './mapMatch.ts';
-import { decodeRoadGraph, pointAt, type RoadFile } from './roadGraph.ts';
+import { decodeRoadGraph, edgeSlice, pointAt, type RoadFile } from './roadGraph.ts';
 import * as routing from './roadRouting.ts';
 import { fixAt, grid, litOn, litTotal, network } from './testNetwork.ts';
 import { visitedEdges } from './visitedRoads.ts';
@@ -217,10 +217,26 @@ test('the VR1 with its tunnels, no fix underground: lit end to end, on the right
  * were in the network the ride matched the streets underneath it.
  */
 test('the Monte cable car lights the cable, not the streets under it', () => {
-  const cable = [189, 190];
-  for (const edge of cable) {
-    assert.equal(graph.edgeKindCodes[edge], 'a', 'edges 189 and 190 are the Funchal to Monte cable car');
+  // Found by its stations, not by index: the indices move whenever the
+  // network is rebuilt (they did when parking aisles were kept, 2026-10-04).
+  // Funchal (Almirante Reis), the mid-line joint, and Monte.
+  const stations: [number, number][] = [[32.6473, -16.9022], [32.6526, -16.9018], [32.6754, -16.9002]];
+  const near = (p: [number, number], q: [number, number]) =>
+    Math.hypot((p[0] - q[0]) * 110540, (p[1] - q[1]) * 93700) < 60;
+  const cable: number[] = [];
+  for (let leg = 0; leg < 2; leg += 1) {
+    for (let e = 0; e < graph.edgeCount; e += 1) {
+      const points = edgeSlice(graph, e, 0, Infinity);
+      if (
+        graph.edgeKindCodes[e] === 'a' &&
+        near(points[0], stations[leg]) &&
+        near(points[points.length - 1], stations[leg + 1])
+      ) {
+        cable.push(e);
+      }
+    }
   }
+  assert.equal(cable.length, 2, 'the Funchal to Monte cable car, in two legs');
   const steps = cable.map((edge) => ({ edge, forward: true }));
   const random = rng(31);
   const trip = sampleTrip(graph, pointAt, steps, random, {

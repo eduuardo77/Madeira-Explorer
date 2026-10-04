@@ -96,6 +96,13 @@ of `tools/preview-collected-options.mjs`, the lead's pick (they also liked C's e
 *"but for now E"*): unvisited stamps plain grey and 25% dimmer (the border only 7%, held at 3:1),
 collected ones glow in their own colour and carry a postmark with the day earned, placed on the
 paper per shape. Less dim than the sketch's 60%, which broke D-015's legibility floors. On the P30.
+✅ **The first ground truth (same evening):** the lead carried an iPhone 15 on SensorLogger (1 Hz)
+on the promenade walk. `tools/compare-sensorlogger.mjs` measures the app's lit roads against it:
+lit within 10 m of the walked track 96%, median 1.8 m; walked within 10 m of a lit line 94.6%,
+then **98.6% after keeping parking aisles in the network** (`build-roads.mjs`: the walk from the
+car crossed an aisle, so the first and last 100 m lit nothing). The P30's fixes sat a median 3.2 m
+(p90 6.4 m) from the iPhone at the same second. The importer (`tools/lib/sensorLogger.mjs`) read
+its first real export without a change. The trace stays out of `tools/fixtures/` (it reaches home).
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

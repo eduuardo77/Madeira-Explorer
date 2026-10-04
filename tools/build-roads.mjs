@@ -24,9 +24,14 @@
  *     Funchal maps many pavements as separate ways a few metres from the road.
  *     Kept, a walk along a street would light the pavement, which Google does
  *     not draw, instead of the street, which it does.
- *   - **Parking aisles and driveways are left out.** Driving into a car park
- *     would draw its aisles as a scribble, and a driveway is where a phone at
- *     rest drifts.
+ *   - **Driveways are left out**: a driveway is where a phone at rest drifts.
+ *     ⚠ **Parking aisles are kept since 2026-10-04.** They were left out so a
+ *     drive into a car park would not draw a scribble, but nearly every walk
+ *     starts and ends at a parked car: on the promenade walk from Praia Formosa
+ *     the iPhone's 1 Hz track crossed the car park's aisle to reach the path,
+ *     nothing mapped was within 45 to 90 m, and the first and last 100 m of
+ *     the walk lit nothing, both ways. A parked phone lights nothing anyway
+ *     (`motionGate.ts`).
  *   - **Areas** (`area=yes`, a square drawn as its outline) are left out: the
  *     outline is not a way anybody walked.
  *   - Private service roads, construction, proposed roads, platforms, indoor
@@ -138,7 +143,7 @@ export function kindOf(tags) {
       return null;
     }
     if (tags.highway === 'service') {
-      if (['parking_aisle', 'driveway', 'drive-through'].includes(tags.service)) {
+      if (['driveway', 'drive-through'].includes(tags.service)) {
         return null;
       }
       if (tags.access === 'private' || tags.access === 'no') {

@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { effectiveActivity, matchTrace, MIN_CHAIN_FIXES, stepCosts } from './mapMatch.ts';
+import { effectiveActivity, HOP_MAX_M, matchTrace, MIN_CHAIN_FIXES, stepCosts } from './mapMatch.ts';
 import { decodeRoadGraph, pointAt, type RoadFile } from './roadGraph.ts';
 import * as routing from './roadRouting.ts';
 import { fixAt, grid, litOn, litTotal, network } from './testNetwork.ts';
@@ -282,4 +282,46 @@ test('a walking label at driving speed is not trusted', () => {
   assert.equal(effectiveActivity('driving', 1.5), 'driving', 'a car can crawl');
   assert.equal(stepCosts('driving', 'walking'), null, 'the car park: nothing dear');
   assert.equal(stepCosts('driving', 'unknown'), stepCosts('driving', 'driving'));
+});
+
+test('a walk across a gap the map leaves between a path and a street stays one line', () => {
+  // The promenade into Câmara de Lobos, 2026-10-04: the footpath stops 10 m
+  // short of the street in the data, and the line broke there both ways.
+  const net = network(
+    { a: [0, 0], b: [200, 0], c: [210, 0], d: [400, 0] },
+    [
+      { from: 'a', to: 'b', kind: 'f' },
+      { from: 'c', to: 'd', kind: 'r' },
+    ]
+  );
+  const fixes = Array.from({ length: 30 }, (_, i) => fixAt(i * 10, 20 + i * 12.5, 1, 1.25));
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.equal(chains.length, 1, 'one line across the gap');
+});
+
+test('a car never hops between two roads the map does not join', () => {
+  // Two carriageways 10 m apart that do not meet: a bridge over another road.
+  const net = network(
+    { a: [0, 0], b: [200, 0], c: [210, 0], d: [400, 0] },
+    [
+      { from: 'a', to: 'b', kind: 'r' },
+      { from: 'c', to: 'd', kind: 'r' },
+    ]
+  );
+  const fixes = Array.from({ length: 30 }, (_, i) => fixAt(i * 10, 20 + i * 12.5, 1, 1.25));
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.notEqual(chains.length, 1);
+});
+
+test('no hop across a gap wider than twice HOP_MAX_M', () => {
+  const net = network(
+    { a: [0, 0], b: [200, 0], c: [200 + 2 * HOP_MAX_M + 15, 0], d: [500, 0] },
+    [
+      { from: 'a', to: 'b', kind: 'f' },
+      { from: 'c', to: 'd', kind: 'f' },
+    ]
+  );
+  const fixes = Array.from({ length: 38 }, (_, i) => fixAt(i * 10, 20 + i * 12.5, 1, 1.25));
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.notEqual(chains.length, 1);
 });

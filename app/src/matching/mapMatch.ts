@@ -57,7 +57,7 @@
 import { distanceM } from '../recording/distance.ts';
 import { MOTION_WINDOW_S, movingMask, speedCeiling } from './motionGate.ts';
 import type { GateFix } from './motionGate.ts';
-import { KIND_COUNT, KIND_INDEX, nearbyEdges } from './roadGraph.ts';
+import { KIND_COUNT, KIND_INDEX, nearbyEdges, pointAt } from './roadGraph.ts';
 import type { Candidate, RoadGraph } from './roadGraph.ts';
 import { createScratch, distancesFrom, routeBetween } from './roadRouting.ts';
 import type { EdgePiece, KindCosts, RouteScratch } from './roadRouting.ts';
@@ -68,7 +68,7 @@ import type { Activity } from '../recording/activityTimeline.ts';
  * fixes differently. Chains kept by `chainStore.ts` under another version are
  * dropped and the trip rematched.
  */
-export const MATCHER_VERSION = 2;
+export const MATCHER_VERSION = 3;
 
 /** What the matcher needs of a fix: a subset of the `raw_fix` row. */
 export type MatchFix = GateFix & {
@@ -159,6 +159,41 @@ export const MAX_ROUTE_SLACK_M = 200;
  * lesson, kept).
  */
 export const MAX_BRIDGE_S = 5 * 60;
+
+/**
+ * The widest gap the line may step across where the map does not join two
+ * pieces, metres, and what each metre of it costs against a real route.
+ *
+ * ⚠ Found 2026-10-04 on the promenade into Câmara de Lobos: the footpath and
+ * the street it meets are 10 m apart on the ground and 1.5 km apart in the
+ * network, because OpenStreetMap stops the path short of the street (and
+ * `build-roads.mjs` leaves sidewalks and crossings out on purpose). With no
+ * route between two fixes 9 s apart, the line broke there, both ways. Nobody
+ * teleports, so a short hop is allowed when no route is.
+ *
+ * Only where one side is a path or levada (`HOP_KINDS`): two roads that do
+ * not meet are usually a bridge over another road, and a car must never hop
+ * from one to the other.
+ */
+export const HOP_MAX_M = 25;
+export const HOP_COST_FACTOR = 3;
+const HOP_KINDS = new Set([KIND_INDEX.f, KIND_INDEX.l]);
+
+/**
+ * The straight hop between two candidates, metres, or null when none is
+ * allowed. `movedM` is how far apart the two fixes are: the line waits at the
+ * end of the path until no route is left, by which time the walker is past
+ * the gap, so the hop may cover that too, up to twice `HOP_MAX_M`.
+ */
+function hopM(graph: RoadGraph, from: Candidate, to: Candidate, movedM: number): number | null {
+  if (!HOP_KINDS.has(graph.kindIndex[from.edge]) && !HOP_KINDS.has(graph.kindIndex[to.edge])) {
+    return null;
+  }
+  const [aLat, aLon] = pointAt(graph, from.edge, from.offset);
+  const [bLat, bLon] = pointAt(graph, to.edge, to.offset);
+  const metres = distanceM({ lat: aLat, lon: aLon }, { lat: bLat, lon: bLon });
+  return metres <= HOP_MAX_M + Math.min(movedM, HOP_MAX_M) ? metres : null;
+}
 
 /**
  * Fixes that match no road for this long end the chain, seconds. A few
@@ -655,30 +690,48 @@ function step(
     effectiveActivity(fix.activity, ceiling)
   );
 
-  for (let i = 0; i < previous.candidates.length; i += 1) {
-    if (previous.score[i] === -Infinity) {
-      continue;
-    }
-    const from = previous.candidates[i];
-    const routes = distancesFrom(
-      graph,
-      scratch,
-      { edge: from.edge, offset: from.offset },
-      targets,
-      limitM,
-      costs
-    );
-    // `routes` are costs; whether a route was possible at all was decided in
-    // real metres inside the search (`RouteScratch.len`).
-    for (let j = 0; j < candidates.length; j += 1) {
-      if (!Number.isFinite(routes[j])) {
+  // ⚠ Hops only where the line would otherwise break: a second pass, taken
+  // when no route at all joins the two fixes. Offered alongside routes, a
+  // hop was cheaper than following a levada's own path beside its channel,
+  // and the synthetic trail walk's precision fell from 98% to 69%.
+  for (const allowHops of [false, true]) {
+    for (let i = 0; i < previous.candidates.length; i += 1) {
+      if (previous.score[i] === -Infinity) {
         continue;
       }
-      const value = previous.score[i] + transitionLog(routes[j], straight);
-      if (value > score[j]) {
-        score[j] = value;
-        back[j] = i;
+      const from = previous.candidates[i];
+      // `routes` are costs; whether a route was possible at all was decided
+      // in real metres inside the search (`RouteScratch.len`).
+      const routes = allowHops
+        ? null
+        : distancesFrom(
+            graph,
+            scratch,
+            { edge: from.edge, offset: from.offset },
+            targets,
+            limitM,
+            costs
+          );
+      for (let j = 0; j < candidates.length; j += 1) {
+        let routeCost = routes === null ? Infinity : routes[j];
+        if (allowHops) {
+          const hop = hopM(graph, from, candidates[j], straight);
+          if (hop === null) {
+            continue;
+          }
+          routeCost = HOP_COST_FACTOR * hop;
+        } else if (!Number.isFinite(routeCost)) {
+          continue;
+        }
+        const value = previous.score[i] + transitionLog(routeCost, straight);
+        if (value > score[j]) {
+          score[j] = value;
+          back[j] = i;
+        }
       }
+    }
+    if (score.some((value) => value !== -Infinity)) {
+      break;
     }
   }
 
@@ -746,12 +799,27 @@ function* backtrack(
       undefined,
       layers[k].costs
     );
-    if (route === null) {
-      // Viterbi found a route within this limit a moment ago; the same search
-      // cannot fail now. Refuse the chain rather than draw a guess.
-      return { chain: null, wild: [] };
-    }
     let routeM = 0;
+    if (route === null) {
+      // No route, so Viterbi chose a hop (`HOP_MAX_M`). The next route starts
+      // on the far side; the hop adds nothing to the distance along the
+      // pieces, which is what the anchors measure.
+      const hop = hopM(
+        graph,
+        chosen[k - 1],
+        chosen[k],
+        distanceM(layers[k - 1].fix, layers[k].fix)
+      );
+      if (hop === null) {
+        // Viterbi found a route or a hop a moment ago; neither can fail now.
+        // Refuse the chain rather than draw a guess.
+        return { chain: null, wild: [] };
+      }
+      stepM.push(hop);
+      anchors.push({ ts: layers[k].fix.ts, atM });
+      likelihood += Math.exp(emissionLog(chosen[k].distance, sigmaOf(layers[k].fix.accuracy_m)));
+      continue;
+    }
     for (const piece of route) {
       appendPiece(pieces, piece);
       routeM += Math.abs(piece.to - piece.from);

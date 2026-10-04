@@ -618,50 +618,51 @@ export const STRINGS = {
     'Freischalten, um diesen Stempel zu sehen'
   ),
 
-  // T-156d: the unlock sheet (D-089). ⚠ OQ-8: the project lead reads the
-  // Portuguese aloud before it ships. A locked stamp is one the user earned
+  // T-156d: the unlock sheet (D-089). OQ-8: the Portuguese was read and
+  // rewritten by the project lead 2026-10-04, in the informal "tu" (the rest
+  // of the app still uses the formal register; see TASKS T-156d). A locked stamp is one the user earned
   // and has not seen yet, never one they failed to get. No price in any of
   // these: the only price is the one Google returns.
-  'unlock.title': s('Unlock your passport', 'Desbloquear o seu passaporte', 'Ihren Reisepass freischalten'),
+  'unlock.title': s('Unlock your passport', 'Desbloqueia o teu passaporte', 'Ihren Reisepass freischalten'),
   'unlock.earned.none': s(
     'Every stamp you collect will be shown in full.',
-    'Todos os carimbos que obtiver ficam à vista.',
+    'Vais ver todos os carimbos que conseguires.',
     'Jeder Stempel, den Sie sammeln, wird vollständig gezeigt.'
   ),
   'unlock.adds.stamps': s(
     'Every stamp, now and on every visit, for good',
-    'Todos os carimbos, agora e em cada visita, para sempre',
+    'Todos os carimbos, nesta e nas próximas visitas',
     'Alle Stempel, jetzt und bei jedem Besuch, für immer'
   ),
   'unlock.adds.medals': s(
     'A medal for each set you complete',
-    'Uma medalha por cada conjunto que completar',
+    'Uma medalha por cada conjunto que completares',
     'Eine Medaille für jedes vollständige Set'
   ),
   'unlock.adds.founder': s(
     'A founder stamp, for buying in the first three months',
-    'Um carimbo de fundador, por comprar nos primeiros três meses',
+    'Um carimbo de fundador, por comprares nos primeiros três meses',
     'Einen Gründerstempel für den Kauf in den ersten drei Monaten'
   ),
   'unlock.adds.once': s(
     'One payment. No subscription.',
-    'Um só pagamento. Sem subscrição.',
+    'Pagamento único. Sem subscrição.',
     'Eine einmalige Zahlung. Kein Abo.'
   ),
   'unlock.buy': s('Unlock for {price}', 'Desbloquear por {price}', 'Für {price} freischalten'),
   'unlock.buy.noPrice': s('Unlock', 'Desbloquear', 'Freischalten'),
   'unlock.working': s('Waiting for Google Play', 'À espera do Google Play', 'Warten auf Google Play'),
-  'unlock.restore': s('Restore purchase', 'Restaurar compra', 'Kauf wiederherstellen'),
+  'unlock.restore': s('Restore purchase', 'Recuperar compra', 'Kauf wiederherstellen'),
   'unlock.notNow': s('Not now', 'Agora não', 'Nicht jetzt'),
   'unlock.done': s('See my stamps', 'Ver os meus carimbos', 'Meine Stempel ansehen'),
   'unlock.pending': s(
     'Payment pending. Your passport unlocks as soon as Google confirms it.',
-    'Pagamento pendente. O seu passaporte fica desbloqueado assim que a Google o confirmar.',
+    'Pagamento pendente. O teu passaporte fica desbloqueado assim que a Google o confirmar.',
     'Zahlung ausstehend. Ihr Reisepass wird freigeschaltet, sobald Google sie bestätigt.'
   ),
   'unlock.offline': s(
     'You can unlock this later, when you have a connection.',
-    'Pode desbloquear mais tarde, quando tiver ligação à internet.',
+    'Podes desbloquear mais tarde, quando tiveres ligação à internet.',
     'Sie können das später freischalten, wenn Sie eine Verbindung haben.'
   ),
   // ⚠ Not "this phone has no Google Play": the same answer comes from an old
@@ -674,12 +675,12 @@ export const STRINGS = {
   // ⚠ No promise about charges: the app cannot know.
   'unlock.failed': s(
     'The purchase did not go through. You can try again.',
-    'A compra não foi concluída. Pode tentar outra vez.',
+    'A compra não foi concluída. Podes tentar outra vez.',
     'Der Kauf wurde nicht abgeschlossen. Sie können es noch einmal versuchen.'
   ),
   'unlock.unlocked': s(
     'Your passport is unlocked. Every stamp is yours to see.',
-    'O seu passaporte está desbloqueado. Todos os carimbos estão à vista.',
+    'O teu passaporte está desbloqueado. Todos os carimbos estão à vista.',
     'Ihr Reisepass ist freigeschaltet. Alle Stempel sind sichtbar.'
   ),
   'unlock.nothingToRestore': s(
@@ -1188,12 +1189,12 @@ export const PLURALS = {
   'unlock.earned': {
     one: s(
       'You have collected {collected} places, and {count} stamp is waiting to be seen.',
-      'Já visitou {collected} lugares, e {count} carimbo está à espera de ser visto.',
+      'Já visitaste {collected} lugares. Há {count} carimbo à tua espera.',
       'Sie haben {collected} Orte gesammelt, und {count} Stempel wartet darauf, gesehen zu werden.'
     ),
     other: s(
       'You have collected {collected} places, and {count} stamps are waiting to be seen.',
-      'Já visitou {collected} lugares, e {count} carimbos estão à espera de serem vistos.',
+      'Já visitaste {collected} lugares. Há {count} carimbos à tua espera.',
       'Sie haben {collected} Orte gesammelt, und {count} Stempel warten darauf, gesehen zu werden.'
     ),
   },

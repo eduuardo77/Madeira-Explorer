@@ -352,8 +352,18 @@ section's definition of done.
       the app, pull `madeira.db*` through `run-as`, change a copy, push it back with
       `MSYS_NO_PATHCONV=1`, delete the device's `-wal` and `-shm` first. The probes also produced one
       *Novo selo* pop-up each (D-096), which `stamps_shown` records.
-      **Left:** OQ-8 (the project lead found the Portuguese reads as Brazilian; under review), and
-      the purchase itself once the track is rolled out to a tester list that includes their account.
+      ✅ **OQ-8, 2026-10-04:** the project lead read the Portuguese as Brazilian-sounding (no Brazilian
+      forms were found; the rhythm read as translated) and rewrote it **in the informal "tu"**
+      (*Desbloqueia o teu passaporte*, *Já visitaste 10 lugares. Há 5 carimbos à tua espera.*,
+      *Recuperar compra*, *Podes tentar outra vez.*). ⚠ **The rest of the app is still in the formal
+      register** (*Abrir o seu passaporte*, the locked stamp's *Desbloqueie...*), so the sheet and
+      the card it opens from now speak differently: the project lead's call whether to move the
+      whole app to "tu". Seen on the P30: the new text, and Google's price kept on the button after
+      a failure.
+      ⚠ **Second purchase attempt, after the track was rolled out: still `item-unavailable`.** The
+      P30 has two Google accounts and the app has no installer (sideloaded by `adb`), so Play may be
+      choosing an account that is not the opted-in tester, or the rollout has not propagated yet.
+      **Left:** a purchase that reaches Google's payment sheet.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

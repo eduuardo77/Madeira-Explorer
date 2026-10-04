@@ -50,7 +50,7 @@ test('it says what was earned and how much is waiting, in the user\'s language',
   );
   assert.equal(
     unlockSheetModel(input({ language: 'pt' })).earned,
-    'Já visitou 14 lugares, e 8 carimbos estão à espera de serem vistos.'
+    'Já visitaste 14 lugares. Há 8 carimbos à tua espera.'
   );
   assert.match(unlockSheetModel(input({ waiting: 0 })).earned, /Every stamp you collect/);
 });

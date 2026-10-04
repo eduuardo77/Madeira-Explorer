@@ -60,6 +60,7 @@ export const SECTIONS_PT: PolicySection[] = [
       'No seu telemóvel, num espaço que só esta aplicação consegue ler.',
       'A sua viagem é incluída na cópia de segurança normal que o seu telemóvel já faz para o iCloud ou para a Google, se tiver as cópias de segurança ligadas. É isso que protege as suas férias se o telemóvel se perder ou avariar a meio. Essa cópia é sua, na sua própria conta e com a sua própria encriptação. Nós não lhe conseguimos chegar, e mais ninguém consegue sem a sua conta.',
       'Pode desligar isso nas definições do telemóvel, no mesmo sítio onde controla as cópias de segurança de tudo o resto.',
+      'Também pode guardar uma cópia da viagem num ficheiro, nas Definições, e restaurá-la mais tarde. O ficheiro contém tudo o que a aplicação registou, incluindo onde dormiu, e vai só para onde o enviar. Mantenha-o privado.',
     ],
   },
   {

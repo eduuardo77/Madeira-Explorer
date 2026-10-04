@@ -54,6 +54,8 @@ export type RecordingEventKind =
   | 'stamp'
   /** The day-1 check ran and said something (T-049). */
   | 'health_check'
+  /** The trip was saved to a file, or restored from one (2026-10-04). */
+  | 'backup'
   /** The trip was detected as over, and by which signal (T-099, D-012). */
   | 'trip_end'
   /**

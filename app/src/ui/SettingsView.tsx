@@ -90,6 +90,14 @@ export type SettingsViewProps = {
   /** Opens the confirmation. Must never erase on its own (T-125). */
   onEraseRequested: () => void;
   /**
+   * Save the trip to a file, and restore it from one (2026-10-04). Absent
+   * hides the Data group (the workbench). Restore asks first, in the screen.
+   */
+  onSaveBackup?: () => void;
+  onRestoreBackup?: () => void;
+  /** A save or restore is running; its row says so and does not run twice. */
+  backupBusy?: boolean;
+  /**
    * The language chosen here, or null to follow the phone (T-202). Absent
    * hides the row (the workbench).
    */
@@ -421,6 +429,9 @@ export default function SettingsView({
   onOpenLicences,
   onOpenDebug,
   onEraseRequested,
+  onSaveBackup,
+  onRestoreBackup,
+  backupBusy,
   onDonateWalk,
   donating,
   version,
@@ -554,6 +565,25 @@ export default function SettingsView({
           </Group>
         ) : null}
 
+        {/* 2026-10-04: WalkNYC's Data group. Above About, so a user worried
+            about an uninstall finds it without scrolling to the bottom. */}
+        {onSaveBackup === undefined || onRestoreBackup === undefined ? null : (
+          <Group title={t('settings.section.data')} footnote={t('settings.backup.footnote')}>
+            <ListRow
+              icon="backup"
+              label={t('settings.backup.save')}
+              tone="action"
+              onPress={backupBusy === true ? () => undefined : onSaveBackup}
+            />
+            <ListRow
+              icon="restore"
+              label={t('settings.backup.restore')}
+              tone="action"
+              onPress={backupBusy === true ? () => undefined : onRestoreBackup}
+            />
+          </Group>
+        )}
+
         <Group title={t('settings.section.about')} footnote={t('settings.about.footnote')}>
           <ListRow icon="privacy" label={t('settings.about.privacy')} onPress={onOpenPrivacyPolicy} />
           {onOpenLicences === undefined ? null : (
@@ -579,7 +609,8 @@ export default function SettingsView({
           )}
         </Group>
 
-        {/* Last, its own group, in red. §5, T-125. */}
+        {/* Last, its own group, in red. §5, T-125. Titled as WalkNYC's
+            "Danger Zone" since 2026-10-04. */}
         <Group title={t('settings.section.erase')} destructive footnote={t('settings.erase.footnote')}>
           <ListRow icon="erase" label={t('settings.erase.action')} tone="danger" onPress={onEraseRequested} />
         </Group>

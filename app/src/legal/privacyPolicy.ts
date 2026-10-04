@@ -146,6 +146,7 @@ const SECTIONS_EN: PolicySection[] = [
       'On your phone, in storage that only this app can read.',
       'Your trip is included in the ordinary backup your phone already makes to iCloud or to Google, if you have backups switched on. That is what protects your holiday if your phone is lost or broken halfway through it. That backup is yours, under your own account and your own encryption. We cannot reach it, and neither can anyone else without your account.',
       'You can turn that off in your phone settings, in the same place you control backups for everything else.',
+      'You can also save a copy of your trip to a file, in Settings, and restore it later. The file holds everything the app recorded, including where you slept, and goes only where you send it. Keep it private.',
     ],
   },
   {

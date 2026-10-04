@@ -109,6 +109,15 @@ or on return, roads lit since the map was last shown are framed together with th
 it too, teardown item 18). Proven on the P30 by a probe: the marker set back to 15:52 in a copy of
 the database, the app opened on the promenade walk and the drive home with the blue dot in Caniço.
 Backup of the real database before the probe: the session scratchpad, `backup-1950/`.
+✅ **Backup and restore to a file, and a Danger zone (same evening, WalkNYC's Settings):**
+*Dados* → *Guardar uma cópia da viagem* (a `VACUUM INTO` snapshot through the share sheet: Drive,
+Gmail, Bluetooth on the P30; Expo 57 has no "save as") and *Restaurar a partir de uma cópia*
+(system picker, confirm first; the copy is migrated, attached and copied in inside the recorder's
+queue and one transaction; `stamps_unlocked` and the geofence set stay). The erase group is now
+*Zona de perigo*. **Proven on the P30 with the real trip:** saved (17,075 fixes, integrity ok),
+restored from that file, integrity and foreign keys ok, recording and map on. `backupPolicy.ts`
+fails the build if a new table is missing from the copy. A byte-exact pull of the P30 is in
+`Madeira-fieldwork/p30-2026-10-04/` (with the iPhone export), before the upload-key uninstall.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

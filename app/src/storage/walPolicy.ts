@@ -83,7 +83,7 @@ export const WAL_FRAME_BYTES = 24 + 4096;
 export const STALLED_WAL_FRAMES = 2 * SQLITE_AUTOCHECKPOINT_FRAMES;
 
 /** When a checkpoint was asked for. Goes into the diary line verbatim. */
-export type WalCheckpointTrigger = 'open' | 'trip_end' | 'erase_all';
+export type WalCheckpointTrigger = 'open' | 'trip_end' | 'erase_all' | 'restore';
 
 /**
  * One row of `PRAGMA wal_checkpoint(...)`. `log` is the WAL's length in frames

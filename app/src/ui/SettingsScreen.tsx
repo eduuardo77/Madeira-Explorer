@@ -52,6 +52,8 @@ import { parseLanguageChoice, type Language } from '../i18n/languages';
 import { applyBackgroundTrackingChange } from '../recording/tripRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
+import { restoreBackupFile, saveBackupFile } from '../storage/backupFile';
+import { APP_NAME } from '../brand';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
@@ -87,6 +89,8 @@ export default function SettingsScreen({
   const [showingLicences, setShowingLicences] = useState(false);
   /** True while a walk report is being assembled (OD-11, D-069). */
   const [donating, setDonating] = useState(false);
+  /** A save or restore of the trip file is running (2026-10-04). */
+  const [backupBusy, setBackupBusy] = useState(false);
   /** T-202: the language chosen here, or null to follow the phone. */
   const [languageChoice, setLanguageChoiceState] = useState<Language | null>(null);
 
@@ -190,6 +194,73 @@ export default function SettingsScreen({
       setErased(true);
     })();
   }, []);
+
+  /** Save the trip to a file through the share sheet (2026-10-04, `backupFile.ts`). */
+  const saveBackup = useCallback(() => {
+    if (backupBusy) {
+      return;
+    }
+    setBackupBusy(true);
+    void (async () => {
+      const saved = await saveBackupFile();
+      setBackupBusy(false);
+      if (!saved.ok) {
+        Alert.alert(
+          t('settings.backup.save'),
+          t(saved.refusal === 'unavailable' ? 'settings.backup.unavailable' : 'settings.backup.saveFailed')
+        );
+      }
+    })();
+  }, [backupBusy]);
+
+  /**
+   * Replace the trip with a copy, after asking (2026-10-04). Nothing changes
+   * until the picked file has been read and found to be a backup.
+   */
+  const restoreBackup = useCallback(() => {
+    if (backupBusy) {
+      return;
+    }
+    Alert.alert(t('settings.restore.confirm.title'), t('settings.restore.confirm.body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.restore.confirm.choose'),
+        style: 'destructive',
+        onPress: () => {
+          setBackupBusy(true);
+          void (async () => {
+            const restored = await restoreBackupFile();
+            setBackupBusy(false);
+            if (!restored.ok) {
+              if (restored.refusal !== 'cancelled') {
+                Alert.alert(
+                  t('settings.backup.restore'),
+                  restored.refusal === 'not-a-backup'
+                    ? t('settings.restore.notBackup', { app: APP_NAME })
+                    : restored.refusal === 'newer-app'
+                      ? t('settings.restore.newer', { app: APP_NAME })
+                      : t('settings.restore.failed')
+                );
+              }
+              return;
+            }
+            // The settings held in memory belong to the trip that was
+            // replaced, as after an erase; the language comes from the copy.
+            forgetCachedTrackingSettings();
+            setChosenLanguage(
+              parseLanguageChoice(await appStateDao.get(appStateDao.AppStateKey.Language))
+            );
+            Alert.alert(
+              t('settings.backup.restore'),
+              t('settings.restore.done', { count: String(restored.fixes) }),
+              // Back to the map, which reads the restored trip as it mounts.
+              [{ text: t('walk.summary.ok'), onPress: onClose }]
+            );
+          })();
+        },
+      },
+    ]);
+  }, [backupBusy, onClose]);
 
   /**
    * Build a walk report and hand it to the share sheet (OD-11, D-069).
@@ -333,6 +404,9 @@ export default function SettingsScreen({
       onOpenLicences={() => setShowingLicences(true)}
       onOpenDebug={onOpenDebug}
       onEraseRequested={() => setConfirmingErase(true)}
+      onSaveBackup={saveBackup}
+      onRestoreBackup={restoreBackup}
+      backupBusy={backupBusy}
       donating={donating}
       onDonateWalk={donateWalk}
       // T-202: the version a support email needs. From the manifest, never typed.

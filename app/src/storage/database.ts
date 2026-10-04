@@ -17,6 +17,7 @@
 import * as SQLite from 'expo-sqlite';
 import { createKeepAlive } from './keepAlive';
 import { MIGRATIONS } from './migrations';
+import { checkBackup, RESTORE_KEEPS_APP_STATE, USER_TABLES } from './backupPolicy';
 import { onceOrRetry } from './onceOrRetry';
 import { recordingQueue } from './recordingQueue';
 import {
@@ -285,6 +286,27 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
   await db.execAsync('PRAGMA synchronous = NORMAL;');
   await db.execAsync('PRAGMA foreign_keys = ON;');
 
+  await runMigrations(db);
+
+  // T-178: whatever the last process left in the WAL — including a WAL a leaked
+  // statement pinned until the process died — goes now, before anything else
+  // can hold the connection. ⚠ Directly, NOT through `truncateWal`: that takes
+  // `recordingQueue`, and a queued batch already waiting on `getDatabase()`
+  // would be waiting on this — a deadlock on the first launch with a backlog.
+  await checkpointAndNote(db, 'open');
+
+  // Wrapped only after the migrations have run. A migration failing for a
+  // released object should be loud and should not be retried behind anyone's
+  // back — a half-applied schema is not recoverable on a user's phone.
+  return resilient(db);
+}
+
+/**
+ * Bring a database to this app's schema: every migration it has not had, in
+ * order, each in its own transaction. The app's own database at open, and a
+ * backup being restored (`restoreFromBackup`), go through this one loop.
+ */
+async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS schema_migration (
       id         INTEGER PRIMARY KEY,
@@ -321,18 +343,6 @@ async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
       );
     });
   }
-
-  // T-178: whatever the last process left in the WAL — including a WAL a leaked
-  // statement pinned until the process died — goes now, before anything else
-  // can hold the connection. ⚠ Directly, NOT through `truncateWal`: that takes
-  // `recordingQueue`, and a queued batch already waiting on `getDatabase()`
-  // would be waiting on this — a deadlock on the first launch with a backlog.
-  await checkpointAndNote(db, 'open');
-
-  // Wrapped only after the migrations have run. A migration failing for a
-  // released object should be loud and should not be retried behind anyone's
-  // back — a half-applied schema is not recoverable on a user's phone.
-  return resilient(db);
 }
 
 /**
@@ -384,6 +394,110 @@ export async function deleteAllUserData(): Promise<void> {
   // that way. Truncating is what makes "delete my data" true on disk.
   await checkpointAndNote(db, 'erase_all');
   });
+}
+
+/** A `file://` URI or a plain path, as a path SQL can take in quotes. */
+function sqlPath(uriOrPath: string): string {
+  return decodeURI(uriOrPath.replace(/^file:\/\//, '')).replace(/'/g, "''");
+}
+
+/**
+ * Write a snapshot of the whole database to `targetUri` (2026-10-04,
+ * `backupPolicy.ts`). `VACUUM INTO` reads one consistent state, WAL included,
+ * and writes a compact single file; through the recorder's queue so no batch
+ * is half in it.
+ */
+export async function writeBackup(targetUri: string): Promise<void> {
+  const db = await getDatabase();
+  await recordingQueue(async () => {
+    await db.execAsync(`VACUUM INTO '${sqlPath(targetUri)}';`);
+  });
+}
+
+export type RestoreOutcome =
+  | { ok: true; fixes: number }
+  | { ok: false; refusal: 'not-a-backup' | 'newer-app' };
+
+/**
+ * Replace the user's data with a backup's (2026-10-04, `backupPolicy.ts`).
+ *
+ * `candidateName` is a copy of the picked file, already placed in the
+ * databases directory by the caller. It is migrated to this app's schema in
+ * place, attached, and copied in, inside the recorder's queue and one
+ * transaction: all of it lands or none of it does. Throws on a failure the
+ * caller should report; a file that is not a usable backup is an answer, not
+ * an error.
+ */
+export async function restoreFromBackup(candidateName: string): Promise<RestoreOutcome> {
+  const candidate = await SQLite.openDatabaseAsync(candidateName);
+  try {
+    const tables = (
+      await candidate.getAllAsync<{ name: string }>(
+        "SELECT name FROM sqlite_master WHERE type = 'table';"
+      )
+    ).map((row) => row.name);
+    const applied = tables.includes('schema_migration')
+      ? (await candidate.getAllAsync<{ id: number }>('SELECT id FROM schema_migration;')).map(
+          (row) => row.id
+        )
+      : [];
+    const check = checkBackup(
+      tables,
+      applied,
+      MIGRATIONS.map((migration) => migration.id)
+    );
+    if (!check.ok) {
+      return { ok: false, refusal: check.reason };
+    }
+    if (check.missingMigrations.length > 0) {
+      await runMigrations(candidate);
+    }
+  } finally {
+    await candidate.closeAsync();
+  }
+
+  const db = await getDatabase();
+  const keeps = RESTORE_KEEPS_APP_STATE.map((key) => `'${key}'`).join(', ');
+  let fixes = 0;
+  await recordingQueue(async () => {
+    // ATTACH cannot run inside a transaction, so it brackets one.
+    await db.execAsync(
+      `ATTACH DATABASE '${sqlPath(`${SQLite.defaultDatabaseDirectory}/${candidateName}`)}' AS backup;`
+    );
+    try {
+      await db.withTransactionAsync(async () => {
+        // Children first out, parents first in: every table refers to trip.
+        for (const table of [...USER_TABLES].reverse()) {
+          await db.execAsync(
+            table === 'app_state'
+              ? `DELETE FROM main.app_state WHERE key NOT IN (${keeps});`
+              : `DELETE FROM main.${table};`
+          );
+        }
+        for (const table of USER_TABLES) {
+          // Named columns, from this app's own table, rather than `SELECT *`:
+          // the backup has been migrated to the same schema, but the column
+          // list is what makes a mismatch fail loudly instead of shifting.
+          const columns = (
+            await db.getAllAsync<{ name: string }>(`PRAGMA main.table_info(${table});`)
+          )
+            .map((column) => column.name)
+            .join(', ');
+          await db.execAsync(
+            table === 'app_state'
+              ? `INSERT INTO main.app_state (${columns}) SELECT ${columns} FROM backup.app_state WHERE key NOT IN (${keeps});`
+              : `INSERT INTO main.${table} (${columns}) SELECT ${columns} FROM backup.${table};`
+          );
+        }
+      });
+      const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM main.raw_fix;');
+      fixes = row?.n ?? 0;
+    } finally {
+      await db.execAsync('DETACH DATABASE backup;');
+    }
+    await checkpointAndNote(db, 'restore');
+  });
+  return { ok: true, fixes };
 }
 
 /**

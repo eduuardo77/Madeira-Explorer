@@ -25,6 +25,8 @@ export type SettingsIconName =
   | 'contact'
   | 'send'
   | 'technical'
+  | 'backup'
+  | 'restore'
   | 'erase';
 
 /** Drawn square, in dp. 22 since D-095: at 24 the glyphs outweighed 16 sp rows. */
@@ -105,6 +107,19 @@ const GLYPHS: Record<SettingsIconName, (color: string, stroke: Stroke) => ReactE
   technical: (_, s) => (
     <>
       <Path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5" {...s} />
+    </>
+  ),
+  // An arrow up out of a tray, and one down into it: WalkNYC's pair.
+  backup: (_, s) => (
+    <>
+      <Path d="M5 13v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6" {...s} />
+      <Path d="M12 15V3.5M7.5 8L12 3.5 16.5 8" {...s} />
+    </>
+  ),
+  restore: (_, s) => (
+    <>
+      <Path d="M5 13v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6" {...s} />
+      <Path d="M12 3.5V15M7.5 10.5L12 15l4.5-4.5" {...s} />
     </>
   ),
   erase: (color) => (

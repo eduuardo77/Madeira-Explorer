@@ -868,11 +868,63 @@ export const STRINGS = {
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),
   'settings.help.preparing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
-  'settings.section.erase': s('Erase', 'Apagar', 'Löschen'),
+  // 2026-10-04: WalkNYC's "Danger Zone", on the project lead's word.
+  'settings.section.erase': s('Danger zone', 'Zona de perigo', 'Gefahrenbereich'),
   'settings.erase.footnote': s(
-    'This cannot be undone. Your phone’s own backup may still hold a copy.',
-    'Não pode ser desfeito. A cópia de segurança do telemóvel pode ainda guardar uma cópia.',
-    'Das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten.'
+    'This cannot be undone. Save a copy first if you might want your trip back. Your phone’s own backup may still hold a copy.',
+    'Não pode ser desfeito. Guarde primeiro uma cópia se quiser recuperar a viagem. A cópia de segurança do telemóvel pode ainda guardar uma cópia.',
+    'Das lässt sich nicht rückgängig machen. Speichern Sie zuerst eine Kopie, wenn Sie Ihre Reise zurückhaben möchten. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten.'
+  ),
+  // 2026-10-04: a copy of the trip in a file, as WalkNYC's Backup and Restore.
+  'settings.section.data': s('Data', 'Dados', 'Daten'),
+  'settings.backup.save': s('Save a copy of my trip', 'Guardar uma cópia da viagem', 'Eine Kopie meiner Reise speichern'),
+  'settings.backup.restore': s('Restore from a copy', 'Restaurar a partir de uma cópia', 'Aus einer Kopie wiederherstellen'),
+  'settings.backup.footnote': s(
+    'Your trip lives only on this phone, and uninstalling the app removes it. Keep a copy in Drive or on another device. It shows everywhere you have been, so keep it private.',
+    'A sua viagem vive só neste telemóvel, e desinstalar a aplicação apaga-a. Guarde uma cópia no Drive ou noutro aparelho. Mostra todos os sítios onde esteve, por isso mantenha-a privada.',
+    'Ihre Reise ist nur auf diesem Telefon, und wer die App deinstalliert, löscht sie. Bewahren Sie eine Kopie in Drive oder auf einem anderen Gerät auf. Sie zeigt jeden Ort, an dem Sie waren, also halten Sie sie privat.'
+  ),
+  'settings.backup.dialogTitle': s('Save a copy of your trip', 'Guardar uma cópia da sua viagem', 'Eine Kopie Ihrer Reise speichern'),
+  'settings.backup.saveFailed': s(
+    'The copy could not be saved.',
+    'Não foi possível guardar a cópia.',
+    'Die Kopie konnte nicht gespeichert werden.'
+  ),
+  'settings.backup.unavailable': s(
+    'This phone cannot share files.',
+    'Este telemóvel não consegue partilhar ficheiros.',
+    'Dieses Telefon kann keine Dateien teilen.'
+  ),
+  'settings.restore.confirm.title': s(
+    'Replace your trip with a copy?',
+    'Substituir a viagem por uma cópia?',
+    'Ihre Reise durch eine Kopie ersetzen?'
+  ),
+  'settings.restore.confirm.body': s(
+    'Everything on this phone now is replaced by what the copy holds. Save a copy first if you want to keep what is here.',
+    'Tudo o que está agora neste telemóvel é substituído pelo que a cópia contém. Guarde primeiro uma cópia se quiser manter o que tem.',
+    'Alles, was jetzt auf diesem Telefon ist, wird durch den Inhalt der Kopie ersetzt. Speichern Sie zuerst eine Kopie, wenn Sie es behalten möchten.'
+  ),
+  'settings.restore.confirm.choose': s('Choose a copy', 'Escolher cópia', 'Kopie auswählen'),
+  'settings.restore.done': s(
+    'Restored: {count} recorded positions.',
+    'Restaurado: {count} posições registadas.',
+    'Wiederhergestellt: {count} aufgezeichnete Positionen.'
+  ),
+  'settings.restore.notBackup': s(
+    'That file is not a copy saved by {app}. Nothing was changed.',
+    'Esse ficheiro não é uma cópia guardada pelo {app}. Nada foi alterado.',
+    'Diese Datei ist keine von {app} gespeicherte Kopie. Nichts wurde geändert.'
+  ),
+  'settings.restore.newer': s(
+    'That copy was saved by a newer version of {app}. Update the app first. Nothing was changed.',
+    'Essa cópia foi guardada por uma versão mais recente do {app}. Atualize primeiro a aplicação. Nada foi alterado.',
+    'Diese Kopie wurde von einer neueren Version von {app} gespeichert. Aktualisieren Sie zuerst die App. Nichts wurde geändert.'
+  ),
+  'settings.restore.failed': s(
+    'The copy could not be restored. Nothing was changed.',
+    'Não foi possível restaurar a cópia. Nada foi alterado.',
+    'Die Kopie konnte nicht wiederhergestellt werden. Nichts wurde geändert.'
   ),
   'settings.erase.action': s(
     'Erase everything I have recorded',

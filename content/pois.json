@@ -435,6 +435,12 @@
           "lat": 32.63919,
           "lon": -16.95117,
           "radiusM": 250
+        },
+        {
+          "id": "praia-formosa-west",
+          "lat": 32.642,
+          "lon": -16.9565,
+          "radiusM": 250
         }
       ]
     },

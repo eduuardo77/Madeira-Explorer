@@ -58,6 +58,9 @@ import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard, formatDistance } from '../places/placeCard';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
+import type { StampPopup } from '../progress/stampAnnouncer';
+import { markStampShown, pendingStampPopups } from '../progress/stampAnnouncer';
+import StampNewsCard from '../ui/StampNewsCard';
 import { isUnlocked } from '../entitlement/entitlementStore';
 import { buttonStamp, STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
 import type { TripProgress } from '../progress/tripProgress';
@@ -339,6 +342,8 @@ export default function NativeMapScreen({
   const [resumeCount, setResumeCount] = useState(0);
   /** "14 km", for the status line; null below 100 m, which is matching noise. */
   const [travelledToday, setTravelledToday] = useState<string | null>(null);
+  /** D-096: stamps earned since the map last showed one, oldest first. */
+  const [stampNews, setStampNews] = useState<StampPopup[]>([]);
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (next) => {
       if (next === 'active') {
@@ -363,6 +368,10 @@ export default function NativeMapScreen({
 
       try {
         await runAwardPass();
+        const popups = await pendingStampPopups();
+        if (!cancelled) {
+          setStampNews(popups);
+        }
 
         const nextProgress = await getCurrentProgress();
         // ⚠ The walk flag, read from storage and never inferred. The control
@@ -606,6 +615,14 @@ export default function NativeMapScreen({
         const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
         if (!cancelled && fix !== null) {
           setUserAt({ latitude: fix.lat, longitude: fix.lon });
+        }
+      })();
+      // D-096: a stamp earned while the map is on screen. The recorder's batch
+      // judges it; this only picks it up.
+      void (async () => {
+        const popups = await pendingStampPopups();
+        if (!cancelled && popups.length > 0) {
+          setStampNews((showing) => (showing.length > 0 ? showing : popups));
         }
       })();
       // D-087 §4: the same poll keeps the notice honest. A recorder can stop,
@@ -913,6 +930,24 @@ export default function NativeMapScreen({
         showRecentre={showRecentre}
         onRecentre={recentre}
       />
+
+      {stampNews.length === 0 ? null : (
+        <StampNewsCard
+          stamp={stampNews[0]}
+          onClose={() => {
+            void markStampShown(stampNews[0].placeId);
+            setStampNews((showing) => showing.slice(1));
+          }}
+          onOpenPassport={() => {
+            // Every pending one is in the passport the user is about to open.
+            for (const stamp of stampNews) {
+              void markStampShown(stamp.placeId);
+            }
+            setStampNews([]);
+            onOpenPassport();
+          }}
+        />
+      )}
     </View>
   );
 }

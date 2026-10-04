@@ -20,6 +20,8 @@ import type {
   FixSource,
   GeofenceEventType,
 } from '../storage/types';
+import { AppState } from 'react-native';
+import { announceNewStamps } from '../progress/stampAnnouncer';
 import { checkTripEnd } from '../progress/tripEndDetection';
 import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
 import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
@@ -96,6 +98,11 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   // staleness against wall-clock would read a perfectly healthy batch as an
   // outage.
   await applySamplingGate(latest.ts);
+
+  // D-096: a stamp is said when it is earned, not when the app is next opened.
+  // After everything above, because it can only add to it: nothing here may
+  // cost a fix. On screen, the map's pop-up says it instead.
+  await announceNewStamps(Date.now(), AppState.currentState === 'active');
 });
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {

@@ -85,6 +85,14 @@ event was stored twice, 1 ms apart (wall clock converted at delivery): fixed wit
 `REPLAY_JITTER_MS`. ⚠ **For the project lead (content, D-064):** no Praia Formosa stamp. They parked
 and walked along the beach but never came within 225 m of its single point (radius 250 m), which
 sits at the beach's east end. A second geofence along the beach, or a moved point, is their call.
+✅ **Done the same evening on their word:** `praia-formosa-west` added (and it stamped Praia Formosa
+from that walk's trace); the matcher hops a short gap where a path stops short of a street
+(`HOP_MAX_M`); **D-096**, a new stamp is said when earned (quiet notification while closed, a
+pop-up on the map, seen working on the P30 for Praia Formosa). The notification itself has not yet
+fired on a phone: the first pass seeds its record, so the next stamp earned with the app closed is
+its first proof. ⚠ **Field builds for the P30 must now be re-signed with the debug key**
+(`docs/dev-build.md`), since release builds use the upload key. **Open: the stamp contrast**
+(collected versus not looks too alike, *"doesn't feel special"*): options to be drawn for the lead.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

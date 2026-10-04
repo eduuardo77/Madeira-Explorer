@@ -173,7 +173,7 @@ const SECTIONS_EN: PolicySection[] = [
       'Your location. This is the whole app; without it there is no map. You can allow it only while the app is open, and it will still work: you start and stop recording yourself.',
       'Your location while the app is closed. This is what lets you forget about the app for a week and still get your map. You can say no, and the app keeps working.',
       'Physical activity. This is the reading from your phone\u2019s motion sensors described above. You can say no, and the app keeps working.',
-      'Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.',
+      'Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready. It also tells you quietly when you collect a new stamp, without a sound. You can turn that off in your phone’s settings.',
       'After an update to the app, it may also ask you once to open it, so that recording can carry on.',
       'You can change any of these later in your phone settings, and the app will carry on with whatever you allow.',
     ],

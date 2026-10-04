@@ -87,7 +87,7 @@ export const SECTIONS_PT: PolicySection[] = [
       'A sua localização. É esta a aplicação inteira; sem ela não há mapa. Pode permitir apenas com a aplicação aberta, e continua a funcionar: é você que inicia e para o registo.',
       'A sua localização com a aplicação fechada. É isto que lhe permite esquecer-se da aplicação durante uma semana e mesmo assim receber o seu mapa. Pode dizer que não, e a aplicação continua a funcionar.',
       'Atividade física. É a leitura dos sensores de movimento do telemóvel descrita acima. Pode dizer que não, e a aplicação continua a funcionar.',
-      'Notificações. Enquanto regista, o telemóvel mostra que está a registar, como o Android exige. Além disso, a aplicação envia no máximo duas por viagem: uma no primeiro dia para lhe dizer se o registo está a funcionar, e outra no fim para dizer que o seu mapa está pronto.',
+      'Notificações. Enquanto regista, o telemóvel mostra que está a registar, como o Android exige. Além disso, a aplicação envia no máximo duas por viagem: uma no primeiro dia para lhe dizer se o registo está a funcionar, e outra no fim para dizer que o seu mapa está pronto. Também avisa discretamente, sem som, quando recolhe um novo selo. Pode desligar esse aviso nas definições do telemóvel.',
       'Depois de uma atualização da aplicação, pode também pedir-lhe uma vez que a abra, para que o registo continue.',
       'Pode mudar qualquer uma destas mais tarde nas definições do telemóvel, e a aplicação continua com aquilo que permitir.',
     ],

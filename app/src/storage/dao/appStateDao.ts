@@ -149,6 +149,14 @@ export const AppStateKey = {
    * can never read whether it is currently exempt.
    */
   KeepRunningSeen: 'keep_running_seen',
+  /**
+   * The stamps already announced by a notification, as a JSON list of place
+   * ids (D-096). Absent until the first announcement pass, which seeds it with
+   * every stamp already earned, so an update never announces a backlog.
+   */
+  StampsNotified: 'stamps_notified',
+  /** The stamps already shown in the map's pop-up (D-096), same shape and seeding. */
+  StampsShown: 'stamps_shown',
 } as const;
 
 export type AppStateKeyName =

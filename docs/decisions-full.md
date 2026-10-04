@@ -350,6 +350,8 @@ difference between a delightful surprise and a silent failure discovered too lat
 - *Daily summaries.* Rejected: destroys the surprise, adds nagging, and contradicts the
   entire product concept.
 
+⚠ **Amended 2026-10-04 by D-096: new stamps are announced by a quiet notification of their own, outside this budget, on the project lead's instruction.** The trip's two messages and their budget are unchanged.
+
 **Amended 2026-08-12 — the budget holds at two. Confirmed by the project lead.**
 
 T-052b built a continuous check that notices a recorder which is running and receiving nothing
@@ -5364,3 +5366,41 @@ walks): D waits on T-246's measurement of how much of a walk's start automatic r
 
 **Still open.** The notice's tap is untried on a phone without "all the time" (the P30 has it); the
 lead's outing (T-246) decides whether 6D becomes possible.
+
+## D-096 — A new stamp is said when it is earned: a quiet notification, and a pop-up on the map
+
+**Status:** Accepted 2026-10-04, on the project lead's instruction. Amends D-011.
+
+**Decision:** The recorder's background batch runs the award pass, at most once a minute, after
+everything else it does. A stamp earned since the last pass is announced once:
+
+- **while the app is closed, by a notification on its own channel** (`stamp-messages`, low
+  importance: in the shade, no sound, no vibration, no banner), titled *"Novo selo: {local}"*;
+- **when the map is next on screen, by a pop-up** with the stamp drawn large on the passport's
+  dark page, *Ver no passaporte* and *Fechar*.
+
+Each has its own record (`stamps_notified`, `stamps_shown`), seeded on its first run with every
+stamp already earned, so an update never announces a backlog. A stamp the free tier withholds is
+named and drawn muted, with the sentence that says it is kept; the award pass itself still never
+reads the free tier (`freeTier.ts`).
+
+**Why:** on 2026-10-04 the project lead earned Câmara de Lobos at 16:26 and found it at 16:38,
+when they happened to open the app: *"15 min in Câmara de Lobos to get the stamp is a lot"*. The
+rule had asked for three minutes; the quarter of an hour was the app not looking. And a stamp
+found later in a list *"doesn't feel special"*.
+
+**What it costs D-011.** D-011 capped the app at two notifications per trip and the privacy policy
+promised it. Both are changed: the policy (both languages) now says stamps are announced quietly
+and can be switched off. The trip's two messages keep their own channel and budget, so silencing
+stamps cannot silence the health check (D-087 §5's reason for that channel).
+
+**Alternatives considered:**
+- *Keep D-011 and show only the pop-up.* Rejected by the project lead: they want to know at the
+  place, not later.
+- *A sound, or a heads-up banner.* Rejected: "discreet" was the instruction, and a beep on every
+  viewpoint of a driving morning is the nagging D-011 was written against.
+- *Run the award pass on every batch.* Rejected for an unmeasured cost every few seconds while
+  driving; once a minute adds at most a minute to a three-minute rule.
+
+**Unmeasured:** the award pass's cost in the background batch on a phone.
+

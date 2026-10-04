@@ -27,7 +27,7 @@ import type { NotificationKind } from './notificationPolicy';
 import { canNotify, parseSent, serialiseSent } from './notificationPolicy';
 
 /** D-087 §5: the channel both trip messages are posted on (Android). Stable: renaming it orphans the user's own setting for it. */
-import { TRIP_CHANNEL_ID } from './tripChannel';
+import { STAMP_CHANNEL_ID, TRIP_CHANNEL_ID } from './tripChannel';
 export { TRIP_CHANNEL_ID };
 
 export type SendResult = {
@@ -98,5 +98,40 @@ export async function sendTripNotification(
   } catch (error) {
     await recordingEventDao.logError('notification', error);
     return { sent: false, reason: 'notification failed' };
+  }
+}
+
+/**
+ * A new stamp, said quietly (D-096). **Outside the trip's budget of two**, on
+ * the project lead's word (2026-10-04): a stamp found out about only when the
+ * app is next opened, maybe hours later, did not feel earned. So it has its
+ * own rules instead:
+ *
+ * - **its own channel, at low importance:** it appears in the shade without a
+ *   sound, a vibration or a banner, and a user can switch stamps off in
+ *   Android's settings without losing the trip's two messages;
+ * - **once per stamp**, which `stampAnnouncer.ts` keeps track of;
+ * - **only while the app is not on screen**, where the map's pop-up says it.
+ *
+ * Never throws, for the same reason as above.
+ */
+export async function sendStampNotification(title: string, body: string): Promise<boolean> {
+  try {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(STAMP_CHANNEL_ID, {
+        name: t('notify.channel.stamps'),
+        description: t('notify.channel.stampsDescription'),
+        importance: Notifications.AndroidImportance.LOW,
+      });
+    }
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body },
+      trigger: Platform.OS === 'android' ? { channelId: STAMP_CHANNEL_ID } : null,
+    });
+    await recordingEventDao.log('notification', 'stamp');
+    return true;
+  } catch (error) {
+    await recordingEventDao.logError('stamp notification', error);
+    return false;
   }
 }

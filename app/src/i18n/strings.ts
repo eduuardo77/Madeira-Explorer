@@ -884,6 +884,35 @@ export const STRINGS = {
   // D-087 §5: the Android channel both trip messages use. Shown by name in the
   // phone's own notification settings.
   'notify.channel.trip': s('Trip messages', 'Mensagens da viagem', 'Reisenachrichten'),
+  // D-096: a new stamp, said quietly (no sound) on a channel of its own, so
+  // it can be silenced without silencing the trip's two messages.
+  'notify.channel.stamps': s('New stamps', 'Novos selos', 'Neue Stempel'),
+  'notify.channel.stampsDescription': s(
+    'A quiet note when you collect a place.',
+    'Um aviso discreto quando recolhe um local.',
+    'Ein leiser Hinweis, wenn Sie einen Ort sammeln.'
+  ),
+  'notify.stamp.title': s('New stamp: {place}', 'Novo selo: {place}', 'Neuer Stempel: {place}'),
+  'notify.stamp.body': s(
+    'It is in your passport.',
+    'Já está no seu passaporte.',
+    'Er ist in Ihrem Reisepass.'
+  ),
+  // The free tier withholds the artwork, never the visit (freeTier.ts).
+  'notify.stamp.bodyLocked': s(
+    'Kept in your passport, ready to unlock.',
+    'Guardado no seu passaporte, pronto a desbloquear.',
+    'In Ihrem Reisepass aufbewahrt, bereit zum Freischalten.'
+  ),
+  // D-096: the map's pop-up for a stamp earned since it was last looked at.
+  'stampNews.heading': s('New stamp', 'Novo selo', 'Neuer Stempel'),
+  'stampNews.locked': s(
+    'Kept in your passport. Unlock to see the stamp.',
+    'Guardado no seu passaporte. Desbloqueie para ver o selo.',
+    'In Ihrem Reisepass aufbewahrt. Freischalten, um den Stempel zu sehen.'
+  ),
+  'stampNews.passport': s('See in passport', 'Ver no passaporte', 'Im Reisepass ansehen'),
+  'stampNews.close': s('Close', 'Fechar', 'Schließen'),
   // T-210: after an app update Android does not let the recorder restart from
   // the background (measured on the P30), so one message asks for one tap.
   // Posted by native code (UpdateNoticeReceiver), from text the app leaves it.

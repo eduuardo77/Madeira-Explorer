@@ -578,6 +578,18 @@ else. `betaBuild.test.ts` fails if any committed file (`app.json`, `eas.json`, `
 
 ## The field build — a release APK we can still read, 2026-09-22
 
+⚠ **Since 2026-10-04 (T-117e) release builds are signed with the upload key**, from
+`~/.gradle/gradle.properties`, and the P30's copy is signed with the **debug key**: `install -r`
+fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Uninstalling would erase the phone's data, so
+re-sign the field APK with the debug key and install that:
+
+```bash
+apksigner sign --ks app/android/app/debug.keystore --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android <copy of app-release.apk>
+```
+
+(`tools/android-sdk/build-tools/36.0.0/apksigner.bat`; sign a copy outside the repo.) Moving the
+P30 to the upload key means one uninstall and the loss of its trip, which is the project lead's call.
+
 For a phone that is going to record a **real walk**: a release build (bundled JS, minified, no dev
 client, **no Metro**) that still lets `run-as` pull the database afterwards.
 

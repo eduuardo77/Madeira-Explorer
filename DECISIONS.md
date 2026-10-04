@@ -39,7 +39,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-008** | The app must be fully usable with "While Using" permission only. | Accepted |
 | **D-009** | Bias matching toward false positives. | Accepted |
 | **D-010** | Retain raw traces; treat matching as a replaceable layer. | **Accepted** |
-| **D-011** | Exactly two notifications per trip. | Accepted |
+| **D-011** | Exactly two notifications per trip. **Amended by D-096:** stamps have a quiet one of their own. | Accepted |
 | **D-012** | Airport geofence as the trip-end trigger. | Accepted |
 | **D-013** | The souvenir video is the distribution strategy. | Accepted |
 | **D-014** | Printed poster / physical souvenir monetisation deferred. | Deferred (see OD-4) |
@@ -124,6 +124,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-093** | **The map lights the roads and paths travelled**, matched on the phone against OSM's network shipped as `content/roads.json`; nothing where the phone lay still or no road matched. Motion gate from the receiver's speed; exports clipped at the mask circle. Supersedes D-082; reverses D-032's deferral of matching. | **Accepted** 2026-09-27 (the direction; every threshold Provisional until the field outing, T-246) |
 | **D-094** | **The phone's motion sensors are a second witness** (Activity Transition API, optional, asked after location): still vetoes drift, the mode makes the wrong kind of way dear, a vehicle switches recording to the driving rate. Weights, never filters. **Cable cars are in the network**, drawn faded. Reverses D-050 for activity. | **Accepted** 2026-09-27 (the direction; numbers Provisional until T-246) |
 | **D-095** | The map **says when automatic recording works** (a status line in the progress line's place) and **warns in WalkNYC's amber banner** when it does not; the banner's tap goes through the disclosure to *Permitir sempre*. Controls drawn at WalkNYC's size (walk button 52 dp, 16 sp), **targets still 60 dp**, type still ≥ 14. Amends D-087 §4, D-090. | **Accepted** 2026-09-27 |
+| **D-096** | **A new stamp is said when it is earned:** the recorder's batch runs the award pass (at most once a minute), a **quiet notification** (own channel, low importance, no sound) goes out once per stamp while the app is closed, and the map shows a **pop-up** with the stamp when next on screen. Outside D-011's budget of two; locked stamps are named, not drawn. Amends D-011. | **Accepted** 2026-10-04 (the project lead's instruction) |
 
 **IDs are stable and never reused.** Supersede rather than delete: mark the old
 entry Superseded in the full text and link forward (CONTEXT §9).

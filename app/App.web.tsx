@@ -209,14 +209,14 @@ type Screen =
  * workbench's own words, never a real one: only Google's is ever shown.
  */
 const UNLOCK_STATES: Record<UnlockState['kind'], UnlockState> = {
-  offer: { kind: 'offer', price: '0,00 € (workbench)' },
+  offer: { kind: 'offer' },
   working: { kind: 'working' },
   pending: { kind: 'pending' },
   offline: { kind: 'offline' },
   unavailable: { kind: 'unavailable' },
   failed: { kind: 'failed' },
   unlocked: { kind: 'unlocked' },
-  nothingToRestore: { kind: 'nothingToRestore', price: '0,00 € (workbench)' },
+  nothingToRestore: { kind: 'nothingToRestore' },
 };
 
 const SCREENS: { id: Screen; label: string }[] = [
@@ -409,6 +409,7 @@ export default function DesignWorkbench() {
               <UnlockSheetView
                 model={unlockSheetModel({
                   state: UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
+                  price: '0,00 € (workbench)',
                   collected: stamps.filter((stamp) => stamp.collected).length,
                   waiting: stamps.filter((stamp) => stamp.locked === true).length,
                   offers: { medals: false, founder: false },

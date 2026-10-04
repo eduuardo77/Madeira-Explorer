@@ -339,8 +339,21 @@ section's definition of done.
       *waiting*, and the first version stayed waiting forever; a test now holds the return to the
       offer. **Tests (958).** **Workbench:** eight `Unlock:` screens; at 375 px the card is 340
       wide with nothing overflowing and every button 60 dp tall; a locked stamp's card opens it.
-      **P30:** the build runs, map and passport render, no crash; the real data has no locked stamp,
-      so the sheet itself has not been reached on a phone.
+      **P30, 2026-10-04 22:25:** with 8 labelled probe awards (database backed up first,
+      `Madeira-fieldwork/p30-2026-10-04c`), the passport showed 10 of 80, the card offered *Desbloquear
+      para ver este carimbo* and the sheet read **Google's real price, 5,99 €**. **The test purchase
+      did not reach payment:** Google's own sheet said *item not found* (`item-unavailable`, in the
+      diary), because the internal testing track is **Inativo**: the release was saved, never rolled
+      out. Nothing was charged and no card was offered. The sheet showed *A compra não foi concluída*
+      as designed. **Found:** after that failure the button lost its price; the price now sits
+      beside the state, not inside it, and a test holds it (959). The probes were then removed from
+      the live database by their reason, and `stamps_notified` / `stamps_shown` put back, so fixes
+      recorded meanwhile were kept; the phone reads 2 of 80 again. **Method, for next time:** stop
+      the app, pull `madeira.db*` through `run-as`, change a copy, push it back with
+      `MSYS_NO_PATHCONV=1`, delete the device's `-wal` and `-shm` first. The probes also produced one
+      *Novo selo* pop-up each (D-096), which `stamps_shown` records.
+      **Left:** OQ-8 (the project lead found the Portuguese reads as Brazilian; under review), and
+      the purchase itself once the track is rolled out to a tester list that includes their account.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

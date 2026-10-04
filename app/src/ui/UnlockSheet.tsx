@@ -11,7 +11,7 @@
  * starts a purchase or a restore, and listens for what Google says.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import {
   buyPassport,
@@ -41,9 +41,9 @@ export default function UnlockSheet({
   /** The passport is unlocked: redraw what was waiting. */
   onUnlocked: () => void;
 }) {
-  const [state, setState] = useState<UnlockState>({ kind: 'offer', price: null });
-  /** Google's last price, so a cancelled purchase returns to the same offer. */
-  const price = useRef<string | null>(null);
+  const [state, setState] = useState<UnlockState>({ kind: 'offer' });
+  /** Google's price, kept through every state once it has answered. */
+  const [price, setPrice] = useState<string | null>(null);
 
   useEffect(() => {
     let open = true;
@@ -55,7 +55,7 @@ export default function UnlockSheet({
       } else if (event.kind === 'pending') {
         setState({ kind: 'pending' });
       } else {
-        setState(stateAfterFailure(event.failure, price.current));
+        setState(stateAfterFailure(event.failure));
         if (event.failure === 'alreadyOwned') void restore();
       }
     });
@@ -63,10 +63,9 @@ export default function UnlockSheet({
       const answer = await passportPrice();
       if (!open) return;
       if ('price' in answer) {
-        price.current = answer.price;
-        setState({ kind: 'offer', price: answer.price });
+        setPrice(answer.price);
       } else if (answer.failure !== 'failed') {
-        setState(stateAfterFailure(answer.failure, null));
+        setState(stateAfterFailure(answer.failure));
       }
       // A failed price lookup leaves the offer without a price; Buy still works.
     })();
@@ -82,7 +81,7 @@ export default function UnlockSheet({
     void (async () => {
       const failure = await buyPassport();
       // Success arrives through `subscribe`, as Google's sheet closes.
-      if (failure !== null) setState(stateAfterFailure(failure, price.current));
+      if (failure !== null) setState(stateAfterFailure(failure));
     })();
   };
 
@@ -90,19 +89,20 @@ export default function UnlockSheet({
     setState({ kind: 'working' });
     const failure = await restorePurchases();
     if (failure !== null) {
-      setState(stateAfterFailure(failure, price.current));
+      setState(stateAfterFailure(failure));
     } else if (await isUnlocked()) {
       setState({ kind: 'unlocked' });
       onUnlocked();
     } else {
       setState((current) =>
-        current.kind === 'pending' ? current : { kind: 'nothingToRestore', price: price.current }
+        current.kind === 'pending' ? current : { kind: 'nothingToRestore' }
       );
     }
   };
 
   const model = unlockSheetModel({
     state,
+    price,
     collected,
     waiting,
     // Each turns on in the commit that builds it (T-235, T-233).

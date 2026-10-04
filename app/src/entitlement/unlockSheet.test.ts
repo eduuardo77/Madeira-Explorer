@@ -14,7 +14,8 @@ import { stateAfterFailure, unlockSheetModel, type UnlockSheetInput } from './un
 
 function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   return {
-    state: { kind: 'offer', price: '5,99 €' },
+    state: { kind: 'offer' },
+    price: '5,99 €',
     collected: 14,
     waiting: 8,
     offers: { medals: false, founder: false },
@@ -33,7 +34,7 @@ test('the offer names the price Google gave, on the button', () => {
 });
 
 test('⚠ no price from Google means no price at all, never a remembered one', () => {
-  const model = unlockSheetModel(input({ state: { kind: 'offer', price: null } }));
+  const model = unlockSheetModel(input({ price: null }));
   assert.equal(model.buy?.label, 'Unlock');
   assert.doesNotMatch(JSON.stringify(model), /\d[.,]\d\d/);
 });
@@ -111,42 +112,47 @@ test('unlocked: one way out, to the stamps', () => {
 });
 
 test('a restore that finds nothing says so, and the offer stays', () => {
-  const model = unlockSheetModel(input({ state: { kind: 'nothingToRestore', price: null } }));
+  const model = unlockSheetModel(input({ state: { kind: 'nothingToRestore' } }));
   assert.match(model.notice ?? '', /found no purchase/);
   assert.equal(model.buy?.enabled, true);
 });
 
 test('what each failure from the store becomes', () => {
-  const price = '5,99 €';
   // ⚠ Closing Google's sheet arrives while the sheet says "waiting": it must go
-  // back to the offer with its price, quietly, and never stay waiting.
-  assert.deepEqual(stateAfterFailure('cancelled', price), { kind: 'offer', price });
-  assert.deepEqual(stateAfterFailure('cancelled', null), { kind: 'offer', price: null });
-  assert.deepEqual(stateAfterFailure('pending', price), { kind: 'pending' });
-  assert.deepEqual(stateAfterFailure('offline', price), { kind: 'offline' });
-  assert.deepEqual(stateAfterFailure('unavailable', price), { kind: 'unavailable' });
-  assert.deepEqual(stateAfterFailure('failed', price), { kind: 'failed' });
+  // back to the offer, quietly, and never stay waiting.
+  assert.deepEqual(stateAfterFailure('cancelled'), { kind: 'offer' });
+  assert.deepEqual(stateAfterFailure('pending'), { kind: 'pending' });
+  assert.deepEqual(stateAfterFailure('offline'), { kind: 'offline' });
+  assert.deepEqual(stateAfterFailure('unavailable'), { kind: 'unavailable' });
+  assert.deepEqual(stateAfterFailure('failed'), { kind: 'failed' });
   // Already owned: the screen runs a restore, which unlocks.
-  assert.deepEqual(stateAfterFailure('alreadyOwned', price), { kind: 'working' });
+  assert.deepEqual(stateAfterFailure('alreadyOwned'), { kind: 'working' });
+});
+
+test("⚠ a failure keeps Google's price on the button (seen on the P30)", () => {
+  // The first version kept the price in the offer state only, and after a
+  // failed purchase the button fell back to a bare "Unlock".
+  for (const kind of ['failed', 'offline', 'nothingToRestore', 'offer'] as const) {
+    assert.equal(unlockSheetModel(input({ state: { kind } })).buy?.label, 'Unlock for 5,99 €', kind);
+  }
 });
 
 test('no text a user reads has a dash, in any language or state', () => {
   const states: UnlockSheetInput['state'][] = [
-    { kind: 'offer', price: '5,99 €' },
-    { kind: 'offer', price: null },
+    { kind: 'offer' },
     { kind: 'working' },
     { kind: 'pending' },
     { kind: 'offline' },
     { kind: 'unavailable' },
     { kind: 'failed' },
     { kind: 'unlocked' },
-    { kind: 'nothingToRestore', price: null },
+    { kind: 'nothingToRestore' },
   ];
   for (const language of ['en', 'pt', 'de'] as const) {
     for (const state of states) {
-      for (const waiting of [0, 1, 8]) {
+      for (const [waiting, price] of [[0, null], [1, '5,99 €'], [8, null]] as const) {
         const text = JSON.stringify(
-          unlockSheetModel(input({ state, language, waiting, offers: { medals: true, founder: true } }))
+          unlockSheetModel(input({ state, language, waiting, price, offers: { medals: true, founder: true } }))
         );
         assert.doesNotMatch(text, /[–—]/, `${language} ${state.kind}`);
       }

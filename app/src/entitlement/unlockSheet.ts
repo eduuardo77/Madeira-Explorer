@@ -29,19 +29,25 @@ import { PLURALS, STRINGS } from '../i18n/strings.ts';
 import { plural, translate } from '../i18n/translate.ts';
 import type { StoreFailure } from './billingOutcomes.ts';
 
-/** Where the sheet is. `price` is Google's string, or null before it answers. */
+/** Where the sheet is. */
 export type UnlockState =
-  | { kind: 'offer'; price: string | null }
+  | { kind: 'offer' }
   | { kind: 'working' }
   | { kind: 'pending' }
   | { kind: 'offline' }
   | { kind: 'unavailable' }
   | { kind: 'failed' }
   | { kind: 'unlocked' }
-  | { kind: 'nothingToRestore'; price: string | null };
+  | { kind: 'nothingToRestore' };
 
 export interface UnlockSheetInput {
   state: UnlockState;
+  /**
+   * Google's price for this user ("5,99 €"), or null until it answers. Apart
+   * from the state so that no state loses it: seen on the P30, the button fell
+   * back to a bare "Unlock" after a failed purchase.
+   */
+  price: string | null;
   /** Places collected, locked ones included (D-075). */
   collected: number;
   /** Of those, how many are locked. */
@@ -72,7 +78,7 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
   if (input.offers.founder) adds.push(say('unlock.adds.founder'));
   adds.push(say('unlock.adds.once'));
 
-  const price = state.kind === 'offer' || state.kind === 'nothingToRestore' ? state.price : null;
+  const { price } = input;
   const buyLabel = price === null ? say('unlock.buy.noPrice') : say('unlock.buy', { price });
   const canBuy = { label: buyLabel, enabled: true };
 
@@ -111,17 +117,16 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
 }
 
 /**
- * Where a failure from the store leaves the sheet. `price` is the last one
- * Google gave, so a cancelled sheet returns to the same offer.
+ * Where a failure from the store leaves the sheet.
  *
  * ⚠ Cancelling arrives while the sheet says *waiting for Google Play*, so it
  * must return to the offer, never stay where it is.
  * `alreadyOwned` becomes `working`: the sheet then runs a restore, which unlocks.
  */
-export function stateAfterFailure(failure: StoreFailure, price: string | null): UnlockState {
+export function stateAfterFailure(failure: StoreFailure): UnlockState {
   switch (failure) {
     case 'cancelled':
-      return { kind: 'offer', price };
+      return { kind: 'offer' };
     case 'alreadyOwned':
       return { kind: 'working' };
     default:

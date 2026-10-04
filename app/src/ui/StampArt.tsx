@@ -26,8 +26,10 @@ import Svg, {
 } from 'react-native-svg';
 import {
   CANVAS,
+  GLOW_PAD_UNITS,
   stampElements,
   toPolygon,
+  type Postmark,
   type StampDesign,
 } from '../passport/stampArt';
 import { RIM_PAD_UNITS, rimElements, type Rim } from '../passport/stampRim';
@@ -38,6 +40,7 @@ export default function StampArt({
   name,
   collected,
   rim,
+  postmark,
   size,
 }: {
   /**
@@ -55,14 +58,18 @@ export default function StampArt({
    * `size`.
    */
   rim?: Rim | null;
+  /** The day a collected stamp was earned, printed as a postmark (option E). */
+  postmark?: Postmark | null;
   /** Drawn square, in dp. */
   size: number;
 }) {
   const elements = [
     ...(rim === undefined || rim === null ? [] : rimElements(design, rim)),
-    ...stampElements(design, name, collected),
+    ...stampElements(design, name, collected, postmark ?? null),
   ];
-  const pad = rim === undefined || rim === null ? 0 : RIM_PAD_UNITS;
+  // The rim's room, or room for a collected stamp's glow; every stamp gets it
+  // so a grid of them keeps one size (option E, 2026-10-04).
+  const pad = rim === undefined || rim === null ? GLOW_PAD_UNITS : RIM_PAD_UNITS;
   const clipId = `stamp-panel-${placeId}`;
 
   return (
@@ -111,6 +118,8 @@ export default function StampArt({
               clipPath={element.clip === true ? `url(#${clipId})` : undefined}
               d={element.d}
               fill={element.fill}
+              stroke={element.stroke}
+              strokeWidth={element.strokeWidth}
               transform={element.transform}
               opacity={element.opacity}
             />
@@ -148,6 +157,7 @@ export default function StampArt({
             letterSpacing={0.6}
             textAnchor="middle"
             opacity={element.opacity}
+            transform={element.transform}
             // Null means "draw at natural width" — condensing every label
             // would make short names look wrong to fix a problem they do not
             // have. See `stampArt.ts`.

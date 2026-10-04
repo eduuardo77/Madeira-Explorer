@@ -913,6 +913,13 @@ export const STRINGS = {
   ),
   'stampNews.passport': s('See in passport', 'Ver no passaporte', 'Im Reisepass ansehen'),
   'stampNews.close': s('Close', 'Fechar', 'Schließen'),
+  // Option E's postmark on a collected stamp prints the day it was earned
+  // (*"4 OUT"*): twelve month abbreviations, comma-separated, January first.
+  'postmark.months': s(
+    'JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC',
+    'JAN,FEV,MAR,ABR,MAI,JUN,JUL,AGO,SET,OUT,NOV,DEZ',
+    'JAN,FEB,MÄR,APR,MAI,JUN,JUL,AUG,SEP,OKT,NOV,DEZ'
+  ),
   // T-210: after an app update Android does not let the recorder restart from
   // the background (measured on the P30), so one message asks for one tap.
   // Posted by native code (UpdateNoticeReceiver), from text the app leaves it.

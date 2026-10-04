@@ -327,11 +327,13 @@ test('an uncollected sticker is visible as a SHAPE on the page', () => {
   assert.ok(contrastRatio(UNCOLLECTED.border, colors.stampPage) >= BOUNDARY);
 });
 
-test('⚠ T-203: an unvisited stamp keeps its hue, so a row of them is not one colour', () => {
-  // The review's P2-5. If `uncollectedFor` ever collapsed back to the one grey,
+test('option E (2026-10-04): every hue belongs to the collected stamps', () => {
+  // T-203 (option D) kept 35% of each place's hue on its unvisited stamp; on a
+  // phone the project lead found collected and unvisited too alike and chose
+  // option E (`tools/preview-collected-options.mjs`). If the hue crept back,
   // everything above would still pass; this is the test that notices.
   const papers = new Set(allColourways().map(({ colourway }) => uncollectedFor(colourway).paper));
-  assert.ok(papers.size > 10, `only ${papers.size} distinct unvisited papers`);
+  assert.equal(papers.size, 1, `${papers.size} distinct unvisited papers`);
 });
 
 test('T-203: everything on the dark passport album is readable', () => {

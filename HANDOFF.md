@@ -91,8 +91,11 @@ from that walk's trace); the matcher hops a short gap where a path stops short o
 pop-up on the map, seen working on the P30 for Praia Formosa). The notification itself has not yet
 fired on a phone: the first pass seeds its record, so the next stamp earned with the app closed is
 its first proof. ⚠ **Field builds for the P30 must now be re-signed with the debug key**
-(`docs/dev-build.md`), since release builds use the upload key. **Open: the stamp contrast**
-(collected versus not looks too alike, *"doesn't feel special"*): options to be drawn for the lead.
+(`docs/dev-build.md`), since release builds use the upload key. ✅ **Stamp contrast: option E**
+of `tools/preview-collected-options.mjs`, the lead's pick (they also liked C's empty dashed slot,
+*"but for now E"*): unvisited stamps plain grey and 25% dimmer (the border only 7%, held at 3:1),
+collected ones glow in their own colour and carry a postmark with the day earned, placed on the
+paper per shape. Less dim than the sketch's 60%, which broke D-015's legibility floors. On the P30.
 
 ## Where the release plan stands — `TASKS.md`, top section (T-182 to T-212)
 

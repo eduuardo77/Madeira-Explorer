@@ -65,6 +65,7 @@ import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
+import { postmarkFor } from './postmark';
 import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
@@ -287,6 +288,7 @@ function CategoryRow({
   collected,
   total,
   stamps,
+  awardedAt,
   stampSize,
   onStripWidth,
   onSelectStamp,
@@ -295,6 +297,8 @@ function CategoryRow({
   collected: number;
   total: number;
   stamps: PassportStamp[];
+  /** When each collected place was earned, for its postmark (option E). */
+  awardedAt: ReadonlyMap<string, number>;
   /** The sticker's cell, in dp (`stripLayout.ts`). */
   stampSize: number;
   /** The strip's measured width, which `stampSize` is computed from. */
@@ -360,6 +364,9 @@ function CategoryRow({
           design={designFor(stamp.placeId, stamp.category)}
           name={stamp.name}
           collected={locked ? false : stamp.collected}
+          postmark={
+            locked || !stamp.collected ? null : postmarkFor(awardedAt.get(stamp.placeId))
+          }
           // The cell's Pressable above says "locked" in the user's language; the
           // sticker itself is hidden from screen readers (StampArt).
           // Shrunk so the tilted corners stay inside the cell.
@@ -450,6 +457,7 @@ export default function PassportView({
   onWatch,
   onEndTrip,
 }: PassportViewProps) {
+  const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
   // Every row's strip is the same width, so whichever reports last is right.
   // Setting the same number again does not re-render.
@@ -539,6 +547,7 @@ export default function PassportView({
           stamps={(stamps ?? []).filter(
             (stamp) => stamp.category === row.category
           )}
+          awardedAt={awardedAt}
           stampSize={stampSize}
           onStripWidth={setStripWidth}
           onSelectStamp={onSelectStamp}

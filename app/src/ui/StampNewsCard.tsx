@@ -14,6 +14,7 @@ import { t } from '../i18n';
 import { designFor } from '../passport/stampArt';
 import type { StampPopup } from '../progress/stampAnnouncer';
 import StampArt from './StampArt';
+import { postmarkFor } from './postmark';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 const STAMP_SIZE = 180;
@@ -40,6 +41,7 @@ export default function StampNewsCard({
               design={designFor(stamp.placeId, stamp.category)}
               name={stamp.name}
               collected={!stamp.locked}
+              postmark={stamp.locked ? null : postmarkFor(stamp.awardedTs)}
               size={STAMP_SIZE}
             />
           </View>

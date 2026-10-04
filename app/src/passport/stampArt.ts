@@ -546,7 +546,7 @@ export function dotsPath(outline: Point[], spacing: number, radius: number): str
  */
 export type StampElement =
   | { kind: 'polygon'; points: string; fill: string; stroke?: string; strokeWidth?: number; strokeLinejoin?: 'round'; opacity?: number; clip?: boolean }
-  | { kind: 'path'; d: string; fill: string; transform?: string; opacity?: number; clip?: boolean }
+  | { kind: 'path'; d: string; fill: string; stroke?: string; strokeWidth?: number; transform?: string; opacity?: number; clip?: boolean }
   | { kind: 'rect'; x: number; y: number; width: number; height: number; fill: string; opacity?: number; clip?: boolean }
   | {
       kind: 'text';
@@ -556,6 +556,8 @@ export type StampElement =
       fill: string;
       fontSize: number;
       opacity?: number;
+      /** For the postmark's date, which is stamped at an angle. */
+      transform?: string;
       /**
        * The width the name must occupy, when it would otherwise overrun the
        * band. Null means "draw it at its natural width".
@@ -579,6 +581,13 @@ export type StampElement =
  * the category still reads, and the difference survives colour blindness.
  */
 export const UNCOLLECTED: Colourway = {
+  // ⚠ **Dimmer since 2026-10-04 (option E, the project lead's pick):** each
+  // grey of the old palette moved 25% towards the album page, so a row of
+  // unvisited stamps recedes and the collected ones stand out. The border
+  // moved only 7%: it carries the sticker's shape and is held at 3:1 on the
+  // page (`contrast.test.ts`), which 25% would have broken (2.48:1). The
+  // emblem keeps 5.08:1 on its paper and the name 5.38:1 on its band.
+  //
   // ⚠ **Neutral since 2026-08-14, and it was a real defect.** These were
   // blue-greys taken from the old theme, and when D-054 made the passport card
   // neutral `#1C1C1E` the sticker's paper measured **1.16:1** against the card
@@ -586,27 +595,29 @@ export const UNCOLLECTED: Colourway = {
   // in it. Nothing failed, because no test measured the *uncollected* palette
   // against the page — only the thirty collected ones.
   //
-  // The **border** carries the shape now (3.36:1 on the card) rather than the
-  // paper, which is what lets the paper stay properly muted. That is how a
-  // real die-cut sticker reads anyway: you see its edge, not its middle.
-  border: '#6E6E73',
-  inner: '#8E8E93',
-  paper: '#3A3A3C',
-  ink: '#D1D1D6',
-  accent: '#48484A',
-  band: '#2C2C2E',
-  bandInk: '#C7C7CC',
+  // The **border** carries the shape now rather than the paper, which is what
+  // lets the paper stay properly muted. That is how a real die-cut sticker
+  // reads anyway: you see its edge, not its middle.
+  border: '#68686D',
+  inner: '#727276',
+  paper: '#333335',
+  ink: '#A4A4A8',
+  accent: '#3D3D3F',
+  band: '#28282A',
+  bandInk: '#9C9CA1',
 };
 
 /**
- * How much of the place's hue an unvisited stamp keeps (T-203, option D).
+ * How much of the place's hue an unvisited stamp keeps.
  *
- * The review (P2-5) found every unvisited stamp the same grey, a row of them
- * hard to tell apart. The project lead chose, from four drawn and measured
- * options (`tools/preview-passport-options.mjs`), stamps that keep a hint of
- * their own colour.
+ * ⚠ **None since 2026-10-04.** T-203 (option D) kept 35%, so a row of
+ * unvisited stamps was not one grey; on a phone the project lead then found
+ * collected and unvisited too alike (*"hard to differentiate both. And doesn't
+ * feel special"*) and chose option E of `tools/preview-collected-options.mjs`:
+ * every hue belongs to the collected stamps. The emblem and the shape still
+ * tell unvisited stamps apart. Kept as a number so the choice can move back.
  */
-export const UNCOLLECTED_HUE = 0.35;
+export const UNCOLLECTED_HUE = 0;
 
 /**
  * The parts of `UNCOLLECTED` that stay grey, because they carry legibility.
@@ -941,12 +952,118 @@ export function bestEmblem(
 }
 
 /**
- * Everything to draw for one stamp, in order, on the 100×100 grid.
+ * Room drawn around every stamp, in grid units, for a collected stamp's glow
+ * (option E, 2026-10-04). Every stamp gets it, collected or not, so a grid of
+ * them keeps one size; the renderers widen the viewBox by it.
+ */
+export const GLOW_PAD_UNITS = 6;
+
+/**
+ * The day a stamp was earned, as the postmark prints it: `top` is the day and
+ * month (*"4 OUT"*), `bottom` the year. Formatted by the caller, which may use
+ * the translated month names; this module may not (CONTEXT §6).
+ */
+export type Postmark = { top: string; bottom: string };
+
+/** A circle as a path, for the postmark's rings. */
+function ringPath(cx: number, cy: number, r: number): string {
+  return `M ${round(cx - r)} ${cy} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0`;
+}
+
+/**
+ * What marks a collected stamp as the user's own (option E): a glow of its
+ * own colour around the sticker, drawn first so the sticker sits on it, and a
+ * postmark with the day it was earned, drawn last, over the top corner and
+ * clear of the name. The glow is three widening copies of the outline at
+ * falling opacity: `react-native-svg` has no blur that is safe to rely on.
+ */
+function glowElements(design: StampDesign): StampElement[] {
+  return [
+    { amount: GLOW_PAD_UNITS - 0.5, opacity: 0.14 },
+    { amount: GLOW_PAD_UNITS * 0.6, opacity: 0.22 },
+    { amount: GLOW_PAD_UNITS * 0.3, opacity: 0.32 },
+  ].map(({ amount, opacity }) => ({
+    kind: 'polygon',
+    points: toPolygon(inset(design.cutOutline, -amount)),
+    fill: design.colourway.accent,
+    opacity,
+  }));
+}
+
+/** The postmark's lettering, in grid units (not sp: it scales with the stamp). */
+const POSTMARK_DAY_UNITS = 5.6;
+const POSTMARK_YEAR_UNITS = 4.4;
+
+/** How many glow layers a collected stamp draws before its sticker. */
+export const GLOW_LAYERS = 3;
+
+/** The postmark's outer ring, in grid units. */
+const POSTMARK_RADIUS = 14;
+
+/** The right edge of the panel at height `y`, or null where the panel is not. */
+function panelRightAt(panel: Point[], y: number): number | null {
+  let right: number | null = null;
+  for (let i = 0; i < panel.length; i += 1) {
+    const [ax, ay] = panel[i];
+    const [bx, by] = panel[(i + 1) % panel.length];
+    if (ay === by || y < Math.min(ay, by) || y > Math.max(ay, by)) {
+      continue;
+    }
+    const x = ax + ((y - ay) / (by - ay)) * (bx - ax);
+    right = right === null ? x : Math.max(right, x);
+  }
+  return right;
+}
+
+/**
+ * Where the postmark goes: as far right as it fits **on the paper**, above the
+ * band, highest first. Searched per shape, like the emblem, because a fixed
+ * corner fell off the sticker on a triangle and lay half on the dark page,
+ * where no ink of the stamp's own could be seen against both (P30, 2026-10-04).
+ */
+function postmarkCentre(panel: Point[], top: number, bottom: number): [number, number] {
+  const r = POSTMARK_RADIUS;
+  let best: [number, number] | null = null;
+  for (let cy = top + r * 0.8; cy <= bottom - r * 0.6; cy += 1) {
+    const edges = [cy - r * 0.7, cy, cy + r * 0.7].map((y) => panelRightAt(panel, y));
+    if (edges.some((edge) => edge === null)) {
+      continue;
+    }
+    // A little over the edge, as a real cancellation lands.
+    const cx = Math.min(...(edges as number[])) - r * 0.75;
+    if (best === null || cx > best[0] + 0.5) {
+      best = [round(cx), round(cy)];
+    }
+  }
+  return best ?? [50, round((top + bottom) / 2)];
+}
+
+function postmarkElements(design: StampDesign, postmark: Postmark, bandY: number): StampElement[] {
+  const panelTop = Math.min(...design.panel.map(([, y]) => y));
+  const [cx, cy] = postmarkCentre(design.panel, panelTop, bandY);
+  // The stamp's own ink: dark, on the pale paper the postmark now sits on.
+  const ink = design.colourway.ink;
+  const rotate = `rotate(-14 ${cx} ${cy})`;
+  return [
+    { kind: 'path', d: ringPath(cx, cy, POSTMARK_RADIUS), fill: 'none', stroke: ink, strokeWidth: 1.8, transform: rotate, opacity: 0.8 },
+    { kind: 'path', d: ringPath(cx, cy, POSTMARK_RADIUS - 3.5), fill: 'none', stroke: ink, strokeWidth: 0.8, transform: rotate, opacity: 0.8 },
+    { kind: 'text', x: cx, y: cy - 0.5, text: postmark.top, fill: ink, fontSize: POSTMARK_DAY_UNITS, opacity: 0.8, transform: rotate, textLength: null },
+    { kind: 'text', x: cx, y: cy + 5.5, text: postmark.bottom, fill: ink, fontSize: POSTMARK_YEAR_UNITS, opacity: 0.8, transform: rotate, textLength: null },
+  ];
+}
+
+/**
+ * Everything to draw for one stamp, in order, on the 100×100 grid (and, for a
+ * collected stamp's glow, `GLOW_PAD_UNITS` around it).
+ *
+ * `postmark` is the day it was earned, where the caller knows it; null draws
+ * none (the passport button, too small for one).
  */
 export function stampElements(
   design: StampDesign,
   name: string,
-  collected: boolean
+  collected: boolean,
+  postmark: Postmark | null = null
 ): StampElement[] {
   const colours = collected ? design.colourway : uncollectedFor(design.colourway);
   // The sticker drops the word its section heading already carries; the full
@@ -982,6 +1099,7 @@ export function stampElements(
   const iconTransform = `translate(${round(offsetX)} ${round(offsetY)}) scale(${round(iconScale)})`;
 
   const elements: StampElement[] = [
+    ...(collected ? glowElements(design) : []),
     // Two cut borders, one inside the other. The second is most of what makes
     // this read as a printed label rather than a coloured shape.
     { kind: 'polygon', points: toPolygon(design.cutOutline), fill: colours.border },
@@ -1037,5 +1155,8 @@ export function stampElements(
     });
   });
 
+  if (collected && postmark !== null) {
+    elements.push(...postmarkElements(design, postmark, bandY));
+  }
   return elements;
 }

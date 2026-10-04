@@ -17,6 +17,7 @@
 import {
   CANVAS,
   designFor,
+  GLOW_PAD_UNITS,
   stampElements,
   toPolygon,
 } from '../../app/src/passport/stampArt.ts';
@@ -54,8 +55,8 @@ function attrs(element) {
  * `rim` is the passport button's rank rim (D-083), from `stampRim.ts`'s
  * `rimFor`; the viewBox grows by the same pad `StampArt.tsx` uses.
  */
-export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined, rim = null) {
-  return stampSvgWithDesign(id, designFor(id, category, motif), name, collected, extraStyle, rim);
+export function stampSvg(id, name, category, collected, extraStyle = '', motif = undefined, rim = null, postmark = null) {
+  return stampSvgWithDesign(id, designFor(id, category, motif), name, collected, extraStyle, rim, postmark);
 }
 
 /**
@@ -63,12 +64,13 @@ export function stampSvg(id, name, category, collected, extraStyle = '', motif =
  * compares a *proposed* colourway (T-203) while every shape, emblem and band
  * still comes from `stampElements`, i.e. from what ships.
  */
-export function stampSvgWithDesign(id, design, name, collected, extraStyle = '', rim = null) {
+export function stampSvgWithDesign(id, design, name, collected, extraStyle = '', rim = null, postmark = null) {
   const elements = [
     ...(rim === null ? [] : rimElements(design, rim)),
-    ...stampElements(design, name, collected),
+    ...stampElements(design, name, collected, postmark),
   ];
-  const pad = rim === null ? 0 : RIM_PAD_UNITS;
+  // The same pad as `StampArt.tsx`: the rim's, or room for a collected glow.
+  const pad = rim === null ? GLOW_PAD_UNITS : RIM_PAD_UNITS;
 
   const body = elements
     .map((element) => {

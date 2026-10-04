@@ -30,6 +30,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { CATEGORIES, type Category } from '../content/contentPack.ts';
+import { contrastRatio } from '../ui/contrast.ts';
 import {
 
   CANVAS,
@@ -38,6 +39,7 @@ import {
   MAX_LINES,
   MAX_TILT_DEG,
   MIN_EMBLEM_ROOM,
+  GLOW_LAYERS,
   SHAPE_NAMES,
   TILT_FIT,
   bestBandY,
@@ -327,8 +329,12 @@ test('a tilted stamp fits the space it is given', () => {
 
 test('a collected stamp draws in its own colours, an uncollected one does not', () => {
   const design = designFor('ponta-de-sao-lourenco', 'viewpoint');
-  const on = stampElements(design, 'Ponta', true);
+  // A collected stamp draws its glow first (option E, 2026-10-04); past that,
+  // the sticker itself is the same list.
+  const glow = stampElements(design, 'Ponta', true).slice(0, GLOW_LAYERS);
+  const on = stampElements(design, 'Ponta', true).slice(GLOW_LAYERS);
   const off = stampElements(design, 'Ponta', false);
+  assert.ok(glow.every((e) => e.kind === 'polygon' && e.fill === design.colourway.accent));
 
   // Same elements in the same order — only the palette changes. That is what
   // keeps the category readable when the place has not been collected.
@@ -679,4 +685,27 @@ test('trimming never leaves a fragment', () => {
   // rendering an empty band.
   assert.equal(bandLabel('Levada', 'levada'), 'Levada');
   assert.equal(bandLabel('Levada do Rei', 'levada'), 'Levada do Rei');
+});
+
+test('option E: the postmark sits on the paper and reads against it, on every place', () => {
+  const pack = JSON.parse(
+    readFileSync(
+      path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'content', 'pois.json'),
+      'utf8'
+    )
+  ) as { places: { id: string; name: string; category: Category; motif?: string }[] };
+  for (const place of pack.places) {
+    const design = designFor(place.id, place.category, place.motif);
+    const ring = stampElements(design, place.name, true, { top: '4 OUT', bottom: '2026' }).find(
+      (e) => e.kind === 'path' && e.stroke !== undefined
+    );
+    assert.ok(ring !== undefined && ring.kind === 'path' && ring.stroke !== undefined);
+    const ratio = contrastRatio(ring.stroke, design.colourway.paper);
+    assert.ok(ratio >= 3, `${place.id}: postmark ${ratio.toFixed(2)}:1 on its paper`);
+    // Its centre is on the sticker's panel, so most of it is on the paper.
+    const [, x, y] = /^M (\S+) (\S+)/.exec(ring.d)!.map(Number);
+    const cx = x + 14;
+    assert.ok(panelWidthAt(design.panel, y) > 0, `${place.id}: postmark off the panel`);
+    assert.ok(cx > 30 && cx < 90, `${place.id}: postmark centre at ${cx}`);
+  }
 });

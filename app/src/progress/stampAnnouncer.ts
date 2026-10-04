@@ -41,6 +41,8 @@ export type StampPopup = {
   category: Category;
   /** Withheld by the free tier: name it, do not draw it. */
   locked: boolean;
+  /** When it was earned, for its postmark. */
+  awardedTs: number;
 };
 
 type Earned = { placeId: string; name: string; category: Category; awardedTs: number };
@@ -125,7 +127,15 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
       const stamp = stamps.earned.find((each) => each.placeId === placeId);
       return stamp === undefined
         ? []
-        : [{ placeId, name: stamp.name, category: stamp.category, locked: stamps.locked.has(placeId) }];
+        : [
+            {
+              placeId,
+              name: stamp.name,
+              category: stamp.category,
+              locked: stamps.locked.has(placeId),
+              awardedTs: stamp.awardedTs,
+            },
+          ];
     });
   } catch (error) {
     await recordingEventDao.logError('stamp pop-up', error);

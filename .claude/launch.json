@@ -23,6 +23,18 @@
         "site"
       ],
       "port": 8090
+    },
+    {
+      "name": "options",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8091",
+        "--directory",
+        "tools/out"
+      ],
+      "port": 8091
     }
   ]
 }

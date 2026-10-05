@@ -393,6 +393,21 @@ section's definition of done.
       minutes, so the acknowledgement went through. The app's own diary line was not seen.
       **Open:** the relaunch check (blocked by the downgrade prompt until "Permitir sempre" is granted on this new
       install), and V4 to V10.
+- [ ] **T-249** **D-097: the paywall, its reminders and the new-stamp pop-up, redesigned** ⇠ the
+      project lead's pick. Options drawn 2026-10-05: `node tools/preview-unlock-options.mjs` →
+      `tools/out/unlock-options.html` (served by the `options` entry in `.claude/launch.json`).
+      Sheet A (your stamps behind frosted glass), B (the full passport, price tag), C (founder,
+      only once the window is set and T-233 is drawn); reminders R1 (a card atop the passport), R2
+      (a gold count on the map's passport button); new stamp E1 (slammed, ink ring, confetti), E2
+      (gold rays, spin-in, counter), E3 (a locked stamp's celebration with the offer). Built with
+      React Native's own `Animated`; no new library.
+- [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
+      One card per ask, same layout, a step count, and a replica of Android's dialog with the right
+      answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
+      twelve-hour delay. ⚠ **Bug first, reported 2026-10-05:** after the Play install, one
+      permission ask *"popped off randomly"* before the project lead could accept it. Suspect two
+      prompts racing at launch (onboarding, the downgrade notice, the stamp pop-up); find it on the
+      P30 before redrawing anything.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like
@@ -1711,6 +1726,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **T-117b and T-127 must be restated**, not quietly failed.
       — Restore-purchases must work offline after first sync, because the user is in a levada valley.
 - [ ] **T-157** **Say what is waiting, once** ⇠ T-155
+      ⚠ **Superseded 2026-10-05 by D-097:** the project lead no longer holds to "once, quietly"; a
+      standing reminder on the passport and the map is wanted. The notes below are history.
       — A free user at the cap may have **earned more than they can see** — 18 collected, 11 shown.
       Saying nothing is honest but wastes the best unlock moment; saying it repeatedly is the nagging
       the project lead explicitly did not want.

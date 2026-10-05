@@ -5404,3 +5404,32 @@ stamps cannot silence the health check (D-087 §5's reason for that channel).
 
 **Unmeasured:** the award pass's cost in the background batch on a phone.
 
+## D-097 — The paywall asks, and keeps asking where it is useful
+
+**Status: Accepted 2026-10-05** by the project lead; the design is chosen from drawn options
+(`tools/preview-unlock-options.mjs`, `tools/out/unlock-options.html`). **Supersedes T-157's rule**
+(*said once, quietly, never a notification, never a repeating banner*) and the reading of D-089 that
+made the Settings row the only standing way in.
+
+**The decision.** After the first real purchase on the P30 the project lead found the unlock
+pop-ups *"a bit weak... too boring"* and asked for them to be *"way more appealing"* with *"more
+aggressive"* text, for a reminder *"on the main page or the passport page"* after a first *Not
+now*, and for the new-stamp pop-up to be *"more extravagant"*: *"We need to step up the game."*
+On T-157's rule: *"I don't agree with this anymore."*
+
+**What changes:** the unlock sheet's look and copy; a standing reminder on the passport and the
+map while stamps are locked; the new-stamp pop-up becomes a celebration and, for a locked stamp,
+offers the unlock there.
+
+**Lines kept, and why each is worth more than the sale it might add:**
+- **Nothing false.** No invented countdown, no "only today", no scarcity that is not real. The
+  founder window (D-089 rule 6) is real urgency and may be used once it is set. Play rejects
+  misleading purchase flows, and a "scammy" review costs more than one sale.
+- **No purchase notifications.** Notifications stay for the trip and for stamps (D-011, D-096).
+- **The map's roads stay clear.** The lit roads are the product; a reminder there is a mark on the
+  passport button, not a banner over the map.
+
+**Alternatives considered:** keeping T-157 (rejected by the project lead); a banner across the
+map (rejected for covering the product itself); a purchase notification after N stamps (rejected:
+uninstall risk, and D-011's budget).
+

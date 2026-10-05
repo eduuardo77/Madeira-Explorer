@@ -1209,6 +1209,11 @@ export type StringKey = keyof typeof STRINGS;
 
 /** Counted strings, where singular and plural differ. */
 export const PLURALS = {
+  // D-097, R2: the gold count on the map's passport button.
+  'map.a11y.unlockWaiting': {
+    one: s('{count} stamp waiting. Unlock the passport', '{count} carimbo à espera. Desbloquear o passaporte', '{count} Stempel wartet. Reisepass freischalten'),
+    other: s('{count} stamps waiting. Unlock the passport', '{count} carimbos à espera. Desbloquear o passaporte', '{count} Stempel warten. Reisepass freischalten'),
+  },
   // D-097, R1: the passport's standing reminder while stamps are locked.
   'passport.nudge.title': {
     one: s('{count} of your stamps is waiting', '{count} carimbo teu à espera', '{count} Ihrer Stempel wartet'),

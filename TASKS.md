@@ -427,6 +427,12 @@ section's definition of done.
       cores"* and a gold *Ver*; it opens the sheet with every locked stamp. Never in a beta build.
       The passport now opens the sheet from a list (`openUnlock`), the tapped stamp first when there
       is one. Seen on the emulator under *10 / 80*.
+      **Piece 3 of 4 ✅: R2.** A gold count on the map's passport button (`WaitingBadge` in
+      `PrimaryOverlay`), 30 dp drawn and 60 dp to the finger through a measured `BADGE_HIT_SLOP`
+      (the accessibility rule refuses a single number); it pulses twice when the count rises, and
+      tapping it opens the unlock sheet over the map. The stamp under it still opens the passport.
+      The map reads the waiting stamps through `stampAnnouncer.earnedStamps`, like the passport and
+      Settings. Never in a beta build. Seen on the emulator: the badge reads 5 and opens the sheet.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's

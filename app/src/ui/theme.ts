@@ -195,6 +195,8 @@ export const reward = {
   /** The passport's reminder card (R1): warm on the left, violet on the right. */
   nudgeFrom: '#3A2A08',
   nudgeEdge: '#F2A90066',
+  /** The ring around the map's gold count, so it reads on any map colour. */
+  badgeEdge: '#FFFFFF',
   text: '#F2F2F7',
   textMuted: '#D1D1D6',
   /** The small gold line over a headline. */

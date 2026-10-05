@@ -61,7 +61,10 @@ import { runAwardPass } from '../progress/stampAwards';
 import type { StampPopup } from '../progress/stampAnnouncer';
 import { markStampShown, pendingStampPopups } from '../progress/stampAnnouncer';
 import StampNewsCard from '../ui/StampNewsCard';
-import { isUnlocked } from '../entitlement/entitlementStore';
+import { BETA_BUILD, isUnlocked } from '../entitlement/entitlementStore';
+import { earnedStamps } from '../progress/stampAnnouncer';
+import type { PassportStamp } from '../ui/PassportView';
+import UnlockSheet from '../ui/UnlockSheet';
 import { buttonStamp, STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
 import type { TripProgress } from '../progress/tripProgress';
 import { locationProvider } from '../recording/ExpoLocationProvider';
@@ -246,6 +249,10 @@ export default function NativeMapScreen({
    */
   const cameraHeldByFocus = useRef(false);
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
+  /** D-097, R2: the locked stamps, counted on the passport button. */
+  const [waiting, setWaiting] = useState<PassportStamp[]>([]);
+  /** The unlock sheet, opened from that count. */
+  const [unlocking, setUnlocking] = useState(false);
   /** What the passport button draws (D-083) — the placeholder until loaded. */
   const [passportStamp, setPassportStamp] = useState<ButtonStamp>(() =>
     buttonStamp([], [], false, t('passport.title'))
@@ -373,6 +380,15 @@ export default function NativeMapScreen({
           );
           if (!cancelled) {
             setPassportStamp(nextStamp);
+          }
+          // The same earned-and-locked reading the passport and Settings use.
+          const stamps = await earnedStamps();
+          if (!cancelled) {
+            setWaiting(
+              (stamps?.earned ?? [])
+                .filter((stamp) => stamps?.locked.has(stamp.placeId) === true)
+                .map((stamp) => ({ ...stamp, collected: true, locked: true }))
+            );
           }
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
@@ -893,6 +909,8 @@ export default function NativeMapScreen({
         // map stays as quiet as WalkNYC's. A ring is named by tapping it.
         bottomSlot={card !== null ? <PlaceCardView card={card} onClose={closeCard} /> : null}
         onOpenPassport={onOpenPassport}
+        waitingCount={waiting.length}
+        onOpenUnlock={BETA_BUILD ? undefined : () => setUnlocking(true)}
         onOpenSettings={onOpenSettings}
         isWalking={walkStarted}
         control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}
@@ -903,6 +921,15 @@ export default function NativeMapScreen({
         showRecentre={showRecentre}
         onRecentre={recentre}
       />
+
+      {!unlocking ? null : (
+        <UnlockSheet
+          waiting={waiting}
+          onClose={() => setUnlocking(false)}
+          // Read the map again: the count goes, and the button's stamp is shown.
+          onUnlocked={() => setResumeCount((count) => count + 1)}
+        />
+      )}
 
       {stampNews.length === 0 ? null : (
         <StampNewsCard

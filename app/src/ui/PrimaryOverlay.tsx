@@ -59,8 +59,8 @@
  * Presentational: props in, pixels out, so the workbench can mount it.
  */
 
-import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { TripProgress } from '../progress/tripProgress';
 import SettingsMark from './SettingsMark';
 import RecentreMark from './RecentreMark';
@@ -81,9 +81,25 @@ import {
   mapChrome,
   MIN_TAP_TARGET,
   radius,
+  reward,
   spacing,
   warningBanner,
 } from './theme';
+
+/** The gold count's drawn size (D-097, R2): a circle, wider only for two digits. */
+const BADGE_SIZE = 30;
+
+/**
+ * Its target: drawn at 30 dp, grown to MIN_TAP_TARGET on every side (D-015),
+ * the way the recentre pill is. A two-digit count is wider, so its sides need
+ * less, and over-reaching by a few dp there is harmless.
+ */
+const BADGE_HIT_SLOP = {
+  top: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
+  bottom: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
+  left: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
+  right: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
+};
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 20;
@@ -244,6 +260,13 @@ export type PrimaryOverlayProps = {
    */
   bottomSlot?: ReactNode;
   onOpenPassport: () => void;
+  /**
+   * D-097, R2: how many earned stamps are locked, drawn as a gold count on the
+   * passport button; tapping it opens the unlock sheet. Absent (a beta build,
+   * the workbench) or zero draws nothing.
+   */
+  waitingCount?: number;
+  onOpenUnlock?: () => void;
   onOpenSettings: () => void;
   onToggleRecording: () => void;
 };
@@ -270,6 +293,8 @@ export default function PrimaryOverlay({
   onRecentre,
   bottomSlot,
   onOpenPassport,
+  waitingCount = 0,
+  onOpenUnlock,
   onOpenSettings,
   onToggleRecording,
 }: PrimaryOverlayProps) {
@@ -408,6 +433,9 @@ export default function PrimaryOverlay({
               rim={rimFor(tier, mapStyle)}
               size={STAMP_BUTTON_SIZE * TILT_FIT}
             />
+            {onOpenUnlock === undefined || waitingCount === 0 ? null : (
+              <WaitingBadge count={waitingCount} onPress={onOpenUnlock} />
+            )}
           </Pressable>
 
           <View style={styles.rowCentre} pointerEvents="box-none">
@@ -584,7 +612,69 @@ export default function PrimaryOverlay({
   );
 }
 
+/**
+ * The gold count on the passport button (D-097, R2). It pulses twice when the
+ * count rises, so a stamp that locks is noticed without a word, and the map's
+ * roads stay clear. Its own button: the stamp under it still opens the passport.
+ */
+function WaitingBadge({ count, onPress }: { count: number; onPress: () => void }) {
+  const pulse = useRef(new Animated.Value(0)).current;
+  const shown = useRef(count);
+  useEffect(() => {
+    const rose = count > shown.current;
+    shown.current = count;
+    if (!rose) return;
+    const once = Animated.sequence([
+      Animated.timing(pulse, { toValue: 1, duration: 260, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 0, duration: 340, useNativeDriver: true }),
+    ]);
+    Animated.sequence([once, once]).start();
+  }, [count, pulse]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.badge,
+        { transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] }) }] },
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={n('map.a11y.unlockWaiting', count)}
+        onPress={onPress}
+        hitSlop={BADGE_HIT_SLOP}
+        style={styles.badgeHit}
+      >
+        <Text style={styles.badgeText}>{count}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: BADGE_SIZE,
+    height: BADGE_SIZE,
+    borderRadius: BADGE_SIZE / 2,
+    backgroundColor: reward.goldButton,
+    borderWidth: 2,
+    borderColor: reward.badgeEdge,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  badgeHit: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: reward.goldButtonText,
+    fontSize: fontSize.label,
+    fontWeight: '800',
+  },
   // RN 0.86 exposes the registered style, not the raw object.
   root: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
   pressed: { opacity: 0.75 },

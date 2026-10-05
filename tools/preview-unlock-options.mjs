@@ -364,10 +364,10 @@ h1 { font-size: 22px; margin: 0 0 8px; } h2 { font-size: 19px; margin: 0 0 6px; 
 @keyframes slam { from { transform: scale(3) rotate(-25deg); opacity: 0; } to { transform: scale(1) rotate(-4deg); opacity: 1; } }
 @keyframes shake { 0%,100% { translate: 0 0; } 20% { translate: -6px 3px; } 40% { translate: 5px -4px; } 60% { translate: -4px 2px; } 80% { translate: 3px -1px; } }
 .ink-ring { position: absolute; top: 120px; width: 200px; height: 200px; border-radius: 50%; border: 6px solid #F2A900; opacity: 0; animation: ring 0.9s ease-out 0.55s both; }
-@keyframes ring { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.8); opacity: 0; } }
+@keyframes ring { 0% { transform: scale(0.6); opacity: 0; } 1% { opacity: 0.9; } 100% { transform: scale(1.8); opacity: 0; } }
 .confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .cf { position: absolute; top: 34%; width: 8px; height: 13px; border-radius: 2px; opacity: 0; animation: cf 1.6s cubic-bezier(.2,.7,.4,1) calc(0.55s + var(--d)) both; }
-@keyframes cf { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--x), 360px) rotate(calc(var(--r) + 540deg)); } }
+@keyframes cf { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 1% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), 360px) rotate(calc(var(--r) + 540deg)); } }
 .place { font-size: 22px; font-weight: 800; margin-top: 12px; animation: pop 0.4s ease-out 0.8s both; }
 .progress { width: 100%; margin: 12px 0 4px; font-size: 13px; color: #D1D1D6; animation: pop 0.4s ease-out 0.95s both; }
 .bar { height: 8px; background: #3A3A3C; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }

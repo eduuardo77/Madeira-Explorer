@@ -406,6 +406,10 @@ section's definition of done.
       fair to borrow from). Both reminders. E2 for a collected stamp and E3 for a locked one; E1 is
       not disliked, and **E2 "could have some more work done"**: take E1's impact (the shake, the ink
       ring, confetti) into E2's rays and counter, and show the revision before building it.
+      **Revision drawn 2026-10-05** on the same page as the trophies: a gold flash opens the rays, the
+      stamp drops spinning and lands with E1's shake and ink ring, a dated cancellation is stamped
+      on, gold confetti, then the counter and the set's bar; and a second frame for when the stamp
+      lifts the passport's rank (bronze to silver at 10, D-078), shown only when it really does.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
@@ -438,6 +442,12 @@ section's definition of done.
       for D-097 (`tools/preview-unlock-options.mjs` is the pattern): the stamp large and lit, the date
       and its postmark, how it ranks in its set (*4 de 19 miradouros*), the same visual language as
       E2. Keep *Ver no mapa* and the place's why-line.
+      **Options drawn 2026-10-05:** `node tools/preview-trophy-options.mjs` → `tools/out/trophy-options.html`.
+      T1 *Vitrine* (spotlight, pedestal, a slow sheen, three facts: when, minutes there, place in
+      the set), T2 *Página do passaporte* (paper page, an ink cancellation, the time handwritten), T3
+      *Na mão* (tilts with the phone, a holographic sheen: Phase 5's tilt and shine, T-236/T-237).
+      Every fact is one an award already stores. ⚠ **No place has a why-line** (`content/pois.json`,
+      0 of 80), so none shows; T-201 built the field and nothing fills it.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

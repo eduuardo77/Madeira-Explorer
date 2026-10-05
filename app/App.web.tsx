@@ -410,12 +410,11 @@ export default function DesignWorkbench() {
                 model={unlockSheetModel({
                   state: UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
                   price: '0,00 € (workbench)',
-                  collected: stamps.filter((stamp) => stamp.collected).length,
                   waiting: stamps.filter((stamp) => stamp.locked === true).length,
                   offers: { medals: false, founder: false },
                   language: deviceLanguage(),
                 })}
-                stamp={stamps.find((stamp) => stamp.locked === true) ?? null}
+                waiting={stamps.filter((stamp) => stamp.locked === true)}
                 unlocked={screen === 'unlock:unlocked'}
                 working={screen === 'unlock:working'}
                 onBuy={() => setScreen('unlock:working')}

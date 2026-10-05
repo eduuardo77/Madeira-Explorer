@@ -19,6 +19,9 @@
 import Svg, {
   ClipPath,
   Defs,
+  FeGaussianBlur,
+  Filter,
+  G,
   Path,
   Polygon,
   Rect,
@@ -42,6 +45,7 @@ export default function StampArt({
   rim,
   postmark,
   size,
+  blur,
 }: {
   /**
    * Only used to name the clip path, and that is not cosmetic: on the web
@@ -62,6 +66,11 @@ export default function StampArt({
   postmark?: Postmark | null;
   /** Drawn square, in dp. */
   size: number;
+  /**
+   * Frosted glass, in drawing units (D-097, sheet A): a stamp that is the
+   * user's but not yet seen, drawn in colour and softened. Absent draws sharp.
+   */
+  blur?: number;
 }) {
   const elements = [
     ...(rim === undefined || rim === null ? [] : rimElements(design, rim)),
@@ -71,6 +80,7 @@ export default function StampArt({
   // so a grid of them keeps one size (option E, 2026-10-04).
   const pad = rim === undefined || rim === null ? GLOW_PAD_UNITS : RIM_PAD_UNITS;
   const clipId = `stamp-panel-${placeId}`;
+  const blurId = `stamp-blur-${placeId}`;
 
   return (
     <Svg
@@ -92,86 +102,93 @@ export default function StampArt({
         <ClipPath id={clipId}>
           <Polygon points={toPolygon(design.panel)} />
         </ClipPath>
+        {blur === undefined ? null : (
+          <Filter id={blurId} x="-20%" y="-20%" width="140%" height="140%">
+            <FeGaussianBlur stdDeviation={blur} />
+          </Filter>
+        )}
       </Defs>
-      {elements.map((element, index) => {
-        const key = `${element.kind}-${index}`;
+      <G filter={blur === undefined ? undefined : `url(#${blurId})`}>
+        {elements.map((element, index) => {
+          const key = `${element.kind}-${index}`;
 
-        if (element.kind === 'polygon') {
-          return (
-            <Polygon
-              key={key}
-              clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-              points={element.points}
-              fill={element.fill}
-              stroke={element.stroke}
-              strokeWidth={element.strokeWidth}
-              strokeLinejoin={element.strokeLinejoin}
-              opacity={element.opacity}
-            />
-          );
-        }
+          if (element.kind === 'polygon') {
+            return (
+              <Polygon
+                key={key}
+                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
+                points={element.points}
+                fill={element.fill}
+                stroke={element.stroke}
+                strokeWidth={element.strokeWidth}
+                strokeLinejoin={element.strokeLinejoin}
+                opacity={element.opacity}
+              />
+            );
+          }
 
-        if (element.kind === 'path') {
-          return (
-            <Path
-              key={key}
-              clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-              d={element.d}
-              fill={element.fill}
-              stroke={element.stroke}
-              strokeWidth={element.strokeWidth}
-              transform={element.transform}
-              opacity={element.opacity}
-            />
-          );
-        }
+          if (element.kind === 'path') {
+            return (
+              <Path
+                key={key}
+                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
+                d={element.d}
+                fill={element.fill}
+                stroke={element.stroke}
+                strokeWidth={element.strokeWidth}
+                transform={element.transform}
+                opacity={element.opacity}
+              />
+            );
+          }
 
-        if (element.kind === 'rect') {
+          if (element.kind === 'rect') {
+            return (
+              <Rect
+                key={key}
+                x={element.x}
+                y={element.y}
+                width={element.width}
+                height={element.height}
+                fill={element.fill}
+                opacity={element.opacity}
+                // Which elements clip is decided by `stampArt.ts`, not guessed
+                // from the kind here: the band is drawn full width and clipped
+                // to the panel — which gives it the sticker's own shape on a
+                // triangle or a diamond for free — and so is the sunburst,
+                // whose rays deliberately overshoot the canvas.
+                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
+              />
+            );
+          }
+
           return (
-            <Rect
+            <SvgText
               key={key}
               x={element.x}
               y={element.y}
-              width={element.width}
-              height={element.height}
               fill={element.fill}
+              fontSize={element.fontSize}
+              fontWeight="700"
+              letterSpacing={0.6}
+              textAnchor="middle"
               opacity={element.opacity}
-              // Which elements clip is decided by `stampArt.ts`, not guessed
-              // from the kind here: the band is drawn full width and clipped
-              // to the panel — which gives it the sticker's own shape on a
-              // triangle or a diamond for free — and so is the sunburst,
-              // whose rays deliberately overshoot the canvas.
-              clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-            />
+              transform={element.transform}
+              // Null means "draw at natural width" — condensing every label
+              // would make short names look wrong to fix a problem they do not
+              // have. See `stampArt.ts`.
+              {...(element.textLength === null
+                ? {}
+                : {
+                    textLength: element.textLength,
+                    lengthAdjust: 'spacingAndGlyphs' as const,
+                  })}
+            >
+              {element.text}
+            </SvgText>
           );
-        }
-
-        return (
-          <SvgText
-            key={key}
-            x={element.x}
-            y={element.y}
-            fill={element.fill}
-            fontSize={element.fontSize}
-            fontWeight="700"
-            letterSpacing={0.6}
-            textAnchor="middle"
-            opacity={element.opacity}
-            transform={element.transform}
-            // Null means "draw at natural width" — condensing every label
-            // would make short names look wrong to fix a problem they do not
-            // have. See `stampArt.ts`.
-            {...(element.textLength === null
-              ? {}
-              : {
-                  textLength: element.textLength,
-                  lengthAdjust: 'spacingAndGlyphs' as const,
-                })}
-          >
-            {element.text}
-          </SvgText>
-        );
-      })}
+        })}
+      </G>
     </Svg>
   );
 }

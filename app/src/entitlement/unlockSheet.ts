@@ -48,9 +48,7 @@ export interface UnlockSheetInput {
    * back to a bare "Unlock" after a failed purchase.
    */
   price: string | null;
-  /** Places collected, locked ones included (D-075). */
-  collected: number;
-  /** Of those, how many are locked. */
+  /** How many earned stamps are locked: the headline's count (D-097, sheet A). */
   waiting: number;
   /** What paying adds beyond the stamps, once each exists. */
   offers: { medals: boolean; founder: boolean };
@@ -58,6 +56,8 @@ export interface UnlockSheetInput {
 }
 
 export interface UnlockSheetModel {
+  /** The small line over the headline. */
+  eyebrow: string;
   title: string;
   earned: string;
   adds: string[];
@@ -79,15 +79,24 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
   adds.push(say('unlock.adds.once'));
 
   const { price } = input;
-  const buyLabel = price === null ? say('unlock.buy.noPrice') : say('unlock.buy', { price });
+  const waiting = input.waiting > 0;
+  // Sheet A (D-097): with stamps waiting, the offer is to see what is already
+  // theirs; with none (opened from Settings), it is the plain unlock.
+  const buyLabel = waiting
+    ? price === null
+      ? say('unlock.buy.see.noPrice')
+      : say('unlock.buy.see', { price })
+    : price === null
+      ? say('unlock.buy.noPrice')
+      : say('unlock.buy', { price });
   const canBuy = { label: buyLabel, enabled: true };
 
   const model: UnlockSheetModel = {
-    title: say('unlock.title'),
-    earned:
-      input.waiting > 0
-        ? plural(PLURALS['unlock.earned'], input.waiting, language, { collected: input.collected })
-        : say('unlock.earned.none'),
+    eyebrow: say('unlock.eyebrow'),
+    title: waiting
+      ? plural(PLURALS['unlock.title.waiting'], input.waiting, language)
+      : say('unlock.title'),
+    earned: waiting ? say('unlock.lead') : say('unlock.earned.none'),
     adds,
     notice: null,
     buy: canBuy,

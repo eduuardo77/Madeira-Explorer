@@ -181,6 +181,38 @@ export const album = {
 } as const;
 
 /**
+ * Gold and violet: the paywall, its reminders and the celebrations (D-097,
+ * T-249). Drawn from the options the project lead picked
+ * (`tools/preview-unlock-options.mjs`, `tools/preview-trophy-options.mjs`).
+ * Every ink is measured on both ends of the panel's gradient in `contrast.test.ts`.
+ */
+export const reward = {
+  /** The unlock sheet's panel: violet at the top, near-black at the bottom. */
+  panelTop: '#2B2340',
+  panelBottom: '#17171B',
+  /** The panel's edge: a faint light line. Decorative. */
+  panelEdge: '#FFFFFF1A',
+  text: '#F2F2F7',
+  textMuted: '#D1D1D6',
+  /** The small gold line over a headline. */
+  goldInk: '#FFD479',
+  /** The gold fill (badges, the gold button), top to bottom. */
+  gold: '#FFD45C',
+  goldDeep: '#E59A00',
+  goldButton: '#F2B820',
+  goldButtonText: '#1C1C1E',
+  /** A tick in front of what paying adds. */
+  tick: '#7ED957',
+  link: '#5AA9FF',
+  /** The main button. */
+  action: '#5AA9FF',
+  actionText: '#111111',
+  /** Behind a celebration: very dark, with warmth near the stamp. */
+  stageGlow: '#2A2310',
+  stage: '#000000',
+} as const;
+
+/**
  * The floating controls that sit **on the map**, per map style (T-112).
  *
  * ⚠ WHY THE APP'S PALETTE CANNOT SERVE THIS, FOUND BY LOOKING 2026-08-17

@@ -61,6 +61,7 @@ import { writeUpdateNotice } from '../notify/updateNoticeFile';
 import { BETA_BUILD, isUnlocked } from '../entitlement/entitlementStore';
 import { passportSettings, type PassportSettings } from '../entitlement/settingsPassport';
 import { earnedStamps } from '../progress/stampAnnouncer';
+import type { PassportStamp } from './PassportView';
 import UnlockSheet from './UnlockSheet';
 import { useBackHandler } from './useBackHandler';
 import Constants from 'expo-constants';
@@ -101,8 +102,7 @@ export default function SettingsScreen({
   /** The unlock sheet, when a passport row opened it, with the counts it says. */
   const [unlockSheet, setUnlockSheet] = useState<{
     restore: boolean;
-    collected: number;
-    waiting: number;
+    waiting: PassportStamp[];
   } | null>(null);
 
   const readPassport = useCallback(() => {
@@ -111,14 +111,15 @@ export default function SettingsScreen({
       .catch(() => undefined);
   }, []);
 
-  /** Count what is collected and what is waiting, then open the sheet. */
+  /** Find the stamps that are waiting, then open the sheet with them. */
   const openUnlockSheet = (restore: boolean) => {
     void (async () => {
       const stamps = await earnedStamps().catch(() => null);
       setUnlockSheet({
         restore,
-        collected: stamps?.earned.length ?? 0,
-        waiting: stamps?.locked.size ?? 0,
+        waiting: (stamps?.earned ?? [])
+          .filter((stamp) => stamps?.locked.has(stamp.placeId) === true)
+          .map((stamp) => ({ ...stamp, collected: true, locked: true })),
       });
     })();
   };
@@ -473,8 +474,6 @@ export default function SettingsScreen({
       />
       {unlockSheet === null ? null : (
         <UnlockSheet
-          stamp={null}
-          collected={unlockSheet.collected}
           waiting={unlockSheet.waiting}
           startWithRestore={unlockSheet.restore}
           onClose={() => {

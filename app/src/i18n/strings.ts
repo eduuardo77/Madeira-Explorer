@@ -624,6 +624,15 @@ export const STRINGS = {
   // and has not seen yet, never one they failed to get. No price in any of
   // these: the only price is the one Google returns.
   'unlock.title': s('Unlock your passport', 'Desbloqueia o teu passaporte', 'Ihren Reisepass freischalten'),
+  // D-097, sheet A (picked 2026-10-05): what is already theirs, not a purchase.
+  'unlock.eyebrow': s('YOUR PASSPORT', 'O TEU PASSAPORTE', 'IHR REISEPASS'),
+  'unlock.lead': s(
+    "You've been there. All that's left is to see them.",
+    'Já lá estiveste. Só falta vê-los.',
+    'Sie waren schon dort. Es fehlt nur noch, sie zu sehen.'
+  ),
+  'unlock.buy.see': s('See my stamps · {price}', 'Ver os meus carimbos · {price}', 'Meine Stempel ansehen · {price}'),
+  'unlock.buy.see.noPrice': s('See my stamps', 'Ver os meus carimbos', 'Meine Stempel ansehen'),
   'unlock.earned.none': s(
     'Every stamp you collect will be shown in full.',
     'Vais ver todos os carimbos que conseguires.',
@@ -1200,17 +1209,9 @@ export type StringKey = keyof typeof STRINGS;
 export const PLURALS = {
   // T-156d: the unlock sheet's line on what is waiting. `{collected}` is every
   // place collected, locked included; `{count}` is how many are locked.
-  'unlock.earned': {
-    one: s(
-      'You have collected {collected} places, and {count} stamp is waiting to be seen.',
-      'Já visitaste {collected} lugares. Há {count} carimbo à tua espera.',
-      'Sie haben {collected} Orte gesammelt, und {count} Stempel wartet darauf, gesehen zu werden.'
-    ),
-    other: s(
-      'You have collected {collected} places, and {count} stamps are waiting to be seen.',
-      'Já visitaste {collected} lugares. Há {count} carimbos à tua espera.',
-      'Sie haben {collected} Orte gesammelt, und {count} Stempel warten darauf, gesehen zu werden.'
-    ),
+  'unlock.title.waiting': {
+    one: s('You have {count} stamp waiting for you', 'Tens {count} carimbo à tua espera', 'Auf Sie wartet {count} Stempel'),
+    other: s('You have {count} stamps waiting for you', 'Tens {count} carimbos à tua espera', 'Auf Sie warten {count} Stempel'),
   },
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),

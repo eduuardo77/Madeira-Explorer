@@ -411,6 +411,17 @@ section's definition of done.
       on, gold confetti, then the counter and the set's bar; and a second frame for when the stamp
       lifts the passport's rank (bronze to silver at 10, D-078), shown only when it really does.
       ✅ **Picked 2026-10-05: E2 revised, with the rank-up frame.** ("I really like the revised E2".)
+      **Building, piece 1 of 4 ✅ 2026-10-05: sheet A.** `unlockSheet.ts` gains the eyebrow and a
+      headline that counts the waiting stamps (*Tens 5 carimbos à tua espera*), the lead *Já lá
+      estiveste. Só falta vê-los.*, and *Ver os meus carimbos · {price}*; with nothing waiting
+      (Settings) the plain offer stands. `UnlockSheetView` redrawn: a violet panel, the waiting
+      stamps fanned **in colour behind a blur** (`StampArt` gains `blur`, an SVG Gaussian filter),
+      a drawn padlock that wobbles, green ticks, and a button that breathes. Colours are a new
+      `reward` palette in `theme.ts`, measured in `contrast.test.ts`. The sheet now receives the
+      waiting stamps, the tapped one first. **Seen on the emulator** (Android 14), with a probe
+      trip of 10 stamps: the blur renders on Android. **Found by looking:** a glow drawn behind the
+      button read as a grey frame (Android has no blur under a view), so the button breathes
+      instead; the first blur (2.4) left names readable, now 3.4. 968 tests.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
@@ -457,7 +468,7 @@ section's definition of done.
       category set (1 of 19 villages), the stamp's place in the trip (the 2nd), and the nearest
       place not collected (Cabo Girão, 2,9 km in a straight line, in the same medal set). **A** shows
       the medal's four stamps and the next stamp as cards; **B** shows two progress bars and the
-      next stamp as one sentence. Waiting on the project lead's pick.
+      next stamp as one sentence. ✅ **Picked: A** (2026-10-05).
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

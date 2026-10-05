@@ -27,17 +27,17 @@ import { colors, spacing } from './theme';
 import UnlockSheetView from './UnlockSheetView';
 
 export default function UnlockSheet({
-  stamp,
-  collected,
   waiting,
   onClose,
   onUnlocked,
   startWithRestore = false,
 }: {
-  /** The locked stamp that was tapped, drawn as the passport draws it. */
-  stamp: PassportStamp | null;
-  collected: number;
-  waiting: number;
+  /**
+   * The locked stamps, the one tapped first (D-097, sheet A): drawn in colour
+   * behind frosted glass, and counted in the headline. Empty from Settings
+   * when nothing is waiting.
+   */
+  waiting: PassportStamp[];
   onClose: () => void;
   /** The passport is unlocked: redraw what was waiting. */
   onUnlocked: () => void;
@@ -107,8 +107,7 @@ export default function UnlockSheet({
   const model = unlockSheetModel({
     state,
     price,
-    collected,
-    waiting,
+    waiting: waiting.length,
     // Each turns on in the commit that builds it (T-235, T-233).
     offers: { medals: false, founder: false },
     language: deviceLanguage(),
@@ -119,7 +118,7 @@ export default function UnlockSheet({
       <View style={styles.scrim}>
         <UnlockSheetView
           model={model}
-          stamp={stamp}
+          waiting={waiting}
           unlocked={state.kind === 'unlocked'}
           working={state.kind === 'working'}
           onBuy={buy}

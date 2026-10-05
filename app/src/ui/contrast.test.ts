@@ -39,7 +39,7 @@ import { CATEGORIES } from '../content/contentPack.ts';
 import { designFor, UNCOLLECTED, uncollectedFor } from '../passport/stampArt.ts';
 import { contrastRatio, parseHex, relativeLuminance } from './contrast.ts';
 import { NIGHT_LAND } from '../map/googleNightStyle.ts';
-import { album, colors, mapChrome, warningBanner } from './theme.ts';
+import { album, colors, mapChrome, warningBanner, reward } from './theme.ts';
 
 /** Body text. Above WCAG's 4.5, because this is read outdoors. */
 const BODY = 5;
@@ -348,6 +348,26 @@ test('T-203: everything on the dark passport album is readable', () => {
   assert.ok(contrastRatio(album.actionText, album.action) >= BODY, 'the button label');
   // The button is a tap target: its fill must stand out from the card it is on.
   assert.ok(contrastRatio(album.action, album.surface) >= BOUNDARY, 'the button against its card');
+});
+
+test('D-097: the reward palette (unlock sheet, reminders, celebrations) is readable', () => {
+  // Gold and violet arrived with the redesigned paywall (T-249). Every ink is
+  // measured on both panel ends of the gradient it sits on.
+  for (const ground of [reward.panelTop, reward.panelBottom]) {
+    for (const [name, ink] of [
+      ['text', reward.text],
+      ['muted', reward.textMuted],
+      ['gold eyebrow', reward.goldInk],
+      ['tick', reward.tick],
+      ['link', reward.link],
+    ] as const) {
+      const ratio = contrastRatio(ink, ground);
+      assert.ok(ratio >= BODY, `${name} on ${ground} is ${ratio.toFixed(2)}:1`);
+    }
+  }
+  assert.ok(contrastRatio(reward.goldButtonText, reward.goldButton) >= BODY, 'ink on the gold button');
+  assert.ok(contrastRatio(reward.actionText, reward.action) >= BODY, 'ink on the blue button');
+  assert.ok(contrastRatio(reward.action, reward.panelBottom) >= BOUNDARY, 'the blue button against the panel');
 });
 
 /**

@@ -16,7 +16,6 @@ function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   return {
     state: { kind: 'offer' },
     price: '5,99 €',
-    collected: 14,
     waiting: 8,
     offers: { medals: false, founder: false },
     language: 'en',
@@ -24,8 +23,27 @@ function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   };
 }
 
-test('the offer names the price Google gave, on the button', () => {
+test('D-097, sheet A: the headline counts what is waiting, and the button offers to see it', () => {
   const model = unlockSheetModel(input());
+  assert.equal(model.eyebrow, 'YOUR PASSPORT');
+  assert.equal(model.title, 'You have 8 stamps waiting for you');
+  assert.equal(model.earned, "You've been there. All that's left is to see them.");
+  assert.equal(model.buy?.label, 'See my stamps · 5,99 €');
+  assert.equal(unlockSheetModel(input({ waiting: 1 })).title, 'You have 1 stamp waiting for you');
+});
+
+test('D-097, sheet A, in Portuguese as the project lead chose it', () => {
+  const model = unlockSheetModel(input({ language: 'pt' }));
+  assert.equal(model.eyebrow, 'O TEU PASSAPORTE');
+  assert.equal(model.title, 'Tens 8 carimbos à tua espera');
+  assert.equal(model.earned, 'Já lá estiveste. Só falta vê-los.');
+  assert.equal(model.buy?.label, 'Ver os meus carimbos · 5,99 €');
+  assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).title, 'Tens 1 carimbo à tua espera');
+});
+
+test('with nothing waiting (from Settings), the plain offer names the price Google gave', () => {
+  const model = unlockSheetModel(input({ waiting: 0 }));
+  assert.equal(model.title, 'Unlock your passport');
   assert.equal(model.buy?.label, 'Unlock for 5,99 €');
   assert.equal(model.buy?.enabled, true);
   assert.equal(model.restore, 'Restore purchase');
@@ -34,24 +52,13 @@ test('the offer names the price Google gave, on the button', () => {
 });
 
 test('⚠ no price from Google means no price at all, never a remembered one', () => {
-  const model = unlockSheetModel(input({ price: null }));
+  assert.equal(unlockSheetModel(input({ price: null })).buy?.label, 'See my stamps');
+  const model = unlockSheetModel(input({ price: null, waiting: 0 }));
   assert.equal(model.buy?.label, 'Unlock');
   assert.doesNotMatch(JSON.stringify(model), /\d[.,]\d\d/);
 });
 
-test('it says what was earned and how much is waiting, in the user\'s language', () => {
-  assert.equal(
-    unlockSheetModel(input()).earned,
-    'You have collected 14 places, and 8 stamps are waiting to be seen.'
-  );
-  assert.equal(
-    unlockSheetModel(input({ waiting: 1 })).earned,
-    'You have collected 14 places, and 1 stamp is waiting to be seen.'
-  );
-  assert.equal(
-    unlockSheetModel(input({ language: 'pt' })).earned,
-    'Já visitaste 14 lugares. Há 8 carimbos à tua espera.'
-  );
+test('with nothing waiting, it says what paying will show', () => {
   assert.match(unlockSheetModel(input({ waiting: 0 })).earned, /Every stamp you collect/);
 });
 
@@ -133,7 +140,8 @@ test("⚠ a failure keeps Google's price on the button (seen on the P30)", () =>
   // The first version kept the price in the offer state only, and after a
   // failed purchase the button fell back to a bare "Unlock".
   for (const kind of ['failed', 'offline', 'nothingToRestore', 'offer'] as const) {
-    assert.equal(unlockSheetModel(input({ state: { kind } })).buy?.label, 'Unlock for 5,99 €', kind);
+    assert.equal(unlockSheetModel(input({ state: { kind } })).buy?.label, 'See my stamps · 5,99 €', kind);
+    assert.equal(unlockSheetModel(input({ state: { kind }, waiting: 0 })).buy?.label, 'Unlock for 5,99 €', kind);
   }
 });
 

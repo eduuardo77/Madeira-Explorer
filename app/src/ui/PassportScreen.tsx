@@ -410,9 +410,11 @@ export default function PassportScreen({
       )}
       {unlockFrom === null ? null : (
         <UnlockSheet
-          stamp={unlockFrom}
-          collected={stamps.filter((stamp) => stamp.collected).length}
-          waiting={stamps.filter((stamp) => stamp.locked === true).length}
+          // The stamp that was tapped leads the fan; the rest follow.
+          waiting={[
+            unlockFrom,
+            ...stamps.filter((stamp) => stamp.locked === true && stamp.placeId !== unlockFrom.placeId),
+          ]}
           onClose={() => setUnlockFrom(null)}
           // Read everything again: the stamps that were waiting are now shown.
           onUnlocked={() => setReloadKey((key) => key + 1)}

@@ -456,7 +456,7 @@ section's definition of done.
       **Update 2026-10-05 13:23:** the P30 is back on a cable field build with all of it; the
       passport is locked (test order refunded with *Remover titularidade*), but with 2 real stamps
       nothing is locked, so R1, R2 and E3 need probes to be seen there.
-- [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
+- [x] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
       twelve-hour delay. ⚠ **Bug first, reported 2026-10-05:** after the Play install, one

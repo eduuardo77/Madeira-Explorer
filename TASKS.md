@@ -393,7 +393,7 @@ section's definition of done.
       minutes, so the acknowledgement went through. The app's own diary line was not seen.
       **Open:** the relaunch check (blocked by the downgrade prompt until "Permitir sempre" is granted on this new
       install), and V4 to V10.
-- [ ] **T-249** **D-097: the paywall, its reminders and the new-stamp pop-up, redesigned** ⇠ the
+- [~] **T-249** **D-097: the paywall, its reminders and the new-stamp pop-up, redesigned** (built 2026-10-05, emulator only) ⇠ the
       project lead's pick. Options drawn 2026-10-05: `node tools/preview-unlock-options.mjs` →
       `tools/out/unlock-options.html` (served by the `options` entry in `.claude/launch.json`).
       Sheet A (your stamps behind frosted glass), B (the full passport, price tag), C (founder,
@@ -433,6 +433,26 @@ section's definition of done.
       tapping it opens the unlock sheet over the map. The stamp under it still opens the passport.
       The map reads the waiting stamps through `stampAnnouncer.earnedStamps`, like the passport and
       Settings. Never in a beta build. Seen on the emulator: the badge reads 5 and opens the sheet.
+      **Piece 4 of 4 ✅: E2 revised with rank-up, and E3.** `StampNewsCard` redrawn: a gold flash
+      opens rotating rays centred on the stamp, which drops spinning and lands with a shake, a
+      short vibration, an ink ring and confetti; a red postmark with the day is stamped on; the
+      counter ticks; the set's bar fills (*5 de 19 miradouros*), or, only when this stamp crossed a
+      rank line, the new medal arrives (*Passaporte de bronze!*). A locked stamp (E3) lands frosted
+      under the padlock with *É teu. Desbloqueia para o ver a cores, a ele e aos outros 4 à
+      espera.* and *Desbloquear*, which opens sheet A with that stamp leading the fan. The numbers
+      are `progress/stampCelebration.ts` (pure, 6 tests), as of the stamp, so queued pop-ups each
+      tell their own truth. Heading now *"Novo carimbo!"* (it said *selo*, alone in the app). All
+      motion is `Animated` on the native driver; *remove animations* shows it all at once, still.
+      **Seen on the emulator:** rank-up (Pico do Areeiro, the first), plain (Chão dos Terreiros,
+      5 of 19), locked (Praia Formosa), and E3's button opening the sheet. **Found by looking:**
+      the burst was centred on the screen's top, not the stamp, and cut off; an empty band sat
+      above the buttons; the medal repeated the counter. All three fixed.
+      ⚠ **Found, for the tools:** `uiautomator` cannot read a screen whose animation never stops
+      (the rays, the sheet's padlock and button): it reports *could not get idle state* and returns
+      stale nodes, so `tools/lib/device.mjs` cannot drive these screens, and taps went by position.
+      `smoke-release.mjs` will need to dismiss them by coordinate or the loops need a pause.
+      **Left:** none of it has been on the P30, whose app now comes from Play: it reaches the phone
+      with the next internal testing upload. 974 tests.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's

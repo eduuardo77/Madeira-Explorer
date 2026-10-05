@@ -24,6 +24,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { runAwardPass } from './stampAwards';
+import { celebrationFor, type Celebration } from './stampCelebration';
 import { parseTold, stampNews } from './stampNews';
 
 /**
@@ -43,6 +44,10 @@ export type StampPopup = {
   locked: boolean;
   /** When it was earned, for its postmark. */
   awardedTs: number;
+  /** The counter, the set and any rank-up, as of this stamp (T-249). */
+  celebration: Celebration | null;
+  /** Other locked stamps, for a locked stamp's offer (E3). */
+  othersWaiting: number;
 };
 
 type Earned = { placeId: string; name: string; category: Category; awardedTs: number };
@@ -127,8 +132,12 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
       // Seeds the record on the first run, so the backlog is never shown.
       await appStateDao.setJson(appStateDao.AppStateKey.StampsShown, news.record);
     }
+    const places = getContentPack().places;
+    const categoryTotals = { viewpoint: 0, levada: 0, village: 0, beach: 0, landmark: 0 };
+    for (const place of places) categoryTotals[place.category] += 1;
     return news.announce.flatMap((placeId) => {
       const stamp = stamps.earned.find((each) => each.placeId === placeId);
+      const locked = stamps.locked.has(placeId);
       return stamp === undefined
         ? []
         : [
@@ -136,8 +145,10 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
               placeId,
               name: stamp.name,
               category: stamp.category,
-              locked: stamps.locked.has(placeId),
+              locked,
               awardedTs: stamp.awardedTs,
+              celebration: celebrationFor(placeId, stamps.earned, places.length, categoryTotals),
+              othersWaiting: stamps.locked.size - (locked ? 1 : 0),
             },
           ];
     });

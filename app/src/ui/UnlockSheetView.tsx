@@ -14,10 +14,11 @@
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { UnlockSheetModel } from '../entitlement/unlockSheet';
 import { designFor } from '../passport/stampArt';
 import type { PassportStamp } from './PassportView';
+import Padlock from './Padlock';
 import StampArt from './StampArt';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
 
@@ -194,17 +195,6 @@ function useLoop(durationMs: number): Animated.Value {
     return () => loop.stop();
   }, [value, durationMs]);
   return value;
-}
-
-/** An open padlock, drawn: an emoji would be a different picture on every phone. */
-function Padlock() {
-  return (
-    <Svg width={40} height={40} viewBox="0 0 40 40">
-      <Path d="M12 18V12a8 8 0 0 1 15.4-3" stroke={reward.gold} strokeWidth={3.4} fill="none" strokeLinecap="round" />
-      <Rect x={7} y={18} width={26} height={18} rx={4} fill={reward.gold} stroke={reward.goldDeep} strokeWidth={1.5} />
-      <Rect x={18.6} y={23} width={2.8} height={7} rx={1.4} fill={reward.goldDeep} />
-    </Svg>
-  );
 }
 
 const styles = StyleSheet.create({

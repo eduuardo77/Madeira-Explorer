@@ -251,8 +251,11 @@ export default function NativeMapScreen({
   const [progress, setProgress] = useState<TripProgress>(EMPTY_PROGRESS);
   /** D-097, R2: the locked stamps, counted on the passport button. */
   const [waiting, setWaiting] = useState<PassportStamp[]>([]);
-  /** The unlock sheet, opened from that count. */
-  const [unlocking, setUnlocking] = useState(false);
+  /**
+   * The unlock sheet, opened from that count (null when closed), and the stamp
+   * that leads its fan: the one just celebrated, when E3 opened it.
+   */
+  const [unlocking, setUnlocking] = useState<{ first: string | null } | null>(null);
   /** What the passport button draws (D-083) — the placeholder until loaded. */
   const [passportStamp, setPassportStamp] = useState<ButtonStamp>(() =>
     buttonStamp([], [], false, t('passport.title'))
@@ -910,7 +913,7 @@ export default function NativeMapScreen({
         bottomSlot={card !== null ? <PlaceCardView card={card} onClose={closeCard} /> : null}
         onOpenPassport={onOpenPassport}
         waitingCount={waiting.length}
-        onOpenUnlock={BETA_BUILD ? undefined : () => setUnlocking(true)}
+        onOpenUnlock={BETA_BUILD ? undefined : () => setUnlocking({ first: null })}
         onOpenSettings={onOpenSettings}
         isWalking={walkStarted}
         control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}
@@ -922,10 +925,13 @@ export default function NativeMapScreen({
         onRecentre={recentre}
       />
 
-      {!unlocking ? null : (
+      {unlocking === null ? null : (
         <UnlockSheet
-          waiting={waiting}
-          onClose={() => setUnlocking(false)}
+          waiting={[
+            ...waiting.filter((stamp) => stamp.placeId === unlocking.first),
+            ...waiting.filter((stamp) => stamp.placeId !== unlocking.first),
+          ]}
+          onClose={() => setUnlocking(null)}
           // Read the map again: the count goes, and the button's stamp is shown.
           onUnlocked={() => setResumeCount((count) => count + 1)}
         />
@@ -946,6 +952,19 @@ export default function NativeMapScreen({
             setStampNews([]);
             onOpenPassport();
           }}
+          // E3 (D-097): a locked stamp's offer opens the unlock sheet here.
+          onUnlock={
+            BETA_BUILD
+              ? undefined
+              : () => {
+                  const first = stampNews[0].placeId;
+                  for (const stamp of stampNews) {
+                    void markStampShown(stamp.placeId);
+                  }
+                  setStampNews([]);
+                  setUnlocking({ first });
+                }
+          }
         />
       )}
     </View>

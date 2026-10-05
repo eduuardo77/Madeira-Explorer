@@ -368,6 +368,11 @@ test('D-097: the reward palette (unlock sheet, reminders, celebrations) is reada
   assert.ok(contrastRatio(reward.goldButtonText, reward.goldButton) >= BODY, 'ink on the gold button');
   assert.ok(contrastRatio(reward.actionText, reward.action) >= BODY, 'ink on the blue button');
   assert.ok(contrastRatio(reward.action, reward.panelBottom) >= BOUNDARY, 'the blue button against the panel');
+  // The rank-up medal carries the count in dark ink (T-249).
+  for (const tier of ['bronze', 'silver', 'gold', 'platinum'] as const) {
+    const ratio = contrastRatio(reward.goldButtonText, reward.medal[tier]);
+    assert.ok(ratio >= BODY, `the count on a ${tier} medal is ${ratio.toFixed(2)}:1`);
+  }
 });
 
 /**

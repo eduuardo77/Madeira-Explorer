@@ -1059,12 +1059,25 @@ export const STRINGS = {
     'In Ihrem Reisepass aufbewahrt, bereit zum Freischalten.'
   ),
   // D-096: the map's pop-up for a stamp earned since it was last looked at.
-  'stampNews.heading': s('New stamp', 'Novo selo', 'Neuer Stempel'),
+  // T-249 (E2 revised, E3): "carimbo", as everywhere else; it said "selo" here.
+  'stampNews.heading': s('New stamp!', 'Novo carimbo!', 'Neuer Stempel!'),
   'stampNews.locked': s(
-    'Kept in your passport. Unlock to see the stamp.',
-    'Guardado no seu passaporte. Desbloqueie para ver o selo.',
-    'In Ihrem Reisepass aufbewahrt. Freischalten, um den Stempel zu sehen.'
+    "It's yours. Unlock it to see it in colour.",
+    'É teu. Desbloqueia para o ver a cores.',
+    'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen.'
   ),
+  'stampNews.unlock': s('Unlock', 'Desbloquear', 'Freischalten'),
+  // The set line, one per category so each language can decline its noun.
+  'stampNews.set.viewpoint': s('{count} of {total} viewpoints', '{count} de {total} miradouros', '{count} von {total} Aussichtspunkten'),
+  'stampNews.set.levada': s('{count} of {total} levadas', '{count} de {total} levadas', '{count} von {total} Levadas'),
+  'stampNews.set.village': s('{count} of {total} villages', '{count} de {total} aldeias', '{count} von {total} Dörfern'),
+  'stampNews.set.beach': s('{count} of {total} beaches', '{count} de {total} praias', '{count} von {total} Stränden'),
+  'stampNews.set.landmark': s('{count} of {total} landmarks', '{count} de {total} monumentos', '{count} von {total} Sehenswürdigkeiten'),
+  // The rank-up frame (D-078), shown only when this stamp crossed the line.
+  'stampNews.rankUp.bronze': s('Bronze passport!', 'Passaporte de bronze!', 'Bronze-Reisepass!'),
+  'stampNews.rankUp.silver': s('Silver passport!', 'Passaporte de prata!', 'Silber-Reisepass!'),
+  'stampNews.rankUp.gold': s('Gold passport!', 'Passaporte de ouro!', 'Gold-Reisepass!'),
+  'stampNews.rankUp.platinum': s('Platinum passport!', 'Passaporte de platina!', 'Platin-Reisepass!'),
   'stampNews.passport': s('See in passport', 'Ver no passaporte', 'Im Reisepass ansehen'),
   'stampNews.close': s('Close', 'Fechar', 'Schließen'),
   // Option E's postmark on a collected stamp prints the day it was earned
@@ -1209,6 +1222,19 @@ export type StringKey = keyof typeof STRINGS;
 
 /** Counted strings, where singular and plural differ. */
 export const PLURALS = {
+  // T-249, E3: a locked stamp's celebration, with how many others wait.
+  'stampNews.lockedMore': {
+    one: s(
+      "It's yours. Unlock it to see it in colour, with the other one waiting.",
+      'É teu. Desbloqueia para o ver a cores, a ele e ao outro à espera.',
+      'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen, zusammen mit dem anderen.'
+    ),
+    other: s(
+      "It's yours. Unlock it to see it in colour, with the {count} others waiting.",
+      'É teu. Desbloqueia para o ver a cores, a ele e aos outros {count} à espera.',
+      'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen, zusammen mit den {count} anderen.'
+    ),
+  },
   // D-097, R2: the gold count on the map's passport button.
   'map.a11y.unlockWaiting': {
     one: s('{count} stamp waiting. Unlock the passport', '{count} carimbo à espera. Desbloquear o passaporte', '{count} Stempel wartet. Reisepass freischalten'),

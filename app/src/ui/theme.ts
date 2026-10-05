@@ -215,6 +215,22 @@ export const reward = {
   /** Behind a celebration: very dark, with warmth near the stamp. */
   stageGlow: '#2A2310',
   stage: '#000000',
+  /** The flash that opens a celebration. Decorative. */
+  flash: '#FFF4C2',
+  /** Confetti, in turn. Decorative. */
+  confetti: ['#F2A900', '#FFE08A', '#5AA9FF', '#FF6B6B', '#FFFFFF'],
+  /** The postmark stamped on a new stamp: red ink, as the post office's. */
+  postmarkInk: '#E5484D',
+  /** The track under a set's progress bar. */
+  barTrack: '#3A3A3C',
+  /** The passport's rank, as a medal's fill (D-078). `none` is never drawn. */
+  medal: {
+    none: '#3A3A3C',
+    bronze: '#D08B4C',
+    silver: '#C9CED6',
+    gold: '#F2B820',
+    platinum: '#E8F0F7',
+  },
 } as const;
 
 /**

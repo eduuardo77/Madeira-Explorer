@@ -38,8 +38,8 @@ after (backups `Madeira-fieldwork/p30-2026-10-05-t250*/`). Copy approved (versio
 **Next, in order:** (1) show T-249 on the P30 with probes, if the project lead wants; (2) **T-250**,
 first run after WalkNYC (approved as drawn), whose notifications screen now says something false
 (*"two messages... nothing else, ever"*, untrue since D-096): rewrite, the lead approves the copy;
-(3) the **version 3 AAB** for internal testing when the lead asks (bump `versionCode` in `app.json`
-and `app/android/app/build.gradle`); (4) Phase 3, T-233.
+(3) ✅ **version 3 AAB built 2026-10-05 15:15** (`Madeira-fieldwork/apks/bruma-0.1.0-vc3.aab`: upload key,
+not debuggable, T-249, T-251 and T-250 in it), for the lead to upload; the next one is version 4; (4) Phase 3, T-233.
 
 **Traps found this session, each cost time:**
 - **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at

@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- T-250: the one-tap "let it always run in the background" dialog, WalkNYC's
+       way, instead of the system list the user had to search. Play reviews this
+       permission against its acceptable uses; D-045 recorded it as the fallback,
+       and the project lead chose it on 2026-10-05 (first run, O3). -->
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+</manifest>

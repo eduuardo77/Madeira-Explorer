@@ -36,6 +36,8 @@ const NEEDED = [
   // The one purchase, through Google Play (D-089, D-091). Stripped, the unlock
   // sheet would open and nothing could be bought.
   'com.android.vending.BILLING',
+  // T-250: the one-tap battery dialog (O3). Stripped, it fails silently to the settings list.
+  'android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
 ];
 
 test('⚠ T-194 — nothing the recorder, the map or a notification needs is stripped', () => {

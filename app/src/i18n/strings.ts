@@ -44,7 +44,7 @@ export const STRINGS = {
   // read "Aldeia · Visitado". Place names and categories come in both genders,
   // so these say "já lá esteve" / "ainda por visitar", which agree with nothing.
   // `i18n.test.ts` fails the build on a placeholder followed by "visitado".
-  // ── Onboarding (T-114, D-041) ───────────────────────────────────────────
+  // ── Onboarding (T-114, D-041; redrawn after WalkNYC in T-250) ───────────
   // T-191: "Bem-vindo" addresses a man; "Boas-vindas" addresses anyone.
   // ⚠ T-200 (review P1-3): onboarding sold a passive tracker — "this app
   // quietly notes the places you visit" — which is the part competitors give
@@ -52,6 +52,8 @@ export const STRINGS = {
   // It now leads with what is collected. `{destination}` and `{count}` come
   // from the content pack; the island's name used to be written here, against
   // D-017.
+  // ⚠ T-250 (2026-10-05): first run speaks Portuguese in "tu", as the project
+  // lead wrote the approved sketches and the unlock sheet. German keeps "Sie".
   'onboarding.welcome.title': s('Welcome to {app}', 'Boas-vindas ao {app}', 'Willkommen bei {app}'),
   // ⚠ Never rendered until T-054 measures the figure (D-041); translated ahead of it.
   'onboarding.battery': s(
@@ -61,35 +63,77 @@ export const STRINGS = {
   ),
   'onboarding.welcome.body1': s(
     '{destination} has {count} places waiting for a stamp in your passport. Go to one, and its stamp appears by itself.',
-    '{destination} tem {count} lugares à espera de um carimbo no seu passaporte. Vá a um, e o carimbo aparece sozinho.',
+    '{destination} tem {count} lugares à espera de um carimbo no teu passaporte. Vai a um, e o carimbo aparece sozinho.',
     '{destination} hat {count} Orte, die auf einen Stempel in Ihrem Reisepass warten. Gehen Sie zu einem, und der Stempel erscheint von selbst.'
   ),
   'onboarding.welcome.body2': s(
-    'Along the way {app} draws everywhere you went, and on your way home it turns the trip into a map to keep.',
-    'Pelo caminho, o {app} desenha tudo por onde passou e, no regresso, transforma a viagem num mapa para guardar.',
-    'Unterwegs zeichnet {app} alles auf, wo Sie waren, und auf dem Heimweg wird daraus eine Karte zum Behalten.'
-  ),
-  'onboarding.location.title': s(
-    'It needs to know where you go',
-    'Precisa de saber por onde anda',
-    'Sie muss wissen, wohin Sie gehen'
-  ),
-  'onboarding.location.body1': s(
-    'That is how stamps are collected: {app} notices the places you reach, and draws where you travelled.',
-    'É assim que se obtêm os carimbos: o {app} repara nos lugares a que chega e desenha por onde viajou.',
-    'So kommen die Stempel zustande: {app} bemerkt die Orte, die Sie erreichen, und zeichnet Ihren Weg.'
-  ),
-  'onboarding.location.body2': s(
-    'There is no account, and your trip is never sent to us. It stays on this phone, and in your phone’s own backup, if you have that switched on.',
-    'Não há conta e a sua viagem nunca nos é enviada. Fica neste telemóvel, e na cópia de segurança do próprio telemóvel, se a tiver ligada.',
-    'Es gibt kein Konto, und Ihre Reise wird nie an uns gesendet. Sie bleibt auf diesem Telefon und in der eigenen Sicherung Ihres Telefons, falls diese eingeschaltet ist.'
+    'And along the way, {app} lights up every road you travel.',
+    'E pelo caminho, o {app} acende cada estrada por onde passas.',
+    'Und unterwegs lässt {app} jede Straße aufleuchten, auf der Sie waren.'
   ),
   'onboarding.action.start': s('Get started', 'Começar', 'Los geht es'),
-  'onboarding.action.allow': s('Allow location', 'Permitir localização', 'Standort erlauben'),
-  'onboarding.action.skip': s('Skip for now', 'Agora não', 'Später'),
+  'onboarding.action.continue': s('Continue', 'Continuar', 'Weiter'),
   'onboarding.action.notNow': s('Not now', 'Agora não', 'Jetzt nicht'),
+  /** The step count over every first-run card ("2 de 4"). */
+  'onboarding.step': s('{step} of {of}', '{step} de {of}', '{step} von {of}'),
+  /** Above the replica of Android's own dialog: what comes next, and which answer. */
+  'onboarding.next.dialog': s('Next, Android asks:', 'A seguir, o Android pergunta:', 'Als Nächstes fragt Android:'),
+  'onboarding.next.settings': s(
+    'Next, Android opens this page. Choose:',
+    'A seguir, o Android abre esta página. Escolhe:',
+    'Als Nächstes öffnet Android diese Seite. Wählen Sie:'
+  ),
+  'onboarding.next.pick': s('Choose this', 'Escolhe este', 'Diese wählen'),
 
-  // ── Onboarding: physical activity (D-094) ───────────────────────────────
+  // ── O1: location, While-Using ────────────────────────────────────────────
+  'onboarding.location.title': s(
+    'Your map fills itself in',
+    'O teu mapa enche-se sozinho',
+    'Ihre Karte füllt sich von selbst'
+  ),
+  'onboarding.location.body1': s(
+    '{app} lights up the roads you travel and stamps the places you reach. For that, it needs to know where you are.',
+    'O {app} acende as estradas por onde passas e carimba os lugares a que chegas. Para isso, precisa de saber onde estás.',
+    '{app} lässt die Straßen aufleuchten, auf denen Sie unterwegs sind, und stempelt die Orte, die Sie erreichen. Dafür muss die App wissen, wo Sie sind.'
+  ),
+  'onboarding.location.note': s(
+    'There is no account, and your trip is never sent to us.',
+    'Não há conta, e a tua viagem nunca nos é enviada.',
+    'Es gibt kein Konto, und Ihre Reise wird nie an uns gesendet.'
+  ),
+
+  // ── O2: all the time, with Play's prominent disclosure ──────────────────
+  // ⚠ COMPLIANCE TEXT (T-121), in first run since T-250. Google Play requires a
+  // prominent disclosure before background location is requested, and between
+  // them `body1` and `note` must say, in every language: WHAT is collected
+  // (location data), WHEN (even when the app is closed or not in use), and WHAT
+  // FOR (drawing the user's own map). A rewording may be plainer; it may not
+  // drop any of the three. `i18n.test.ts` checks the three are present.
+  'onboarding.always.title': s(
+    'Even with your phone in your pocket',
+    'Mesmo com o telemóvel no bolso',
+    'Auch mit dem Telefon in der Tasche'
+  ),
+  'onboarding.always.body1': s(
+    'To fill in your map without you opening the app, {app} collects location data even when it is closed or not in use.',
+    'Para encher o teu mapa sem teres de abrir a app, o {app} recolhe dados de localização mesmo quando está fechado ou não está a ser usado.',
+    'Damit sich Ihre Karte füllt, ohne dass Sie die App öffnen, erfasst {app} Standortdaten auch dann, wenn die App geschlossen ist oder nicht verwendet wird.'
+  ),
+  'onboarding.always.note': s(
+    'They are used only to draw your own map on this phone. They are never sent to us, never sold, and never used for advertising.',
+    'Servem só para desenhar o teu mapa neste telemóvel. Nunca nos são enviados, nunca são vendidos e nunca são usados para publicidade.',
+    'Sie dienen nur dazu, Ihre eigene Karte auf diesem Telefon zu zeichnen. Sie werden nie an uns gesendet, nie verkauft und nie für Werbung genutzt.'
+  ),
+  /** Android 11 and later: the answer is on a settings page, not a dialog. */
+  'onboarding.always.openSettings': s('Open settings', 'Abrir definições', 'Einstellungen öffnen'),
+  // The decline names what happens instead (2026-09-22), as the later prompts do.
+  'onboarding.always.skip': s(
+    'I’ll start it myself',
+    'Prefiro iniciar eu',
+    'Ich starte selbst'
+  ),
+
+  // ── Physical activity (D-094) ───────────────────────────────────────────
   // Android's "Physical activity". Optional (D-008): the map works without it.
   // What it buys, in the user's terms: the right road, and no lines drawn
   // while the phone lies still. The privacy policy says the same.
@@ -99,73 +143,109 @@ export const STRINGS = {
     'Zu Fuß oder im Auto?'
   ),
   'onboarding.activity.body1': s(
-    'Your phone can tell whether you are walking, in a car, or keeping still. With that, {app} lights the street you drove along rather than the path beside it, and draws nothing while your phone sits on a table.',
-    'O seu telemóvel sabe dizer se está a andar, num carro ou parado. Com isso, o {app} ilumina a rua por onde conduziu e não o caminho ao lado, e não desenha nada enquanto o telemóvel está pousado numa mesa.',
-    'Ihr Telefon erkennt, ob Sie gehen, fahren oder stillstehen. Damit leuchtet {app} die Straße auf, die Sie gefahren sind, statt des Wegs daneben, und zeichnet nichts, während Ihr Telefon auf dem Tisch liegt.'
+    'Your phone can tell whether you are walking, driving or keeping still. With that, {app} lights the right road, and draws nothing while your phone lies on a table.',
+    'O teu telemóvel sabe se estás a andar, a conduzir ou parado. Assim o {app} acende a estrada certa, e não desenha nada enquanto o telemóvel está pousado numa mesa.',
+    'Ihr Telefon erkennt, ob Sie gehen, fahren oder stillstehen. Damit leuchtet {app} die richtige Straße auf und zeichnet nichts, während Ihr Telefon auf dem Tisch liegt.'
   ),
-  'onboarding.activity.body2': s(
-    'It stays on your phone, like the rest of your trip. You can say no, and the map still works.',
-    'Fica no seu telemóvel, como o resto da viagem. Pode dizer que não, e o mapa continua a funcionar.',
-    'Es bleibt auf Ihrem Telefon, wie der Rest Ihrer Reise. Sie können ablehnen, und die Karte funktioniert trotzdem.'
+  'onboarding.activity.note': s(
+    'It stays on your phone. If you say no, the map still works.',
+    'Fica no teu telemóvel. Se disseres que não, o mapa continua a funcionar.',
+    'Es bleibt auf Ihrem Telefon. Wenn Sie ablehnen, funktioniert die Karte trotzdem.'
   ),
-  'onboarding.activity.allow': s('Allow', 'Permitir', 'Erlauben'),
 
-  // ── Onboarding: notifications (D-011 — exactly two per trip) ────────────
+  // ── Notifications ───────────────────────────────────────────────────────
+  // ⚠ T-250: this said "Two messages. That is all. Nothing else, ever." and has
+  // been false since D-096 announced every stamp. It now names what is sent:
+  // a quiet one per stamp (D-096), the day-1 check (T-049) and the finished
+  // map (D-011). "No offers" stays true: D-097 sends no purchase notification.
   'onboarding.messages.title': s(
-    'Two messages. That is all.',
-    'Duas mensagens. Só isso.',
-    'Zwei Nachrichten. Mehr nicht.'
+    'Know when you earn a stamp',
+    'Sabe quando ganhas um carimbo',
+    'Erfahren Sie, wann Sie einen Stempel bekommen'
   ),
   'onboarding.messages.body1': s(
-    'Tomorrow, one message to confirm it is working, so a problem cannot go unnoticed for your whole trip.',
-    'Amanhã, uma mensagem a confirmar que está a funcionar, para que um problema não passe despercebido a viagem inteira.',
-    'Morgen eine Nachricht zur Bestätigung, dass alles läuft, damit ein Problem nicht Ihre ganze Reise lang unbemerkt bleibt.'
+    'A quiet message for each new stamp, with no sound. And two about your trip: tomorrow, to say whether everything is working, and at the end, when your map is ready.',
+    'Uma mensagem discreta por cada carimbo novo, sem som. E duas sobre a viagem: amanhã, a dizer se está tudo a funcionar, e no fim, quando o teu mapa estiver pronto.',
+    'Eine leise Nachricht für jeden neuen Stempel, ohne Ton. Und zwei zu Ihrer Reise: morgen, ob alles läuft, und am Ende, wenn Ihre Karte fertig ist.'
   ),
-  'onboarding.messages.body2': s(
-    'And one at the end, when your map is ready.',
-    'E outra no fim, quando o seu mapa estiver pronto.',
-    'Und eine am Ende, wenn Ihre Karte fertig ist.'
+  'onboarding.messages.note': s(
+    'Never advertising, never offers.',
+    'Nunca publicidade, nunca promoções.',
+    'Nie Werbung, nie Angebote.'
   ),
-  // ⚠ THE KEEP-RUNNING SCREEN (2026-08-28, Android only). Written for EMUI,
-  // MIUI and ColorOS, where an app is paused the moment it leaves the screen and
-  // nothing in the app can tell the user why the map stopped filling in. No
-  // jargon: "battery optimisation" is the phone's phrase and appears only in the
-  // note, so the screen the button opens is recognisable when they get there.
-  // ⚠ "Swipe away" is named in plain words because it is the one thing the user
-  // does that silently ends recording, and no permission can prevent it.
+
+  // ── O3: keep running (Android only) ─────────────────────────────────────
+  // Written for EMUI, MIUI and ColorOS, where an app is paused the moment it
+  // leaves the screen and nothing in the app can tell the user why the map
+  // stopped filling in. ⚠ "Asks Android", not "fixes it": the one-tap dialog is
+  // the official lever, and some skins (EMUI's app launch manager) stop apps
+  // anyway, which nobody has measured yet (T-053).
   'onboarding.keepRunning.title': s(
-    'Let {app} keep running',
-    'Deixe o {app} continuar',
-    'Lassen Sie {app} weiterlaufen'
+    'Don’t let Android stop the recording',
+    'Não deixes o Android parar o registo',
+    'Damit Android die Aufzeichnung nicht stoppt'
   ),
   'onboarding.keepRunning.body1': s(
-    'Some phones pause apps to save power. If that happens to this one, your map quietly stops filling in.',
-    'Alguns telemóveis pausam aplicações para poupar energia. Se isso acontecer a esta, o seu mapa deixa de se preencher sem avisar.',
-    'Manche Telefone pausieren Apps, um Strom zu sparen. Passiert das hier, füllt sich Ihre Karte stillschweigend nicht mehr.'
+    'Some phones close apps to save battery, and then your map stops filling in. One tap asks Android to leave {app} running.',
+    'Alguns telemóveis fecham apps para poupar bateria, e o teu mapa deixa de se encher. Um toque pede ao Android que deixe o {app} a funcionar.',
+    'Manche Telefone schließen Apps, um Akku zu sparen, und dann füllt sich Ihre Karte nicht mehr. Ein Tippen bittet Android, {app} weiterlaufen zu lassen.'
   ),
-  'onboarding.keepRunning.body2': s(
-    'And do not swipe {app} away from your recent apps while you are out. Locking your phone or switching apps is fine. Closing it is what stops the recording.',
-    'E não deslize o {app} para fora das aplicações recentes enquanto estiver na rua. Bloquear o telemóvel ou mudar de aplicação não faz mal. Fechá-la é que para o registo.',
-    'Und wischen Sie {app} unterwegs nicht aus den zuletzt verwendeten Apps. Das Telefon sperren oder die App wechseln ist in Ordnung. Sie zu schließen beendet die Aufzeichnung.'
+
+  // ── The last card: what is on, and the map ──────────────────────────────
+  'onboarding.ready.title': s('All set', 'Tudo pronto', 'Alles bereit'),
+  'onboarding.ready.always': s(
+    'Your map fills in by itself, even with the app closed.',
+    'O teu mapa enche-se sozinho, mesmo com a app fechada.',
+    'Ihre Karte füllt sich von selbst, auch bei geschlossener App.'
   ),
-  'onboarding.keepRunning.note': s(
-    'The button opens your phone’s own battery settings. Look for {app} in the list.',
-    'O botão abre as definições de bateria do seu telemóvel. Procure o {app} na lista.',
-    'Die Schaltfläche öffnet die Akku-Einstellungen Ihres Telefons. Suchen Sie dort {app}.'
+  'onboarding.ready.whileUsing': s(
+    'Press Start an outing on the map when you go out, and your map fills in while it runs.',
+    'Carrega em Começar passeio no mapa quando saíres, e o teu mapa enche-se enquanto o passeio dura.',
+    'Tippen Sie auf der Karte auf Ausflug starten, wenn Sie losziehen, und Ihre Karte füllt sich, solange er läuft.'
   ),
-  'onboarding.keepRunning.open': s(
-    'Open battery settings',
-    'Abrir definições de bateria',
-    'Akku-Einstellungen öffnen'
+  'onboarding.ready.denied': s(
+    'Without your location the map stays empty. You can turn it on later in your phone’s settings.',
+    'Sem a tua localização, o mapa fica vazio. Podes ligá-la mais tarde nas definições do telemóvel.',
+    'Ohne Ihren Standort bleibt die Karte leer. Sie können ihn später in den Einstellungen Ihres Telefons einschalten.'
   ),
-  'onboarding.keepRunning.skip': s('Got it', 'Percebi', 'Verstanden'),
-  'onboarding.messages.note': s(
-    'Nothing else, ever. No offers, no reminders.',
-    'Mais nada, nunca. Sem promoções, sem lembretes.',
-    'Sonst nichts, niemals. Keine Angebote, keine Erinnerungen.'
+  // ⚠ "Swipe away" is named in plain words because it is the one thing the user
+  // does that silently ends recording, and no permission can prevent it.
+  'onboarding.ready.tip': s(
+    'One tip: don’t swipe {app} away from your recent apps. Locking your phone is fine.',
+    'Uma dica: não feches o {app} deslizando-o das apps recentes. Bloquear o telemóvel não faz mal.',
+    'Ein Tipp: Wischen Sie {app} nicht aus den zuletzt verwendeten Apps. Das Telefon sperren ist in Ordnung.'
   ),
-  'onboarding.messages.allow': s('Allow messages', 'Permitir mensagens', 'Nachrichten erlauben'),
-  'onboarding.messages.deny': s('No messages', 'Sem mensagens', 'Keine Nachrichten'),
+  'onboarding.ready.open': s('Open the map', 'Abrir o mapa', 'Zur Karte'),
+
+  // ── Android's own words, for the replica of its dialog (T-250) ──────────
+  // ⚠ NOT OURS TO WORD. Each is the label Android itself shows, read out of the
+  // phone's own PermissionController and Settings on 2026-10-05: Android 10
+  // from the P30 (EMUI's overlay changes none of them), Android 11 and later
+  // from the Android 14 emulator. A replica that names a button the phone does
+  // not show is worse than none, so fix these from a phone, never by ear.
+  // ⚠ Android 11 itself (API 30) was not read; it is given the Android 14 set.
+  'os.allow': s('Allow', 'Permitir', 'Zulassen'),
+  'os.deny': s('Deny', 'Recusar', 'Ablehnen'),
+  'os.dontAllow': s('Don’t allow', 'Não permitir', 'Nicht zulassen'),
+  'os.allowAlways': s('Allow all the time', 'Permitir sempre', 'Immer zulassen'),
+  'os.q.whileUsing': s(
+    'Allow only while using the app',
+    'Permitir apenas durante a utilização da aplicação',
+    'Zugriff nur während der Nutzung der App zulassen'
+  ),
+  'os.q.keepWhileUsing': s(
+    'Keep while-in-use access',
+    'Manter acesso durante a utilização',
+    'Zugriff während der Verwendung beibehalten'
+  ),
+  'os.whileUsing': s('While using the app', 'Enquanto uso a app', 'Bei Nutzung der App'),
+  'os.onlyThisTime': s('Only this time', 'Apenas desta vez', 'Nur dieses Mal'),
+  'os.settings.whileUsing': s(
+    'Allow only while using the app',
+    'Permitir apenas enquanto uso a app',
+    'Zugriff nur während der Nutzung der App zulassen'
+  ),
+  'os.settings.askEveryTime': s('Ask every time', 'Perguntar sempre', 'Jedes Mal fragen'),
 
   // ── Onboarding: the Android prominent disclosure ────────────────────────
   // ⚠ COMPLIANCE TEXT (T-121). Google Play requires a prominent disclosure

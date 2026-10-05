@@ -19,13 +19,18 @@
  * ------------
  *   1. Welcome — what this does, in one sentence.
  *   2. Location — why, then the system dialog. While-Using only.
+ *   2b. All the time (Android, T-250) — Play's disclosure and the ask, in first
+ *      run since 2026-10-05: the project lead chose WalkNYC's order (O2), so
+ *      the twelve-hour wait below now serves only iOS and older installs.
  *   2a. Physical activity (Android, D-094) — why, then the system dialog.
  *      Right after location because it serves the same map; with its own
  *      screen in front, so it is never a second dialog on the heels of the
  *      first.
  *   3. Notifications — explained separately, because D-011 spends exactly two
  *      of them and the day-1 check (T-049) is useless without permission.
- *   4. Done. The map appears and the app goes quiet.
+ *   3a. Keep running (Android) — the one-tap battery dialog (T-250, O3),
+ *      skipped when Android already leaves the app alone.
+ *   4. Ready — what is on, and the map. The flow shows it; it is not a step.
  *
  * Then, days later and outside onboarding entirely, the Always upgrade
  * (T-043) and downgrade recovery (T-044).
@@ -73,6 +78,7 @@ export function notificationAnswer(input: {
 export type OnboardingStep =
   | 'welcome'
   | 'location'
+  | 'always'
   | 'activity'
   | 'notifications'
   | 'keep-running'
@@ -142,6 +148,16 @@ export type OnboardingState = {
    * can read the platform and the native module; this module cannot.
    */
   activityAskable: boolean;
+  /**
+   * The Always ask has been made, in first run or as the later upgrade
+   * (`always_offered_ts`). Asked once, ever (D-008).
+   */
+  alwaysOffered: boolean;
+  /**
+   * Android already exempts the app from battery optimisation, so the
+   * keep-running screen has nothing to ask (T-250). False when unknown.
+   */
+  batteryExempt: boolean;
 };
 
 /**
@@ -159,8 +175,15 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
   if (state.location === 'undetermined') {
     return 'welcome';
   }
-  // Location has been answered, either way. Physical activity next (D-094),
-  // once, where the phone can report it.
+  // ⚠ T-250 (2026-10-05): Android asks for "all the time" right after, in
+  // first run, as WalkNYC does (O2, the project lead's pick). Only after a
+  // While-Using grant: somebody who refused location does not want a bigger
+  // version of the same question. iOS keeps the later upgrade, because its
+  // escalation shows a map of everywhere the app has been (T-043).
+  if (state.android && state.location === 'while_using' && !state.alwaysOffered) {
+    return 'always';
+  }
+  // Physical activity next (D-094), once, where the phone can report it.
   if (state.activityAskable) {
     return 'activity';
   }
@@ -177,10 +200,42 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
   // ⚠ It is a screen, not a gate (D-008): both actions move on, and it is shown
   // once. It is deliberately after notifications rather than before, because two
   // system dialogs back to back get both refused and this one opens a third.
-  if (state.android && !state.keepRunningSeen) {
+  if (state.android && !state.keepRunningSeen && !state.batteryExempt) {
     return 'keep-running';
   }
   return 'complete';
+}
+
+/** The asks first run makes, each its own card with the same layout (T-250). */
+export type FirstRunAsk = 'location' | 'always' | 'activity' | 'notifications' | 'keep-running';
+
+/**
+ * Every ask first run expects to make from here, in order, for the step count
+ * ("2 de 4"). Worked out once, at the welcome, as if location will be granted
+ * While-Using: an ask that later stops applying (Always, after a refusal) is
+ * passed over and the count jumps, which is honest; a count that shrank as you
+ * went would read as a mistake.
+ */
+export function firstRunPlan(state: OnboardingState): FirstRunAsk[] {
+  const plan: FirstRunAsk[] = [];
+  const undecided = state.location === 'undetermined';
+  if (undecided) plan.push('location');
+  if (state.android && (undecided || state.location === 'while_using') && !state.alwaysOffered) {
+    plan.push('always');
+  }
+  if (state.activityAskable) plan.push('activity');
+  if (state.notifications === 'undetermined') plan.push('notifications');
+  if (state.android && !state.keepRunningSeen && !state.batteryExempt) plan.push('keep-running');
+  return plan;
+}
+
+/** Where a card sits in the plan, 1-based, or null when it is not part of it. */
+export function stepPosition(
+  plan: readonly FirstRunAsk[],
+  ask: string
+): { step: number; of: number } | null {
+  const index = plan.indexOf(ask as FirstRunAsk);
+  return index === -1 ? null : { step: index + 1, of: plan.length };
 }
 
 /**

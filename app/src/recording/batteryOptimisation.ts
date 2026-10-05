@@ -48,6 +48,50 @@
  */
 
 import { Linking, Platform } from 'react-native';
+import { requireOptionalNativeModule } from 'expo';
+
+/**
+ * ⚠ **T-250 (2026-10-05): the two limits above are lifted where the native
+ * module exists.** `app/modules/battery-exemption` reads the exemption and
+ * shows the one-tap dialog (option 1), the project lead's choice for first run
+ * (O3, after WalkNYC), which takes D-045's fallback now. A build without the
+ * module, or iOS, gets null and the settings list as before.
+ */
+type NativeBatteryExemption = {
+  isExempt(): boolean;
+  request(): Promise<'exempt' | 'declined' | 'unavailable'>;
+};
+
+const native: NativeBatteryExemption | null =
+  Platform.OS === 'android'
+    ? requireOptionalNativeModule<NativeBatteryExemption>('BatteryExemption')
+    : null;
+
+/** Whether Android leaves this app alone to save battery; null when it cannot say. */
+export function batteryExempt(): boolean | null {
+  try {
+    return native === null ? null : native.isExempt();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The one-tap dialog, settled when the user has answered. Falls back to the
+ * settings list when the dialog cannot be shown. Never throws.
+ */
+export async function requestBatteryExemption(): Promise<'exempt' | 'declined' | 'settings'> {
+  try {
+    if (native !== null) {
+      const answer = await native.request();
+      if (answer !== 'unavailable') return answer;
+    }
+  } catch {
+    // The list below is the fallback.
+  }
+  await openBatteryOptimisationSettings();
+  return 'settings';
+}
 
 /**
  * The system screen listing every app's battery setting.

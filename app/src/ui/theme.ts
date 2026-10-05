@@ -421,6 +421,8 @@ export const fontSize = {
   /** iOS's own body size, which this already was. */
   body: 17,
   title: 22,
+  /** A first-run card's title (T-250): bigger than a screen title, short of the large one, so a two-line title still fits. */
+  cardTitle: 28,
   /** The iOS large title: the screen says its own name, once, in 34 pt bold. */
   largeTitle: 34,
   hero: 48,

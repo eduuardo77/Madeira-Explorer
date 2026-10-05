@@ -17,14 +17,23 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { locationProvider } from '../recording/ExpoLocationProvider';
-import { openBatteryOptimisationSettings } from '../recording/batteryOptimisation';
+import { batteryExempt, requestBatteryExemption } from '../recording/batteryOptimisation';
 import * as appStateDao from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import OnboardingView, {
   needsAndroidDisclosure,
   type OnboardingScreen,
 } from './OnboardingView';
-import { nextOnboardingStep, notificationAnswer } from './permissionPolicy';
+import {
+  firstRunPlan,
+  nextOnboardingStep,
+  notificationAnswer,
+  stepPosition,
+  type FirstRunAsk,
+} from './permissionPolicy';
+import { alwaysOpensSettings, systemAskFor } from './systemAsk';
+import { deviceLanguage } from '../i18n';
+import type { PermissionLevel } from '../recording/LocationProvider';
 import {
   activityAvailable,
   activityPermitted,
@@ -42,6 +51,9 @@ async function activityAskable(): Promise<boolean> {
   }
   return (await appStateDao.get(appStateDao.AppStateKey.ActivityAskedTs)) === null;
 }
+
+/** Android's API level, for the replica of its dialog; 0 elsewhere. */
+const API_LEVEL = Platform.OS === 'android' && typeof Platform.Version === 'number' ? Platform.Version : 0;
 
 export default function OnboardingFlow({
   initialScreen,
@@ -61,6 +73,20 @@ export default function OnboardingFlow({
   const [screen, setScreen] = useState<OnboardingScreen | null>(
     initialScreen ?? null
   );
+  /**
+   * T-250: the asks this first run will make, for the step count, worked out
+   * once from the state at its start (`firstRunPlan`).
+   */
+  const plan = useRef<FirstRunAsk[] | null>(null);
+  /** A first-run card was shown, so it ends on the ready card rather than vanishing. */
+  const showedFirstRun = useRef(false);
+  /**
+   * "Not now" on location leaves Android's answer undetermined; for the
+   * sequence it is an answer, so the welcome is not shown again.
+   */
+  const locationSkipped = useRef(false);
+  /** The ready card says what location ended up as. */
+  const [finalLocation, setFinalLocation] = useState<PermissionLevel>('undetermined');
 
   const finish = useCallback(async () => {
     await appStateDao.setFlag(appStateDao.AppStateKey.OnboardingCompleted, true);
@@ -69,7 +95,7 @@ export default function OnboardingFlow({
 
   /** Work out where the user is in the sequence and show that screen. */
   const advance = useCallback(async () => {
-    const [location, notifications, notificationsAsked, completed, keepRunningSeen, askActivity] =
+    const [actualLocation, notifications, notificationsAsked, completed, keepRunningSeen, askActivity, alwaysOfferedTs] =
       await Promise.all([
         locationProvider.getPermissionLevel(),
         Notifications.getPermissionsAsync(),
@@ -77,9 +103,12 @@ export default function OnboardingFlow({
         appStateDao.getFlag(appStateDao.AppStateKey.OnboardingCompleted),
         appStateDao.getFlag(appStateDao.AppStateKey.KeepRunningSeen),
         activityAskable(),
+        appStateDao.get(appStateDao.AppStateKey.AlwaysOfferedTs),
       ]);
+    const location: PermissionLevel =
+      actualLocation === 'undetermined' && locationSkipped.current ? 'denied' : actualLocation;
 
-    const step = nextOnboardingStep({
+    const state = {
       location,
       notifications: notificationAnswer({
         status: notifications.status,
@@ -92,20 +121,27 @@ export default function OnboardingFlow({
       android: Platform.OS === 'android',
       keepRunningSeen,
       activityAskable: askActivity,
-    });
+      alwaysOffered: alwaysOfferedTs !== null,
+      batteryExempt: batteryExempt() === true,
+    };
+    if (plan.current === null) plan.current = firstRunPlan(state);
+    const step = nextOnboardingStep(state);
 
     if (step === 'complete') {
+      if (showedFirstRun.current) {
+        // T-250: end on a card that says what is on, not on a sudden map.
+        setFinalLocation(actualLocation);
+        setScreen('ready');
+        return;
+      }
       await finish();
       return;
     }
+    showedFirstRun.current = true;
     // `welcome` and `location` are two screens over one policy step: the
     // policy cares whether location has been answered, the user needs to be
     // told what the app is before being asked for anything.
-    if (step === 'keep-running' || step === 'activity') {
-      setScreen(step);
-      return;
-    }
-    setScreen(step === 'welcome' ? 'welcome' : 'notifications');
+    setScreen(step);
   }, [finish]);
 
   useEffect(() => {
@@ -139,10 +175,19 @@ export default function OnboardingFlow({
             setScreen('location');
             return;
           case 'location':
-            // While-Using only. Always is a later, separate conversation
-            // (T-043) — asking for it now is what gets it denied (D-008).
+            // While-Using first. "All the time" is its own card right after
+            // (T-250), never the same dialog: asked cold, it gets denied.
             await locationProvider.requestWhileUsingPermission();
             break;
+          case 'always':
+            // Marked first: on Android 11+ the answer is on a settings page,
+            // and leaving the app is a moment this component may not survive.
+            await appStateDao.set(appStateDao.AppStateKey.AlwaysOfferedTs, String(Date.now()));
+            await locationProvider.requestAlwaysPermission();
+            break;
+          case 'ready':
+            await finish();
+            return;
           case 'activity':
             // Marked asked first: the system dialog is a moment this
             // component may not survive, and asking twice is nagging.
@@ -168,10 +213,9 @@ export default function OnboardingFlow({
               appStateDao.AppStateKey.KeepRunningSeen,
               true
             );
-            // The result is deliberately ignored: the app cannot read whether
-            // the exemption was granted, and a failure to open is not worth
-            // stopping onboarding for (`recording/batteryOptimisation.ts`).
-            await openBatteryOptimisationSettings();
+            // T-250: Android's one-tap dialog, settled when answered. Either
+            // answer moves on; a phone without it gets the settings list.
+            await requestBatteryExemption();
             break;
           case 'android-disclosure':
             setScreen('always-upgrade');
@@ -235,13 +279,26 @@ export default function OnboardingFlow({
       // Skipping a system ask is the same as declining it, as far as the
       // sequence is concerned: move on, do not re-ask.
       if (screen === 'location') {
-        setScreen('notifications');
+        locationSkipped.current = true;
+        await advance();
+        return;
+      }
+      if (screen === 'always') {
+        // "I'll start it myself" is an answer: never asked again (D-008).
+        await appStateDao.set(appStateDao.AppStateKey.AlwaysOfferedTs, String(Date.now()));
+        await advance();
+        return;
+      }
+      if (screen === 'notifications') {
+        // Marked as asked, so the sequence reads it answered and goes on.
+        await appStateDao.set(appStateDao.AppStateKey.NotificationsAskedTs, String(Date.now()));
+        await advance();
         return;
       }
       // "Got it" is an answer, not an evasion: the advice has been read.
       if (screen === 'keep-running') {
         await appStateDao.setFlag(appStateDao.AppStateKey.KeepRunningSeen, true);
-        await finish();
+        await advance();
         return;
       }
       await finish();
@@ -252,11 +309,26 @@ export default function OnboardingFlow({
     return null;
   }
 
+  // The step count belongs to first run only; a later prompt stands alone.
+  const position =
+    initialScreen === undefined && plan.current !== null ? stepPosition(plan.current, screen) : null;
+  const android = Platform.OS === 'android';
+  const ask =
+    screen === 'location' || screen === 'always' || screen === 'activity' ||
+    screen === 'notifications' || screen === 'keep-running' || screen === 'always-upgrade' ||
+    screen === 'downgrade'
+      ? systemAskFor(screen, { android, apiLevel: API_LEVEL, language: deviceLanguage() })
+      : null;
+
   return (
     <OnboardingView
       screen={screen}
       onContinue={handleContinue}
       onSkip={handleSkip}
+      position={position}
+      systemAsk={ask}
+      opensSettings={alwaysOpensSettings({ android, apiLevel: API_LEVEL })}
+      location={finalLocation}
     />
   );
 }

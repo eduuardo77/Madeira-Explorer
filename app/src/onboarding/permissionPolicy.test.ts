@@ -22,8 +22,10 @@ import {
   batterySentence,
   detectDowngrade,
   MEASURED_BATTERY_PERCENT_PER_DAY,
+  firstRunPlan,
   nextOnboardingStep,
   shouldOfferAlwaysUpgrade,
+  stepPosition,
   type AlwaysUpgradeState,
   type OnboardingState,
 } from './permissionPolicy.ts';
@@ -42,6 +44,8 @@ function onboarding(overrides: Partial<OnboardingState> = {}): OnboardingState {
     android: false,
     keepRunningSeen: false,
     activityAskable: false,
+    alwaysOffered: false,
+    batteryExempt: false,
     ...overrides,
   };
 }
@@ -212,6 +216,7 @@ test('Android gets the keep-running screen, last, and only once', () => {
     location: 'while_using' as const,
     notifications: 'granted' as const,
     android: true,
+    alwaysOffered: true,
   };
 
   // ⚠ Last on purpose. It opens a third system screen, and two system dialogs
@@ -248,7 +253,7 @@ test('the keep-running screen never jumps the queue', () => {
   // has not yet explained what it does.
   assert.equal(nextOnboardingStep(onboarding({ android: true })), 'welcome');
   assert.equal(
-    nextOnboardingStep(onboarding({ android: true, location: 'while_using' })),
+    nextOnboardingStep(onboarding({ android: true, location: 'while_using', alwaysOffered: true })),
     'notifications'
   );
 });
@@ -271,19 +276,19 @@ test('⚠ nothing about the new step can gate the user (D-008)', () => {
 
 /** D-094: physical activity, right after location, once. */
 test('the activity ask comes after location and before notifications, when it is due', () => {
-  const due = { android: true, activityAskable: true };
+  const due = { android: true, activityAskable: true, alwaysOffered: true };
   assert.equal(nextOnboardingStep(onboarding(due)), 'welcome', 'nothing before location');
   assert.equal(nextOnboardingStep(onboarding({ ...due, location: 'while_using' })), 'activity');
   assert.equal(nextOnboardingStep(onboarding({ ...due, location: 'denied' })), 'activity', 'a refusal of location still reaches it');
   assert.equal(
-    nextOnboardingStep(onboarding({ android: true, location: 'while_using', activityAskable: false })),
+    nextOnboardingStep(onboarding({ android: true, location: 'while_using', activityAskable: false, alwaysOffered: true })),
     'notifications',
     'asked once, or not available: straight on'
   );
 });
 
 test('the activity ask never blocks the end of onboarding', () => {
-  const answered = onboarding({ android: true, location: 'while_using', notifications: 'granted', keepRunningSeen: true });
+  const answered = onboarding({ android: true, location: 'while_using', notifications: 'granted', keepRunningSeen: true, alwaysOffered: true });
   assert.equal(nextOnboardingStep(answered), 'complete');
 });
 
@@ -308,4 +313,69 @@ test('T-250: granted is granted, and undetermined (iOS) is still undetermined', 
   assert.equal(notificationAnswer({ status: 'granted', canAskAgain: true, askedBefore: false }), 'granted');
   assert.equal(notificationAnswer({ status: 'undetermined', canAskAgain: true, askedBefore: false }), 'undetermined');
   assert.equal(notificationAnswer({ status: 'undetermined', canAskAgain: true, askedBefore: true }), 'denied');
+});
+
+// ---------------------------------------------------------------------------
+// T-250: first run after WalkNYC (O1 to O3)
+// ---------------------------------------------------------------------------
+
+test('T-250: Android asks for "all the time" right after a While-Using grant, in first run', () => {
+  const android = { android: true, activityAskable: true };
+  assert.equal(nextOnboardingStep(onboarding({ ...android, location: 'while_using' })), 'always');
+  assert.equal(
+    nextOnboardingStep(onboarding({ ...android, location: 'while_using', alwaysOffered: true })),
+    'activity',
+    'once answered, never again (D-008)'
+  );
+});
+
+test('T-250: no "all the time" for a refusal, an existing grant, or iOS', () => {
+  assert.equal(nextOnboardingStep(onboarding({ android: true, location: 'denied' })), 'notifications');
+  assert.equal(nextOnboardingStep(onboarding({ android: true, location: 'always' })), 'notifications');
+  assert.equal(nextOnboardingStep(onboarding({ android: false, location: 'while_using' })), 'notifications');
+});
+
+test('T-250: the battery card is skipped when Android already leaves the app alone', () => {
+  const rest = { android: true, location: 'always' as const, notifications: 'granted' as const };
+  assert.equal(nextOnboardingStep(onboarding(rest)), 'keep-running');
+  assert.equal(nextOnboardingStep(onboarding({ ...rest, batteryExempt: true })), 'complete');
+});
+
+test('T-250: the plan counts every card first run will show, in the order it shows them', () => {
+  // The P30: Android 10, no notification permission to ask.
+  const p30 = onboarding({ android: true, activityAskable: true, notifications: 'granted' });
+  assert.deepEqual(firstRunPlan(p30), ['location', 'always', 'activity', 'keep-running']);
+  // Android 13+: all five.
+  assert.deepEqual(firstRunPlan(onboarding({ android: true, activityAskable: true })), [
+    'location', 'always', 'activity', 'notifications', 'keep-running',
+  ]);
+  // iOS: location and notifications.
+  assert.deepEqual(firstRunPlan(onboarding()), ['location', 'notifications']);
+});
+
+test('T-250: the plan agrees with the sequence, card by card, when everything is granted', () => {
+  // Walk the sequence as a user who says yes to everything would, and check
+  // every card it shows is the next one the plan promised.
+  let state = onboarding({ android: true, activityAskable: true });
+  const plan = firstRunPlan(state);
+  const shown: string[] = [];
+  for (let guard = 0; guard < 10; guard++) {
+    const step = nextOnboardingStep(state);
+    if (step === 'complete') break;
+    if (step === 'welcome') { state = { ...state, location: 'while_using' }; shown.push('location'); continue; }
+    shown.push(step);
+    if (step === 'always') state = { ...state, alwaysOffered: true, location: 'always' };
+    if (step === 'activity') state = { ...state, activityAskable: false };
+    if (step === 'notifications') state = { ...state, notifications: 'granted' };
+    if (step === 'keep-running') state = { ...state, keepRunningSeen: true };
+  }
+  assert.deepEqual(shown, plan);
+});
+
+test('T-250: a card reads its place in the plan; anything else has none', () => {
+  const plan = ['location', 'always', 'activity', 'keep-running'] as const;
+  assert.deepEqual(stepPosition(plan, 'always'), { step: 2, of: 4 });
+  assert.deepEqual(stepPosition(plan, 'keep-running'), { step: 4, of: 4 });
+  assert.equal(stepPosition(plan, 'welcome'), null);
+  assert.equal(stepPosition(plan, 'downgrade'), null);
 });

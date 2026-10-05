@@ -223,6 +223,30 @@ test('⚠ T-200 — the welcome screen sells the passport, by name, in every lan
   }
 });
 
+test('⚠ T-250 — the first-run Always card keeps Play\'s three facts, in every language (T-121)', () => {
+  // What is collected, that it happens with the app closed, and what it is for.
+  const facts = {
+    en: [/location data/i, /closed or not in use/i, /only to draw your own map/i],
+    pt: [/dados de localização/i, /fechado ou não está a ser usado/i, /só para desenhar o teu mapa/i],
+    de: [/Standortdaten/i, /geschlossen ist oder nicht verwendet wird/i, /nur dazu, Ihre eigene Karte/i],
+  } as const;
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const text = [
+      translate(STRINGS['onboarding.always.body1'], language),
+      translate(STRINGS['onboarding.always.note'], language),
+    ].join(' ');
+    for (const fact of facts[language]) assert.match(text, fact, `${language}: ${fact}`);
+  }
+});
+
+test('⚠ T-250 — the notifications card no longer promises "nothing else, ever" (D-096 says every stamp)', () => {
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const text = translate(STRINGS['onboarding.messages.body1'], language) + translate(STRINGS['onboarding.messages.note'], language);
+    assert.doesNotMatch(text, /that is all|nothing else|só isso|mais nada|mehr nicht|sonst nichts/i, language);
+    assert.match(text, /stamp|carimbo|Stempel/i, `${language}: the stamps are named`);
+  }
+});
+
 test('T-202 — a stored language choice parses, and anything else follows the phone', () => {
   assert.equal(parseLanguageChoice('pt'), 'pt');
   assert.equal(parseLanguageChoice(' DE '), 'de');

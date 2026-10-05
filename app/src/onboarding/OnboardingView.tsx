@@ -1,44 +1,53 @@
 /**
- * Onboarding (T-114) and the permission asks around it (T-042, T-043, T-121).
+ * First run (T-114, redrawn in T-250) and the permission asks around it
+ * (T-042, T-043, T-121).
  *
  * WHO THIS IS WRITTEN FOR
  * -----------------------
  * CONTEXT §3 sets the bar: an eighty-year-old must use this with no
  * instruction. So the copy here has no jargon, no nouns the user has to
  * decode, and no sentence that exists to protect us rather than to inform
- * them. "Permission", "background", "geofence" and "GPS" do not appear.
+ * them. "Permission", "geofence" and "GPS" do not appear.
  *
- * Every screen is one idea, one illustration-free block of text, and one
- * obvious action. Anything the user can skip, they can skip — **no screen
- * gates on a grant** (D-008), and the skip is a real button, not grey text in
- * a corner.
+ * ONE CARD, THE SAME EVERY TIME (T-250, 2026-10-05)
+ * ------------------------------------------------
+ * The project lead found the old screens "confusing" and "pretty ugly", the
+ * first thing a new user sees, and chose WalkNYC's model from drawn options
+ * (O1 to O3, `tools/preview-unlock-options.mjs` section 4): every ask is the
+ * same card, with a step count, a large drawing, a title, a sentence, and a
+ * **replica of the dialog Android is about to show, with the right answer
+ * marked** (`systemAsk.ts`), so the system's own screen arrives expected.
+ * The welcome leads with real stamps from the pack; a last card says what is
+ * on and opens the map.
  *
- * THE THREE PIECES
- * ----------------
- *   Welcome        what this does, in a sentence
- *   Location       why, then the system dialog
- *   Notifications  how few there will be, then the system dialog
- *
- * And two that appear days later, not during onboarding: the Always upgrade
- * (T-043) and its Android prominent-disclosure screen (T-121), and the
- * downgrade recovery (T-044).
+ * Nothing gates on a grant (D-008): the decline is always there, and moves on.
  *
  * Presentational: props in, pixels out, so the workbench can mount every
  * screen against every state (D-038).
  */
 
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
+import type { SystemAsk } from './systemAsk';
 import { getContentPack } from '../content/poiCatalogue';
+import type { Place } from '../content/contentPack';
+import { designFor } from '../passport/stampArt';
+import type { PermissionLevel } from '../recording/LocationProvider';
+import StampArt from '../ui/StampArt';
+import { useReduceMotion } from '../ui/useReduceMotion';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
+import OnboardingArt, { type ArtName } from './OnboardingArt';
 
 export type OnboardingScreen =
   | 'welcome'
   | 'location'
+  | 'always'
   | 'activity'
   | 'notifications'
   | 'keep-running'
+  | 'ready'
   | 'always-upgrade'
   | 'android-disclosure'
   | 'downgrade';
@@ -47,23 +56,34 @@ export type OnboardingViewProps = {
   screen: OnboardingScreen;
   /** The affirmative action. Triggers the system dialog where there is one. */
   onContinue: () => void;
-  /** Always available. Never styled as a lesser choice (D-008). */
+  /** The decline. Moves on, like the affirmative (D-008). */
   onSkip: () => void;
+  /** "2 de 4", for a first-run ask; null for the welcome and the later prompts. */
+  position?: { step: number; of: number } | null;
+  /** What Android will show next, and which answer to pick; null where nothing is shown. */
+  systemAsk?: SystemAsk | null;
+  /** The `always` card on Android 11+: the answer is on a settings page. */
+  opensSettings?: boolean;
+  /** The `ready` card: how location was answered, which decides what it says. */
+  location?: PermissionLevel;
 };
 
 type Copy = {
+  art: ArtName | 'stamps';
   title: string;
   body: string[];
-  /** Extra emphasis line, when there is one thing that must land. */
+  /** A quieter line under the body, when there is one. */
   note?: string;
   continueLabel: string;
-  skipLabel: string;
+  /** Absent where there is nothing to decline (the welcome, the last card, O3). */
+  skipLabel?: string;
 };
 
-function copyFor(screen: OnboardingScreen): Copy {
+function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
   switch (screen) {
     case 'welcome':
       return {
+        art: 'stamps',
         title: t('onboarding.welcome.title'),
         body: [
           // The pack's own facts (D-017): never the island's name in app/.
@@ -74,93 +94,105 @@ function copyFor(screen: OnboardingScreen): Copy {
           t('onboarding.welcome.body2'),
         ],
         continueLabel: t('onboarding.action.start'),
-        skipLabel: t('onboarding.action.notNow'),
       };
 
     case 'location':
       return {
+        art: 'location',
         title: t('onboarding.location.title'),
-        body: [t('onboarding.location.body1'), t('onboarding.location.body2')],
-        note: batterySentence(deviceLanguage()) ?? undefined,
-        continueLabel: t('onboarding.action.allow'),
-        skipLabel: t('onboarding.action.skip'),
+        body: [t('onboarding.location.body1')],
+        note: batterySentence(deviceLanguage()) ?? t('onboarding.location.note'),
+        continueLabel: t('onboarding.action.continue'),
+        skipLabel: t('onboarding.action.notNow'),
+      };
+
+    case 'always':
+      // ⚠ COMPLIANCE TEXT (T-121): Play's prominent disclosure, now in first
+      // run. `body1` and `note` together carry its three facts; see strings.ts.
+      return {
+        art: 'always',
+        title: t('onboarding.always.title'),
+        body: [t('onboarding.always.body1')],
+        note: t('onboarding.always.note'),
+        continueLabel: props.opensSettings === true ? t('onboarding.always.openSettings') : t('onboarding.action.continue'),
+        skipLabel: t('onboarding.always.skip'),
+      };
+
+    case 'activity':
+      // D-094. Android only, optional, once. "Not now" is a real answer.
+      return {
+        art: 'activity',
+        title: t('onboarding.activity.title'),
+        body: [t('onboarding.activity.body1')],
+        note: t('onboarding.activity.note'),
+        continueLabel: t('onboarding.action.continue'),
+        skipLabel: t('onboarding.action.notNow'),
       };
 
     case 'notifications':
       return {
+        art: 'notifications',
         title: t('onboarding.messages.title'),
-        body: [t('onboarding.messages.body1'), t('onboarding.messages.body2')],
+        body: [t('onboarding.messages.body1')],
         note: t('onboarding.messages.note'),
-        continueLabel: t('onboarding.messages.allow'),
-        skipLabel: t('onboarding.messages.deny'),
-      };
-
-    case 'activity':
-      // D-094. Android only, optional, once. The skip is "Not now" like every
-      // other optional ask, and it is a real answer: never asked again.
-      return {
-        title: t('onboarding.activity.title'),
-        body: [t('onboarding.activity.body1'), t('onboarding.activity.body2')],
-        continueLabel: t('onboarding.activity.allow'),
+        continueLabel: t('onboarding.action.continue'),
         skipLabel: t('onboarding.action.notNow'),
       };
 
     case 'keep-running':
-      // ⚠ Android only, and last (2026-08-28). Both actions move on — this is
-      // advice about the phone, not a permission, and D-008 forbids a gate
-      // either way. The affirmative opens the OS's own battery screen; the app
-      // can never read whether the exemption was actually granted, which is why
-      // the copy says "look for this app in the list" rather than claiming an
-      // outcome (`recording/batteryOptimisation.ts`).
+      // O3 as approved: one button. Android's own dialog carries the refusal,
+      // and every answer, or none, moves on (D-008).
       return {
+        art: 'keep-running',
         title: t('onboarding.keepRunning.title'),
-        body: [
-          t('onboarding.keepRunning.body1'),
-          t('onboarding.keepRunning.body2'),
-        ],
-        note: t('onboarding.keepRunning.note'),
-        continueLabel: t('onboarding.keepRunning.open'),
-        skipLabel: t('onboarding.keepRunning.skip'),
+        body: [t('onboarding.keepRunning.body1')],
+        continueLabel: t('onboarding.action.continue'),
       };
 
-    case 'android-disclosure':
-      // ⚠ COMPLIANCE TEXT (T-121). Google Play requires this before asking for
-      // background location, and it must keep saying three things in every
-      // language: what is collected, that it happens when the app is closed, and
-      // what it is used for. `strings.ts` repeats that warning where the
-      // translations live.
+    case 'ready': {
+      const line =
+        props.location === 'always'
+          ? t('onboarding.ready.always')
+          : props.location === 'while_using'
+            ? t('onboarding.ready.whileUsing')
+            : t('onboarding.ready.denied');
       return {
+        art: 'ready',
+        title: t('onboarding.ready.title'),
+        body: [line],
+        note: props.location === 'denied' || Platform.OS !== 'android' ? undefined : t('onboarding.ready.tip'),
+        continueLabel: t('onboarding.ready.open'),
+      };
+    }
+
+    case 'android-disclosure':
+      // ⚠ COMPLIANCE TEXT (T-121), for the later upgrade on installs that
+      // finished first run before T-250. Unchanged words, the new card.
+      return {
+        art: 'always',
         title: t('onboarding.background.title'),
-        body: [
-          t('onboarding.background.body1'),
-          t('onboarding.background.body2'),
-          t('onboarding.background.body3'),
-        ],
+        body: [t('onboarding.background.body1'), t('onboarding.background.body2')],
+        note: t('onboarding.background.body3'),
         continueLabel: t('onboarding.background.continue'),
         skipLabel: t('onboarding.background.deny'),
       };
 
     case 'always-upgrade':
-      // ⚠ `body3` is a third paragraph rather than the `note` slot, and that is
-      // deliberate: `note` belongs to `batterySentence()`, which is null only
-      // until T-054 measures it (D-041). Putting the what-you-keep line there
-      // would make the honest battery figure evict it the day it arrives.
+      // ⚠ `body3` stays a paragraph, not the note: the note slot belongs to
+      // `batterySentence()` the day T-054 measures it (D-041).
       return {
+        art: 'always',
         title: t('onboarding.upgrade.title'),
-        body: [
-          t('onboarding.upgrade.body1'),
-          t('onboarding.upgrade.body2'),
-          t('onboarding.upgrade.body3'),
-        ],
+        body: [t('onboarding.upgrade.body1'), t('onboarding.upgrade.body2'), t('onboarding.upgrade.body3')],
         note: batterySentence(deviceLanguage()) ?? undefined,
         continueLabel: t('onboarding.upgrade.continue'),
         skipLabel: t('onboarding.upgrade.skip'),
       };
 
     case 'downgrade':
-      // T-044. The user almost certainly did not realise they changed
-      // anything — iOS asked, they tapped the safe-looking option.
+      // T-044. The user almost certainly did not realise they changed anything.
       return {
+        art: 'warning',
         title: t('onboarding.downgrade.title'),
         body: [t('onboarding.downgrade.body1'), t('onboarding.downgrade.body2')],
         continueLabel: t('onboarding.downgrade.continue'),
@@ -169,33 +201,174 @@ function copyFor(screen: OnboardingScreen): Copy {
   }
 }
 
-export default function OnboardingView({
-  screen,
-  onContinue,
-  onSkip,
-}: OnboardingViewProps) {
-  const copy = copyFor(screen);
+/**
+ * Three real stamps for the welcome: the first place of each of the pack's
+ * first three categories, so the fan shows a range (a viewpoint, a levada, a
+ * village) and names no place in app/ (D-017).
+ */
+function welcomeStamps(places: readonly Place[]): Place[] {
+  const picked: Place[] = [];
+  const seen = new Set<string>();
+  for (const place of places) {
+    if (seen.has(place.category)) continue;
+    seen.add(place.category);
+    picked.push(place);
+    if (picked.length === 3) break;
+  }
+  return picked;
+}
+
+const ART_SIZE = 168;
+const FAN_STAMP = 118;
+
+function StampFan() {
+  const stamps = useMemo(() => welcomeStamps(getContentPack().places), []);
+  const tilt = ['-11deg', '0deg', '11deg'];
+  const shift = [-78, 0, 78];
+  return (
+    <View style={styles.fan} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      {stamps.map((place, index) => (
+        <View
+          key={place.id}
+          style={[
+            styles.fanStamp,
+            {
+              transform: [{ translateX: shift[index] }, { translateY: index === 1 ? -10 : 8 }, { rotate: tilt[index] }],
+              zIndex: index === 1 ? 2 : 1,
+            },
+          ]}
+        >
+          <StampArt
+            placeId={`welcome-${place.id}`}
+            design={designFor(place.id, place.category)}
+            name={place.name}
+            collected
+            postmark={null}
+            size={FAN_STAMP}
+          />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** The step bars and "2 de 4". */
+function Steps({ step, of }: { step: number; of: number }) {
+  const label = t('onboarding.step', { step, of });
+  return (
+    <View style={styles.steps} accessible accessibilityLabel={label}>
+      <View style={styles.bars}>
+        {Array.from({ length: of }, (_, index) => (
+          <View key={index} style={[styles.bar, index < step && styles.barOn]} />
+        ))}
+      </View>
+      <Text style={styles.stepText}>{label}</Text>
+    </View>
+  );
+}
+
+/**
+ * A small replica of Android's dialog, or of its settings page, with the
+ * answer to choose filled in and labelled.
+ */
+function SystemReplica({ ask }: { ask: SystemAsk }) {
+  const lead = ask.kind === 'settings' ? t('onboarding.next.settings') : t('onboarding.next.dialog');
+  const pickLabel = t('onboarding.next.pick');
+  return (
+    <View style={styles.replicaWrap}>
+      <Text style={styles.replicaLead}>{lead}</Text>
+      <View style={styles.replica}>
+        {ask.options.map((option, index) => {
+          const picked = index === ask.pick;
+          return (
+            <View
+              key={option}
+              style={[
+                ask.kind === 'settings' ? styles.radioRow : styles.optionRow,
+                picked && styles.optionPicked,
+              ]}
+              accessible
+              accessibilityLabel={picked ? `${option}. ${pickLabel}` : option}
+            >
+              {ask.kind === 'settings' ? (
+                <View style={[styles.radio, picked && styles.radioOn]}>
+                  {picked ? <View style={styles.radioDot} /> : null}
+                </View>
+              ) : null}
+              <Text style={[styles.optionText, picked ? styles.optionTextPicked : styles.optionTextOther]}>
+                {option}
+              </Text>
+              {picked ? (
+                <View style={styles.pickBadge}>
+                  <Text style={styles.pickBadgeText}>{pickLabel}</Text>
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+export default function OnboardingView(props: OnboardingViewProps) {
+  const { screen, onContinue, onSkip, position, systemAsk } = props;
+  const copy = copyFor(screen, props);
+  const reduceMotion = useReduceMotion();
+
+  // Each card arrives: the drawing settles in, the words rise a little after.
+  // Restarted on every screen change; still when the phone asks for less motion.
+  const enter = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduceMotion) {
+      enter.setValue(1);
+      return;
+    }
+    enter.setValue(0);
+    Animated.timing(enter, {
+      toValue: 1,
+      duration: 420,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [screen, reduceMotion, enter]);
+
+  const artStyle = {
+    opacity: enter,
+    transform: [{ scale: enter.interpolate({ inputRange: [0, 1], outputRange: [0.86, 1] }) }],
+  };
+  const textStyle = {
+    opacity: enter,
+    transform: [{ translateY: enter.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }],
+  };
 
   return (
     <View style={styles.root}>
+      {position != null ? <Steps step={position.step} of={position.of} /> : <View style={styles.stepsSpacer} />}
+
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{copy.title}</Text>
-        {copy.body.map((paragraph) => (
-          <Text key={paragraph} style={styles.body}>
-            {paragraph}
+        <Animated.View style={[styles.art, artStyle]}>
+          {copy.art === 'stamps' ? <StampFan /> : <OnboardingArt name={copy.art} size={ART_SIZE} />}
+        </Animated.View>
+
+        <Animated.View style={[styles.words, textStyle]}>
+          <Text style={styles.title} accessibilityRole="header">
+            {copy.title}
           </Text>
-        ))}
-        {copy.note !== undefined ? (
-          <Text style={styles.note}>{copy.note}</Text>
-        ) : null}
+          {copy.body.map((paragraph) => (
+            <Text key={paragraph} style={styles.body}>
+              {paragraph}
+            </Text>
+          ))}
+          {copy.note !== undefined ? <Text style={styles.note}>{copy.note}</Text> : null}
+          {systemAsk != null ? <SystemReplica ask={systemAsk} /> : null}
+        </Animated.View>
       </ScrollView>
 
-      {/* The actions live OUTSIDE the ScrollView, and that is load-bearing.
-          Measured at 2x text scaling (D-015 requires system font scaling to
-          work): the Play disclosure screen's copy overflows and scrolls, while
-          both buttons stay put and reachable. Inside the ScrollView they would
-          be pushed off the bottom exactly for the users who most need large
-          text. */}
+      {/* The actions live OUTSIDE the ScrollView, and that is load-bearing:
+          at 2x text scaling (D-015) the copy scrolls and the buttons stay
+          reachable. Inside it they would be pushed off the bottom exactly for
+          the users who most need large text. */}
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
@@ -206,17 +379,19 @@ export default function OnboardingView({
           <Text style={styles.primaryText}>{copy.continueLabel}</Text>
         </Pressable>
 
-        {/* A real button, the same size as the other one. Making the decline
-            small or grey is a dark pattern, and D-008 means it every time:
-            refusing is a supported way to use this app. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={copy.skipLabel}
-          onPress={onSkip}
-          style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
-        >
-          <Text style={styles.secondaryText}>{copy.skipLabel}</Text>
-        </Pressable>
+        {/* The decline: a full-size tap target in readable ink, never grey
+            text in a corner (D-008). Plain text rather than an outline, the
+            iOS construction D-054 adopted and the approved sketch drew. */}
+        {copy.skipLabel !== undefined ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={copy.skipLabel}
+            onPress={onSkip}
+            style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
+          >
+            <Text style={styles.secondaryText}>{copy.skipLabel}</Text>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
@@ -230,43 +405,136 @@ export function needsAndroidDisclosure(): boolean {
   return Platform.OS === 'android';
 }
 
+/** The tint behind the chosen answer: the action blue, faint. */
+const PICK_FILL = '#E3EEFA';
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
+  steps: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  stepsSpacer: { height: spacing.lg },
+  bars: { flex: 1, flexDirection: 'row', gap: 6 },
+  bar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#D1D1D6' },
+  barOn: { backgroundColor: colors.action },
+  stepText: { color: colors.textMuted, fontSize: fontSize.small, fontWeight: '600', marginLeft: spacing.xs },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
+  art: { alignItems: 'center', marginBottom: spacing.lg },
+  fan: { width: '100%', height: FAN_STAMP + 34, alignItems: 'center', justifyContent: 'center' },
+  fanStamp: {
+    position: 'absolute',
+    // A soft shadow lifts the paper off the page. Elevation, not a drawn glow:
+    // a glow drawn behind a view is a grey frame on Android (HANDOFF).
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  words: { alignItems: 'center', gap: spacing.sm + 4 },
   title: {
     color: colors.text,
-    fontSize: fontSize.title,
-    fontWeight: '700',
-    marginBottom: spacing.sm,
+    fontSize: fontSize.cardTitle,
+    lineHeight: fontSize.cardTitle * 1.2,
+    fontWeight: '800',
+    textAlign: 'center',
   },
   body: {
     color: colors.text,
     fontSize: fontSize.body,
-    // Generous for a screen read once, by somebody deciding whether to trust
-    // the app with a week of their location.
-    lineHeight: fontSize.body * 1.5,
+    lineHeight: fontSize.body * 1.45,
+    textAlign: 'center',
   },
   note: {
     color: colors.textMuted,
-    fontSize: fontSize.body,
-    lineHeight: fontSize.body * 1.5,
-    marginTop: spacing.sm,
+    fontSize: fontSize.label,
+    lineHeight: (fontSize.label) * 1.45,
+    textAlign: 'center',
   },
-  actions: {
-    padding: spacing.lg,
+  replicaWrap: { alignSelf: 'stretch', marginTop: spacing.sm },
+  replicaLead: {
+    color: colors.textMuted,
+    fontSize: fontSize.small,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  replica: {
+    backgroundColor: colors.surface,
+    borderRadius: 22,
+    padding: spacing.sm + 2,
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  optionRow: {
+    minHeight: 48,
+    borderRadius: 24,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.sm,
+    backgroundColor: colors.background,
+  },
+  radioRow: {
+    minHeight: 48,
+    borderRadius: 14,
+    paddingHorizontal: spacing.sm + 4,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm + 4,
+  },
+  optionPicked: {
+    backgroundColor: PICK_FILL,
+    borderWidth: 2,
+    borderColor: colors.action,
+  },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOn: { borderColor: colors.action },
+  radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.action },
+  optionText: { flex: 1, fontSize: fontSize.label, lineHeight: (fontSize.label) * 1.3 },
+  optionTextPicked: { color: colors.text, fontWeight: '700' },
+  optionTextOther: { color: colors.textMuted },
+  pickBadge: {
+    backgroundColor: colors.action,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  pickBadgeText: { color: colors.actionText, fontSize: fontSize.small, fontWeight: '700' },
+  actions: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg,
+    gap: spacing.xs,
   },
   pressed: { opacity: 0.75 },
   primary: {
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: MIN_TAP_TARGET / 2,
     backgroundColor: colors.action,
   },
   primaryText: {
@@ -278,13 +546,10 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
   },
   secondaryText: {
-    color: colors.text,
+    color: colors.tint,
     fontSize: fontSize.body,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

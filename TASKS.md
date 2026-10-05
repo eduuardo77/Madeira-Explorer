@@ -482,6 +482,18 @@ section's definition of done.
       That is all... Nothing else, ever. No offers, no reminders."* has been untrue since D-096
       announced every stamp; the privacy policy was updated then, this screen was not. Rewrite it
       with the first-run redesign (the copy is the project lead's to approve).
+      🔨 **Built 2026-10-05, not yet on any phone.** One card per ask (`OnboardingView`, `OnboardingArt`):
+      step bars, a drawing, a title, a line, and a replica of Android's dialog with the answer marked
+      (`systemAsk.ts`; labels read out of the P30's and the Android 14 image's own PermissionController
+      and Settings, not by ear: the sketch's *"Durante a utilização da app"* is wrong on 14). Welcome
+      fans three real stamps; *Permitir sempre* asked in first run on Android (`firstRunPlan`, Play's
+      disclosure on the card, tested for its three facts); the battery card uses Android's one-tap
+      dialog through a new local module `modules/battery-exemption` (adds
+      `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, Play-reviewed, D-045's fallback) and is skipped when
+      already exempt; a last *Tudo pronto* card. Notifications copy rewritten (no more *"nothing
+      else, ever"*). 994 tests. **Next:** field build, back up the P30's database, uninstall, walk
+      first run, restore and `pm grant`; then the lead approves the copy. D-008's and D-045's text
+      still need the amendment recorded.
 - [~] **T-251** **A collected stamp's card should feel like a trophy** (built 2026-10-05, emulator only) (project lead, 2026-10-05:
       *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
       trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as

@@ -401,6 +401,11 @@ section's definition of done.
       (a gold count on the map's passport button); new stamp E1 (slammed, ink ring, confetti), E2
       (gold rays, spin-in, counter), E3 (a locked stamp's celebration with the offer). Built with
       React Native's own `Animated`; no new library.
+      ✅ **Picked 2026-10-05: A + R1 + R2 + E2 + E3.** Sheet A, though the project lead *"likes the
+      other options too"* (B's price tag and lighting stamps, C once the founder window exists, are
+      fair to borrow from). Both reminders. E2 for a collected stamp and E3 for a locked one; E1 is
+      not disliked, and **E2 "could have some more work done"**: take E1's impact (the shake, the ink
+      ring, confetti) into E2's rays and counter, and show the revision before building it.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
@@ -408,6 +413,7 @@ section's definition of done.
       permission ask *"popped off randomly"* before the project lead could accept it. Suspect two
       prompts racing at launch (onboarding, the downgrade notice, the stamp pop-up); find it on the
       P30 before redrawing anything.
+      ✅ **First run approved 2026-10-05** as drawn (O1 to O3), *Permitir sempre* in first run included.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

@@ -17,6 +17,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  notificationAnswer,
   ALWAYS_UPGRADE_DELAY_MS,
   batterySentence,
   detectDowngrade,
@@ -284,4 +285,27 @@ test('the activity ask comes after location and before notifications, when it is
 test('the activity ask never blocks the end of onboarding', () => {
   const answered = onboarding({ android: true, location: 'while_using', notifications: 'granted', keepRunningSeen: true });
   assert.equal(nextOnboardingStep(answered), 'complete');
+});
+
+// ---------------------------------------------------------------------------
+// T-250: the notification answer, as Android 13+ reports it
+// ---------------------------------------------------------------------------
+
+test('⚠ T-250: Android 13+ reports a never-asked notification permission as denied, and it is still asked', () => {
+  // Found on the emulator (Android 14) 2026-10-05: onboarding read "denied",
+  // skipped the screen, and the app could post no notification at all, the
+  // recorder's and D-096's stamps included.
+  assert.equal(notificationAnswer({ status: 'denied', canAskAgain: true, askedBefore: false }), 'undetermined');
+});
+
+test('T-250: once asked, the answer stands, whatever Android says it could still do', () => {
+  // Android lets an app ask twice; asking again on every launch is nagging (D-008).
+  assert.equal(notificationAnswer({ status: 'denied', canAskAgain: true, askedBefore: true }), 'denied');
+  assert.equal(notificationAnswer({ status: 'denied', canAskAgain: false, askedBefore: false }), 'denied');
+});
+
+test('T-250: granted is granted, and undetermined (iOS) is still undetermined', () => {
+  assert.equal(notificationAnswer({ status: 'granted', canAskAgain: true, askedBefore: false }), 'granted');
+  assert.equal(notificationAnswer({ status: 'undetermined', canAskAgain: true, askedBefore: false }), 'undetermined');
+  assert.equal(notificationAnswer({ status: 'undetermined', canAskAgain: true, askedBefore: true }), 'denied');
 });

@@ -414,6 +414,30 @@ section's definition of done.
       prompts racing at launch (onboarding, the downgrade notice, the stamp pop-up); find it on the
       P30 before redrawing anything.
       ✅ **First run approved 2026-10-05** as drawn (O1 to O3), *Permitir sempre* in first run included.
+      **Bug hunt, 2026-10-05.** The P30's log no longer reached the install (it starts at 09:13), and
+      by then the project lead had granted *Permitir sempre*, so the vanished ask could not be
+      repeated there. On the emulator (Android 14, the only image here; the P30 is Android 10) a
+      fresh first run opened exactly two system dialogs, both answered normally, and a double tap
+      on *Allow location* did not close the dialog. **Not reproduced.** Guarded anyway: the first-run
+      buttons ignore a second tap while their request runs (`OnboardingFlow`'s `working`), since on
+      older Androids a second request closes the first dialog. Likeliest cause, not a proven one.
+      ⚠ **Found instead, and fixed: Android 13+ never asked for notifications.** It reports a
+      never-asked permission as *denied*, onboarding read that as answered and skipped the step,
+      so the app could post nothing on those phones (the recorder's notification, D-096's
+      stamps). `notificationAnswer` (pure, 3 tests) treats "not granted, can ask, never asked" as
+      unanswered; `notifications_asked_ts` stops a second ask. Seen on the emulator: the screen
+      and Android's dialog now appear, and the permission reads granted. The P30 (Android 10) has
+      no such permission and was never affected.
+      ⚠ **Found, not fixed: the notifications screen now says something false.** *"Two messages.
+      That is all... Nothing else, ever. No offers, no reminders."* has been untrue since D-096
+      announced every stamp; the privacy policy was updated then, this screen was not. Rewrite it
+      with the first-run redesign (the copy is the project lead's to approve).
+- [ ] **T-251** **A collected stamp's card should feel like a trophy** (project lead, 2026-10-05:
+      *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
+      trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as
+      for D-097 (`tools/preview-unlock-options.mjs` is the pattern): the stamp large and lit, the date
+      and its postmark, how it ranks in its set (*4 de 19 miradouros*), the same visual language as
+      E2. Keep *Ver no mapa* and the place's why-line.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

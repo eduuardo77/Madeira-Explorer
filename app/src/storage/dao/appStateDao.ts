@@ -55,6 +55,11 @@ export const AppStateKey = {
    * for somebody who finished onboarding before it existed.
    */
   ActivityAskedTs: 'activity_asked_ts',
+  /**
+   * When onboarding asked for notifications (T-250). Android 13+ cannot say
+   * whether it has been asked, so this is what stops it being asked twice.
+   */
+  NotificationsAskedTs: 'notifications_asked_ts',
   /** Last location permission state we observed, for downgrade detection (T-044). */
   LastPermissionState: 'last_permission_state',
   /**

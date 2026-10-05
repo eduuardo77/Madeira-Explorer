@@ -13,7 +13,7 @@
  * moves forward, and `onFinished` is always reached.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { locationProvider } from '../recording/ExpoLocationProvider';
@@ -24,7 +24,7 @@ import OnboardingView, {
   needsAndroidDisclosure,
   type OnboardingScreen,
 } from './OnboardingView';
-import { nextOnboardingStep } from './permissionPolicy';
+import { nextOnboardingStep, notificationAnswer } from './permissionPolicy';
 import {
   activityAvailable,
   activityPermitted,
@@ -69,10 +69,11 @@ export default function OnboardingFlow({
 
   /** Work out where the user is in the sequence and show that screen. */
   const advance = useCallback(async () => {
-    const [location, notifications, completed, keepRunningSeen, askActivity] =
+    const [location, notifications, notificationsAsked, completed, keepRunningSeen, askActivity] =
       await Promise.all([
         locationProvider.getPermissionLevel(),
-        Notifications.getPermissionsAsync().then((s) => s.status),
+        Notifications.getPermissionsAsync(),
+        appStateDao.get(appStateDao.AppStateKey.NotificationsAskedTs),
         appStateDao.getFlag(appStateDao.AppStateKey.OnboardingCompleted),
         appStateDao.getFlag(appStateDao.AppStateKey.KeepRunningSeen),
         activityAskable(),
@@ -80,12 +81,11 @@ export default function OnboardingFlow({
 
     const step = nextOnboardingStep({
       location,
-      notifications:
-        notifications === 'granted'
-          ? 'granted'
-          : notifications === 'undetermined'
-            ? 'undetermined'
-            : 'denied',
+      notifications: notificationAnswer({
+        status: notifications.status,
+        canAskAgain: notifications.canAskAgain,
+        askedBefore: notificationsAsked !== null,
+      }),
       completed,
       // ⚠ Read here rather than in the policy: a pure module that imports
       // `Platform` breaks every Node test (CLAUDE.md).
@@ -120,7 +120,18 @@ export default function OnboardingFlow({
     });
   }, [advance, onFinished, initialScreen]);
 
+  /**
+   * ⚠ T-250: one answer at a time. A second tap while a system dialog is
+   * opening asks Android again, and on older versions the second request
+   * closes the first: the project lead saw an ask "pop off" before they could
+   * answer it (2026-10-05, after the Play install). Not reproduced on the
+   * Android 14 emulator, so this is the likeliest cause, guarded, not a proven one.
+   */
+  const working = useRef(false);
+
   const handleContinue = useCallback(() => {
+    if (working.current) return;
+    working.current = true;
     void (async () => {
       try {
         switch (screen) {
@@ -144,6 +155,8 @@ export default function OnboardingFlow({
             }
             break;
           case 'notifications':
+            // Marked first, as for activity: Android 13+ cannot tell us later.
+            await appStateDao.set(appStateDao.AppStateKey.NotificationsAskedTs, String(Date.now()));
             await Notifications.requestPermissionsAsync();
             break;
           case 'keep-running':
@@ -179,12 +192,23 @@ export default function OnboardingFlow({
       } catch (error) {
         await recordingEventDao.logError('onboarding continue', error);
         await advance();
+      } finally {
+        working.current = false;
       }
     })();
   }, [screen, advance, onFinished, initialScreen]);
 
   const handleSkip = useCallback(() => {
+    if (working.current) return;
+    working.current = true;
     void (async () => {
+      try {
+        await skip();
+      } finally {
+        working.current = false;
+      }
+    })();
+    async function skip() {
       if (screen === 'activity') {
         // "Not now" is an answer: never asked again (D-008).
         await appStateDao.set(appStateDao.AppStateKey.ActivityAskedTs, String(Date.now()));
@@ -221,7 +245,7 @@ export default function OnboardingFlow({
         return;
       }
       await finish();
-    })();
+    }
   }, [screen, finish, onFinished, initialScreen, advance]);
 
   if (screen === null) {

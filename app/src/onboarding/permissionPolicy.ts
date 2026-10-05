@@ -48,6 +48,28 @@ import { translate } from '../i18n/translate.ts';
 /** Whether the OS will show our notifications. */
 export type NotificationPermission = 'granted' | 'denied' | 'undetermined';
 
+/**
+ * The notification answer, from what the OS reports and whether we asked (T-250).
+ *
+ * ⚠ **Android 13+ reports a permission nobody has asked for as `denied`**, with
+ * `canAskAgain` true; only iOS says `undetermined`. Read as-is, onboarding
+ * skipped the ask on every Android 13+ phone and the app could post nothing,
+ * the recorder's notification and D-096's stamps included (found on the
+ * emulator, 2026-10-05). So "not granted, can ask, never asked" is unanswered.
+ *
+ * Once asked, the answer stands even though Android would allow a second ask:
+ * asking on every launch is the nagging D-008 rules out.
+ */
+export function notificationAnswer(input: {
+  status: 'granted' | 'denied' | 'undetermined';
+  canAskAgain: boolean;
+  askedBefore: boolean;
+}): NotificationPermission {
+  if (input.status === 'granted') return 'granted';
+  if (input.askedBefore || !input.canAskAgain) return 'denied';
+  return 'undetermined';
+}
+
 export type OnboardingStep =
   | 'welcome'
   | 'location'

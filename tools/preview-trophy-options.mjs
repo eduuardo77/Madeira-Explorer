@@ -181,6 +181,70 @@ const trophyTilt = phone(
   't-tilt'
 );
 
+
+// ---------------------------------------------------------------------------
+// T1, reworked (the lead: "I don't think info like '15min no local' is
+// important"). Facts computed from content/ and the lead's two awards, each
+// one the app can derive: the municipality's medal set (D-089, OQ-3), the
+// category set, the stamp's place in the trip, and the nearest place not yet
+// collected (straight line, as the place card already says).
+// ---------------------------------------------------------------------------
+
+const MEDAL_SET = ['camara-de-lobos', 'cabo-girao', 'curral-das-freiras', 'eira-do-serrado'];
+const GOT = new Set(['camara-de-lobos', 'praia-formosa']);
+const NEXT = { id: 'cabo-girao', name: 'Cabo Girão', km: '2,9' };
+
+/** Small stamps in a row: collected ones lit, the rest dim, lighting in turn. */
+function setRow(ids) {
+  return `<div class="setrow">${ids.map((id, i) => `<div class="mini ${GOT.has(id) ? 'got' : ''}" style="--i:${i}">${stamp(id)}</div>`).join('')}</div>`;
+}
+
+const medalBlock = `<div class="medal-card">
+  <div class="mc-head"><div class="seal-mini">CL</div><div><b>Medalha de Câmara de Lobos</b><span>1 de 4 lugares · faltam 3</span></div></div>
+  ${setRow(MEDAL_SET)}
+</div>`;
+
+const nextBlock = `<div class="next-card">
+  <div class="next-stamp">${stamp(NEXT.id)}</div>
+  <div class="next-text"><span>PRÓXIMO CARIMBO</span><b>${NEXT.name}</b><small>a ${NEXT.km} km daqui, em linha reta · conta para a medalha</small></div>
+  <div class="next-go">›</div>
+</div>`;
+
+const t1Collection = phone(
+  '<b>T1 revisto, A: a coleção.</b> Entrada: o foco acende e o carimbo sobe para o pedestal. Por baixo, o que este carimbo significa: <b>a medalha do concelho</b> (os 4 lugares de Câmara de Lobos, um aceso) e o <b>próximo carimbo</b> mais perto, que conta para a mesma medalha. Uma fita diz qual foi na viagem.',
+  `<div class="vitrine v2">
+    <div class="close">×</div>
+    <div class="ribbon">2.º CARIMBO DA VIAGEM</div>
+    <div class="spot on"></div>
+    <div class="trophy-stamp sheen rise">${stamp(AWARD.id, AWARD.postmark)}</div>
+    <div class="pedestal glow"></div>
+    <div class="tname">${AWARD.name}</div>
+    <div class="sub">Aldeia · visitada a ${AWARD.date}</div>
+    ${medalBlock}
+    ${nextBlock}
+    <div class="btns"><div class="cta gold-bg">Ver no mapa</div><div class="cta ghost">Partilhar</div></div>
+  </div>`,
+  't1-collection'
+);
+
+const t1Progress = phone(
+  '<b>T1 revisto, B: o progresso.</b> A mesma entrada. Em vez de caixas, duas barras com o que falta: o conjunto das aldeias (1 de 19) e a medalha do concelho (1 de 4), e o próximo carimbo como um convite. Mais curto de ler.',
+  `<div class="vitrine v2">
+    <div class="close">×</div>
+    <div class="ribbon">2.º CARIMBO DA VIAGEM</div>
+    <div class="spot on"></div>
+    <div class="trophy-stamp sheen rise">${stamp(AWARD.id, AWARD.postmark)}</div>
+    <div class="pedestal glow"></div>
+    <div class="tname">${AWARD.name}</div>
+    <div class="sub">Visitada a ${AWARD.date}</div>
+    <div class="prog"><div class="prog-row"><span>Aldeias</span><b>1 de 19</b></div><div class="bar"><i style="--from:0%;--to:5.3%"></i></div></div>
+    <div class="prog"><div class="prog-row"><span>Medalha de Câmara de Lobos</span><b>1 de 4</b></div><div class="bar gold-bar"><i style="--from:0%;--to:25%"></i></div></div>
+    <div class="invite">Cabo Girão fica a ${NEXT.km} km e conta para a medalha.</div>
+    <div class="btns"><div class="cta gold-bg">Ver no mapa</div><div class="cta ghost">Partilhar</div></div>
+  </div>`,
+  't1-progress'
+);
+
 const CSS = `
 * { box-sizing: border-box; }
 body { margin: 0; font: 15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; background: #111113; color: #F2F2F7; }
@@ -270,6 +334,33 @@ h1 { font-size: 22px; margin: 0 0 8px; } h2 { font-size: 19px; margin: 0 0 6px; 
 @keyframes holo { from { background-position: 0% 0%; } to { background-position: 200% 200%; } }
 .medal-row { display: flex; align-items: center; gap: 10px; margin: 10px 0 2px; font-size: 13px; color: #D1D1D6; }
 .medal-row .medal { width: 34px; height: 34px; font-size: 13px; }
+.v2 { padding-top: 14px; }
+.ribbon { background: linear-gradient(90deg, transparent, #F2A90044, transparent); color: #FFD479; font-size: 10.5px; letter-spacing: 2px; font-weight: 800; padding: 3px 30px; margin-top: 16px; z-index: 2; animation: pop .4s ease-out 1.2s both; }
+.spot.on { animation: spoton .9s ease-out both; }
+@keyframes spoton { 0% { opacity: 0; } 30% { opacity: 1; } 40% { opacity: .4; } 55%,100% { opacity: 1; } }
+.rise { animation: rise 1s cubic-bezier(.2,1.2,.4,1) .5s both, float 4s ease-in-out 1.6s infinite; }
+@keyframes rise { from { transform: translateY(70px) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.v2 .trophy-stamp { width: 170px; height: 170px; margin-top: 6px; }
+.pedestal.glow { animation: pop .6s ease-out .9s both; }
+.v2 .tname { font-size: 23px; animation: pop .4s ease-out 1.1s both; } .v2 .sub { animation: pop .4s ease-out 1.2s both; }
+.medal-card, .next-card, .prog, .invite { width: 100%; animation: pop .45s ease-out both; }
+.medal-card { background: #ffffff0d; border: 1px solid #F2A90044; border-radius: 14px; padding: 8px 10px; margin-top: 10px; animation-delay: 1.35s; }
+.mc-head { display: flex; gap: 8px; align-items: center; text-align: left; } .mc-head b { display: block; font-size: 13px; } .mc-head span { font-size: 11.5px; color: #AEAEB2; }
+.seal-mini { width: 30px; height: 30px; border-radius: 50%; border: 2px dashed #F2A900; color: #F2A900; display: grid; place-items: center; font-size: 10px; font-weight: 900; flex: none; }
+.setrow { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+.mini { width: 50px; height: 50px; filter: grayscale(1) brightness(.45); }
+.mini.got { filter: none; animation: lit .6s ease-out calc(1.7s + var(--i) * .15s) both; }
+@keyframes lit { from { filter: grayscale(1) brightness(.45); transform: scale(.8); } 60% { transform: scale(1.12); } to { filter: drop-shadow(0 0 8px #F2A900aa); transform: none; } }
+.next-card { display: flex; align-items: center; gap: 10px; background: #ffffff0d; border: 1px solid #ffffff1a; border-radius: 14px; padding: 6px 10px; margin-top: 8px; text-align: left; animation-delay: 1.55s; }
+.next-stamp { width: 40px; height: 40px; filter: grayscale(.85) brightness(.75); flex: none; }
+.next-text { flex: 1; display: flex; flex-direction: column; } .next-text span { font-size: 9.5px; letter-spacing: 1.5px; color: #5AA9FF; font-weight: 800; } .next-text b { font-size: 14px; } .next-text small { font-size: 11px; color: #AEAEB2; }
+.next-go { font-size: 24px; color: #5AA9FF; }
+.btns { width: 100%; display: flex; gap: 8px; margin-top: auto; } .btns .cta { flex: 1; animation: pop .4s ease-out 1.8s both; }
+.ghost { background: #ffffff14; color: #F2F2F7; border: 1px solid #ffffff2a; }
+.prog { margin-top: 10px; text-align: left; animation-delay: 1.4s; } .prog + .prog { animation-delay: 1.55s; }
+.prog-row { display: flex; justify-content: space-between; font-size: 12.5px; color: #D1D1D6; margin-bottom: 4px; } .prog-row b { color: #F2F2F7; }
+.prog .bar i { animation: fill 1s ease-out 1.9s both; } .gold-bar i { background: linear-gradient(90deg, #E59A00, #FFE08A); }
+.invite { margin-top: 12px; background: #5AA9FF1a; border: 1px solid #5AA9FF55; color: #CFE5FF; border-radius: 12px; padding: 9px 10px; font-size: 12.5px; animation-delay: 1.7s; }
 `;
 
 const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -287,6 +378,11 @@ const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta n
   <h2>2. Um carimbo que já tens, como troféu (T-251)</h2>
   <p class="note">Hoje: um cartão com o carimbo pequeno ao lado do nome. As três direções abaixo põem o carimbo ao centro e grande. Em T3, passa o rato por cima do carimbo para o inclinar.</p>
   <div class="row">${trophyVitrine}${trophyPage}${trophyTilt}</div>
+</section>
+<section>
+  <h2>3. T1 revisto: menos números soltos, mais significado</h2>
+  <p class="note">"15 min no local" saiu. Ficam factos que dizem o que este carimbo vale: a medalha do concelho para onde conta, o conjunto da categoria, em que lugar veio na viagem, e o próximo carimbo mais perto. Todos calculados a partir dos teus dados e do conteúdo: Câmara de Lobos tem 4 lugares (Câmara de Lobos, Cabo Girão, Curral das Freiras, Eira do Serrado), foi o teu 2.º carimbo desta viagem depois da Praia Formosa, e Cabo Girão é o mais perto que ainda não tens.</p>
+  <div class="row">${t1Collection}${t1Progress}</div>
 </section>
 <script>
 function replay(id) { const el = document.getElementById(id); el.parentNode.replaceChild(el.cloneNode(true), el); }

@@ -410,6 +410,7 @@ section's definition of done.
       stamp drops spinning and lands with E1's shake and ink ring, a dated cancellation is stamped
       on, gold confetti, then the counter and the set's bar; and a second frame for when the stamp
       lifts the passport's rank (bronze to silver at 10, D-078), shown only when it really does.
+      ✅ **Picked 2026-10-05: E2 revised, with the rank-up frame.** ("I really like the revised E2".)
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
@@ -448,6 +449,15 @@ section's definition of done.
       *Na mão* (tilts with the phone, a holographic sheen: Phase 5's tilt and shine, T-236/T-237).
       Every fact is one an award already stores. ⚠ **No place has a why-line** (`content/pois.json`,
       0 of 80), so none shows; T-201 built the field and nothing fills it.
+      ✅ **Picked 2026-10-05: T1.** T2 is liked but speaks a different design language (*"maybe in the
+      future"*); T3's tilt is not bad but its rainbow sheen *"still needs some work"* (Phase 5).
+      *"15 min no local"* is not worth showing: T1 reworked in two layouts (section 3 of the page),
+      both with an entrance (the spotlight comes on, the stamp rises onto the pedestal) and facts
+      the app can derive: the municipality's medal set (Câmara de Lobos, 1 of 4, D-089), the
+      category set (1 of 19 villages), the stamp's place in the trip (the 2nd), and the nearest
+      place not collected (Cabo Girão, 2,9 km in a straight line, in the same medal set). **A** shows
+      the medal's four stamps and the next stamp as cards; **B** shows two progress bars and the
+      next stamp as one sentence. Waiting on the project lead's pick.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

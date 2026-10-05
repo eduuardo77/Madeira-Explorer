@@ -226,9 +226,9 @@ test('⚠ T-200 — the welcome screen sells the passport, by name, in every lan
 test('⚠ T-250 — the first-run Always card keeps Play\'s three facts, in every language (T-121)', () => {
   // What is collected, that it happens with the app closed, and what it is for.
   const facts = {
-    en: [/location data/i, /closed or not in use/i, /only to draw your own map/i],
-    pt: [/dados de localização/i, /fechado ou não está a ser usado/i, /só para desenhar o teu mapa/i],
-    de: [/Standortdaten/i, /geschlossen ist oder nicht verwendet wird/i, /nur dazu, Ihre eigene Karte/i],
+    en: [/location data/i, /closed or not in use/i, /only to draw your map/i],
+    pt: [/dados de localização/i, /com a app fechada ou sem estar a ser usada/i, /só para desenhar o teu mapa/i],
+    de: [/Standortdaten/i, /geschlossen ist oder nicht verwendet wird/i, /nur dazu, Ihre Karte/i],
   } as const;
   for (const language of ['en', 'pt', 'de'] as const) {
     const text = [

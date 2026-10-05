@@ -501,8 +501,15 @@ section's definition of done.
       novamente*; Settings' battery dialog puts *Recusar* left and *Permitir* right, side by side;
       reopened halfway, the count restarted at *1 de 3* (the plan is now stored,
       `first_run_plan`). On the Always card Play's text leaves no room, so the drawing shrinks to the
-      space left and steps aside below 64 dp. 995 tests. ⚠ **Left:** the lead approves the copy
-      (`onboarding.*` in `strings.ts`); Android 11+ (settings page for Always) not seen on a phone.
+      space left and steps aside below 64 dp. 995 tests.
+      ✅ **Copy approved 2026-10-05: version B** (shorter, warmer, of two drafted), in all three
+      languages. Card 4 rewritten after the lead found it ambiguous: it now names Android's own
+      *atividade física* and says it counts no steps and keeps no health data. The badge is
+      *Recomendado*, not *Escolhe este* (*"forcing too much"*). Seen on the P30 again (backup
+      `p30-2026-10-05-t250b`, restored by checksum). **Found by looking:** the drawing vanished from
+      a card with room, because shrinking by the scroll content's overflow compounded when the step
+      bar appeared; it is now sized from the words' height alone. ⚠ **Left:** Android 11+ (the
+      settings page for Always, the notifications card) not seen on a phone.
 - [~] **T-251** **A collected stamp's card should feel like a trophy** (built 2026-10-05, emulator only) (project lead, 2026-10-05:
       *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
       trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as

@@ -226,6 +226,8 @@ function welcomeStamps(places: readonly Place[]): Place[] {
 const ART_SIZE = 112;
 /** Below this the drawing is a smudge, and the card is better without it. */
 const ART_MIN = 64;
+/** The scroll content's vertical padding and the drawing's margin, around the drawing. */
+const ART_CHROME = spacing.sm * 2 + spacing.sm;
 const FAN_STAMP = 118;
 
 function StampFan() {
@@ -331,21 +333,24 @@ export default function OnboardingView(props: OnboardingViewProps) {
 
   // ⚠ The drawing gives way to the words (2026-10-05, the P30): on the Always
   // card, Play's required text pushed Android's third option below the
-  // buttons. The drawing shrinks by exactly the overflow, and steps aside when
-  // that leaves too little; the words and the replica are never cut. With
-  // large system text the card still scrolls (D-015).
-  const [artSize, setArtSize] = useState(ART_SIZE);
-  const viewport = useRef(0);
-  const content = useRef(0);
-  useEffect(() => setArtSize(ART_SIZE), [screen]);
-  // Either measurement can arrive first; fit once both are known.
-  const fit = () => {
-    if (viewport.current === 0 || content.current === 0 || copy.art === 'stamps') return;
-    const overflow = content.current - viewport.current;
-    if (overflow <= 1 || artSize === 0) return;
-    const next = artSize - overflow;
-    setArtSize(next >= ART_MIN ? Math.floor(next) : 0);
-  };
+  // buttons. The drawing gets whatever height the words leave, and steps aside
+  // below ART_MIN; the words and the replica are never cut. With large system
+  // text the card still scrolls (D-015).
+  // ⚠ Worked out from the words' height alone, never from the scroll content's:
+  // that includes the drawing, and shrinking by its overflow compounded when
+  // the step bar changed the viewport mid-measure (the drawing vanished from a
+  // card with room to spare).
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [wordsHeight, setWordsHeight] = useState(0);
+  const room = viewportHeight - wordsHeight - ART_CHROME;
+  const artSize =
+    viewportHeight === 0 || wordsHeight === 0
+      ? ART_SIZE
+      : room >= ART_SIZE
+        ? ART_SIZE
+        : room >= ART_MIN
+          ? Math.floor(room)
+          : 0;
 
   // Each card arrives: the drawing settles in, the words rise a little after.
   // Restarted on every screen change; still when the phone asks for less motion.
@@ -379,14 +384,7 @@ export default function OnboardingView(props: OnboardingViewProps) {
 
       <ScrollView
         contentContainerStyle={styles.content}
-        onLayout={(event) => {
-          viewport.current = event.nativeEvent.layout.height;
-          fit();
-        }}
-        onContentSizeChange={(_, height) => {
-          content.current = height;
-          fit();
-        }}
+        onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
       >
         {copy.art === 'stamps' ? (
           <Animated.View style={[styles.art, artStyle]}>
@@ -398,7 +396,10 @@ export default function OnboardingView(props: OnboardingViewProps) {
           </Animated.View>
         ) : null}
 
-        <Animated.View style={[styles.words, textStyle]}>
+        <Animated.View
+          style={[styles.words, textStyle]}
+          onLayout={(event) => setWordsHeight(event.nativeEvent.layout.height)}
+        >
           <Text style={styles.title} accessibilityRole="header">
             {copy.title}
           </Text>

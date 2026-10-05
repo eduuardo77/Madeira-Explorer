@@ -54,6 +54,7 @@ export const STRINGS = {
   // D-017.
   // ⚠ T-250 (2026-10-05): first run speaks Portuguese in "tu", as the project
   // lead wrote the approved sketches and the unlock sheet. German keeps "Sie".
+  // The copy is the lead's version B of two drafted the same day.
   'onboarding.welcome.title': s('Welcome to {app}', 'Boas-vindas ao {app}', 'Willkommen bei {app}'),
   // ⚠ Never rendered until T-054 measures the figure (D-041); translated ahead of it.
   'onboarding.battery': s(
@@ -62,16 +63,20 @@ export const STRINGS = {
     'Die Aufzeichnung verbraucht etwa {percent} % des Akkus pro Tag.'
   ),
   'onboarding.welcome.body1': s(
-    '{destination} has {count} places waiting for a stamp in your passport. Go to one, and its stamp appears by itself.',
-    '{destination} tem {count} lugares à espera de um carimbo no teu passaporte. Vai a um, e o carimbo aparece sozinho.',
-    '{destination} hat {count} Orte, die auf einen Stempel in Ihrem Reisepass warten. Gehen Sie zu einem, und der Stempel erscheint von selbst.'
+    '{destination} has {count} stamps waiting in your passport. Just get there: the stamp appears by itself.',
+    '{destination} tem {count} carimbos à tua espera no passaporte. Basta lá chegares: o carimbo aparece sozinho.',
+    '{destination} hat {count} Stempel, die in Ihrem Reisepass auf Sie warten. Kommen Sie einfach hin: Der Stempel erscheint von selbst.'
   ),
   'onboarding.welcome.body2': s(
-    'And along the way, {app} lights up every road you travel.',
-    'E pelo caminho, o {app} acende cada estrada por onde passas.',
-    'Und unterwegs lässt {app} jede Straße aufleuchten, auf der Sie waren.'
+    'And every road you travel lights up on your map.',
+    'E cada estrada que percorres fica acesa no teu mapa.',
+    'Und jede Straße, auf der Sie unterwegs sind, leuchtet auf Ihrer Karte auf.'
   ),
-  'onboarding.action.start': s('Get started', 'Começar', 'Los geht es'),
+  'onboarding.action.start': s(
+    'Let’s go',
+    'Vamos lá',
+    'Los geht es'
+  ),
   'onboarding.action.continue': s('Continue', 'Continuar', 'Weiter'),
   'onboarding.action.notNow': s('Not now', 'Agora não', 'Jetzt nicht'),
   /** The step count over every first-run card ("2 de 4"). */
@@ -79,27 +84,29 @@ export const STRINGS = {
   /** Above the replica of Android's own dialog: what comes next, and which answer. */
   'onboarding.next.dialog': s('Next, Android asks:', 'A seguir, o Android pergunta:', 'Als Nächstes fragt Android:'),
   'onboarding.next.settings': s(
-    'Next, Android opens this page. Choose:',
-    'A seguir, o Android abre esta página. Escolhe:',
-    'Als Nächstes öffnet Android diese Seite. Wählen Sie:'
+    'Next, Android opens this page:',
+    'A seguir, o Android abre esta página:',
+    'Als Nächstes öffnet Android diese Seite:'
   ),
-  'onboarding.next.pick': s('Choose this', 'Escolhe este', 'Diese wählen'),
+  // "Recommended", not "Choose this": the project lead found an order too
+  // forceful for an answer the user is free to refuse (D-008), 2026-10-05.
+  'onboarding.next.pick': s('Recommended', 'Recomendado', 'Empfohlen'),
 
   // ── O1: location, While-Using ────────────────────────────────────────────
   'onboarding.location.title': s(
-    'Your map fills itself in',
-    'O teu mapa enche-se sozinho',
-    'Ihre Karte füllt sich von selbst'
+    'Every road lights up',
+    'Cada estrada fica acesa',
+    'Jede Straße leuchtet auf'
   ),
   'onboarding.location.body1': s(
-    '{app} lights up the roads you travel and stamps the places you reach. For that, it needs to know where you are.',
-    'O {app} acende as estradas por onde passas e carimba os lugares a que chegas. Para isso, precisa de saber onde estás.',
-    '{app} lässt die Straßen aufleuchten, auf denen Sie unterwegs sind, und stempelt die Orte, die Sie erreichen. Dafür muss die App wissen, wo Sie sind.'
+    'To light up your way and give you your stamps, {app} needs your location.',
+    'Para acender o teu caminho e te dar os carimbos, o {app} precisa da tua localização.',
+    'Um Ihren Weg aufleuchten zu lassen und Ihnen Ihre Stempel zu geben, braucht {app} Ihren Standort.'
   ),
   'onboarding.location.note': s(
-    'There is no account, and your trip is never sent to us.',
-    'Não há conta, e a tua viagem nunca nos é enviada.',
-    'Es gibt kein Konto, und Ihre Reise wird nie an uns gesendet.'
+    'You need no account, and your trip is never sent to us.',
+    'Não precisas de conta, e a tua viagem nunca nos é enviada.',
+    'Sie brauchen kein Konto, und Ihre Reise wird nie an uns gesendet.'
   ),
 
   // ── O2: all the time, with Play's prominent disclosure ──────────────────
@@ -110,19 +117,19 @@ export const STRINGS = {
   // FOR (drawing the user's own map). A rewording may be plainer; it may not
   // drop any of the three. `i18n.test.ts` checks the three are present.
   'onboarding.always.title': s(
-    'Even with your phone in your pocket',
-    'Mesmo com o telemóvel no bolso',
-    'Auch mit dem Telefon in der Tasche'
+    'Keep your phone in your pocket',
+    'Deixa o telemóvel no bolso',
+    'Lassen Sie das Telefon in der Tasche'
   ),
   'onboarding.always.body1': s(
-    'To fill in your map without you opening the app, {app} collects location data even when it is closed or not in use.',
-    'Para encher o teu mapa sem teres de abrir a app, o {app} recolhe dados de localização mesmo quando está fechado ou não está a ser usado.',
-    'Damit sich Ihre Karte füllt, ohne dass Sie die App öffnen, erfasst {app} Standortdaten auch dann, wenn die App geschlossen ist oder nicht verwendet wird.'
+    'So your map fills in without you having to remember, {app} collects location data even when the app is closed or not in use.',
+    'Para o teu mapa se encher sem teres de te lembrar, o {app} recolhe dados de localização mesmo com a app fechada ou sem estar a ser usada.',
+    'Damit sich Ihre Karte füllt, ohne dass Sie daran denken müssen, erfasst {app} Standortdaten auch dann, wenn die App geschlossen ist oder nicht verwendet wird.'
   ),
   'onboarding.always.note': s(
-    'They are used only to draw your own map on this phone. They are never sent to us, never sold, and never used for advertising.',
-    'Servem só para desenhar o teu mapa neste telemóvel. Nunca nos são enviados, nunca são vendidos e nunca são usados para publicidade.',
-    'Sie dienen nur dazu, Ihre eigene Karte auf diesem Telefon zu zeichnen. Sie werden nie an uns gesendet, nie verkauft und nie für Werbung genutzt.'
+    'That data is used only to draw your map, here on your phone. It never reaches us, is never sold, and is never used for advertising.',
+    'Esses dados servem só para desenhar o teu mapa, aqui no telemóvel. Nunca nos chegam, nunca são vendidos e nunca servem para publicidade.',
+    'Diese Daten dienen nur dazu, Ihre Karte hier auf Ihrem Telefon zu zeichnen. Sie erreichen uns nie, werden nie verkauft und nie für Werbung genutzt.'
   ),
   /** Android 11 and later: the answer is on a settings page, not a dialog. */
   'onboarding.always.openSettings': s('Open settings', 'Abrir definições', 'Einstellungen öffnen'),
@@ -138,19 +145,19 @@ export const STRINGS = {
   // What it buys, in the user's terms: the right road, and no lines drawn
   // while the phone lies still. The privacy policy says the same.
   'onboarding.activity.title': s(
-    'Walking, or in a car?',
-    'A pé ou de carro?',
-    'Zu Fuß oder im Auto?'
+    'Let {app} tell walking from driving',
+    'Deixa o {app} saber se vais a pé ou de carro',
+    'Lassen Sie {app} Gehen und Fahren unterscheiden'
   ),
   'onboarding.activity.body1': s(
-    'Your phone can tell whether you are walking, driving or keeping still. With that, {app} lights the right road, and draws nothing while your phone lies on a table.',
-    'O teu telemóvel sabe se estás a andar, a conduzir ou parado. Assim o {app} acende a estrada certa, e não desenha nada enquanto o telemóvel está pousado numa mesa.',
-    'Ihr Telefon erkennt, ob Sie gehen, fahren oder stillstehen. Damit leuchtet {app} die richtige Straße auf und zeichnet nichts, während Ihr Telefon auf dem Tisch liegt.'
+    'Android calls this physical activity: your phone senses whether you are walking, driving or keeping still. With it, {app} lights the right road, and draws nothing while your phone lies on a table.',
+    'O Android chama-lhe atividade física: o telemóvel sente se estás a andar, a conduzir ou parado. Com isso, o {app} acende a estrada certa, e não desenha nada enquanto o telemóvel está pousado na mesa.',
+    'Android nennt das körperliche Aktivität: Ihr Telefon spürt, ob Sie gehen, fahren oder stillstehen. Damit leuchtet {app} die richtige Straße auf und zeichnet nichts, während Ihr Telefon auf dem Tisch liegt.'
   ),
   'onboarding.activity.note': s(
-    'It stays on your phone. If you say no, the map still works.',
-    'Fica no teu telemóvel. Se disseres que não, o mapa continua a funcionar.',
-    'Es bleibt auf Ihrem Telefon. Wenn Sie ablehnen, funktioniert die Karte trotzdem.'
+    'It counts no steps and keeps no health data. It all stays on your phone, and if you say no, the map still works.',
+    'Não conta passos nem guarda dados de saúde. Fica tudo no telemóvel, e se recusares, o mapa funciona na mesma.',
+    'Es zählt keine Schritte und speichert keine Gesundheitsdaten. Alles bleibt auf Ihrem Telefon, und wenn Sie ablehnen, funktioniert die Karte trotzdem.'
   ),
 
   // ── Notifications ───────────────────────────────────────────────────────
@@ -159,19 +166,19 @@ export const STRINGS = {
   // a quiet one per stamp (D-096), the day-1 check (T-049) and the finished
   // map (D-011). "No offers" stays true: D-097 sends no purchase notification.
   'onboarding.messages.title': s(
-    'Know when you earn a stamp',
-    'Sabe quando ganhas um carimbo',
-    'Erfahren Sie, wann Sie einen Stempel bekommen'
+    'A note for every stamp',
+    'Um aviso a cada carimbo',
+    'Eine Nachricht für jeden Stempel'
   ),
   'onboarding.messages.body1': s(
-    'A quiet message for each new stamp, with no sound. And two about your trip: tomorrow, to say whether everything is working, and at the end, when your map is ready.',
-    'Uma mensagem discreta por cada carimbo novo, sem som. E duas sobre a viagem: amanhã, a dizer se está tudo a funcionar, e no fim, quando o teu mapa estiver pronto.',
-    'Eine leise Nachricht für jeden neuen Stempel, ohne Ton. Und zwei zu Ihrer Reise: morgen, ob alles läuft, und am Ende, wenn Ihre Karte fertig ist.'
+    'When you earn a stamp, you get a quiet message, with no sound. About your trip, just two: tomorrow, to say whether everything is working, and at the end, with your map ready.',
+    'Quando ganhas um carimbo, recebes uma mensagem discreta, sem som. Sobre a viagem, só duas: amanhã, a dizer se está tudo a funcionar, e no fim, com o teu mapa pronto.',
+    'Wenn Sie einen Stempel bekommen, erhalten Sie eine leise Nachricht, ohne Ton. Zu Ihrer Reise nur zwei: morgen, ob alles läuft, und am Ende, mit Ihrer fertigen Karte.'
   ),
   'onboarding.messages.note': s(
-    'Never advertising, never offers.',
-    'Nunca publicidade, nunca promoções.',
-    'Nie Werbung, nie Angebote.'
+    'No advertising, no offers.',
+    'Nada de publicidade nem promoções.',
+    'Keine Werbung, keine Angebote.'
   ),
 
   // ── O3: keep running (Android only) ─────────────────────────────────────
@@ -181,41 +188,49 @@ export const STRINGS = {
   // the official lever, and some skins (EMUI's app launch manager) stop apps
   // anyway, which nobody has measured yet (T-053).
   'onboarding.keepRunning.title': s(
-    'Don’t let Android stop the recording',
-    'Não deixes o Android parar o registo',
-    'Damit Android die Aufzeichnung nicht stoppt'
+    'Keep {app} awake',
+    'Mantém o {app} acordado',
+    'Halten Sie {app} wach'
   ),
   'onboarding.keepRunning.body1': s(
-    'Some phones close apps to save battery, and then your map stops filling in. One tap asks Android to leave {app} running.',
-    'Alguns telemóveis fecham apps para poupar bateria, e o teu mapa deixa de se encher. Um toque pede ao Android que deixe o {app} a funcionar.',
-    'Manche Telefone schließen Apps, um Akku zu sparen, und dann füllt sich Ihre Karte nicht mehr. Ein Tippen bittet Android, {app} weiterlaufen zu lassen.'
+    'Some phones put apps to sleep to save battery, and your map stops filling in. With one tap, you ask Android to keep {app} running.',
+    'Alguns telemóveis adormecem as apps para poupar bateria, e o mapa para de se encher. Com um toque, pedes ao Android que deixe o {app} a funcionar.',
+    'Manche Telefone legen Apps schlafen, um Akku zu sparen, und Ihre Karte füllt sich nicht mehr. Mit einem Tippen bitten Sie Android, {app} weiterlaufen zu lassen.'
   ),
 
   // ── The last card: what is on, and the map ──────────────────────────────
-  'onboarding.ready.title': s('All set', 'Tudo pronto', 'Alles bereit'),
+  'onboarding.ready.title': s(
+    'Ready to go',
+    'Pronto para sair',
+    'Bereit zum Losgehen'
+  ),
   'onboarding.ready.always': s(
-    'Your map fills in by itself, even with the app closed.',
-    'O teu mapa enche-se sozinho, mesmo com a app fechada.',
-    'Ihre Karte füllt sich von selbst, auch bei geschlossener App.'
+    'You can put your phone away now. Your map fills in by itself.',
+    'Já podes guardar o telemóvel. O mapa enche-se sozinho.',
+    'Sie können das Telefon jetzt wegstecken. Ihre Karte füllt sich von selbst.'
   ),
   'onboarding.ready.whileUsing': s(
-    'Press Start an outing on the map when you go out, and your map fills in while it runs.',
-    'Carrega em Começar passeio no mapa quando saíres, e o teu mapa enche-se enquanto o passeio dura.',
-    'Tippen Sie auf der Karte auf Ausflug starten, wenn Sie losziehen, und Ihre Karte füllt sich, solange er läuft.'
+    'When you go out, press Start an outing. Your map fills in while it runs.',
+    'Quando saíres, carrega em Começar passeio. O mapa enche-se enquanto o passeio dura.',
+    'Wenn Sie losziehen, tippen Sie auf Ausflug starten. Ihre Karte füllt sich, solange er läuft.'
   ),
   'onboarding.ready.denied': s(
-    'Without your location the map stays empty. You can turn it on later in your phone’s settings.',
-    'Sem a tua localização, o mapa fica vazio. Podes ligá-la mais tarde nas definições do telemóvel.',
-    'Ohne Ihren Standort bleibt die Karte leer. Sie können ihn später in den Einstellungen Ihres Telefons einschalten.'
+    'Without your location, the map does not fill in. You can turn it on whenever you like in your phone’s settings.',
+    'Sem localização, o mapa não se enche. Podes ligá-la quando quiseres nas definições do telemóvel.',
+    'Ohne Ihren Standort füllt sich die Karte nicht. Sie können ihn jederzeit in den Einstellungen Ihres Telefons einschalten.'
   ),
   // ⚠ "Swipe away" is named in plain words because it is the one thing the user
   // does that silently ends recording, and no permission can prevent it.
   'onboarding.ready.tip': s(
-    'One tip: don’t swipe {app} away from your recent apps. Locking your phone is fine.',
-    'Uma dica: não feches o {app} deslizando-o das apps recentes. Bloquear o telemóvel não faz mal.',
-    'Ein Tipp: Wischen Sie {app} nicht aus den zuletzt verwendeten Apps. Das Telefon sperren ist in Ordnung.'
+    'Just one thing: don’t close {app} from your recent apps. Locking the screen is fine.',
+    'Só uma coisa: não feches o {app} nas apps recentes. Bloquear o ecrã não faz mal.',
+    'Nur eines: Schließen Sie {app} nicht über die zuletzt verwendeten Apps. Den Bildschirm sperren ist in Ordnung.'
   ),
-  'onboarding.ready.open': s('Open the map', 'Abrir o mapa', 'Zur Karte'),
+  'onboarding.ready.open': s(
+    'See my map',
+    'Ver o meu mapa',
+    'Meine Karte ansehen'
+  ),
 
   // ── Android's own words, for the replica of its dialog (T-250) ──────────
   // ⚠ NOT OURS TO WORD. Each is the label Android itself shows, read out of the

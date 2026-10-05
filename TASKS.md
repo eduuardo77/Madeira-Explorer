@@ -376,6 +376,23 @@ section's definition of done.
       footnote read as written; *Recuperar compra* answered *O Google Play não encontrou nenhuma
       compra nesta conta* with the price on Buy. **Version code 2** (`app.json` and the generated
       `build.gradle`), for the AAB that carries this, the sheet and the trip backup to Play.
+- [~] **T-156 verification (plan §6)** **The first real purchase, 2026-10-05 08:30 UTC, on the P30.**
+      Version code 2 on internal testing; the P30 moved to the **Play install** (uninstall, install
+      through the tester link, trip back with *Restaurar cópia*; passport 2 of 80 after). Opened from
+      Settings, *Desbloquear o passaporte*. Google's sheet first asked the EU withdrawal waiver
+      (*Reveja e aceite*, accepted by the project lead), then showed **the project lead's real
+      Mastercard**: the account was in the internal testing list but **not in License testing**,
+      and joining the first is not the second. The project lead stopped it there. After they added
+      the Play Store's active account to License testing: *Cartão de teste, aprova sempre* and *"Esta
+      é uma encomenda de teste"*; they tapped buy. **V2 ✅:** the sheet read *O teu passaporte está
+      desbloqueado*, Settings switched to *O passaporte está desbloqueado* with only *Recuperar
+      compra*, and Play Console lists order `GPA.3359-8950-2717-73315`, *Teste: The Madeira
+      Passport*, **Processado**. **Not visible:** the app's own diary, because a Play install is not
+      debuggable. **V3 ✅ (indirect):** at 08:41 UTC, ten minutes later, the order still reads
+      *Processado*, not refunded; license-test purchases left unacknowledged are refunded within
+      minutes, so the acknowledgement went through. The app's own diary line was not seen.
+      **Open:** the relaunch check (blocked by the downgrade prompt until "Permitir sempre" is granted on this new
+      install), and V4 to V10.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

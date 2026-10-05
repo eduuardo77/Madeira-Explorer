@@ -453,6 +453,9 @@ section's definition of done.
       `smoke-release.mjs` will need to dismiss them by coordinate or the loops need a pause.
       **Left:** none of it has been on the P30, whose app now comes from Play: it reaches the phone
       with the next internal testing upload. 974 tests.
+      **Update 2026-10-05 13:23:** the P30 is back on a cable field build with all of it; the
+      passport is locked (test order refunded with *Remover titularidade*), but with 2 real stamps
+      nothing is locked, so R1, R2 and E3 need probes to be seen there.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's
@@ -510,7 +513,8 @@ section's definition of done.
       `useReduceMotion` now shared with the celebration. **Found by looking:** Santana's 12 places
       ran off the card (a big set now wraps, smaller); the spotlight was a black wedge, because a
       fill naming a gradient in another Svg is black on Android; an empty band above the buttons.
-      **Left:** not on the P30 yet; *Partilhar* not tried on a phone. 981 tests.
+      **Left:** *Partilhar* not tried on a phone; on the P30 since 2026-10-05 13:23 (cable field
+      build), not yet looked at there. 981 tests.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

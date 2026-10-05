@@ -1,9 +1,64 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-09-24 (end of the session that
-worked the release-readiness plan).
+**For:** a session picking this project up cold. **Updated:** 2026-10-05 (end of the session that
+built billing, the paywall redesign and the trophy; the section just below is the latest state).
+Older sections further down are dated and partly superseded; trust the newest one.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
+
+## ⚠⚠ 2026-10-05: where the last session ended — read this first
+
+**Monetisation (`docs/monetization-execution-plan.md`).** Phase 0 done (app in Play Console, upload
+key, payments, testers, `passport_madeira` active at €5.99, Maps key carries the Play and upload
+SHA-1s). Phase 1 done. **Phase 2 done (T-156a to e)**: `expo-iap` 5.8.2 behind `storeBilling.ts`,
+`billingSync.ts` (saved, then acknowledged), the unlock sheet, the Settings rows. **The first real
+test purchase worked 2026-10-05** (bought, unlocked, acknowledged: order still *Processado* ten
+minutes later), then the project lead **refunded it with "Remover titularidade"** so the phone is a
+new user again. Plan §6: V2, V3 ✅; V4 to V10 open. Next phase: **3, the founder stamp (T-233)**.
+
+**D-097 (2026-10-05): the paywall asks, and keeps asking.** Supersedes T-157. Built in **T-249**:
+sheet A (waiting stamps in colour behind a blur, "Tens 5 carimbos à tua espera"), R1 (a gold card
+on the passport), R2 (a gold count on the map's passport button), the new-stamp celebration E2
+revised with a rank-up frame, and E3 for a locked stamp. **T-251**: a collected stamp opens as a
+trophy (T1 layout A: spotlight, medal set of its municipality, the next stamp). Options pages:
+`tools/preview-unlock-options.mjs`, `tools/preview-trophy-options.mjs` (served by the `options`
+entry in `.claude/launch.json`). **981 tests.**
+
+**On the P30 now (2026-10-05 13:23): a cable field build, version code 2, signed with the upload
+key, debuggable** (`run-as` works), with all of the above. The project lead's real data restored
+(18,078 fixes, 31 trips, 2 stamps), all permissions granted, **passport locked** (Google answers
+"owned 0" after the refund). With only 2 stamps nothing is locked, so R1, R2, the blurred fan and E3
+do not show: **offer the 8-probe method** (TASKS T-156d notes) to show them, and remove the probes
+after. Backups: `Madeira-fieldwork/p30-2026-10-05/`. The project lead prefers the phone to the
+emulator ("uses a lot of cpu power"): use the emulator only when the phone cannot answer.
+
+**Next, in order:** (1) show T-249 on the P30 with probes, if the project lead wants; (2) **T-250**,
+first run after WalkNYC (approved as drawn), whose notifications screen now says something false
+(*"two messages... nothing else, ever"*, untrue since D-096): rewrite, the lead approves the copy;
+(3) the **version 3 AAB** for internal testing when the lead asks (bump `versionCode` in `app.json`
+and `app/android/app/build.gradle`); (4) Phase 3, T-233.
+
+**Traps found this session, each cost time:**
+- **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at
+  every attempt (Google sells only to the copy it signs). And **License testing is not the
+  internal-testing tester list**: with only the latter, Google's sheet offered the lead's real card.
+  Read the sheet before any tap; it must say *Cartão de teste*.
+- **A Play install is not debuggable**: no `run-as`. Its only backup is the app's own *Guardar
+  uma cópia*. Moving between Play and cable installs needs an uninstall each time.
+- **Git Bash rewrites device paths** (`/data/local/tmp`, `/sdcard`) and arguments starting with `/`:
+  set `MSYS_NO_PATHCONV=1` for `adb push`/`shell`, but unset it for `node` script paths. The
+  scratch scripts take `re:` for a regular expression instead of `/.../`.
+- **Two `adb` binaries** (`tools/android-sdk` and `%LOCALAPPDATA%\Android\Sdk`) knock each other's
+  server over; use the repo's, and pass `-s` with two devices attached.
+- **`uiautomator` cannot read a screen whose animation never stops** (the celebration's rays, the
+  sheet's padlock): *could not get idle state*. Tap by position there; `smoke-release.mjs` will need it.
+- **react-native-svg on Android**: a fill naming a gradient defined in **another** `<Svg>` draws
+  black; a glow drawn behind a view is a grey frame (no blur under views). Blur on an SVG itself works.
+- **CSS/RN animations show their first frame before they start**: start confetti and rings hidden.
+- **Android 13+ reports a never-asked notification permission as denied**: fixed in onboarding
+  (`notificationAnswer`), but any new permission check must not read "denied" as "answered".
+- **Bash heredocs with quotes break here**: write Python edit scripts to the scratchpad with the
+  file tool and run them.
 
 ## State, in one paragraph
 
@@ -41,7 +96,7 @@ drawn at WalkNYC's size with the 60 dp targets kept by hitSlop. The banner's tap
 phone without "all the time". Type stops at 14 sp (D-015); WalkNYC's is 12, and lowering the floor
 is the lead's call.
 
-**On the P30 since 2026-10-04 22:07: a STORE field build SIGNED WITH THE UPLOAD KEY** (debuggable,
+**(Superseded by the 2026-10-05 section at the top.) On the P30 since 2026-10-04 22:07: a STORE field build SIGNED WITH THE UPLOAD KEY** (debuggable,
 `run-as` works), with billing sync (T-156c). ⚠ **The debug-key builds can no longer `install -r` over
 it**: build release builds as before (the upload key is configured), or uninstall after pulling the
 database. The real database was restored into it (checksums matched; backups in

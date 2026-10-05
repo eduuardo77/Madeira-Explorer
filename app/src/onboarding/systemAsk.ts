@@ -18,8 +18,12 @@ import { translate } from '../i18n/translate.ts';
 import type { FirstRunAsk } from './permissionPolicy.ts';
 
 export type SystemAsk = {
-  /** A dialog over the app, or a settings page the app is left for. */
-  kind: 'dialog' | 'settings';
+  /**
+   * A permission dialog (buttons stacked), a plain dialog (two buttons side by
+   * side, the refusal on the left, as Settings' battery dialog draws them), or
+   * a settings page the app is left for.
+   */
+  kind: 'dialog' | 'buttons' | 'settings';
   /** The labels, top to bottom, as Android lays them out. */
   options: string[];
   /** Which one to choose. */
@@ -59,7 +63,7 @@ export function systemAskFor(
     case 'downgrade':
       // Android 10 asks in a dialog; 11 and later only on the app's location page.
       return apiLevel < API_R
-        ? dialog(['os.allowAlways', 'os.q.keepWhileUsing'])
+        ? dialog(['os.allowAlways', 'os.q.keepWhileUsing', 'os.q.keepDontAsk'])
         : {
             kind: 'settings',
             options: labels(
@@ -74,8 +78,9 @@ export function systemAskFor(
       // Android 13 and later only; nothing older asks.
       return dialog(['os.allow', 'os.dontAllow']);
     case 'keep-running':
-      // Settings' own dialog, the same two words on 10 and 14.
-      return dialog(['os.allow', 'os.deny']);
+      // Settings' own dialog, the same two words on 10 and 14, side by side
+      // with the refusal first (seen on the P30, 2026-10-05).
+      return { kind: 'buttons', options: labels(['os.deny', 'os.allow'], language), pick: 1 };
   }
 }
 

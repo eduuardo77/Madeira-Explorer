@@ -229,6 +229,20 @@ export function firstRunPlan(state: OnboardingState): FirstRunAsk[] {
   return plan;
 }
 
+const ASKS: readonly FirstRunAsk[] = ['location', 'always', 'activity', 'notifications', 'keep-running'];
+
+/** A stored plan, or null when it is missing or not one. */
+export function parsePlan(raw: string | null): FirstRunAsk[] | null {
+  if (raw === null) return null;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (!Array.isArray(value) || !value.every((ask) => ASKS.includes(ask as FirstRunAsk))) return null;
+    return value as FirstRunAsk[];
+  } catch {
+    return null;
+  }
+}
+
 /** Where a card sits in the plan, 1-based, or null when it is not part of it. */
 export function stepPosition(
   plan: readonly FirstRunAsk[],

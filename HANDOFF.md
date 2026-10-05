@@ -32,6 +32,9 @@ do not show: **offer the 8-probe method** (TASKS T-156d notes) to show them, and
 after. Backups: `Madeira-fieldwork/p30-2026-10-05/`. The project lead prefers the phone to the
 emulator ("uses a lot of cpu power"): use the emulator only when the phone cannot answer.
 
+**T-250 built and seen on the P30 (2026-10-05 afternoon):** first run is one card per ask with a
+replica of Android's dialog, matched word for word on Android 10; the P30's real data was restored
+after (backup `Madeira-fieldwork/p30-2026-10-05-t250/`). Waiting on the lead's approval of the copy.
 **Next, in order:** (1) show T-249 on the P30 with probes, if the project lead wants; (2) **T-250**,
 first run after WalkNYC (approved as drawn), whose notifications screen now says something false
 (*"two messages... nothing else, ever"*, untrue since D-096): rewrite, the lead approves the copy;

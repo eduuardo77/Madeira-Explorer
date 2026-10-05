@@ -242,7 +242,10 @@ work — not worth it for v1.
 
 ## D-008 — The app must be fully usable with "While Using" permission only.
 
-**Status:** Accepted
+**Status:** Accepted. ⚠ **Amended 2026-10-05 (T-250, the project lead's pick of the drawn first
+run, O2):** on Android, Always is now asked **in first run**, on its own card right after the
+While-Using grant, as WalkNYC does; the card carries Play's prominent disclosure. Still never a
+gate: *Prefiro iniciar eu* moves on and is never asked again. iOS keeps the later upgrade below.
 
 **Decision:** Background ("Always") location is an *upgrade*, never a gate. The app ships a
 complete experience with While-Using permission via an explicit start/end recording mode, and
@@ -2046,6 +2049,13 @@ domain question settled — the same open item as the bundle identifier.
 
 **Status:** Provisional — implemented 2026-08-11 (T-046). **Deliberately reversible**, and
 T-053 is what decides.
+
+⚠ **Reversed for first run 2026-10-05 (T-250):** the project lead chose WalkNYC's one-tap dialog
+(O3). `app/modules/battery-exemption` sends `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` and can
+read `isIgnoringBatteryOptimizations`, so the card is skipped when already exempt. The manifest
+now carries `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which Play reviews against its acceptable
+uses: **the risk this entry avoided is now taken**, and if Play objects, deleting the module
+returns the app to the settings list with no other change. Settings still opens the list.
 
 **Context:** CONTEXT §7 and HANDOFF both state it plainly — **Android OEMs kill background work
 regardless of the official APIs.** Xiaomi, Huawei, Samsung, Oppo and OnePlus ship battery

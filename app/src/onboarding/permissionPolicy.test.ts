@@ -24,6 +24,7 @@ import {
   MEASURED_BATTERY_PERCENT_PER_DAY,
   firstRunPlan,
   nextOnboardingStep,
+  parsePlan,
   shouldOfferAlwaysUpgrade,
   stepPosition,
   type AlwaysUpgradeState,
@@ -378,4 +379,10 @@ test('T-250: a card reads its place in the plan; anything else has none', () => 
   assert.deepEqual(stepPosition(plan, 'keep-running'), { step: 4, of: 4 });
   assert.equal(stepPosition(plan, 'welcome'), null);
   assert.equal(stepPosition(plan, 'downgrade'), null);
+});
+
+test('T-250: a stored plan reads back, and anything else is ignored', () => {
+  // Found on the P30: reopened halfway, the count restarted at "1 de 3".
+  assert.deepEqual(parsePlan('["location","always","activity","keep-running"]'), ['location', 'always', 'activity', 'keep-running']);
+  for (const raw of [null, '', 'nope', '{}', '["location","welcome"]']) assert.equal(parsePlan(raw), null, String(raw));
 });

@@ -163,6 +163,11 @@ export const AppStateKey = {
    */
   KeepRunningSeen: 'keep_running_seen',
   /**
+   * The asks first run planned at its start, as a JSON list (T-250), so the
+   * step count survives the app being reopened halfway ("2 de 4", not "1 de 3").
+   */
+  FirstRunPlan: 'first_run_plan',
+  /**
    * The stamps already announced by a notification, as a JSON list of place
    * ids (D-096). Absent until the first announcement pass, which seeds it with
    * every stamp already earned, so an update never announces a backlog.

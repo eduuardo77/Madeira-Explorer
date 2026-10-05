@@ -27,6 +27,7 @@ import OnboardingView, {
 import {
   firstRunPlan,
   nextOnboardingStep,
+  parsePlan,
   notificationAnswer,
   stepPosition,
   type FirstRunAsk,
@@ -124,7 +125,17 @@ export default function OnboardingFlow({
       alwaysOffered: alwaysOfferedTs !== null,
       batteryExempt: batteryExempt() === true,
     };
-    if (plan.current === null) plan.current = firstRunPlan(state);
+    if (plan.current === null) {
+      // Kept across a restart halfway (found on the P30): a plan worked out
+      // again from a later state would restart the count.
+      const stored = parsePlan(await appStateDao.get(appStateDao.AppStateKey.FirstRunPlan));
+      if (stored !== null && !completed) {
+        plan.current = stored;
+      } else {
+        plan.current = firstRunPlan(state);
+        if (!completed) await appStateDao.set(appStateDao.AppStateKey.FirstRunPlan, JSON.stringify(plan.current));
+      }
+    }
     const step = nextOnboardingStep(state);
 
     if (step === 'complete') {

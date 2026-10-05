@@ -36,7 +36,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-005** | Geofences as the system backbone. | Accepted |
 | **D-006** | Buy the background-geolocation library rather than build it. | **Superseded in part by D-025** |
 | **D-007** | React Native or Flutter, not fully native. | Accepted |
-| **D-008** | The app must be fully usable with "While Using" permission only. | Accepted |
+| **D-008** | The app must be fully usable with "While Using" permission only. Android asks Always in first run since T-250, never as a gate. | Accepted, amended 2026-10-05 |
 | **D-009** | Bias matching toward false positives. | Accepted |
 | **D-010** | Retain raw traces; treat matching as a replaceable layer. | **Accepted** |
 | **D-011** | Exactly two notifications per trip. **Amended by D-096:** stamps have a quiet one of their own. | Accepted |
@@ -73,7 +73,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-042** | The souvenir is planned as a storyboard, paced by movement, and never partial. | Provisional |
 | **D-043** | Firebase Cloud Messaging ships in the Android build, and stays. | Provisional |
 | **D-044** | The privacy policy is shown offline in the app, and the web copy is generated from it. | Provisional |
-| **D-045** | The battery exemption opens a settings screen; it does not ask for the restricted permission. | Provisional |
+| **D-045** | The battery exemption opens a settings screen; it does not ask for the restricted permission. **First run uses the one-tap dialog since T-250** (restricted permission taken). | Provisional, reversed in first run 2026-10-05 |
 | **D-046** | Stamp artwork is generated per place. The emblem carries the category; shape and colour do not. | Provisional |
 | **D-047** | The emulator cannot serve a `balanced`-accuracy location request. The recorder was never broken. | Provisional |
 | **D-048** | The recording sink is serialised. The OS delivers concurrently and our writes assumed it did not. | Provisional |

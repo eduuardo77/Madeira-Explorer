@@ -26,7 +26,7 @@
  * screen against every state (D-038).
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
@@ -218,7 +218,14 @@ function welcomeStamps(places: readonly Place[]): Place[] {
   return picked;
 }
 
-const ART_SIZE = 168;
+/**
+ * ⚠ 112, not the sketch's larger drawing: on the P30 at 168 the replica of
+ * Android's dialog, the part that matters, fell below the buttons (2026-10-05), and at 128 its
+ * last option still did.
+ */
+const ART_SIZE = 112;
+/** Below this the drawing is a smudge, and the card is better without it. */
+const ART_MIN = 64;
 const FAN_STAMP = 118;
 
 function StampFan() {
@@ -277,7 +284,7 @@ function SystemReplica({ ask }: { ask: SystemAsk }) {
   return (
     <View style={styles.replicaWrap}>
       <Text style={styles.replicaLead}>{lead}</Text>
-      <View style={styles.replica}>
+      <View style={[styles.replica, ask.kind === 'buttons' && styles.replicaButtons]}>
         {ask.options.map((option, index) => {
           const picked = index === ask.pick;
           return (
@@ -285,6 +292,8 @@ function SystemReplica({ ask }: { ask: SystemAsk }) {
               key={option}
               style={[
                 ask.kind === 'settings' ? styles.radioRow : styles.optionRow,
+                ask.kind === 'buttons' && styles.optionSideBySide,
+                !picked && styles.optionCompact,
                 picked && styles.optionPicked,
               ]}
               accessible
@@ -295,14 +304,18 @@ function SystemReplica({ ask }: { ask: SystemAsk }) {
                   {picked ? <View style={styles.radioDot} /> : null}
                 </View>
               ) : null}
-              <Text style={[styles.optionText, picked ? styles.optionTextPicked : styles.optionTextOther]}>
-                {option}
-              </Text>
-              {picked ? (
-                <View style={styles.pickBadge}>
-                  <Text style={styles.pickBadgeText}>{pickLabel}</Text>
-                </View>
-              ) : null}
+              {/* The badge above the label, not beside it: Android 10's labels are
+                  long, and beside a badge one wrapped to four lines on the P30. */}
+              <View style={styles.optionWords}>
+                {picked ? (
+                  <View style={styles.pickBadge}>
+                    <Text style={styles.pickBadgeText}>{pickLabel}</Text>
+                  </View>
+                ) : null}
+                <Text style={[styles.optionText, picked ? styles.optionTextPicked : styles.optionTextOther]}>
+                  {option}
+                </Text>
+              </View>
             </View>
           );
         })}
@@ -315,6 +328,24 @@ export default function OnboardingView(props: OnboardingViewProps) {
   const { screen, onContinue, onSkip, position, systemAsk } = props;
   const copy = copyFor(screen, props);
   const reduceMotion = useReduceMotion();
+
+  // ⚠ The drawing gives way to the words (2026-10-05, the P30): on the Always
+  // card, Play's required text pushed Android's third option below the
+  // buttons. The drawing shrinks by exactly the overflow, and steps aside when
+  // that leaves too little; the words and the replica are never cut. With
+  // large system text the card still scrolls (D-015).
+  const [artSize, setArtSize] = useState(ART_SIZE);
+  const viewport = useRef(0);
+  const content = useRef(0);
+  useEffect(() => setArtSize(ART_SIZE), [screen]);
+  // Either measurement can arrive first; fit once both are known.
+  const fit = () => {
+    if (viewport.current === 0 || content.current === 0 || copy.art === 'stamps') return;
+    const overflow = content.current - viewport.current;
+    if (overflow <= 1 || artSize === 0) return;
+    const next = artSize - overflow;
+    setArtSize(next >= ART_MIN ? Math.floor(next) : 0);
+  };
 
   // Each card arrives: the drawing settles in, the words rise a little after.
   // Restarted on every screen change; still when the phone asks for less motion.
@@ -346,10 +377,26 @@ export default function OnboardingView(props: OnboardingViewProps) {
     <View style={styles.root}>
       {position != null ? <Steps step={position.step} of={position.of} /> : <View style={styles.stepsSpacer} />}
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <Animated.View style={[styles.art, artStyle]}>
-          {copy.art === 'stamps' ? <StampFan /> : <OnboardingArt name={copy.art} size={ART_SIZE} />}
-        </Animated.View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        onLayout={(event) => {
+          viewport.current = event.nativeEvent.layout.height;
+          fit();
+        }}
+        onContentSizeChange={(_, height) => {
+          content.current = height;
+          fit();
+        }}
+      >
+        {copy.art === 'stamps' ? (
+          <Animated.View style={[styles.art, artStyle]}>
+            <StampFan />
+          </Animated.View>
+        ) : artSize > 0 ? (
+          <Animated.View style={[styles.art, artStyle]}>
+            <OnboardingArt name={copy.art} size={artSize} />
+          </Animated.View>
+        ) : null}
 
         <Animated.View style={[styles.words, textStyle]}>
           <Text style={styles.title} accessibilityRole="header">
@@ -426,9 +473,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  art: { alignItems: 'center', marginBottom: spacing.lg },
+  art: { alignItems: 'center', marginBottom: spacing.sm },
   fan: { width: '100%', height: FAN_STAMP + 34, alignItems: 'center', justifyContent: 'center' },
   fanStamp: {
     position: 'absolute',
@@ -439,7 +486,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
   },
-  words: { alignItems: 'center', gap: spacing.sm + 4 },
+  words: { alignItems: 'center', gap: spacing.sm },
   title: {
     color: colors.text,
     fontSize: fontSize.cardTitle,
@@ -459,7 +506,7 @@ const styles = StyleSheet.create({
     lineHeight: (fontSize.label) * 1.45,
     textAlign: 'center',
   },
-  replicaWrap: { alignSelf: 'stretch', marginTop: spacing.sm },
+  replicaWrap: { alignSelf: 'stretch', marginTop: spacing.xs },
   replicaLead: {
     color: colors.textMuted,
     fontSize: fontSize.small,
@@ -478,6 +525,10 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
   },
+  replicaButtons: { flexDirection: 'row', alignItems: 'stretch' },
+  optionSideBySide: { flex: 1 },
+  /** The answers not to pick are drawn smaller, so a three-option dialog still fits. */
+  optionCompact: { minHeight: 40, paddingVertical: 6 },
   optionRow: {
     minHeight: 48,
     borderRadius: 24,
@@ -513,7 +564,8 @@ const styles = StyleSheet.create({
   },
   radioOn: { borderColor: colors.action },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.action },
-  optionText: { flex: 1, fontSize: fontSize.label, lineHeight: (fontSize.label) * 1.3 },
+  optionWords: { flex: 1, alignItems: 'flex-start', gap: 6 },
+  optionText: { fontSize: fontSize.label, lineHeight: (fontSize.label) * 1.3 },
   optionTextPicked: { color: colors.text, fontWeight: '700' },
   optionTextOther: { color: colors.textMuted },
   pickBadge: {

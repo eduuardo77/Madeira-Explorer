@@ -491,9 +491,18 @@ section's definition of done.
       dialog through a new local module `modules/battery-exemption` (adds
       `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, Play-reviewed, D-045's fallback) and is skipped when
       already exempt; a last *Tudo pronto* card. Notifications copy rewritten (no more *"nothing
-      else, ever"*). 994 tests. **Next:** field build, back up the P30's database, uninstall, walk
-      first run, restore and `pm grant`; then the lead approves the copy. D-008's and D-045's text
-      still need the amendment recorded.
+      else, ever"*). D-008 and D-045 amended.
+      ✅ **Seen on the P30 2026-10-05, the whole first run, twice** (database backed up to
+      `Madeira-fieldwork/p30-2026-10-05-t250/`, app uninstalled, then restored by checksum: 31 trips,
+      2 stamps, integrity ok, permissions as before, battery exemption declined so as not to change
+      the phone). Every real dialog matched its replica word for word (EMUI writes them in capitals).
+      **Found by looking, fixed:** the replica fell below the buttons (drawing 168 → 112, spacing,
+      badge above the label); Android 10's Always dialog has a third button, *Manter e não perguntar
+      novamente*; Settings' battery dialog puts *Recusar* left and *Permitir* right, side by side;
+      reopened halfway, the count restarted at *1 de 3* (the plan is now stored,
+      `first_run_plan`). On the Always card Play's text leaves no room, so the drawing shrinks to the
+      space left and steps aside below 64 dp. 995 tests. ⚠ **Left:** the lead approves the copy
+      (`onboarding.*` in `strings.ts`); Android 11+ (settings page for Always) not seen on a phone.
 - [~] **T-251** **A collected stamp's card should feel like a trophy** (built 2026-10-05, emulator only) (project lead, 2026-10-05:
       *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
       trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as

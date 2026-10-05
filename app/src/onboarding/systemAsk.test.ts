@@ -22,7 +22,13 @@ test('T-250: the P30 (Android 10) is told to pick the button its own dialog show
   });
   const always = systemAskFor('always', P30);
   assert.equal(always?.kind, 'dialog');
-  assert.deepEqual(always?.options, ['Permitir sempre', 'Manter acesso durante a utilização']);
+  assert.deepEqual(always?.options, [
+    'Permitir sempre',
+    'Manter acesso durante a utilização',
+    'Manter e não perguntar novamente',
+  ]);
+  // Settings' battery dialog: two buttons side by side, the refusal on the left.
+  assert.deepEqual(systemAskFor('keep-running', P30), { kind: 'buttons', options: ['Recusar', 'Permitir'], pick: 1 });
 });
 
 test('T-250: Android 11 and later get their own words, and Always on a settings page', () => {

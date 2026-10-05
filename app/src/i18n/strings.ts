@@ -238,6 +238,12 @@ export const STRINGS = {
     'Manter acesso durante a utilização',
     'Zugriff während der Verwendung beibehalten'
   ),
+  // Android 10 on the P30 shows this third button on the first "all the time" ask too.
+  'os.q.keepDontAsk': s(
+    'Keep and don’t ask again',
+    'Manter e não perguntar novamente',
+    'Beibehalten und nicht mehr fragen'
+  ),
   'os.whileUsing': s('While using the app', 'Enquanto uso a app', 'Bei Nutzung der App'),
   'os.onlyThisTime': s('Only this time', 'Apenas desta vez', 'Nur dieses Mal'),
   'os.settings.whileUsing': s(

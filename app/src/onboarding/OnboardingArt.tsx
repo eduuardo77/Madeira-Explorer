@@ -70,7 +70,6 @@ const DRAWINGS: Record<ArtName, ReactNode> = {
   always: (
     <G>
       <Path d="M16 98C30 92 30 80 44 76" stroke={GOLD} strokeWidth={6} fill="none" strokeLinecap="round" />
-      <Path d="M16 98C30 92 30 80 44 76" stroke="#FFFFFF" strokeWidth={1.5} strokeDasharray="2 6" fill="none" strokeLinecap="round" />
       <Rect x={46} y={20} width={34} height={58} rx={6} fill={INK} />
       <Rect x={50} y={26} width={26} height={40} rx={2} fill="#B9D7EE" />
       <Path d="M52 58c6-5 10-1 14-8s6-6 8-5" stroke={GOLD} strokeWidth={3} fill="none" strokeLinecap="round" />
@@ -116,7 +115,7 @@ const DRAWINGS: Record<ArtName, ReactNode> = {
       <Rect x={82} y={50} width={7} height={20} rx={2.5} fill="#2E7D32" />
       <Rect x={37} y={41} width={38} height={38} rx={5} fill="#BFE6C8" />
       <Path d="M60 44l-12 18h10l-4 14 14-20H58z" fill={GOLD} stroke="#B97E00" strokeWidth={1} strokeLinejoin="round" />
-      <Path d="M18 100c16-6 26-2 40-8s26-4 44-10" stroke={GOLD} strokeWidth={5} fill="none" strokeLinecap="round" />
+      <Path d="M16 104c16-4 28 0 44-5s28-4 44-8" stroke={GOLD} strokeWidth={5} fill="none" strokeLinecap="round" />
     </G>
   ),
   // The last card: a tick over a lit road.

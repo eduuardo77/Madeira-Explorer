@@ -17,9 +17,8 @@
  * phone's "remove animations" setting on, everything appears at once, still.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
-  AccessibilityInfo,
   Animated,
   Easing,
   Modal,
@@ -38,6 +37,7 @@ import Padlock from './Padlock';
 import StampArt from './StampArt';
 import { postmarkFor } from './postmark';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
+import { useReduceMotion } from './useReduceMotion';
 
 const STAMP_SIZE = 196;
 const RAYS_SIZE = 560;
@@ -205,17 +205,6 @@ export default function StampNewsCard({
       </View>
     </Modal>
   );
-}
-
-/** Whether the phone asks for less motion. False until it has answered. */
-function useReduceMotion(): boolean {
-  const [reduce, setReduce] = useState(false);
-  useEffect(() => {
-    void AccessibilityInfo.isReduceMotionEnabled().then(setReduce);
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduce);
-    return () => subscription.remove();
-  }, []);
-  return reduce;
 }
 
 /** Every moving value, on one timeline that starts when the card opens. */

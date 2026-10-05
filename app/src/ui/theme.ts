@@ -214,6 +214,10 @@ export const reward = {
   actionText: '#111111',
   /** Behind a celebration: very dark, with warmth near the stamp. */
   stageGlow: '#2A2310',
+  /** The warmth behind a trophy (T-251). */
+  trophyWarm: '#3A3020',
+  /** A card on the dark stage: the medal set, the next stamp. */
+  cardFill: '#FFFFFF0F',
   stage: '#000000',
   /** The flash that opens a celebration. Decorative. */
   flash: '#FFF4C2',

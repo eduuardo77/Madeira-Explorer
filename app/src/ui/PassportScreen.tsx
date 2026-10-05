@@ -7,11 +7,12 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { deviceLanguage, t } from '../i18n';
-import { DATE_LOCALES } from '../i18n/languages';
+import { deviceLanguage, n, t } from '../i18n';
+import { DATE_LOCALES, type Language } from '../i18n/languages';
+import type { StringKey } from '../i18n/strings';
 import type { WalkedEvidence } from '../progress/levadaCoverage';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { Place } from '../content/contentPack';
+import type { Category, Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
@@ -42,6 +43,9 @@ import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shar
 import PassportView, { type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
+import TrophyCard from './TrophyCard';
+import { trophyFacts } from '../places/trophy';
+import { formatDistance } from '../places/placeCard';
 import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
@@ -104,6 +108,11 @@ export default function PassportScreen({
    * locked stamp's card, T-156d; the reminder card, D-097 R1). Null when closed.
    */
   const [unlockWaiting, setUnlockWaiting] = useState<PassportStamp[] | null>(null);
+  /**
+   * A collected, unlocked stamp's trophy (T-251), with what it says; null when
+   * closed. Locked and uncollected stamps open the place card instead.
+   */
+  const [trophy, setTrophy] = useState<TrophyView | null>(null);
   /** Open the sheet with every locked stamp, `first` leading the fan. */
   const openUnlock = (first: PassportStamp | null) => {
     const locked = stamps.filter((stamp) => stamp.locked === true);
@@ -224,6 +233,12 @@ export default function PassportScreen({
               day: 'numeric',
               month: 'long',
             });
+
+      // T-251: a collected stamp the user can see is a trophy, not a card.
+      if (stamp.collected && stamp.locked !== true) {
+        setTrophy(trophyView(stamp, place, awards, language));
+        return;
+      }
 
       setCardPlace(place);
       setCardStamp(stamp);
@@ -418,6 +433,25 @@ export default function PassportScreen({
           />
         </View>
       )}
+      {trophy === null ? null : (
+        <TrophyCard
+          stamp={trophy.stamp}
+          awardedTs={trophy.awardedTs}
+          subtitle={trophy.subtitle}
+          ribbon={trophy.ribbon}
+          medal={trophy.medal}
+          next={trophy.next}
+          onShowOnMap={() => {
+            setTrophy(null);
+            onShowOnMap(trophy.place, true);
+          }}
+          onShowNext={() => {
+            setTrophy(null);
+            if (trophy.nextPlace !== null) onShowOnMap(trophy.nextPlace, false);
+          }}
+          onClose={() => setTrophy(null)}
+        />
+      )}
       {unlockWaiting === null ? null : (
         <UnlockSheet
           waiting={unlockWaiting}
@@ -573,6 +607,80 @@ function earnedStamps(awards: StampAward[]): EarnedStamp[] {
       ? []
       : [{ placeId: entry.place_id, category, awardedTs: entry.awarded_ts }];
   });
+}
+
+/** Everything a trophy shows, worked out when it is opened (T-251). */
+type TrophyView = {
+  place: Place;
+  stamp: { placeId: string; name: string; category: Category };
+  awardedTs: number | null;
+  subtitle: string;
+  ribbon: string | null;
+  medal: {
+    title: string;
+    progress: string;
+    stamps: Array<{ placeId: string; name: string; category: Category; collected: boolean }>;
+  } | null;
+  next: { placeId: string; name: string; category: Category; distance: string; countsForMedal: boolean } | null;
+  nextPlace: Place | null;
+};
+
+function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], language: Language): TrophyView {
+  const places = getContentPack().places;
+  // The trip's stamps in the order they were earned.
+  const order = [...awards].sort((a, b) => a.awarded_ts - b.awarded_ts).map((award) => award.place_id);
+  const facts = trophyFacts(place.id, places, order);
+  const award = awards.find((candidate) => candidate.place_id === place.id);
+  const date =
+    award === undefined
+      ? null
+      : new Date(award.awarded_ts).toLocaleDateString(DATE_LOCALES[language], {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+  const category = t(`placeCard.category.${place.category}` as StringKey);
+  const regionName = facts.medal === null ? null : getRegionName(facts.medal.regionId);
+  const byId = new Map(places.map((each) => [each.id, each]));
+  const collected = new Set(order);
+
+  return {
+    place,
+    stamp: { placeId: place.id, name: place.name, category: place.category },
+    awardedTs: award?.awarded_ts ?? null,
+    subtitle: date === null ? category : t('trophy.subtitle', { category, date }),
+    ribbon: facts.orderInTrip === null ? null : t('trophy.ribbon', { count: facts.orderInTrip }),
+    medal:
+      facts.medal === null || regionName === null
+        ? null
+        : {
+            title: t('trophy.medal.title', { region: regionName }),
+            progress:
+              facts.medal.collected === facts.medal.total
+                ? t('trophy.medal.done', { total: facts.medal.total })
+                : n('trophy.medal.progress', facts.medal.total - facts.medal.collected, {
+                    collected: facts.medal.collected,
+                    total: facts.medal.total,
+                  }),
+            stamps: facts.medal.placeIds.flatMap((id) => {
+              const each = byId.get(id);
+              return each === undefined
+                ? []
+                : [{ placeId: id, name: each.name, category: each.category, collected: collected.has(id) }];
+            }),
+          },
+    next:
+      facts.next === null
+        ? null
+        : {
+            placeId: facts.next.placeId,
+            name: facts.next.name,
+            category: facts.next.category,
+            distance: formatDistance(facts.next.distanceM, language),
+            countsForMedal: facts.next.countsForMedal,
+          },
+    nextPlace: facts.next === null ? null : (byId.get(facts.next.placeId) ?? null),
+  };
 }
 
 const styles = StyleSheet.create({

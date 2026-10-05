@@ -1067,6 +1067,23 @@ export const STRINGS = {
     'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen.'
   ),
   'stampNews.unlock': s('Unlock', 'Desbloquear', 'Freischalten'),
+  // T-251: a collected stamp as a trophy (T1 layout A).
+  'trophy.ribbon': s('STAMP {count} OF THIS TRIP', '{count}.º CARIMBO DA VIAGEM', '{count}. STEMPEL DIESER REISE'),
+  'trophy.subtitle': s('{category} · {date}', '{category} · {date}', '{category} · {date}'),
+  'trophy.medal.title': s('{region} medal', 'Medalha de {region}', 'Medaille {region}'),
+  'trophy.medal.done': s(
+    '{total} of {total} places · complete',
+    '{total} de {total} lugares · completa',
+    '{total} von {total} Orten · vollständig'
+  ),
+  'trophy.next.label': s('NEXT STAMP', 'PRÓXIMO CARIMBO', 'NÄCHSTER STEMPEL'),
+  'trophy.next.distance': s('{distance} away, in a straight line', 'a {distance} daqui, em linha reta', '{distance} entfernt, Luftlinie'),
+  'trophy.next.medal': s('counts for the medal', 'conta para a medalha', 'zählt für die Medaille'),
+  'trophy.a11y.next': s(
+    'Next stamp: {name}, {distance} away. Show it on the map',
+    'Próximo carimbo: {name}, a {distance}. Ver no mapa',
+    'Nächster Stempel: {name}, {distance} entfernt. Auf der Karte zeigen'
+  ),
   // The set line, one per category so each language can decline its noun.
   'stampNews.set.viewpoint': s('{count} of {total} viewpoints', '{count} de {total} miradouros', '{count} von {total} Aussichtspunkten'),
   'stampNews.set.levada': s('{count} of {total} levadas', '{count} de {total} levadas', '{count} von {total} Levadas'),
@@ -1222,6 +1239,11 @@ export type StringKey = keyof typeof STRINGS;
 
 /** Counted strings, where singular and plural differ. */
 export const PLURALS = {
+  // T-251: the medal's progress; {count} is how many are left.
+  'trophy.medal.progress': {
+    one: s('{collected} of {total} places · {count} to go', '{collected} de {total} lugares · falta {count}', '{collected} von {total} Orten · noch {count}'),
+    other: s('{collected} of {total} places · {count} to go', '{collected} de {total} lugares · faltam {count}', '{collected} von {total} Orten · noch {count}'),
+  },
   // T-249, E3: a locked stamp's celebration, with how many others wait.
   'stampNews.lockedMore': {
     one: s(

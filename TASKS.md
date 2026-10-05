@@ -479,7 +479,7 @@ section's definition of done.
       That is all... Nothing else, ever. No offers, no reminders."* has been untrue since D-096
       announced every stamp; the privacy policy was updated then, this screen was not. Rewrite it
       with the first-run redesign (the copy is the project lead's to approve).
-- [ ] **T-251** **A collected stamp's card should feel like a trophy** (project lead, 2026-10-05:
+- [~] **T-251** **A collected stamp's card should feel like a trophy** (built 2026-10-05, emulator only) (project lead, 2026-10-05:
       *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
       trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as
       for D-097 (`tools/preview-unlock-options.mjs` is the pattern): the stamp large and lit, the date
@@ -500,6 +500,17 @@ section's definition of done.
       place not collected (Cabo Girão, 2,9 km in a straight line, in the same medal set). **A** shows
       the medal's four stamps and the next stamp as cards; **B** shows two progress bars and the
       next stamp as one sentence. ✅ **Picked: A** (2026-10-05).
+      **Built 2026-10-05, seen on the emulator.** `places/trophy.ts` (pure, 7 tests): the stamp's
+      place in the trip, the municipality's medal set (only with ≥ 3 places, OQ-3), and the
+      nearest place not collected, with whether it counts for the medal. `ui/TrophyCard.tsx`: the
+      spotlight catches and flickers, the stamp rises onto a lit pedestal and floats; the medal
+      card with the set's stamps lighting in turn; the next stamp, which opens it on the map;
+      *Ver no mapa*, *Partilhar* (a picture of the trophy through the share sheet) and *Fechar*.
+      Opened by a collected, unlocked stamp; locked and uncollected still open the place card.
+      `useReduceMotion` now shared with the celebration. **Found by looking:** Santana's 12 places
+      ran off the card (a big set now wraps, smaller); the spotlight was a black wedge, because a
+      fill naming a gradient in another Svg is black on Android; an empty band above the buttons.
+      **Left:** not on the P30 yet; *Partilhar* not tried on a phone. 981 tests.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

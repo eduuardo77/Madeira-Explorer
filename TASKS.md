@@ -422,6 +422,11 @@ section's definition of done.
       trip of 10 stamps: the blur renders on Android. **Found by looking:** a glow drawn behind the
       button read as a grey frame (Android has no blur under a view), so the button breathes
       instead; the first blur (2.4) left names readable, now 3.4. 968 tests.
+      **Piece 2 of 4 ✅: R1.** `UnlockNudge`, a gold-edged card under the passport's number while
+      stamps are locked: a frosted stack of three, *"5 carimbos teus à espera · Desbloqueia e vê-os a
+      cores"* and a gold *Ver*; it opens the sheet with every locked stamp. Never in a beta build.
+      The passport now opens the sheet from a list (`openUnlock`), the tapped stamp first when there
+      is one. Seen on the emulator under *10 / 80*.
 - [ ] **T-250** **First run, after WalkNYC** ⇠ the project lead's pick (section 4 of the same page).
       One card per ask, same layout, a step count, and a replica of Android's dialog with the right
       answer marked; *Permitir sempre* asked in first run as WalkNYC does, which reopens D-008's

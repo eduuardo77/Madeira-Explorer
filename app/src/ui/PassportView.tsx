@@ -65,6 +65,7 @@ import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
 import StampArt from './StampArt';
+import UnlockNudge from './UnlockNudge';
 import { postmarkFor } from './postmark';
 import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
@@ -246,6 +247,13 @@ export type PassportViewProps = {
    * in the workbench. The screen owns the confirmation.
    */
   onEndTrip?: () => void;
+  /**
+   * The locked stamps, for the reminder card under the number (D-097, R1).
+   * The card shows when there is at least one and `onUnlock` is given; the
+   * screen gives it only where something can be bought (never a beta build).
+   */
+  waiting?: PassportStamp[];
+  onUnlock?: () => void;
 };
 
 /**
@@ -456,6 +464,8 @@ export default function PassportView({
   onDecline,
   onWatch,
   onEndTrip,
+  waiting,
+  onUnlock,
 }: PassportViewProps) {
   const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
@@ -507,6 +517,10 @@ export default function PassportView({
         </View>
       ) : (
         <Text style={styles.rowEmpty}>{t('passport.nothingCurated')}</Text>
+      )}
+
+      {onUnlock === undefined || waiting === undefined || waiting.length === 0 ? null : (
+        <UnlockNudge waiting={waiting} onPress={onUnlock} />
       )}
 
       {confirmation === undefined ? null : (

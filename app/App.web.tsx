@@ -360,6 +360,9 @@ export default function DesignWorkbench() {
                 awards={awards}
                 stamps={stamps}
                 onSelectStamp={setPassportCard}
+                // D-097, R1: the reminder card, in the free-tier scenario.
+                waiting={stamps.filter((stamp) => stamp.locked === true)}
+                onUnlock={() => setScreen('unlock:offer')}
                 // Under the hero, and under the invitation at zero (T-217).
                 // ⚠ There is nowhere for it to go here: the replay is the real
                 // Google map now (D-076), and the workbench has no map.

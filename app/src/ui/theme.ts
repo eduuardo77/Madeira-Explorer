@@ -192,6 +192,9 @@ export const reward = {
   panelBottom: '#17171B',
   /** The panel's edge: a faint light line. Decorative. */
   panelEdge: '#FFFFFF1A',
+  /** The passport's reminder card (R1): warm on the left, violet on the right. */
+  nudgeFrom: '#3A2A08',
+  nudgeEdge: '#F2A90066',
   text: '#F2F2F7',
   textMuted: '#D1D1D6',
   /** The small gold line over a headline. */

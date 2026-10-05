@@ -966,6 +966,8 @@ export const STRINGS = {
   // T-156e: the passport group. The rows open the unlock sheet; its own words
   // are `unlock.*`. Written without a pronoun, so neither register clashes.
   'settings.section.passport': s('Passport', 'Passaporte', 'Reisepass'),
+  'passport.nudge.body': s('Unlock them and see them in colour', 'Desbloqueia e vê-os a cores', 'Freischalten und in Farbe sehen'),
+  'passport.nudge.button': s('See', 'Ver', 'Ansehen'),
   'settings.passport.unlock': s('Unlock the passport', 'Desbloquear o passaporte', 'Reisepass freischalten'),
   'settings.passport.footnote.locked': s(
     'One payment shows every stamp, with no subscription. A purchase made on another phone comes back with Recover purchase.',
@@ -1207,6 +1209,11 @@ export type StringKey = keyof typeof STRINGS;
 
 /** Counted strings, where singular and plural differ. */
 export const PLURALS = {
+  // D-097, R1: the passport's standing reminder while stamps are locked.
+  'passport.nudge.title': {
+    one: s('{count} of your stamps is waiting', '{count} carimbo teu à espera', '{count} Ihrer Stempel wartet'),
+    other: s('{count} of your stamps are waiting', '{count} carimbos teus à espera', '{count} Ihrer Stempel warten'),
+  },
   // T-156d: the unlock sheet's line on what is waiting. `{collected}` is every
   // place collected, locked included; `{count}` is how many are locked.
   'unlock.title.waiting': {

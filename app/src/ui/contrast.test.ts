@@ -353,7 +353,7 @@ test('T-203: everything on the dark passport album is readable', () => {
 test('D-097: the reward palette (unlock sheet, reminders, celebrations) is readable', () => {
   // Gold and violet arrived with the redesigned paywall (T-249). Every ink is
   // measured on both panel ends of the gradient it sits on.
-  for (const ground of [reward.panelTop, reward.panelBottom]) {
+  for (const ground of [reward.panelTop, reward.panelBottom, reward.nudgeFrom]) {
     for (const [name, ink] of [
       ['text', reward.text],
       ['muted', reward.textMuted],

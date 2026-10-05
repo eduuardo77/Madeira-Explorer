@@ -100,10 +100,17 @@ export default function PassportScreen({
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
   /**
-   * The unlock sheet, opened from a locked stamp's card (T-156d), with the
-   * stamp it was opened from. Null when closed, which is nearly always.
+   * The unlock sheet's waiting stamps, the one it was opened from first (a
+   * locked stamp's card, T-156d; the reminder card, D-097 R1). Null when closed.
    */
-  const [unlockFrom, setUnlockFrom] = useState<PassportStamp | null>(null);
+  const [unlockWaiting, setUnlockWaiting] = useState<PassportStamp[] | null>(null);
+  /** Open the sheet with every locked stamp, `first` leading the fan. */
+  const openUnlock = (first: PassportStamp | null) => {
+    const locked = stamps.filter((stamp) => stamp.locked === true);
+    setUnlockWaiting(
+      first === null ? locked : [first, ...locked.filter((stamp) => stamp.placeId !== first.placeId)]
+    );
+  };
   const shareCardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -370,6 +377,9 @@ export default function PassportScreen({
           onDecline={declineWalk}
           onWatch={canWatch ? onWatch : undefined}
           onEndTrip={tripOpen ? endTrip : undefined}
+          waiting={stamps.filter((stamp) => stamp.locked === true)}
+          // D-097, R1: the reminder, only where something can be bought.
+          onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
         />
       )}
 
@@ -399,7 +409,7 @@ export default function PassportScreen({
             onUnlock={
               cardStamp?.locked === true && !BETA_BUILD
                 ? () => {
-                    setUnlockFrom(cardStamp);
+                    openUnlock(cardStamp);
                     closeCard();
                   }
                 : undefined
@@ -408,14 +418,10 @@ export default function PassportScreen({
           />
         </View>
       )}
-      {unlockFrom === null ? null : (
+      {unlockWaiting === null ? null : (
         <UnlockSheet
-          // The stamp that was tapped leads the fan; the rest follow.
-          waiting={[
-            unlockFrom,
-            ...stamps.filter((stamp) => stamp.locked === true && stamp.placeId !== unlockFrom.placeId),
-          ]}
-          onClose={() => setUnlockFrom(null)}
+          waiting={unlockWaiting}
+          onClose={() => setUnlockWaiting(null)}
           // Read everything again: the stamps that were waiting are now shown.
           onUnlocked={() => setReloadKey((key) => key + 1)}
         />

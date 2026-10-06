@@ -68,7 +68,7 @@ import type { Activity } from '../recording/activityTimeline.ts';
  * fixes differently. Chains kept by `chainStore.ts` under another version are
  * dropped and the trip rematched.
  */
-export const MATCHER_VERSION = 3;
+export const MATCHER_VERSION = 4;
 
 /** What the matcher needs of a fix: a subset of the `raw_fix` row. */
 export type MatchFix = GateFix & {

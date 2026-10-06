@@ -53,7 +53,8 @@ passport), seen on the P30 with a probe. Next in the plan: Phase 5, tilt and shi
 ⚠ **2026-10-06, the first motorbike ride: the P30 recorded 29 points in 83 minutes** (Poupança,
 and Huawei's launch setting probably reset by the 2026-10-05 uninstall). **Every real-world test is
 now listed in `docs/field-test-log.md`**, with a checklist before a ride; add to it after each one.
-Detail in field-notes, 2026-10-06, including a stale-speed bug that lit a road at home.
+Detail in field-notes, 2026-10-06. The stale-speed bug it found (Huawei copies an old speed onto
+new fixes) is fixed in T-252, in tests and on the real database, not yet in a build on the phone.
 
 ⚠ **Before swapping the P30's database for a probe, ask whether the lead has been out with it.**
 2026-10-06: a restore came minutes after their test trip; the backup happened to be newer than the

@@ -510,6 +510,14 @@ section's definition of done.
       a card with room, because shrinking by the scroll content's overflow compounded when the step
       bar appeared; it is now sized from the words' height alone. ⚠ **Left:** Android 11+ (the
       settings page for Always, the notifications card) not seen on a phone.
+- [x] **T-252** **Speeds the phone copied, not measured** (2026-10-06, after the motorbike ride).
+      The P30 put the last riding speed, exactly 8.589351654052734 m/s, on every fix at home, and
+      the map drew lines there; the stamp check would have refused a stop after a ride as a
+      drive-by. `recording/staleSpeed.ts`: a non-zero speed equal to one an earlier fix reported is
+      a copy. Used by `motionGate` and `rawFixDao.getSpeedBetween`. Field-notes, 2026-10-06.
+      ⚠ Not yet in a build on the P30. **Found, left as it was:** the stamp speed average still
+      counts Android's exact 0 ("no speed", per `motionGate`) as standing still, so a drive past
+      on network fixes reads slower than it was.
 - [~] **T-251** **A collected stamp's card should feel like a trophy** (built 2026-10-05, emulator only) (project lead, 2026-10-05:
       *"When you click on a stamp you already got, the pop-up is quite simple... make it feel like a
       trophy"*). Today `PlaceCardView` draws the stamp small beside the name. Draw options first, as

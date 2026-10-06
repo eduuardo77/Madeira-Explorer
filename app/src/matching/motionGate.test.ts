@@ -64,10 +64,10 @@ test('the speed ceiling is the fastest reported nearby, ignoring zeros', () => {
 
 /** D-094: the motion sensors as a second witness. */
 test('still vetoes a slow median speed, but not a car the receiver clearly measures', () => {
-  const slowDrift = Array.from({ length: 10 }, (_, i) => ({ ...fixAt(i * 10, i * 6, 0, 0.8), activity: 'still' as const }));
+  const slowDrift = Array.from({ length: 10 }, (_, i) => ({ ...fixAt(i * 10, i * 6, 0, 0.8 + i * 1e-3), activity: 'still' as const }));
   assert.ok(movingMask(slowDrift).every((moving) => !moving), '0.8 m/s would pass alone; still vetoes it');
 
-  const pullingAway = Array.from({ length: 10 }, (_, i) => ({ ...fixAt(i * 10, i * 60, 0, 6), activity: 'still' as const }));
+  const pullingAway = Array.from({ length: 10 }, (_, i) => ({ ...fixAt(i * 10, i * 60, 0, 6 + i * 0.1), activity: 'still' as const }));
   assert.ok(movingMask(pullingAway).every((moving) => moving), 'the label lags; 6 m/s is not still');
 });
 
@@ -77,4 +77,35 @@ test('with no speeds, the motion sensors decide before the positions do', () => 
 
   const stillButJumping = Array.from({ length: 6 }, (_, i) => ({ ...fixAt(i * 30, i * 60, 0, 0, 30), activity: 'still' as const }));
   assert.ok(stillButJumping.every((_, i) => !movingMask(stillButJumping)[i]), 'wifi jumps are not a walk when the phone is still');
+});
+
+/**
+ * 2026-10-06, the P30 after a ride: every fix at home carried the last riding
+ * speed, 8.589351654052734 m/s, and the motion label still said *driving*.
+ */
+test('a speed copied onto a phone at rest does not make it move, nor does a lagging driving label', () => {
+  const copied = 8.589351654052734;
+  const atHome = Array.from({ length: 30 }, (_, i) => ({
+    ...fixAt(i * 10, (i % 4) * 3, (i % 3) * 2, copied, 18),
+    activity: 'driving' as const,
+  }));
+  assert.ok(movingMask(atHome).every((moving) => !moving), 'nothing at home is movement');
+  assert.ok(speedCeiling(atHome).slice(4).every((ceiling) => ceiling === null), 'beyond the first reading, a copy bounds nothing');
+});
+
+test('a genuine ride is still moving, and its first reading is not mistaken for a copy', () => {
+  const ride = Array.from({ length: 12 }, (_, i) => ({
+    ...fixAt(i * 10, i * 85, 0, 8.4 + Math.sin(i) * 0.6),
+    activity: 'driving' as const,
+  }));
+  assert.ok(movingMask(ride).every((moving) => moving));
+});
+
+test('a copy among measured desk speeds leaves the desk at rest', () => {
+  // 4 October: 1.2663035392 m/s at ±100 m kept reappearing at home between
+  // real readings of a few centimetres a second.
+  const fixes = Array.from({ length: 15 }, (_, i) =>
+    fixAt(i * 10, (i % 5) * 4, 0, i % 4 === 0 ? 1.2663035392 : 0.03 + i * 1e-3)
+  );
+  assert.ok(movingMask(fixes).every((moving) => !moving));
 });

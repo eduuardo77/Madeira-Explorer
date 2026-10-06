@@ -7,6 +7,7 @@
 
 import { getDatabase, withStatement } from '../database';
 import type { RawFix, RawFixInput } from '../types';
+import { meanFreshSpeed } from '../../recording/staleSpeed';
 
 /**
  * Append a batch of fixes in a single transaction.
@@ -160,6 +161,12 @@ export async function getRecentFixes(
  * speed are excluded by the WHERE clause rather than averaged as zero —
  * "unknown" must never be silently read as "stationary", which would hand out
  * stamps to people driving past.
+ *
+ * A speed the phone only copied from an earlier fix is left out too
+ * (`recording/staleSpeed.ts`): after a ride the P30 stamped 31 km/h on every
+ * fix while it lay still, which would refuse any place visited after one. The
+ * earlier fix can be hours before the window, so a second query asks which of
+ * the window's speeds the trip had already reported.
  */
 export async function getSpeedBetween(
   tripId: number,
@@ -167,15 +174,29 @@ export async function getSpeedBetween(
   toTs: number
 ): Promise<{ meanSpeedMps: number | null; fixCount: number }> {
   const db = await getDatabase();
-  const row = await db.getFirstAsync<{ mean: number | null; n: number }>(
-    `SELECT AVG(speed_mps) AS mean, COUNT(speed_mps) AS n
+  const rows = await db.getAllAsync<{ ts: number; speed_mps: number }>(
+    `SELECT ts, speed_mps
        FROM raw_fix
-      WHERE trip_id = ? AND ts >= ? AND ts <= ? AND speed_mps IS NOT NULL;`,
+      WHERE trip_id = ? AND ts >= ? AND ts <= ? AND speed_mps IS NOT NULL
+      ORDER BY ts;`,
     tripId,
     fromTs,
     toTs
   );
-  return { meanSpeedMps: row?.mean ?? null, fixCount: row?.n ?? 0 };
+  const speeds = [...new Set(rows.map((row) => row.speed_mps).filter((v) => v > 0))];
+  const seenBefore = new Set<number>();
+  if (speeds.length > 0) {
+    const earlier = await db.getAllAsync<{ speed_mps: number }>(
+      `SELECT DISTINCT speed_mps
+         FROM raw_fix
+        WHERE trip_id = ? AND ts < ? AND speed_mps IN (${speeds.map(() => '?').join(', ')});`,
+      tripId,
+      fromTs,
+      ...speeds
+    );
+    earlier.forEach((row) => seenBefore.add(row.speed_mps));
+  }
+  return meanFreshSpeed(rows, seenBefore);
 }
 
 export type Gap = {

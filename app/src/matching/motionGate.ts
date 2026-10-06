@@ -39,6 +39,15 @@
  * automatic recording's balanced accuracy. It never overrules a speed the
  * receiver clearly measures, because the label lags.
  *
+ * AND A SPEED THE PHONE ONLY REPEATED (2026-10-06)
+ * -------------------------------------------------
+ * After a ride the P30 copied its last speed onto every fix for half an hour
+ * while it lay still (`recording/staleSpeed.ts`). Copies do not vote. And a
+ * window that has them skips the motion label too, straight to the positions:
+ * the label lagged the same way that afternoon (*driving* for 13 minutes after
+ * the ride), and a provider stuck on old values is no witness either way.
+ * *Still* keeps its veto, which only ever removes lines.
+ *
  * ⚠ **Every threshold here is set from one phone on one desk and has not seen
  * a real walk** (the lead's outing, T-245, tunes them). Pure. Tested in
  * `motionGate.test.ts`.
@@ -46,6 +55,7 @@
 
 import { distanceM } from '../recording/distance.ts';
 import type { Activity } from '../recording/activityTimeline.ts';
+import { staleSpeedMask } from '../recording/staleSpeed.ts';
 
 /** What the gate needs of a fix. */
 export type GateFix = {
@@ -106,6 +116,7 @@ export const DISPLACEMENT_MIN_MPS = 0.6;
  */
 export function movingMask(fixes: readonly GateFix[]): boolean[] {
   const mask = new Array<boolean>(fixes.length).fill(false);
+  const stale = staleSpeedMask(fixes);
   const windowMs = MOTION_WINDOW_S * 1000;
   let low = 0;
   let high = 0;
@@ -120,7 +131,12 @@ export function movingMask(fixes: readonly GateFix[]): boolean[] {
     }
 
     const speeds: number[] = [];
+    let copies = 0;
     for (let j = low; j <= high; j += 1) {
+      if (stale[j]) {
+        copies += 1;
+        continue;
+      }
       const speed = fixes[j].speed_mps;
       // ⚠ **Exactly zero is "no speed", not "still"** (measured on the P30,
       // 2026-09-27). Android reports 0 when a fix has no speed at all: all 243
@@ -151,7 +167,7 @@ export function movingMask(fixes: readonly GateFix[]): boolean[] {
       mask[i] = false;
       continue;
     }
-    if (MOVING_ACTIVITIES.has(activity)) {
+    if (MOVING_ACTIVITIES.has(activity) && copies === 0) {
       mask[i] = true;
       continue;
     }
@@ -183,6 +199,8 @@ export function movingMask(fixes: readonly GateFix[]): boolean[] {
  */
 export function speedCeiling(fixes: readonly GateFix[]): (number | null)[] {
   const out = new Array<number | null>(fixes.length).fill(null);
+  // A copied speed is no evidence of how fast the phone went (staleSpeed.ts).
+  const stale = staleSpeedMask(fixes);
   const windowMs = MOTION_WINDOW_S * 1000;
   let low = 0;
   let high = 0;
@@ -196,6 +214,9 @@ export function speedCeiling(fixes: readonly GateFix[]): (number | null)[] {
     }
     let fastest: number | null = null;
     for (let j = low; j <= high; j += 1) {
+      if (stale[j]) {
+        continue;
+      }
       const speed = fixes[j].speed_mps;
       if (speed !== null && speed !== undefined && Number.isFinite(speed) && speed > 0) {
         fastest = fastest === null ? speed : Math.max(fastest, speed);

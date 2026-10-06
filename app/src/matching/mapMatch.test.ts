@@ -59,7 +59,8 @@ test('a phone at rest lights nothing, however its position drifts', () => {
   const g = grid(3, 80);
   // Drift out along a street and back, at the desk's reported speeds.
   const out = [0, 5, 23, 29, 34, 39, 44, 38, 27, 20, 12, 3, 0, 8, 26, 41, 52, 40, 22, 6];
-  const fixes = out.map((m, i) => fixAt(i * 10, 80 + m, 80 + 2, 0.1 + (i % 3) * 0.1));
+  // Measured speeds differ in the last digits; an exact repeat is a copy (staleSpeed.ts).
+  const fixes = out.map((m, i) => fixAt(i * 10, 80 + m, 80 + 2, 0.1 + (i % 3) * 0.1 + i * 1e-4));
   const { chains, stats } = matchTrace(g.graph, fixes);
   assert.equal(stats.fixesMoving, 0);
   assert.equal(litTotal(visitedEdges(g.graph, chains)), 0);

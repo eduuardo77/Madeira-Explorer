@@ -166,8 +166,9 @@ test('the distance travelled since a moment counts only the road after it', () =
 
 test('a road driven twice counts twice: a trip meter, not the lit length', () => {
   const net = network({ a: [0, 0], b: [400, 0] }, [{ from: 'a', to: 'b' }]);
-  const out = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5));
-  const back = Array.from({ length: 11 }, (_, i) => fixAt(110 + i * 10, 370 - i * 35, 1, 3.5));
+  // Measured speeds differ in the last digits; an exact repeat is a copy (staleSpeed.ts).
+  const out = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5 + i * 1e-3));
+  const back = Array.from({ length: 11 }, (_, i) => fixAt(110 + i * 10, 370 - i * 35, 1, 3.4 + i * 1e-3));
   const { chains } = matchTrace(net.graph, [...out, ...back]);
   const total = travelledSinceM(net.graph, chains, 0);
   assert.ok(total > 600, `there and back, got ${total}`);

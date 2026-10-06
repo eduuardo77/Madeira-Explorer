@@ -128,12 +128,18 @@ export function grid(blocks: number, blockM: number): TestNetwork {
   return network(junctions, edges);
 }
 
-/** A fix `east`, `north` metres from the origin, at `seconds`. */
+/**
+ * A fix `east`, `north` metres from the origin, at `seconds`.
+ *
+ * The default speed is a walk that differs in the last digits from fix to fix,
+ * as a measured one does: an exact repeat reads as a copy
+ * (`recording/staleSpeed.ts`).
+ */
 export function fixAt(
   seconds: number,
   east: number,
   north: number,
-  speed: number | null = 1.4,
+  speed: number | null = 1.4 + seconds * 1e-6,
   accuracy: number | null = 5
 ) {
   const [lat, lon] = at(east, north);

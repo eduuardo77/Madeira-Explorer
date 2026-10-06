@@ -32,6 +32,7 @@ import { isUsableCoordinate } from '../recording/distance.ts';
 import type { GeofencePlace } from '../recording/geofenceSelection.ts';
 import { isMechanismRegionId } from '../recording/geofenceSelection.ts';
 import { LANGUAGES, type Language } from '../i18n/languages.ts';
+import { parseWindowStart } from '../entitlement/founder.ts';
 
 /**
  * The five categories, and there is deliberately no "Other" (D-027). A place
@@ -97,6 +98,12 @@ export type Place = {
   why?: PlaceWhy;
 };
 
+/**
+ * The founder window as content gives it: `start` a `YYYY-MM-DD` date (midnight
+ * UTC) or null until the public release, `months` how long it stays open.
+ */
+export type FounderWindow = { start: string | null; months: number };
+
 /** `{ en, pt, de }`, each optional. See `Place.why`. */
 export type PlaceWhy = Partial<Record<Language, string>>;
 
@@ -143,6 +150,12 @@ export type ContentPack = {
    * cannot be reused. Change it here only together with Play Console.
    */
   productId: string | null;
+  /**
+   * When buying earns the founder stamp (T-233, D-089 rule 6), or null when
+   * the pack offers none. `start` stays null until the public release sets it
+   * (`entitlement/founder.ts` has the rule).
+   */
+  founderWindow: FounderWindow | null;
   places: Place[];
   /** Optional: a pack with none simply never ends a trip by airport. */
   departurePoints: DeparturePoint[];
@@ -242,6 +255,7 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
       formatVersion: SUPPORTED_FORMAT_VERSION,
       destination: parseDestination(root.destination, problems),
       productId: parseProductId(root.productId, problems),
+      founderWindow: parseFounderWindow(root.founderWindow, problems),
       places,
       departurePoints,
     },
@@ -290,6 +304,38 @@ function parseProductId(raw: unknown, problems: ContentProblem[]): string | null
     return null;
   }
   return raw;
+}
+
+/**
+ * The founder window (T-233): `{ "start": "YYYY-MM-DD" | null, "months": n }`.
+ *
+ * `start` is null until the public release, and that is a valid pack: nobody
+ * is a founder yet. A start that is not a real date, or a month count outside
+ * 1 to 24, is reported and the whole window dropped, so a typo cannot quietly
+ * hand the stamp to everybody or to nobody.
+ */
+function parseFounderWindow(raw: unknown, problems: ContentProblem[]): FounderWindow | null {
+  if (raw === undefined || raw === null) {
+    return null;
+  }
+  const where = 'founderWindow';
+  if (typeof raw !== 'object' || Array.isArray(raw)) {
+    problems.push({ where, problem: 'must be an object with "start" and "months"' });
+    return null;
+  }
+  const { start, months } = raw as { start?: unknown; months?: unknown };
+  if (typeof months !== 'number' || !Number.isInteger(months) || months < 1 || months > 24) {
+    problems.push({ where, problem: '"months" must be a whole number from 1 to 24' });
+    return null;
+  }
+  if (start === null || start === undefined) {
+    return { start: null, months };
+  }
+  if (typeof start !== 'string' || parseWindowStart(start) === null) {
+    problems.push({ where, problem: '"start" must be null or a real date written YYYY-MM-DD' });
+    return null;
+  }
+  return { start, months };
 }
 
 /**

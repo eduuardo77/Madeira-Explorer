@@ -327,6 +327,15 @@ async function main() {
     error('productId', 'not set - the passport could never be unlocked (D-089)');
   }
 
+  // The founder window (T-233). Null until the public release sets the date;
+  // `tools/smoke-release.mjs` refuses a release while it is, so here it is
+  // only a reminder. Absent altogether means the pack offers no founder stamp.
+  if (parsed.pack.founderWindow === null) {
+    warn('founderWindow', 'not set - nobody can ever earn the founder stamp (D-089 rule 6)');
+  } else if (parsed.pack.founderWindow.start === null) {
+    warn('founderWindow', 'start is null - nobody is a founder until the public release sets it');
+  }
+
   // Every levada should have a course to draw (D-055). A missing one is not a
   // broken pack — the card still works, it just shows a marker and no walk —
   // but it is invisible in the app and obvious here, which is the right place

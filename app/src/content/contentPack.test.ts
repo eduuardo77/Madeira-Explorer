@@ -422,3 +422,27 @@ test('T-201: one bad language keeps the good ones', () => {
   assert.deepEqual(parsed.places[0].why, { en: 'The view.' });
   assert.equal(problems.length, 1);
 });
+
+test('T-233: the founder window is read, with a null start until the public release', () => {
+  const unset = parseContentPack({ formatVersion: 1, founderWindow: { start: null, months: 3 }, places: [] });
+  assert.deepEqual(unset.pack.founderWindow, { start: null, months: 3 });
+  assert.deepEqual(unset.problems, []);
+  const set = parseContentPack({ formatVersion: 1, founderWindow: { start: '2026-11-15', months: 3 }, places: [] });
+  assert.deepEqual(set.pack.founderWindow, { start: '2026-11-15', months: 3 });
+  assert.equal(parseContentPack({ formatVersion: 1, places: [] }).pack.founderWindow, null, 'absent: no founder stamp');
+});
+
+test('T-233: a founder window with a typo is reported and dropped, never half read', () => {
+  for (const bad of [
+    'soon',
+    { start: '2026-02-30', months: 3 },
+    { start: '15/11/2026', months: 3 },
+    { start: null, months: 0 },
+    { start: null, months: 2.5 },
+    { start: null },
+  ]) {
+    const result = parseContentPack({ formatVersion: 1, founderWindow: bad, places: [] });
+    assert.equal(result.pack.founderWindow, null, JSON.stringify(bad));
+    assert.ok(result.problems.some((problem) => problem.where === 'founderWindow'), JSON.stringify(bad));
+  }
+});

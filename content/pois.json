@@ -2,6 +2,7 @@
   "formatVersion": 1,
   "destination": "Madeira",
   "productId": "passport_madeira",
+  "founderWindow": { "start": null, "months": 3 },
   "places": [
     {
       "id": "pico-do-areeiro",

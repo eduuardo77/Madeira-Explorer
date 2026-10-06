@@ -159,6 +159,17 @@ node tools/validate-content.mjs my-draft.json
 | `geofences[].role` | Optional, defaults to `main`. Use `start` and `end` on levadas. |
 | `geofences[].radiusM` | Between 40 and 2000. See below — this number matters more than it looks. |
 
+### The pack's own fields: `destination`, `productId`, `founderWindow`
+
+Beside `places`, three top-level fields describe the pack rather than a place (D-017: the app
+knows none of this itself).
+
+| Field | Rules |
+|---|---|
+| `destination` | The place's name for the app's warmer copy (*"Madeira tem 80 carimbos..."*). Optional. |
+| `productId` | The Play product that unlocks the passport (T-156b, D-089). ⚠ **Permanent**: Play never renames or reuses one, so change it only with Play Console. |
+| `founderWindow` | `{ "start": null, "months": 3 }` (T-233, D-089 rule 6). Buying before `start` plus `months` calendar months (UTC, Google's purchase time) earns the founder stamp, including purchases before `start`. ⚠ **`start` stays `null` until the public release**, and is set to that day, written `YYYY-MM-DD`, in the release commit itself. While it is null nobody is a founder and the unlock sheet does not offer it; `tools/smoke-release.mjs` fails until it is set (pass `--internal` for a testing build). |
+
 ### Departure points — how the trip knows it is over
 
 Alongside `places`, the same file carries the geofences that **end the trip** (D-012, T-099):

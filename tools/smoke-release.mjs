@@ -5,6 +5,15 @@
  *
  *     node tools/smoke-release.mjs                 # the one attached phone
  *     node tools/smoke-release.mjs --serial XPH…   # a chosen one
+ *     node tools/smoke-release.mjs --internal      # a testing build (see below)
+ *
+ * ⚠ THE FOUNDER WINDOW (T-233)
+ * ----------------------------
+ * Before touching the phone it refuses a release whose
+ * `founderWindow.start` is still null in `content/pois.json`: that is the
+ * state every testing build ships in, so it is the one that gets forgotten,
+ * and a public release with it would make nobody a founder, for good. A
+ * build for internal or closed testing passes `--internal` to say so.
  *
  * WHY THIS EXISTS
  * ---------------
@@ -41,9 +50,23 @@ import { device, pause } from './lib/device.mjs';
 import { crashLines, findNode } from './lib/uiTree.mjs';
 import { PLURALS, STRINGS } from '../app/src/i18n/strings.ts';
 import { LANGUAGE_NAMES } from '../app/src/i18n/languages.ts';
+import { readFileSync } from 'node:fs';
+import { parseContentPack } from '../app/src/content/contentPack.ts';
+import { founderStartMissing } from '../app/src/entitlement/founder.ts';
 
 const PKG = 'com.proa.madeira';
 
+const internal = process.argv.includes('--internal');
+const founderWindow = parseContentPack(
+  JSON.parse(readFileSync(new URL('../content/pois.json', import.meta.url), 'utf8'))
+).pack.founderWindow;
+if (founderStartMissing(founderWindow) && !internal) {
+  console.log(
+    '✖ Not a public release: founderWindow.start is null in content/pois.json. Set it to the ' +
+      'public release date (YYYY-MM-DD), or pass --internal for a testing build.'
+  );
+  process.exit(1);
+}
 const serialAt = process.argv.indexOf('--serial');
 const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
 const { adb, shell, screen, reach, tap } = device(serial);

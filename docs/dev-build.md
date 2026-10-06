@@ -432,19 +432,26 @@ A backup of the original sits beside it as `config.ini.bak-<epoch>`.
 
 | | Before | After |
 |---|---|---|
-| GPU | `swiftshader_indirect` (software) | `auto` (picks the GTX 1060) |
 | Screen | 1080 x 2400, 420 dpi | 720 x 1560, 320 dpi: the P30's 360 x 780 dp |
 | Cores | 4 | 2 |
 | Audio | on | off |
-| **CPU, idle** | **78%** | **6%** |
+| **CPU, idle, software GPU** | **78%** | **17%** |
 
-The Google map draws under `auto`, also after a force-stop and relaunch, which is the case
-that went black in August. If it ever goes black again, `MADEIRA_GPU=swiftshader_indirect` is
-the fallback. The AVD settings live in `~/.android/avd/madeira.avd/config.ini` (backup beside
-it, `config.ini.bak-<epoch>`); `fetch-android-emulator.sh` now writes them for a new AVD.
+⚠ **The graphics card (`-gpu auto`) gave 6% and then froze the emulator** 25 minutes into a
+session (0% CPU, "not responding", adb offline; the start-up log had warned *"a device attached
+to the system is not functioning"*). It was the default for one commit and was reverted the same
+evening. Software rendering stays; `MADEIRA_GPU=auto` is there for a short session. The Google map
+did draw under `auto`, including after a force-stop and relaunch.
+
+The AVD settings live in `~/.android/avd/madeira.avd/config.ini` (backup beside it,
+`config.ini.bak-<epoch>`); `fetch-android-emulator.sh` now writes them for a new AVD.
 
 ⚠ **Third-party Play apps will not run here.** WalkNYC, copied from the P30, installs and then
-refuses: *"Check that Google Play is enabled on your device"*. This image has no Play Store.
+refuses: *"Check that Google Play is enabled on your device"*. This image has no Play Store. A
+second AVD, `madeira-play` (`system-images;android-34;google_apis_playstore;x86_64`, same
+settings), has it; the project lead signed in there and installed WalkNYC to study it. Start it
+with `ANDROID_HOME` set to `tools/android-sdk`, or it looks in the other SDK and fails ("Broken
+AVD system path"). `tools/routes/manhattan-midtown.txt` walks it round Midtown.
 
 ## ⚠ A second SDK on the machine, and Gradle will not choose, 2026-08-28
 

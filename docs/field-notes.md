@@ -401,7 +401,7 @@ reused 4 chains from `matched_chain` and rematched 1 (118 fixes) in 67 ms.
 
 ## 2026-10-06 — First motorbike ride: the P30 recorded almost nothing in the background
 
-83 min, 32.7 km, Caniço → Camacha → home, P30 in *Poupança* the whole ride (`tracking_quality`
+83 min, 32.7 km, a loop from home through Camacha, P30 in *Poupança* the whole ride (`tracking_quality`
 last written 14:28:52; the lead remembers switching to *Equilibrado* mid-ride, and nothing in
 `app_state` or `recording_event` shows it). Ground truth: Sensor Logger on an iPhone 15, ~1 Hz,
 ±3 m, kept outside the repo at `Madeira-fieldwork/iphone-2026-10-06-ride/` (unmasked: never commit).
@@ -421,5 +421,11 @@ Phone DB: `Madeira-fieldwork/p30-2026-10-06-t235b/` (taken after the ride).
   looks, which is likely most of "struggling to load"; one launch had no data (`billing ... offline`).
 - **Camacha was stamped correctly** (the iPhone stopped there 15:29–15:30), but with `1554s inside`:
   the exit was only processed at the next launch, so dwell is inflated by however long the app sleeps.
+- ⚠ **Stale speed lit a road at home.** From 15:56 to 16:05 the phone lay still, and every fix
+  carried the same 8.6 m/s (31 km/h), the last riding speed. `motionGate` trusts the receiver's speed
+  (D-093), so the map kept a chain for those nine minutes. A speed repeated unchanged over still
+  positions is not Doppler and needs to be rejected.
+- The restore by the other session (about 16:11) lost nothing: a read-only pull at 16:20 has the
+  ride's fixes, the Camacha stamp and both of today's chains.
 - No `deviceidle` whitelist entry for the app. The reinstall of 2026-10-05 (signing key change) may
   have reset EMUI's *Iniciar aplicações* manual setting (HANDOFF traps); not checked yet.

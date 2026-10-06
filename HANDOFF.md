@@ -50,6 +50,11 @@ it fails while `founderWindow.start` is null, which is deliberate.
 the passport (each municipality's own outline, silver to gold, frosted when complete on a free
 passport), seen on the P30 with a probe. Next in the plan: Phase 5, tilt and shine.
 
+⚠ **2026-10-06, the first motorbike ride: the P30 recorded 29 points in 83 minutes** (Poupança,
+and Huawei's launch setting probably reset by the 2026-10-05 uninstall). **Every real-world test is
+now listed in `docs/field-test-log.md`**, with a checklist before a ride; add to it after each one.
+Detail in field-notes, 2026-10-06, including a stale-speed bug that lit a road at home.
+
 ⚠ **Before swapping the P30's database for a probe, ask whether the lead has been out with it.**
 2026-10-06: a restore came minutes after their test trip; the backup happened to be newer than the
 trip, so nothing was lost but five still minutes. And close pop-ups with the Back key, never a tap
@@ -272,6 +277,7 @@ lead outdoors.
   silence.
 - **EMUI setting, done by the project lead:** *Definições → Bateria → Iniciar aplicações → Proa*
   set to manual with all three switches on. Without it, an update never wakes the app.
+  ⚠ **Every uninstall resets it** (and the upload-key switch needed one): ask the lead to set it again.
 - **Gradle does not re-bundle when only an environment variable changes** (beta versus store) or
   when only `content/` changes. Delete the bundle outputs first (`docs/dev-build.md`).
 - **`run-as` works only on the field build** (debuggable). The P30 now runs a beta *release* build.

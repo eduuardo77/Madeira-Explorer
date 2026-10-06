@@ -10,7 +10,7 @@ import { buildUpdateNotice } from './updateNotice.ts';
 test('T-210: the notice is in the user\'s language, names the app, and says whether to fire', () => {
   const pt = buildUpdateNotice(true, 'pt');
   assert.equal(pt.autoRecording, true);
-  assert.equal(pt.title, `Abra o ${APP_NAME} para continuar a registar`);
+  assert.equal(pt.title, `Abre o ${APP_NAME} para continuar a registar`);
   assert.ok(pt.body.startsWith(`O ${APP_NAME} foi atualizado.`));
   assert.equal(buildUpdateNotice(false, 'de').autoRecording, false);
   assert.ok(buildUpdateNotice(true, 'de').title.includes(APP_NAME));

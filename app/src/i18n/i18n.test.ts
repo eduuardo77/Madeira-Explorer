@@ -196,6 +196,35 @@ test('⚠ T-191 — no Portuguese adjective agrees with a placeholder it cannot 
   assert.deepEqual(found, []);
 });
 
+test('⚠ T-255 — the Portuguese speaks to the user as "tu", never "você" (D-098)', () => {
+  // The third review found two voices: "tu" in first run and the paywall,
+  // "você" in the passport, Settings and the notices ("Ver a sua viagem").
+  // These are the "você" voice's markers: the pronoun, the third-person
+  // possessive, and the formal imperatives and past tenses the app used.
+  // ⚠ Letter lookarounds, not \b: JavaScript's \b does not count "á" or "ê"
+  // as a letter, so /\bterá\b/ never matches "terá de".
+  const formal =
+    /(?<!\p{L})(você|vocês|seu|sua|seus|suas|lhe|esteve|andou|passou|dormiu|visitou|percorreu|abra|tente|guarde|registe|desbloqueie|atualize|ponha|mantenha|quer|terá)(?!\p{L})/iu;
+  // "pode" and "toque" are also "it can" and "a tap", so only as a
+  // sentence's first word, where they are the formal imperative.
+  const formalOpening = /(^|[.:!?]\s+)(Pode|Toque)\s/u;
+  // Genuine third-person uses, each read: "chama-lhe" is "calls it", and the
+  // licences belong to the packages, not to the reader.
+  const genuine = new Set(['onboarding.activity.body1', 'licences.note']);
+  const found: string[] = [];
+  const all = { ...STRINGS, ...Object.fromEntries(
+    Object.entries(PLURALS).flatMap(([k, v]) => [[`${k}.one`, v.one], [`${k}.other`, v.other]])
+  ) } as Record<string, { pt: string }>;
+  for (const [key, phrase] of Object.entries(all)) {
+    if (!genuine.has(key) && (formal.test(phrase.pt) || formalOpening.test(phrase.pt))) found.push(`${key}: ${phrase.pt}`);
+  }
+  assert.deepEqual(found, []);
+  // And the probe is real: it reads the strings the first-run cards use.
+  assert.ok(formal.test('Ver a sua viagem'), 'the probe must catch the review\'s own example');
+  assert.ok(formalOpening.test('Algo correu mal. Toque para tentar.'));
+  assert.ok(Object.values(all).some((phrase) => /(?<!\p{L})tua(?!\p{L})/u.test(phrase.pt)));
+});
+
 test('⚠ T-200 — no string names the island (D-017), and none says "this app"', () => {
   // The welcome screen said "around Madeira", against D-017's absolute rule
   // that no Madeira knowledge lives in app/. And the app called itself "this

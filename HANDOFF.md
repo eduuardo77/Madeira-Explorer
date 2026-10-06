@@ -19,8 +19,7 @@ build (version code 3) with the lead's real data, the version 3 AAB built for in
 
 L1 *tu* (D-098), L2 keep the battery dialog (D-045 amended), L3 waiting on the lead. **T-253**
 replay fix committed and on the P30; the lead then asked for a replay modelled on WalkNYC's (see
-T-253 in TASKS). **T-255** (*tu*) is built and on the P30 but **uncommitted** until the lead reads
-`tools/out/voice-review.html`. The P30 runs a field build of the working tree (version code 3,
+T-253 in TASKS). **T-255** (*tu*) done: approved by the lead and committed. The P30 runs a field build of the working tree (version code 3,
 installed 21:51), data kept.
 
 ## ⚠⚠ 2026-10-05: where the last session ended — read this first

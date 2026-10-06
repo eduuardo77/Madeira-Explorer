@@ -75,9 +75,9 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
-- [~] **T-255** One Portuguese voice, *tu* (D-098). 79 strings, 35 policy sentences, "selo" made
-      "carimbo"; a test fails on the *você* markers (67 hits on the old text). **Waits on the lead
-      reading** `tools/out/voice-review.html` before the commit (OQ-8). Built into the P30's field
+- [x] **T-255** One Portuguese voice, *tu* (D-098). 79 strings, 35 policy sentences, "selo" made
+      "carimbo"; a test fails on the *você* markers (67 hits on the old text). **Read and approved by the lead**
+      2026-10-06 (OQ-8), from `tools/out/voice-review.html`. Built into the P30's field
       build 2026-10-06 21:51.
 
 ## Release readiness — the plan from the 2026-09-22 review (order superseded 2026-10-06)

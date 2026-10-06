@@ -299,7 +299,7 @@ test('no island is named anywhere in `app/` for this notification', () => {
 test('⚠ T-190 — the reveal is in the phone’s language', () => {
   // The notification D-012 calls the best moment in the product was English on
   // every phone until 2026-09-23.
-  assert.equal(revealTitle('Madeira', 'pt'), 'Madeira: o seu mapa está pronto');
+  assert.equal(revealTitle('Madeira', 'pt'), 'Madeira: o teu mapa está pronto');
   assert.equal(revealTitle('Madeira', 'de'), 'Ihre Madeira-Karte ist fertig');
-  assert.equal(revealTitle(null, 'pt'), 'O seu mapa está pronto');
+  assert.equal(revealTitle(null, 'pt'), 'O teu mapa está pronto');
 });

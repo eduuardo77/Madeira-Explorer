@@ -194,7 +194,7 @@ test('⚠ the Portuguese policy makes the same promises as the English one', () 
     ['no server', 'não há servidor'],
     ['never sent to us', 'nunca nos é enviada'],
     ['no adverts', 'não há publicidade'],
-    ['never sends your trip to the map', 'nunca envia a sua viagem para o mapa'],
+    ['never sends your trip to the map', 'nunca envia a tua viagem para o mapa'],
   ];
 
   const lost = promises.filter(([, portuguese]) => !pt.includes(portuguese));
@@ -265,9 +265,11 @@ test('⚠ no claim the app cannot keep, in either language (review N6, T-216)', 
       'fica tudo',
       'absolutamente nada',
       'não vê a sua viagem',
+      'não vê a tua viagem',
       'pequeno vídeo',
       'fica de fora da cópia',
       'única altura em que a sua viagem sai',
+      'única altura em que a tua viagem sai',
     ],
   };
 

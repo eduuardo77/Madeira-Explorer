@@ -281,7 +281,7 @@ export const STRINGS = {
   ),
   'onboarding.background.body1': s(
     'To fill in your map without you having to remember anything, {app} collects location data even when it is closed or not in use.',
-    'Para preencher o seu mapa sem que tenha de se lembrar de nada, o {app} recolhe dados de localização mesmo quando está fechada ou não está a ser usada.',
+    'Para preencher o teu mapa sem teres de te lembrar de nada, o {app} recolhe dados de localização mesmo quando está fechada ou não está a ser usada.',
     'Damit sich Ihre Karte füllt, ohne dass Sie an etwas denken müssen, erfasst {app} Standortdaten auch dann, wenn sie geschlossen ist oder nicht verwendet wird.'
   ),
   // ⚠ T-193: Play's prominent disclosure. It said "never uploaded, never
@@ -290,12 +290,12 @@ export const STRINGS = {
   // went. What is true: never sent to us, never sold, never for ads.
   'onboarding.background.body2': s(
     'It is used only to draw your own map on this phone. It is never sent to us, never sold, and never used for advertising.',
-    'Serve apenas para desenhar o seu próprio mapa neste telemóvel. Nunca nos é enviado, nunca é vendido e nunca é usado para publicidade.',
+    'Serve apenas para desenhar o teu próprio mapa neste telemóvel. Nunca nos é enviado, nunca é vendido e nunca é usado para publicidade.',
     'Sie dienen ausschließlich dazu, Ihre eigene Karte auf diesem Telefon zu zeichnen. Sie werden nie an uns gesendet, nie verkauft und nie für Werbung genutzt.'
   ),
   'onboarding.background.body3': s(
     'You can say no and keep using the app. You will just start and stop recording yourself.',
-    'Pode recusar e continuar a usar a aplicação. Só terá de ser você a iniciar e a parar o registo.',
+    'Podes recusar e continuar a usar a aplicação. Só terás de ser tu a iniciar e a parar o registo.',
     'Sie können ablehnen und die App weiter nutzen. Dann starten und stoppen Sie die Aufzeichnung selbst.'
   ),
   'onboarding.background.continue': s('Continue', 'Continuar', 'Weiter'),
@@ -310,17 +310,17 @@ export const STRINGS = {
   // ── Onboarding: offering background recording later ─────────────────────
   'onboarding.upgrade.title': s(
     'Want it to fill in by itself?',
-    'Quer que se preencha sozinho?',
+    'Queres que se preencha sozinho?',
     'Soll sie sich von selbst füllen?'
   ),
   'onboarding.upgrade.body1': s(
     'Right now your map only fills in while the app is open.',
-    'Neste momento o seu mapa só se preenche com a aplicação aberta.',
+    'Neste momento o teu mapa só se preenche com a aplicação aberta.',
     'Im Moment füllt sich Ihre Karte nur, solange die App geöffnet ist.'
   ),
   'onboarding.upgrade.body2': s(
     'If you let it record in the background, you can put your phone away and it will keep going on its own, without pressing Start an outing each time you go out.',
-    'Se o deixar registar em segundo plano, pode guardar o telemóvel e ele continua sozinho, sem carregar em Começar passeio de cada vez que sai.',
+    'Se o deixares registar em segundo plano, podes guardar o telemóvel e ele continua sozinho, sem carregares em Começar passeio de cada vez que sais.',
     'Wenn Sie die Aufzeichnung im Hintergrund erlauben, können Sie das Telefon weglegen und sie läuft von selbst weiter, ohne jedes Mal auf Ausflug starten zu tippen, wenn Sie losziehen.'
   ),
   // ⚠ What the user KEEPS if they say no (2026-09-22). The ask is the scariest
@@ -333,7 +333,7 @@ export const STRINGS = {
   // who was told about it. Same wording as `settings.background.off`.
   'onboarding.upgrade.body3': s(
     'Either way, nothing is lost: you can always press Start an outing on the map when you go out.',
-    'De qualquer forma, não perde nada: pode sempre carregar em Começar passeio no mapa quando sair.',
+    'De qualquer forma, não perdes nada: podes sempre carregar em Começar passeio no mapa quando saíres.',
     'So oder so geht nichts verloren: Sie können auf der Karte jederzeit auf Ausflug starten tippen, wenn Sie losziehen.'
   ),
   'onboarding.upgrade.continue': s('Turn it on', 'Ligar', 'Einschalten'),
@@ -350,17 +350,17 @@ export const STRINGS = {
   // ── Onboarding: the permission was silently downgraded (T-044) ──────────
   'onboarding.downgrade.title': s(
     'Your map has stopped filling in',
-    'O seu mapa deixou de se preencher',
+    'O teu mapa deixou de se preencher',
     'Ihre Karte füllt sich nicht mehr'
   ),
   'onboarding.downgrade.body1': s(
     'Your phone recently switched {app} back to recording only while it is open.',
-    'O seu telemóvel voltou a pôr o {app} a registar apenas quando está aberto.',
+    'O teu telemóvel voltou a pôr o {app} a registar apenas quando está aberto.',
     'Ihr Telefon hat {app} kürzlich wieder auf Aufzeichnung nur bei geöffneter App zurückgestellt.'
   ),
   'onboarding.downgrade.body2': s(
     'That is fine, but you will need to start it yourself each time, or turn background recording back on.',
-    'Não faz mal, mas terá de a iniciar de cada vez, ou voltar a ligar o registo em segundo plano.',
+    'Não faz mal, mas terás de iniciar o registo de cada vez, ou voltar a ligá-lo em segundo plano.',
     'Das ist in Ordnung, aber dann müssen Sie sie jedes Mal selbst starten oder die Aufzeichnung im Hintergrund wieder einschalten.'
   ),
   'onboarding.downgrade.continue': s('Turn it back on', 'Voltar a ligar', 'Wieder einschalten'),
@@ -437,7 +437,7 @@ export const STRINGS = {
   ),
   'map.a11y.recentre': s(
     'Re-center the map on where you are',
-    'Centrar o mapa onde está',
+    'Centrar o mapa onde estás',
     'Karte auf Ihren Standort zentrieren'
   ),
   'map.a11y.settings': s('Settings', 'Definições', 'Einstellungen'),
@@ -446,7 +446,7 @@ export const STRINGS = {
   // three for somebody in a car.
   'map.a11y.startRecording': s(
     'Start an outing. The app follows it more closely until you end it.',
-    'Começar um passeio. A aplicação acompanha-o com mais detalhe até o terminar.',
+    'Começar um passeio. A aplicação acompanha-te com mais detalhe até o terminares.',
     'Einen Ausflug starten. Die App verfolgt ihn genauer, bis Sie ihn beenden.'
   ),
   'map.a11y.stopRecording': s(
@@ -458,7 +458,7 @@ export const STRINGS = {
   'map.grantLocation': s('Allow location', 'Permitir localização', 'Standort erlauben'),
   'map.a11y.grantLocation': s(
     'Allow location, so the app can record where you go',
-    'Permitir a localização, para a aplicação poder registar por onde anda',
+    'Permitir a localização, para a aplicação poder registar por onde andas',
     'Standort erlauben, damit die App aufzeichnen kann, wo Sie unterwegs sind'
   ),
   // ── D-087 §4, D-095: what the map says about automatic recording ──
@@ -472,7 +472,7 @@ export const STRINGS = {
   ),
   'notice.needsAlways.action': s(
     'Tap to choose “Allow all the time”',
-    'Toque para escolher “Permitir sempre”',
+    'Toca para escolher “Permitir sempre”',
     'Tippen, um „Immer zulassen“ zu wählen'
   ),
   // D-095 (option 6B): said while automatic recording is working, where the
@@ -495,7 +495,7 @@ export const STRINGS = {
   ),
   'notice.silent.action': s(
     'Tap to restart recording',
-    'Toque para reiniciar o registo',
+    'Toca para reiniciar o registo',
     'Tippen, um die Aufzeichnung neu zu starten'
   ),
   'notice.a11y.dismiss': s('Dismiss', 'Fechar', 'Schließen'),
@@ -512,7 +512,7 @@ export const STRINGS = {
     'Keine neuen Stempel auf diesem Ausflug.'
   ),
   'walk.summary.ok': s('OK', 'OK', 'OK'),
-  'map.a11y.openPassport': s('Open your passport', 'Abrir o seu passaporte', 'Reisepass öffnen'),
+  'map.a11y.openPassport': s('Open your passport', 'Abrir o teu passaporte', 'Reisepass öffnen'),
 
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────
   'passport.title': s('Passport', 'Passaporte', 'Reisepass'),
@@ -530,9 +530,9 @@ export const STRINGS = {
   ),
   'passport.share.failedTitle': s('Could not share', 'Não foi possível partilhar', 'Teilen nicht möglich'),
   // T-190: the title of the phone's own share sheet. It was English on every phone.
-  'passport.share.dialogTitle': s('Share your trip', 'Partilhar a sua viagem', 'Ihre Reise teilen'),
+  'passport.share.dialogTitle': s('Share your trip', 'Partilhar a tua viagem', 'Ihre Reise teilen'),
   // The card's heading when the content pack names no destination.
-  'share.fallbackTitle': s('Your trip', 'A sua viagem', 'Ihre Reise'),
+  'share.fallbackTitle': s('Your trip', 'A tua viagem', 'Ihre Reise'),
   // T-190: after the named stamps on the share card. Was English on every phone.
   'share.andMore': s('and {count} more', 'e mais {count}', 'und {count} weitere'),
   // ⚠ T-190: the reveal (T-102) — the notification D-012 calls the best moment
@@ -541,13 +541,13 @@ export const STRINGS = {
   // first to avoid choosing an article for a name this file cannot know.
   'reveal.title': s(
     'Your {destination} map is ready',
-    '{destination}: o seu mapa está pronto',
+    '{destination}: o teu mapa está pronto',
     'Ihre {destination}-Karte ist fertig'
   ),
-  'reveal.titleGeneric': s('Your map is ready', 'O seu mapa está pronto', 'Ihre Karte ist fertig'),
+  'reveal.titleGeneric': s('Your map is ready', 'O teu mapa está pronto', 'Ihre Karte ist fertig'),
   'reveal.bodyNoPlaces': s(
     'Open the app to see the map of everywhere you went.',
-    'Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+    'Abre a aplicação para veres o mapa de todos os sítios por onde passaste.',
     'Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
   ),
   // ⚠ T-190: why a share or a send was refused, as a person reads it. These
@@ -555,12 +555,12 @@ export const STRINGS = {
   // the diary keeps those. One key per refusal code in `exportTrace.ts`.
   'share.refusal.nothing': s(
     'Nothing has been recorded yet. Your trip appears here once you have been out with the app.',
-    'Ainda não foi registado nada. A sua viagem aparece aqui depois de sair com a aplicação.',
+    'Ainda não foi registado nada. A tua viagem aparece aqui depois de saíres com a aplicação.',
     'Es wurde noch nichts aufgezeichnet. Ihre Reise erscheint hier, sobald Sie mit der App unterwegs waren.'
   ),
   'share.refusal.withheld': s(
     'This trip cannot be shared yet: the app could not work out where you spent the night, so it cannot hide it.',
-    'Esta viagem ainda não pode ser partilhada: a aplicação não conseguiu perceber onde passou a noite, por isso não o consegue esconder.',
+    'Esta viagem ainda não pode ser partilhada: a aplicação não conseguiu perceber onde passaste a noite, por isso não o consegue esconder.',
     'Diese Reise kann noch nicht geteilt werden: Die App konnte nicht erkennen, wo Sie übernachtet haben, und kann es daher nicht ausblenden.'
   ),
   'share.refusal.unavailable': s(
@@ -570,7 +570,7 @@ export const STRINGS = {
   ),
   'share.refusal.failed': s(
     'Something went wrong. Please try again.',
-    'Algo correu mal. Tente novamente.',
+    'Algo correu mal. Tenta outra vez.',
     'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.'
   ),
   'passport.category.viewpoint': s('Viewpoints', 'Miradouros', 'Aussichtspunkte'),
@@ -584,7 +584,7 @@ export const STRINGS = {
   // Nothing here may read as a scolding or as a countdown.
   'passport.locked.a11y': s(
     '{name}, collected. Unlock your passport to see this stamp.',
-    '{name}: já lá esteve. Desbloqueie o seu passaporte para ver este carimbo.',
+    '{name}: já lá estiveste. Desbloqueia o teu passaporte para veres este carimbo.',
     '{name}, gesammelt. Schalten Sie Ihren Reisepass frei, um diesen Stempel zu sehen.'
   ),
   'passport.locked.badge.a11y': s('Locked', 'Bloqueado', 'Gesperrt'),
@@ -593,14 +593,14 @@ export const STRINGS = {
   // the replay, and the video (T-105b) is a separate thing that does not exist
   // yet. Promising one in a button and delivering the other is the store-copy
   // mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
-  'replay.watch': s('Watch your trip', 'Ver a sua viagem', 'Ihre Reise ansehen'),
+  'replay.watch': s('Watch your trip', 'Ver a tua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
   'replay.nothingToWatch': s(
     'There is nothing to watch yet. Record somewhere you go and it will appear here.',
-    'Ainda não há nada para ver. Registe um sítio por onde ande e aparecerá aqui.',
+    'Ainda não há nada para ver. Quando saíres com a aplicação, a tua viagem aparece aqui.',
     'Es gibt noch nichts zu sehen. Zeichnen Sie eine Fahrt oder einen Weg auf, dann erscheint sie hier.'
   ),
-  'replay.a11y.play': s('Play your trip', 'Reproduzir a sua viagem', 'Ihre Reise abspielen'),
+  'replay.a11y.play': s('Play your trip', 'Reproduzir a tua viagem', 'Ihre Reise abspielen'),
   'replay.a11y.pause': s('Pause', 'Pausa', 'Pause'),
   'replay.a11y.watchAgain': s('Watch again', 'Ver outra vez', 'Noch einmal ansehen'),
   'replay.a11y.close': s('Close and go back', 'Fechar e voltar', 'Schließen und zurück'),
@@ -620,7 +620,7 @@ export const STRINGS = {
   'passport.endTrip.title': s('End this trip?', 'Terminar esta viagem?', 'Diese Reise beenden?'),
   'passport.endTrip.body': s(
     'Your passport stays as it is. Automatic recording turns off, and your next trip starts the next time you record.',
-    'O seu passaporte fica como está. O registo automático desliga-se, e a próxima viagem começa quando voltar a registar.',
+    'O teu passaporte fica como está. O registo automático desliga-se, e a próxima viagem começa quando voltares a registar.',
     'Ihr Pass bleibt, wie er ist. Die automatische Aufzeichnung wird ausgeschaltet, und Ihre nächste Reise beginnt, wenn Sie wieder aufzeichnen.'
   ),
   'passport.endTrip.confirm': s('End trip', 'Terminar viagem', 'Reise beenden'),
@@ -632,7 +632,7 @@ export const STRINGS = {
 
   'passport.a11y.share': s(
     'Share your trip as an image',
-    'Partilhar a sua viagem como imagem',
+    'Partilhar a tua viagem como imagem',
     'Ihre Reise als Bild teilen'
   ),
   // T-192: said when Share is disabled, so a screen reader knows why.
@@ -644,7 +644,7 @@ export const STRINGS = {
   'passport.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
   'passport.a11y.stampCollected': s(
     '{name}, collected. Open to show it on the map.',
-    '{name}: já lá esteve. Abrir para ver no mapa.',
+    '{name}: já lá estiveste. Abrir para ver no mapa.',
     '{name}, gesammelt. Öffnen, um es auf der Karte zu zeigen.'
   ),
   'passport.a11y.stampUncollected': s(
@@ -698,7 +698,7 @@ export const STRINGS = {
   'placeCard.category.village': s('Village', 'Aldeia', 'Dorf'),
   'placeCard.category.beach': s('Beach', 'Praia', 'Strand'),
   'placeCard.category.landmark': s('Landmark', 'Monumento', 'Sehenswürdigkeit'),
-  'placeCard.collected': s('{category} · Collected', '{category} · Já lá esteve', '{category} · Gesammelt'),
+  'placeCard.collected': s('{category} · Collected', '{category} · Já lá estiveste', '{category} · Gesammelt'),
   // ⚠ One sentence, not a number and a note: the qualification has to travel
   // with the number in every language (placeCard.ts rule 2).
   'placeCard.distance': s(
@@ -711,7 +711,7 @@ export const STRINGS = {
   'date.range': s('{start} to {end}', '{start} a {end}', '{start} bis {end}'),
   // 2026-09-25: the status line under the name on the passport's card.
   'placeCard.status.notYet': s('Not visited yet', 'Ainda por visitar', 'Noch nicht besucht'),
-  'placeCard.status.visited': s('Visited', 'Já lá esteve', 'Besucht'),
+  'placeCard.status.visited': s('Visited', 'Já lá estiveste', 'Besucht'),
   // T-156d: the way from a locked stamp's card to the unlock sheet.
   'placeCard.unlock': s(
     'Unlock to see this stamp',
@@ -829,13 +829,13 @@ export const STRINGS = {
     'O Google Play não encontrou nenhuma compra nesta conta.',
     'Google Play hat für dieses Konto keinen Kauf gefunden.'
   ),
-  'placeCard.status.visitedOn': s('Visited on {date}', 'Visitou a {date}', 'Besucht am {date}'),
+  'placeCard.status.visitedOn': s('Visited on {date}', 'Visitaste a {date}', 'Besucht am {date}'),
   // T-190: the passport's "did you walk it?" question (T-149). It was English on
   // every phone until 2026-09-23. `{name}` is always a levada: only a course can
   // be half-walked.
   'confirm.question': s(
     'Did you walk the {name}?',
-    'Percorreu a {name}?',
+    'Percorreste a {name}?',
     'Sind Sie die {name} gegangen?'
   ),
   'confirm.detail': s(
@@ -857,7 +857,7 @@ export const STRINGS = {
     '{name} und den Verlauf der Wanderung auf der Karte zeigen'
   ),
 
-  'privacy.title': s('Your privacy', 'A sua privacidade', 'Ihre Privatsphäre'),
+  'privacy.title': s('Your privacy', 'A tua privacidade', 'Ihre Privatsphäre'),
   // ⚠ T-202: the dateline under the title said "last changed" in English on
   // every phone. It sat as plain JSX text between two {} expressions, which no
   // i18n check read; `i18nCoverage.test.ts` does now.
@@ -895,29 +895,29 @@ export const STRINGS = {
   'privacy.summary.title': s('In short', 'Em resumo', 'Kurz gesagt'),
   'privacy.summary.local': s(
     'The app never sends your trip to us. There is no account and no server.',
-    'A aplicação nunca nos envia a sua viagem. Não há conta nem servidor.',
+    'A aplicação nunca nos envia a tua viagem. Não há conta nem servidor.',
     'Die App sendet Ihre Reise nie an uns. Es gibt kein Konto und keinen Server.'
   ),
   'privacy.summary.map': s(
     'The map is Google’s, so Google sees which part of the island you are looking at.',
-    'O mapa é da Google, por isso a Google vê que parte da ilha está a ver.',
+    'O mapa é da Google, por isso a Google vê que parte da ilha estás a ver.',
     'Die Karte stammt von Google, daher sieht Google, welchen Teil der Insel Sie ansehen.'
   ),
   'privacy.summary.backup': s(
     'Your phone’s own backup may include your trip, under your account.',
-    'A cópia de segurança do seu telemóvel pode incluir a viagem, na sua conta.',
+    'A cópia de segurança do teu telemóvel pode incluir a viagem, na tua conta.',
     'Die Sicherung Ihres Telefons kann Ihre Reise enthalten, in Ihrem Konto.'
   ),
   // ⚠ Not "it leaves your phone only when you share it": the backup above is
   // another way it leaves, and i18n.test.ts's banned claims caught the first draft.
   'privacy.summary.share': s(
     'When you share or send your trip, where you slept is removed first.',
-    'Quando partilha ou envia a sua viagem, o sítio onde dormiu é removido antes.',
+    'Quando partilhas ou envias a tua viagem, o sítio onde dormiste é removido antes.',
     'Wenn Sie Ihre Reise teilen oder senden, wird Ihr Übernachtungsort vorher entfernt.'
   ),
   'privacy.summary.erase': s(
     'You can erase everything the app recorded, in Settings.',
-    'Pode apagar tudo o que a aplicação registou, nas Definições.',
+    'Podes apagar tudo o que a aplicação registou, nas Definições.',
     'Sie können alles Aufgezeichnete in den Einstellungen löschen.'
   ),
   'privacy.fullText': s('The full policy', 'A política completa', 'Die vollständige Erklärung'),
@@ -980,7 +980,7 @@ export const STRINGS = {
   'settings.appearance.dark': s('Dark', 'Escuro', 'Dunkel'),
   'settings.appearance.footnote': s(
     'Light is easier to read outdoors. Dark dims the whole map, Google’s own included, and is what your end-of-trip souvenir uses whichever you pick here.',
-    'O claro lê-se melhor ao ar livre. O escuro escurece todo o mapa, incluindo o da Google, e é o que a recordação do fim da viagem usa, escolha o que escolher aqui.',
+    'O claro lê-se melhor ao ar livre. O escuro escurece todo o mapa, incluindo o da Google, e é o que a recordação do fim da viagem usa, escolhas o que escolheres aqui.',
     'Hell lässt sich draußen besser lesen. Dunkel dämpft die ganze Karte, auch Googles eigene, und wird für Ihr Reise-Andenken verwendet, unabhängig von dieser Auswahl.'
   ),
   'settings.a11y.useLightMap': s('Use the light map', 'Usar o mapa claro', 'Helle Karte verwenden'),
@@ -1002,7 +1002,7 @@ export const STRINGS = {
   'settings.permission.denied': s('Not allowed', 'Não permitido', 'Nicht erlaubt'),
   'settings.recording.footnoteLimited': s(
     'Your map fills in only while the app is open. To let it fill in by itself, set location to “Allow all the time”.',
-    'O mapa só se preenche com a aplicação aberta. Para se preencher sozinho, ponha a localização em “Permitir sempre”.',
+    'O mapa só se preenche com a aplicação aberta. Para se preencher sozinho, põe a localização em “Permitir sempre”.',
     'Die Karte füllt sich nur bei geöffneter App. Damit sie sich von selbst füllt, stellen Sie den Standort auf „Immer zulassen“.'
   ),
   // ⚠ `{collected} of {total}` was written into PassportView as a template
@@ -1038,7 +1038,7 @@ export const STRINGS = {
   // lead: "we need an explanation for each option, just like WalkNYC").
   'settings.recording.explain': s(
     'Collects your stamps in the background, so you do not have to press Start an outing every time.',
-    'Recolhe os seus carimbos em segundo plano, sem ter de carregar em Começar passeio.',
+    'Recolhe os teus carimbos em segundo plano, sem teres de carregar em Começar passeio.',
     'Sammelt Ihre Stempel im Hintergrund, ohne dass Sie jedes Mal Ausflug starten drücken müssen.'
   ),
   // Each tier's line says what it does, spoken as the segment's hint; none
@@ -1061,7 +1061,7 @@ export const STRINGS = {
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
     'The app never sends your trip to us. There is no account and no server. Your phone’s own backup includes it, if you have backups switched on.',
-    'A aplicação nunca nos envia a sua viagem. Não há conta nem servidor. A cópia de segurança do seu telemóvel inclui-a, se a tiver ligada.',
+    'A aplicação nunca nos envia a tua viagem. Não há conta nem servidor. A cópia de segurança do teu telemóvel inclui-a, se a tiveres ligada.',
     'Die App sendet Ihre Reise nie an uns. Es gibt kein Konto und keinen Server. Die Sicherung Ihres Telefons enthält sie, falls Sie Sicherungen eingeschaltet haben.'
   ),
   'settings.about.privacy': s('Privacy', 'Privacidade', 'Datenschutz'),
@@ -1090,7 +1090,7 @@ export const STRINGS = {
   'settings.section.erase': s('Danger zone', 'Zona de perigo', 'Gefahrenbereich'),
   'settings.erase.footnote': s(
     'This cannot be undone. Save a copy first if you might want your trip back. Your phone’s own backup may still hold a copy.',
-    'Não pode ser desfeito. Guarde primeiro uma cópia se quiser recuperar a viagem. A cópia de segurança do telemóvel pode ainda guardar uma cópia.',
+    'Não pode ser desfeito. Guarda primeiro uma cópia se quiseres recuperar a viagem. A cópia de segurança do telemóvel pode ainda guardar uma cópia.',
     'Das lässt sich nicht rückgängig machen. Speichern Sie zuerst eine Kopie, wenn Sie Ihre Reise zurückhaben möchten. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten.'
   ),
   // 2026-10-04: a copy of the trip in a file, as WalkNYC's Backup and Restore.
@@ -1115,10 +1115,10 @@ export const STRINGS = {
   'settings.backup.restore': s('Restore from a copy', 'Restaurar a partir de uma cópia', 'Aus einer Kopie wiederherstellen'),
   'settings.backup.footnote': s(
     'Your trip lives only on this phone, and uninstalling the app removes it. Keep a copy in Drive or on another device. It shows everywhere you have been, so keep it private.',
-    'A sua viagem vive só neste telemóvel, e desinstalar a aplicação apaga-a. Guarde uma cópia no Drive ou noutro aparelho. Mostra todos os sítios onde esteve, por isso mantenha-a privada.',
+    'A tua viagem vive só neste telemóvel, e desinstalar a aplicação apaga-a. Guarda uma cópia no Drive ou noutro aparelho. Mostra todos os sítios onde estiveste, por isso mantém-na privada.',
     'Ihre Reise ist nur auf diesem Telefon, und wer die App deinstalliert, löscht sie. Bewahren Sie eine Kopie in Drive oder auf einem anderen Gerät auf. Sie zeigt jeden Ort, an dem Sie waren, also halten Sie sie privat.'
   ),
-  'settings.backup.dialogTitle': s('Save a copy of your trip', 'Guardar uma cópia da sua viagem', 'Eine Kopie Ihrer Reise speichern'),
+  'settings.backup.dialogTitle': s('Save a copy of your trip', 'Guardar uma cópia da tua viagem', 'Eine Kopie Ihrer Reise speichern'),
   'settings.backup.saveFailed': s(
     'The copy could not be saved.',
     'Não foi possível guardar a cópia.',
@@ -1136,7 +1136,7 @@ export const STRINGS = {
   ),
   'settings.restore.confirm.body': s(
     'Everything on this phone now is replaced by what the copy holds. Save a copy first if you want to keep what is here.',
-    'Tudo o que está agora neste telemóvel é substituído pelo que a cópia contém. Guarde primeiro uma cópia se quiser manter o que tem.',
+    'Tudo o que está agora neste telemóvel é substituído pelo que a cópia contém. Guarda primeiro uma cópia se quiseres manter o que tens.',
     'Alles, was jetzt auf diesem Telefon ist, wird durch den Inhalt der Kopie ersetzt. Speichern Sie zuerst eine Kopie, wenn Sie es behalten möchten.'
   ),
   'settings.restore.confirm.choose': s('Choose a copy', 'Escolher cópia', 'Kopie auswählen'),
@@ -1152,7 +1152,7 @@ export const STRINGS = {
   ),
   'settings.restore.newer': s(
     'That copy was saved by a newer version of {app}. Update the app first. Nothing was changed.',
-    'Essa cópia foi guardada por uma versão mais recente do {app}. Atualize primeiro a aplicação. Nada foi alterado.',
+    'Essa cópia foi guardada por uma versão mais recente do {app}. Atualiza primeiro a aplicação. Nada foi alterado.',
     'Diese Kopie wurde von einer neueren Version von {app} gespeichert. Aktualisieren Sie zuerst die App. Nichts wurde geändert.'
   ),
   'settings.restore.failed': s(
@@ -1172,22 +1172,22 @@ export const STRINGS = {
   'notify.channel.trip': s('Trip messages', 'Mensagens da viagem', 'Reisenachrichten'),
   // D-096: a new stamp, said quietly (no sound) on a channel of its own, so
   // it can be silenced without silencing the trip's two messages.
-  'notify.channel.stamps': s('New stamps', 'Novos selos', 'Neue Stempel'),
+  'notify.channel.stamps': s('New stamps', 'Novos carimbos', 'Neue Stempel'),
   'notify.channel.stampsDescription': s(
     'A quiet note when you collect a place.',
-    'Um aviso discreto quando recolhe um local.',
+    'Um aviso discreto quando ganhas um carimbo.',
     'Ein leiser Hinweis, wenn Sie einen Ort sammeln.'
   ),
-  'notify.stamp.title': s('New stamp: {place}', 'Novo selo: {place}', 'Neuer Stempel: {place}'),
+  'notify.stamp.title': s('New stamp: {place}', 'Novo carimbo: {place}', 'Neuer Stempel: {place}'),
   'notify.stamp.body': s(
     'It is in your passport.',
-    'Já está no seu passaporte.',
+    'Já está no teu passaporte.',
     'Er ist in Ihrem Reisepass.'
   ),
   // The free tier withholds the artwork, never the visit (freeTier.ts).
   'notify.stamp.bodyLocked': s(
     'Kept in your passport, ready to unlock.',
-    'Guardado no seu passaporte, pronto a desbloquear.',
+    'Guardado no teu passaporte, pronto a desbloquear.',
     'In Ihrem Reisepass aufbewahrt, bereit zum Freischalten.'
   ),
   // D-096: the map's pop-up for a stamp earned since it was last looked at.
@@ -1240,12 +1240,12 @@ export const STRINGS = {
   // Posted by native code (UpdateNoticeReceiver), from text the app leaves it.
   'notify.updated.title': s(
     'Open {app} to keep recording',
-    'Abra o {app} para continuar a registar',
+    'Abre o {app} para continuar a registar',
     'Öffnen Sie {app}, um weiter aufzuzeichnen'
   ),
   'notify.updated.body': s(
     '{app} was updated. Open it once and your trip keeps recording.',
-    'O {app} foi atualizado. Abra-o uma vez e a sua viagem continua a ser registada.',
+    'O {app} foi atualizado. Abre-o uma vez e a tua viagem continua a ser registada.',
     '{app} wurde aktualisiert. Öffnen Sie die App einmal, dann wird Ihre Reise weiter aufgezeichnet.'
   ),
   'notify.channel.tripDescription': s(
@@ -1255,27 +1255,27 @@ export const STRINGS = {
   ),
   'notify.recording.title': s(
     'Recording your trip',
-    'A registar a sua viagem',
+    'A registar a tua viagem',
     'Ihre Reise wird aufgezeichnet'
   ),
   'notify.title.notRecorded': s(
     'Your trip is not being recorded',
-    'A sua viagem não está a ser registada',
+    'A tua viagem não está a ser registada',
     'Ihre Reise wird nicht aufgezeichnet'
   ),
   'notify.title.oneTap': s(
     'One tap to start your map',
-    'Um toque para começar o seu mapa',
+    'Um toque para começar o teu mapa',
     'Ein Tippen, und Ihre Karte beginnt'
   ),
   'notify.title.notFilling': s(
     'Your map is not filling in',
-    'O seu mapa não se está a preencher',
+    'O teu mapa não se está a preencher',
     'Ihre Karte füllt sich nicht'
   ),
   'notify.title.fillingNicely': s(
     'Your map is filling in nicely',
-    'O seu mapa está a preencher-se bem',
+    'O teu mapa está a preencher-se bem',
     'Ihre Karte füllt sich schön'
   ),
   // D-087 §5: the same ongoing notification while a walk is running. No timer:
@@ -1283,42 +1283,42 @@ export const STRINGS = {
   'notify.walk.title': s('Walk in progress', 'Passeio em curso', 'Spaziergang läuft'),
   'notify.walk.body': s(
     '{app} is recording this walk in more detail until you end it.',
-    'O {app} está a registar este passeio com mais detalhe até o terminar.',
+    'O {app} está a registar este passeio com mais detalhe até o terminares.',
     '{app} zeichnet diesen Spaziergang genauer auf, bis Sie ihn beenden.'
   ),
   'notify.recording.body': s(
     '{app} is noting where you have been.',
-    'O {app} está a registar por onde andou.',
+    'O {app} está a registar por onde andas.',
     '{app} merkt sich, wo Sie gewesen sind.'
   ),
   'notify.locationOff.body': s(
     '{app} cannot see where you go, so your map will stay empty. Open the app to turn location back on. There is still plenty of your trip left.',
-    'O {app} não consegue ver por onde anda, por isso o mapa fica vazio. Abra a aplicação para voltar a ligar a localização. Ainda falta muito da sua viagem.',
+    'O {app} não consegue ver por onde andas, por isso o mapa fica vazio. Abre a aplicação para voltar a ligar a localização. Ainda falta muito da tua viagem.',
     '{app} kann nicht sehen, wohin Sie gehen, deshalb bleibt Ihre Karte leer. Öffnen Sie die App und schalten Sie den Standort wieder ein. Von Ihrer Reise liegt noch viel vor Ihnen.'
   ),
   'notify.notStarted.body': s(
     '{app} has not started recording yet. Open the app and allow location, and it will fill in the rest of your trip by itself.',
-    'O {app} ainda não começou a registar. Abra a aplicação e permita a localização, e ela preenche sozinha o resto da viagem.',
+    'O {app} ainda não começou a registar. Abre a aplicação e permite a localização, e ela preenche sozinha o resto da viagem.',
     '{app} hat noch nicht mit der Aufzeichnung begonnen. Öffnen Sie die App und erlauben Sie den Standort, dann füllt sie den Rest Ihrer Reise von selbst.'
   ),
   'notify.blocked.body': s(
     '{app} is running, but your phone is not letting it record. Open the app: it will show you the one setting to change.',
-    'O {app} está a funcionar, mas o telemóvel não o deixa registar. Abra a aplicação: ela mostra-lhe a única definição a mudar.',
+    'O {app} está a funcionar, mas o telemóvel não o deixa registar. Abre a aplicação: ela mostra-te a única definição a mudar.',
     '{app} läuft, aber Ihr Telefon lässt die Aufzeichnung nicht zu. Öffnen Sie die App: Sie zeigt Ihnen die eine Einstellung, die zu ändern ist.'
   ),
   'notify.silent.body': s(
     '{app} has not recorded anything for several hours. Open the app to check it. The rest of your trip can still be saved.',
-    'O {app} não regista nada há várias horas. Abra a aplicação para verificar. O resto da viagem ainda pode ser guardado.',
+    'O {app} não regista nada há várias horas. Abre a aplicação para verificar. O resto da viagem ainda pode ser guardado.',
     '{app} hat seit Stunden nichts aufgezeichnet. Öffnen Sie die App zur Kontrolle. Der Rest Ihrer Reise lässt sich noch retten.'
   ),
   'notify.background.body': s(
     '{app} is recording your trip in the background. You will not hear from it again until you are heading home.',
-    'O {app} está a registar a sua viagem em segundo plano. Não volta a incomodá-lo até estar de regresso a casa.',
+    'O {app} está a registar a tua viagem em segundo plano. Não te volta a incomodar até estares de regresso a casa.',
     '{app} zeichnet Ihre Reise im Hintergrund auf. Sie hören erst wieder davon, wenn Sie nach Hause fahren.'
   ),
   'notify.stopped.body': s(
     'Recording has stopped. Open the app to start it again. The rest of your trip can still be saved.',
-    'O registo parou. Abra a aplicação para o iniciar outra vez. O resto da viagem ainda pode ser guardado.',
+    'O registo parou. Abre a aplicação para o iniciar outra vez. O resto da viagem ainda pode ser guardado.',
     'Die Aufzeichnung wurde gestoppt. Öffnen Sie die App, um sie neu zu starten. Der Rest Ihrer Reise lässt sich noch retten.'
   ),
 
@@ -1326,12 +1326,12 @@ export const STRINGS = {
   'erase.confirm.title': s('Erase everything?', 'Apagar tudo?', 'Alles löschen?'),
   'erase.confirm.body1': s(
     'This deletes every place you have visited, the whole map of your trip, and every stamp you have collected.',
-    'Isto apaga todos os lugares por onde passou, o mapa inteiro da sua viagem e todos os carimbos que juntou.',
+    'Isto apaga todos os lugares por onde passaste, o mapa inteiro da tua viagem e todos os carimbos que juntaste.',
     'Das löscht jeden Ort, den Sie besucht haben, die ganze Karte Ihrer Reise und jeden gesammelten Stempel.'
   ),
   'erase.confirm.body2': s(
     '{app} has no account and no server, so we cannot bring it back. This cannot be undone. Your phone’s own backup may still hold a copy; that is yours to keep or remove in your phone settings.',
-    'O {app} não tem conta nem servidor, por isso não o podemos recuperar. Não se pode desfazer. A cópia de segurança do seu telemóvel pode ainda guardar uma cópia; é sua para manter ou apagar nas definições do telemóvel.',
+    'O {app} não tem conta nem servidor, por isso não o podemos recuperar. Não se pode desfazer. A cópia de segurança do teu telemóvel pode ainda guardar uma cópia; é tua para manter ou apagar nas definições do telemóvel.',
     '{app} hat kein Konto und keinen Server, deshalb können wir nichts zurückholen. Das lässt sich nicht rückgängig machen. Die Sicherung Ihres Telefons kann noch eine Kopie enthalten; ob Sie sie behalten oder löschen, entscheiden Sie in den Einstellungen Ihres Telefons.'
   ),
   'erase.confirm.keep': s('Keep my trip', 'Manter a minha viagem', 'Meine Reise behalten'),
@@ -1343,7 +1343,7 @@ export const STRINGS = {
   ),
   'erase.done.body': s(
     'Nothing you recorded is left on this phone. If you keep the app, it will start a new map from here.',
-    'Não resta nada do que registou neste telemóvel. Se mantiver a aplicação, ela começa um mapa novo a partir daqui.',
+    'Não resta nada do que registaste neste telemóvel. Se mantiveres a aplicação, ela começa um mapa novo a partir daqui.',
     'Von dem, was Sie aufgezeichnet haben, ist auf diesem Telefon nichts geblieben. Wenn Sie die App behalten, beginnt sie hier eine neue Karte.'
   ),
   'erase.done.done': s('Done', 'Concluído', 'Fertig'),
@@ -1416,12 +1416,12 @@ export const PLURALS = {
   'reveal.body': {
     one: s(
       'You collected {count} place. Open the app to see the map of everywhere you went.',
-      'Visitou {count} lugar. Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+      'Visitaste {count} lugar. Abre a aplicação para veres o mapa de todos os sítios por onde passaste.',
       'Sie haben {count} Ort gesammelt. Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
     ),
     other: s(
       'You collected {count} places. Open the app to see the map of everywhere you went.',
-      'Visitou {count} lugares. Abra a aplicação para ver o mapa de todos os sítios por onde passou.',
+      'Visitaste {count} lugares. Abre a aplicação para veres o mapa de todos os sítios por onde passaste.',
       'Sie haben {count} Orte gesammelt. Öffnen Sie die App, um die Karte aller Orte zu sehen, an denen Sie waren.'
     ),
   },
@@ -1430,24 +1430,24 @@ export const PLURALS = {
   'donate.description': {
     one: s(
       'This sends {points} location points from {minutes} minutes of your trip, and what the app decided about {count} place. Where you slept has been removed. It contains no name, no account and nothing that identifies you or your phone. You choose where it goes.',
-      'Isto envia {points} pontos de localização de {minutes} minutos da sua viagem, e o que a aplicação decidiu sobre {count} lugar. O sítio onde dormiu foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é sua.',
+      'Isto envia {points} pontos de localização de {minutes} minutos da tua viagem, e o que a aplicação decidiu sobre {count} lugar. O sítio onde dormiste foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é tua.',
       'Gesendet werden {points} Standortpunkte aus {minutes} Minuten Ihrer Reise und was die App über {count} Ort entschieden hat. Wo Sie übernachtet haben, wurde entfernt. Die Datei enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Sie entscheiden, wohin sie geht.'
     ),
     other: s(
       'This sends {points} location points from {minutes} minutes of your trip, and what the app decided about {count} places. Where you slept has been removed. It contains no name, no account and nothing that identifies you or your phone. You choose where it goes.',
-      'Isto envia {points} pontos de localização de {minutes} minutos da sua viagem, e o que a aplicação decidiu sobre {count} lugares. O sítio onde dormiu foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é sua.',
+      'Isto envia {points} pontos de localização de {minutes} minutos da tua viagem, e o que a aplicação decidiu sobre {count} lugares. O sítio onde dormiste foi removido. Não contém nome, conta nem nada que identifique quem o envia ou o telemóvel. A escolha do destino é tua.',
       'Gesendet werden {points} Standortpunkte aus {minutes} Minuten Ihrer Reise und was die App über {count} Orte entschieden hat. Wo Sie übernachtet haben, wurde entfernt. Die Datei enthält keinen Namen, kein Konto und nichts, was Sie oder Ihr Telefon identifiziert. Sie entscheiden, wohin sie geht.'
     ),
   },
   'passport.a11y.openWithCount': {
     one: s(
       'Open your passport, {collected} of {total} place collected',
-      'Abrir o seu passaporte, {collected} de {total} lugar visitado',
+      'Abrir o teu passaporte, {collected} de {total} lugar visitado',
       'Reisepass öffnen, {collected} von {total} Ort gesammelt'
     ),
     other: s(
       'Open your passport, {collected} of {total} places collected',
-      'Abrir o seu passaporte, {collected} de {total} lugares visitados',
+      'Abrir o teu passaporte, {collected} de {total} lugares visitados',
       'Reisepass öffnen, {collected} von {total} Orten gesammelt'
     ),
   },

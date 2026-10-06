@@ -158,7 +158,7 @@ test('⚠ T-190 — on a Portuguese phone the card has no English in it', () => 
   // Review P1-4, seen on the P30: "VIEWPOINT" and "13 km away, in a straight line".
   const card = buildPlaceCard(input({ category: 'viewpoint', collected: true, language: 'pt' }));
   assert.equal(card.categoryLabel, 'Miradouro');
-  assert.equal(card.metaLabel, 'Miradouro · Já lá esteve');
+  assert.equal(card.metaLabel, 'Miradouro · Já lá estiveste');
   assert.equal(card.distanceSentence, 'A 1,1 km, em linha reta');
 });
 
@@ -218,10 +218,10 @@ test('the status line says where the user stands, and never un-collects a stamp'
   assert.equal(buildPlaceCard(input({ collected: false, language: 'pt' })).statusLine, 'Ainda por visitar');
   assert.equal(
     buildPlaceCard(input({ collected: true, visitedOn: '20 de setembro', language: 'pt' })).statusLine,
-    'Visitou a 20 de setembro'
+    'Visitaste a 20 de setembro'
   );
   // Collected with no date known still says visited (D-075: never "not yet").
-  assert.equal(buildPlaceCard(input({ collected: true, language: 'pt' })).statusLine, 'Já lá esteve');
+  assert.equal(buildPlaceCard(input({ collected: true, language: 'pt' })).statusLine, 'Já lá estiveste');
   // A date handed in for a place not collected is ignored rather than shown.
   assert.equal(
     buildPlaceCard(input({ collected: false, visitedOn: '20 September' })).statusLine,

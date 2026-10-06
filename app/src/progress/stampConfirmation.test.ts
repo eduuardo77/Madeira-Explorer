@@ -93,7 +93,7 @@ test('⚠ T-190 — the detail says "enough to ask" once, not twice', () => {
 test('⚠ T-190 — on a Portuguese phone the question has no English in it', () => {
   const prompt = nextPrompt([furado], new Set(), new Set(), 'pt');
   assert.ok(prompt !== null);
-  assert.equal(prompt.question, 'Percorreu a Levada do Furado?');
+  assert.equal(prompt.question, 'Percorreste a Levada do Furado?');
   assert.match(prompt.detail, /^O registo mostra 2,1 km de 5,0 km \(42%\)/);
   assert.equal(prompt.confirmLabel, 'Fiz este percurso');
   assert.equal(prompt.declineLabel, 'Desta vez não');

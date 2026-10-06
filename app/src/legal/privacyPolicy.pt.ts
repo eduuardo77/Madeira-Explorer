@@ -20,7 +20,8 @@
  * ⚠ **THIS TRANSLATION STILL NEEDS THE PROJECT LEAD'S EYE.** It is European
  * Portuguese, written to match the English exactly in *meaning* — not in word
  * order — and to keep D-015's register: plain, short sentences, no jargon, the
- * kind of thing an eighty-year-old will actually read. Where the English says
+ * kind of thing an eighty-year-old will actually read. It addresses the reader as
+ * *tu*, as the whole app does (D-098, T-255). Where the English says
  * "we", the Portuguese says "nós" only where dropping it would be ambiguous,
  * because Portuguese does not need the pronoun and the English habit reads as
  * translated.
@@ -38,67 +39,67 @@ export const SECTIONS_PT: PolicySection[] = [
   {
     heading: 'A versão curta',
     paragraphs: [
-      `O ${APP_NAME} regista por onde anda durante as férias e mostra-lhe isso de volta como um mapa. Esse registo fica guardado no seu telemóvel, não num servidor.`,
-      'Não há conta, não há registo e não há servidor por trás desta aplicação. Não temos maneira de ver por onde andou, porque a sua viagem nunca nos é enviada pela aplicação. Não sabemos quem é e não conseguimos descobrir.',
-      'O mapa que vê por baixo da sua viagem vem da Google, como na maioria das aplicações de mapas. A Google vê que parte da ilha está a olhar. A aplicação nunca envia a sua viagem para o mapa.',
-      'Ninguém nos paga pelos seus dados. Não há publicidade e não há nada a medir como usa a aplicação.',
+      `O ${APP_NAME} regista por onde andas durante as férias e mostra-te isso de volta como um mapa. Esse registo fica guardado no teu telemóvel, não num servidor.`,
+      'Não há conta, não há registo e não há servidor por trás desta aplicação. Não temos maneira de ver por onde andaste, porque a tua viagem nunca nos é enviada pela aplicação. Não sabemos quem és e não conseguimos descobrir.',
+      'O mapa que vês por baixo da tua viagem vem da Google, como na maioria das aplicações de mapas. A Google vê que parte da ilha estás a olhar. A aplicação nunca envia a tua viagem para o mapa.',
+      'Ninguém nos paga pelos teus dados. Não há publicidade e não há nada a medir como usas a aplicação.',
     ],
   },
   {
     heading: 'O que a aplicação regista',
     paragraphs: [
-      'Onde o seu telemóvel esteve, e quando. É este o mapa da sua viagem.',
-      'O telemóvel calcula isso com o seu próprio serviço de localização. Na maioria dos telemóveis Android esse serviço é da Google, e o que a Google faz com ele depende das definições de localização do seu telemóvel, não desta aplicação.',
-      'O que os sensores de movimento do telemóvel dizem que está a fazer, se o permitir: parado, a andar, a correr, de bicicleta ou num veículo. Ajuda a desenhar a estrada certa, a rua e não o caminho ao lado quando vai de carro, e a distinguir um telemóvel pousado de um em movimento.',
-      'Quais dos lugares da aplicação já alcançou, e quando juntou cada carimbo.',
-      'Um pequeno diário sobre se o registo esteve a funcionar, para que a aplicação lhe possa dizer se parou.',
+      'Onde o teu telemóvel esteve, e quando. É este o mapa da tua viagem.',
+      'O telemóvel calcula isso com o seu próprio serviço de localização. Na maioria dos telemóveis Android esse serviço é da Google, e o que a Google faz com ele depende das definições de localização do teu telemóvel, não desta aplicação.',
+      'O que os sensores de movimento do telemóvel dizem que estás a fazer, se o permitires: parado, a andar, a correr, de bicicleta ou num veículo. Ajuda a desenhar a estrada certa, a rua e não o caminho ao lado quando vais de carro, e a distinguir um telemóvel pousado de um em movimento.',
+      'Quais dos lugares da aplicação já alcançaste, e quando juntaste cada carimbo.',
+      'Um pequeno diário sobre se o registo esteve a funcionar, para que a aplicação te possa dizer se parou.',
     ],
   },
   {
     heading: 'Onde é que isso tudo fica guardado',
     paragraphs: [
-      'No seu telemóvel, num espaço que só esta aplicação consegue ler.',
-      'A sua viagem é incluída na cópia de segurança normal que o seu telemóvel já faz para o iCloud ou para a Google, se tiver as cópias de segurança ligadas. É isso que protege as suas férias se o telemóvel se perder ou avariar a meio. Essa cópia é sua, na sua própria conta e com a sua própria encriptação. Nós não lhe conseguimos chegar, e mais ninguém consegue sem a sua conta.',
-      'Pode desligar isso nas definições do telemóvel, no mesmo sítio onde controla as cópias de segurança de tudo o resto.',
-      'Também pode guardar uma cópia da viagem num ficheiro, nas Definições, e restaurá-la mais tarde. O ficheiro contém tudo o que a aplicação registou, incluindo onde dormiu, e vai só para onde o enviar. Mantenha-o privado.',
+      'No teu telemóvel, num espaço que só esta aplicação consegue ler.',
+      'A tua viagem é incluída na cópia de segurança normal que o teu telemóvel já faz para o iCloud ou para a Google, se tiveres as cópias de segurança ligadas. É isso que protege as tuas férias se o telemóvel se perder ou avariar a meio. Essa cópia é tua, na tua própria conta e com a tua própria encriptação. Nós não lhe conseguimos chegar, e mais ninguém consegue sem a tua conta.',
+      'Podes desligar isso nas definições do telemóvel, no mesmo sítio onde controlas as cópias de segurança de tudo o resto.',
+      'Também podes guardar uma cópia da viagem num ficheiro, nas Definições, e restaurá-la mais tarde. O ficheiro contém tudo o que a aplicação registou, incluindo onde dormiste, e vai só para onde o enviares. Mantém-no privado.',
     ],
   },
   {
-    heading: 'Quando partilha a sua viagem',
+    heading: 'Quando partilhas a tua viagem',
     paragraphs: [
-      'No fim das suas férias, a aplicação pode fazer uma imagem do seu mapa, para partilhar se quiser.',
-      'Partilhar é a forma de a sua viagem sair do telemóvel, e vai para onde a enviar, não para nós. Quem a vir consegue perceber, por alto, por onde andou.',
-      'Antes de a fazer, a aplicação descobre onde dormiu e remove essa parte do mapa. Faz isto sempre, e não há nenhuma definição para desligar. Se não conseguir perceber onde estava alojado, não faz a imagem de todo, em vez de arriscar mostrar a sua morada.',
-      'Todo o resto do mapa é seu, para partilhar ou não.',
-      'As definições também podem preparar um registo para enviar, para ajudar a melhorar a forma como a aplicação reconhece os lugares. Primeiro diz-lhe o que contém, e o sítio onde dormiu é removido. Se decidir enviá-lo para nós, esse registo é a única coisa que recebemos.',
+      'No fim das tuas férias, a aplicação pode fazer uma imagem do teu mapa, para partilhares se quiseres.',
+      'Partilhar é a forma de a tua viagem sair do telemóvel, e vai para onde a enviares, não para nós. Quem a vir consegue perceber, por alto, por onde andaste.',
+      'Antes de a fazer, a aplicação descobre onde dormiste e remove essa parte do mapa. Faz isto sempre, e não há nenhuma definição para desligar. Se não conseguir perceber onde estavas alojado, não faz a imagem de todo, em vez de arriscar mostrar a tua morada.',
+      'Todo o resto do mapa é teu, para partilhares ou não.',
+      'As definições também podem preparar um registo para enviar, para ajudar a melhorar a forma como a aplicação reconhece os lugares. Primeiro diz-te o que contém, e o sítio onde dormiste é removido. Se decidires enviá-lo para nós, esse registo é a única coisa que recebemos.',
     ],
   },
   {
     heading: 'O mapa em si',
     paragraphs: [
-      'O mapa que vê é da Google, o mesmo mapa usado pela maioria das aplicações num telemóvel Android. É descarregado aos poucos à medida que se desloca por ele, por isso a Google consegue ver que parte da ilha está no seu ecrã.',
-      'Esta aplicação não envia a sua viagem à Google. A linha que mostra por onde andou é desenhada por esta aplicação, por cima do mapa deles, a partir do registo guardado no seu telemóvel. A aplicação nunca lhes envia esse registo, nem a nós.',
-      'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma: a sua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiver ligação.',
+      'O mapa que vês é da Google, o mesmo mapa usado pela maioria das aplicações num telemóvel Android. É descarregado aos poucos à medida que te deslocas por ele, por isso a Google consegue ver que parte da ilha está no teu ecrã.',
+      'Esta aplicação não envia a tua viagem à Google. A linha que mostra por onde andaste é desenhada por esta aplicação, por cima do mapa deles, a partir do registo guardado no teu telemóvel. A aplicação nunca lhes envia esse registo, nem a nós.',
+      'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma: a tua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiveres ligação.',
       'A Google tem a sua própria política de privacidade, que cobre o que fazem com esses pedidos de mapa.',
     ],
   },
   {
     heading: 'O que a aplicação pede permissão para fazer',
     paragraphs: [
-      'A sua localização. É esta a aplicação inteira; sem ela não há mapa. Pode permitir apenas com a aplicação aberta, e continua a funcionar: é você que inicia e para o registo.',
-      'A sua localização com a aplicação fechada. É isto que lhe permite esquecer-se da aplicação durante uma semana e mesmo assim receber o seu mapa. Pode dizer que não, e a aplicação continua a funcionar.',
-      'Atividade física. É a leitura dos sensores de movimento do telemóvel descrita acima. Pode dizer que não, e a aplicação continua a funcionar.',
-      'Notificações. Enquanto regista, o telemóvel mostra que está a registar, como o Android exige. Além disso, a aplicação envia no máximo duas por viagem: uma no primeiro dia para lhe dizer se o registo está a funcionar, e outra no fim para dizer que o seu mapa está pronto. Também avisa discretamente, sem som, quando recolhe um novo selo. Pode desligar esse aviso nas definições do telemóvel.',
-      'Depois de uma atualização da aplicação, pode também pedir-lhe uma vez que a abra, para que o registo continue.',
-      'Pode mudar qualquer uma destas mais tarde nas definições do telemóvel, e a aplicação continua com aquilo que permitir.',
+      'A tua localização. É esta a aplicação inteira; sem ela não há mapa. Podes permitir apenas com a aplicação aberta, e continua a funcionar: és tu que inicias e paras o registo.',
+      'A tua localização com a aplicação fechada. É isto que te permite esqueceres-te da aplicação durante uma semana e mesmo assim receberes o teu mapa. Podes dizer que não, e a aplicação continua a funcionar.',
+      'Atividade física. É a leitura dos sensores de movimento do telemóvel descrita acima. Podes dizer que não, e a aplicação continua a funcionar.',
+      'Notificações. Enquanto regista, o telemóvel mostra que está a registar, como o Android exige. Além disso, a aplicação envia no máximo duas por viagem: uma no primeiro dia para te dizer se o registo está a funcionar, e outra no fim para dizer que o teu mapa está pronto. Também avisa discretamente, sem som, quando ganhas um novo carimbo. Podes desligar esse aviso nas definições do telemóvel.',
+      'Depois de uma atualização da aplicação, pode também pedir-te uma vez que a abras, para que o registo continue.',
+      'Podes mudar qualquer uma destas mais tarde nas definições do telemóvel, e a aplicação continua com aquilo que permitires.',
     ],
   },
   {
-    heading: 'Apagar a sua viagem',
+    heading: 'Apagar a tua viagem',
     paragraphs: [
       'As definições têm um botão que apaga tudo o que a aplicação registou. Tem efeito imediato e completo.',
-      'Não há conta nem servidor, por isso não há nada para apagarmos do nosso lado nem nada para nos pedir. Apagar do seu telemóvel é tudo o que há.',
-      'Não guardamos cópia em lado nenhum, por isso apagar não se pode desfazer do nosso lado. Se a cópia de segurança do seu telemóvel ainda guardar uma cópia, essa é sua para remover nas definições do telemóvel.',
+      'Não há conta nem servidor, por isso não há nada para apagarmos do nosso lado nem nada para nos pedires. Apagar do teu telemóvel é tudo o que há.',
+      'Não guardamos cópia em lado nenhum, por isso apagar não se pode desfazer do nosso lado. Se a cópia de segurança do teu telemóvel ainda guardar uma cópia, essa é tua para remover nas definições do telemóvel.',
       'Desinstalar a aplicação também apaga tudo.',
     ],
   },
@@ -111,7 +112,7 @@ export const SECTIONS_PT: PolicySection[] = [
   {
     heading: 'Se esta política mudar',
     paragraphs: [
-      'Qualquer alteração aparece aqui e a data no topo muda com ela. Esta página está guardada dentro da aplicação, por isso pode sempre ler a versão que tem de facto, mesmo sem rede.',
+      'Qualquer alteração aparece aqui e a data no topo muda com ela. Esta página está guardada dentro da aplicação, por isso podes sempre ler a versão que tens de facto, mesmo sem rede.',
     ],
   },
 ];
@@ -120,7 +121,7 @@ export const SECTIONS_PT: PolicySection[] = [
 export const CONTACT_SECTION_PT = (email: string): PolicySection => ({
   heading: 'Falar connosco',
   paragraphs: [
-    `Se tiver alguma questão sobre isto, escreva para ${email}.`,
-    'Não vamos conseguir procurar nada sobre a sua viagem, porque não a temos.',
+    `Se tiveres alguma questão sobre isto, escreve para ${email}.`,
+    'Não vamos conseguir procurar nada sobre a tua viagem, porque não a temos.',
   ],
 });

@@ -593,6 +593,17 @@ export const STRINGS = {
   // the replay, and the video (T-105b) is a separate thing that does not exist
   // yet. Promising one in a button and delivering the other is the store-copy
   // mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
+  // ── The trip viewer (T-253, D-099): WalkNYC's walk viewer, a page per day ──
+  'trip.day': s('Day {day} of {days}', 'Dia {day} de {days}', 'Tag {day} von {days}'),
+  'trip.share': s('Share', 'Partilhar', 'Teilen'),
+  'trip.ofTrip': s('Trip of {range}', 'Viagem de {range}', 'Reise: {range}'),
+  'trip.stat.travelled': s('Travelled', 'Percorridos', 'Unterwegs'),
+  'trip.stat.trip': s('This trip', 'Na viagem', 'Diese Reise'),
+  'trip.share.plug': s('Light up your roads with {app}', 'Acende as tuas estradas com o {app}', 'Lassen Sie Ihre Straßen mit {app} aufleuchten'),
+  'trip.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
+  'trip.a11y.previous': s('Previous day', 'Dia anterior', 'Vorheriger Tag'),
+  'trip.a11y.next': s('Next day', 'Dia seguinte', 'Nächster Tag'),
+  'trip.a11y.stampAt': s('{name}, at {time}', '{name}, às {time}', '{name}, um {time}'),
   'replay.watch': s('Watch your trip', 'Ver a tua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
   'replay.nothingToWatch': s(
@@ -1403,6 +1414,15 @@ export const PLURALS = {
   'unlock.title.waiting': {
     one: s('You have {count} stamp waiting for you', 'Tens {count} carimbo à tua espera', 'Auf Sie wartet {count} Stempel'),
     other: s('You have {count} stamps waiting for you', 'Tens {count} carimbos à tua espera', 'Auf Sie warten {count} Stempel'),
+  },
+  // T-253: the trip viewer's figure for a day's stamps; zero takes the plural.
+  'trip.stat.stamps': {
+    one: s('Stamp', 'Carimbo', 'Stempel'),
+    other: s('Stamps', 'Carimbos', 'Stempel'),
+  },
+  'trip.stat.days': {
+    one: s('Day', 'Dia', 'Tag'),
+    other: s('Days', 'Dias', 'Tage'),
   },
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),

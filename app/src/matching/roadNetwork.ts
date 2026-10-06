@@ -36,7 +36,7 @@ import {
   pointsSince,
   travelledSinceM,
 } from './roadTrace';
-import type { TimedPoint } from './roadTrace';
+import type { TimedPoint, TimedRun } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
 import type { VisitedLine } from './visitedRoads';
 
@@ -221,6 +221,22 @@ export async function routeSince(sinceTs: number): Promise<[number, number][]> {
     return [];
   }
   return pointsSince(await loadRoadGraph(), cached.chains, sinceTs);
+}
+
+/**
+ * The trip's lit roads as timed runs, from the last `roadLinesFor` answer: what
+ * the trip viewer splits into days (T-253). Empty until `roadLinesFor` has run
+ * for this trip, so the caller asks for the lines first.
+ *
+ * ⚠ Unmasked: the viewer is on the phone, for its owner. Anything that leaves
+ * the phone goes through `exportRoadSegments`, which masks.
+ */
+export async function timedRunsFor(tripId: number): Promise<TimedRun[]> {
+  if (cached === null || !cached.key.startsWith(`${tripId}:`)) {
+    return [];
+  }
+  const graph = await loadRoadGraph();
+  return cached.chains.flatMap((chain) => chainTimedRuns(graph, chain));
 }
 
 /** Local midnight, on the phone's clock. */

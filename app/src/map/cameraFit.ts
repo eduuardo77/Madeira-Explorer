@@ -166,3 +166,29 @@ export function fitBounds(
     zoom,
   };
 }
+
+/**
+ * Where a point lands on screen, in points from the top left, for a camera
+ * `fitBounds` gave and the viewport it was given (T-253).
+ *
+ * The inverse of the arithmetic above: the camera's centre is the screen's
+ * centre (the padding was already folded into that centre), and the offset is
+ * the Mercator distance at the camera's zoom. The trip viewer pins its stamp
+ * tags with this, over a map whose gestures are off, so the camera it was
+ * given is the camera on screen.
+ */
+export function projectPoint(
+  point: Coordinates,
+  camera: CameraFit,
+  viewport: { width: number; height: number }
+): { x: number; y: number } {
+  const worldPoints = TILE_SIZE * Math.pow(2, camera.zoom);
+  const x =
+    viewport.width / 2 +
+    ((point.longitude - camera.coordinates.longitude) * worldPoints) / 360;
+  const y =
+    viewport.height / 2 +
+    ((mercatorY(camera.coordinates.latitude) - mercatorY(point.latitude)) * worldPoints) /
+      (2 * Math.PI);
+  return { x, y };
+}

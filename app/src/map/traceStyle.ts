@@ -55,6 +55,12 @@ export type TracePaint = {
    * over blocks with no street drawn read as a line in a random place.
    */
   fadedColor: string;
+  /**
+   * The rest of the trip, behind the day the trip viewer is showing (T-253):
+   * the core colour at a fifth opacity. Paler than `fadedColor`, so a day's
+   * tunnel never looks like another day's road.
+   */
+  otherDayColor: string;
 };
 
 export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
@@ -83,6 +89,7 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     coreColor: '#0A5FCC',
     coreWidth: 4,
     fadedColor: '#0A5FCC59',
+    otherDayColor: '#0A5FCC33',
   },
 
   /**
@@ -101,5 +108,6 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     coreColor: '#64B5F6',
     coreWidth: 4,
     fadedColor: '#64B5F659',
+    otherDayColor: '#64B5F633',
   },
 };

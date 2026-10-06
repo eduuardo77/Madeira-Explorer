@@ -1,8 +1,24 @@
+diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
+index e7b12c8..0eef7ff 100644
+--- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
++++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
+@@ -15,6 +15,11 @@ class GoogleMapsModule : Module() {
+         view.setCameraPosition(config)
+       }
+ 
++      // Bruma (T-253): see GoogleMapsView.takeSnapshot.
++      AsyncFunction("takeSnapshot") Coroutine { view: GoogleMapsView ->
++        view.takeSnapshot()
++      }
++
+       AsyncFunction("selectMarker") Coroutine { view: GoogleMapsView, id: String?, options: SelectOptionsRecord? ->
+         view.selectMarker(id, options)
+       }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..2caf28b 100644
+index 82450b6..b9b8d0e 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-@@ -24,6 +24,8 @@ import com.google.android.gms.maps.LocationSource
+@@ -24,8 +24,16 @@ import com.google.android.gms.maps.LocationSource
  import com.google.android.gms.maps.model.BitmapDescriptor
  import com.google.android.gms.maps.model.BitmapDescriptorFactory
  import com.google.android.gms.maps.model.CameraPosition
@@ -10,8 +26,41 @@ index 82450b6..2caf28b 100644
 +import com.google.android.gms.maps.model.RoundCap
  import com.google.android.gms.maps.model.LatLng
  import com.google.maps.android.compose.CameraMoveStartedReason
++import com.google.maps.android.compose.MapEffect
++import com.google.maps.android.compose.MapsComposeExperimentalApi
++import java.io.File
++import java.io.FileOutputStream
++import kotlin.coroutines.resume
++import kotlinx.coroutines.suspendCancellableCoroutine
  import com.google.maps.android.compose.CameraPositionState
-@@ -160,6 +162,12 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+ import com.google.maps.android.compose.GoogleMap
+ import com.google.maps.android.compose.Marker
+@@ -84,6 +92,9 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+   private lateinit var cameraState: CameraPositionState
+   private var manualCameraControl = false
+ 
++  // Bruma (T-253): the native map, held so `takeSnapshot` can photograph it.
++  private var nativeMap: com.google.android.gms.maps.GoogleMap? = null
++
+   private var lastTouchPoint: Point? = null
+ 
+   // Selection state management
+@@ -96,6 +107,7 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+     return super.dispatchTouchEvent(event)
+   }
+ 
++  @OptIn(MapsComposeExperimentalApi::class)
+   @Composable
+   override fun ComposableScope.Content() {
+     cameraState = updateCameraState()
+@@ -154,12 +166,19 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+       mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
+       locationSource = locationSource
+     ) {
++      MapEffect(Unit) { map -> nativeMap = map }
+       polylineState.forEach { (polyline, coordinates) ->
+         Polyline(
+           points = coordinates,
            color = Color(polyline.color),
            geodesic = polyline.geodesic,
            width = polyline.width,
@@ -24,3 +73,74 @@ index 82450b6..2caf28b 100644
            clickable = true,
            onClick = {
              onPolylineClick(
+@@ -361,6 +380,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+     }
+   }
+ 
++  /**
++   * Bruma (T-253): the map as drawn now, roads and circles included, as a PNG in
++   * the app's cache, for the trip viewer's share. Null before the map exists or
++   * when Google returns no bitmap. Nothing leaves the phone here.
++   */
++  suspend fun takeSnapshot(): String? {
++    val map = nativeMap ?: return null
++    return suspendCancellableCoroutine { continuation ->
++      map.snapshot { bitmap ->
++        if (bitmap == null) {
++          continuation.resume(null)
++        } else {
++          val file = File(context.cacheDir, "map-snapshot-${System.currentTimeMillis()}.png")
++          FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
++          continuation.resume("file://${file.absolutePath}")
++        }
++      }
++    }
++  }
++
+   suspend fun setCameraPosition(config: SetCameraPositionConfig?) {
+     // Stop updating the camera position based on user location.
+     manualCameraControl = true
+diff --git a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
+index 100005c..5d0e7cd 100644
+--- a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
++++ b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
+@@ -435,6 +435,8 @@ export type GoogleMapsViewType = {
+      * @param config New camera position config.
+      */
+     setCameraPosition: (config?: SetCameraPositionConfig) => void;
++    /** Bruma (T-253): the map as drawn now, as a PNG file URI in the app cache. */
++    takeSnapshot: () => Promise<string | null>;
+     /**
+      * This is an async operation that animates the camera to the marker. If called
+      * rapidly, a previous animation may be cancelled, causing the returned promise to reject.
+diff --git a/node_modules/expo-maps/src/google/GoogleMaps.types.ts b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
+index cc2b88f..71db629 100644
+--- a/node_modules/expo-maps/src/google/GoogleMaps.types.ts
++++ b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
+@@ -512,6 +512,11 @@ export type GoogleMapsViewType = {
+    */
+   setCameraPosition: (config?: SetCameraPositionConfig) => void;
+ 
++  /**
++   * Bruma (T-253): the map as drawn now, as a PNG file URI in the app cache.
++   */
++  takeSnapshot: () => Promise<string | null>;
++
+   /**
+    * This is an async operation that animates the camera to the marker. If called
+    * rapidly, a previous animation may be cancelled, causing the returned promise to reject.
+diff --git a/node_modules/expo-maps/src/google/GoogleMapsView.tsx b/node_modules/expo-maps/src/google/GoogleMapsView.tsx
+index 80b2526..3d15489 100644
+--- a/node_modules/expo-maps/src/google/GoogleMapsView.tsx
++++ b/node_modules/expo-maps/src/google/GoogleMapsView.tsx
+@@ -52,6 +52,10 @@ export const GoogleMapsView = React.forwardRef<GoogleMapsViewType, GoogleMapsVie
+       setCameraPosition(config?: SetCameraPositionConfig) {
+         nativeRef.current?.setCameraPosition(config);
+       },
++      // Bruma (T-253): the map as a PNG file URI, for the trip viewer's share.
++      async takeSnapshot(): Promise<string | null> {
++        return (await nativeRef.current?.takeSnapshot()) ?? null;
++      },
+       async selectMarker(id?: string, options?: { zoom?: number; moveCamera?: boolean }) {
+         return nativeRef.current?.selectMarker(id, options);
+       },

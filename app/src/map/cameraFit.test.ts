@@ -13,7 +13,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { fitBounds, MAX_ZOOM, MIN_ZOOM } from './cameraFit.ts';
+import { fitBounds, MAX_ZOOM, MIN_ZOOM, projectPoint } from './cameraFit.ts';
 
 /** A phone-ish viewport, in points. */
 const SCREEN = { width: 360, height: 780 };
@@ -124,4 +124,28 @@ test('aligned to the bottom, a wide shallow box rests on the bottom padding (202
   assert.ok(Math.abs(screenY(low, 32.64) - (800 - 330)) < 1, `south edge at ${screenY(low, 32.64)}`);
   assert.ok(screenY(low, 32.66) > screenY(centred, 32.66) + 50, 'visibly lower than centred');
   assert.ok(screenY(low, 32.66) >= 100, 'still below the top padding');
+});
+
+test('T-253: a fitted box projects onto the screen inside its padding, corner to corner', () => {
+  const viewport = { width: 360, height: 780, padding: { top: 110, bottom: 240, left: 32, right: 32 } };
+  const box: [number, number, number, number] = [-16.95, 32.63, -16.85, 32.68];
+  const camera = fitBounds(box, viewport);
+  assert.ok(camera !== null);
+
+  const sw = projectPoint({ latitude: box[1], longitude: box[0] }, camera, viewport);
+  const ne = projectPoint({ latitude: box[3], longitude: box[2] }, camera, viewport);
+
+  // The box fits by width here, so its sides sit on the side padding exactly.
+  assert.ok(Math.abs(sw.x - 32) < 0.5, `west edge at ${sw.x}`);
+  assert.ok(Math.abs(ne.x - (360 - 32)) < 0.5, `east edge at ${ne.x}`);
+  // And it is inside the band between the pills and the card.
+  assert.ok(ne.y >= 110 - 0.5 && sw.y <= 780 - 240 + 0.5, `${ne.y} to ${sw.y}`);
+  // North is up.
+  assert.ok(ne.y < sw.y);
+});
+
+test('T-253: the camera\'s own centre projects to the middle of the screen', () => {
+  const camera = { coordinates: { latitude: 32.65, longitude: -16.9 }, zoom: 13 };
+  const p = projectPoint(camera.coordinates, camera, { width: 360, height: 780 });
+  assert.deepEqual(p, { x: 180, y: 390 });
 });

@@ -30,7 +30,7 @@ import {
 } from './composition.ts';
 import { CATEGORY_COLOUR, STAMP_MARK_POINTS, stampMarkPoints } from './filmPaint.ts';
 import { frameAt, frameTimes, type Film } from './frame.ts';
-import { cameraMoveDue, cameraPlan, replayMapFrame } from './replayMap.ts';
+import { cameraMoveDue, cameraPlan, openingCamera, replayMapFrame } from './replayMap.ts';
 
 const T0 = 1_800_000_000_000;
 
@@ -318,4 +318,57 @@ test('GPS strokes, with no tunnel flag, are drawn at full strength', () => {
   const f = film(composeSouvenir(input()));
   const frame = frameAt(f, f.durationMs);
   assert.ok(frame.faded.every((faded) => faded === false));
+});
+
+/**
+ * T-253: where the replay opens, and how it ends (third review, D2).
+ */
+test('the map is born on the trip, never at the native default of 0°, 0°', () => {
+  const f = film(composeSouvenir(input()));
+  const plan = cameraPlan(f, VIEWPORT);
+  const opening = openingCamera(plan);
+
+  assert.notEqual(opening, null);
+  // The establish shot, exactly: the map must not have to travel to start.
+  assert.deepEqual(opening, plan[0].camera);
+  assert.ok(Math.abs((opening?.coordinates.latitude ?? 0) - 32.68) < 0.2);
+  assert.ok(Math.abs((opening?.coordinates.longitude ?? 0) + 16.87) < 0.2);
+});
+
+test('an empty plan has no opening camera', () => {
+  assert.equal(openingCamera([]), null);
+});
+
+test('the finale rests the whole trip on the closing card, not mid-screen over sea', () => {
+  // Wide and shallow, as a day along the south coast is: on a portrait phone
+  // it fits by width and leaves most of the height spare.
+  const coast: TraceFix[] = Array.from({ length: 160 }, (_, i) => ({
+    ts: T0 + i * 60_000,
+    lat: 32.65 + (i % 2) * 0.002,
+    lon: -17.2 + i * 0.003,
+    accuracy_m: 10,
+  }));
+  const viewport = { ...VIEWPORT, padding: { top: 64, bottom: 160, left: 24, right: 24 } };
+  const f = film(composeSouvenir(input({ trace: { fixes: coast, safeToShare: true, reason: 'ok' } })));
+  const finale = f.scenes.find((scene) => scene.kind === 'finale');
+  assert.ok(finale !== undefined && finale.kind === 'finale');
+  const move = cameraPlan(f, viewport).find((m) => m.atMs === finale.startMs);
+  assert.ok(move !== undefined);
+
+  // Project the trip's edges onto the screen at the finale's camera.
+  const mercator = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+  const world = 256 * Math.pow(2, move.camera.zoom);
+  const screenY = (lat: number) =>
+    viewport.height / 2 + ((mercator(move.camera.coordinates.latitude) - mercator(lat)) * world) / (2 * Math.PI);
+  const screenX = (lon: number) =>
+    viewport.width / 2 + ((lon - move.camera.coordinates.longitude) * world) / 360;
+
+  const foot = screenY(finale.bounds.south);
+  assert.ok(
+    Math.abs(foot - (viewport.height - viewport.padding.bottom)) < 1,
+    `the trip ends ${Math.round(viewport.height - viewport.padding.bottom - foot)} pt above the card`
+  );
+  // And it uses the width it was fitted by: the trip is as large as it can be.
+  const span = screenX(finale.bounds.east) - screenX(finale.bounds.west);
+  assert.ok(Math.abs(span - (viewport.width - 48)) < 1, `the trip spans ${Math.round(span)} pt`);
 });

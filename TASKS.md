@@ -63,6 +63,22 @@ what users notice (T-253 replay start, T-254 jank, T-255 one voice, T-256 place 
 T-201, T-263); 4 compliance and store (T-264 to T-269, T-123, T-160a); 5 verification (T-270,
 T-239, T-207, T-271); 6 launch (T-137). Lead decisions to ask first: L1 voice, L2 battery
 permission, L3 privacy contact.
+**Decisions (2026-10-06):** L1 **tu** (D-098). L2 **keep the one-tap battery dialog**, as WalkNYC does
+(D-045 amended; T-266 still quotes Google's text). L3 open: the lead asked for guidance.
+
+- [~] **T-253** The replay starts on the trip and ends framed on it (review D2). **Done:** the map is
+      born on the establish shot (`openingCamera`, the native default was 0°, 0° at zoom 10, which is
+      Côte d'Ivoire); a cover hides it until `onMapLoaded` (3 s fallback when offline) and only then
+      does the film start; the finale is fitted with `align: 'bottom'` so the trip rests on the
+      caption (was 301 pt of sea between them in the test fixture). Seen on the P30 2026-10-06 21:53:
+      Madeira in every capture, end card on the trip. **Open:** the lead asked (same day) for the
+      replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
+      bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
+      The establish shot also still sits high over sea.
+- [~] **T-255** One Portuguese voice, *tu* (D-098). 79 strings, 35 policy sentences, "selo" made
+      "carimbo"; a test fails on the *você* markers (67 hits on the old text). **Waits on the lead
+      reading** `tools/out/voice-review.html` before the commit (OQ-8). Built into the P30's field
+      build 2026-10-06 21:51.
 
 ## Release readiness — the plan from the 2026-09-22 review (order superseded 2026-10-06)
 

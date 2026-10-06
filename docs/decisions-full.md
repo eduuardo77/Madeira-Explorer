@@ -2057,6 +2057,13 @@ now carries `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which Play reviews against i
 uses: **the risk this entry avoided is now taken**, and if Play objects, deleting the module
 returns the app to the settings list with no other change. Settings still opens the list.
 
+⚠ **Kept 2026-10-06 (execution plan, decision L2).** The project lead asked for what WalkNYC does.
+WalkNYC 1.1.6, installed from Play on the P30, declares `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` and
+holds it granted (`dumpsys package com.walknyc.app`, 2026-10-06), so a published walk tracker
+carries it through Play review today. Bruma keeps the one-tap dialog. **T-266 still has to quote
+Google's current policy text and write the Play declaration**; if that text excludes this use, the
+module is deleted and the settings list returns, as above.
+
 **Context:** CONTEXT §7 and HANDOFF both state it plainly — **Android OEMs kill background work
 regardless of the official APIs.** Xiaomi, Huawei, Samsung, Oppo and OnePlus ship battery
 managers that stop a foreground service anyway. The battery-optimisation exemption is the one
@@ -5450,3 +5457,20 @@ offers the unlock there.
 map (rejected for covering the product itself); a purchase notification after N stamps (rejected:
 uninstall risk, and D-011's budget).
 
+
+## D-098 — The Portuguese speaks to the user as *tu*
+
+**Status: Accepted 2026-10-06** by the project lead (execution plan, decision L1). Built in T-255.
+
+**The decision.** Every Portuguese string the app shows (`strings.ts`, the notifications, the
+privacy policy, the store listing) addresses the user as *tu*. German stays *Sie*; English is
+unaffected.
+
+**Why.** The third review (F1) found the app in two voices: first run and the paywall in *tu*,
+the passport, Settings and the notices in *você* (*Ver a sua viagem*). *Tu* is the voice of the
+newest and best screens, the one the lead wrote the paywall in, and the warmer one for a holiday
+app. Two voices read as two authors.
+
+**Alternatives considered:** *você* throughout (rejected: colder, and it would mean rewriting the
+screens the lead approved most recently); leaving the split (rejected: a craft and localisation
+defect the review scored).

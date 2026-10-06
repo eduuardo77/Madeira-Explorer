@@ -15,6 +15,14 @@ at hand-off: all work committed and pushed (`0842c22` and after), 1045 tests, th
 build (version code 3) with the lead's real data, the version 3 AAB built for internal testing
 (`Madeira-fieldwork/apks/bruma-0.1.0-vc3.aab`, not yet uploaded by the lead).
 
+## ⚠⚠⚠ 2026-10-06 evening: Phase 1 started
+
+L1 *tu* (D-098), L2 keep the battery dialog (D-045 amended), L3 waiting on the lead. **T-253**
+replay fix committed and on the P30; the lead then asked for a replay modelled on WalkNYC's (see
+T-253 in TASKS). **T-255** (*tu*) is built and on the P30 but **uncommitted** until the lead reads
+`tools/out/voice-review.html`. The P30 runs a field build of the working tree (version code 3,
+installed 21:51), data kept.
+
 ## ⚠⚠ 2026-10-05: where the last session ended — read this first
 
 **Monetisation (`docs/monetization-execution-plan.md`).** Phase 0 done (app in Play Console, upload

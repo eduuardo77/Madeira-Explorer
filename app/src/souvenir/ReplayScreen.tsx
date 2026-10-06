@@ -73,10 +73,29 @@ import {
   restart,
   type Playback,
 } from './playback';
-import { cameraMoveDue, cameraPlan, replayMapFrame } from './replayMap';
+import { cameraMoveDue, cameraPlan, openingCamera, replayMapFrame } from './replayMap';
 import { formatDateRange } from './shareCard';
 import { getSouvenirComposition } from './souvenirPlan';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
+
+/**
+ * Where the closing card sits, and how much of the map it covers.
+ *
+ * The card's foot is `HERO_BOTTOM` above the screen's; the number (48 sp) and
+ * the caption (17 sp) stack about 80 points above that. The map frames the trip
+ * into what is left, and the finale rests the trip on the card (T-253).
+ */
+const HERO_BOTTOM = spacing.xl * 2;
+const HERO_CLEARANCE = spacing.xl * 5;
+
+/**
+ * How long the film waits for the map to report its tiles drawn (T-253).
+ *
+ * ⚠ A safety net, not a tuning. Google calls `onMapLoaded` once every tile in
+ * view has been fetched, which with no signal may be never; the film must
+ * still play then, over whatever the map has cached.
+ */
+const MAP_READY_FALLBACK_MS = 3_000;
 
 export default function ReplayScreen({ onClose }: { onClose: () => void }) {
   const [composition, setComposition] = useState<Composition | null>(null);
@@ -115,12 +134,6 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         if (trip !== null) {
           setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now(), deviceLanguage()));
         }
-
-        // Autoplay. The user pressed *Watch*; making them press play as well is
-        // a step that exists only because it was easier to build.
-        if (plan.renderable) {
-          setClock(restart(Date.now()));
-        }
       } catch (error) {
         await recordingEventDao.logError('replay', error);
         if (!cancelled) {
@@ -136,6 +149,33 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
 
   const durationMs =
     composition !== null && composition.renderable ? composition.durationMs : 0;
+
+  /**
+   * Whether the map has drawn its first picture (T-253).
+   *
+   * Until then a cover hides it, and the film's clock has not started: the
+   * opening seconds of the film are the establish shot, and spending them on a
+   * blank map is how the third review saw nothing at all.
+   */
+  const [mapReady, setMapReady] = useState(false);
+
+  const renderable = composition !== null && composition.renderable;
+
+  useEffect(() => {
+    if (!renderable || mapReady) {
+      return;
+    }
+    const fallback = setTimeout(() => setMapReady(true), MAP_READY_FALLBACK_MS);
+    return () => clearTimeout(fallback);
+  }, [renderable, mapReady]);
+
+  // Autoplay, once the map is showing. The user pressed *Watch*; making them
+  // press play as well is a step that exists only because it was easier to build.
+  useEffect(() => {
+    if (renderable && mapReady) {
+      setClock(restart(Date.now()));
+    }
+  }, [renderable, mapReady]);
 
   const playing = isPlaying(clock);
 
@@ -178,7 +218,7 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
       // padding for its controls.
       padding: {
         top: spacing.xl * 2,
-        bottom: spacing.xl * 4,
+        bottom: HERO_CLEARANCE,
         left: spacing.lg,
         right: spacing.lg,
       },
@@ -207,6 +247,17 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         : [],
     [composition, viewport]
   );
+
+  /**
+   * The map's first camera, given as a prop so the map is born on the trip.
+   *
+   * ⚠ Memoised, and that is load-bearing: the native view rebuilds its camera
+   * only when this value changes, so a stable value is set once and then leaves
+   * `setCameraPosition` in charge. A fresh object each render would not move
+   * the camera (the record compares by value) but would cost a prop update per
+   * frame.
+   */
+  const initialCamera = useMemo(() => openingCamera(plan) ?? undefined, [plan]);
 
   /**
    * Which instruction the map has already been given.
@@ -294,9 +345,10 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
       <GoogleMaps.View
         ref={mapRef}
         style={StyleSheet.absoluteFill}
-        // ⚠ No `cameraPosition` prop. The camera is driven imperatively through
-        // `setCameraPosition` so the map can animate itself; a prop would fight
-        // that by snapping the camera back on every render.
+        // The opening shot only. Every move after it goes through
+        // `setCameraPosition`, so the map can animate itself.
+        cameraPosition={initialCamera}
+        onMapLoaded={() => setMapReady(true)}
         polylines={painted.polylines}
         circles={painted.circles}
         colorScheme={
@@ -329,6 +381,14 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
           tiltGesturesEnabled: false,
         }}
       />
+
+      {/* Hides the map until its first picture is drawn: plain background, never
+          a half-loaded map or an empty grid. */}
+      {mapReady ? null : (
+        <View style={[StyleSheet.absoluteFill, styles.root, styles.centre]} pointerEvents="none">
+          <ActivityIndicator size="large" color={colors.action} />
+        </View>
+      )}
 
       {/* The closing card, over the map rather than instead of it — the last
           frame is the one people screenshot, and it should still show where
@@ -388,7 +448,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: spacing.xl * 2,
+    bottom: HERO_BOTTOM,
     alignItems: 'center',
   },
   heroNumber: {

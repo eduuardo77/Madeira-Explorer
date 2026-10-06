@@ -171,13 +171,22 @@ export function cameraPlan(film: Film, viewport: Viewport): CameraMove[] {
   const fit = (bounds: Bounds): CameraFit | null =>
     fitBounds([bounds.west, bounds.south, bounds.east, bounds.north], viewport);
 
+  // T-253: the finale's caption sits at the foot of the screen, so the whole
+  // trip rests on it rather than floating mid-screen with sea between them.
+  // Only the finale: during the draw nothing is at the foot to rest on.
+  const fitFinale = (bounds: Bounds): CameraFit | null =>
+    fitBounds([bounds.west, bounds.south, bounds.east, bounds.north], {
+      ...viewport,
+      align: 'bottom',
+    });
+
   for (const scene of film.scenes) {
     if (scene.kind !== 'draw') {
       // The establish and finale shots hold one box. Arriving at the finale is
       // worth animating — it is the pull-back to the whole trip — but the
       // opening shot must be *there* when the film starts, not gliding into
       // place from wherever the map happened to be.
-      const camera = fit(scene.bounds);
+      const camera = scene.kind === 'finale' ? fitFinale(scene.bounds) : fit(scene.bounds);
       if (camera !== null) {
         moves.push({
           atMs: scene.startMs,
@@ -218,6 +227,21 @@ export function cameraPlan(film: Film, viewport: Viewport): CameraMove[] {
   return ordered.filter(
     (move, index) => ordered[index + 1]?.atMs !== move.atMs
   );
+}
+
+/**
+ * Where the map must already be looking when it first appears (T-253).
+ *
+ * ⚠ The replay once mounted its map with no camera at all, and the native map's
+ * default is 0°, 0° at zoom 10: the coast of Côte d'Ivoire, which is what the
+ * third review saw for several seconds before the first instruction landed.
+ * The screen hands this to the map as its *initial* camera, so the first tile
+ * the map asks for is already Madeira.
+ *
+ * Null for an empty plan; the screen then has no film to show anyway.
+ */
+export function openingCamera(moves: readonly CameraMove[]): CameraFit | null {
+  return moves[0]?.camera ?? null;
 }
 
 /**

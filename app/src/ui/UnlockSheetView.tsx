@@ -158,16 +158,6 @@ export default function UnlockSheetView({
           </Pressable>
         </Animated.View>
       )}
-      {model.restore === null ? null : (
-        <Pressable
-          accessibilityRole="button"
-          disabled={working}
-          onPress={onRestore}
-          style={({ pressed }) => [styles.plain, pressed && styles.pressed]}
-        >
-          <Text style={styles.link}>{model.restore}</Text>
-        </Pressable>
-      )}
       <Pressable
         accessibilityRole="button"
         onPress={onClose}
@@ -175,6 +165,19 @@ export default function UnlockSheetView({
       >
         <Text style={styles.dismiss}>{model.close}</Text>
       </Pressable>
+      {/* Last and quiet (the project lead, 2026-10-06): restoring is for the
+          few who bought on another phone, so it sits under "Not now" in small
+          grey type, as store apps keep it. The tap target stays full size. */}
+      {model.restore === null ? null : (
+        <Pressable
+          accessibilityRole="button"
+          disabled={working}
+          onPress={onRestore}
+          style={({ pressed }) => [styles.plain, pressed && styles.pressed]}
+        >
+          <Text style={styles.restore}>{model.restore}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -289,13 +292,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  link: {
-    color: reward.link,
-    fontSize: fontSize.body,
+  restore: {
+    color: reward.textMuted,
+    fontSize: fontSize.small,
   },
   dismiss: {
     color: reward.textMuted,
-    fontSize: fontSize.body,
+    fontSize: fontSize.label,
   },
   disabled: {
     opacity: 0.6,

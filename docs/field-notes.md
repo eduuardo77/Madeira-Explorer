@@ -436,4 +436,5 @@ Phone DB: `Madeira-fieldwork/p30-2026-10-06-t235b/` (taken after the ride).
 - No `deviceidle` whitelist entry for the app. The reinstall of 2026-10-05 (signing key change) may
   have reset EMUI's *Iniciar aplicações* manual setting (HANDOFF traps). ✅ **Checked the same
   evening, read off the phone's screen over adb: Bruma was on *Gestão automática*.** So the whole ride
-  ran with Huawei managing the app. Power saving mode was off.
+  ran with Huawei managing the app. Power saving mode was off. The lead then set it to manual, and
+  the list read *Gestão manual* (the three switches inside are not visible from the list).

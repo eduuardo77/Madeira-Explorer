@@ -469,6 +469,8 @@ same day: the gold postmark.
 
 #### T-234 Medals: content and logic ⇠ OQ-3
 
+✅ **Done 2026-10-06** (TASKS T-234).
+
 - **Content:** `content/medals.json` (§4.2); `validate-content.mjs` extended with its checks
   and a failing fixture for each check.
 - **New:** `progress/medals.ts`, pure. Input: medal definitions, the places, the awards (all of
@@ -482,6 +484,8 @@ same day: the gold postmark.
   file.
 
 #### T-235 Medals: art and UI ⇠ T-234, OQ-2, OQ-9
+
+✅ **Done 2026-10-06** (TASKS T-235): municipality outlines on the gold postmark; preview `tools/preview-medals.mjs`.
 
 - **New:** `passport/medalArt.ts` (pure design) and `ui/MedalArt.tsx` (draws it). Extend
   `tools/preview-stamps.mjs` to draw every medal, so the project lead approves the design by eye

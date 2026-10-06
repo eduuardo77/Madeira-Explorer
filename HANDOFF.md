@@ -46,6 +46,10 @@ section, the gold postmark chosen by the lead from three designs, `tools/out/fou
 the P30 with a probe, real data restored). ⚠ `node tools/smoke-release.mjs` now needs **`--internal`** for every testing build:
 it fails while `founderWindow.start` is null, which is deliberate.
 
+**2026-10-06: Phase 4 done, the set medals (T-234, T-235)**: `content/medals.json`, a Medalhas shelf in
+the passport (each municipality's own outline, silver to gold, frosted when complete on a free
+passport), seen on the P30 with a probe. Next in the plan: Phase 5, tilt and shine.
+
 **Traps found this session, each cost time:**
 - **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at
   every attempt (Google sells only to the copy it signs). And **License testing is not the

@@ -565,6 +565,30 @@ section's definition of done.
       purchase and a reinstall waits on V2/V10. ⚠ **Found, not touched:** `build-levadas.mjs` now
       fetches a slightly different course for Levada do Barreiro than the committed one (OSM moved);
       the file was put back, the change is the lead's to accept.
+- [x] **T-234** **Set medals: content and logic** (plan Phase 4) ⇠ OQ-3. **Done 2026-10-06.**
+      `content/medals.json` (nine municipalities with 3+ places, all 18 levadas), `content/medalPack.ts`
+      (parse, never throws; `medalContentProblems` for the validator), `progress/medals.ts` (members,
+      collected, `completedTs`, state progress/complete/locked; removed places count for nothing, a
+      locked region D-024 leaves a set only when the whole set is in it). A test pins that completing a
+      medal does not move the passport count (OQ-2). The plan put the loader in `contentPack.ts`; it is
+      `medalPack.ts` + `medalCatalogue.ts`, as the regions are. **Found:** the trophy card (T-251) had
+      its own "3 or more places" rule; it now reads the same definitions.
+- [x] **T-235** **Set medals: art and UI** ⇠ T-234, OQ-2, OQ-9. **Done 2026-10-06, seen on the P30.**
+      Art in `passport/medalArt.ts`, the gold postmark's family: each municipality carries **its own
+      outline from `regions.json`** (the region parser now keeps the largest polygon's ring), the
+      levadas medal the stamps' levada emblem; silver with a gold arc while under way, gold when
+      complete, frosted under the padlock when complete on a free passport (a tap opens the unlock
+      sheet, which now lists the medals). `tools/preview-medals.mjs` → `tools/out/medals.html`. The
+      passport's **Medalhas** shelf, three to a row, finished sets first, under the founder card. **Seen
+      on the P30** with the real data (Funchal 1 de 14, Câmara de Lobos 1 de 4) and a probe completing
+      Câmara de Lobos, locked then unlocked (*Completa a 4 de outubro de 2026*); real data restored by
+      checksum (`Madeira-fieldwork/p30-2026-10-06-t235/`), smoke test passing. 1031 tests.
+      **Found by looking:** *CÂMARA DE LOBOS* ran off the band on the phone though the preview fitted
+      (Android draws the bold wider and ignores `textLength` there): long names are now set smaller
+      before any squeeze. ⚠ **Left:** a stamp that completes a set gets the plain *Novo carimbo!*
+      pop-up, nothing about the medal (a follow-up for D-097's celebration). ⚠ **Found, not touched:**
+      the trophy's *"Medalha de {region}"* is wrong Portuguese for Funchal, Calheta and Ribeira Brava
+      (*do* Funchal, *da* Calheta); the copy is the lead's.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

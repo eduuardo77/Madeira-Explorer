@@ -41,6 +41,12 @@ export type Region = {
    * "not lockable", never "locked".
    */
   islandId: string | null;
+  /**
+   * The municipality's shape, `[lon, lat]` around its largest polygon, for its
+   * medal (T-235): the main body, not an islet. Null when the file has no
+   * usable geometry, which costs the medal its picture and nothing else.
+   */
+  outline: Array<[number, number]> | null;
 };
 
 export type RegionProblem = {
@@ -87,6 +93,7 @@ export function parseRegionPack(raw: unknown): ParsedRegionPack {
     }
 
     const { id, name, islandId } = properties as Record<string, unknown>;
+    const geometry = (feature as { geometry?: unknown } | null)?.geometry;
 
     if (typeof id !== 'string' || id.length === 0) {
       problems.push({ where, problem: 'missing or empty `id`' });
@@ -109,10 +116,45 @@ export function parseRegionPack(raw: unknown): ParsedRegionPack {
       id,
       name,
       islandId: typeof islandId === 'string' && islandId.length > 0 ? islandId : null,
+      outline: largestRing(geometry),
     });
   });
 
   return { regions, problems };
+}
+
+/** The outer ring of a Polygon, or of a MultiPolygon's largest part, or null. */
+function largestRing(geometry: unknown): Array<[number, number]> | null {
+  const { type, coordinates } = (geometry ?? {}) as { type?: unknown; coordinates?: unknown };
+  const polygons =
+    type === 'Polygon' ? [coordinates] : type === 'MultiPolygon' && Array.isArray(coordinates) ? coordinates : [];
+  let best: Array<[number, number]> | null = null;
+  let bestArea = 0;
+  for (const polygon of polygons) {
+    const ring = Array.isArray(polygon) ? polygon[0] : null;
+    if (!Array.isArray(ring) || ring.length < 4) continue;
+    const points = ring.filter(
+      (point): point is [number, number] =>
+        Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])
+    );
+    const area = Math.abs(shoelace(points));
+    if (area > bestArea) {
+      best = points.map(([lon, lat]) => [lon, lat]);
+      bestArea = area;
+    }
+  }
+  return best;
+}
+
+/** Twice a ring's signed area, in degrees squared: enough to compare sizes. */
+function shoelace(points: ReadonlyArray<[number, number]>): number {
+  let sum = 0;
+  for (let i = 0; i < points.length; i += 1) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[(i + 1) % points.length];
+    sum += x0 * y1 - x1 * y0;
+  }
+  return sum;
 }
 
 /** The regions, by id, for the lookups the app actually does. */

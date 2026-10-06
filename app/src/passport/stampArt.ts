@@ -235,6 +235,11 @@ const ICONS: Record<Category, Emblem> = {
   },
 };
 
+/** A category's own emblem, for the set medals (T-235), which carry no motif. */
+export function categoryEmblem(category: Category): Emblem {
+  return ICONS[category];
+}
+
 /* --------------------------------------------------------------- colourways */
 
 /**

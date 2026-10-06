@@ -64,8 +64,9 @@ import { stripStampSize, type StripGeometry } from '../passport/stripLayout';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
-import type { FounderWords } from '../passport/medalArt';
+import type { FounderWords, SetMedalWords } from '../passport/medalArt';
 import MedalArt from './MedalArt';
+import Padlock from './Padlock';
 import StampArt from './StampArt';
 import UnlockNudge from './UnlockNudge';
 import { postmarkFor } from './postmark';
@@ -259,16 +260,32 @@ export type PassportViewProps = {
   /**
    * The founder stamp, for a buyer inside the window (T-233), or absent. Its
    * own Medals section, under the places: it is not a place and is never in
-   * the count or the rank (OQ-2). The set medals join it in T-235.
+   * the count or the rank (OQ-2).
    */
   founder?: FounderCard;
+  /** The set medals (T-235), in the order to show them; absent or empty shows none. */
+  medals?: MedalTile[];
 };
 
 /** The founder stamp's card: what its face says, and the purchase day, written out. */
 export type FounderCard = { words: FounderWords; boughtOn: string };
 
+/** One set medal on the shelf, with its words already worked out by the screen. */
+export type MedalTile = {
+  id: string;
+  words: SetMedalWords;
+  /** The set's name: the municipality, or the category's plural. */
+  name: string;
+  /** "6 de 14", or the day it was completed, or that it waits for the unlock. */
+  detail: string;
+  /** Complete on a passport not yet unlocked (D-089): frosted, and a tap opens the sheet. */
+  locked: boolean;
+};
+
 /** The founder stamp's size in its card, near a passport stamp's. */
 const MEDAL_SIZE = 84;
+/** A medal on the shelf: three to a row on a 360 dp phone. */
+const SHELF_MEDAL_SIZE = 76;
 
 /**
  * The mark on an earned stamp the user has not paid to see (T-155, D-072).
@@ -306,12 +323,18 @@ function LockBadge() {
 }
 
 /**
- * The Medals section, holding the founder stamp for now (T-233). Under the
- * places, and outside their count and rank (OQ-2).
+ * The Medals section (T-233, T-235): the founder stamp's card, then a shelf of
+ * the set medals. Under the places, and outside their count and rank (OQ-2).
  */
-function FounderSection({ founder }: { founder: FounderCard }) {
-  const name = t('medal.founder.name');
-  const detail = t('medal.founder.detail', { date: founder.boughtOn });
+function MedalsSection({
+  founder,
+  medals,
+  onUnlock,
+}: {
+  founder: FounderCard | undefined;
+  medals: MedalTile[];
+  onUnlock: (() => void) | undefined;
+}) {
   return (
     <View style={styles.section}>
       <View style={styles.rowHeader}>
@@ -319,13 +342,75 @@ function FounderSection({ founder }: { founder: FounderCard }) {
           {t('passport.medals')}
         </Text>
       </View>
-      <View style={styles.medalCard} accessible accessibilityLabel={`${name}. ${detail}`}>
-        <MedalArt words={founder.words} size={MEDAL_SIZE} />
-        <View style={styles.medalWords}>
-          <Text style={styles.medalName}>{name}</Text>
-          <Text style={styles.medalDetail}>{detail}</Text>
+      {founder === undefined ? null : <FounderCardView founder={founder} />}
+      {medals.length === 0 ? null : (
+        <View style={styles.shelf}>
+          {medals.map((medal) => (
+            <MedalShelfTile key={medal.id} medal={medal} onUnlock={onUnlock} />
+          ))}
         </View>
+      )}
+    </View>
+  );
+}
+
+function FounderCardView({ founder }: { founder: FounderCard }) {
+  const name = t('medal.founder.name');
+  const detail = t('medal.founder.detail', { date: founder.boughtOn });
+  return (
+    <View style={styles.medalCard} accessible accessibilityLabel={`${name}. ${detail}`}>
+      <MedalArt id="founder" drawing={{ kind: 'founder', words: founder.words }} size={MEDAL_SIZE} />
+      <View style={styles.medalWords}>
+        <Text style={styles.medalName}>{name}</Text>
+        <Text style={styles.medalDetail}>{detail}</Text>
       </View>
+    </View>
+  );
+}
+
+/**
+ * One set medal: the drawing, its name, and how far it has got. A locked one
+ * is frosted under the padlock, as a locked stamp is, and a tap offers the
+ * unlock (D-097); every other tile is read, not pressed.
+ */
+function MedalShelfTile({ medal, onUnlock }: { medal: MedalTile; onUnlock: (() => void) | undefined }) {
+  const label = `${medal.name}. ${medal.detail}`;
+  const body = (
+    <>
+      <View>
+        <MedalArt
+          id={medal.id}
+          drawing={{ kind: 'set', words: medal.words }}
+          size={SHELF_MEDAL_SIZE}
+          blur={medal.locked ? 3.4 : undefined}
+        />
+        {medal.locked ? (
+          <View style={styles.medalLock}>
+            <Padlock size={30} />
+          </View>
+        ) : null}
+      </View>
+      <Text style={styles.shelfName} numberOfLines={2}>
+        {medal.name}
+      </Text>
+      <Text style={styles.shelfDetail}>{medal.detail}</Text>
+    </>
+  );
+  if (medal.locked && onUnlock !== undefined) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        onPress={onUnlock}
+        style={({ pressed }) => [styles.shelfTile, pressed && styles.seeAllPressed]}
+      >
+        {body}
+      </Pressable>
+    );
+  }
+  return (
+    <View style={styles.shelfTile} accessible accessibilityLabel={label}>
+      {body}
     </View>
   );
 }
@@ -506,6 +591,7 @@ export default function PassportView({
   waiting,
   onUnlock,
   founder,
+  medals,
 }: PassportViewProps) {
   const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
@@ -608,7 +694,9 @@ export default function PassportView({
         />
       ))}
 
-      {founder === undefined ? null : <FounderSection founder={founder} />}
+      {founder === undefined && (medals === undefined || medals.length === 0) ? null : (
+        <MedalsSection founder={founder} medals={medals ?? []} onUnlock={onUnlock} />
+      )}
 
       {awards.length > 0 ? (
         <Text style={styles.footnote}>
@@ -699,6 +787,26 @@ const styles = StyleSheet.create({
     padding: spacing.sm + 4,
   },
   medalWords: { flex: 1, gap: 2 },
+  shelf: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    backgroundColor: album.surface,
+    borderRadius: radius.card,
+    padding: spacing.sm,
+  },
+  shelfTile: {
+    // Three to a row; the gaps take the rest.
+    flexBasis: '30%',
+    flexGrow: 1,
+    minHeight: MIN_TAP_TARGET,
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    gap: 2,
+  },
+  medalLock: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+  shelfName: { color: album.text, fontSize: fontSize.small, fontWeight: '700', textAlign: 'center' },
+  shelfDetail: { color: album.textMuted, fontSize: fontSize.small, textAlign: 'center' },
   medalName: { color: album.text, fontSize: fontSize.body, fontWeight: '700' },
   medalDetail: { color: album.textMuted, fontSize: fontSize.small },
   rowHeader: {

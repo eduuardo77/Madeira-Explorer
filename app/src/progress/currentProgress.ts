@@ -26,7 +26,7 @@ import { computeTripProgress } from './tripProgress';
  * **T-067a fills this in**, from an island-level geofence and the permanent
  * unlock flag already reserved in `app_state`.
  */
-async function getLockedRegionIds(): Promise<Set<string>> {
+export async function getLockedRegionIds(): Promise<Set<string>> {
   return new Set();
 }
 

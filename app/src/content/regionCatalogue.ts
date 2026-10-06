@@ -59,6 +59,11 @@ export function getRegionName(regionId: string): string | null {
   return load().get(regionId)?.name ?? null;
 }
 
+/** A region with its outline, for its medal (T-235), or null when we shipped no such region. */
+export function getRegion(regionId: string): Region | null {
+  return load().get(regionId) ?? null;
+}
+
 /** How many regions shipped. For the debug screen and the validator. */
 export function getRegionCount(): number {
   return load().size;

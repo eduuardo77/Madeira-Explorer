@@ -757,6 +757,15 @@ export const STRINGS = {
   /** The word on the stamp's face, drawn in capitals by `medalArt.ts`. */
   'medal.founder.title': s('Founder', 'Fundador', 'Gründer'),
   'medal.founder.name': s('Founder stamp', 'Carimbo de fundador', 'Gründerstempel'),
+  // ── The set medals (T-235) ──────────────────────────────────────────────
+  // ⚠ No adjective agrees with a placeholder (T-191): "Completa" is the medal's.
+  'medal.set.progress': s('{collected} of {total}', '{collected} de {total}', '{collected} von {total}'),
+  'medal.set.complete': s('Completed {date}', 'Completa a {date}', 'Vollständig am {date}'),
+  'medal.set.locked': s(
+    'Complete. Unlock to see it',
+    'Completa. Desbloqueia para a veres',
+    'Vollständig. Freischalten, um sie zu sehen'
+  ),
   'medal.founder.detail': s(
     'Bought on {date}, while {app} was new',
     'Comprado a {date}, quando o {app} era novo',

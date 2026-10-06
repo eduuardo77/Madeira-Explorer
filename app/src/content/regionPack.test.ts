@@ -26,8 +26,8 @@ function feature(properties: Record<string, unknown> = {}): unknown {
       islandId: 'ilha-da-madeira',
       ...properties,
     },
-    // Geometry is deliberately not parsed, so it is deliberately nonsense here:
-    // if a future change starts reading it, this test says so immediately.
+    // Nonsense on purpose: since T-235 the outline is read, and a geometry the
+    // parser cannot use must cost the medal its picture, never the region.
     geometry: { type: 'Polygon', coordinates: 'not coordinates' },
   };
 }
@@ -40,8 +40,24 @@ test('a region becomes an id, a name and an island', () => {
   const { regions, problems } = parseRegionPack(collection([feature()]));
   assert.deepEqual(problems, []);
   assert.deepEqual(regions, [
-    { id: 'machico', name: 'Machico', islandId: 'ilha-da-madeira' },
+    { id: 'machico', name: 'Machico', islandId: 'ilha-da-madeira', outline: null },
   ]);
+});
+
+/** A square ring of a given size, closed, at a given corner. */
+function square(x: number, y: number, size: number): number[][] {
+  return [[x, y], [x + size, y], [x + size, y + size], [x, y + size], [x, y]];
+}
+
+test('T-235: the outer ring of a polygon is kept as the medal outline', () => {
+  const raw = collection([{ ...(feature() as object), geometry: { type: 'Polygon', coordinates: [square(0, 0, 1), square(0.2, 0.2, 0.1)] } }]);
+  assert.deepEqual(parseRegionPack(raw).regions[0].outline, square(0, 0, 1));
+});
+
+test('T-235: a municipality in several parts keeps its largest, not an islet', () => {
+  const geometry = { type: 'MultiPolygon', coordinates: [[square(5, 5, 0.1)], [square(0, 0, 2)], [square(9, 9, 0.5)]] };
+  const raw = collection([{ ...(feature() as object), geometry }]);
+  assert.deepEqual(parseRegionPack(raw).regions[0].outline, square(0, 0, 2));
 });
 
 test('a missing, empty or malformed file is survivable, never thrown', () => {

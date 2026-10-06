@@ -19,6 +19,7 @@ import {
   restorePurchases,
   subscribe,
 } from '../entitlement/billingSync';
+import { getMedals } from '../content/medalCatalogue';
 import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
 import { founderWindowOpen } from '../entitlement/founder';
@@ -110,10 +111,13 @@ export default function UnlockSheet({
     state,
     price,
     waiting: waiting.length,
-    // Each turns on in the commit that builds it (T-235 for medals). The
-    // founder stamp is offered only while buying now would still earn it:
-    // never while its start is unset, so no testing build promises it (T-233).
-    offers: { medals: false, founder: founderWindowOpen(Date.now(), getContentPack().founderWindow) },
+    // Medals whenever content defines any (T-235). The founder stamp only
+    // while buying now would still earn it: never while its start is unset,
+    // so no testing build promises it (T-233).
+    offers: {
+      medals: getMedals().length > 0,
+      founder: founderWindowOpen(Date.now(), getContentPack().founderWindow),
+    },
     language: deviceLanguage(),
   });
 

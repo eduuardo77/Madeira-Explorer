@@ -41,7 +41,10 @@ import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
 import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
-import PassportView, { type FounderCard, type PassportStamp } from './PassportView';
+import PassportView, { type FounderCard, type MedalTile, type PassportStamp } from './PassportView';
+import { medalProgress, type MedalProgress } from '../progress/medals';
+import { getLockedRegionIds } from '../progress/currentProgress';
+import { getRegion } from '../content/regionCatalogue';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
 import TrophyCard from './TrophyCard';
@@ -73,6 +76,51 @@ function founderCard(boughtMs: number | null, language: Language): FounderCard |
       year: 'numeric',
     }),
   };
+}
+
+/**
+ * The medal shelf's tiles (T-235): finished sets first, in content order
+ * within each group, so what was earned is seen before what is under way.
+ */
+function medalTiles(progress: readonly MedalProgress[], language: Language): MedalTile[] {
+  const finished = (medal: MedalProgress) => (medal.state === 'progress' ? 1 : 0);
+  return [...progress]
+    .sort((a, b) => finished(a) - finished(b))
+    .map((medal): MedalTile => {
+      const region = 'region' in medal.rule ? getRegion(medal.rule.region) : null;
+      const name =
+        'region' in medal.rule
+          ? region?.name ?? medal.rule.region
+          : t(`passport.category.${medal.rule.category}`);
+      const detail =
+        medal.state === 'locked'
+          ? t('medal.set.locked')
+          : medal.state === 'complete' && medal.completedTs !== null
+            ? t('medal.set.complete', {
+                date: new Date(medal.completedTs).toLocaleDateString(DATE_LOCALES[language], {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                }),
+              })
+            : t('medal.set.progress', { collected: medal.collected, total: medal.total });
+      return {
+        id: medal.id,
+        name,
+        detail,
+        locked: medal.state === 'locked',
+        words: {
+          emblem:
+            'region' in medal.rule
+              ? { kind: 'outline', points: region?.outline ?? [] }
+              : { kind: 'category', category: medal.rule.category },
+          name,
+          collected: medal.collected,
+          total: medal.total,
+          look: medal.state === 'progress' ? 'silver' : 'gold',
+        },
+      };
+    });
 }
 
 export default function PassportScreen({
@@ -127,6 +175,8 @@ export default function PassportScreen({
   const [canWatch, setCanWatch] = useState(false);
   /** The founder stamp, when this phone's purchase earned one (T-233). */
   const [founder, setFounder] = useState<FounderCard | null>(null);
+  /** The set medals' shelf (T-235). */
+  const [medals, setMedals] = useState<MedalTile[]>([]);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
   /**
@@ -184,6 +234,12 @@ export default function PassportScreen({
         );
 
         const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
+        // T-235: every award of the trip, locked stamps included (D-075): a
+        // set completes from what was earned, paid or not.
+        const nextMedals = medalTiles(
+          medalProgress(getMedals(), getContentPack().places, nextAwards, await isUnlocked(), await getLockedRegionIds()),
+          deviceLanguage()
+        );
 
         if (!cancelled) {
           setProgress(nextProgress);
@@ -193,6 +249,7 @@ export default function PassportScreen({
           setConfirmation(prompt?.prompt ?? null);
           setConfirmationEvidence(prompt?.evidence ?? '');
           setFounder(nextFounder);
+          setMedals(nextMedals);
         }
 
         // After the page is on screen: this reads and masks the whole trace,
@@ -425,6 +482,7 @@ export default function PassportScreen({
           // D-097, R1: the reminder, only where something can be bought.
           onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
           founder={founder ?? undefined}
+          medals={medals}
         />
       )}
 

@@ -749,6 +749,19 @@ export const STRINGS = {
     'Uma medalha por cada conjunto que completares',
     'Eine Medaille für jedes vollständige Set'
   ),
+  // ── The founder stamp (T-233, D-089 rule 6) ──────────────────────────────
+  // ⚠ Not a place: it sits in the passport's own Medals section and never in
+  // the "de 80" count or the rank (OQ-2). "While {app} was new" rather than a
+  // number of months, so the window's length lives in content alone.
+  'passport.medals': s('Medals', 'Medalhas', 'Medaillen'),
+  /** The word on the stamp's face, drawn in capitals by `medalArt.ts`. */
+  'medal.founder.title': s('Founder', 'Fundador', 'Gründer'),
+  'medal.founder.name': s('Founder stamp', 'Carimbo de fundador', 'Gründerstempel'),
+  'medal.founder.detail': s(
+    'Bought on {date}, while {app} was new',
+    'Comprado a {date}, quando o {app} era novo',
+    'Gekauft am {date}, als {app} neu war'
+  ),
   'unlock.adds.founder': s(
     'A founder stamp, for buying in the first three months',
     'Um carimbo de fundador, por comprares nos primeiros três meses',

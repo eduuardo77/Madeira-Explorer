@@ -16,17 +16,8 @@
  * has been seen is the browser's SVG, in the workbench and in the preview.
  */
 
-import Svg, {
-  ClipPath,
-  Defs,
-  FeGaussianBlur,
-  Filter,
-  G,
-  Path,
-  Polygon,
-  Rect,
-  Text as SvgText,
-} from 'react-native-svg';
+import Svg, { ClipPath, Defs, FeGaussianBlur, Filter, G, Polygon } from 'react-native-svg';
+import ArtElement from './ArtElement';
 import {
   CANVAS,
   GLOW_PAD_UNITS,
@@ -109,85 +100,9 @@ export default function StampArt({
         )}
       </Defs>
       <G filter={blur === undefined ? undefined : `url(#${blurId})`}>
-        {elements.map((element, index) => {
-          const key = `${element.kind}-${index}`;
-
-          if (element.kind === 'polygon') {
-            return (
-              <Polygon
-                key={key}
-                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-                points={element.points}
-                fill={element.fill}
-                stroke={element.stroke}
-                strokeWidth={element.strokeWidth}
-                strokeLinejoin={element.strokeLinejoin}
-                opacity={element.opacity}
-              />
-            );
-          }
-
-          if (element.kind === 'path') {
-            return (
-              <Path
-                key={key}
-                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-                d={element.d}
-                fill={element.fill}
-                stroke={element.stroke}
-                strokeWidth={element.strokeWidth}
-                transform={element.transform}
-                opacity={element.opacity}
-              />
-            );
-          }
-
-          if (element.kind === 'rect') {
-            return (
-              <Rect
-                key={key}
-                x={element.x}
-                y={element.y}
-                width={element.width}
-                height={element.height}
-                fill={element.fill}
-                opacity={element.opacity}
-                // Which elements clip is decided by `stampArt.ts`, not guessed
-                // from the kind here: the band is drawn full width and clipped
-                // to the panel — which gives it the sticker's own shape on a
-                // triangle or a diamond for free — and so is the sunburst,
-                // whose rays deliberately overshoot the canvas.
-                clipPath={element.clip === true ? `url(#${clipId})` : undefined}
-              />
-            );
-          }
-
-          return (
-            <SvgText
-              key={key}
-              x={element.x}
-              y={element.y}
-              fill={element.fill}
-              fontSize={element.fontSize}
-              fontWeight="700"
-              letterSpacing={0.6}
-              textAnchor="middle"
-              opacity={element.opacity}
-              transform={element.transform}
-              // Null means "draw at natural width" — condensing every label
-              // would make short names look wrong to fix a problem they do not
-              // have. See `stampArt.ts`.
-              {...(element.textLength === null
-                ? {}
-                : {
-                    textLength: element.textLength,
-                    lengthAdjust: 'spacingAndGlyphs' as const,
-                  })}
-            >
-              {element.text}
-            </SvgText>
-          );
-        })}
+        {elements.map((element, index) => (
+          <ArtElement key={`${element.kind}-${index}`} element={element} clipId={clipId} />
+        ))}
       </G>
     </Svg>
   );

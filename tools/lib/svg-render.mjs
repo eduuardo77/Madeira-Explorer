@@ -46,6 +46,40 @@ function attrs(element) {
 }
 
 /**
+ * The elements of a drawing as SVG markup, the way both art modules describe
+ * them (`stampArt.ts`, `medalArt.ts`). `clipId` names the clip path an element
+ * with `clip: true` uses; a drawing without one passes null.
+ */
+export function elementsBody(elements, clipId) {
+  return elements
+    .map((element) => {
+      if (element.kind === 'text') {
+        const { text, textLength, ...rest } = element;
+        // `textLength` and `lengthAdjust` are camelCase in SVG itself, so they
+        // bypass the kebab-case conversion above.
+        const fit =
+          textLength === null || textLength === undefined
+            ? ''
+            : ` textLength="${textLength}" lengthAdjust="spacingAndGlyphs"`;
+        return `<text ${attrs(rest)}${fit} text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="0.6">${escapeXml(text)}</text>`;
+      }
+      // Which elements clip is the art module's decision, not this file's: the
+      // band and the sunburst both need it, and guessing from the kind would
+      // have let the sunburst paint over the borders.
+      const clip = element.clip === true && clipId !== null ? ` clip-path="url(#${clipId})"` : '';
+      return `<${element.kind} ${attrs(element)}${clip} />`;
+    })
+    .join('\n      ');
+}
+
+/** A medal or the founder stamp (`medalArt.ts`), as a standalone `<svg>`. */
+export function medalSvg(elements, extraStyle = '') {
+  return `<svg viewBox="0 0 ${CANVAS} ${CANVAS}" style="${extraStyle}">
+      ${elementsBody(elements, null)}
+    </svg>`;
+}
+
+/**
  * One passport stamp, as a standalone `<svg>`.
  *
  * `id` also names the clip path, which is not cosmetic: several stamps render
@@ -72,25 +106,7 @@ export function stampSvgWithDesign(id, design, name, collected, extraStyle = '',
   // The same pad as `StampArt.tsx`: the rim's, or room for a collected glow.
   const pad = rim === null ? GLOW_PAD_UNITS : RIM_PAD_UNITS;
 
-  const body = elements
-    .map((element) => {
-      if (element.kind === 'text') {
-        const { text, textLength, ...rest } = element;
-        // `textLength` and `lengthAdjust` are camelCase in SVG itself, so they
-        // bypass the kebab-case conversion above.
-        const fit =
-          textLength === null || textLength === undefined
-            ? ''
-            : ` textLength="${textLength}" lengthAdjust="spacingAndGlyphs"`;
-        return `<text ${attrs(rest)}${fit} text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="0.6">${escapeXml(text)}</text>`;
-      }
-      // Which elements clip is `stampArt.ts`'s decision, not this file's: the
-      // band and the sunburst both need it, and guessing from the kind would
-      // have let the sunburst paint over the borders.
-      const clip = element.clip === true ? ` clip-path="url(#panel-${id})"` : '';
-      return `<${element.kind} ${attrs(element)}${clip} />`;
-    })
-    .join('\n      ');
+  const body = elementsBody(elements, `panel-${id}`);
 
   // Taken from the design rather than by indexing the element list — the list
   // gained two layers when the artwork was made more detailed, and an index

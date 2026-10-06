@@ -42,8 +42,8 @@ never where the lead lives.
   the app was next opened.
 - **Not recorded:** the lead switched to *Equilibrado* mid-ride; the database shows no change.
 - **Likely causes, not yet separated:** (1) Poupança asks for no GPS and holds background points in
-  memory until 9 min and 3 km have both passed; (2) Huawei's *Iniciar aplicações* setting was most
-  likely reset by the uninstall on 2026-10-05.
+  memory until 9 min and 3 km have both passed; (2) Huawei's *Iniciar aplicações* setting, which
+  **was on *Gestão automática*** (checked that evening; reset by the uninstall on 2026-10-05).
 - **Detail:** field-notes, 2026-10-06. Data: `Madeira-fieldwork/iphone-2026-10-06-ride/`,
   `p30-2026-10-06-t235b/`.
 

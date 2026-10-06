@@ -33,6 +33,8 @@ export interface TrophyFacts {
   /** 1 for the trip's first stamp; null if this stamp is not in the trip. */
   orderInTrip: number | null;
   medal: {
+    /** The set's id in `content/medals.json`, for its title. */
+    medalId: string;
     regionId: string;
     /** The municipality's places, in content order. */
     placeIds: string[];
@@ -74,6 +76,7 @@ export function trophyFacts(
     self === undefined || set === undefined
       ? null
       : {
+          medalId: set.id,
           regionId: self.regionId,
           placeIds: members.map((each) => each.id),
           collected: members.filter((each) => collected.has(each.id)).length,

@@ -1,15 +1,25 @@
 {
   "formatVersion": 1,
   "medals": [
-    { "id": "region-porto-moniz", "rule": { "region": "porto-moniz" } },
-    { "id": "region-funchal", "rule": { "region": "funchal" } },
-    { "id": "region-santana", "rule": { "region": "santana" } },
-    { "id": "region-machico", "rule": { "region": "machico" } },
-    { "id": "region-calheta", "rule": { "region": "calheta" } },
-    { "id": "region-sao-vicente", "rule": { "region": "sao-vicente" } },
-    { "id": "region-camara-de-lobos", "rule": { "region": "camara-de-lobos" } },
-    { "id": "region-ribeira-brava", "rule": { "region": "ribeira-brava" } },
-    { "id": "region-santa-cruz", "rule": { "region": "santa-cruz" } },
-    { "id": "category-levada", "rule": { "category": "levada" } }
+    { "id": "region-porto-moniz", "rule": { "region": "porto-moniz" },
+      "title": { "en": "Porto Moniz medal", "pt": "Medalha de Porto Moniz", "de": "Medaille Porto Moniz" } },
+    { "id": "region-funchal", "rule": { "region": "funchal" },
+      "title": { "en": "Funchal medal", "pt": "Medalha do Funchal", "de": "Medaille Funchal" } },
+    { "id": "region-santana", "rule": { "region": "santana" },
+      "title": { "en": "Santana medal", "pt": "Medalha de Santana", "de": "Medaille Santana" } },
+    { "id": "region-machico", "rule": { "region": "machico" },
+      "title": { "en": "Machico medal", "pt": "Medalha de Machico", "de": "Medaille Machico" } },
+    { "id": "region-calheta", "rule": { "region": "calheta" },
+      "title": { "en": "Calheta medal", "pt": "Medalha da Calheta", "de": "Medaille Calheta" } },
+    { "id": "region-sao-vicente", "rule": { "region": "sao-vicente" },
+      "title": { "en": "São Vicente medal", "pt": "Medalha de São Vicente", "de": "Medaille São Vicente" } },
+    { "id": "region-camara-de-lobos", "rule": { "region": "camara-de-lobos" },
+      "title": { "en": "Câmara de Lobos medal", "pt": "Medalha de Câmara de Lobos", "de": "Medaille Câmara de Lobos" } },
+    { "id": "region-ribeira-brava", "rule": { "region": "ribeira-brava" },
+      "title": { "en": "Ribeira Brava medal", "pt": "Medalha da Ribeira Brava", "de": "Medaille Ribeira Brava" } },
+    { "id": "region-santa-cruz", "rule": { "region": "santa-cruz" },
+      "title": { "en": "Santa Cruz medal", "pt": "Medalha de Santa Cruz", "de": "Medaille Santa Cruz" } },
+    { "id": "category-levada", "rule": { "category": "levada" },
+      "title": { "en": "Levadas medal", "pt": "Medalha das Levadas", "de": "Levada-Medaille" } }
   ]
 }

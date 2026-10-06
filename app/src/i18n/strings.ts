@@ -759,6 +759,15 @@ export const STRINGS = {
   'medal.founder.name': s('Founder stamp', 'Carimbo de fundador', 'Gründerstempel'),
   // ── The set medals (T-235) ──────────────────────────────────────────────
   // ⚠ No adjective agrees with a placeholder (T-191): "Completa" is the medal's.
+  /** Only when medals.json gives no title for a language (T-235). */
+  'medal.title': s('{name} medal', 'Medalha {name}', 'Medaille {name}'),
+  // The new-stamp pop-up's line under a set's medal, when the stamp completed it.
+  'stampNews.medal.done': s('Set complete!', 'Conjunto completo!', 'Sammlung komplett!'),
+  'stampNews.medal.locked': s(
+    'Set complete. Unlock to see it',
+    'Conjunto completo. Desbloqueia para a veres',
+    'Sammlung komplett. Freischalten, um sie zu sehen'
+  ),
   'medal.set.progress': s('{collected} of {total}', '{collected} de {total}', '{collected} von {total}'),
   'medal.set.complete': s('Completed {date}', 'Completa a {date}', 'Vollständig am {date}'),
   'medal.set.locked': s(
@@ -1193,7 +1202,6 @@ export const STRINGS = {
   // T-251: a collected stamp as a trophy (T1 layout A).
   'trophy.ribbon': s('STAMP {count} OF THIS TRIP', '{count}.º CARIMBO DA VIAGEM', '{count}. STEMPEL DIESER REISE'),
   'trophy.subtitle': s('{category} · {date}', '{category} · {date}', '{category} · {date}'),
-  'trophy.medal.title': s('{region} medal', 'Medalha de {region}', 'Medaille {region}'),
   'trophy.medal.done': s(
     '{total} of {total} places · complete',
     '{total} de {total} lugares · completa',

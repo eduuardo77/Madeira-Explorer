@@ -28,8 +28,8 @@ const PLACES = [
 // As content/medals.json: Câmara de Lobos has a set, Ponta do Sol's single place has none,
 // and the levadas' category set is not a municipality's.
 const MEDALS: MedalDefinition[] = [
-  { id: 'region-cl', rule: { region: 'cl' } },
-  { id: 'category-levada', rule: { category: 'levada' } },
+  { id: 'region-cl', rule: { region: 'cl' }, title: {} },
+  { id: 'category-levada', rule: { category: 'levada' }, title: {} },
 ];
 const trophyFacts = (placeId: string, places: TrophyPlace[], order: string[]) => facts(placeId, places, order, MEDALS);
 
@@ -41,6 +41,7 @@ test('the stamp\'s place in the trip, in the order they were earned', () => {
 test('the municipality\'s medal set: its places, which are collected, how many', () => {
   const facts = trophyFacts('camara-de-lobos', PLACES, ['praia-formosa', 'camara-de-lobos']);
   assert.deepEqual(facts.medal, {
+    medalId: 'region-cl',
     regionId: 'cl',
     placeIds: ['camara-de-lobos', 'cabo-girao', 'curral-das-freiras', 'eira-do-serrado'],
     collected: 1,

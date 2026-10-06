@@ -25,6 +25,11 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { runAwardPass } from './stampAwards';
 import { celebrationFor, type Celebration } from './stampCelebration';
+import { getMedals } from '../content/medalCatalogue';
+import { medalTitleFor, setMedalWordsFor } from '../passport/medalView';
+import type { SetMedalWords } from '../passport/medalArt';
+import { getLockedRegionIds } from './currentProgress';
+import { medalProgress, medalsCompletedBy } from './medals';
 import { parseTold, stampNews } from './stampNews';
 
 /**
@@ -48,6 +53,18 @@ export type StampPopup = {
   celebration: Celebration | null;
   /** Other locked stamps, for a locked stamp's offer (E3). */
   othersWaiting: number;
+  /** The set medals this stamp completed (T-235); usually none. */
+  medals: CompletedMedal[];
+};
+
+/** A medal a stamp completed, ready to draw in the pop-up. */
+export type CompletedMedal = {
+  id: string;
+  /** "Medalha do Funchal". */
+  title: string;
+  words: SetMedalWords;
+  /** Complete on a passport not yet unlocked (D-089): frosted, under the padlock. */
+  locked: boolean;
 };
 
 type Earned = { placeId: string; name: string; category: Category; awardedTs: number };
@@ -135,6 +152,20 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
     const places = getContentPack().places;
     const categoryTotals = { viewpoint: 0, levada: 0, village: 0, beach: 0, landmark: 0 };
     for (const place of places) categoryTotals[place.category] += 1;
+    // T-235: every set as it stands, to find the ones a stamp completed.
+    const awards = stamps.earned.map((each) => ({ place_id: each.placeId, awarded_ts: each.awardedTs }));
+    const definitions = getMedals();
+    const medals =
+      news.announce.length === 0
+        ? []
+        : medalProgress(definitions, places, awards, await isUnlocked(), await getLockedRegionIds());
+    const completedBy = (placeId: string): CompletedMedal[] =>
+      medalsCompletedBy(placeId, medals, awards).flatMap((medal) => {
+        const definition = definitions.find((each) => each.id === medal.id);
+        return definition === undefined
+          ? []
+          : [{ id: medal.id, title: medalTitleFor(definition), words: setMedalWordsFor(medal), locked: medal.state === 'locked' }];
+      });
     return news.announce.flatMap((placeId) => {
       const stamp = stamps.earned.find((each) => each.placeId === placeId);
       const locked = stamps.locked.has(placeId);
@@ -149,6 +180,7 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
               awardedTs: stamp.awardedTs,
               celebration: celebrationFor(placeId, stamps.earned, places.length, categoryTotals),
               othersWaiting: stamps.locked.size - (locked ? 1 : 0),
+              medals: completedBy(placeId),
             },
           ];
     });

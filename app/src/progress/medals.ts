@@ -82,3 +82,21 @@ export function medalProgress(
     ];
   });
 }
+
+/**
+ * The medals this stamp completed: complete sets it belongs to whose last
+ * place was this one (its first award is the set's completion time). For the
+ * new-stamp pop-up (T-235), which says so once, on the stamp that did it.
+ */
+export function medalsCompletedBy(
+  placeId: string,
+  progress: readonly MedalProgress[],
+  awards: readonly MedalAward[]
+): MedalProgress[] {
+  const times = awards.filter((award) => award.place_id === placeId).map((award) => award.awarded_ts);
+  if (times.length === 0) return [];
+  const earned = Math.min(...times);
+  return progress.filter(
+    (medal) => medal.state !== 'progress' && medal.placeIds.includes(placeId) && medal.completedTs === earned
+  );
+}

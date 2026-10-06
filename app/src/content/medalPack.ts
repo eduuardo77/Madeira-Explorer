@@ -7,8 +7,13 @@
  * code (D-017), and adding one later is never a rug pull (OQ-3).
  *
  *     { "formatVersion": 1,
- *       "medals": [ { "id": "region-santana", "rule": { "region": "santana" } },
- *                   { "id": "category-levada", "rule": { "category": "levada" } } ] }
+ *       "medals": [ { "id": "region-funchal", "rule": { "region": "funchal" },
+ *                     "title": { "en": "Funchal medal", "pt": "Medalha do Funchal", "de": "Medaille Funchal" } } ] }
+ *
+ * The title is content, not a template, because Portuguese wants the article
+ * a name takes (*do* Funchal, *da* Calheta, *de* Machico) and no rule picks it;
+ * the project lead corrects them by hand. A missing language falls back to
+ * `medal.title` in `strings.ts`, and the validator says so.
  *
  * Whether each rule picks out enough real places is checked against the pack
  * by `medalContentProblems` below, which the validator runs; how far each set
@@ -21,6 +26,9 @@
  */
 
 import { CATEGORIES, type Category } from './contentPack.ts';
+import { LANGUAGES, type Language } from '../i18n/languages.ts';
+import { STRINGS } from '../i18n/strings.ts';
+import { translate } from '../i18n/translate.ts';
 
 export type MedalRule = { region: string } | { category: Category };
 
@@ -28,6 +36,8 @@ export type MedalDefinition = {
   /** Stable: an earned medal is keyed by it. Never change one after release. */
   id: string;
   rule: MedalRule;
+  /** What to call it, per language ("Medalha do Funchal"); any may be missing. */
+  title: Partial<Record<Language, string>>;
 };
 
 export type MedalProblem = { where: string; problem: string };
@@ -82,10 +92,36 @@ export function parseMedalPack(raw: unknown): ParsedMedalPack {
       return;
     }
     seen.add(id);
-    medals.push({ id, rule: parsed });
+    const title = parseTitle((entry as { title?: unknown }).title);
+    if (title === null) {
+      problems.push({ where: `${where} (${id})`, problem: '`title` must map en, pt, de to text' });
+    }
+    medals.push({ id, rule: parsed, title: title ?? {} });
   });
 
   return { medals, problems };
+}
+
+/** Absent is an empty title; anything but language-to-text is null. */
+function parseTitle(raw: unknown): Partial<Record<Language, string>> | null {
+  if (raw === undefined) return {};
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const title: Partial<Record<Language, string>> = {};
+  for (const [language, text] of Object.entries(raw)) {
+    if (!(LANGUAGES as readonly string[]).includes(language) || typeof text !== 'string' || text.trim() === '') {
+      return null;
+    }
+    title[language as Language] = text.trim();
+  }
+  return title;
+}
+
+/**
+ * A medal's title in a language: content's, or the generic one built from the
+ * set's name when content has none for that language.
+ */
+export function medalTitle(medal: MedalDefinition, language: Language, setName: string): string {
+  return medal.title[language] ?? translate(STRINGS['medal.title'], language, { name: setName });
 }
 
 function parseRule(raw: unknown): MedalRule | null {
@@ -98,6 +134,17 @@ function parseRule(raw: unknown): MedalRule | null {
     return { category: category as Category };
   }
   return null;
+}
+
+/**
+ * The languages each medal has no title in, for the validator to warn about:
+ * the generic title is used there, so it is a gap, not a fault.
+ */
+export function medalTitleGaps(medals: readonly MedalDefinition[]): string[] {
+  return medals.flatMap((medal) => {
+    const missing = LANGUAGES.filter((language) => medal.title[language] === undefined);
+    return missing.length === 0 ? [] : [`${medal.id}: no title in ${missing.join(', ')} (the generic one is used)`];
+  });
 }
 
 /**

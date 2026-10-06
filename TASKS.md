@@ -583,12 +583,18 @@ section's definition of done.
       on the P30** with the real data (Funchal 1 de 14, Câmara de Lobos 1 de 4) and a probe completing
       Câmara de Lobos, locked then unlocked (*Completa a 4 de outubro de 2026*); real data restored by
       checksum (`Madeira-fieldwork/p30-2026-10-06-t235/`), smoke test passing. 1031 tests.
+      ✅ **Same day, the lead's asks:** a stamp that completes a set now says so in its *Novo carimbo!*
+      pop-up, as one quiet card under the numbers (the medal, its title, *Conjunto completo!*; frosted
+      under the padlock with *Desbloqueia para a veres* on a free passport), from
+      `medalsCompletedBy` (pure, tested). Medal titles are content (`medals.json`, `title` per
+      language: *Medalha do Funchal*, *da Calheta*), for the lead to correct by hand; the trophy
+      card uses them too, and the validator warns on a missing language. Seen on the P30 with a
+      probe (locked look); the unlocked pop-up was not captured (the probe's pop-ups did not
+      reappear), it is the same component as the gold shelf.
       **Found by looking:** *CÂMARA DE LOBOS* ran off the band on the phone though the preview fitted
       (Android draws the bold wider and ignores `textLength` there): long names are now set smaller
       before any squeeze. ⚠ **Left:** a stamp that completes a set gets the plain *Novo carimbo!*
-      pop-up, nothing about the medal (a follow-up for D-097's celebration). ⚠ **Found, not touched:**
-      the trophy's *"Medalha de {region}"* is wrong Portuguese for Funchal, Calheta and Ribeira Brava
-      (*do* Funchal, *da* Calheta); the copy is the lead's.
+      pop-up, nothing about the medal (done the same day, below).
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

@@ -44,7 +44,7 @@ import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shar
 import PassportView, { type FounderCard, type MedalTile, type PassportStamp } from './PassportView';
 import { medalProgress, type MedalProgress } from '../progress/medals';
 import { getLockedRegionIds } from '../progress/currentProgress';
-import { getRegion } from '../content/regionCatalogue';
+import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
 import TrophyCard from './TrophyCard';
@@ -87,11 +87,6 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
   return [...progress]
     .sort((a, b) => finished(a) - finished(b))
     .map((medal): MedalTile => {
-      const region = 'region' in medal.rule ? getRegion(medal.rule.region) : null;
-      const name =
-        'region' in medal.rule
-          ? region?.name ?? medal.rule.region
-          : t(`passport.category.${medal.rule.category}`);
       const detail =
         medal.state === 'locked'
           ? t('medal.set.locked')
@@ -106,19 +101,10 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
             : t('medal.set.progress', { collected: medal.collected, total: medal.total });
       return {
         id: medal.id,
-        name,
+        name: medalSetName(medal.rule),
         detail,
         locked: medal.state === 'locked',
-        words: {
-          emblem:
-            'region' in medal.rule
-              ? { kind: 'outline', points: region?.outline ?? [] }
-              : { kind: 'category', category: medal.rule.category },
-          name,
-          collected: medal.collected,
-          total: medal.total,
-          look: medal.state === 'progress' ? 'silver' : 'gold',
-        },
+        words: setMedalWordsFor(medal),
       };
     });
 }
@@ -718,6 +704,7 @@ function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], la
   // The trip's stamps in the order they were earned.
   const order = [...awards].sort((a, b) => a.awarded_ts - b.awarded_ts).map((award) => award.place_id);
   const facts = trophyFacts(place.id, places, order, getMedals());
+  const medalDefinition = getMedals().find((each) => each.id === facts.medal?.medalId);
   const award = awards.find((candidate) => candidate.place_id === place.id);
   const date =
     award === undefined
@@ -728,7 +715,6 @@ function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], la
           year: 'numeric',
         });
   const category = t(`placeCard.category.${place.category}` as StringKey);
-  const regionName = facts.medal === null ? null : getRegionName(facts.medal.regionId);
   const byId = new Map(places.map((each) => [each.id, each]));
   const collected = new Set(order);
 
@@ -739,10 +725,10 @@ function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], la
     subtitle: date === null ? category : t('trophy.subtitle', { category, date }),
     ribbon: facts.orderInTrip === null ? null : t('trophy.ribbon', { count: facts.orderInTrip }),
     medal:
-      facts.medal === null || regionName === null
+      facts.medal === null || medalDefinition === undefined
         ? null
         : {
-            title: t('trophy.medal.title', { region: regionName }),
+            title: medalTitleFor(medalDefinition),
             progress:
               facts.medal.collected === facts.medal.total
                 ? t('trophy.medal.done', { total: facts.medal.total })

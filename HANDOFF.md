@@ -50,6 +50,12 @@ it fails while `founderWindow.start` is null, which is deliberate.
 the passport (each municipality's own outline, silver to gold, frosted when complete on a free
 passport), seen on the P30 with a probe. Next in the plan: Phase 5, tilt and shine.
 
+⚠ **Before swapping the P30's database for a probe, ask whether the lead has been out with it.**
+2026-10-06: a restore came minutes after their test trip; the backup happened to be newer than the
+trip, so nothing was lost but five still minutes. And close pop-ups with the Back key, never a tap
+at the bottom: *Fechar* sits over *Começar passeio*, and a tap that lands after the pop-up has
+gone starts an outing.
+
 **Traps found this session, each cost time:**
 - **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at
   every attempt (Google sells only to the copy it signs). And **License testing is not the

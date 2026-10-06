@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { MEDAL_MINIMUM, medalContentProblems, parseMedalPack, type MedalDefinition, type MedalPlace } from './medalPack.ts';
+import { MEDAL_MINIMUM, medalContentProblems, medalTitle, medalTitleGaps, parseMedalPack, type MedalDefinition, type MedalPlace } from './medalPack.ts';
 import { parseContentPack } from './contentPack.ts';
 
 test('T-234: the shipped medals.json parses cleanly', () => {
@@ -22,14 +22,14 @@ test('T-234: a region rule and a category rule are both read', () => {
   const { medals, problems } = parseMedalPack({
     formatVersion: 1,
     medals: [
-      { id: 'region-santana', rule: { region: 'santana' } },
-      { id: 'category-levada', rule: { category: 'levada' } },
+      { id: 'region-santana', rule: { region: 'santana' }, title: {} },
+      { id: 'category-levada', rule: { category: 'levada' }, title: {} },
     ],
   });
   assert.deepEqual(problems, []);
   assert.deepEqual(medals, [
-    { id: 'region-santana', rule: { region: 'santana' } },
-    { id: 'category-levada', rule: { category: 'levada' } },
+    { id: 'region-santana', rule: { region: 'santana' }, title: {} },
+    { id: 'category-levada', rule: { category: 'levada' }, title: {} },
   ]);
 });
 
@@ -45,11 +45,11 @@ test('T-234: a bad entry is dropped and reported, and the good ones kept', () =>
   const { medals, problems } = parseMedalPack({
     formatVersion: 1,
     medals: [
-      { id: 'region-santana', rule: { region: 'santana' } },
-      { id: '', rule: { region: 'funchal' } },
-      { id: 'region-santana', rule: { region: 'funchal' } },
-      { id: 'category-castle', rule: { category: 'castle' } },
-      { id: 'both', rule: { region: 'funchal', category: 'levada' } },
+      { id: 'region-santana', rule: { region: 'santana' }, title: {} },
+      { id: '', rule: { region: 'funchal' }, title: {} },
+      { id: 'region-santana', rule: { region: 'funchal' }, title: {} },
+      { id: 'category-castle', rule: { category: 'castle' }, title: {} },
+      { id: 'both', rule: { region: 'funchal', category: 'levada' }, title: {} },
       { id: 'none', rule: {} },
     ],
   });
@@ -63,13 +63,13 @@ const PLACES: MedalPlace[] = [
   { id: 'santana-houses', category: 'village', regionId: 'santana' },
   { id: 'rabacal', category: 'levada', regionId: 'calheta' },
 ];
-const SANTANA: MedalDefinition = { id: 'region-santana', rule: { region: 'santana' } };
-const LEVADAS: MedalDefinition = { id: 'category-levada', rule: { category: 'levada' } };
+const SANTANA: MedalDefinition = { id: 'region-santana', rule: { region: 'santana' }, title: { en: 'x medal', pt: 'Medalha x', de: 'Medaille x' } };
+const LEVADAS: MedalDefinition = { id: 'category-levada', rule: { category: 'levada' }, title: { en: 'x medal', pt: 'Medalha x', de: 'Medaille x' } };
 
 test('T-234 (OQ-3): the content check catches an unknown region and a set too small', () => {
   const regions = new Set(['santana', 'calheta']);
   assert.deepEqual(medalContentProblems([SANTANA], PLACES, regions), []);
-  const [unknown] = medalContentProblems([{ id: 'region-nowhere', rule: { region: 'nowhere' } }], PLACES, regions);
+  const [unknown] = medalContentProblems([{ id: 'region-nowhere', rule: { region: 'nowhere' }, title: { en: 'x medal', pt: 'Medalha x', de: 'Medaille x' } }], PLACES, regions);
   assert.match(unknown, /no region "nowhere"/);
   const [small] = medalContentProblems([LEVADAS], PLACES, regions);
   assert.match(small, new RegExp(`2 place\\(s\\), a set needs at least ${MEDAL_MINIMUM}`));
@@ -81,4 +81,22 @@ test('T-234: every shipped medal is sound against the shipped pack and regions',
   const regions = JSON.parse(readFileSync(new URL('../../../content/regions.json', import.meta.url), 'utf8'));
   const ids = new Set<string>(regions.features.map((feature: { properties: { id: string } }) => feature.properties.id));
   assert.deepEqual(medalContentProblems(medals, pack.places, ids), []);
+});
+
+test('T-235: a title per language is read, a bad one is reported, and a missing one falls back', () => {
+  const { medals, problems } = parseMedalPack({
+    formatVersion: 1,
+    medals: [
+      { id: 'region-funchal', rule: { region: 'funchal' }, title: { pt: 'Medalha do Funchal', en: 'Funchal medal' } },
+      { id: 'region-calheta', rule: { region: 'calheta' }, title: { fr: 'Médaille' } },
+    ],
+  });
+  assert.equal(problems.length, 1, 'an unknown language is reported');
+  assert.equal(medals.length, 2, 'and the medal kept, without a title');
+  assert.equal(medalTitle(medals[0], 'pt', 'Funchal'), 'Medalha do Funchal');
+  assert.equal(medalTitle(medals[0], 'de', 'Funchal'), 'Medaille Funchal', 'the generic one, from strings.ts');
+  assert.deepEqual(medalTitleGaps(medals), [
+    'region-funchal: no title in de (the generic one is used)',
+    'region-calheta: no title in en, pt, de (the generic one is used)',
+  ]);
 });

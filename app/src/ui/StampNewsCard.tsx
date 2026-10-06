@@ -33,6 +33,7 @@ import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
 import { designFor } from '../passport/stampArt';
 import type { StampPopup } from '../progress/stampAnnouncer';
+import MedalArt from './MedalArt';
 import Padlock from './Padlock';
 import StampArt from './StampArt';
 import { postmarkFor } from './postmark';
@@ -40,6 +41,8 @@ import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
 import { useReduceMotion } from './useReduceMotion';
 
 const STAMP_SIZE = 196;
+/** The completed set's medal, beside its title (T-235). */
+const MEDAL_SIZE = 60;
 const RAYS_SIZE = 560;
 const CONFETTI = 26;
 /** When the stamp lands, in ms: the impact everything else is timed from. */
@@ -184,6 +187,37 @@ export default function StampNewsCard({
             </Animated.View>
           )}
 
+          {/* T-235: the set this stamp completed, said once, here, as the last
+              beat. One quiet card, not a second celebration. */}
+          {stamp.medals.map((medal) => {
+            const line = t(medal.locked ? 'stampNews.medal.locked' : 'stampNews.medal.done');
+            return (
+              <Animated.View
+                key={medal.id}
+                style={[styles.medalRow, { opacity: anim.buttons }]}
+                accessible
+                accessibilityLabel={`${medal.title}. ${line}`}
+              >
+                <View>
+                  <MedalArt
+                    id={`news-${medal.id}`}
+                    drawing={{ kind: 'set', words: medal.words }}
+                    size={MEDAL_SIZE}
+                    blur={medal.locked ? 3 : undefined}
+                  />
+                  {medal.locked ? (
+                    <View style={styles.medalLock}>
+                      <Padlock size={24} />
+                    </View>
+                  ) : null}
+                </View>
+                <View style={styles.medalWords}>
+                  <Text style={styles.medalTitle}>{medal.title}</Text>
+                  <Text style={styles.medalLine}>{line}</Text>
+                </View>
+              </Animated.View>
+            );
+          })}
         </View>
 
         <Animated.View style={[styles.actions, { opacity: anim.buttons }]}>
@@ -489,6 +523,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.sm,
   },
+  medalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    gap: spacing.md,
+    marginTop: spacing.md,
+    padding: spacing.sm + 4,
+    borderRadius: radius.card,
+    backgroundColor: reward.cardFill,
+    borderWidth: 1,
+    borderColor: reward.panelEdge,
+  },
+  medalLock: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+  medalWords: { flex: 1, gap: 2 },
+  medalTitle: { color: reward.goldInk, fontSize: fontSize.label, fontWeight: '800' },
+  medalLine: { color: reward.textMuted, fontSize: fontSize.small },
   numbers: {
     alignSelf: 'stretch',
     marginTop: spacing.sm,

@@ -8,13 +8,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { medalProgress } from './medals.ts';
+import { medalProgress, medalsCompletedBy } from './medals.ts';
 import { parseMedalPack, type MedalDefinition, type MedalPlace } from '../content/medalPack.ts';
 import { parseContentPack } from '../content/contentPack.ts';
 import { computeTripProgress } from './tripProgress.ts';
 
-const SANTANA: MedalDefinition = { id: 'region-santana', rule: { region: 'santana' } };
-const LEVADAS: MedalDefinition = { id: 'category-levada', rule: { category: 'levada' } };
+const SANTANA: MedalDefinition = { id: 'region-santana', rule: { region: 'santana' }, title: {} };
+const LEVADAS: MedalDefinition = { id: 'category-levada', rule: { category: 'levada' }, title: {} };
 
 const PLACES: MedalPlace[] = [
   { id: 'pico-ruivo', category: 'viewpoint', regionId: 'santana' },
@@ -65,8 +65,8 @@ test('T-234: an award for a place no longer in the pack counts for nothing', () 
 });
 
 test('T-234 (D-024): a locked region leaves a medal out only when the set is all in it', () => {
-  const portoSanto: MedalDefinition = { id: 'region-porto-santo', rule: { region: 'porto-santo' } };
-  const beaches: MedalDefinition = { id: 'category-beach', rule: { category: 'beach' } };
+  const portoSanto: MedalDefinition = { id: 'region-porto-santo', rule: { region: 'porto-santo' }, title: {} };
+  const beaches: MedalDefinition = { id: 'category-beach', rule: { category: 'beach' }, title: {} };
   const locked = new Set(['porto-santo']);
   const shown = medalProgress([SANTANA, portoSanto, beaches], PLACES, [], true, locked);
   assert.deepEqual(shown.map((medal) => medal.id), ['region-santana']);
@@ -84,4 +84,24 @@ test('⚠ T-234 (OQ-2): completing a medal does not move the passport\'s count',
   assert.equal(done.find((medal) => medal.id === 'category-levada')?.state, 'complete');
   assert.equal(after.collected, before.collected + 1, 'one more place, not one more place and a medal');
   assert.equal(after.total, before.total);
+});
+
+test('T-235: a medal is announced on the stamp that completed it, and on no other', () => {
+  const awards = [award('pico-ruivo', 10), award('caldeirao-verde', 25), award('santana-houses', 40), award('rabacal', 50)];
+  const progress = medalProgress([SANTANA, LEVADAS], PLACES, awards, true);
+  assert.deepEqual(medalsCompletedBy('santana-houses', progress, awards).map((m) => m.id), ['region-santana']);
+  assert.deepEqual(medalsCompletedBy('pico-ruivo', progress, awards), [], 'an earlier stamp of the set');
+  assert.deepEqual(
+    medalsCompletedBy('rabacal', progress, awards).map((m) => m.id),
+    ['category-levada'],
+    'the last levada completes the levadas, not Santana'
+  );
+});
+
+test('T-235: one stamp can complete two sets at once, and a locked medal is still announced', () => {
+  const both = [award('pico-ruivo', 10), award('rabacal', 20), award('santana-houses', 30), award('caldeirao-verde', 40)];
+  const progress = medalProgress([SANTANA, LEVADAS], PLACES, both, false);
+  const done = medalsCompletedBy('caldeirao-verde', progress, both);
+  assert.deepEqual(done.map((m) => [m.id, m.state]), [['region-santana', 'locked'], ['category-levada', 'locked']]);
+  assert.deepEqual(medalsCompletedBy('a-place-never-earned', progress, both), []);
 });

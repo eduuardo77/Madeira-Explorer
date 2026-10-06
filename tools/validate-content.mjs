@@ -40,7 +40,7 @@ const { countByCategory, parseContentPack } = await import(
 const { distanceM } = await import('../app/src/recording/distance.ts');
 // The medal sets' own parser and checks, for the same reason: the validator and
 // the phone must agree on what a medal is (T-234).
-const { medalContentProblems, parseMedalPack } = await import('../app/src/content/medalPack.ts');
+const { medalContentProblems, medalTitleGaps, parseMedalPack } = await import('../app/src/content/medalPack.ts');
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -435,6 +435,9 @@ async function main() {
     const medalPack = parseMedalPack(medalRaw);
     for (const problem of medalPack.problems) {
       error(problem.where, problem.problem);
+    }
+    for (const gap of medalTitleGaps(medalPack.medals)) {
+      warn('medals.json', gap);
     }
     if (regions.length > 0) {
       for (const problem of medalContentProblems(medalPack.medals, places, new Set(regionNames.keys()))) {

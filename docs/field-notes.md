@@ -398,3 +398,28 @@ the city, drawn at full strength, looked like lines in random places; they are f
 written, about 800 ms after rewriting for an interpreter, now spread in 12 ms slices (1.4 s wall).
 Matching: 1.6 ms a moving fix in one block at first, about 0.9 ms after, sliced. A second cold open
 reused 4 chains from `matched_chain` and rematched 1 (118 fixes) in 67 ms.
+
+## 2026-10-06 — First motorbike ride: the P30 recorded almost nothing in the background
+
+83 min, 32.7 km, Caniço → Camacha → home, P30 in *Poupança* the whole ride (`tracking_quality`
+last written 14:28:52; the lead remembers switching to *Equilibrado* mid-ride, and nothing in
+`app_state` or `recording_event` shows it). Ground truth: Sensor Logger on an iPhone 15, ~1 Hz,
+±3 m, kept outside the repo at `Madeira-fieldwork/iphone-2026-10-06-ride/` (unmasked: never commit).
+Phone DB: `Madeira-fieldwork/p30-2026-10-06-t235b/` (taken after the ride).
+
+- **29 fixes in 83 minutes**, and a **33-minute hole (14:38 to 15:11) at 30–60 km/h**. Fixes arrive
+  almost only when the app is in front; the one background run (15:39–15:44, one a minute) was
+  delivered in a batch when the app was opened at 15:56. Lit length went 44.8 → 46.1 km.
+- The process was **alive** at 15:11:51 (a resume, not an `app_launch`), so the hole is not simply
+  a killed process; but nothing buffered from it was flushed either. Unresolved between EMUI
+  holding location/JobScheduler back and the deferred buffer being lost.
+- **What Poupança asks for while driving:** 60 s / 150 m, `Accuracy.Low` (= Android
+  BALANCED_POWER, no GPS: 150 m fixes), and a background deferral of **9 min and 3 km**, held in
+  `LocationTaskConsumer`'s in-memory list until both are met. That buffer does not survive the
+  process.
+- Four cold starts during the ride (14:28, 14:36, 15:12, 15:18): EMUI killed the app between
+  looks, which is likely most of "struggling to load"; one launch had no data (`billing ... offline`).
+- **Camacha was stamped correctly** (the iPhone stopped there 15:29–15:30), but with `1554s inside`:
+  the exit was only processed at the next launch, so dwell is inflated by however long the app sleeps.
+- No `deviceidle` whitelist entry for the app. The reinstall of 2026-10-05 (signing key change) may
+  have reset EMUI's *Iniciar aplicações* manual setting (HANDOFF traps); not checked yet.

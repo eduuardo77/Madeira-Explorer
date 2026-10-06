@@ -1,6 +1,6 @@
 # Bruma Privacy Policy
 
-**Last changed:** 2026-09-24
+**Last changed:** 2026-09-27
 
 <!--
   GENERATED FILE — DO NOT EDIT.
@@ -27,7 +27,7 @@ Where your phone was, and when. This is the map of your trip.
 
 Your phone works this out with its own location service. On most Android phones that service comes from Google, and what Google does with it is set by the location settings on your phone, not by this app.
 
-Your step count and the air pressure around you, on phones that can measure them. These help work out where you walked when the satellite signal is blocked, in a tunnel or under trees.
+What your phone’s motion sensors say you are doing, if you allow it: still, walking, running, cycling or in a vehicle. This helps draw the right road, the street rather than the path beside it when you drive, and tells a phone lying still from one on the move.
 
 Which of the places in the app you have reached, and when you collected each stamp.
 
@@ -40,6 +40,8 @@ On your phone, in storage that only this app can read.
 Your trip is included in the ordinary backup your phone already makes to iCloud or to Google, if you have backups switched on. That is what protects your holiday if your phone is lost or broken halfway through it. That backup is yours, under your own account and your own encryption. We cannot reach it, and neither can anyone else without your account.
 
 You can turn that off in your phone settings, in the same place you control backups for everything else.
+
+You can also save a copy of your trip to a file, in Settings, and restore it later. The file holds everything the app recorded, including where you slept, and goes only where you send it. Keep it private.
 
 ## When you share your trip
 
@@ -69,9 +71,9 @@ Your location. This is the whole app; without it there is no map. You can allow 
 
 Your location while the app is closed. This is what lets you forget about the app for a week and still get your map. You can say no, and the app keeps working.
 
-Motion and fitness, or physical activity. This is the step counter and the air pressure sensor described above.
+Physical activity. This is the reading from your phone’s motion sensors described above. You can say no, and the app keeps working.
 
-Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready.
+Notifications. While it is recording, your phone shows that it is, as Android requires. Beyond that the app sends at most two for each trip: one on your first day to tell you whether recording is working, and one at the end to say your map is ready. It also tells you quietly when you collect a new stamp, without a sound. You can turn that off in your phone’s settings.
 
 After an update to the app, it may also ask you once to open it, so that recording can carry on.
 
@@ -94,3 +96,9 @@ This app is not aimed at children and we do not knowingly collect anything from 
 ## If this policy changes
 
 Any change will appear here and the date at the top will change with it. This page is stored inside the app, so you can always read the version you actually have, even with no signal.
+
+## Getting in touch
+
+If you have a question about any of this, write to slimiedu@gmail.com.
+
+We will not be able to look anything up about your trip, because we do not have it.

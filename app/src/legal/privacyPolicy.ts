@@ -102,10 +102,13 @@ import { CONTACT_SECTION_PT, SECTIONS_PT } from './privacyPolicy.pt.ts';
  * policy inviting people to write to `example@example.com` is worse than one
  * that does not invite them to write at all.
  *
- * It is deliberately not defaulted to the project lead's personal address:
+ * It was deliberately not defaulted to the project lead's personal address:
  * publishing somebody's email in a store listing is their decision to make.
+ * ⚠ **They made it 2026-10-06 (L3):** their Gmail for now, to be replaced by a
+ * Bruma address they intend to create. Change it here; the in-app policy, the
+ * Settings contact row and the generated `docs/privacy-policy.md` follow.
  */
-export const CONTACT_EMAIL: string | null = null;
+export const CONTACT_EMAIL: string | null = 'slimiedu@gmail.com';
 
 export type PolicySection = {
   heading: string;

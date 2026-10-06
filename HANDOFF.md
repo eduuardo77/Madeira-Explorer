@@ -42,9 +42,9 @@ first run after WalkNYC (approved as drawn), whose notifications screen now says
 not debuggable, T-249, T-251 and T-250 in it), for the lead to upload; the next one is version 4; (4) Phase 3, T-233.
 
 **2026-10-06: T-233, the founder stamp, built** (rule, content window, release guard, Medalhas
-section, three art designs at `tools/out/founder-options.html`; seen on the P30 with a probe, real
-data restored). ⚠ `node tools/smoke-release.mjs` now needs **`--internal`** for every testing build:
-it fails while `founderWindow.start` is null, which is deliberate. Waiting on the lead's art pick.
+section, the gold postmark chosen by the lead from three designs, `tools/out/founder.html`; seen on
+the P30 with a probe, real data restored). ⚠ `node tools/smoke-release.mjs` now needs **`--internal`** for every testing build:
+it fails while `founderWindow.start` is null, which is deliberate.
 
 **Traps found this session, each cost time:**
 - **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at

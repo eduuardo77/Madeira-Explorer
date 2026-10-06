@@ -4,18 +4,17 @@
  *     cd app && npm test
  *
  * Geometry is checked here; whether it looks right is judged by eye on
- * `tools/out/founder-options.html` (OQ-9), because a mark that passed every
+ * `tools/out/founder.html` (`tools/preview-founder.mjs`, OQ-9), because a mark that passed every
  * geometry test once rendered as a crosshair (CLAUDE.md).
  */
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { FOUNDER_STYLE, founderElements, type FounderStyle } from './medalArt.ts';
+import { founderElements, type FounderWords } from './medalArt.ts';
 import { CANVAS } from './stampArt.ts';
 
-const STYLES: FounderStyle[] = ['seal', 'medal', 'postmark'];
-const WORDS = { title: 'Fundador', destination: 'Madeira', year: 2026 };
+const WORDS: FounderWords = { title: 'Fundador', destination: 'Madeira', year: 2026 };
 
 /** Every coordinate a path or polygon names. */
 function coordinates(element: ReturnType<typeof founderElements>[number]): number[] {
@@ -26,26 +25,22 @@ function coordinates(element: ReturnType<typeof founderElements>[number]): numbe
   return [...element.d.matchAll(/[MLQ]([^MLQZa-z]+)/g)].flatMap((m) => m[1].trim().split(/[ ,]+/).map(Number));
 }
 
-test('T-233: every design stays inside the stamp canvas', () => {
-  for (const style of STYLES) {
-    for (const element of founderElements(WORDS, style)) {
-      for (const value of coordinates(element)) {
-        assert.ok(Number.isFinite(value), `${style}: ${element.kind} has a non-number`);
-        assert.ok(value >= 0 && value <= CANVAS, `${style}: ${element.kind} reaches ${value}`);
-      }
+test('T-233: the founder stamp stays inside the stamp canvas', () => {
+  for (const element of founderElements(WORDS)) {
+    for (const value of coordinates(element)) {
+      assert.ok(Number.isFinite(value), `${element.kind} has a non-number`);
+      assert.ok(value >= 0 && value <= CANVAS, `${element.kind} reaches ${value}`);
     }
   }
 });
 
 test('T-233: the title is drawn in capitals, with the destination and the year under it', () => {
-  for (const style of STYLES) {
-    const words = founderElements(WORDS, style).flatMap((e) => (e.kind === 'text' ? [e.text] : []));
-    assert.deepEqual(words, ['FUNDADOR', 'MADEIRA · 2026'], style);
-  }
+  const words = founderElements(WORDS).flatMap((e) => (e.kind === 'text' ? [e.text] : []));
+  assert.deepEqual(words, ['FUNDADOR', 'MADEIRA · 2026']);
 });
 
 test('T-233: no year yet, no destination: the line under the title says only what is known', () => {
-  const texts = (words: typeof WORDS | { title: string; destination: string | null; year: number | null }) =>
+  const texts = (words: FounderWords) =>
     founderElements(words).flatMap((e) => (e.kind === 'text' ? [e.text] : []));
   assert.deepEqual(texts({ title: 'Founder', destination: 'Madeira', year: null }), ['FOUNDER', 'MADEIRA']);
   assert.deepEqual(texts({ title: 'Founder', destination: null, year: null }), ['FOUNDER']);
@@ -57,8 +52,4 @@ test('T-233: a long word is condensed to fit, a short one is drawn as it is', ()
   assert.ok(title?.kind === 'text' && title.textLength !== null);
   const short = founderElements(WORDS).find((e) => e.kind === 'text');
   assert.ok(short?.kind === 'text' && short.textLength === null);
-});
-
-test('T-233: the app draws one of the three', () => {
-  assert.ok(STYLES.includes(FOUNDER_STYLE));
 });

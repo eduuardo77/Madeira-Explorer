@@ -543,7 +543,7 @@ section's definition of done.
       fill naming a gradient in another Svg is black on Android; an empty band above the buttons.
       **Left:** *Partilhar* not tried on a phone; on the P30 since 2026-10-05 13:23 (cable field
       build), not yet looked at there. 981 tests.
-- [~] **T-233** **The founder stamp** (D-089 rule 6, plan Phase 3) ⇠ OQ-2, OQ-5, OQ-9. **Built 2026-10-06.**
+- [x] **T-233** **The founder stamp** (D-089 rule 6, plan Phase 3) ⇠ OQ-2, OQ-5, OQ-9. **Built 2026-10-06.**
       `entitlement/founder.ts`: Google's purchase time before `start` plus `months` calendar months
       (UTC), purchases before `start` included (OQ-5); a start late in the month ends on the target
       month's last day. `founderWindow` sits at the top of `pois.json` beside `productId` (the plan
@@ -551,16 +551,17 @@ section's definition of done.
       `tools/smoke-release.mjs` now **fails at once while `start` is null** unless `--internal` says
       it is a testing build; `validate-content.mjs` warns. The passport shows it in a new **Medalhas**
       section under the places, outside the count (OQ-2); the unlock sheet offers it only while the
-      window is open. Art: `passport/medalArt.ts`, three designs on
-      `tools/out/founder-options.html` (seal, medal, gold postmark), the postmark drawn for now.
+      window is open. Art: `passport/medalArt.ts`. ✅ **OQ-9 answered 2026-10-06: the gold
+      postmark (F3)**, picked from three after references (CS2's service medal, real wax seals and
+      passport stamps, Strava's badges, US park cancellations, Discord's Early Supporter); the seal
+      and the medal were deleted. `tools/preview-founder.mjs` → `tools/out/founder.html`.
       Stamps and medals now share one element renderer on each side (`ui/ArtElement.tsx`,
       `elementsBody` in `svg-render.mjs`; the stamps page is byte-identical). **Seen on the P30**
       with a probe (window opened 1 Oct in a field build, a purchase of 5 Oct written into a copy of
       the database): *Carimbo de fundador, Comprado a 5 de outubro de 2026, quando o Bruma era novo*,
       count still 2 of 80; then the clean build and the real data back by checksum (backup
       `Madeira-fieldwork/p30-2026-10-06-t233/`), smoke test passing. 1012 tests.
-      ⚠ **Left:** the project lead picks the design (OQ-9), and the other two are deleted; nobody can
-      see it before the public release sets `start`. The plan's P30 evidence after a real test
+      ⚠ **Left:** nobody can see it before the public release sets `start`. The plan's P30 evidence after a real test
       purchase and a reinstall waits on V2/V10. ⚠ **Found, not touched:** `build-levadas.mjs` now
       fetches a slightly different course for Levada do Barreiro than the committed one (OSM moved);
       the file was put back, the change is the lead's to accept.

@@ -4912,7 +4912,8 @@ the project lead accepted all nine:
 - **OQ-8** The project lead reads the Portuguese of the lock, offer and pending text aloud before
   it ships.
 - **OQ-9** Medal and founder art drawn in-house from the stamp system, approved by eye through the
-  preview renderer.
+  preview renderer. Founder stamp: **the gold postmark**, chosen 2026-10-06 from three drawn designs
+  (T-233); the set medals are still to be drawn (T-235).
 
 **"Ruled out" is not "never"** (the project lead, same day): a subscription, ads, accounts and the
 rest are a firm no today and can be reopened by a new decision. Rule 9 is the exception, because

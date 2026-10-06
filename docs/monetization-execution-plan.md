@@ -451,8 +451,8 @@ account owner, and several involve bank and tax details that the assistant must 
 #### T-233 Founder stamp ⇠ T-156a, T-156c, OQ-2, OQ-5, OQ-9
 
 ✅ **Built 2026-10-06** (TASKS T-233). Two departures: `founderWindow` is top level in `pois.json`, since
-`destination` is a string; and the release guard fails unless `--internal` is passed. The art waits
-on OQ-9's pick.
+`destination` is a string; and the release guard fails unless `--internal` is passed. OQ-9 answered the
+same day: the gold postmark.
 
 - **New:** `entitlement/founder.ts`: `isFounder(purchaseTimeMs, window)`, with `window.start`
   possibly null. Tests: null start means nobody; the last millisecond inside the window; the

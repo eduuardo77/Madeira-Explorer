@@ -2,7 +2,7 @@
  * The founder stamp, drawn (T-233); the set medals join it in T-235.
  *
  * **This component decides nothing**, like `StampArt`: `passport/medalArt.ts`
- * composes the drawing and `tools/preview-founder-options.mjs` replays the same
+ * composes the drawing and `tools/preview-founder.mjs` replays the same
  * elements for the page the project lead approves by eye (OQ-9).
  */
 

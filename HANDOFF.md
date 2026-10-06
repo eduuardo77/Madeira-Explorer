@@ -6,6 +6,15 @@ Older sections further down are dated and partly superseded; trust the newest on
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
+## ⚠⚠⚠ 2026-10-06: START HERE, the execution plan
+
+**Work from `docs/execution-plan-2026-10.md`, in its order.** It came from the third review
+(`docs/app-review-2026-10-06.md`, strict **9.1 / 20**, WalkNYC ≈ 14) and aims at ≥ 15. Its §0 says
+how to use it, §3 the three decisions to ask the lead first, §7 the working notes and traps. State
+at hand-off: all work committed and pushed (`0842c22` and after), 1045 tests, the P30 on a field
+build (version code 3) with the lead's real data, the version 3 AAB built for internal testing
+(`Madeira-fieldwork/apks/bruma-0.1.0-vc3.aab`, not yet uploaded by the lead).
+
 ## ⚠⚠ 2026-10-05: where the last session ended — read this first
 
 **Monetisation (`docs/monetization-execution-plan.md`).** Phase 0 done (app in Play Console, upload

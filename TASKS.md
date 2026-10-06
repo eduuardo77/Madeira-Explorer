@@ -53,7 +53,18 @@ Legend: `[x]` done · `[ ]` not started · `[~]` in progress · `[!]` blocked
 
 ---
 
-## Release readiness — the plan from the 2026-09-22 review ⚠ CURRENT PRIORITY
+## ⚠⚠ CURRENT PRIORITY: the execution plan to exceed WalkNYC (2026-10-06)
+
+**`docs/execution-plan-2026-10.md` is the order of work.** Target: strict score ≥ 15 / 20 (today
+9.1, `docs/app-review-2026-10-06.md`). It supersedes the order below and the monetisation plan's
+phases 6 and 7, without cancelling their tasks. Reserved IDs: **T-253 to T-271**. Phases: 1 fix
+what users notice (T-253 replay start, T-254 jank, T-255 one voice, T-256 place card, T-257 icon);
+2 prove the core (T-246, T-205, T-054, T-258, T-259); 3 home and depth (T-260, T-220, T-261, T-262,
+T-201, T-263); 4 compliance and store (T-264 to T-269, T-123, T-160a); 5 verification (T-270,
+T-239, T-207, T-271); 6 launch (T-137). Lead decisions to ask first: L1 voice, L2 battery
+permission, L3 privacy contact.
+
+## Release readiness — the plan from the 2026-09-22 review (order superseded 2026-10-06)
 
 **Added 2026-09-23, approved by the project lead.** Source: `docs/app-review-2026-09-22.md` —
 **7/20, not an MVP, not publishable.** Finding IDs (P0-1…P2-10) refer to that document. The

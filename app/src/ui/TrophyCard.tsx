@@ -20,6 +20,7 @@ import { t } from '../i18n';
 import type { Category } from '../content/contentPack';
 import { designFor } from '../passport/stampArt';
 import { REFUSAL_KEYS, shareCardImage } from '../souvenir/shareTrip';
+import StampSheen from './StampSheen';
 import StampArt from './StampArt';
 import { postmarkFor } from './postmark';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
@@ -71,6 +72,7 @@ export default function TrophyCard({
   onClose: () => void;
 }) {
   const reduceMotion = useReduceMotion();
+  const design = designFor(stamp.placeId, stamp.category);
   const anim = useEntrance(reduceMotion, medal?.stamps.length ?? 0);
   const shareRef = useRef<View>(null);
 
@@ -126,14 +128,18 @@ export default function TrophyCard({
                 { opacity: anim.rise, transform: [{ translateY: anim.riseY }, { scale: anim.riseScale }, { translateY: anim.float }] },
               ]}
             >
-              <StampArt
-                placeId={`trophy-${stamp.placeId}`}
-                design={designFor(stamp.placeId, stamp.category)}
-                name={stamp.name}
-                collected
-                postmark={postmarkFor(awardedTs)}
-                size={STAMP_SIZE}
-              />
+              {/* T-236: a still band of light, the stamp's gloss (D-089 rule 7). */}
+              <View>
+                <StampArt
+                  placeId={`trophy-${stamp.placeId}`}
+                  design={design}
+                  name={stamp.name}
+                  collected
+                  postmark={postmarkFor(awardedTs)}
+                  size={STAMP_SIZE}
+                />
+                <StampSheen id={`trophy-${stamp.placeId}`} design={design} size={STAMP_SIZE} />
+              </View>
             </Animated.View>
             <Animated.View style={{ opacity: anim.rise }}>
               <Svg width={190} height={22} viewBox="0 0 190 22">

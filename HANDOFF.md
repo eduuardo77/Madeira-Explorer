@@ -62,6 +62,10 @@ trip, so nothing was lost but five still minutes. And close pop-ups with the Bac
 at the bottom: *Fechar* sits over *Começar passeio*, and a tap that lands after the pop-up has
 gone starts an outing.
 
+**2026-10-06: Phase 5 closed simply (T-236):** a still band of light on the trophy's stamp, no tilt
+(the lead's choice; T-237 set aside with what a tilt would need). Next: **Phase 6, privacy and store
+paperwork** (T-238), which the public release cannot ship without.
+
 **Traps found this session, each cost time:**
 - **A test purchase needs the Play install.** A build installed by cable gets `item-unavailable` at
   every attempt (Google sells only to the copy it signs). And **License testing is not the

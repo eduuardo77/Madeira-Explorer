@@ -4857,6 +4857,12 @@ critical path.
    phone's motion sensor and a metallic sheen crosses it. The free five get the full finish, so
    stamp six is felt. **Real 3D inspect is the long-term goal** (the project lead's reference: the
    medal inspect in CS2), not v1.
+   ⚠ **Amended 2026-10-06 (T-236), the project lead's choice: shine only, no tilt.** One still,
+   faint band of white light on the stamp, shown only on the trophy card, the one place a collected
+   stamp is shown large (OQ-4 named the place card and the unlock sheet's hero; since T-251 and
+   D-097 the first is the trophy and the second a frosted fan). No sensor. A tilting version was
+   built and set aside: it needed a patch to expo-sensors (which runs the accelerometer at its
+   fastest rate on Android 10 and at 5 Hz on Android 12+), and time is better spent on the release.
 8. **The video is not in v1 (study Q5, path A).** v1 sells stamps; the video limit arrives with
    the export (T-105b-v2), which is additive because no one ever had a clean exported video. When
    it exists: **free** carries a **medium mark in the lower third** (5.2% of the frame in the

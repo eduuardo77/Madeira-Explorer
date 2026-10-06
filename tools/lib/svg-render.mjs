@@ -22,6 +22,7 @@ import {
   toPolygon,
 } from '../../app/src/passport/stampArt.ts';
 import { RIM_PAD_UNITS, rimElements } from '../../app/src/passport/stampRim.ts';
+import { sheenStops } from '../../app/src/passport/stampSheen.ts';
 import { projector } from '../../app/src/souvenir/frame.ts';
 import { CATEGORY_COLOUR, stampMarkPoints } from '../../app/src/souvenir/filmPaint.ts';
 
@@ -98,7 +99,7 @@ export function stampSvg(id, name, category, collected, extraStyle = '', motif =
  * compares a *proposed* colourway (T-203) while every shape, emblem and band
  * still comes from `stampElements`, i.e. from what ships.
  */
-export function stampSvgWithDesign(id, design, name, collected, extraStyle = '', rim = null, postmark = null) {
+export function stampSvgWithDesign(id, design, name, collected, extraStyle = '', rim = null, postmark = null, sheen = null) {
   const elements = [
     ...(rim === null ? [] : rimElements(design, rim)),
     ...stampElements(design, name, collected, postmark),
@@ -115,8 +116,25 @@ export function stampSvgWithDesign(id, design, name, collected, extraStyle = '',
 
   return `<svg viewBox="${-pad} ${-pad} ${CANVAS + 2 * pad} ${CANVAS + 2 * pad}" style="transform: rotate(${design.tiltDeg}deg);${extraStyle}">
       <defs><clipPath id="panel-${id}"><polygon points="${panelPoints}" /></clipPath></defs>
-      ${body}
+      ${body}${sheen === null ? '' : `
+      ${sheenLayer(id, design, sheen)}`}
     </svg>`;
+}
+
+/**
+ * The band of light over a held stamp (T-236), as `ui/StampSheen.tsx` draws
+ * it: `stampSheen.ts`'s stops along the diagonal, clipped to the stamp's cut
+ * outline so it never spills onto the page behind.
+ */
+export function sheenLayer(id, design, sheen) {
+  const stops = sheenStops(sheen)
+    .map((stop) => `<stop offset="${stop.offset}" stop-color="#FFFFFF" stop-opacity="${stop.opacity}" />`)
+    .join('');
+  return `<defs>
+        <linearGradient id="sheen-${id}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${CANVAS}" y2="${CANVAS}">${stops}</linearGradient>
+        <clipPath id="sheen-clip-${id}"><polygon points="${toPolygon(design.cutOutline)}" /></clipPath>
+      </defs>
+      <rect x="0" y="0" width="${CANVAS}" height="${CANVAS}" fill="url(#sheen-${id})" clip-path="url(#sheen-clip-${id})" />`;
 }
 
 /**

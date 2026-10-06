@@ -501,6 +501,8 @@ same day: the gold postmark.
 
 #### T-236 Sheen logic and the static sheen ⇠ OQ-4
 
+✅ **Done 2026-10-06, simplified** (TASKS T-236, D-089 rule 7 amended): a still band on the trophy's stamp only; no tilt, no sensor, no grid sheen.
+
 - **New:** `passport/stampSheen.ts`, pure. Input: a gravity vector from the sensor (or none).
   Output: tilt angles (clamped to a few degrees), the sheen band's position and strength.
   A low-pass filter so the stamp moves smoothly, not jitters. A **static** output for the passport
@@ -513,6 +515,8 @@ same day: the gold postmark.
   gives the same output.
 
 #### T-237 Tilt on the device ⇠ T-236
+
+⏸ **Set aside 2026-10-06** by the project lead (shine only). Found while spiking it: expo-sensors registers at `SENSOR_DELAY_FASTEST` below Android 12 (500 Hz on the P30) and `SENSOR_DELAY_NORMAL` from 12, whatever `setUpdateInterval` says; a tilt would need a patch to `SensorSubscription.kt`.
 
 - **Start with a spike, and report its number honestly:** on the P30, redraw one stamp at 30 and
   at 60 updates a second and measure the frame time (`dumpsys gfxinfo`). Redrawing an SVG that

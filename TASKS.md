@@ -603,6 +603,18 @@ section's definition of done.
       (Android draws the bold wider and ignores `textLength` there): long names are now set smaller
       before any squeeze. ⚠ **Left:** a stamp that completes a set gets the plain *Novo carimbo!*
       pop-up, nothing about the medal (done the same day, below).
+- [x] **T-236** **Shine on the trophy's stamp** (plan Phase 5, D-089 rule 7 amended). **Done 2026-10-06.**
+      The project lead chose **shine only, kept simple** over tilt (*"we've got more important things
+      to use our time"*). One still, faint band of white across the diagonal (`passport/stampSheen.ts`,
+      40% at the peak), clipped to the stamp's cut outline, drawn on its own layer over the trophy's
+      stamp (`ui/StampSheen.tsx`); the preview renderer draws the same stops
+      (`tools/preview-sheen.mjs` → `tools/out/sheen.html`). The passport grid has none: at 84 dp it
+      could not be seen. Seen on the P30. No sensor runs.
+- [ ] **T-237** ⏸ **Tilt, set aside 2026-10-06.** Built and removed the same day. If it returns:
+      expo-sensors registers at `SENSOR_DELAY_FASTEST` below Android 12 (seen: 500 Hz on the P30,
+      `dumpsys sensorservice` *samplingPeriod=2000us*) and `SENSOR_DELAY_NORMAL` (about 5 Hz) from 12,
+      whatever `setUpdateInterval` asks; `SensorSubscription.kt` needs a patch and `expo-sensors` a
+      `buildFromSource` entry first.
 - [~] **T-241** **bruma.lol, a WalkNYC-style page** (project lead, 2026-09-26). ✅ `site/`: `index.html`
       (name, promise, Play button marked *coming soon*, five screen slots, highlights, FAQ, about) and
       `privacy.html`, **generated** by `node tools/build-site.mjs` from `privacyPolicy.ts`, like

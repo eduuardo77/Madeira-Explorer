@@ -1110,6 +1110,10 @@ options as language rows; it did not search plural labels). Fixed in the script.
 
 - [ ] **T-208** **Re-run the review at each gate**, using the review's §2 method and weights, and
       record the score. No predicted scores.
+      **2026-10-06:** `docs/app-review-2026-10-06.md`. Strict rubric **9.1 / 20** (was 6.7), original
+      **9.5 ≈ 10** (was 8). The core now works outdoors; held down by no trip ended, a performance
+      regression (6,3% janky frames), the replay opening on West Africa, the template icon and the
+      unchanged store paperwork. Its §6 is the ordered list to reach a shippable beta.
 - [x] **T-209** ⚠ **Found on the P30 2026-09-24: Settings crashed the app, and took the recorder
       with it.** Tapping *Licenças de código aberto* closed the app. Logcat: *"Rendered fewer
       hooks than expected"* in `SettingsScreen`. `donateWalk` (a `useCallback`) had sat below

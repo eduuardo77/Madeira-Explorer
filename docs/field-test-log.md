@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-06 | Car to the gym and back, 1.2 km each way | P30 | Equilibrado | ⚠ there: recorded and drawn; back: nothing |
 | 2026-10-06 | Motorbike ride, 83 min, 32.7 km, iPhone alongside | P30 | Poupança | ❌ 29 points; a 33 min hole while riding |
 | 2026-10-05 | First real purchase, then refunded | P30 (Play install) | n/a | ✅ bought, unlocked, acknowledged |
 | 2026-10-04 | Outing by car and on foot, 3h13, 24 km, iPhone alongside | P30 | Preciso | ✅ 1,088 points; 2 stamps; backup and restore proven |
@@ -27,6 +28,25 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-06 (evening): car to the gym and back, Equilibrado
+
+- **Setup:** P30, build installed 17:03 by cable over the top (includes T-252; data and the Huawei
+  setting kept). Huawei launch setting **manual**, set an hour before. Tier **Equilibrado**, set at
+  17:16 with the app open, just before leaving. No iPhone.
+- **There (17:17 to 17:25):** recorded. A point every 13 to 27 s at ±3 to 5 m, matched to the roads
+  as one line. The app had been opened a minute before leaving.
+- **At the gym (17:25 to 18:18):** a few points, as it should be when still. They sat in the
+  recorder's memory for 80 minutes (the 1 km deferral is never reached standing still) and were
+  saved only when the app was opened at 18:44.
+- **Back:** **nothing.** No point between 18:18:21 at the gym and 18:44:38 at home. The phone's
+  log from 18:33 shows almost no activity and no location work at all until the screen came on at
+  18:44:37. The silence notice was showing, and *Reiniciar* was tapped.
+- **So:** the launch setting alone did not fix it. Recording works just after the app has been
+  open and stops once the phone has slept for a while. On 4 October (Preciso) the phone kept a
+  point every 10 s for over an hour twice with no restart, so the next test is Preciso, in a
+  pocket, screen off, app not opened.
+- Data: read-only pull at 18:50, scratch only.
 
 ### 2026-10-06: motorbike ride, the recorder barely recorded
 

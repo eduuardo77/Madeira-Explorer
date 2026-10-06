@@ -46,6 +46,7 @@ import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
 import TrophyCard from './TrophyCard';
 import { trophyFacts } from '../places/trophy';
+import { getMedals } from '../content/medalCatalogue';
 import { formatDistance } from '../places/placeCard';
 import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
@@ -658,7 +659,7 @@ function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], la
   const places = getContentPack().places;
   // The trip's stamps in the order they were earned.
   const order = [...awards].sort((a, b) => a.awarded_ts - b.awarded_ts).map((award) => award.place_id);
-  const facts = trophyFacts(place.id, places, order);
+  const facts = trophyFacts(place.id, places, order, getMedals());
   const award = awards.find((candidate) => candidate.place_id === place.id);
   const date =
     award === undefined

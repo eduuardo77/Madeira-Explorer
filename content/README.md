@@ -251,6 +251,20 @@ validator reports it. It counts how many places have a line. The draft to veto i
 
 ---
 
+## `medals.json` — the set medals, hand-written (T-234, D-089, OQ-3)
+
+```json
+{ "formatVersion": 1,
+  "medals": [ { "id": "region-santana", "rule": { "region": "santana" } },
+              { "id": "category-levada", "rule": { "category": "levada" } } ] }
+```
+
+A medal is earned by collecting every place its rule picks out: every place of a municipality
+(`region`, an id from `regions.json`) or of a category. Today: one per municipality with at least
+three places, and all the levadas. ⚠ **A set needs at least 3 places** (a medal for one stop is not
+a set), every region must exist, and ids are unique; `validate-content.mjs` refuses otherwise.
+**Never change an `id` after release.** Adding a set later is fine, and never takes anything away.
+
 ## `levadas.json` — generated, never hand-edited (D-055)
 
 The course of each curated levada, as drawn when the user taps *Show on map*. One feature per

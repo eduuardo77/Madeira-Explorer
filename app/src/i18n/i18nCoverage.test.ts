@@ -290,6 +290,8 @@ const DIARY_ONLY: Record<string, string> = {
     'validation messages for a malformed content pack; validate-content.mjs refuses to ship one',
   'content/regionPack.ts':
     'validation messages for a malformed region pack; build-regions.mjs refuses to ship one',
+  'content/medalPack.ts':
+    'validation messages for a malformed medal pack; validate-content.mjs refuses to ship one',
   'map/mapAssets.ts': 'font family names and bundled asset paths, not prose',
   'recording/geofenceManager.ts': 'geofence diary lines, read on the debug screen only',
   'recording/tripRecording.ts': 'recorder diary lines, read on the debug screen only',

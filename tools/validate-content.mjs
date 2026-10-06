@@ -38,6 +38,9 @@ const { countByCategory, parseContentPack } = await import(
 // of "how far apart are two points" would let a curator's duplicate check
 // disagree with what the phone actually does.
 const { distanceM } = await import('../app/src/recording/distance.ts');
+// The medal sets' own parser and checks, for the same reason: the validator and
+// the phone must agree on what a medal is (T-234).
+const { medalContentProblems, parseMedalPack } = await import('../app/src/content/medalPack.ts');
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -414,6 +417,29 @@ async function main() {
         place.id,
         `${metres} m out to sea — no geofence there can be reached on foot. Check the coordinate against OSM.`
       );
+    }
+  }
+
+  // The set medals (T-234, OQ-3): every entry parses, every region exists,
+  // and every set has at least three places. Checked against the pack here
+  // because a medal for one stop is not a set, and a typo in a region id would
+  // otherwise be a medal nobody could ever earn.
+  const medalPath = path.resolve(repositoryRoot, 'content', 'medals.json');
+  let medalRaw = null;
+  try {
+    medalRaw = JSON.parse(await readFile(medalPath, 'utf8'));
+  } catch {
+    error('medals.json', 'missing or unreadable - the passport would have no set medals (D-089)');
+  }
+  if (medalRaw !== null) {
+    const medalPack = parseMedalPack(medalRaw);
+    for (const problem of medalPack.problems) {
+      error(problem.where, problem.problem);
+    }
+    if (regions.length > 0) {
+      for (const problem of medalContentProblems(medalPack.medals, places, new Set(regionNames.keys()))) {
+        error('medals.json', problem);
+      }
     }
   }
 

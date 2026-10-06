@@ -7,26 +7,25 @@
  * what the stamp means:
  *
  * - **its place in the trip**: the 2nd stamp of this trip;
- * - **the municipality's medal** it counts towards (D-089, OQ-3: a set for each
- *   municipality with at least three places), with which of them are collected;
+ * - **the municipality's medal** it counts towards (D-089, OQ-3), with which of
+ *   its places are collected. The sets are `content/medals.json`'s, the same
+ *   ones the passport shows (T-234), so the two can never disagree;
  * - **the next stamp**: the nearest place not collected yet, in a straight
  *   line, and whether it counts for the same medal.
  *
- * Pure: the places, and the trip's award order, come in.
+ * Pure: the places, the medal sets and the trip's award order come in.
  */
 
 import type { Category } from '../content/contentPack.ts';
+import { inSet, type MedalDefinition } from '../content/medalPack.ts';
 import { distanceM } from '../recording/distance.ts';
-
-/** OQ-3: a municipality with fewer places than this has no medal. */
-export const MEDAL_MINIMUM = 3;
 
 /** The parts of a content place a trophy reads. */
 export interface TrophyPlace {
   id: string;
   name: string;
   category: Category;
-  regionId: string | null;
+  regionId: string;
   geofences: ReadonlyArray<{ lat: number; lon: number }>;
 }
 
@@ -53,29 +52,33 @@ export interface TrophyFacts {
  * @param placeId the trophy's stamp
  * @param places every place in the pack
  * @param tripOrder the trip's collected place ids, in the order they were earned
+ * @param medals the medal sets (`content/medals.json`)
  */
 export function trophyFacts(
   placeId: string,
   places: readonly TrophyPlace[],
-  tripOrder: readonly string[]
+  tripOrder: readonly string[],
+  medals: readonly MedalDefinition[]
 ): TrophyFacts {
   const collected = new Set(tripOrder);
   const self = places.find((each) => each.id === placeId);
   const index = tripOrder.indexOf(placeId);
 
-  const sameRegion =
-    self === undefined || self.regionId === null
-      ? []
-      : places.filter((each) => each.regionId === self.regionId);
+  // The municipality's set this place belongs to, if content defines one.
+  const set =
+    self === undefined
+      ? undefined
+      : medals.find((each) => 'region' in each.rule && inSet(each.rule, self));
+  const members = set === undefined ? [] : places.filter((each) => inSet(set.rule, each));
   const medal =
-    self !== undefined && self.regionId !== null && sameRegion.length >= MEDAL_MINIMUM
-      ? {
+    self === undefined || set === undefined
+      ? null
+      : {
           regionId: self.regionId,
-          placeIds: sameRegion.map((each) => each.id),
-          collected: sameRegion.filter((each) => collected.has(each.id)).length,
-          total: sameRegion.length,
-        }
-      : null;
+          placeIds: members.map((each) => each.id),
+          collected: members.filter((each) => collected.has(each.id)).length,
+          total: members.length,
+        };
 
   let next: TrophyFacts['next'] = null;
   const here = self?.geofences[0];

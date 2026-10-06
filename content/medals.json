@@ -1,0 +1,15 @@
+{
+  "formatVersion": 1,
+  "medals": [
+    { "id": "region-porto-moniz", "rule": { "region": "porto-moniz" } },
+    { "id": "region-funchal", "rule": { "region": "funchal" } },
+    { "id": "region-santana", "rule": { "region": "santana" } },
+    { "id": "region-machico", "rule": { "region": "machico" } },
+    { "id": "region-calheta", "rule": { "region": "calheta" } },
+    { "id": "region-sao-vicente", "rule": { "region": "sao-vicente" } },
+    { "id": "region-camara-de-lobos", "rule": { "region": "camara-de-lobos" } },
+    { "id": "region-ribeira-brava", "rule": { "region": "ribeira-brava" } },
+    { "id": "region-santa-cruz", "rule": { "region": "santa-cruz" } },
+    { "id": "category-levada", "rule": { "category": "levada" } }
+  ]
+}

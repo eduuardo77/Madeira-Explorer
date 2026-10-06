@@ -19,7 +19,9 @@ import {
   restorePurchases,
   subscribe,
 } from '../entitlement/billingSync';
+import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
+import { founderWindowOpen } from '../entitlement/founder';
 import { stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
 import type { PassportStamp } from './PassportView';
@@ -108,8 +110,10 @@ export default function UnlockSheet({
     state,
     price,
     waiting: waiting.length,
-    // Each turns on in the commit that builds it (T-235, T-233).
-    offers: { medals: false, founder: false },
+    // Each turns on in the commit that builds it (T-235 for medals). The
+    // founder stamp is offered only while buying now would still earn it:
+    // never while its start is unset, so no testing build promises it (T-233).
+    offers: { medals: false, founder: founderWindowOpen(Date.now(), getContentPack().founderWindow) },
     language: deviceLanguage(),
   });
 

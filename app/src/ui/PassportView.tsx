@@ -64,6 +64,8 @@ import { stripStampSize, type StripGeometry } from '../passport/stripLayout';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
+import type { FounderWords } from '../passport/medalArt';
+import MedalArt from './MedalArt';
 import StampArt from './StampArt';
 import UnlockNudge from './UnlockNudge';
 import { postmarkFor } from './postmark';
@@ -254,7 +256,19 @@ export type PassportViewProps = {
    */
   waiting?: PassportStamp[];
   onUnlock?: () => void;
+  /**
+   * The founder stamp, for a buyer inside the window (T-233), or absent. Its
+   * own Medals section, under the places: it is not a place and is never in
+   * the count or the rank (OQ-2). The set medals join it in T-235.
+   */
+  founder?: FounderCard;
 };
+
+/** The founder stamp's card: what its face says, and the purchase day, written out. */
+export type FounderCard = { words: FounderWords; boughtOn: string };
+
+/** The founder stamp's size in its card, near a passport stamp's. */
+const MEDAL_SIZE = 84;
 
 /**
  * The mark on an earned stamp the user has not paid to see (T-155, D-072).
@@ -287,6 +301,31 @@ function LockBadge() {
         />
         <Rect x={2.3} y={5.2} width={7.4} height={5.3} rx={1.2} fill={colors.text} />
       </Svg>
+    </View>
+  );
+}
+
+/**
+ * The Medals section, holding the founder stamp for now (T-233). Under the
+ * places, and outside their count and rank (OQ-2).
+ */
+function FounderSection({ founder }: { founder: FounderCard }) {
+  const name = t('medal.founder.name');
+  const detail = t('medal.founder.detail', { date: founder.boughtOn });
+  return (
+    <View style={styles.section}>
+      <View style={styles.rowHeader}>
+        <Text style={styles.rowTitle} accessibilityRole="header">
+          {t('passport.medals')}
+        </Text>
+      </View>
+      <View style={styles.medalCard} accessible accessibilityLabel={`${name}. ${detail}`}>
+        <MedalArt words={founder.words} size={MEDAL_SIZE} />
+        <View style={styles.medalWords}>
+          <Text style={styles.medalName}>{name}</Text>
+          <Text style={styles.medalDetail}>{detail}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -466,6 +505,7 @@ export default function PassportView({
   onEndTrip,
   waiting,
   onUnlock,
+  founder,
 }: PassportViewProps) {
   const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
@@ -568,6 +608,8 @@ export default function PassportView({
         />
       ))}
 
+      {founder === undefined ? null : <FounderSection founder={founder} />}
+
       {awards.length > 0 ? (
         <Text style={styles.footnote}>
           {/* ⚠ T-202: "Most recent:" was English on every phone, as JSX text
@@ -648,6 +690,17 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.sm,
   },
+  medalCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: album.surface,
+    borderRadius: radius.card,
+    padding: spacing.sm + 4,
+  },
+  medalWords: { flex: 1, gap: 2 },
+  medalName: { color: album.text, fontSize: fontSize.body, fontWeight: '700' },
+  medalDetail: { color: album.textMuted, fontSize: fontSize.small },
   rowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

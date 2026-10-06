@@ -18,7 +18,8 @@ import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
-import { BETA_BUILD, isUnlocked } from '../entitlement/entitlementStore';
+import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitlementStore';
+import { founderYear, isFounder } from '../entitlement/founder';
 import { visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
@@ -40,7 +41,7 @@ import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
 import type { ShareCard } from '../souvenir/shareCard';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
-import PassportView, { type PassportStamp } from './PassportView';
+import PassportView, { type FounderCard, type PassportStamp } from './PassportView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
 import TrophyCard from './TrophyCard';
@@ -50,6 +51,28 @@ import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 import { StatusBar } from 'expo-status-bar';
+
+/**
+ * The founder stamp's card when this phone's purchase earned one (T-233), else
+ * null. Google's purchase time against the pack's window; a beta build has no
+ * purchase, so no founder (plan V15).
+ */
+function founderCard(boughtMs: number | null, language: Language): FounderCard | null {
+  const pack = getContentPack();
+  if (boughtMs === null || !isFounder(boughtMs, pack.founderWindow)) return null;
+  return {
+    words: {
+      title: t('medal.founder.title'),
+      destination: pack.destination,
+      year: founderYear(pack.founderWindow),
+    },
+    boughtOn: new Date(boughtMs).toLocaleDateString(DATE_LOCALES[language], {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
+  };
+}
 
 export default function PassportScreen({
   onClose,
@@ -101,6 +124,8 @@ export default function PassportScreen({
    * nothing drawable was left. A resident is exactly that case.
    */
   const [canWatch, setCanWatch] = useState(false);
+  /** The founder stamp, when this phone's purchase earned one (T-233). */
+  const [founder, setFounder] = useState<FounderCard | null>(null);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
   /**
@@ -157,6 +182,8 @@ export default function PassportScreen({
           visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
         );
 
+        const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
+
         if (!cancelled) {
           setProgress(nextProgress);
           setTripOpen(active !== null);
@@ -164,6 +191,7 @@ export default function PassportScreen({
           setStamps(resolveStamps(awardedIds, locked));
           setConfirmation(prompt?.prompt ?? null);
           setConfirmationEvidence(prompt?.evidence ?? '');
+          setFounder(nextFounder);
         }
 
         // After the page is on screen: this reads and masks the whole trace,
@@ -395,6 +423,7 @@ export default function PassportScreen({
           waiting={stamps.filter((stamp) => stamp.locked === true)}
           // D-097, R1: the reminder, only where something can be bought.
           onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
+          founder={founder ?? undefined}
         />
       )}
 

@@ -425,6 +425,27 @@ usable.
 are ordinary; whether the emulator now *feels* fine is something only the project lead can say.
 A backup of the original sits beside it as `config.ini.bak-<epoch>`.
 
+## ⚠ The emulator was costing 78% of the PC, 2026-10-06
+
+**The project lead:** the emulator uses too much CPU. Measured over an idle stretch with
+`Get-Process qemu-system-x86_64`, as a share of all 12 logical cores:
+
+| | Before | After |
+|---|---|---|
+| GPU | `swiftshader_indirect` (software) | `auto` (picks the GTX 1060) |
+| Screen | 1080 x 2400, 420 dpi | 720 x 1560, 320 dpi: the P30's 360 x 780 dp |
+| Cores | 4 | 2 |
+| Audio | on | off |
+| **CPU, idle** | **78%** | **6%** |
+
+The Google map draws under `auto`, also after a force-stop and relaunch, which is the case
+that went black in August. If it ever goes black again, `MADEIRA_GPU=swiftshader_indirect` is
+the fallback. The AVD settings live in `~/.android/avd/madeira.avd/config.ini` (backup beside
+it, `config.ini.bak-<epoch>`); `fetch-android-emulator.sh` now writes them for a new AVD.
+
+⚠ **Third-party Play apps will not run here.** WalkNYC, copied from the P30, installs and then
+refuses: *"Check that Google Play is enabled on your device"*. This image has no Play Store.
+
 ## ⚠ A second SDK on the machine, and Gradle will not choose, 2026-08-28
 
 Found while building the first dev-client APK for a real phone. Every Gradle build from a fresh

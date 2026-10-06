@@ -46,7 +46,16 @@ fi
 # place. `-no-snapshot-load` forces a genuinely cold boot:
 #
 #     MADEIRA_COLD=1 bash tools/run-emulator.sh
-GPU="${MADEIRA_GPU:-swiftshader_indirect}"
+# ⚠⚠ **REVERSED 2026-10-06: the default is now `auto`, the graphics card.** The
+# project lead reported the emulator using too much of the PC. Measured with
+# `Get-Process qemu-system-x86_64` over an idle stretch: **78% of the whole PC**
+# with swiftshader at 1080x2400 and 4 cores, **6%** with `auto` (it picks the
+# GTX 1060) at 720x1560, 2 cores, no audio. Under `auto` the Google map drew,
+# and still drew after a force-stop and relaunch (0% black pixels in the map
+# area). `angle_indirect` is refused by this emulator ("not a valid option").
+# The history above stays because it may come back: if the map is black, run
+# MADEIRA_GPU=swiftshader_indirect bash tools/run-emulator.sh and cold-boot.
+GPU="${MADEIRA_GPU:-auto}"
 COLD=""
 if [ -n "${MADEIRA_COLD:-}" ]; then
   COLD="-no-snapshot-load"

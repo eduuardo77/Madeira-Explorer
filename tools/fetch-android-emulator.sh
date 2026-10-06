@@ -108,6 +108,16 @@ if ! "$AVDMANAGER" list avd 2>/dev/null | grep -q "Name: $AVD_NAME"; then
     --force
 fi
 
+# The P30's layout (360 x 780 dp) at a third fewer pixels than a Pixel 6, two
+# cores and no audio: what the screen is drawn at is most of what the emulator
+# costs the PC (docs/dev-build.md, 2026-10-06).
+CONFIG="$HOME/.android/avd/$AVD_NAME.avd/config.ini"
+if [ -f "$CONFIG" ]; then
+  sed -i 's/^hw.lcd.width = .*/hw.lcd.width = 720/; s/^hw.lcd.height = .*/hw.lcd.height = 1560/;
+          s/^hw.lcd.density = .*/hw.lcd.density = 320/; s/^hw.cpu.ncore = .*/hw.cpu.ncore = 2/;
+          s/^hw.audioInput = .*/hw.audioInput = no/; s/^hw.audioOutput = .*/hw.audioOutput = no/' "$CONFIG"
+fi
+
 cat <<'DONE'
 
 Done. Two commands from here, both from the repo root:

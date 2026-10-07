@@ -142,9 +142,12 @@ permission, L3 privacy contact.
       path, read off the P30: *Definições, Aplicações, **Iniciação de aplicações*** (the T-210 note's
       "Iniciar aplicações" was wrong). A button straight to it is not possible: EMUI 12 refuses its
       `HSM_STARTUPAPP_MANAGER` action and both activities to other apps (tried from the shell).
-      Seen on the P30: the Settings row. **Left:** the measurement on *automatic*, which needs the lead
-      to flip that switch (a phone setting); the first-run card unseen on the phone (onboarding is
-      behind us there); the day-after check (T-049) after an update.
+      Seen on the P30: the Settings row. ✅ **On *automatic*** (the lead flipped it, 2026-10-07):
+      `install -r` at 15:44:07; Android finished the `MY_PACKAGE_REPLACED` broadcast at 15:44:30
+      **without starting the app**: a minute later no process, no recorder and **no notice**. So on
+      EMUI's default an update stops recording silently, and the manual setting is what lets the
+      notice through: the guidance is the fix, not a nicety. **Left:** the first-run card unseen on
+      the phone (onboarding is behind us there); the day-after check (T-049) after an update.
 - [x] **T-262** Stats that mean something. **Done 2026-10-07, the lead's option A** (of three drawn
       by `tools/preview-stats-options.mjs --db <copy>`: a line, a row of four, a card): under
       "lugares visitados", *"47 km de estradas acesas em 2 dias"*, and *"N km em todas as viagens"* in

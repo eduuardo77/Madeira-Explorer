@@ -5474,3 +5474,29 @@ app. Two voices read as two authors.
 **Alternatives considered:** *você* throughout (rejected: colder, and it would mean rewriting the
 screens the lead approved most recently); leaving the split (rejected: a craft and localisation
 defect the review scored).
+
+## D-099 — Watching a trip, WalkNYC's way: a viewer by day, a timelapse, a picture to share
+
+**Status: Accepted 2026-10-07** by the project lead. Built in T-253 and T-253b.
+
+**The decision.** "Ver a tua viagem" opens a **trip viewer** modelled on WalkNYC's walk viewer:
+a still map framed on one **day** (the lead's option B of three drawn; a holiday day is the nearest
+thing to a WalkNYC walk), that day's roads bright over the rest of the trip pale, a dark time tag
+on each stamp earned that day, a round back button, a "Dia 2 de 2" pill, and one card at the
+foot with arrows between days and the day's figures. Beside the back button, **▶ opens the
+timelapse**, WalkNYC's *Replay* (seen on the lead's iPhone), always on the dark map. **Partilhar**
+sends one PNG, as WalkNYC's does: the whole trip drawn from the masked roads (D-040), Google's
+snapshot of the map under the stamp tags and a card with the dates, the figures and a line about
+the app.
+
+**Not copied: S and E.** WalkNYC marks where a walk began and ended. A Bruma day begins and ends at
+the hotel, which nothing shared may show, so the tags go on the stamps instead.
+
+**How it was decided.** WalkNYC was studied on a Play Store emulator with a fake Manhattan walk
+(`tools/out/walknyc/`), and the options drawn on the lead's real trip
+(`tools/preview-trip-viewer-options.mjs`). The Android walk viewer is a still picture; the iOS app
+also has the timelapse, which is why the animated film was kept rather than removed.
+
+**Costs taken.** The map's gestures are off in the viewer (the tags are placed by this app's own
+projection); a share waits 1.5 s for map tiles rather than a signal, which expo-maps does not give;
+`takeSnapshot` is a native addition in the project's expo-maps patch.

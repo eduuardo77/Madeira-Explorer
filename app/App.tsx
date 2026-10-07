@@ -18,6 +18,7 @@ import { startBillingSync } from './src/entitlement/billingSync';
 import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
+import ReplayScreen from './src/souvenir/ReplayScreen';
 import TripViewerScreen from './src/souvenir/TripViewerScreen';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
@@ -215,7 +216,13 @@ export default function App() {
       ) : screen === 'replay' ? (
         // Back to the passport, not to the map: the trip viewer was reached
         // from the passport and that is where the user was looking.
-        <TripViewerScreen onClose={() => setScreen('passport')} />
+        <TripViewerScreen
+          onClose={() => setScreen('passport')}
+          onReplay={() => setScreen('timelapse')}
+        />
+      ) : screen === 'timelapse' ? (
+        // WalkNYC's Replay: the whole trip as a timelapse, back to the viewer.
+        <ReplayScreen onClose={() => setScreen('replay')} />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

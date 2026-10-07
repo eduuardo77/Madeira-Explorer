@@ -81,7 +81,13 @@ import { loadTripView, type TripView } from './tripViewerData';
  * Camacha's tag sat under the pills at 112).
  */
 const TOP_CLEARANCE = 112 + 34;
-const CARD_CLEARANCE = 236;
+/**
+ * The card's foot sits above Google's logo, which must stay visible: map
+ * attribution is one of the things Bruma keeps that others trade away. At
+ * `spacing.md` the card covered half of it, in the viewer and the shared image.
+ */
+const CARD_BOTTOM = spacing.xl + spacing.sm;
+const CARD_CLEARANCE = 236 + CARD_BOTTOM - spacing.md;
 
 /**
  * How long the map gets to fetch its tiles after the camera moves for a share,
@@ -96,7 +102,14 @@ const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 /** The share's picture: the masked trip, framed, and Google's photograph of it once taken. */
 type ShareScene = { runs: DayRun[]; camera: CameraFit; snapshot: string | null };
 
-export default function TripViewerScreen({ onClose }: { onClose: () => void }) {
+export default function TripViewerScreen({
+  onClose,
+  onReplay,
+}: {
+  onClose: () => void;
+  /** WalkNYC's Replay: the animated film of the whole trip. */
+  onReplay: () => void;
+}) {
   const [view, setView] = useState<TripView | null | 'loading'>('loading');
   const [styleName, setStyleName] = useState<MapStyleName>('light');
   const [dayIndex, setDayIndex] = useState(-1);
@@ -164,6 +177,9 @@ export default function TripViewerScreen({ onClose }: { onClose: () => void }) {
         left: spacing.xl,
         right: spacing.xl,
       },
+      // The trip rests on the card, as the replay's finale does: a wide, shallow
+      // trip centred left empty sea between them (seen in the first shared image).
+      align: 'bottom',
     }),
     [width, height],
   );
@@ -358,7 +374,14 @@ export default function TripViewerScreen({ onClose }: { onClose: () => void }) {
               accessible
               accessibilityLabel={t('trip.a11y.stampAt', { name: stamp.name, time })}
               pointerEvents="none"
-              style={[styles.tagAnchor, { left: at.x, top: at.y - TAG_LIFT }]}
+              style={[
+                styles.tagAnchor,
+                // Kept on screen: a stamp on the coast at the frame's edge pushed its tag off it.
+                {
+                  left: Math.max(TAG_HALF, Math.min(width - TAG_HALF, at.x)),
+                  top: at.y - TAG_LIFT,
+                },
+              ]}
             >
               <Text style={styles.tag}>{time}</Text>
             </View>
@@ -401,23 +424,42 @@ export default function TripViewerScreen({ onClose }: { onClose: () => void }) {
 
       {shareScene !== null ? null : (
         <View style={styles.topRow} pointerEvents="box-none">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('trip.a11y.back')}
-            onPress={onClose}
-            hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
-            style={({ pressed }) => [
-              styles.round,
-              { backgroundColor: chrome.surface },
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={[styles.roundGlyph, { color: chrome.content }]}>{'←'}</Text>
-          </Pressable>
-          <View style={[styles.pill, { backgroundColor: chrome.surface }]}>
-            <Text style={[styles.pillText, { color: chrome.content }]}>
-              {t('trip.day', { day: dayIndex + 1, days: days.length })}
-            </Text>
+          {/* Centred on the screen, not between its neighbours, as WalkNYC's is. */}
+          <View style={styles.pillCentre} pointerEvents="none">
+            <View style={[styles.pill, { backgroundColor: chrome.surface }]}>
+              <Text style={[styles.pillText, { color: chrome.content }]}>
+                {t('trip.day', { day: dayIndex + 1, days: days.length })}
+              </Text>
+            </View>
+          </View>
+          {/* Back and play on the left: on the right, play met the pill at 360 dp. */}
+          <View style={styles.buttonGroup}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('trip.a11y.back')}
+              onPress={onClose}
+              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
+              style={({ pressed }) => [
+                styles.round,
+                { backgroundColor: chrome.surface },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[styles.roundGlyph, { color: chrome.content }]}>{'←'}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('trip.a11y.replay')}
+              onPress={onReplay}
+              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
+              style={({ pressed }) => [
+                styles.round,
+                { backgroundColor: chrome.surface },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
+            </Pressable>
           </View>
           <Pressable
             accessibilityRole="button"
@@ -442,13 +484,18 @@ export default function TripViewerScreen({ onClose }: { onClose: () => void }) {
         <View
           ref={shareFrameRef}
           collapsable={false}
-          style={StyleSheet.absoluteFill}
+          // Opaque, so no corner of the image is ever transparent: the first
+          // shared image showed Android's checkerboard wherever nothing was drawn.
+          style={[StyleSheet.absoluteFill, styles.root]}
           pointerEvents="none"
         >
           {shareScene.snapshot === null ? null : (
             <Image
               source={{ uri: shareScene.snapshot }}
               style={StyleSheet.absoluteFill}
+              // ⚠ No fade: Android fades a loaded image in over 300 ms, and the
+              // first shared image was captured mid-fade, the map a faint ghost.
+              fadeDuration={0}
               onLoad={() => snapshotLoaded.current?.()}
             />
           )}
@@ -558,6 +605,8 @@ const PILL = 34;
 const ARROW = 36;
 /** How far above its stamp a tag sits, so the mark stays visible under it. */
 const TAG_LIFT = 34;
+/** Half the widest tag ("12:07 PM"): how close to an edge a tag's centre may come. */
+const TAG_HALF = 44;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
@@ -595,6 +644,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: mapChrome.light.elevation,
   },
+  pillCentre: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
+  buttonGroup: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  playGlyph: { fontSize: fontSize.label, marginLeft: 3 },
   pillText: { fontSize: fontSize.small, fontWeight: '600' },
   tagAnchor: {
     position: 'absolute',
@@ -616,7 +668,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    bottom: spacing.md,
+    bottom: CARD_BOTTOM,
     backgroundColor: colors.surface,
     borderRadius: radius.card + 4,
     paddingHorizontal: spacing.md,

@@ -11,15 +11,22 @@
  * running, D-010).
  */
 
-export type AppScreen = 'map' | 'passport' | 'replay' | 'settings' | 'debug';
+/**
+ * ⚠ `replay` is the trip viewer since T-253 (the id kept, so nothing else moves);
+ * `timelapse` is the animated film, WalkNYC's *Replay*, opened from the viewer.
+ */
+export type AppScreen = 'map' | 'passport' | 'replay' | 'timelapse' | 'settings' | 'debug';
 
 export function backTarget(screen: AppScreen): AppScreen | null {
   switch (screen) {
     case 'map':
       return null;
     case 'replay':
-      // The replay is opened from the passport, so it goes back there.
+      // The trip viewer is opened from the passport, so it goes back there.
       return 'passport';
+    case 'timelapse':
+      // And the timelapse from the trip viewer.
+      return 'replay';
     case 'passport':
     case 'settings':
     case 'debug':

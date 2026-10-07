@@ -55,10 +55,7 @@ import {
 import { deviceLanguage, t } from '../i18n';
 import { darkMapPropsFor } from '../map/darkMode';
 import type { MapStyleName } from '../map/mapStyle';
-import { effectiveMapStyle, parseMapStyle } from '../map/mapStylePreference';
 import { supportsNativeDarkMap } from '../map/mapsRenderer';
-import * as appStateDao from '../storage/dao/appStateDao';
-import { AppStateKey } from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { Composition } from './composition';
@@ -100,7 +97,12 @@ const MAP_READY_FALLBACK_MS = 3_000;
 export default function ReplayScreen({ onClose }: { onClose: () => void }) {
   const [composition, setComposition] = useState<Composition | null>(null);
   const [caption, setCaption] = useState('');
-  const [styleName, setStyleName] = useState<MapStyleName>('light');
+  /**
+   * Always the dark map (T-253, 2026-10-07): WalkNYC's Replay plays on a dark
+   * map with the blocks glowing, and the lit roads read the same way here. Not
+   * the everyday map's setting: this is the one screen made to be watched.
+   */
+  const styleName: MapStyleName = 'dark';
   const [clock, setClock] = useState<Playback>(STOPPED);
   /**
    * The wall clock, re-read once per animation frame while playing.
@@ -118,11 +120,10 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
 
     (async () => {
       try {
-        const [plan, trip, preference] = await Promise.all([
+        const [plan, trip] = await Promise.all([
           getSouvenirComposition(),
           // T-204: the film of a trip that has ended is the one worth watching.
           tripDao.getTripOnShow(),
-          appStateDao.get(AppStateKey.MapStyle),
         ]);
 
         if (cancelled) {
@@ -130,7 +131,6 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
         }
 
         setComposition(plan);
-        setStyleName(effectiveMapStyle(parseMapStyle(preference)));
         if (trip !== null) {
           setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now(), deviceLanguage()));
         }
@@ -440,9 +440,10 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+  // Dark, like the map it always plays on (T-253): a light cover flashed first.
+  root: { flex: 1, backgroundColor: '#0d1319' },
   centre: { alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-  empty: { color: colors.textMuted, fontSize: fontSize.body, textAlign: 'center' },
+  empty: { color: 'rgba(255, 255, 255, 0.7)', fontSize: fontSize.body, textAlign: 'center' },
   pressed: { opacity: 0.75 },
   hero: {
     position: 'absolute',
@@ -452,7 +453,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroNumber: {
-    color: colors.text,
+    // White on the dark map it always plays on; dark text vanished there.
+    color: '#FFFFFF',
     fontSize: fontSize.hero,
     fontWeight: '700',
     // The map underneath can be any colour at all, so the number carries its
@@ -462,9 +464,9 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 8,
   },
-  heroTotal: { color: colors.textMuted, fontSize: fontSize.title, fontWeight: '700' },
+  heroTotal: { color: 'rgba(255, 255, 255, 0.7)', fontSize: fontSize.title, fontWeight: '700' },
   heroCaption: {
-    color: colors.text,
+    color: '#FFFFFF',
     fontSize: fontSize.body,
     textShadowColor: 'rgba(0, 0, 0, 0.65)',
     textShadowOffset: { width: 0, height: 1 },

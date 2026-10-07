@@ -600,6 +600,7 @@ export const STRINGS = {
   'trip.stat.travelled': s('Travelled', 'Percorridos', 'Unterwegs'),
   'trip.stat.trip': s('This trip', 'Na viagem', 'Diese Reise'),
   'trip.share.plug': s('Light up your roads with {app}', 'Acende as tuas estradas com o {app}', 'Lassen Sie Ihre Straßen mit {app} aufleuchten'),
+  'trip.a11y.replay': s('Watch the trip as a timelapse', 'Ver a viagem em timelapse', 'Die Reise im Zeitraffer ansehen'),
   'trip.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
   'trip.a11y.previous': s('Previous day', 'Dia anterior', 'Vorheriger Tag'),
   'trip.a11y.next': s('Next day', 'Dia seguinte', 'Nächster Tag'),

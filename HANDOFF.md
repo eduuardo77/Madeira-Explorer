@@ -15,17 +15,19 @@ at hand-off: all work committed and pushed (`0842c22` and after), 1045 tests, th
 build (version code 3) with the lead's real data, the version 3 AAB built for internal testing
 (`Madeira-fieldwork/apks/bruma-0.1.0-vc3.aab`, not yet uploaded by the lead).
 
-## ⚠⚠⚠ 2026-10-07: where Phase 1 stands
+## ⚠⚠⚠ 2026-10-07: where the plan stands
 
-Done: T-253/T-253b (trip viewer by day, WalkNYC's way, ▶ timelapse, Partilhar one PNG; D-099),
-T-254 (jank solved: 0.00% janky frames, 5 of 5 runs), T-255 (*tu*), T-256 (place card, dark tone),
-T-257 (icon A2, animated splash), T-260 (quiet count), T-261 (trips list), T-265, T-266, and
-**T-272 (cold start: map with roads at about 4.5 s, was about 16; the splash is the loading
-screen)**, T-254 memory (274 to 280 MB after the workload, 266 settled; a geofence event storm
-was running the end-of-trip check ~70 times at once). Open: the Phase 1 gate write-up; why the
-geofence burst happens (TASKS T-254). P30: field build,
-data kept. `tools/measure-jank.sh` needs a non-debuggable build. The P30 has no `screenrecord`:
-time launches with an `adb exec-out screencap` loop.
+**Phase 1 done** (T-253 to T-257, T-272 cold start ~4.5 s, T-254 memory 274 to 280 MB after the
+workload). Only its gate write-up is left. **Also done today:** T-273 (recorder started twice per
+launch), T-274 (geofence repeats; migration 5 deleted 3,898), T-275 (play and share any trip),
+T-262 (passport stats, option A), T-258 (EMUI's automatic launch setting stops recording silently
+after an update; Huawei guidance in first run and Settings), T-270 (smoke test passes; the pop-up
+probe waits for a real stamp). **D-100:** the developer collects no data from users, for now.
+**Phase 4 ready for the lead:** Data safety (T-268, decided), background-location pack (T-123,
+`docs/play-background-location.md`; the video still to film), listing copy (T-269, PT title
+approved). **The lead outdoors next:** a ride with *Começar passeio* and SensorLogger on the
+iPhone (T-246). P30: field build, data kept, launch setting on manual. The P30 has no
+`screenrecord`: time launches with an `adb exec-out screencap` loop.
 
 **bruma.lol on Vercel (T-267, the lead's to set up):** import the GitHub repo, Root Directory `site`,
 Framework *Other*, no build command; add `bruma.lol` under Domains and set the DNS records Vercel

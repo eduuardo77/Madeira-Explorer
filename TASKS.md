@@ -137,6 +137,10 @@ permission, L3 privacy contact.
       0.00% janky on 5 of 5 runs, p99 9 to 10 ms (24 Sep: 0.72%, 15 ms; WalkNYC 0%, 8 ms). *Centrar*
       still appears after a pan and goes after a tap. **Memory 286 to 320 MB: the 280 target is
       not met** and stays open.
+- [~] **T-264** Inventory. **Done 2026-10-07** at the top of `docs/store-privacy-answers.md`: every
+      permission with what adds it (from the APK and the manifest merger report) and why; every
+      table on the phone; everything that leaves it, with evidence; the August banner replaced.
+      **Left:** the packet capture over a launch, a map pan and the purchase sheet (T-117b).
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.

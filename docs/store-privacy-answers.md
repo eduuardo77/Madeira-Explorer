@@ -1,23 +1,69 @@
 # Store privacy answers
 
-> ### ⚠ REWRITE REQUIRED BEFORE SUBMISSION — 2026-08-14 (D-057)
-> This document was written when the app made **no network requests at all**. It now draws
-> **Google Maps on Android**, which streams tiles. Two things follow, and both must be settled
-> before either store form is filled in:
->
-> 1. **The "zero outbound connections" framing below is no longer true of the app as a whole.** It
->    remains true of the *trip*: the recorded trace, the stamps and the diary never leave the phone,
->    there is still no account, no server of ours, no analytics and no ads. The distinction is now
->    load-bearing and every answer has to make it precisely.
-> 2. **Google Play's Data Safety form asks about third-party SDKs.** The Maps SDK is one, and its
->    own data collection is Google's to declare, not ours — but the form asks whether the app
->    *shares* data with third parties, and "which part of the map you are looking at" is a judgement
->    call a reviewer may read differently than we do. Answer it conservatively and in writing here.
->
-> `legal/privacyPolicy.ts` is already rewritten (D-044 keeps the two in step). This file is not,
-> because the store answers are a compliance artefact and rewriting them from a code change without
-> the project lead reading them would be exactly the wrong kind of confidence.
+> ### Status, 2026-10-07 (T-264)
+> **The inventory just below is current for the Android release** and is the source for the Play
+> Data safety form (T-268). It replaces the August banner, which warned that the app had started
+> talking to Google Maps; that is now answered row by row. **The Apple section further down is still
+> the August text** and must be redone before any iOS build. **Not legal advice.**
 
+## Inventory: what the app asks for, keeps and sends (T-264, 2026-10-07)
+
+Built from the release APK (`aapt2 dump permissions`, version code 3 tree, 2026-10-07), the
+manifest merger report, and the code. ⚠ **Not yet done: a packet capture** over a launch, a map pan
+and the purchase sheet, which T-264 asks for to confirm the only hosts are Google's (T-117b). Until
+then the "leaves the phone" table rests on the code and Google's own disclosures.
+
+### Every permission, and why
+
+| Permission | Added by | Why |
+|---|---|---|
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | `app.json` | Recording where the user goes: the core feature |
+| `ACCESS_BACKGROUND_LOCATION` | `app.json` | Recording with the app closed (T-123 review pending) |
+| `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION` | `app.json` | The recorder runs as a location foreground service, with its notification |
+| `ACTIVITY_RECOGNITION`, `com.google.android.gms.permission.ACTIVITY_RECOGNITION` | `app.json`; `modules/activity-transitions` | Walking or driving, to light the right road (D-094); optional |
+| `POST_NOTIFICATIONS` | `app.json` | The recorder's notification, the day-after check, the trip's end, each new stamp (D-096) |
+| `RECEIVE_BOOT_COMPLETED` | `app.json`; expo-notifications | Restarting the recorder after the phone restarts |
+| `WAKE_LOCK` | `app.json`; Firebase (inert) | Keeping the recorder's batch writes alive |
+| `VIBRATE` | the app's manifest | The new-stamp celebration's short vibration (`StampNewsCard.tsx`) |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | `modules/battery-exemption` | The one-tap battery exemption in first run (D-045, T-266: kept, declaration drafted there) |
+| `com.android.vending.BILLING` | expo-iap (openiap) | Unlocking the passport, one payment through Google Play (D-089) |
+| `INTERNET`, `ACCESS_NETWORK_STATE` | Expo; Google Play services | The map's tiles; Play Billing |
+| `com.proa.madeira.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX | Internal to the app; protects its own broadcast receivers |
+
+### What is kept on the phone
+
+All in the app's own database (`madeira.db`), readable only by the app:
+
+| Data | Table | Notes |
+|---|---|---|
+| Positions with time, accuracy and speed | `raw_fix` | The trip itself; never sent by the app |
+| Motion sensor readings and walking or driving changes | `sensor_sample`, `activity_event` | D-094 |
+| The roads matched from the positions | `matched_chain`, `match_progress` | What the map lights |
+| Trips, stamps earned and when | `trip`, `stamp_award` | |
+| Place entries and exits | `geofence_event` | |
+| A diary of whether recording worked | `recording_event` | For the day-after check (T-049) |
+| Settings, and the purchase's answer and time | `app_state` | The purchase time drives the founder stamp (T-233) |
+
+⚠ **Android's own backup includes this database** when the user has backups on (`allowBackup`
+true, `backup_rules`, `data_extraction_rules`): it goes to the user's own Google account, under
+Google's encryption, as the privacy policy says. The app never sends it anywhere itself.
+
+### What leaves the phone
+
+| What | To whom | When | Evidence |
+|---|---|---|---|
+| The part of the map on screen; device details, IP, a pseudonymous Maps identifier, crash data, map pan and zoom events | Google (Maps SDK) | Whenever the map is shown | Google's [Maps SDK data disclosure](https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure) (rows in the Play section below) |
+| The purchase request; the purchase token when it is acknowledged | Google Play | Only when the user buys or restores | `entitlement/storeBilling.ts`, `entitlement/billingSync.ts` (expo-iap); nothing goes to a server of ours |
+| Nothing (Firebase is never initialised: no `google-services.json`) | | | `FirebaseApp: Default FirebaseApp failed to initialize`, every launch on the P30 |
+| The masked share image, the backup file, the walk report | **Wherever the user sends them**, through Android's share sheet | Only on the user's tap | `tripShare.ts` and `shareTrip.ts` (masked, D-040), `backupFile.ts`, `donateWalk.ts` (D-069) |
+| The trip | **Nobody.** No account, no server of ours, no analytics, no ads | | The privacy policy's central claim |
+
+⚠ **New since the September draft, and how each lands on the Play form:** billing (a question for
+T-268: whether purchase data handled by Google Play is declared; quote Google's help text, do not
+assume); physical activity, per-stamp notifications and the battery permission (all on the phone
+only, nothing new collected).
+
+---
 
 **T-120** (Apple's App Privacy "nutrition label") and **T-122** (Google Play's Data safety
 form). Two forms, one set of facts — so they live in one document, because the failure mode is

@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { TimedRun } from '../matching/roadTrace.ts';
-import { dayTitle, formatClock, openingDay, tripDays, type ViewerStamp } from './tripDays.ts';
+import { dayTitle, formatClock, openingDay, tripDayCount, tripDays, type ViewerStamp } from './tripDays.ts';
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
@@ -117,4 +117,19 @@ test('the card’s title names the weekday and the date, capitalised', () => {
   const tuesday = new Date(2026, 9, 6).getTime();
   assert.equal(dayTitle(tuesday, 'pt'), 'Terça-feira, 6 de outubro');
   assert.equal(dayTitle(tuesday, 'en'), 'Tuesday 6 October');
+});
+
+test('T-262: the list counts exactly the pages the viewer makes', () => {
+  const cases: [TimedRun[], ViewerStamp[]][] = [
+    [[run(D0 + 2 * DAY + 10 * HOUR, 5), run(D0 + 10 * HOUR, 5)], [stamp('camacha', D0 + 2 * DAY + 11 * HOUR)]],
+    // A run across midnight, a one-point run (no stretch), and a day of a stamp alone.
+    [[run(D0 + 23 * HOUR + 58 * 60_000, 6), run(D0 + 4 * DAY, 1)], [stamp('fanal', D0 + 6 * DAY)]],
+    [[], []],
+  ];
+  for (const [runs, stamps] of cases) {
+    assert.equal(
+      tripDayCount(runs, stamps.map((each) => each.awardedTs), startOfDay),
+      tripDays(runs, stamps, startOfDay).length,
+    );
+  }
 });

@@ -41,6 +41,8 @@ import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
 import { formatDateRange, type ShareCard } from '../souvenir/shareCard';
 import { listedTrips } from '../souvenir/tripList';
+import { localStartOfDay, tripDayCount } from '../souvenir/tripDays';
+import { storedRoadsFor } from '../matching/roadNetwork';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, {
   type FounderCard,
@@ -254,16 +256,37 @@ export default function PassportScreen({
         if (!cancelled) {
           setCanWatch(film.renderable);
         }
-        // T-261: the trips worth listing, worded for the page.
+        // T-261: the trips worth listing, worded for the page. The stamps at
+        // once; the days once the stored roads are read, which waits on the
+        // road network if the map has not decoded it yet.
         const language = deviceLanguage();
         const nowMs = Date.now();
-        const rows = listedTrips(await tripDao.getTripSummaries()).map((trip) => ({
+        const listed = listedTrips(await tripDao.getTripSummaries());
+        const row = (trip: (typeof listed)[number], days: number | null): PassportTripRow => ({
           id: trip.id,
           dates: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs, language),
-          detail: `${n('passport.trips.days', trip.day_count)} · ${n('passport.trips.stamps', trip.stamp_count)}`,
-        }));
+          detail:
+            days === null
+              ? n('passport.trips.stamps', trip.stamp_count)
+              : `${n('passport.trips.days', days)} · ${n('passport.trips.stamps', trip.stamp_count)}`,
+        });
         if (!cancelled) {
-          setTrips(rows);
+          setTrips(listed.map((trip) => row(trip, null)));
+        }
+        // ⚠ The viewer's days, not the days with any recording (the lead's
+        // choice, 2026-10-07): a trip spent mostly at home said "14 dias" here
+        // and "Dia 2 de 2" when opened.
+        const roads = await storedRoadsFor(listed.map((trip) => trip.id));
+        const known = new Set(getContentPack().places.map((place) => place.id));
+        const days = new Map<number, number>();
+        for (const trip of listed) {
+          const stampTs = (await stampAwardDao.getAwards(trip.id))
+            .filter((award) => known.has(award.place_id))
+            .map((award) => award.awarded_ts);
+          days.set(trip.id, tripDayCount(roads.runs.get(trip.id) ?? [], stampTs, localStartOfDay));
+        }
+        if (!cancelled) {
+          setTrips(listed.map((trip) => row(trip, days.get(trip.id) ?? 0)));
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);

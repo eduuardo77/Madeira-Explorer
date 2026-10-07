@@ -112,6 +112,33 @@ export function tripDays(
 }
 
 /**
+ * How many pages `tripDays` would make, without building them: the days with
+ * a stretch of lit road begun on them, or a stamp earned (T-262). The
+ * passport's list says this number, so it always matches the viewer's
+ * "Dia X de Y" (the lead's choice, 2026-10-07).
+ */
+export function tripDayCount(
+  runs: readonly TimedRun[],
+  stampTs: readonly number[],
+  startOfDay: (ts: number) => number,
+): number {
+  const days = new Set<number>(stampTs.map(startOfDay));
+  for (const run of runs) {
+    for (let i = 1; i < run.points.length; i += 1) {
+      days.add(startOfDay(run.points[i - 1].ts));
+    }
+  }
+  return days.size;
+}
+
+/** Local midnight on the phone's clock: where one page of the viewer ends. */
+export function localStartOfDay(ts: number): number {
+  const day = new Date(ts);
+  day.setHours(0, 0, 0, 0);
+  return day.getTime();
+}
+
+/**
  * The box around some runs and stamps: a day's frame, and the shared image's
  * frame around the whole masked trip.
  */

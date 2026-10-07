@@ -135,8 +135,6 @@ export type TripSummary = {
   started_ts: number;
   ended_ts: number | null;
   fix_count: number;
-  /** Distinct local days with at least one fix. */
-  day_count: number;
   stamp_count: number;
 };
 

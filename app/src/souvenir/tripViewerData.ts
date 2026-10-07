@@ -14,7 +14,7 @@ import type { VisitedLine } from '../matching/visitedRoads';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
-import { tripDays, type TripDay, type ViewerStamp } from './tripDays';
+import { localStartOfDay, tripDays, type TripDay, type ViewerStamp } from './tripDays';
 
 export type TripView = {
   tripId: number;
@@ -33,13 +33,6 @@ export type TripView = {
   days: TripDay[];
   stampCount: number;
 };
-
-/** Local midnight on the phone's clock: where one page of the viewer ends. */
-function localStartOfDay(ts: number): number {
-  const day = new Date(ts);
-  day.setHours(0, 0, 0, 0);
-  return day.getTime();
-}
 
 /**
  * A trip for the viewer: `tripId` from the passport's list (T-261), or the trip

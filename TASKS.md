@@ -132,6 +132,16 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [~] **T-262** Stats that mean something. **Data and the list done 2026-10-07; the layout waits
+      on the lead's pick** (`tools/preview-stats-options.mjs --db <copy>`, three ways: a line, a row
+      of four, a card). `roadNetwork.storedRoadsFor` reads what matching stored, without matching
+      again: each trip's timed runs, km of road lit per trip and for all trips together, each stretch
+      once. Checked on the P30 copy: 47.2 km this trip, which is the map's own diary figure (47,176 m);
+      2 days, the viewer's "Dia 2 de 2"; 3 places; 2 collections started. The all-trips total is also
+      47.2 km, because the old trip's one lit stretch lies on this trip's roads.
+      **The list now says the viewer's days** (the lead's B, 2026-10-07): `tripDayCount`, tested
+      equal to `tripDays`' page count, over the stored runs and the stamps; it was days with any fix
+      ("14 dias" for a trip whose viewer said "Dia 2 de 2"). `day_count` removed from the summary.
 - [x] **T-275** ▶ and *Partilhar* for any trip in the passport's list. **Done 2026-10-07.** One
       optional `tripId` through the masked export (`exportTrace.exportedTrip`, `getExportableTrace`,
       `getSouvenirComposition`, `buildShareScene`), so D-040 still has one door. The viewer passes

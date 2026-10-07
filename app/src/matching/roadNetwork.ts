@@ -245,6 +245,37 @@ export async function timedRunsFor(tripId: number): Promise<TimedRun[]> {
   return cached.chains.flatMap((chain) => chainTimedRuns(graph, chain));
 }
 
+export type StoredRoads = {
+  /** Each trip's lit roads as timed runs, for its days (`tripDays`). */
+  runs: Map<number, TimedRun[]>;
+  /** Each trip's road lit, each stretch counted once, metres. */
+  litM: Map<number, number>;
+  /** Road lit by all of them together, each stretch counted once, metres. */
+  totalLitM: number;
+};
+
+/**
+ * What matching stored for these trips, without matching again (T-262): for
+ * the passport, which summarises trips it is not showing. A trip never
+ * matched (never on the map) has no runs and no metres.
+ *
+ * ⚠ Unmasked, like `timedRunsFor`: on the phone, for its owner.
+ */
+export async function storedRoadsFor(tripIds: readonly number[]): Promise<StoredRoads> {
+  const graph = await loadRoadGraph();
+  const version = chainVersion(graph.version);
+  const runs = new Map<number, TimedRun[]>();
+  const litM = new Map<number, number>();
+  const all: MatchedChain[] = [];
+  for (const tripId of tripIds) {
+    const chains = (await matchedChainDao.getChains(tripId, version)).map(fromStored);
+    runs.set(tripId, chains.flatMap((chain) => chainTimedRuns(graph, chain)));
+    litM.set(tripId, visitedLengthM(visitedEdges(graph, chains)));
+    all.push(...chains);
+  }
+  return { runs, litM, totalLitM: visitedLengthM(visitedEdges(graph, all)) };
+}
+
 /** Local midnight, on the phone's clock. */
 function startOfToday(): number {
   const day = new Date();

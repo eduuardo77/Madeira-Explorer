@@ -13,7 +13,6 @@ const trip = (id: number, fixes: number, stamps = 0): TripSummary => ({
   started_ts: id * 1000,
   ended_ts: null,
   fix_count: fixes,
-  day_count: 1,
   stamp_count: stamps,
 });
 

@@ -7,6 +7,15 @@
 
 import { getDatabase, withStatement } from '../database';
 import type { RawFix, RawFixInput } from '../types';
+import {
+  appendedCountMatches,
+  cachedTrace,
+  keepTrace,
+  mergeAppended,
+  planRead,
+  type TraceHead,
+  type TraceRow,
+} from '../traceCache';
 
 /**
  * Append a batch of fixes in a single transaction.
@@ -111,30 +120,53 @@ export async function getMovementWindow(
 
 /**
  * The whole trip's trace, oldest first, in just the columns drawing needs
- * (T-059). A week of batched fixes is tens of thousands of rows at most, and
- * this backs the one screen where the user is actively looking at the map —
- * not a background path.
+ * (T-059). Backs the map, the viewer, the trip-end check and the stamp pass,
+ * which reads it once a minute while recording.
+ *
+ * ⚠ Kept in memory between reads (T-254, `traceCache.ts`): each read asks only
+ * for the trip's row count and newest id, then for the rows added since, and
+ * reloads whole on anything unexpected. A copy of the list is returned, so a
+ * caller cannot change what the next one reads.
  */
-export async function getTraceFixes(
-  tripId: number
-): Promise<
-  { ts: number; lat: number; lon: number; accuracy_m: number | null; speed_mps: number | null }[]
-> {
+export async function getTraceFixes(tripId: number): Promise<TraceRow[]> {
   const db = await getDatabase();
-  // `speed_mps` since D-093: the road matcher tells a phone at rest from one
-  // moving by the speed the receiver measured, not by the positions.
-  return db.getAllAsync<{
-    ts: number;
-    lat: number;
-    lon: number;
-    accuracy_m: number | null;
-    speed_mps: number | null;
-  }>(
-    `SELECT ts, lat, lon, accuracy_m, speed_mps
-       FROM raw_fix
-      WHERE trip_id = ?
-      ORDER BY ts;`,
+  const head = await db.getFirstAsync<TraceHead>(
+    'SELECT MAX(id) AS maxId, COUNT(*) AS count FROM raw_fix WHERE trip_id = ?;',
     tripId
+  );
+  const now: TraceHead = head ?? { maxId: null, count: 0 };
+  const cache = cachedTrace();
+  const plan = planRead(cache, tripId, now);
+
+  if (plan.kind === 'cached' && cache !== null) {
+    return cache.rows.slice();
+  }
+  if (plan.kind === 'append' && cache !== null) {
+    const added = await traceRows(tripId, plan.afterId);
+    if (appendedCountMatches(cache, added.length, now)) {
+      const rows = mergeAppended(cache.rows, added);
+      keepTrace({ tripId, maxId: now.maxId ?? cache.maxId, count: now.count, rows });
+      return rows.slice();
+    }
+  }
+  const rows = await traceRows(tripId, null);
+  keepTrace({ tripId, maxId: rows.reduce((max, row) => Math.max(max, row.id), 0), count: rows.length, rows });
+  return rows.slice();
+}
+
+/** The trip's rows, all or those after `afterId`, in (ts, id) order. */
+function traceRows(tripId: number, afterId: number | null): Promise<TraceRow[]> {
+  return getDatabase().then((db) =>
+    // `speed_mps` since D-093: the road matcher tells a phone at rest from one
+    // moving by the speed the receiver measured, not by the positions.
+    db.getAllAsync<TraceRow>(
+      `SELECT id, ts, lat, lon, accuracy_m, speed_mps
+         FROM raw_fix
+        WHERE trip_id = ? AND id > ?
+        ORDER BY ts, id;`,
+      tripId,
+      afterId ?? -1
+    )
   );
 }
 

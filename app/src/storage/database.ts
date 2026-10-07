@@ -18,6 +18,7 @@ import * as SQLite from 'expo-sqlite';
 import { createKeepAlive } from './keepAlive';
 import { MIGRATIONS } from './migrations';
 import { checkBackup, RESTORE_KEEPS_APP_STATE, USER_TABLES } from './backupPolicy';
+import { forgetTraceRows } from './traceCache';
 import { onceOrRetry } from './onceOrRetry';
 import { recordingQueue } from './recordingQueue';
 import {
@@ -371,6 +372,8 @@ export async function deleteAllUserData(): Promise<void> {
     // users who have something to erase. Add new child tables here in the
     // same commit that creates them.
     await db.execAsync('DELETE FROM raw_fix;');
+    // T-254: the trace cache holds rows that are gone now.
+    forgetTraceRows();
     await db.execAsync('DELETE FROM sensor_sample;');
     await db.execAsync('DELETE FROM geofence_event;');
     await db.execAsync('DELETE FROM stamp_award;');
@@ -465,6 +468,9 @@ export async function restoreFromBackup(candidateName: string): Promise<RestoreO
       `ATTACH DATABASE '${sqlPath(`${SQLite.defaultDatabaseDirectory}/${candidateName}`)}' AS backup;`
     );
     try {
+      // T-254: the trace cache holds rows this replaces. Forgotten before and
+      // after, so a read in between cannot leave the old trip cached.
+      forgetTraceRows();
       await db.withTransactionAsync(async () => {
         // Children first out, parents first in: every table refers to trip.
         for (const table of [...USER_TABLES].reverse()) {
@@ -490,6 +496,7 @@ export async function restoreFromBackup(candidateName: string): Promise<RestoreO
           );
         }
       });
+      forgetTraceRows();
       const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM main.raw_fix;');
       fixes = row?.n ?? 0;
     } finally {

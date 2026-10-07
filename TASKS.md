@@ -295,6 +295,12 @@ permission, L3 privacy contact.
       around it, back in the trace's order before the time sort, so twin fixes at one second keep
       their order and a stay's walked distance cannot change. PC, the P30's trips: 242 ms to 6 ms
       (17,824 fixes) and 75 to 2 ms (6,509); identical stays on both, nine of them.
+      ✅ **And the read:** the pass read the whole trip from the database every minute.
+      `getTraceFixes` now keeps it in memory (`storage/traceCache.ts`): each read asks only for the
+      trip's row count and newest id, then for rows added since, merged in `ORDER BY ts, id` order,
+      and reloads whole on anything else; erase-all and restore forget it. Replayed on the P30's
+      two trips at four cut points each: every cached read identical to a fresh one. **To see on
+      the phone tonight** (map roads, the viewer, the pass), with the coverage and arrivals changes.
 - [~] **T-264** Inventory. **Done 2026-10-07** at the top of `docs/store-privacy-answers.md`: every
       permission with what adds it (from the APK and the manifest merger report) and why; every
       table on the phone; everything that leaves it, with evidence; the August banner replaced.

@@ -9,6 +9,19 @@
 > town" (it is the third most populous). Confirmed as written: the other 18. **Left blank:** the four
 > placeholders (Levada Nova da Calheta, Levada das Faias, Levada do Barreiro, Achada do Marques),
 > which show no line until there is a fact to stand behind. The German is mine and unreviewed.
+>
+> ### Proposed for the four blanks, 2026-10-07: strike or keep
+>
+> | Lugar | Português | English | Deutsch | Source |
+> |---|---|---|---|---|
+> | Levada Nova da Calheta | Levada com mais de 40 km pelo concelho da Calheta, a correr entre os 600 e os 700 m. | A levada of more than 40 km across the municipality of Calheta, running at 600 to 700 m. | Eine Levada von über 40 km durch den Kreis Calheta, auf 600 bis 700 m Höhe. | Calheta's trail pages, via the PR19 descriptions |
+> | Levada das Faias | Levada na costa norte, percorrida a partir da Fajã do Penedo, na Boaventura. | A levada on the north coast, walked from Fajã do Penedo in Boaventura. | Eine Levada an der Nordküste, begangen ab Fajã do Penedo in Boaventura. | ⚠ one source (iso-maps); it matches where the content places it |
+> | Levada do Barreiro | PR4, do Poço da Neve, uma casa de gelo de 1813, até à Casa do Barreiro, no Parque Ecológico do Funchal. | PR4, from the Poço da Neve, an ice house from 1813, to Casa do Barreiro in the Funchal Ecological Park. | PR4, vom Poço da Neve, einem Eishaus von 1813, zur Casa do Barreiro im Ökologischen Park Funchal. | Visit Madeira, PR4 |
+> | Achada do Marques | Lugarejo a cerca de 846 m em Santana, classificado como paisagem protegida do Parque Natural da Madeira. | A hamlet at about 846 m in Santana, a protected landscape of the Madeira Natural Park. | Ein Weiler auf etwa 846 m in Santana, geschützte Landschaft im Naturpark Madeira. | Wikipedia (Ilha, Santana); the height from map data |
+>
+> ⚠ Not searched and kept out on purpose: a first search for *Levada das Faias* returned the Levada
+> da Serra do Faial, in the east. The content places this one in São Vicente, so that line would
+> have been wrong.
 
 **For:** the project lead. **Rewritten:** 2026-09-25, **facts only**, on their word: *"text like
 'come for sunrise above the clouds' is a no-go"*. **Method:** D-064: I draft, you strike or fix.

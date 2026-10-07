@@ -78,6 +78,11 @@ for (const file of readdirSync(site).filter((f) => f.endsWith('.html'))) {
 if (CONTACT_EMAIL === null) {
   console.log('');
   console.log('⚠ CONTACT_EMAIL is null: no contact on the site yet. Play requires one (T-206).');
+} else if (!readFileSync(path.join(site, 'index.html'), 'utf8').includes(`mailto:${CONTACT_EMAIL}`)) {
+  // The front page is written by hand, so its address is checked here: it
+  // must be the policy's, or the two drift when the address changes.
+  failed = true;
+  console.error(`✗ index.html does not link ${CONTACT_EMAIL}, the policy's contact.`);
 }
 
 process.exit(failed ? 1 : 0);

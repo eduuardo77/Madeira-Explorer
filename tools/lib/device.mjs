@@ -10,6 +10,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -79,6 +80,35 @@ export function device(serial = null) {
     return node;
   }
 
+  /**
+   * A hash of what is on screen below the status bar, whose clock would make
+   * every two readings differ (T-270). For the screens that animate forever
+   * (the trophy's shine, the unlock sheet), which `uiautomator` cannot read:
+   * whether a tap changed the screen is still a fact.
+   */
+  function fingerprint() {
+    const raw = execFileSync(ADB, [...(serial === null ? [] : ['-s', serial]), 'exec-out', 'screencap'], {
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    const width = raw.readUInt32LE(0);
+    const height = raw.readUInt32LE(4);
+    // The header is 12 bytes on older Android and 16 on newer: whatever is
+    // left once the pixels (4 bytes each) are accounted for.
+    const header = raw.length - width * height * 4;
+    const statusBar = Math.round(height * 0.06) * width * 4;
+    return createHash('sha1').update(raw.subarray(header + statusBar)).digest('hex');
+  }
+
+  /** Whether `uiautomator` can read the screen now: false while something animates. */
+  function readable() {
+    try {
+      shell('uiautomator dump /sdcard/proa-ui.xml');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /** A PNG of the screen, written to `file`. */
   function screenshot(file) {
     const png = execFileSync(ADB, [...(serial === null ? [] : ['-s', serial]), 'exec-out', 'screencap', '-p'], {
@@ -87,5 +117,5 @@ export function device(serial = null) {
     writeFileSync(file, png);
   }
 
-  return { adb, shell, screen, reach, tap, size, screenshot };
+  return { adb, shell, screen, reach, tap, size, screenshot, fingerprint, readable };
 }

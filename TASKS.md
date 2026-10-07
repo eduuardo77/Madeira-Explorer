@@ -132,6 +132,19 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [~] **T-270** The smoke test passes the animated screens. **Passes on the P30 2026-10-07**, 12
+      steps. It had fallen behind the app: since T-253 *Ver a tua viagem* opens the trip viewer, and
+      the script still waited for the old film's *Concluído*. Now: the viewer, ▶ its timelapse,
+      and back; **a collected stamp's trophy** and **the unlock sheet** (from Settings, never its
+      buy button), both of which animate as long as they are open, so `uiautomator` cannot read
+      them: opened from a control read behind them, checked by a hash of the screen below the
+      status bar (`device.fingerprint`), closed with Back. At launch, a stamp pop-up over the map
+      is closed with Back, pressed only while the screen cannot be read (on the map Back leaves the
+      app). **Left:** the pop-up probe. The debug screen that could fake one exists only in
+      development builds (T-189), and swapping the phone's database would risk the recording, so
+      the probe is the next real stamp: run the script when the lead's ride earns one. No locked
+      medal exists on the P30 yet (no set complete), so the medal sheet is covered by the same
+      unlock sheet it opens.
 - [~] **T-268** The Data safety form, redone. **Drafted 2026-10-07** in
       `docs/store-privacy-answers.md` (Play section), every answer with Google's own words quoted,
       read that day. Billing is not declared (Google exempts its own billing system when the app

@@ -27,9 +27,18 @@
  * WHAT IT PRESSES, AND WHAT IT NEVER PRESSES
  * ------------------------------------------
  * Only the controls in `STEPS` below: the screens, their *Done* and *Close*,
- * one stamp and its card, and the replay if it is offered. **Never** Erase, End
- * trip, Pause, the recording switch, *Send a recording*, a language row or
- * anything that opens another app. Everything it touches is a door, so a run
+ * one stamp and its card, a collected stamp's trophy, the unlock sheet, and the
+ * trip viewer with its timelapse if they are offered. **Never** Erase, End trip,
+ * Pause, the recording switch, *Send a recording*, a language row, the unlock
+ * sheet's buy button or anything that opens another app.
+ *
+ * ⚠ SCREENS THAT NEVER STOP MOVING (T-270)
+ * ----------------------------------------
+ * `uiautomator` cannot read a screen while anything on it animates, and the
+ * trophy's shine, the unlock sheet and the map's stamp pop-up animate for as
+ * long as they are open. So those are opened by a tap on a control read from
+ * the screen behind them, checked by a hash of the screen (it must change),
+ * and closed with the Back key, as a person would. Everything it touches is a door, so a run
  * leaves the phone's data exactly as it found it. It reads the language rows,
  * to check that exactly one says it is checked (T-215).
  *
@@ -69,7 +78,7 @@ if (founderStartMissing(founderWindow) && !internal) {
 }
 const serialAt = process.argv.indexOf('--serial');
 const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
-const { adb, shell, screen, reach, tap } = device(serial);
+const { adb, shell, screen, reach, tap, fingerprint, readable } = device(serial);
 
 // ---------------------------------------------------------------------------
 // Labels, in the phone's language
@@ -105,6 +114,24 @@ function pattern(...keys) {
 // ---------------------------------------------------------------------------
 
 const MAP = label('map.a11y.settings');
+/** Any stamp in the passport: on screen at whatever point the page is scrolled to. */
+const STAMP = pattern('passport.a11y.stampCollected', 'passport.a11y.stampUncollected', 'passport.locked.a11y');
+
+/**
+ * Tap `control`, check the screen changed, close what opened with Back, and
+ * wait for `behind` again (T-270): for screens that animate as long as they
+ * are open, which `uiautomator` cannot read.
+ */
+async function opensAnimated(control, behind) {
+  const before = fingerprint();
+  await tap(control);
+  await pause(1500);
+  if (fingerprint() === before) {
+    throw new Error(`nothing opened: the screen did not change after ${control}`);
+  }
+  shell('input keyevent 4');
+  await reach(behind, { timeoutMs: 15_000 });
+}
 
 const STEPS = [
   ['the map', async () => {
@@ -112,6 +139,16 @@ const STEPS = [
     // whatever screen it was, so Back is pressed until the map shows. Never
     // more than three times, because Back on the map leaves the app (T-211).
     shell(`am start -n ${PKG}/.MainActivity`);
+    await pause(1500);
+    // A stamp pop-up over the map (D-096) animates, so nothing can be read
+    // until it is closed; Back closes it (T-270). Pressed only while the
+    // screen cannot be read: on the map itself Back leaves the app.
+    let popUps = 0;
+    while (!readable() && popUps < 3) {
+      shell('input keyevent 4');
+      popUps += 1;
+      await pause(1200);
+    }
     for (let backs = 0; backs < 3; backs += 1) {
       const nodes = await screen();
       if (findNode(nodes, MAP) !== null) return;
@@ -122,6 +159,7 @@ const STEPS = [
       if (findNode(await screen(), MAP) === null) shell('input keyevent 4');
     }
     await reach(MAP);
+    return popUps === 0 ? '' : `closed ${popUps} pop-up${popUps === 1 ? '' : 's'} with Back first`;
   }],
   ['Settings', async () => {
     await tap(MAP);
@@ -151,6 +189,18 @@ const STEPS = [
     await tap(label('privacy.a11y.back'));
     await reach(label('settings.title'));
   }],
+  ['the unlock sheet, and Back (T-270)', async () => {
+    // Never its buy button: opening the sheet only asks Play for the price.
+    const unlock = label('settings.passport.unlock');
+    try {
+      await reach(unlock, { scroll: true });
+    } catch {
+      return 'not offered: a beta build, or the passport already unlocked';
+    }
+    // Back to the row itself: scrolled to it, the page's title is out of sight.
+    await opensAnimated(unlock, unlock);
+    return 'opened, changed the screen, closed';
+  }],
   ['Licences, and back', async () => {
     await tap(label('settings.about.licences'), { scroll: true });
     await tap(label('licences.a11y.back'));
@@ -167,14 +217,27 @@ const STEPS = [
     await tap(label('common.close'));
     await reach(label('passport.title'));
   }],
-  ['the replay, if it is offered (T-217)', async () => {
+  ['the trip viewer and its timelapse, if offered (T-217, D-099)', async () => {
     const watch = findNode(await screen(), label('replay.watch'));
     if (watch === null) return 'not offered: nothing drawable in the trip on show';
     await tap(label('replay.watch'));
-    await reach(label('replay.close'), { timeoutMs: 20_000 });
+    await reach(label('trip.a11y.back'), { timeoutMs: 20_000 });
+    await tap(label('trip.a11y.replay'));
+    await reach(label('replay.close'), { timeoutMs: 25_000 });
     await tap(label('replay.close'));
+    await tap(label('trip.a11y.back'), { timeoutMs: 20_000 });
     await reach(label('passport.title'));
-    return 'opened and closed';
+    return 'the viewer, its timelapse, and back';
+  }],
+  ['a collected stamp’s trophy, and Back (T-270)', async () => {
+    const collected = pattern('passport.a11y.stampCollected');
+    try {
+      await reach(collected, { scroll: true });
+    } catch {
+      return 'no stamp collected on this phone';
+    }
+    await opensAnimated(collected, STAMP);
+    return 'opened, changed the screen, closed';
   }],
   ['back to the map', () => tap(label('passport.a11y.backToMap')).then(() => reach(MAP))],
 ];

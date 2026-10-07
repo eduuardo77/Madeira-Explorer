@@ -38,7 +38,7 @@ import {
   GoogleMapsColorScheme,
   GoogleMapsMapType,
 } from 'expo-maps/build/google/GoogleMaps.types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -212,6 +212,20 @@ type Polyline = {
 function px(points: number): number {
   return points * PixelRatio.get();
 }
+
+/**
+ * The screen is allowed three controls (design brief §3), and none of Google's
+ * chrome is one of them. A module constant so its identity never changes
+ * (T-254: an inline object was resent to the native map on every render).
+ */
+const MAP_UI_SETTINGS = {
+  compassEnabled: false,
+  myLocationButtonEnabled: false,
+  zoomControlsEnabled: false,
+  scaleBarEnabled: false,
+  togglePitchEnabled: false,
+  mapToolbarEnabled: false,
+};
 
 export default function NativeMapScreen({
   focusPlace,
@@ -784,6 +798,45 @@ export default function NativeMapScreen({
     })();
   };
 
+  /**
+   * ⚠⚠ T-254: the map's props keep their identity between renders.
+   *
+   * Every camera movement sets `cameraCentre` (so *Centrar* knows when to
+   * show), which renders this screen dozens of times a second during a pan.
+   * Built inline, `polylines` was a new array each time, and the native view
+   * was sent every lit road, every coordinate, on every one of those renders:
+   * the cost grew with the trip, which is why the jank arrived with D-093.
+   * Memoised, a pan sends nothing the map does not already have.
+   */
+  const mapPolylines = useMemo(
+    () => [...tracePolylines, ...coursePolylines],
+    [tracePolylines, coursePolylines]
+  );
+  const mapProperties = useMemo(
+    () => ({
+      mapType: GoogleMapsMapType.NORMAL,
+      // Undefined unless the authored fallback is switched on, so that
+      // Google's cartography ships exactly as Google drew it.
+      mapStyleOptions:
+        darkMap.mapStyleJson === undefined ? undefined : { json: darkMap.mapStyleJson },
+      // ⚠ Google's own blue dot, on the project lead's instruction
+      // (2026-08-28). This is **data, not chrome**: the design brief's
+      // three-control budget is about buttons, and no drawing of ours
+      // would be the dot people already recognise, with the heading
+      // wedge and the accuracy halo that come with it for free.
+      // ⚠ Google's own re-centre button stays off below; ours is a
+      // labelled control, because D-015 forbids an icon alone.
+      isMyLocationEnabled: true,
+      // T-223: no further out than the archipelago and a margin. The
+      // default is 3, half the planet (`mapFence.ts`).
+      minZoomPreference: minZoom ?? undefined,
+      isTrafficEnabled: false,
+      isBuildingEnabled: false,
+      selectionEnabled: false,
+    }),
+    [darkMap.mapStyleJson, minZoom]
+  );
+
   if (failure !== null) {
     return (
       <View style={styles.centred}>
@@ -808,7 +861,7 @@ export default function NativeMapScreen({
         cameraPosition={camera ?? undefined}
         // The trace under the course: the course is only ever on screen in
         // answer to a direct question, so for those few seconds it wins.
-        polylines={[...tracePolylines, ...coursePolylines]}
+        polylines={mapPolylines}
         markers={marker}
         // ⚠ No marks for collected places since 2026-10-04: the project lead
         // asked for the dark dots at their stamps' places to go. The passport
@@ -835,39 +888,8 @@ export default function NativeMapScreen({
             ? GoogleMapsColorScheme.DARK
             : GoogleMapsColorScheme.LIGHT
         }
-        properties={{
-          mapType: GoogleMapsMapType.NORMAL,
-          // Undefined unless the authored fallback is switched on, so that
-          // Google's cartography ships exactly as Google drew it.
-          mapStyleOptions:
-            darkMap.mapStyleJson === undefined
-              ? undefined
-              : { json: darkMap.mapStyleJson },
-          // ⚠ Google's own blue dot, on the project lead's instruction
-          // (2026-08-28). This is **data, not chrome**: the design brief's
-          // three-control budget is about buttons, and no drawing of ours
-          // would be the dot people already recognise — with the heading
-          // wedge and the accuracy halo that come with it for free.
-          // ⚠ Google's own re-centre button stays off below; ours is a
-          // labelled control, because D-015 forbids an icon alone.
-          isMyLocationEnabled: true,
-          // T-223: no further out than the archipelago and a margin. The
-          // default is 3, half the planet (`mapFence.ts`).
-          minZoomPreference: minZoom ?? undefined,
-          isTrafficEnabled: false,
-          isBuildingEnabled: false,
-          selectionEnabled: false,
-        }}
-        uiSettings={{
-          // The screen is allowed three controls (design brief §3), and none
-          // of Google's chrome is one of them.
-          compassEnabled: false,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: false,
-          scaleBarEnabled: false,
-          togglePitchEnabled: false,
-          mapToolbarEnabled: false,
-        }}
+        properties={mapProperties}
+        uiSettings={MAP_UI_SETTINGS}
       />
 
       {/* ⚠ A scrim under the status bar (T-112, found by looking 2026-08-17).

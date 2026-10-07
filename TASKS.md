@@ -89,6 +89,17 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [~] **T-254** The jank. Measured with `tools/measure-jank.sh` (the reviews' 9 pans and 2 double
+      taps, made repeatable) on a **non-debuggable** build, P30, 2026-10-07. **Most of the review's
+      6.3% / p99 32 ms was the debuggable flag:** the same build without it gave 0.81, 2.74 and 2.02%,
+      p99 15 to 19 ms. Cold start 196 to 302 ms (the review's 1,436 ms was debuggable too). Then the
+      cause found: every camera move sets state, and the home map's `polylines` was a new array on
+      each render, so all lit roads were resent to the native map dozens of times a second; memoised
+      with `properties` and `uiSettings`. After: 0.27, 0.27, 1.36, 1.90% (first run after launch,
+      3.98%, excluded as warm-up), p99 14 to 20 ms. **Roughly halved, target (≤1%, p99 ≤16 every
+      run) not reliably met; the spread between runs is as large as the effect.** Memory 300 to 339
+      MB, target 280 not met. Next: profile what still runs per camera move (the overlay re-render
+      for *Centrar*), and more runs per build.
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.

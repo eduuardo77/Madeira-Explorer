@@ -486,6 +486,7 @@ export const STRINGS = {
   // its work (the project lead, 2026-10-04: "still a bit unsure if the app is
   // recording"). {distance} is formatDistance's, e.g. "14 km".
   'map.status.today': s('{distance} today', '{distance} hoje', 'heute {distance}'),
+  'passport.stats.total': s('{distance} on all trips', '{distance} em todas as viagens', '{distance} auf allen Reisen'),
   // ⚠ Says what was measured — nothing arrived — and not that the recorder is
   // dead, which the app cannot see (recorderSilence.ts). Not dismissible (T-174).
   'notice.silent': s(
@@ -1437,6 +1438,20 @@ export const PLURALS = {
   'trip.stat.days': {
     one: s('Day', 'Dia', 'Tag'),
     other: s('Days', 'Dias', 'Tage'),
+  },
+  // T-262, the lead's option A. {distance} is formatDistance's, e.g. "47 km";
+  // the road counted once however often it was travelled.
+  'passport.stats.trip': {
+    one: s(
+      '{distance} of road lit in {count} day',
+      '{distance} de estradas acesas em {count} dia',
+      '{distance} Straße beleuchtet an {count} Tag'
+    ),
+    other: s(
+      '{distance} of road lit in {count} days',
+      '{distance} de estradas acesas em {count} dias',
+      '{distance} Straße beleuchtet an {count} Tagen'
+    ),
   },
   'passport.trips.days': {
     one: s('{count} day', '{count} dia', '{count} Tag'),

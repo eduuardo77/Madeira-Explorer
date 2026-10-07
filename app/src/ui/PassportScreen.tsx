@@ -171,6 +171,8 @@ export default function PassportScreen({
    */
   const [canWatch, setCanWatch] = useState(false);
   const [trips, setTrips] = useState<PassportTripRow[]>([]);
+  /** T-262: absent until the stored roads are read, and while none is lit. */
+  const [stats, setStats] = useState<{ trip: string; total: string | null } | undefined>();
   /** The founder stamp, when this phone's purchase earned one (T-233). */
   const [founder, setFounder] = useState<FounderCard | null>(null);
   /** The set medals' shelf (T-235). */
@@ -261,7 +263,8 @@ export default function PassportScreen({
         // road network if the map has not decoded it yet.
         const language = deviceLanguage();
         const nowMs = Date.now();
-        const listed = listedTrips(await tripDao.getTripSummaries());
+        const summaries = await tripDao.getTripSummaries();
+        const listed = listedTrips(summaries);
         const row = (trip: (typeof listed)[number], days: number | null): PassportTripRow => ({
           id: trip.id,
           dates: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs, language),
@@ -276,17 +279,40 @@ export default function PassportScreen({
         // ⚠ The viewer's days, not the days with any recording (the lead's
         // choice, 2026-10-07): a trip spent mostly at home said "14 dias" here
         // and "Dia 2 de 2" when opened.
-        const roads = await storedRoadsFor(listed.map((trip) => trip.id));
+        // Every trip, not only the listed ones: the total counts all road lit.
+        const roads = await storedRoadsFor(summaries.map((trip) => trip.id));
         const known = new Set(getContentPack().places.map((place) => place.id));
-        const days = new Map<number, number>();
-        for (const trip of listed) {
-          const stampTs = (await stampAwardDao.getAwards(trip.id))
+        const daysOf = async (tripId: number) => {
+          const stampTs = (await stampAwardDao.getAwards(tripId))
             .filter((award) => known.has(award.place_id))
             .map((award) => award.awarded_ts);
-          days.set(trip.id, tripDayCount(roads.runs.get(trip.id) ?? [], stampTs, localStartOfDay));
+          return tripDayCount(roads.runs.get(tripId) ?? [], stampTs, localStartOfDay);
+        };
+        const days = new Map<number, number>();
+        for (const trip of listed) {
+          days.set(trip.id, await daysOf(trip.id));
         }
         if (!cancelled) {
           setTrips(listed.map((trip) => row(trip, days.get(trip.id) ?? 0)));
+        }
+
+        // T-262, the lead's option A: the trip on show in one line, and all
+        // trips' road under it when that says something the first does not.
+        const onShow = await tripDao.getTripOnShow();
+        const tripLitM = onShow === null ? 0 : (roads.litM.get(onShow.id) ?? 0);
+        if (onShow !== null && tripLitM > 0) {
+          const tripDistance = formatDistance(tripLitM, language);
+          const totalDistance = formatDistance(roads.totalLitM, language);
+          const onShowDays = days.get(onShow.id) ?? (await daysOf(onShow.id));
+          if (!cancelled) {
+            setStats({
+              trip: n('passport.stats.trip', onShowDays, { distance: tripDistance }),
+              total:
+                totalDistance === tripDistance
+                  ? null
+                  : t('passport.stats.total', { distance: totalDistance }),
+            });
+          }
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -509,6 +535,7 @@ export default function PassportScreen({
           onWatch={canWatch ? onWatch : undefined}
           onEndTrip={tripOpen ? endTrip : undefined}
           trips={trips}
+          stats={stats}
           onOpenTrip={onOpenTrip}
           waiting={stamps.filter((stamp) => stamp.locked === true)}
           // D-097, R1: the reminder, only where something can be bought.

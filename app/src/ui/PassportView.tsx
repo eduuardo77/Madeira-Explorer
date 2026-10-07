@@ -255,6 +255,12 @@ export type PassportViewProps = {
    */
   onWatch?: () => void;
   /**
+   * The trip in figures, worded by the screen (T-262, the lead's option A):
+   * this trip's road lit and days, and all trips' road when it differs.
+   * Absent until there is road lit, and in the workbench.
+   */
+  stats?: { trip: string; total: string | null };
+  /**
    * End the open trip by hand (T-204, D-088). Absent when no trip is open, and
    * in the workbench. The screen owns the confirmation.
    */
@@ -603,6 +609,7 @@ export default function PassportView({
   onConfirm,
   onDecline,
   onWatch,
+  stats,
   onEndTrip,
   trips,
   onOpenTrip,
@@ -641,6 +648,14 @@ export default function PassportView({
                 (review P2-3). Zero takes the plural in all three languages. */}
             {n('passport.collected', progress.collected)}
           </Text>
+          {stats === undefined ? null : (
+            <>
+              <Text style={styles.statsLine}>{stats.trip}</Text>
+              {stats.total === null ? null : (
+                <Text style={styles.statsTotal}>{stats.total}</Text>
+              )}
+            </>
+          )}
           {/* ⚠ No invitation line any more (2026-09-25). "Estes são os
               lugares. Vá a um deles..." sat here at zero stamps; the project
               lead could not find it and, found, saw no purpose in it, and
@@ -814,6 +829,18 @@ const styles = StyleSheet.create({
     color: album.textMuted,
     fontSize: fontSize.body,
     marginTop: spacing.xs,
+  },
+  statsLine: {
+    color: album.text,
+    fontSize: fontSize.body,
+    marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  statsTotal: {
+    color: album.textMuted,
+    fontSize: fontSize.small,
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
   // Under the hero, in the tinted-word register iOS uses for a section action,
   // not a filled button, which would make the passport's quietest area its

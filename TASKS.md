@@ -132,9 +132,11 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
-- [~] **T-262** Stats that mean something. **Data and the list done 2026-10-07; the layout waits
-      on the lead's pick** (`tools/preview-stats-options.mjs --db <copy>`, three ways: a line, a row
-      of four, a card). `roadNetwork.storedRoadsFor` reads what matching stored, without matching
+- [x] **T-262** Stats that mean something. **Done 2026-10-07, the lead's option A** (of three drawn
+      by `tools/preview-stats-options.mjs --db <copy>`: a line, a row of four, a card): under
+      "lugares visitados", *"47 km de estradas acesas em 2 dias"*, and *"N km em todas as viagens"* in
+      grey when it reads differently (today it does not, so it is hidden). Distances through
+      `formatDistance`, as the map's status line: whole km above 10. `roadNetwork.storedRoadsFor` reads what matching stored, without matching
       again: each trip's timed runs, km of road lit per trip and for all trips together, each stretch
       once. Checked on the P30 copy: 47.2 km this trip, which is the map's own diary figure (47,176 m);
       2 days, the viewer's "Dia 2 de 2"; 3 places; 2 collections started. The all-trips total is also

@@ -117,10 +117,13 @@ const options = [
 
 const out = path.join(here, 'out', 'feature-graphic');
 mkdirSync(out, { recursive: true });
+/** Each option as a PNG, also kept for the page: it embeds them, so it opens on its own when sent. */
+const pngs = new Map();
 for (const [id, , , body] of options) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg>`;
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: W }, font: { loadSystemFonts: true } }).render().asPng();
   writeFileSync(path.join(out, `${id}.png`), png);
+  pngs.set(id, `data:image/png;base64,${Buffer.from(png).toString('base64')}`);
 }
 writeFileSync(
   path.join(out, 'index.html'),
@@ -129,6 +132,6 @@ writeFileSync(
 figure{margin:0 0 28px}img{width:100%;max-width:1024px;display:block;border-radius:8px}
 figcaption{margin-top:8px;max-width:1024px;line-height:1.4}b{display:block;color:#fff}</style>
 <h2>T-269: the Play feature graphic, three ways (1024 × 500)</h2>
-${options.map(([id, name, note]) => `<figure><img src="${id}.png" alt=""><figcaption><b>${name}</b>${note}</figcaption></figure>`).join('')}`
+${options.map(([id, name, note]) => `<figure><img src="${pngs.get(id)}" alt=""><figcaption><b>${name}</b>${note}</figcaption></figure>`).join('')}`
 );
 console.log('tools/out/feature-graphic/index.html');

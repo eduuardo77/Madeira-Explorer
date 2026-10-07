@@ -28,6 +28,8 @@ import {
   tripHasLapsed,
 } from './recordingAdmission.ts';
 import type { Bounds } from '../progress/tripEnd.ts';
+import { reconstructVisits } from '../progress/stampRules.ts';
+import type { GeofenceCrossing } from '../progress/stampRules.ts';
 import { INACTIVITY_END_MS, detectTripEnd } from '../progress/tripEnd.ts';
 
 /** Madeira and Porto Santo together (D-021), near enough for a test. */
@@ -149,9 +151,44 @@ test('a real exit — one that follows an enter — is kept', () => {
   assert.equal(shouldRecordTransition('exit', true), true);
 });
 
-test('enters and dwells are always recorded, whatever came before', () => {
+test('an enter is recorded when it changes something; a dwell always is', () => {
   assert.equal(shouldRecordTransition('enter', false), true);
   assert.equal(shouldRecordTransition('dwell', false), true);
+  assert.equal(shouldRecordTransition('dwell', true), true);
+});
+
+test('⚠ T-274: the burst repeats itself: an exit while outside, an enter while inside', () => {
+  // On the P30, five places entered once had 165 to 429 exits each, one per
+  // registration, because "ever entered in this trip" stayed true for good.
+  assert.equal(shouldRecordTransition('exit', false), false);
+  assert.equal(shouldRecordTransition('enter', true), false);
+});
+
+test('T-274: keeping only state changes leaves the visits exactly as they were', () => {
+  // Praia dos Reis Magos's shape on the P30 (enter, enter, then a run of
+  // exits), a real second visit, and an enter still open at the end.
+  const minute = 60_000;
+  const raw: GeofenceCrossing[] = [
+    ['enter', 0], ['enter', 2], ['exit', 30], ['exit', 31], ['exit', 90],
+    ['exit', 95], ['enter', 120], ['exit', 150], ['exit', 400], ['enter', 500],
+    ['enter', 501],
+  ].map(([eventType, at]) => ({
+    geofenceId: 'g',
+    eventType: eventType as GeofenceCrossing['eventType'],
+    ts: (at as number) * minute,
+  }));
+  let inside = false;
+  const kept = raw.filter((crossing) => {
+    const keep = shouldRecordTransition(crossing.eventType, inside);
+    if (keep) inside = crossing.eventType !== 'exit';
+    return keep;
+  });
+  assert.deepEqual(
+    kept.map((crossing) => crossing.eventType),
+    ['enter', 'exit', 'enter', 'exit', 'enter']
+  );
+  const asOf = 600 * minute;
+  assert.deepEqual(reconstructVisits(kept, asOf), reconstructVisits(raw, asOf));
 });
 
 // ---------------------------------------------------------------- T-173

@@ -175,17 +175,35 @@ export function transitionMayStartTrip(eventType: GeofenceEventType): boolean {
  * crossing, and dropping it costs nothing real — `stampRules` pairs an exit
  * with its enter, so an unpaired one was never going to award anything.
  */
-export function isCredibleExit(hasPriorEnterInTrip: boolean): boolean {
-  return hasPriorEnterInTrip;
+export function isCredibleExit(insideNow: boolean): boolean {
+  return insideNow;
 }
 
-/** Should this crossing be written to `geofence_event` at all? */
+/**
+ * Should this crossing be written to `geofence_event` at all? Only when it
+ * changes whether the user is recorded as inside the place.
+ *
+ * ⚠⚠ **T-274: "ever entered in this trip" was not enough.** Expo registers
+ * with Android's initial ENTER and EXIT triggers (`GeofencingTaskConsumer.kt`),
+ * so every registration reports an exit for each place the phone is outside of.
+ * A place entered once this trip passed T-172's test for good, and on the P30
+ * five such places had one or two real enters followed by 165 to 429 exits,
+ * one per launch; registering while inside a place repeated its enter the
+ * same way. `insideNow` is whether the latest event recorded for the place is
+ * an enter. Dropping what does not change it loses nothing:
+ * `reconstructVisits` keeps the earliest of repeated enters and drops an exit
+ * with nothing open, so the visits, and the stamps, come out the same
+ * (`recordingAdmission.test.ts` runs both through it).
+ */
 export function shouldRecordTransition(
   eventType: GeofenceEventType,
-  hasPriorEnterInTrip: boolean
+  insideNow: boolean
 ): boolean {
   if (eventType === 'exit') {
-    return isCredibleExit(hasPriorEnterInTrip);
+    return isCredibleExit(insideNow);
+  }
+  if (eventType === 'enter') {
+    return !insideNow;
   }
   return true;
 }

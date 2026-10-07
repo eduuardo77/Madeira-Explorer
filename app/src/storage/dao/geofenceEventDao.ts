@@ -70,27 +70,25 @@ export async function getEventsForPoi(
 }
 
 /**
- * Has this place ever been *entered* during this trip?
+ * Is the user recorded as inside this place: is the latest crossing recorded
+ * for it in this trip an enter (or a dwell)?
  *
- * ⚠ **T-172.** The only caller is `recordingSink`, deciding whether an incoming
- * exit is a real crossing or one of the registration burst — 2,699 of which
- * landed on the P30, 83 sharing a single timestamp. `EXISTS` rather than a
- * count or a fetch: this runs on the OS's delivery path, where a cold start can
- * bring 99 crossings inside 100 ms (`storage/serialQueue.ts`), so it has to be
- * an index probe and nothing more.
+ * ⚠ **T-172, T-274.** The only caller is `recordingSink`, deciding whether an
+ * incoming crossing changes anything or is the registration burst repeating
+ * itself (`recordingAdmission.shouldRecordTransition`). One row from the
+ * `(trip_id, poi_id, ts)` index: this runs on the OS's delivery path, where a
+ * cold start can bring 99 crossings inside 100 ms (`storage/serialQueue.ts`),
+ * so it has to be an index probe and nothing more.
  */
-export async function hasEnterInTrip(
-  tripId: number,
-  poiId: string
-): Promise<boolean> {
+export async function isInsideInTrip(tripId: number, poiId: string): Promise<boolean> {
   const db = await getDatabase();
-  const row = await db.getFirstAsync<{ found: number }>(
-    `SELECT EXISTS(
-       SELECT 1 FROM geofence_event
-        WHERE trip_id = ? AND poi_id = ? AND event_type IN ('enter', 'dwell')
-     ) AS found;`,
+  const row = await db.getFirstAsync<{ event_type: string }>(
+    `SELECT event_type FROM geofence_event
+      WHERE trip_id = ? AND poi_id = ?
+      ORDER BY ts DESC, id DESC
+      LIMIT 1;`,
     tripId,
     poiId
   );
-  return row?.found === 1;
+  return row?.event_type === 'enter' || row?.event_type === 'dwell';
 }

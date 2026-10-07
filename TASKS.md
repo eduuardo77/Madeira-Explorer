@@ -142,9 +142,18 @@ permission, L3 privacy contact.
       the P30: one purchase check, one start, one registration at launch; home and back, one each.
       Found along the way: expo-sqlite's released-statement race (T-142) in SDK 57's wording
       ("doesn't contain valid id") reached the diary instead of the retry; `releasedObject.ts` now
-      knows both. ⚠ **Open:** the same five places get an exit stored at every registration
-      (praia-dos-reis-magos has 283), Android's initial trigger most likely; harmless to the rules
-      so far, but it is noise in the data.
+      knows both. The repeated exits it left open are T-274.
+- [x] **T-274** The repeated exits. **Done 2026-10-07.** Expo registers geofences with Android's
+      initial ENTER and EXIT triggers (`GeofencingTaskConsumer.kt:168`), so each registration
+      reports an exit for every place the phone is outside of. T-172 kept an exit when the place had
+      *ever* been entered this trip, which stays true for good: on the P30 five places had one to
+      four real enters followed by 165 to 429 exits (1,194 exits to 12 enters in trip 31).
+      Now a crossing is kept only if it changes whether the user is recorded as inside
+      (`geofenceEventDao.isInsideInTrip`, `shouldRecordTransition`). `reconstructVisits` already
+      ignored both artefacts, so visits and stamps are unchanged; a test runs both through it. On
+      the P30: three registrations, nothing stored (was 5 to 11 per launch). **Not done:** the
+      1,194 old exits stay in the database; deleting them is safe by the same proof but touches
+      recorded data, so it waits for the lead's yes.
 - [x] **T-272** The cold start. **Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
       I'm tired of seeing a white background with blue lines circling"*. Measured on the P30 with
       timing marks (tap = 0): JavaScript at 2.9 s, the stamp pass 4.2 s (one SQL round trip per

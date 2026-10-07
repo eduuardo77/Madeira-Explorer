@@ -261,18 +261,14 @@ export const databaseSink: RecordingSink = {
             return;
           }
 
-          // ⚠⚠ T-172 — THE REGISTRATION BURST. All 2,699 crossings on the P30
-          // were exits, arriving 83 to a single timestamp: every monitored region
-          // reporting EXIT as the set is registered, because the phone is inside
-          // none of them. You cannot leave somewhere you were never recorded
-          // entering, and `stampRules` pairs an exit with its enter — so an
-          // unpaired one was never going to award anything, and dropping it costs
-          // nothing real.
-          const hasPriorEnter =
-            transition.eventType !== 'exit' ||
-            (await geofenceEventDao.hasEnterInTrip(trip.id, transition.poiId));
+          // ⚠⚠ T-172, T-274 — THE REGISTRATION BURST. Every registration
+          // reports an exit for each place the phone is outside of, and an enter
+          // for each it is inside. Only a crossing that changes whether the user
+          // is recorded as inside is kept (`shouldRecordTransition` says why
+          // that loses nothing).
+          const insideNow = await geofenceEventDao.isInsideInTrip(trip.id, transition.poiId);
 
-          if (!shouldRecordTransition(transition.eventType, hasPriorEnter)) {
+          if (!shouldRecordTransition(transition.eventType, insideNow)) {
             return;
           }
 

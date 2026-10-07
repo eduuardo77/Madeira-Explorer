@@ -59,6 +59,14 @@
  */
 const RELEASED = 'shared object that was already released';
 
+/**
+ * The same race in Expo SDK 57's words: the statement's native handle is gone
+ * by the time its argument is converted, so the call is rejected before it
+ * runs, exactly as above. First seen on the P30 2026-10-07, on `prepareAsync`
+ * from the map's poll, where it went to the diary instead of being retried.
+ */
+const NO_VALID_ID = "SharedObject, because it doesn't contain valid id";
+
 export function isReleasedSharedObject(error: unknown): boolean {
   if (error === null || error === undefined) {
     return false;
@@ -67,7 +75,7 @@ export function isReleasedSharedObject(error: unknown): boolean {
   // Expo puts the cause chain in the message; `String(error)` catches both an
   // Error and the bare rejection some native modules produce.
   const text = error instanceof Error ? `${error.message}` : String(error);
-  return text.includes(RELEASED);
+  return text.includes(RELEASED) || text.includes(NO_VALID_ID);
 }
 
 /**

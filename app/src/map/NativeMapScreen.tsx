@@ -42,7 +42,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  AppState,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -108,6 +107,7 @@ import { traceBounds } from './traceGeoJson';
 import { networkTimings, roadLinesFor, routeSince } from '../matching/roadNetwork';
 import type { VisitedLine } from '../matching/visitedRoads';
 import { decodeMapSnapshot, encodeMapSnapshot } from './mapSnapshot';
+import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 
@@ -357,21 +357,9 @@ export default function NativeMapScreen({
   const [travelledToday, setTravelledToday] = useState<string | null>(null);
   /** D-096: stamps earned since the map last showed one, oldest first. */
   const [stampNews, setStampNews] = useState<StampPopup[]>([]);
-  useEffect(() => {
-    // ⚠ Only a return from the background counts. Android also reports
-    // "active" as the app starts, and counting that ran the whole load twice
-    // at once on every cold start (T-272, P30, 2026-10-07).
-    let wentBackground = false;
-    const subscription = AppState.addEventListener('change', (next) => {
-      if (next === 'background') {
-        wentBackground = true;
-      } else if (next === 'active' && wentBackground) {
-        wentBackground = false;
-        setResumeCount((count) => count + 1);
-      }
-    });
-    return () => subscription.remove();
-  }, []);
+  // ⚠ A return, not every "active": counting the one Android reports as the
+  // app starts ran the whole load twice at once (T-272, T-273).
+  useEffect(() => onReturnToFront(() => setResumeCount((count) => count + 1)), []);
 
   /** Road lines as the map's polylines; tunnels and cable cars faded, as Google draws its tunnels. */
   const toPolylines = (lines: VisitedLine[]): Polyline[] =>

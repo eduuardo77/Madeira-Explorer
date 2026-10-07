@@ -132,6 +132,19 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [x] **T-273** The recorder started twice at each launch. **Done 2026-10-07.** Android reports
+      "active" while the app is starting, and three listeners took it for a return to the front:
+      the map's load (T-272), Play's purchase query, and the recorder's sync, which re-registered
+      every geofence (and so a second burst of crossings, T-254). Not "only after a background
+      event": a process started in the background and then opened sees none, and T-212 needs that
+      start. The rule (`navigation/returnToFront.ts`, tested) is a change into "active" from any other
+      state, from the state at subscription; `onReturnToFront` subscribes, used by all three. On
+      the P30: one purchase check, one start, one registration at launch; home and back, one each.
+      Found along the way: expo-sqlite's released-statement race (T-142) in SDK 57's wording
+      ("doesn't contain valid id") reached the diary instead of the retry; `releasedObject.ts` now
+      knows both. ⚠ **Open:** the same five places get an exit stored at every registration
+      (praia-dos-reis-magos has 283), Android's initial trigger most likely; harmless to the rules
+      so far, but it is noise in the data.
 - [x] **T-272** The cold start. **Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
       I'm tired of seeing a white background with blue lines circling"*. Measured on the P30 with
       timing marks (tap = 0): JavaScript at 2.9 s, the stamp pass 4.2 s (one SQL round trip per
@@ -783,6 +796,9 @@ section's definition of done.
       **2026-10-07:** the real icon (`build-icon.mjs` writes `site/icon.png`), the policy regenerated
       (version 2026-10-07), `site/vercel.json` (`cleanUrls`, so `/privacy` works). Hosting: Vercel, the
       lead's steps are in HANDOFF; T-267 closes when `https://bruma.lol/privacy` loads.
+      ✅ **Live 2026-10-07 (T-267):** the lead set up Vercel and Namecheap's DNS; `https://bruma.lol/privacy`
+      redirects to `www.bruma.lol/privacy` and serves policy 2026-10-07 with the contact, as the app
+      shows. Left for T-267: `privacy@bruma.lol` forwarding (Namecheap Email Forwarding), later.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

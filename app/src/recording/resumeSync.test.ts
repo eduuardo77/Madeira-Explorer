@@ -14,11 +14,11 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-test('⚠ T-212: App.tsx re-syncs the recorder when AppState turns active', () => {
+test('⚠ T-212: App.tsx re-syncs the recorder when the app returns to the front', () => {
   const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const source = readFileSync(path.join(appRoot, 'App.tsx'), 'utf8');
-  assert.match(
-    source,
-    /AppState\.addEventListener\('change',[\s\S]{0,120}next === 'active'[\s\S]{0,80}syncRecordingWithPreferences\('active'\)/
-  );
+  // T-273: through `onReturnToFront`, which counts a process started in the
+  // background and then opened (`returnToFront.test.ts`), not the launch's own
+  // "active".
+  assert.match(source, /onReturnToFront\(\(\) => \{\s*void syncRecordingWithPreferences\('active'\)/);
 });

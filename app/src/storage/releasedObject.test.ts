@@ -28,6 +28,15 @@ test('the rejection this exists for is recognised', () => {
   assert.equal(isReleasedSharedObject(new Error(REAL)), true);
 });
 
+test('and in Expo SDK 57’s wording, from the diary on 2026-10-07', () => {
+  const sdk57 = [
+    "Call to function 'NativeDatabase.prepareAsync' has been rejected.",
+    '→ Caused by: The 2nd argument cannot be cast to type class expo.modules.sqlite.NativeStatement (received class java.lang.Integer)',
+    "→ Caused by: Cannot convert provided JavaScriptObject to the SharedObject, because it doesn't contain valid id",
+  ].join('\n');
+  assert.equal(isReleasedSharedObject(new Error(sdk57)), true);
+});
+
 test('it is recognised from every call it arrives on', () => {
   // It has been seen on all three, which is why the match is on the cause and
   // not on the operation name.

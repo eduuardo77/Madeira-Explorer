@@ -12,6 +12,7 @@ import OnboardingFlow, {
 } from './src/onboarding/OnboardingFlow';
 import { needsAndroidDisclosure, type OnboardingScreen } from './src/onboarding/OnboardingView';
 import { syncRecordingWithPreferences } from './src/recording/tripRecording';
+import { onReturnToFront } from './src/navigation/onReturnToFront';
 import { checkTripEnd } from './src/progress/tripEndDetection';
 import * as appStateDao from './src/storage/dao/appStateDao';
 import { runHealthCheck } from './src/recording/healthCheck';
@@ -178,15 +179,19 @@ function AppScreens({ onShown }: { onShown: () => void }) {
   // two relaunches, until the Settings switch was flipped. Re-asserting on
   // each resume re-applies the options, which restarts location updates for a
   // moment; a recorder that stays off is the loss that cannot be recovered.
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (next) => {
-      if (next === 'active') {
+  // ⚠ T-273: a return, not every "active". Android reports one as the app
+  // starts, and acting on it started the recorder a second time at each
+  // launch, re-registering every geofence and setting off a second burst of
+  // crossings. A process started in the background and then opened still
+  // counts (`returnToFront.ts`).
+  useEffect(
+    () =>
+      onReturnToFront(() => {
         void syncRecordingWithPreferences('active');
         void dismissUpdateNotice();
-      }
-    });
-    return () => subscription.remove();
-  }, []);
+      }),
+    []
+  );
 
   // Onboarding and the permission prompts are on screen as soon as they
   // render; the map says so itself, once its tiles are drawn.

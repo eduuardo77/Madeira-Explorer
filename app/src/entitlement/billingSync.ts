@@ -22,7 +22,7 @@
  * return to the front tries again.
  */
 
-import { AppState } from 'react-native';
+import { onReturnToFront } from '../navigation/onReturnToFront';
 
 import { getContentPack } from '../content/poiCatalogue';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -77,13 +77,13 @@ export function startBillingSync(): () => void {
     onPurchase: (purchase) => void serially(() => handle([purchase])),
     onFailure: (failure) => emit({ kind: 'failure', failure }),
   });
-  const resume = AppState.addEventListener('change', (next) => {
-    if (next === 'active') void restorePurchases();
-  });
+  // T-273: on a return, not on the "active" Android reports as the app
+  // starts, which asked Play twice at every launch.
+  const stopResume = onReturnToFront(() => void restorePurchases());
   void restorePurchases();
 
   return () => {
-    resume.remove();
+    stopResume();
     stopListening();
     connected = false;
     void store.disconnect();

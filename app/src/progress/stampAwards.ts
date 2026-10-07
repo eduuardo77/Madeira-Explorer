@@ -30,7 +30,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { findArrivals, judgeArrivals } from './arrivalFromTrace';
 import type { TraceFix } from './levadaCoverage';
-import { computeCoverage, judgeCoverage } from './levadaCoverage';
+import { computeCoverage, indexTrace, judgeCoverage } from './levadaCoverage';
 import type { GeofenceCrossing } from './stampRules';
 import { judgePlace } from './stampRules';
 import { speedLookup } from '../recording/staleSpeed';
@@ -205,6 +205,9 @@ async function creditLevadasByCoverage(
   result: AwardPassResult,
   asOfTs: number
 ): Promise<void> {
+  // Prepared once for every levada: preparing the trip again for each was most
+  // of this detector's cost on a long trip (T-254).
+  const trace = indexTrace(fixes);
   for (const place of candidates.filter((place) => place.category === 'levada')) {
     const course = getLevadaCourse(place.id);
     if (course === null) {
@@ -213,7 +216,7 @@ async function creditLevadasByCoverage(
       continue;
     }
 
-    const coverage = computeCoverage(course.features[0].geometry.coordinates, fixes);
+    const coverage = computeCoverage(course.features[0].geometry.coordinates, trace);
     if (coverage.fixesOnCourse === 0) {
       continue;
     }

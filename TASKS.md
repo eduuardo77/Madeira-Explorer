@@ -286,6 +286,12 @@ permission, L3 privacy contact.
       `roadGraph.test` caught it). **Open:** why the burst (two registrations per launch,
       "recording started" twice; Android's initial exit trigger?), and the pass's two trace scans
       (coverage 0.8 s, arrivals before the box 1.3 s) run once a minute and grow with the trip.
+      ✅ **Coverage, 2026-10-07:** the trip was filtered, bounded and gridded again for each of the
+      18 levadas, the grid keyed by strings built per lookup and each cell copied into a new list
+      per segment. Now prepared once (`indexTrace`), numeric cell keys, cells read in place. On the
+      P30's 17,824-fix trip, on the PC: **314 ms to 17 ms**, every levada's figures identical
+      (compared against the previous version; a test pins it). Arrivals, after its box: 147 ms on
+      the PC for every place; left as is for now.
 - [~] **T-264** Inventory. **Done 2026-10-07** at the top of `docs/store-privacy-answers.md`: every
       permission with what adds it (from the APK and the manifest merger report) and why; every
       table on the phone; everything that leaves it, with evidence; the August banner replaced.

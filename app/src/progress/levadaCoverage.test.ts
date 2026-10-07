@@ -20,6 +20,7 @@ import assert from 'node:assert/strict';
 import {
   CORRIDOR_M,
   computeCoverage,
+  indexTrace,
   judgeCoverage,
   MAX_USABLE_ACCURACY_M,
   WALKED_ABSOLUTE_M,
@@ -235,4 +236,18 @@ test('a levada that runs on forever is not measured against its whole length', (
   assert.ok(coverage.fraction < 0.07, `fraction ${coverage.fraction}`);
   assert.ok(coverage.coveredM < WALKED_ABSOLUTE_M, `covered ${coverage.coveredM}`);
   assert.equal(judgeCoverage(coverage).credited, true);
+});
+
+test('T-254: a trace prepared once gives every levada the same answer as the raw fixes', () => {
+  // The award pass prepares the trip once for all 18 levadas; it must not
+  // change a single figure (checked on the P30's 17,824-fix trip, 2026-10-07).
+  const fixes = [
+    ...walk(0, 1200),
+    ...walk(300, 900, { offsetM: 30, startTs: 1_800_000_900_000 }),
+    ...walk(0, 400, { accuracy: MAX_USABLE_ACCURACY_M + 1, startTs: 1_800_001_900_000 }),
+  ];
+  const trace = indexTrace(fixes);
+  for (const course of [[straightCourse(2000)], [straightCourse(600), straightCourse(300, 25)]]) {
+    assert.deepEqual(computeCoverage(course, trace), computeCoverage(course, fixes));
+  }
 });

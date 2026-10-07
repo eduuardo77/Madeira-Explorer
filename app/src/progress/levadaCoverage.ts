@@ -241,14 +241,9 @@ function corridorFor(fix: TraceFix): number {
  */
 export function computeCoverage(
   lines: readonly (readonly CoursePoint[])[],
-  fixes: readonly TraceFix[]
+  trace: readonly TraceFix[] | TraceIndex
 ): Coverage {
-  const usable = fixes.filter(
-    (fix) =>
-      Number.isFinite(fix.lat) &&
-      Number.isFinite(fix.lon) &&
-      (fix.accuracy_m === null || fix.accuracy_m <= MAX_USABLE_ACCURACY_M)
-  );
+  const { usable, bounds, grid } = 'grid' in trace ? trace : indexTrace(trace);
 
   let courseM = 0;
   let coveredM = 0;
@@ -256,12 +251,6 @@ export function computeCoverage(
   let firstTs: number | null = null;
   let lastTs: number | null = null;
   const countedFixes = new Set<number>();
-
-  // Where the fixes are, so a levada nobody went near costs one comparison
-  // rather than one per segment. A trip is one island wide; a course is one
-  // valley, and most of them will miss this box entirely.
-  const bounds = boundsOf(usable);
-  const grid = indexFixes(usable);
 
   for (const line of lines) {
     for (let i = 1; i < line.length; i += 1) {
@@ -276,10 +265,10 @@ export function computeCoverage(
       }
 
       let covered = false;
-      for (const index of candidatesNear(grid, a, b)) {
+      forEachCandidate(grid, a, b, (index) => {
         const fix = usable[index];
         if (metresToSegment(fix, a, b) > corridorFor(fix)) {
-          continue;
+          return;
         }
         covered = true;
         if (!countedFixes.has(index)) {
@@ -288,7 +277,7 @@ export function computeCoverage(
           firstTs = firstTs === null ? fix.ts : Math.min(firstTs, fix.ts);
           lastTs = lastTs === null ? fix.ts : Math.max(lastTs, fix.ts);
         }
-      }
+      });
       if (covered) {
         coveredM += segmentM;
       }
@@ -322,43 +311,69 @@ export function computeCoverage(
  */
 const CELL_DEGREES = 0.002;
 
-type FixGrid = Map<string, number[]>;
+/** Cells keyed by a number, not a string: a lookup per cell per segment allocates nothing. */
+type FixGrid = Map<number, number[]>;
 
-function cellKey(lat: number, lon: number): string {
-  return `${Math.floor(lat / CELL_DEGREES)},${Math.floor(lon / CELL_DEGREES)}`;
+/** Unique for any cell on Earth: longitude cells stay within ±90,000. */
+function cellKey(latCell: number, lonCell: number): number {
+  return latCell * 1_000_000 + lonCell;
 }
 
-function indexFixes(fixes: readonly TraceFix[]): FixGrid {
+/**
+ * A trace prepared for `computeCoverage`: its usable fixes, their bounds and
+ * their grid (T-254). Prepare once and pass it for every levada: the award
+ * pass asks about 18 and runs once a minute while recording, and preparing a
+ * 17,824-fix trip again for each was most of its cost.
+ */
+export type TraceIndex = {
+  usable: TraceFix[];
+  bounds: ReturnType<typeof boundsOf>;
+  grid: FixGrid;
+};
+
+export function indexTrace(fixes: readonly TraceFix[]): TraceIndex {
+  const usable = fixes.filter(
+    (fix) =>
+      Number.isFinite(fix.lat) &&
+      Number.isFinite(fix.lon) &&
+      (fix.accuracy_m === null || fix.accuracy_m <= MAX_USABLE_ACCURACY_M)
+  );
   const grid: FixGrid = new Map();
-  for (const [index, fix] of fixes.entries()) {
-    const key = cellKey(fix.lat, fix.lon);
+  usable.forEach((fix, index) => {
+    const key = cellKey(Math.floor(fix.lat / CELL_DEGREES), Math.floor(fix.lon / CELL_DEGREES));
     const bucket = grid.get(key);
     if (bucket === undefined) {
       grid.set(key, [index]);
     } else {
       bucket.push(index);
     }
-  }
-  return grid;
+  });
+  // Where the fixes are, so a levada nobody went near costs one comparison
+  // rather than one per segment. A trip is one island wide; a course is one
+  // valley, and most of them will miss this box entirely.
+  return { usable, bounds: boundsOf(usable), grid };
 }
 
-/** Every fix index in the cells this segment passes through, plus a ring around them. */
-function candidatesNear(grid: FixGrid, a: CoursePoint, b: CoursePoint): number[] {
+/** Each fix index in the cells this segment passes through, plus a ring around them. */
+function forEachCandidate(
+  grid: FixGrid,
+  a: CoursePoint,
+  b: CoursePoint,
+  visit: (index: number) => void
+): void {
   const latFrom = Math.floor(Math.min(a[1], b[1]) / CELL_DEGREES) - 1;
   const latTo = Math.floor(Math.max(a[1], b[1]) / CELL_DEGREES) + 1;
   const lonFrom = Math.floor(Math.min(a[0], b[0]) / CELL_DEGREES) - 1;
   const lonTo = Math.floor(Math.max(a[0], b[0]) / CELL_DEGREES) + 1;
 
-  const found: number[] = [];
   for (let lat = latFrom; lat <= latTo; lat += 1) {
     for (let lon = lonFrom; lon <= lonTo; lon += 1) {
-      const bucket = grid.get(`${lat},${lon}`);
+      const bucket = grid.get(cellKey(lat, lon));
       if (bucket !== undefined) {
-        found.push(...bucket);
+        for (const index of bucket) visit(index);
       }
     }
   }
-  return found;
 }
 
 /** The bounding box of the trace, widened by the widest corridor allowed. */

@@ -50,6 +50,7 @@ export type ShareRefusal = ExportRefusal | 'unavailable';
 export const REFUSAL_KEYS = {
   nothing: 'share.refusal.nothing',
   withheld: 'share.refusal.withheld',
+  hidden: 'share.refusal.hidden',
   unavailable: 'share.refusal.unavailable',
   failed: 'share.refusal.failed',
 } as const satisfies Record<ShareRefusal, string>;

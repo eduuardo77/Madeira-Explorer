@@ -73,6 +73,7 @@ import {
 import { cameraMoveDue, cameraPlan, openingCamera, replayMapFrame } from './replayMap';
 import { formatDateRange } from './shareCard';
 import { getSouvenirComposition } from './souvenirPlan';
+import { REFUSAL_KEYS } from './shareTrip';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from '../ui/theme';
 
 /**
@@ -94,7 +95,14 @@ const HERO_CLEARANCE = spacing.xl * 5;
  */
 const MAP_READY_FALLBACK_MS = 3_000;
 
-export default function ReplayScreen({ onClose }: { onClose: () => void }) {
+export default function ReplayScreen({
+  tripId,
+  onClose,
+}: {
+  /** The trip to play (T-275); the trip on show when absent. */
+  tripId?: number;
+  onClose: () => void;
+}) {
   const [composition, setComposition] = useState<Composition | null>(null);
   const [caption, setCaption] = useState('');
   /**
@@ -120,11 +128,12 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
 
     (async () => {
       try {
-        const [plan, trip] = await Promise.all([
-          getSouvenirComposition(),
-          // T-204: the film of a trip that has ended is the one worth watching.
-          tripDao.getTripOnShow(),
-        ]);
+        // T-204: the film of a trip that has ended is the one worth watching.
+        const trip =
+          tripId === undefined ? await tripDao.getTripOnShow() : await tripDao.getTrip(tripId);
+        // The same trip's film: the plan's own default can be a different one
+        // while a trip is open and an ended one is on show.
+        const plan = await getSouvenirComposition({ tripId: trip?.id });
 
         if (cancelled) {
           return;
@@ -145,7 +154,7 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tripId]);
 
   const durationMs =
     composition !== null && composition.renderable ? composition.durationMs : 0;
@@ -321,12 +330,17 @@ export default function ReplayScreen({ onClose }: { onClose: () => void }) {
   }
 
   if (!composition.renderable || frame === null || painted === null) {
-    // ⚠ Honest and unspecific. `composition.reason` is written for the
-    // recorder's diary — "no drawable segments after masking" is true and is
-    // not a sentence to hand a person at the end of their holiday.
+    // ⚠ Honest. `composition.reason` is written for the recorder's diary;
+    // the person reads the share's sentence for the same refusal (T-275), so
+    // a trip hidden for privacy does not claim nothing was recorded.
+    const refusal = composition.renderable ? undefined : composition.refusal;
     return (
       <View style={[styles.root, styles.centre]}>
-        <Text style={styles.empty}>{t('replay.nothingToWatch')}</Text>
+        <Text style={styles.empty}>
+          {refusal === undefined || refusal === 'nothing'
+            ? t('replay.nothingToWatch')
+            : t(REFUSAL_KEYS[refusal])}
+        </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('replay.close')}

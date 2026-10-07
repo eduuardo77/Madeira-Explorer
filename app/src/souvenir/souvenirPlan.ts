@@ -25,10 +25,10 @@ import type { Composition, SouvenirStamp } from './composition';
 import { composeSouvenir } from './composition';
 import { exportRoadSegments } from '../matching/roadNetwork';
 import { MASK_RADIUS_M } from './accommodation';
-import { getExportableTrace } from './exportTrace';
+import { exportedTrip, getExportableTrace } from './exportTrace';
 
 /**
- * Plan the souvenir for the trip that just ended.
+ * Plan the souvenir for `tripId`, or for the trip that just ended.
  *
  * Never throws: this is called from the reveal (T-102), which the user reaches
  * at the airport with their phone at 4% — a failure here must degrade to an
@@ -37,19 +37,22 @@ import { getExportableTrace } from './exportTrace';
  * `quiet`: plan without writing to the diary, for the passport's question
  * "is there a film to offer" (T-217), asked on every visit.
  */
-export async function getSouvenirComposition({ quiet = false }: { quiet?: boolean } = {}): Promise<Composition> {
+export async function getSouvenirComposition({
+  quiet = false,
+  tripId,
+}: { quiet?: boolean; tripId?: number } = {}): Promise<Composition> {
   try {
-    const trace = await getExportableTrace({ quiet });
+    // One trip for the trace and the stamps alike (T-275).
+    const trip = await exportedTrip(tripId);
+    if (trip === null) {
+      return { renderable: false, reason: 'no trip to show' };
+    }
+
+    const trace = await getExportableTrace({ quiet, tripId: trip.id });
     if (!trace.safeToShare) {
       // Already the right answer, and `composeSouvenir` would reach it too.
       // Returning early keeps the reason exactly as the export phrased it.
-      return { renderable: false, reason: trace.reason };
-    }
-
-    const trip =
-      (await tripDao.getActiveTrip()) ?? (await tripDao.getMostRecentTrip());
-    if (trip === null) {
-      return { renderable: false, reason: 'no trip to show' };
+      return { renderable: false, reason: trace.reason, refusal: trace.refusal ?? undefined };
     }
 
     const progress = await getCurrentProgress();

@@ -55,6 +55,7 @@ import type { Category } from '../content/contentPack.ts';
 import type { TraceFix, TraceSegment } from '../map/traceGeoJson.ts';
 import { splitIntoSegments } from '../map/traceGeoJson.ts';
 import { distanceM } from '../recording/distance.ts';
+import type { ExportRefusal } from './exportTrace.ts';
 
 /**
  * 9:16, which is the whole point (D-013) — the video is made to be posted to a
@@ -237,7 +238,12 @@ export type Scene = EstablishScene | DrawScene | FinaleScene;
  * declined to exist.
  */
 export type Composition =
-  | { renderable: false; reason: string }
+  | {
+      renderable: false;
+      reason: string;
+      /** Why the export refused, when it did: what the screen tells the user (T-275). */
+      refusal?: ExportRefusal;
+    }
   | {
       renderable: true;
       widthPx: number;

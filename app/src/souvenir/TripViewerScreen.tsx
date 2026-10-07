@@ -110,8 +110,8 @@ export default function TripViewerScreen({
   /** The trip to show, from the passport's list (T-261); the trip on show when absent. */
   tripId?: number;
   onClose: () => void;
-  /** WalkNYC's Replay: the animated film of the whole trip. */
-  onReplay: () => void;
+  /** WalkNYC's Replay: the animated film of the whole trip, of the trip shown. */
+  onReplay: (tripId: number) => void;
 }) {
   const [view, setView] = useState<TripView | null | 'loading'>('loading');
   const [styleName, setStyleName] = useState<MapStyleName>('light');
@@ -287,7 +287,7 @@ export default function TripViewerScreen({
     }
     setSharing(true);
     try {
-      const scene = await buildShareScene();
+      const scene = await buildShareScene(view.tripId);
       if (!scene.ok) {
         Alert.alert(t('passport.share.nothingTitle'), t(REFUSAL_KEYS[scene.refusal]));
         return;
@@ -340,9 +340,14 @@ export default function TripViewerScreen({
   }
 
   if (view === null || day === null) {
+    // No trip yet, or a trip whose positions never followed a road (the P30's
+    // August day: 128 of them, all at a standstill): "go out with the app"
+    // is true of the first and false of the second (T-275).
     return (
       <View style={[styles.root, styles.centre]}>
-        <Text style={styles.empty}>{t('replay.nothingToWatch')}</Text>
+        <Text style={styles.empty}>
+          {view === null ? t('replay.nothingToWatch') : t('trip.nothingLit')}
+        </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('replay.close')}
@@ -450,42 +455,38 @@ export default function TripViewerScreen({
             >
               <Text style={[styles.roundGlyph, { color: chrome.content }]}>{'←'}</Text>
             </Pressable>
-            {/* T-261: the timelapse and the share play the trip on show, so a
-                past trip from the list offers neither rather than the wrong one. */}
-            {!view.onShow ? null : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('trip.a11y.replay')}
-                onPress={onReplay}
-                hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
-                style={({ pressed }) => [
-                  styles.round,
-                  { backgroundColor: chrome.surface },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
-              </Pressable>
-            )}
-          </View>
-          {!view.onShow ? null : (
+            {/* T-275: the timelapse and the share are of the trip shown, any of
+                them, through the same masked export. */}
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ busy: sharing }}
-              disabled={sharing}
-              onPress={() => void share()}
-              hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+              accessibilityLabel={t('trip.a11y.replay')}
+              onPress={() => onReplay(view.tripId)}
+              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
               style={({ pressed }) => [
-                styles.pill,
+                styles.round,
                 { backgroundColor: chrome.surface },
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.pillText, { color: chrome.link }]}>
-                {sharing ? t('passport.sharing') : t('trip.share')}
-              </Text>
+              <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
             </Pressable>
-          )}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ busy: sharing }}
+            disabled={sharing}
+            onPress={() => void share()}
+            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+            style={({ pressed }) => [
+              styles.pill,
+              { backgroundColor: chrome.surface },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.pillText, { color: chrome.link }]}>
+              {sharing ? t('passport.sharing') : t('trip.share')}
+            </Text>
+          </Pressable>
         </View>
       )}
 

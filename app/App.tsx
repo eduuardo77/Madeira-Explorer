@@ -265,11 +265,14 @@ function AppScreens({ onShown }: { onShown: () => void }) {
         <TripViewerScreen
           tripId={viewedTripId ?? undefined}
           onClose={() => setScreen('passport')}
-          onReplay={() => setScreen('timelapse')}
+          onReplay={(tripId) => {
+            setViewedTripId(tripId);
+            setScreen('timelapse');
+          }}
         />
       ) : screen === 'timelapse' ? (
         // WalkNYC's Replay: the whole trip as a timelapse, back to the viewer.
-        <ReplayScreen onClose={() => setScreen('replay')} />
+        <ReplayScreen tripId={viewedTripId ?? undefined} onClose={() => setScreen('replay')} />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

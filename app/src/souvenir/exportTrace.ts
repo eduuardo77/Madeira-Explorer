@@ -14,6 +14,7 @@
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
+import type { Trip } from '../storage/types';
 import type { Accommodation, OvernightFix } from './accommodation';
 import { detectAccommodation, maskTrace } from './accommodation';
 
@@ -24,7 +25,7 @@ import { detectAccommodation, maskTrace } from './accommodation';
  * 2026-09-23 they showed `reason` itself, so a Portuguese phone read
  * *"nothing recorded"* inside a translated alert.
  */
-export type ExportRefusal = 'nothing' | 'withheld' | 'failed';
+export type ExportRefusal = 'nothing' | 'withheld' | 'hidden' | 'failed';
 
 export type ExportableTrace = {
   /** Safe to render, safe to share. */
@@ -53,7 +54,9 @@ const NOTHING: ExportableTrace = {
 };
 
 /**
- * The trip's trace, with the user's accommodation removed.
+ * The trip's trace, with the user's accommodation removed: `tripId`'s, or
+ * else the open trip's, or else the latest (T-275: the passport's list plays
+ * and shares any trip, through this and nothing else).
  *
  * Masking is applied unconditionally — D-016 requires it **on by default**,
  * and there is deliberately no parameter to turn it off. When a setting to
@@ -65,12 +68,12 @@ const NOTHING: ExportableTrace = {
  * anything to show (the passport's *Watch* offer, T-217), which would
  * otherwise write one on every visit. Masking is the same either way.
  */
-export async function getExportableTrace({ quiet = false }: { quiet?: boolean } = {}): Promise<ExportableTrace> {
+export async function getExportableTrace({
+  quiet = false,
+  tripId,
+}: { quiet?: boolean; tripId?: number } = {}): Promise<ExportableTrace> {
   try {
-    const trip = await tripDao.getActiveTrip();
-    // Note: at export time the trip is usually already ended (T-099), so fall
-    // back to the most recent one rather than requiring an open trip.
-    const target = trip ?? (await tripDao.getMostRecentTrip());
+    const target = await exportedTrip(tripId);
     if (target === null) {
       return NOTHING;
     }
@@ -97,15 +100,29 @@ export async function getExportableTrace({ quiet = false }: { quiet?: boolean } 
       removedCount: masked.removedCount,
       reason: masked.reason,
       safeToShare: masked.fixes.length > 0,
-      // Everything masked away is the same answer to the user as masking
-      // refused: there is nothing it is safe to show.
-      refusal: masked.fixes.length > 0 ? null : 'withheld',
+      // T-275: two different answers to the user. `withheld`: the night was
+      // recorded but where it was spent could not be found, so nothing can be
+      // hidden safely. `hidden`: it was found, and the whole trip is near it,
+      // as a trip spent around the house is (the P30's trip 30).
+      refusal: masked.fixes.length > 0 ? null : accommodation === null ? 'withheld' : 'hidden',
     };
   } catch (error) {
     await recordingEventDao.logError('export trace', error);
     // A failure here must never fall through to an unmasked export.
     return { ...NOTHING, reason: 'export failed', refusal: 'failed' };
   }
+}
+
+/**
+ * The trip an export is of: `tripId`'s when given. Otherwise the open one,
+ * and at export time that is usually already ended (T-099), so the most recent
+ * rather than requiring an open trip.
+ */
+export async function exportedTrip(tripId?: number): Promise<Trip | null> {
+  if (tripId !== undefined) {
+    return tripDao.getTrip(tripId);
+  }
+  return (await tripDao.getActiveTrip()) ?? (await tripDao.getMostRecentTrip());
 }
 
 /**

@@ -21,9 +21,9 @@ export type ShareScene =
   { ok: true; runs: DayRun[] } | { ok: false; refusal: ShareRefusal; reason: string };
 
 /** The whole trip's roads, masked, as runs for the map. */
-export async function buildShareScene(): Promise<ShareScene> {
+export async function buildShareScene(tripId?: number): Promise<ShareScene> {
   try {
-    const trace = await getExportableTrace();
+    const trace = await getExportableTrace({ tripId });
     if (!trace.safeToShare) {
       return { ok: false, refusal: trace.refusal ?? 'failed', reason: trace.reason };
     }

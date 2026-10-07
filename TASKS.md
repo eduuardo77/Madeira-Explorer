@@ -132,6 +132,17 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [x] **T-275** ▶ and *Partilhar* for any trip in the passport's list. **Done 2026-10-07.** One
+      optional `tripId` through the masked export (`exportTrace.exportedTrip`, `getExportableTrace`,
+      `getSouvenirComposition`, `buildShareScene`), so D-040 still has one door. The viewer passes
+      the trip it shows to the timelapse, which fixes a latent mismatch: the film read the open or
+      latest trip while the viewer read the trip on show. Found on the P30: trip 30 (Aug 28 to
+      Sep 24) is entirely within 300 m of where the lead stays, so masking hides all 6,509 positions;
+      the share said *"could not work out where you spent the night"*, which was false. New refusal
+      `hidden` with its own sentence, which the timelapse now shows too instead of *"go out with
+      the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
+      (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
+      the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
 - [x] **T-273** The recorder started twice at each launch. **Done 2026-10-07.** Android reports
       "active" while the app is starting, and three listeners took it for a return to the front:
       the map's load (T-272), Play's purchase query, and the recorder's sync, which re-registered

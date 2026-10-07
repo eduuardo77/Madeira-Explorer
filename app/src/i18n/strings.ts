@@ -558,6 +558,11 @@ export const STRINGS = {
     'Ainda não foi registado nada. A tua viagem aparece aqui depois de saíres com a aplicação.',
     'Es wurde noch nichts aufgezeichnet. Ihre Reise erscheint hier, sobald Sie mit der App unterwegs waren.'
   ),
+  'share.refusal.hidden': s(
+    'There is nothing from this trip to show: all of it was near where you spent the night, and the app always hides that place.',
+    'Não há nada desta viagem para mostrar: foi toda perto de onde passaste a noite, e a aplicação esconde sempre esse sítio.',
+    'Von dieser Reise gibt es nichts zu zeigen: Alles lag in der Nähe Ihrer Unterkunft, und die App blendet diesen Ort immer aus.'
+  ),
   'share.refusal.withheld': s(
     'This trip cannot be shared yet: the app could not work out where you spent the night, so it cannot hide it.',
     'Esta viagem ainda não pode ser partilhada: a aplicação não conseguiu perceber onde passaste a noite, por isso não o consegue esconder.',
@@ -610,6 +615,11 @@ export const STRINGS = {
   'trip.a11y.stampAt': s('{name}, at {time}', '{name}, às {time}', '{name}, um {time}'),
   'replay.watch': s('Watch your trip', 'Ver a tua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
+  'trip.nothingLit': s(
+    'No roads were lit on this trip: the phone recorded it, but never along a road.',
+    'Esta viagem não acendeu nenhuma estrada: o telemóvel registou-a, mas nunca ao longo de uma estrada.',
+    'Auf dieser Reise wurde keine Straße beleuchtet: Das Handy hat sie aufgezeichnet, aber nie entlang einer Straße.'
+  ),
   'replay.nothingToWatch': s(
     'There is nothing to watch yet. Record somewhere you go and it will appear here.',
     'Ainda não há nada para ver. Quando saíres com a aplicação, a tua viagem aparece aqui.',

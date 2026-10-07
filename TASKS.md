@@ -99,7 +99,9 @@ permission, L3 privacy contact.
 - [~] **T-260** The home shows where you stand among the 80. Three options drawn on a real P30
       capture (`tools/preview-home-options.mjs`, the capture passed in, never committed): A WalkNYC's
       bar ("3 de 80 lugares", %, a thin bar) in the status panel; B a ring on the passport button;
-      C the nearest uncollected place as a chip (place and distance an example). **Waits on the pick.**
+      C the nearest uncollected place as a chip (place and distance an example). Round two (lead:
+      A's line adds nothing, B too much, C not liked; "as it is, or a more discreet B"): as it is,
+      against a small muted "3/80" at the passport button's corner. **Waits on the pick.**
 - [x] **T-257** The icon. ⚠ **Built 2026-10-07, A2; see the end of this entry.** Three options drawn (`tools/preview-icon-options.mjs`, art in
       `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a

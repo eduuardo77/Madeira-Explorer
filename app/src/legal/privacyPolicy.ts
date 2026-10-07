@@ -166,6 +166,7 @@ const SECTIONS_EN: PolicySection[] = [
     heading: 'The map itself',
     paragraphs: [
       'The map you see is Google\u2019s, the same map used by most apps on an Android phone. It is downloaded a piece at a time as you move around it, so Google can see which part of the island is on your screen.',
+      'The map also sends Google some details of its own. They are your phone’s model and system version, your internet address, crash reports if the map fails, an anonymous number Google uses to count its users, and how you move and zoom the map. This is how Google’s map works in every app that uses it. None of it is your trip.',
       'This app does not send your trip to Google. The line showing where you have been is drawn by this app, on top of their map, from the record kept on your phone. The app never sends that record to them or to us.',
       'This does mean the map needs an internet connection. Recording carries on regardless: your trip is still being saved with no signal at all, and it will appear on the map once you have one.',
       'Google has its own privacy policy, which covers what they do with those map requests.',

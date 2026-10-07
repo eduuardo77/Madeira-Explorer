@@ -78,6 +78,7 @@ export const SECTIONS_PT: PolicySection[] = [
     heading: 'O mapa em si',
     paragraphs: [
       'O mapa que vês é da Google, o mesmo mapa usado pela maioria das aplicações num telemóvel Android. É descarregado aos poucos à medida que te deslocas por ele, por isso a Google consegue ver que parte da ilha está no teu ecrã.',
+      'O mapa também envia à Google alguns dados seus. São o modelo e a versão do sistema do teu telemóvel, o teu endereço de internet, relatórios de erro se o mapa falhar, um número anónimo que a Google usa para contar os seus utilizadores, e como mexes e aproximas o mapa. É assim que o mapa da Google funciona em todas as aplicações que o usam. Nada disto é a tua viagem.',
       'Esta aplicação não envia a tua viagem à Google. A linha que mostra por onde andaste é desenhada por esta aplicação, por cima do mapa deles, a partir do registo guardado no teu telemóvel. A aplicação nunca lhes envia esse registo, nem a nós.',
       'Isto quer dizer que o mapa precisa de ligação à internet. O registo continua na mesma: a tua viagem continua a ser guardada mesmo sem rede nenhuma, e aparece no mapa assim que tiveres ligação.',
       'A Google tem a sua própria política de privacidade, que cobre o que fazem com esses pedidos de mapa.',

@@ -132,6 +132,16 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [~] **T-268** The Data safety form, redone. **Drafted 2026-10-07** in
+      `docs/store-privacy-answers.md` (Play section), every answer with Google's own words quoted,
+      read that day. Billing is not declared (Google exempts its own billing system when the app
+      never sees the payment); collected: crash logs, diagnostics, device or other IDs, app
+      interactions (the Maps SDK, per its disclosure updated 2026-10-05); privacy URL
+      `https://bruma.lol/privacy`. Found along the way: **the policy did not say what the map
+      sends**; now it names the phone's details, the internet address, crash reports, the anonymous
+      counting number and how the map is moved (en, pt; doc and site regenerated), so form and
+      policy agree. **Left for the lead:** the two marked calls (shared: recommended no; deletion:
+      recommended no, with reasons), then submit in Play Console; the packet capture (T-264).
 - [~] **T-258** An update must not stop the recorder. **Measured 2026-10-07 with EMUI's launch
       setting on manual** (as set 2026-09-24): recorder running, app in the background, `install -r`
       at 15:20:58. The process started for `UpdateNoticeReceiver` and Expo's `TaskService` handled

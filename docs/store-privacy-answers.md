@@ -58,10 +58,9 @@ Google's encryption, as the privacy policy says. The app never sends it anywhere
 | The masked share image, the backup file, the walk report | **Wherever the user sends them**, through Android's share sheet | Only on the user's tap | `tripShare.ts` and `shareTrip.ts` (masked, D-040), `backupFile.ts`, `donateWalk.ts` (D-069) |
 | The trip | **Nobody.** No account, no server of ours, no analytics, no ads | | The privacy policy's central claim |
 
-⚠ **New since the September draft, and how each lands on the Play form:** billing (a question for
-T-268: whether purchase data handled by Google Play is declared; quote Google's help text, do not
-assume); physical activity, per-stamp notifications and the battery permission (all on the phone
-only, nothing new collected).
+**How each lands on the Play form:** see the Data safety section below (T-268, 2026-10-07):
+billing is not declared, by Google's own exemption for its billing system; physical activity,
+per-stamp notifications and the battery permission stay on the phone, so nothing new is collected.
 
 ---
 
@@ -121,54 +120,50 @@ If one is ever changed, change both in the same piece of work.
 
 ---
 
-## Google Play — Data safety (T-122)
+## Google Play — Data safety (T-122, redone as T-268)
 
-> ### ⚠ REDONE 2026-09-24, as a DRAFT for the project lead to read — not yet submitted
-> The old answer was **"No data collected"**. It is wrong for the APK that ships. Google's rule
-> counts *"user data transmitted off device from your app by libraries and/or SDKs used in your
-> app, irrespective of whether data is transmitted to you or a third-party server"*
-> ([Data safety guidance](https://support.google.com/googleplay/android-developer/answer/10787469)),
-> and the Maps SDK transmits some. **Not legal advice**, the same caveat as above.
+> ### ⚠ DRAFT 2026-10-07 (T-268), for the project lead to answer the two marked calls and submit
+> Built from the inventory above (T-264) and Google's text as read on 2026-10-07. **Not legal
+> advice.** Two answers are judgement calls and are marked as such; everything else follows from
+> Google's own words, quoted. The packet capture (T-264, T-117b) is still owed before submission:
+> until then "the only hosts are Google's" rests on the code and Google's disclosure.
 
 ### What each SDK in the release APK sends, and the evidence
 
 | SDK in the APK | What leaves the phone | Evidence |
 |---|---|---|
-| **Maps SDK for Android** (via expo-maps) | Device metadata (OS version, model, brand, form factor), SDK version and result counts; stack traces and crash metrics; **IP address** "to understand usage"; a pseudonymous **Maps SDK identifier** for counting daily active users; **map interaction events** (panning and zooming when the Map Camera APIs are used, which this app does) | Google's [Maps SDK data disclosure](https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure), read 2026-09-24 |
-| **Firebase Cloud Messaging** (inside expo-notifications) | **Nothing.** Firebase never starts: the release build has no `google-services.json`, so no Firebase installation ID is created and FCM never registers | Seen on the P30, every launch: `FirebaseApp: Default FirebaseApp failed to initialize because no default options were found` |
-| **Play Install Referrer** (a transitive dependency) | **Nothing.** The permission that lets it reach the Play Store is removed from the manifest (T-194), and no code calls it | `withoutUnusedPermissions.js`; `dumpsys package` on the P30 lists 12 permissions |
-| **Google Play services location** (the recorder) | Fixes are handed to the app **on the phone**. Whether the phone improves them with Wi-Fi and cell data is *Google Location Accuracy*, a device setting the user controls, not something this app sends | D-010; the recorder stores fixes only in the local database |
+| **Maps SDK for Android** (via expo-maps) | Device metadata (OS version, name, model, brand, form factor), SDK version; stack traces and crash metrics; **IP address** *"to understand SDK usage and improve Google services"*; a *"Maps SDK-specific pseudonymous identifier to measure daily active SDK users"*; **map interaction events** (*"panning and zooming the map"*, when the Camera APIs are used, which this app does) | Google's [Maps SDK data disclosure](https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure), last updated 2026-10-05, read 2026-10-07 |
+| **Google Play Billing** (via expo-iap) | The purchase, between the phone and Google Play. The app receives only Google's answer (owned or not) and keeps it, with the purchase time, on the phone | `entitlement/storeBilling.ts`, `entitlement/billingSync.ts`; no server of ours |
+| **Firebase Cloud Messaging** (inside expo-notifications) | **Nothing.** Firebase never starts: no `google-services.json` | Every launch on the P30: `Default FirebaseApp failed to initialize` |
+| **Play Install Referrer** (transitive) | **Nothing.** Its permission is removed (T-194) and no code calls it | `withoutUnusedPermissions.js` |
+| **Google Play services location** (the recorder) | Fixes are handed to the app **on the phone**. Google Location Accuracy is a device setting the user controls | D-010 |
 
-**The trip itself** (trace, stamps, diary) is still never transmitted by the app. That claim
-stands, and it is the one the listing should lead with.
+**The trip itself** (positions, roads, stamps, diary) is never transmitted by the app. That stays
+the claim the listing leads with.
 
 ### The answers, as drafted
 
-| Question | Draft answer | Why |
+| Question | Draft answer | Source |
 |---|---|---|
-| Does your app collect or share any of the required user data types? | **Yes** | The Maps SDK rows above |
-| **Collected** data types | **App info and performance → Crash logs; Diagnostics.** **Device or other IDs** (the pseudonymous Maps SDK identifier). **App activity → App interactions** (map panning and zooming) | Google's own definitions: crash logs are *"stack traces, or other information directly related to a crash"*; device IDs include *"Firebase installation ID"*-style app identifiers; app interactions are *"how a user interacts with the app"* |
-| Location? | **Not declared** | The only location that leaves the phone is the IP address, and Google says to declare IP as location *"where developers use IP addresses as a means to determine location"*. Neither this app nor, per its disclosure, the Maps SDK does |
-| Shared? | ⚠ **Draft: not shared** | Google processes it to run the map this app uses. The *"service provider"* exception may cover that, but a reviewer could read Google as a third party using the data for its own purposes (measuring the SDK). **This is the call to confirm.** The conservative alternative is to mark the same types as *shared* |
-| Processed ephemerally? | **No** | Crash metrics and a daily-active-user identifier are retained by design |
+| Does your app collect or share any of the required user data types? | **Yes** | Google counts *"user data transmitted off device from your app by libraries and/or SDKs used in your app"* ([guidance](https://support.google.com/googleplay/android-developer/answer/10787469)); the Maps SDK rows above |
+| **Collected** data types | **App info and performance: Crash logs, Diagnostics. Device or other IDs** (the pseudonymous Maps identifier). **App activity: App interactions** (panning and zooming) | The Maps SDK disclosure, row by row |
+| Location? | **Not declared** | The IP address is declared as location only *"where developers use IP addresses as a means to determine location"*; neither the app nor, per its disclosure, the SDK does |
+| Financial info (purchases)? | **Not declared** | *"If your app uses a payment service such as PayPal, Google Pay, Google Play's billing system, or similar services to complete payment transactions, you don't need to declare collection"* when the app never accesses the financial data. The app keeps only "owned" and the time, on the phone, which is not collection |
+| Physical activity, stamps, the trip | **Not declared** | Processed only on the phone; not transmitted, so not collected |
+| ⚠ **Shared?** (the lead's call) | **Recommended: not shared** | *"Sharing"* is *"transferring user data collected from your app to a third party"*. Here the SDK's provider is the party that collects it, through the SDK; the app transfers nothing on to anyone else. The service-provider exception (*"processes user data on behalf of the developer and based on the developer's instructions"*) is the weaker argument, because Google states its own purposes (*"improve Google services"*), so the answer should not rest on it. Google's Maps page says the developer is *"solely responsible"* for the answer and gives none. The conservative alternative: mark the same types *shared* with Google |
+| Processed ephemerally? | **No** | Ephemeral means *"only stored in memory and retained for no longer than necessary to service the specific request in real-time"*; crash metrics and a daily-user identifier are kept |
 | Required or optional? | **Required** | The map cannot be used without the SDK |
-| Purposes | **App functionality; Analytics** | Stability and usage measurement are the purposes Google gives |
-| Encrypted in transit? | **Yes** | The manifest sets `usesCleartextTraffic=false` for the whole process, and the Maps SDK runs in it |
-| Can users request deletion? | ⚠ **Draft: No** | The app's own data is only on the phone and *Apagar tudo* erases it (T-125). But the question is about **collected** data, and the only collected data is the Maps SDK's, held by Google under Google's policy, which the app cannot delete. Saying *Yes* would promise something the app cannot do |
+| Purposes | **App functionality; Analytics** | The SDK's stated purposes: running the map, crash and usage measurement |
+| Encrypted in transit? | **Yes** | `usesCleartextTraffic=false` for the whole process, which the SDK runs in |
+| ⚠ **Can users request deletion?** (the lead's call) | **Recommended: No** | The question is whether *"you provide users with a mechanism to request data deletion; or automatically initiate deletion or anonymization of collected data within 90 days"*. The only collected data is the Maps SDK's, held by Google under Google's policy; the app cannot delete it. *Apagar tudo* erases everything the app keeps, but none of that is collected |
+| Privacy policy URL | **https://bruma.lol/privacy** | Live since 2026-10-07 (T-267), the same text as the app's (`tools/build-site.mjs`) |
 
-⚠ **Coming with T-156 (billing):** Play Billing adds **Financial info → Purchase history**. Redo
-this table in the same piece of work. Billing is `expo-iap` (D-091): the purchase goes between the
-phone and Google only, with no third party such as RevenueCat in between.
+**The policy now says what the map sends** (2026-10-07): the map section names the phone's
+model and system, the internet address, crash reports, the anonymous counting number and how the
+map is moved, in English and Portuguese, so the form and the policy agree.
 
-⚠ **Keep the in-app policy in step (D-044).** `legal/privacyPolicy.ts` says Google sees which
-part of the island the user is looking at. It does **not** yet say that the map component also
-sends Google device details, crash reports, a pseudonymous identifier and how the map is
-moved. **Proposed sentence, pending the project lead:** *"The map component also sends Google
-basic details about your phone, crash reports, an anonymous identifier for counting users, and
-how you move the map. It never sends your trip."* (in en, pt and de).
-
-**Play also requires a privacy policy URL.** ⚠ **Blocked** on T-187 (a domain) and
-`CONTACT_EMAIL`, as before.
+**Not needed:** an account-deletion URL. Play asks for one from apps that let users create an
+account; this one has none.
 
 ---
 

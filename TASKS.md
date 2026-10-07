@@ -89,6 +89,10 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [~] **T-260** The home shows where you stand among the 80. Three options drawn on a real P30
+      capture (`tools/preview-home-options.mjs`, the capture passed in, never committed): A WalkNYC's
+      bar ("3 de 80 lugares", %, a thin bar) in the status panel; B a ring on the passport button;
+      C the nearest uncollected place as a chip (place and distance an example). **Waits on the pick.**
 - [~] **T-257** The icon. Three options drawn (`tools/preview-icon-options.mjs`, art in
       `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a

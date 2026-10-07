@@ -35,9 +35,13 @@
  * earned. The second review (N3) found the one piece of artwork in the app
  * vanishing at the moment you asked about it; the project lead chose this
  * version on 2026-09-25, *"I want the user to look closer to the stamp"*.
- * ⚠ **White, not the album's dark.** A dark card was built first and the
- * project lead preferred the white one. Over the map the card has no stamp,
- * because the mark you tapped is still on screen behind it.
+ * ⚠ **Its colour follows what it sits on (2026-10-07).** A dark card was built
+ * first and the project lead preferred the white one (T-218); seen next to the
+ * dark trophy, they found the white sheet over the dark album "looks off", and
+ * took the recommendation that the card match its ground: dark over the
+ * passport (`tone="dark"`, the album's own colours), white over the map. Over
+ * the map the card has no stamp, because the mark you tapped is still on
+ * screen behind it.
  *
  * Presentational: props in, pixels out, so the workbench (D-038) can mount it
  * without a map, a database or a location.
@@ -48,11 +52,33 @@ import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import type { PlaceCard } from '../places/placeCard';
 import StampArt from './StampArt';
-import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 import { t } from '../i18n';
 
 /** The stamp beside the name, in dp: big enough to read its name band. */
 const CARD_STAMP_SIZE = 88;
+
+/** The card's colours on each ground: the app's light page, or the dark album. */
+const TONES = {
+  light: {
+    sheet: colors.surfaceRaised,
+    grabber: colors.border,
+    text: colors.text,
+    muted: colors.textMuted,
+    tint: colors.tint,
+    action: colors.action,
+    actionText: colors.actionText,
+  },
+  dark: {
+    sheet: album.surface,
+    grabber: album.hairline,
+    text: album.text,
+    muted: album.textMuted,
+    tint: album.tint,
+    action: album.action,
+    actionText: album.actionText,
+  },
+} as const;
 
 export type PlaceCardViewProps = {
   card: PlaceCard;
@@ -79,6 +105,8 @@ export type PlaceCardViewProps = {
    */
   onUnlock?: () => void;
   onClose: () => void;
+  /** The ground it sits on: `dark` over the passport's album, `light` over the map. */
+  tone?: keyof typeof TONES;
 };
 
 export default function PlaceCardView({
@@ -87,26 +115,31 @@ export default function PlaceCardView({
   onShowOnMap,
   onUnlock,
   onClose,
+  tone = 'light',
 }: PlaceCardViewProps) {
+  const ink = TONES[tone];
+  const text = { color: ink.text };
+  const muted = { color: ink.muted };
+  const tint = { color: ink.tint };
   return (
     // ⚠ Not `accessibilityViewIsModal`. The card is deliberately *not* modal —
     // the passport and settings stay reachable while it is open — and marking
     // it modal hides the rest of the screen from a screen reader, which would
     // make that untrue for exactly the users who can least afford it.
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: ink.sheet }]}>
       {/* The grabber. It is not draggable and does not pretend to be — it is
           the mark that says "this is a sheet over the thing behind it", which
           is how iOS distinguishes a temporary surface from a screen. Hidden
           from screen readers, which get the same information from the fact
           that this is a group with a Close button in it. */}
-      <View style={styles.grabber} accessibilityElementsHidden />
+      <View style={[styles.grabber, { backgroundColor: ink.grabber }]} accessibilityElementsHidden />
 
       {stamp === undefined ? (
         <View style={styles.heading}>
-          <Text style={styles.meta}>{card.metaLabel}</Text>
+          <Text style={[styles.meta, muted]}>{card.metaLabel}</Text>
           {/* No `numberOfLines`: a long Portuguese place name must wrap rather
               than be cut, and at 2× text scaling most of them will. */}
-          <Text style={styles.name}>{card.name}</Text>
+          <Text style={[styles.name, text]}>{card.name}</Text>
         </View>
       ) : (
         <View style={styles.stampRow}>
@@ -124,15 +157,15 @@ export default function PlaceCardView({
           <View style={styles.heading}>
             {/* The category alone: whether it is collected is the status line's
                 to say, in words, and saying it twice is noise. */}
-            <Text style={styles.meta}>{card.categoryLabel}</Text>
-            <Text style={styles.name}>{card.name}</Text>
+            <Text style={[styles.meta, muted]}>{card.categoryLabel}</Text>
+            <Text style={[styles.name, text]}>{card.name}</Text>
             {/* T-256 (third review, F2): the municipality with the name it
                 belongs to. Below the row it sat alone under the stamp, and
                 read as a caption for the artwork. */}
             {card.regionLabel === null ? null : (
-              <Text style={styles.region}>{card.regionLabel}</Text>
+              <Text style={[styles.region, text]}>{card.regionLabel}</Text>
             )}
-            <Text style={styles.status}>{card.statusLine}</Text>
+            <Text style={[styles.status, muted]}>{card.statusLine}</Text>
           </View>
         </View>
       )}
@@ -140,7 +173,7 @@ export default function PlaceCardView({
       {/* T-201: the reason to go (review P1-4). Under the name, because it is
           about the place; above the municipality and the distance, which are
           about getting there. */}
-      {card.whyLine === null ? null : <Text style={styles.why}>{card.whyLine}</Text>}
+      {card.whyLine === null ? null : <Text style={[styles.why, text]}>{card.whyLine}</Text>}
 
       {/* The municipality (T-067, D-027) — *where is this*, which is the one
           question the card could not answer.
@@ -153,14 +186,14 @@ export default function PlaceCardView({
           geography rather than the status, and it sits next to the distance,
           which is the other answer to the same question. */}
       {stamp !== undefined || card.regionLabel === null ? null : (
-        <Text style={styles.region}>{card.regionLabel}</Text>
+        <Text style={[styles.region, text]}>{card.regionLabel}</Text>
       )}
 
       {card.distanceSentence === null ? null : (
         // Only when near (`placeCard.ts` rule 3), and the qualification
         // travels with the number (rule 2): on this island a straight line and
         // a drive are very different things.
-        <Text style={styles.distance}>{card.distanceSentence}</Text>
+        <Text style={[styles.distance, muted]}>{card.distanceSentence}</Text>
       )}
 
       {/* One filled button when there is somewhere to go, and a plain tinted
@@ -176,9 +209,15 @@ export default function PlaceCardView({
               : t('placeCard.a11y.show', { name: card.name })
           }
           onPress={onShowOnMap}
-          style={({ pressed }) => [styles.directions, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.directions,
+            { backgroundColor: ink.action },
+            pressed && styles.pressed,
+          ]}
         >
-          <Text style={styles.directionsText}>{t('placeCard.showOnMap')}</Text>
+          <Text style={[styles.directionsText, { color: ink.actionText }]}>
+            {t('placeCard.showOnMap')}
+          </Text>
         </Pressable>
       )}
 
@@ -190,7 +229,7 @@ export default function PlaceCardView({
           onPress={onUnlock}
           style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
         >
-          <Text style={styles.plainButtonText}>{t('placeCard.unlock')}</Text>
+          <Text style={[styles.plainButtonText, tint]}>{t('placeCard.unlock')}</Text>
         </Pressable>
       )}
 
@@ -200,7 +239,7 @@ export default function PlaceCardView({
         onPress={onClose}
         style={({ pressed }) => [styles.plainButton, pressed && styles.pressed]}
       >
-        <Text style={styles.plainButtonText}>{t('common.close')}</Text>
+        <Text style={[styles.plainButtonText, tint]}>{t('common.close')}</Text>
       </Pressable>
     </View>
   );

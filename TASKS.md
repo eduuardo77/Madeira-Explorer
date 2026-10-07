@@ -101,7 +101,10 @@ permission, L3 privacy contact.
       repeats the name ("Porto Moniz" in "Porto Moniz", seen on the P30); tested. **Not done, on
       purpose:** the plan's Directions button contradicts **D-055** (the lead removed it: "we aren't
       a navigator"); the decision wins until the lead says otherwise. The distance shows only when
-      near, by the 2026-09-25 rule. Left: the lead confirms the white card next to the trophy.
+      near, by the 2026-09-25 rule. **Colour (2026-10-07):** the lead found the white sheet over the
+      dark album "looks off"; it now matches its ground, dark over the passport (`tone="dark"`, album
+      colours), white over the map. **Directions:** the lead clarified they meant "show where it is",
+      which *Ver no mapa* does, the whole course for a levada (checked on the P30, Levada do Furado).
 - [~] **T-254** The jank. Measured with `tools/measure-jank.sh` (the reviews' 9 pans and 2 double
       taps, made repeatable) on a **non-debuggable** build, P30, 2026-10-07. **Most of the review's
       6.3% / p99 32 ms was the debuggable flag:** the same build without it gave 0.81, 2.74 and 2.02%,

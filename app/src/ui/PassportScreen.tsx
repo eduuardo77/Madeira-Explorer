@@ -489,6 +489,8 @@ export default function PassportScreen({
         <View style={styles.cardHolder} pointerEvents="box-none">
           <PlaceCardView
             card={card}
+            // Dark over the dark album, as the trophy is (2026-10-07).
+            tone="dark"
             stamp={cardStamp ?? undefined}
             onShowOnMap={
               cardPlace === null || cardStamp === null

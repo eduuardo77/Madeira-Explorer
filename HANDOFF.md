@@ -25,6 +25,10 @@ screen)**. Open: memory 286 to 320 MB against 280; the Phase 1 gate write-up. P3
 data kept. `tools/measure-jank.sh` needs a non-debuggable build. The P30 has no `screenrecord`:
 time launches with an `adb exec-out screencap` loop.
 
+**bruma.lol on Vercel (T-267, the lead's to set up):** import the GitHub repo, Root Directory `site`,
+Framework *Other*, no build command; add `bruma.lol` under Domains and set the DNS records Vercel
+shows at the registrar. `site/vercel.json` gives `/privacy`. Rebuild with `node tools/build-site.mjs`.
+
 ## ⚠⚠⚠ 2026-10-06 evening: Phase 1 started
 
 L1 *tu* (D-098), L2 keep the battery dialog (D-045 amended), L3 waiting on the lead. **T-253**

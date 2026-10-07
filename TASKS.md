@@ -765,6 +765,9 @@ section's definition of done.
       **Left:** real screenshots (the slots are placeholders; the P30's trace is the project lead's
       real movements, so ask before using it); a contact once `CONTACT_EMAIL` exists (T-206); the
       real icon (T-188); hosting and DNS for `bruma.lol`.
+      **2026-10-07:** the real icon (`build-icon.mjs` writes `site/icon.png`), the policy regenerated
+      (version 2026-10-07), `site/vercel.json` (`cleanUrls`, so `/privacy` works). Hosting: Vercel, the
+      lead's steps are in HANDOFF; T-267 closes when `https://bruma.lol/privacy` loads.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

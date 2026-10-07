@@ -4,7 +4,8 @@
  *     cd tools && npm install            (once: the rasteriser, tools only)
  *     node tools/build-icon.mjs
  *     → app/assets/icon.png, android-icon-{foreground,background,monochrome}.png,
- *       notification-icon.png, splash-icon.png, and app/src/ui/splashArt.ts
+ *       notification-icon.png, splash-icon.png, app/src/ui/splashArt.ts, and
+ *       site/icon.png (the website's icon, so bruma.lol shows the same one)
  *
  * Then `npx expo prebuild --platform android` in `app/` turns them into the
  * launcher's mipmaps and the notification drawable.
@@ -74,6 +75,11 @@ for (const [name, data] of Object.entries(files)) {
   writeFileSync(path.join(assets, name), data);
   console.log(`app/assets/${name}  ${data.length} bytes`);
 }
+
+// The website's tab and page icon: the launcher's square, small enough to load fast.
+const siteIcon = png(`${icon.background}${icon.foreground}`, SHOWN, 256);
+writeFileSync(path.join(here, '..', 'site', 'icon.png'), siteIcon);
+console.log(`site/icon.png  ${siteIcon.length} bytes`);
 
 /**
  * The same icon as plain shapes, for the animated splash in the app

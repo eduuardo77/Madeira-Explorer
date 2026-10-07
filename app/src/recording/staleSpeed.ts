@@ -63,7 +63,7 @@ export function staleSpeedMask(
  * `staleSpeedMask`.
  *
  * Zero still counts as a speed here, as it did in the SQL average this
- * replaces (`rawFixDao.getSpeedBetween`); only the copies are new.
+ * replaced (`rawFixDao.getSpeedBetween`, removed 2026-10-07); only the copies are new.
  */
 export function meanFreshSpeed(
   fixes: readonly SpeedFix[],
@@ -81,6 +81,52 @@ export function meanFreshSpeed(
     count += 1;
   });
   return { meanSpeedMps: count > 0 ? sum / count : null, fixCount: count };
+}
+
+/**
+ * The speed of any window of one trip, from its fixes in memory: the answer
+ * the old `rawFixDao.getSpeedBetween` gave (the fixes in `[fromTs, toTs]` that carry
+ * a speed, less copies of one first seen earlier), without the database.
+ *
+ * T-254, measured on the P30 (2026-10-07): the stamp pass asked the database
+ * twice per visit, hundreds of round trips on a trip of a few weeks, which
+ * cost four seconds at launch and churned memory on every location batch.
+ * `fixes` the whole trip, in time order, as `getTraceFixes` returns them.
+ */
+export function speedLookup(
+  fixes: readonly SpeedFix[]
+): (fromTs: number, toTs: number) => { meanSpeedMps: number | null; fixCount: number } {
+  const withSpeed = fixes.filter((fix) => fix.speed_mps !== null && fix.speed_mps !== undefined);
+  const firstSeenTs = new Map<number, number>();
+  for (const fix of withSpeed) {
+    const speed = fix.speed_mps;
+    if (isReported(speed) && !firstSeenTs.has(speed)) {
+      firstSeenTs.set(speed, fix.ts);
+    }
+  }
+  /** The first index whose fix is after `ts`, or at it when `inclusive`. */
+  const firstFrom = (ts: number, inclusive: boolean) => {
+    let low = 0;
+    let high = withSpeed.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      const at = withSpeed[middle].ts;
+      if (at < ts || (!inclusive && at === ts)) low = middle + 1;
+      else high = middle;
+    }
+    return low;
+  };
+  return (fromTs, toTs) => {
+    const window = withSpeed.slice(firstFrom(fromTs, true), firstFrom(toTs, false));
+    const seenBefore = new Set<number>();
+    for (const fix of window) {
+      const speed = fix.speed_mps;
+      if (isReported(speed) && (firstSeenTs.get(speed) ?? Infinity) < fromTs) {
+        seenBefore.add(speed);
+      }
+    }
+    return meanFreshSpeed(window, seenBefore);
+  };
 }
 
 function isReported(speed: number | null | undefined): speed is number {

@@ -96,9 +96,21 @@ export function findArrivals(
   geofence: PlaceGeofence,
   fixes: readonly TraceFix[]
 ): TraceArrival[] {
+  // A box around the circle first, a little larger than it, so a degree
+  // comparison rejects nearly every fix of the trip before any distance is
+  // worked out (T-254: the pass runs once a minute while recording, and this
+  // scan was 1.3 s of it on a 2,600-fix trip on the P30). A position that is
+  // not a number fails the comparison, as it failed the old finite check.
+  const reachM = (geofence.radiusM + MAX_ACCURACY_SLACK_M) * 1.1;
+  const latReach = reachM / 110_000;
+  const lonReach = reachM / (110_000 * Math.cos((geofence.lat * Math.PI) / 180));
   const inside = fixes
-    .filter((fix) => Number.isFinite(fix.lat) && Number.isFinite(fix.lon))
-    .filter((fix) => isInside(fix, geofence))
+    .filter(
+      (fix) =>
+        Math.abs(fix.lat - geofence.lat) <= latReach &&
+        Math.abs(fix.lon - geofence.lon) <= lonReach &&
+        isInside(fix, geofence)
+    )
     .sort((a, b) => a.ts - b.ts);
 
   const arrivals: TraceArrival[] = [];

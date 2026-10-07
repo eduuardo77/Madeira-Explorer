@@ -22,7 +22,7 @@ import type {
 } from '../storage/types';
 import { AppState } from 'react-native';
 import { announceNewStamps } from '../progress/stampAnnouncer';
-import { checkTripEnd } from '../progress/tripEndDetection';
+import { checkTripEnd, isDeparturePoint } from '../progress/tripEndDetection';
 import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
 import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
@@ -156,5 +156,15 @@ TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
   // Written down first, judged second. A crossing at a departure point is how
   // the holiday ends (D-012), and catching it here is what puts the reveal in
   // the departure lounge rather than at the next app launch.
-  await checkTripEnd();
+  //
+  // ⚠ Only at a departure point (T-254, measured on the P30 2026-10-07).
+  // Crossings arrive in bursts, up to about seventy at once in the minute
+  // after a launch, nearly all exits from places the phone is nowhere near,
+  // and the check reads every crossing and fix of the trip: run for each, they
+  // held the JavaScript thread for seconds at a time and grew its heap past
+  // 160 MB. No other crossing can end a trip; the launch and the lapse rule
+  // still check.
+  if (isDeparturePoint(region.identifier)) {
+    await checkTripEnd();
+  }
 });

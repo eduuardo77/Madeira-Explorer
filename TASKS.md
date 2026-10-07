@@ -175,8 +175,23 @@ permission, L3 privacy contact.
       recomposed the whole map content, comparing every polyline's points. **The fix** (in the
       expo-maps patch): the two camera listeners in their own `CameraEvents` composable. **After:**
       0.00% janky on 5 of 5 runs, p99 9 to 10 ms (24 Sep: 0.72%, 15 ms; WalkNYC 0%, 8 ms). *Centrar*
-      still appears after a pan and goes after a tap. **Memory 286 to 320 MB: the 280 target is
-      not met** and stays open.
+      still appears after a pan and goes after a tap. ~~Memory 286 to 320 MB: the 280 target is
+      not met~~ **Memory met 2026-10-07**, store build, three runs: 274 to 280 MB straight after the
+      workload, 266 to 270 settled, still 0.00% janky. ⚠ **A single reading 3 s after the workload
+      was measuring the garbage collector**: Google Maps' Java heap swings 30 to 270 MB as it decodes
+      tiles. Sampled every 10 s for two minutes, the app grew to 350 to 470 MB, and a one-second
+      heartbeat plus heap readings written to the diary (logcat drops lines on the P30; release
+      Hermes has no profiler) found why: **geofence crossings arrive in bursts, up to ~70 at once
+      after a launch, nearly all exits from far-away places, and each ran `checkTripEnd`**, which
+      reads every crossing and fix of the trip. The JS heap reached 166 MB live. Fixed: only a
+      departure point's crossing runs it (`isDeparturePoint`). Also: the award pass answers speed
+      windows from the trip's fixes in memory (`staleSpeed.speedLookup`, tested against the old
+      SQL; was two queries per visit, the geofence part 7 ms now), `findArrivals` rejects by a
+      lat/lon box before measuring, and the road file's encoded polylines are released once
+      decoded. Tried and reverted: 32-bit coordinates (metre-long edges collapse to zero length,
+      `roadGraph.test` caught it). **Open:** why the burst (two registrations per launch,
+      "recording started" twice; Android's initial exit trigger?), and the pass's two trace scans
+      (coverage 0.8 s, arrivals before the box 1.3 s) run once a minute and grow with the trip.
 - [~] **T-264** Inventory. **Done 2026-10-07** at the top of `docs/store-privacy-answers.md`: every
       permission with what adds it (from the APK and the manifest merger report) and why; every
       table on the phone; everything that leaves it, with evidence; the August banner replaced.

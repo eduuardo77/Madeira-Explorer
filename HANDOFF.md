@@ -21,7 +21,9 @@ Done: T-253/T-253b (trip viewer by day, WalkNYC's way, ▶ timelapse, Partilhar 
 T-254 (jank solved: 0.00% janky frames, 5 of 5 runs), T-255 (*tu*), T-256 (place card, dark tone),
 T-257 (icon A2, animated splash), T-260 (quiet count), T-261 (trips list), T-265, T-266, and
 **T-272 (cold start: map with roads at about 4.5 s, was about 16; the splash is the loading
-screen)**. Open: memory 286 to 320 MB against 280; the Phase 1 gate write-up. P30: field build,
+screen)**, T-254 memory (274 to 280 MB after the workload, 266 settled; a geofence event storm
+was running the end-of-trip check ~70 times at once). Open: the Phase 1 gate write-up; why the
+geofence burst happens (TASKS T-254). P30: field build,
 data kept. `tools/measure-jank.sh` needs a non-debuggable build. The P30 has no `screenrecord`:
 time launches with an `adb exec-out screencap` loop.
 

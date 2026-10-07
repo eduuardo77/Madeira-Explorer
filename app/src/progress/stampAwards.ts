@@ -31,8 +31,9 @@ import * as tripDao from '../storage/dao/tripDao';
 import { findArrivals, judgeArrivals } from './arrivalFromTrace';
 import type { TraceFix } from './levadaCoverage';
 import { computeCoverage, judgeCoverage } from './levadaCoverage';
-import type { GeofenceCrossing, SpeedWindow } from './stampRules';
-import { judgePlace, reconstructVisits, speedWindowFor } from './stampRules';
+import type { GeofenceCrossing } from './stampRules';
+import { judgePlace } from './stampRules';
+import { speedLookup } from '../recording/staleSpeed';
 
 export type AwardPassResult = {
   /** Places judged — i.e. places with at least one crossing. */
@@ -110,13 +111,13 @@ export async function runAwardPass(
       }
     }
 
-    // `judgePlace` is synchronous and pure, so it cannot await a database
-    // query mid-judgement. The fix is to work out which windows it will ask
-    // about *before* calling it: the visits are reconstructed here with the
-    // same pure function the rules use, their speed is fetched, and the lookup
-    // handed in is then a plain map read.
-    const speedCache = new Map<string, SpeedWindow>();
-    const cacheKey = (fromTs: number, toTs: number) => `${fromTs}-${toTs}`;
+    // The trip's fixes, read once: `judgePlace` is synchronous and pure, so
+    // every speed it asks about is answered from them in memory, and the two
+    // trace-based detectors below read them too. ⚠ It used to ask the database
+    // twice per visit: about four seconds at each launch on the P30 and a
+    // burst of memory on every location batch (T-254, 2026-10-07).
+    const fixes = await rawFixDao.getTraceFixes(trip.id);
+    const speedBetween = speedLookup(fixes);
 
     const alreadyAwarded = await stampAwardDao.getAwardedPlaceIds(trip.id);
     const result: AwardPassResult = {
@@ -135,30 +136,7 @@ export async function runAwardPass(
       }
       result.considered += 1;
 
-      for (const visit of reconstructVisits(crossings, asOfTs)) {
-        const { fromTs, toTs } = speedWindowFor(visit);
-        const key = cacheKey(fromTs, toTs);
-        if (!speedCache.has(key)) {
-          speedCache.set(
-            key,
-            await rawFixDao.getSpeedBetween(trip.id, fromTs, toTs)
-          );
-        }
-      }
-
-      const decision = judgePlace(
-        place,
-        crossings,
-        (fromTs, toTs) =>
-          // An absent entry can only mean a window the rules asked about but
-          // the loop above did not anticipate. Reporting "no speed data" is
-          // the safe reading: it costs confidence, never a false award.
-          speedCache.get(cacheKey(fromTs, toTs)) ?? {
-            meanSpeedMps: null,
-            fixCount: 0,
-          },
-        asOfTs
-      );
+      const decision = judgePlace(place, crossings, speedBetween, asOfTs);
 
       if (!decision.awarded || decision.awardedTs === null) {
         continue;
@@ -187,12 +165,10 @@ export async function runAwardPass(
       }
     }
 
-    // Both trace-based detectors read the same fixes, so they are read once.
     const traceCandidates = getContentPack().places.filter(
       (place) => !alreadyAwarded.has(place.id) && !result.newlyAwarded.includes(place.id)
     );
     if (traceCandidates.length > 0) {
-      const fixes = await rawFixDao.getTraceFixes(trip.id);
       if (fixes.length > 0) {
         await creditLevadasByCoverage(traceCandidates, fixes, trip.id, result, asOfTs);
         await creditArrivalsFromTrace(traceCandidates, fixes, trip.id, result);

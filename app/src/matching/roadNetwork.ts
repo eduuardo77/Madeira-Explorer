@@ -89,6 +89,12 @@ async function decodeInSlices(): Promise<RoadGraph> {
     phaseMs[phase] += ms;
   });
   graph = run.value;
+  // ⚠ The module system keeps what `require` returned for the life of the
+  // process, so the file's 60,000 encoded polylines would sit beside the
+  // decoded graph for good. Nothing reads them again: emptied once decoded
+  // (T-254, memory). Only after a successful decode, so a retry still has them.
+  file.edgeGeometry = [];
+  file.edgeNodes = [];
   timings = { requireMs, phaseMs, wallMs: Date.now() - started, slices: run.slices };
   return graph;
 }

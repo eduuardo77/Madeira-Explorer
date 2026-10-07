@@ -51,6 +51,14 @@ const NOT_ENDED: TripEndDecision = {
 };
 
 /**
+ * Whether a geofence is a departure point: the only crossing that can end a
+ * trip, and so the only one worth `checkTripEnd` (T-254).
+ */
+export function isDeparturePoint(geofenceId: string): boolean {
+  return getContentPack().departurePoints.some((point) => point.id === geofenceId);
+}
+
+/**
  * Check whether the trip is over; if it is, finalise it and reveal.
  *
  * Never throws. Returns the decision so the debug screen can show what it

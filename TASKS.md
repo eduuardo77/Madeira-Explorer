@@ -151,9 +151,12 @@ permission, L3 privacy contact.
       Now a crossing is kept only if it changes whether the user is recorded as inside
       (`geofenceEventDao.isInsideInTrip`, `shouldRecordTransition`). `reconstructVisits` already
       ignored both artefacts, so visits and stamps are unchanged; a test runs both through it. On
-      the P30: three registrations, nothing stored (was 5 to 11 per launch). **Not done:** the
-      1,194 old exits stay in the database; deleting them is safe by the same proof but touches
-      recorded data, so it waits for the lead's yes.
+      the P30: three registrations, nothing stored (was 5 to 11 per launch). **The old ones,
+      deleted** on the lead's yes: migration 5 applies the same rule in SQL (`LAG` over each trip
+      and place; dwells neither counted nor deleted, as `reconstructVisits` ignores them, which the
+      first draft got wrong and `migrations.test.ts` caught). On a copy of the P30's database:
+      3,912 crossings to 14, visits identical for all 1,137 trip and place pairs; then on the P30
+      itself, the same 14 and the same three stamps. Backup taken before, outside the repo.
 - [x] **T-272** The cold start. **Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
       I'm tired of seeing a white background with blue lines circling"*. Measured on the P30 with
       timing marks (tap = 0): JavaScript at 2.9 s, the stamp pass 4.2 s (one SQL round trip per

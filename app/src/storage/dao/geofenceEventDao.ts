@@ -70,8 +70,9 @@ export async function getEventsForPoi(
 }
 
 /**
- * Is the user recorded as inside this place: is the latest crossing recorded
- * for it in this trip an enter (or a dwell)?
+ * Is the user recorded as inside this place: is the latest enter or exit
+ * recorded for it in this trip an enter? Dwells are not counted, as
+ * `reconstructVisits` ignores them.
  *
  * ⚠ **T-172, T-274.** The only caller is `recordingSink`, deciding whether an
  * incoming crossing changes anything or is the registration burst repeating
@@ -84,11 +85,11 @@ export async function isInsideInTrip(tripId: number, poiId: string): Promise<boo
   const db = await getDatabase();
   const row = await db.getFirstAsync<{ event_type: string }>(
     `SELECT event_type FROM geofence_event
-      WHERE trip_id = ? AND poi_id = ?
+      WHERE trip_id = ? AND poi_id = ? AND event_type IN ('enter', 'exit')
       ORDER BY ts DESC, id DESC
       LIMIT 1;`,
     tripId,
     poiId
   );
-  return row?.event_type === 'enter' || row?.event_type === 'dwell';
+  return row?.event_type === 'enter';
 }

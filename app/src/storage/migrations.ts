@@ -249,4 +249,42 @@ export const MIGRATIONS: Migration[] = [
       `CREATE INDEX idx_activity_event_ts ON activity_event(ts);`,
     ],
   },
+  {
+    id: 5,
+    name: 'geofence_event_repeats',
+    statements: [
+      // ---------------------------------------------------------------------
+      // T-274: the crossings that changed nothing, deleted once.
+      //
+      // Every geofence registration reported an exit for each place the phone
+      // was outside of, and T-172's filter let them through for any place
+      // entered once in the trip: on the P30, 1,194 exits to 12 enters.
+      // Recording now keeps only a crossing that changes whether the user is
+      // inside (`recordingAdmission.shouldRecordTransition`); this applies the
+      // same rule to what was stored before it.
+      //
+      // An enter or exit is kept when it differs from the previous enter or
+      // exit for the same trip and place, the first being compared with an
+      // exit (outside). That equals the recording rule, which always ends in
+      // the state of the crossing it last saw. Dwells are neither deleted nor
+      // counted, as `reconstructVisits` ignores them. Nothing a stamp depends
+      // on goes: it already kept the earliest of repeated enters and dropped
+      // exits with nothing open (`migrations.test.ts`).
+      // ---------------------------------------------------------------------
+      `DELETE FROM geofence_event
+        WHERE id IN (
+          SELECT id FROM (
+            SELECT id,
+                   event_type,
+                   COALESCE(
+                     LAG(event_type) OVER (PARTITION BY trip_id, poi_id ORDER BY ts, id),
+                     'exit'
+                   ) AS before
+              FROM geofence_event
+             WHERE event_type IN ('enter', 'exit')
+          )
+          WHERE event_type = before
+        );`,
+    ],
+  },
 ];

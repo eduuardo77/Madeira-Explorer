@@ -64,22 +64,25 @@ LogBox.ignoreLogs([/Failed to load glyph range/]);
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 /**
- * The app, with the animated splash over it for its first second and a half.
- * The screens mount underneath at once, so the map is drawing while the splash
- * plays rather than after it.
+ * The app, with the animated splash over it until the first screen is up. The
+ * screens mount underneath at once, so the map is drawing while the splash
+ * plays rather than after it, and the splash is the only loading screen.
  */
 export default function App() {
+  const [appShown, setAppShown] = useState(false);
   const [splashDone, setSplashDone] = useState(false);
+  const onShown = useCallback(() => setAppShown(true), []);
   const onSplashDone = useCallback(() => setSplashDone(true), []);
   return (
     <View style={styles.root}>
-      <AppScreens />
-      {splashDone ? null : <AnimatedSplash onDone={onSplashDone} />}
+      <AppScreens onShown={onShown} />
+      {splashDone ? null : <AnimatedSplash appShown={appShown} onDone={onSplashDone} />}
     </View>
   );
 }
 
-function AppScreens() {
+/** `onShown`: the first screen is on screen, so the splash may go (T-257). */
+function AppScreens({ onShown }: { onShown: () => void }) {
   const [screen, setScreen] = useState<AppScreen>('map');
   // T-211: Back walks the screens instead of leaving the app. Screens with
   // something open inside them (a card, the licences) register their own,
@@ -185,6 +188,13 @@ function AppScreens() {
     return () => subscription.remove();
   }, []);
 
+  // Onboarding and the permission prompts are on screen as soon as they
+  // render; the map says so itself, once its tiles are drawn.
+  const showingOnboarding = onboarding === true || prompt !== null;
+  useEffect(() => {
+    if (showingOnboarding) onShown();
+  }, [showingOnboarding, onShown]);
+
   if (onboarding === null) {
     // One frame at most, while the flag is read.
     return <View style={styles.root} />;
@@ -218,6 +228,7 @@ function AppScreens() {
         <MapScreen
           focusPlace={focusPlace}
           onFocusHandled={() => setFocusPlace(null)}
+          onShown={onShown}
           onOpenPassport={() => setScreen('passport')}
           onOpenSettings={() => setScreen('settings')}
           // D-095: the notice's tap. The same screens the day-2 offer uses,

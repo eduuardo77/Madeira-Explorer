@@ -17,12 +17,13 @@ build (version code 3) with the lead's real data, the version 3 AAB built for in
 
 ## ⚠⚠⚠ 2026-10-07: where Phase 1 stands
 
-Done: T-253/T-253b (trip viewer by day, WalkNYC's way, ▶ timelapse on the dark map, Partilhar one
-PNG; D-099), T-255 (*tu*), T-265 (policy names "Eduardo 7", purchases, CNPD; lead to read the new
-PT), T-266 (battery permission kept; Google's text in D-045). **T-254 in progress**: most of the
-review's jank was the debuggable flag; one cause fixed; target not met on every run (TASKS). Next:
-T-254 profiling, T-256 place card, T-257 icon. P30: field build, data kept. `tools/measure-jank.sh`
-needs a non-debuggable build. A second AVD `madeira-play` has WalkNYC (`docs/dev-build.md`).
+Done: T-253/T-253b (trip viewer by day, WalkNYC's way, ▶ timelapse, Partilhar one PNG; D-099),
+T-254 (jank solved: 0.00% janky frames, 5 of 5 runs), T-255 (*tu*), T-256 (place card, dark tone),
+T-257 (icon A2, animated splash), T-260 (quiet count), T-261 (trips list), T-265, T-266, and
+**T-272 (cold start: map with roads at about 4.5 s, was about 16; the splash is the loading
+screen)**. Open: memory 286 to 320 MB against 280; the Phase 1 gate write-up. P30: field build,
+data kept. `tools/measure-jank.sh` needs a non-debuggable build. The P30 has no `screenrecord`:
+time launches with an `adb exec-out screencap` loop.
 
 ## ⚠⚠⚠ 2026-10-06 evening: Phase 1 started
 

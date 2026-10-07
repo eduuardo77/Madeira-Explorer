@@ -106,6 +106,8 @@ import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { traceBounds } from './traceGeoJson';
 import { networkTimings, roadLinesFor, routeSince } from '../matching/roadNetwork';
+import type { VisitedLine } from '../matching/visitedRoads';
+import { decodeMapSnapshot, encodeMapSnapshot } from './mapSnapshot';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 
@@ -233,6 +235,7 @@ export default function NativeMapScreen({
   onOpenPassport,
   onOpenSettings,
   onAskAlways,
+  onShown,
 }: {
   focusPlace: FocusPlace | null;
   onFocusHandled: () => void;
@@ -243,6 +246,11 @@ export default function NativeMapScreen({
    * the phone's own choice (T-121): Play forbids going straight to the ask.
    */
   onAskAlways: () => void;
+  /**
+   * The map is on screen with its tiles drawn, or has failed: the launch
+   * splash covers the wait until then (T-257).
+   */
+  onShown?: () => void;
 }) {
   const { width, height } = useWindowDimensions();
 
@@ -350,13 +358,29 @@ export default function NativeMapScreen({
   /** D-096: stamps earned since the map last showed one, oldest first. */
   const [stampNews, setStampNews] = useState<StampPopup[]>([]);
   useEffect(() => {
+    // ⚠ Only a return from the background counts. Android also reports
+    // "active" as the app starts, and counting that ran the whole load twice
+    // at once on every cold start (T-272, P30, 2026-10-07).
+    let wentBackground = false;
     const subscription = AppState.addEventListener('change', (next) => {
-      if (next === 'active') {
+      if (next === 'background') {
+        wentBackground = true;
+      } else if (next === 'active' && wentBackground) {
+        wentBackground = false;
         setResumeCount((count) => count + 1);
       }
     });
     return () => subscription.remove();
   }, []);
+
+  /** Road lines as the map's polylines; tunnels and cable cars faded, as Google draws its tunnels. */
+  const toPolylines = (lines: VisitedLine[]): Polyline[] =>
+    lines.map((line, index) => ({
+      id: `trace-${index}`,
+      coordinates: line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
+      color: line.faded ? tracePaint.fadedColor : tracePaint.coreColor,
+      width: px(tracePaint.coreWidth),
+    }));
 
   useEffect(() => {
     let cancelled = false;
@@ -372,33 +396,35 @@ export default function NativeMapScreen({
       }
 
       try {
-        await runAwardPass();
-        const popups = await pendingStampPopups();
-        if (!cancelled) {
-          setStampNews(popups);
-        }
-
-        const nextProgress = await getCurrentProgress();
-        // ⚠ The walk flag, read from storage and never inferred. The control
-        // itself is no longer conditional: the project lead asked for it for
-        // everybody, 2026-08-28. It used to appear only when
-        // `permission !== 'always' || !backgroundAllowed`, i.e. only when the
-        // app could not fill the map in by itself; those two are now read at
-        // press time by `isBackgroundRecordingLive`, because they can change
-        // while this screen is open and a stale copy decides wrongly.
-        const control = await readControlInput(Date.now());
-        if (!cancelled) {
-          setProgress(nextProgress);
-          setWalkStarted(control.input.walkInProgress);
-          setControlInput(control.input);
-          setSilentForMs(control.silentForMs);
-        }
-
         const pack = getContentPack();
-
         // T-204: an ended trip's roads and passport button stay on the map.
         const trip = await tripDao.getTripOnShow();
-        if (trip !== null) {
+
+        /**
+         * The counts, the walk control and the passport button: cheap, so
+         * read before anything slow, and again if the stamp pass awards one.
+         */
+        const readStamps = async () => {
+          const nextProgress = await getCurrentProgress();
+          // ⚠ The walk flag, read from storage and never inferred. The control
+          // itself is no longer conditional: the project lead asked for it for
+          // everybody, 2026-08-28. It used to appear only when
+          // `permission !== 'always' || !backgroundAllowed`, i.e. only when the
+          // app could not fill the map in by itself; those two are now read at
+          // press time by `isBackgroundRecordingLive`, because they can change
+          // while this screen is open and a stale copy decides wrongly.
+          const control = await readControlInput(Date.now());
+          if (!cancelled) {
+            setProgress(nextProgress);
+            setWalkStarted(control.input.walkInProgress);
+            setControlInput(control.input);
+            setSilentForMs(control.silentForMs);
+          }
+
+          if (trip === null) {
+            return;
+          }
+
           // ⚠ Through the free tier, like the passport: the button must never
           // show a stamp the passport is withholding (passportButton.ts).
           const awards = await stampAwardDao.getAwards(trip.id);
@@ -420,6 +446,36 @@ export default function NativeMapScreen({
                 .map((stamp) => ({ ...stamp, collected: true, locked: true }))
             );
           }
+        };
+        await readStamps();
+
+        // T-272: the roads and camera the map last showed, at once on a cold
+        // start; the stamp pass and the roads below run behind them and
+        // replace them only with what they find. Not on a return to the
+        // front: the map is already showing what the user left it on.
+        if (resumeCount === 0 && trip !== null) {
+          const snapshot = decodeMapSnapshot(
+            await appStateDao.get(appStateDao.AppStateKey.MapSnapshot),
+            trip.id
+          );
+          if (snapshot !== null && !cancelled) {
+            setTracePolylines(toPolylines(snapshot.lines));
+            setCamera(snapshot.camera);
+            noteCameraCentre(snapshot.camera.coordinates);
+            setReady(true);
+          }
+        }
+
+        const pass = await runAwardPass();
+        const popups = await pendingStampPopups();
+        if (!cancelled) {
+          setStampNews(popups);
+        }
+        if (pass.newlyAwarded.length > 0) {
+          await readStamps();
+        }
+
+        if (trip !== null) {
           const fixes = await rawFixDao.getTraceFixes(trip.id);
           if (!cancelled) {
             // ⚠ **The roads travelled, not the GPS positions (D-093).** The
@@ -448,18 +504,7 @@ export default function NativeMapScreen({
             setTravelledToday(
               roads.todayM >= 100 ? formatDistance(roads.todayM, deviceLanguage()) : null
             );
-            setTracePolylines(
-              roads.lines.map((line, index) => ({
-                id: `trace-${index}`,
-                coordinates: line.points.map(([lat, lon]) => ({
-                  latitude: lat,
-                  longitude: lon,
-                })),
-                // Tunnels and cable cars faded, as Google draws its tunnels.
-                color: line.faded ? tracePaint.fadedColor : tracePaint.coreColor,
-                width: px(tracePaint.coreWidth),
-              }))
-            );
+            setTracePolylines(toPolylines(roads.lines));
 
             // The roads lit since the user last looked, with where they are
             // now (`returnFraming.ts`, the project lead's pick, 2026-10-04).
@@ -486,6 +531,23 @@ export default function NativeMapScreen({
                 setCamera(fit);
                 noteCameraCentre(fit.coordinates);
               }
+            }
+            // T-272: what the next cold start shows at once. The whole trip
+            // framed, as the map opens with nothing new; anything new since
+            // is framed above, on that showing too.
+            const whole = frame(
+              traceBoundsOf(
+                roads.lines.flatMap((line) =>
+                  line.points.map(([lat, lon]) => [lon, lat] as [number, number])
+                )
+              ),
+              'bottom'
+            );
+            if (roads.fresh && whole !== null && roads.lines.length > 0) {
+              await appStateDao.set(
+                appStateDao.AppStateKey.MapSnapshot,
+                encodeMapSnapshot({ tripId: trip.id, camera: whole, lines: roads.lines })
+              );
             }
             const nextSeen = nextSeenTs(seenTs, roads.latestTs);
             if (nextSeen !== null && nextSeen !== seenTs) {
@@ -830,6 +892,12 @@ export default function NativeMapScreen({
     [darkMap.mapStyleJson, minZoom]
   );
 
+  // A map that failed to start never reports its tiles: lift the splash from
+  // its message instead.
+  useEffect(() => {
+    if (failure !== null) onShown?.();
+  }, [failure, onShown]);
+
   if (failure !== null) {
     return (
       <View style={styles.centred}>
@@ -851,6 +919,7 @@ export default function NativeMapScreen({
     <View style={styles.root}>
       <GoogleMaps.View
         style={styles.map}
+        onMapLoaded={onShown}
         cameraPosition={camera ?? undefined}
         // The trace under the course: the course is only ever on screen in
         // answer to a direct question, so for those few seconds it wins.

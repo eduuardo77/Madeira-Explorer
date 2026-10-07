@@ -181,6 +181,12 @@ export const AppStateKey = {
    * (`returnFraming.ts`). Absent until the map has first been seen.
    */
   MapSeenUntilTs: 'map_seen_until_ts',
+  /**
+   * The roads and camera the map last showed, as JSON (`mapSnapshot.ts`), so a
+   * cold start draws them at once while the real ones are worked out (T-272).
+   * Private like the trip it is drawn from; absent until the map has drawn roads.
+   */
+  MapSnapshot: 'map_snapshot',
 } as const;
 
 export type AppStateKeyName =

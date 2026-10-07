@@ -132,6 +132,19 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [x] **T-272** The cold start. **Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
+      I'm tired of seeing a white background with blue lines circling"*. Measured on the P30 with
+      timing marks (tap = 0): JavaScript at 2.9 s, the stamp pass 4.2 s (one SQL round trip per
+      visit, queued behind a busy JS thread), the trip's fixes 2.6 s, the roads 6.5 s (network decode
+      3.6 s of it): the map's roads at about 16 s, and the whole load ran **twice at once**, because
+      Android reports "active" as the app starts and that counted as a return. Fixed three ways:
+      only a return from the background reloads; the map draws the roads and camera it last showed
+      (`map/mapSnapshot.ts`, `app_state.map_snapshot`, ~33 KB) as soon as the cheap reads are in,
+      and the stamp pass and the matching run behind them; and the animated splash (T-257) stays
+      up, the road breathing, until the map reports its tiles (6 s cap). Result, screen captures
+      from the tap: map with roads at 4.4 to 4.9 s, splash until then, no white screen; the first
+      launch after an install still takes the slow path once, to write the snapshot. Not done: the
+      stamp pass's per-visit queries and the network decode are still slow, now hidden.
 - [~] **T-256** The place card. **Done 2026-10-07:** the municipality sits under the name in the
       stamp's column (review F2: "Santana" alone under the stamp), and is left out when it only
       repeats the name ("Porto Moniz" in "Porto Moniz", seen on the P30); tested. **Not done, on

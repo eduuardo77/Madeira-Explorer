@@ -157,9 +157,9 @@ export const AppStateKey = {
    * Whether the keep-running screen has been shown once (2026-08-28, Android).
    *
    * ⚠ Shown once and never again, even if the user skips it. It is advice about
-   * the phone, not a setting: repeating it would be the app nagging about
-   * something it cannot check — `batteryOptimisation.ts` explains why the app
-   * can never read whether it is currently exempt.
+   * the phone, not a setting: repeating it would be nagging. Since T-250 first
+   * run also skips it for a phone already exempt, which the battery-exemption
+   * module can read (`batteryOptimisation.ts`); an OEM's own manager it cannot.
    */
   KeepRunningSeen: 'keep_running_seen',
   /**

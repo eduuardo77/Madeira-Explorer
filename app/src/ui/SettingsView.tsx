@@ -75,10 +75,10 @@ export type SettingsViewProps = {
   onChangeMapStyle: (style: 'light' | 'dark') => void;
   onOpenSystemSettings: () => void;
   /**
-   * Android only, and absent on iOS (T-046). Deliberately paired with no
-   * state: the app cannot read whether it is currently exempt, and showing a
-   * value it cannot know would be an invented fact — see
-   * `recording/batteryOptimisation.ts`.
+   * Android only, and absent on iOS (T-046). Paired with no state: Android's
+   * exemption can be read (T-250), but what stops a recorder is as often an
+   * OEM's own manager, which cannot, so an "on" here would promise more than
+   * the app knows (D-041, `recording/batteryOptimisation.ts`).
    */
   onOpenBatterySettings: (() => void) | null;
   onOpenPrivacyPolicy: () => void;

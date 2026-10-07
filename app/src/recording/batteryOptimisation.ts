@@ -9,54 +9,38 @@
  * exemption is the one official lever against that, and without it a recorder
  * that is correct in every other respect still dies on somebody's holiday.
  *
- * WHY IT OPENS A SETTINGS SCREEN RATHER THAN ASKING DIRECTLY
- * ----------------------------------------------------------
- * Android has two ways to do this and they are not equivalent:
+ * HOW IT ASKS
+ * -----------
+ * Android has two ways, and they are not equivalent:
  *
- *   1. `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — a one-tap dialog. It
- *      requires the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission, which
- *      **Google Play treats as restricted** and reviews against a list of
- *      qualifying uses.
- *   2. `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` — opens the system list
- *      of apps and their battery setting. **No permission, no review.** The
- *      user has to find this app in the list, which is worse for somebody who
- *      needs the setting most (D-015's reader).
+ *   1. `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: a one-tap dialog. It
+ *      needs the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission, which
+ *      Google Play restricts to qualifying uses.
+ *   2. `ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`: the system list of apps
+ *      and their battery setting. No permission, but the user has to find this
+ *      app in the list, which is worst for the reader who needs it most (D-015).
  *
- * v1 uses (2). This app is already going through Play's manual
- * background-location review (T-123), which is slow and on the critical path,
- * and adding a second restricted permission to that submission is a risk taken
- * for a saving of two taps. (1) is the fallback if T-053 shows OEMs killing the
- * recorder in practice — see D-045, which records this as reversible.
+ * **First run uses (1)**, through `app/modules/battery-exemption` (T-250, the
+ * lead's choice after WalkNYC; the permission kept on the lead's L2, D-045
+ * amended, T-266, with Google's text and the declaration in D-045). (2) is the
+ * fallback when the dialog cannot be shown, and what a build without the
+ * module, or iOS, gets. Until T-250, v1 used (2) only, to keep a second
+ * restricted permission out of the background-location review (T-123).
  *
- * WHAT THIS CANNOT DO, AND THE HONEST CONSEQUENCE
- * -----------------------------------------------
- * **The app cannot read whether it is currently exempt.** That is
- * `PowerManager.isIgnoringBatteryOptimizations()`, and there is no Expo API
- * for it — reading it would mean writing a native module, which is a
- * disproportionate amount of new native surface for one boolean.
- *
- * So the settings row offers the action and **never claims a state**. Showing
- * "Off" when the app cannot actually tell would be an invented fact, which is
- * the thing this project keeps refusing to do (D-041). What catches the
- * failure instead is the day-1 health check (T-049): it does not know why
- * recording stopped, but it knows that it stopped, and telling the user that
- * is what actually protects their trip.
- *
- * No unit test, deliberately: there is nothing pure here to test. Everything
- * this module does is send an intent to an OS this project cannot run. T-053
- * is the verification, and it needs an aggressive-OEM Android device.
+ * WHAT IT CAN AND CANNOT KNOW
+ * ---------------------------
+ * The module reads `PowerManager.isIgnoringBatteryOptimizations()`
+ * (`batteryExempt`): first run uses it to skip the card for a phone already
+ * exempt. Without the module the answer is null, and nothing claims a state it
+ * cannot read (D-041). Neither reading sees an OEM's own battery manager, which
+ * can stop a recorder anyway (T-053, and EMUI's launch manager, T-258): the
+ * day-1 health check (T-049) is what notices that recording stopped, whatever
+ * the reason.
  */
 
 import { Linking, Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo';
 
-/**
- * ⚠ **T-250 (2026-10-05): the two limits above are lifted where the native
- * module exists.** `app/modules/battery-exemption` reads the exemption and
- * shows the one-tap dialog (option 1), the project lead's choice for first run
- * (O3, after WalkNYC), which takes D-045's fallback now. A build without the
- * module, or iOS, gets null and the settings list as before.
- */
 type NativeBatteryExemption = {
   isExempt(): boolean;
   request(): Promise<'exempt' | 'declined' | 'unavailable'>;

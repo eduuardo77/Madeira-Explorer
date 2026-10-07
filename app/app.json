@@ -112,7 +112,14 @@
       "expo-dev-client",
       "expo-asset",
       "expo-maps",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#0A4FA3"
+        }
+      ]
     ]
   }
 }

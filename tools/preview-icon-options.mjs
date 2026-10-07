@@ -4,68 +4,28 @@
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-icon-options.mjs
  *     → tools/out/icon-options.html
  *
- * The launcher still shows Expo's template icon (third review, C). The plan
- * asks for three options at real sizes, in a launcher among neighbours, on a
- * light and a dark wallpaper; the lead picks one and then it is built: launcher,
- * adaptive layers, monochrome, splash and the notification's small icon.
+ * The launcher showed Expo's template icon (third review, C). Options were
+ * drawn here at real sizes, in a launcher among neighbours, on a light and a
+ * dark wallpaper, over four rounds; the lead chose A2. The page now shows the
+ * chosen icon as it ships, and `build-icon.mjs` writes the app's files.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   iconSvg,
   monochromeSvg,
   optionFlag,
-  optionFlagPlain,
-  optionGoldOnBlue,
-  optionIslandInFlag,
-  optionLitRoad,
 } from './lib/icon-art.mjs';
+import { mainIslandRings, ROUTE } from './lib/icon-geometry.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const regions = JSON.parse(readFileSync(path.join(here, '..', 'content', 'regions.json'), 'utf8'));
+const rings = mainIslandRings();
 
-/**
- * The main island's outline: every municipality's rings, drawn alike so they
- * read as one shape, except the islets south-east of it. ⚠ Not "the largest
- * ring of each": Santa Cruz's largest ring is the Desertas, and that rule drew
- * the islets and dropped Santa Cruz's part of the island. The main island lies
- * north of 32.6° N; the Desertas lie south of it.
- */
-const MAIN_ISLAND_SOUTH = 32.6;
-const centroidLat = (ring) => ring.reduce((sum, [, lat]) => sum + lat, 0) / ring.length;
-const rings = regions.features
-  .filter((feature) => feature.properties.islandId === 'ilha-da-madeira')
-  .flatMap((feature) =>
-    feature.geometry.type === 'Polygon'
-      ? [feature.geometry.coordinates[0]]
-      : feature.geometry.coordinates.map((polygon) => polygon[0])
-  )
-  .filter((ring) => centroidLat(ring) > MAIN_ISLAND_SOUTH);
-
-/**
- * The lit road: the south coast, a little inland, west to east, Calheta to
- * Machico. Approximate on purpose; at icon size it is a gesture, not a route.
- */
-const ROUTE = [
-  [-17.17, 32.73],
-  [-17.06, 32.69],
-  [-16.98, 32.67],
-  [-16.91, 32.66],
-  [-16.84, 32.66],
-  [-16.78, 32.72],
-];
-
-/**
- * Round four (2026-10-07). The lead "really likes A2, but it has a lot of
- * information": three leaner versions of it, and A2 itself to compare.
- */
+/** The icon the lead chose (A2, 2026-10-07), as it ships: `build-icon.mjs` draws the same. */
 const OPTIONS = [
-  ['A2a', 'A ilha na bandeira', optionIslandInFlag(rings, ROUTE), 'A própria ilha pintada com as faixas da bandeira, sobre o fundo escuro, com a estrada acesa. Uma só forma diz as duas coisas.'],
-  ['A2b', 'A2 sem a cruz', optionFlagPlain(rings, ROUTE), 'As faixas, a ilha verde e a estrada. Sai a cruz e a borda branca.'],
-  ['A2c', 'Duas cores', optionGoldOnBlue(rings, ROUTE), 'A ilha no dourado da bandeira, sobre o azul dela, com a estrada acesa. A mais simples.'],
-  ['A2', 'A2 (para comparar)', optionFlag(rings, ROUTE), 'A da ronda anterior.'],
+  ['A2', 'Estrada acesa na bandeira', optionFlag(rings, ROUTE), 'A escolhida: a ilha com a estrada acesa, sobre a bandeira da Madeira.'],
 ];
 
 /** Neighbours: plain coloured tiles with a letter, so no real app is imitated. */
@@ -126,8 +86,8 @@ figure { margin:0; text-align:center; } figcaption { color:var(--muted); font-si
 .tile { width:52px; height:52px; border-radius:26px; display:grid; place-items:center; font-weight:700; font-size:20px; }
 details { margin-top:12px; } summary { cursor:pointer; color:var(--muted); }
 </style></head><body><main>
-<h1>O ícone do Bruma, quarta ronda</h1>
-<p class="lead">Versões mais simples da A2, nos tamanhos reais e num ecrã de telemóvel entre outras apps (letras simples, para não imitar nenhuma app real).
+<h1>O ícone do Bruma</h1>
+<p class="lead">O ícone escolhido, nos tamanhos reais e num ecrã de telemóvel entre outras apps (letras simples, para não imitar nenhuma app real).
 "Android 13, tema" é a versão de uma só cor que o telemóvel usa quando os ícones seguem o papel de parede.
 Depois de escolheres, faço a partir dela o ícone, as camadas do Android, o ecrã de abertura e o pequeno ícone das notificações.</p>
 ${OPTIONS.map(board).join('')}

@@ -3,9 +3,10 @@
  *
  * Drawn for the project lead in rounds: the lit road (the product, D-093) and
  * the postage stamp (the passport, D-086); then Madeira's own cues, the flag
- * and the Santana house. Kept here is what the lead is choosing between: A2
- * (the island and lit road on the flag) and leaner versions of it; A, the
- * first, supplies their monochrome. The rest were dropped along the way. Pure: geometry in, SVG strings out, so the preview page and the
+ * and the Santana house. **The lead chose A2 (2026-10-07):** the island and
+ * its lit road over the flag, with the flag's cross; A, the first option,
+ * supplies its single-colour version. The rest were dropped along the way and
+ * are in history. Pure: geometry in, SVG strings out, so the preview page and the
  * final PNG export draw the same thing.
  *
  * Every icon is drawn on Android's adaptive-icon canvas: 108 x 108, of which
@@ -92,7 +93,9 @@ export function optionLitRoad(rings, route) {
       <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="3" stroke-linecap="round"/>
       <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="1" stroke-linecap="round"/>`,
     monochrome: `
-      <path d="${island.d}" fill="#FFFFFF" fill-opacity="0.45"/>
+      <!-- Opaque inside a translucent group: the municipalities overlap at their
+           borders, and each drawn translucent showed those borders as lines. -->
+      <g opacity="0.45"><path d="${island.d}" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"/></g>
       <path d="${road}" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 }
@@ -173,61 +176,6 @@ export function optionFlag(rings, route) {
       <path d="${island.d}" fill="${PALETTE.island}" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="${island.d}" fill="${PALETTE.island}"/>
       <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="5" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
-    monochrome: optionLitRoad(rings, route).monochrome,
-  };
-}
-
-/**
- * Round four (2026-10-07): the lead "really likes A2, but it has a lot of
- * information". Three leaner versions keep the flag's colours, the island and
- * the lit road, and drop the rest.
- */
-
-/** A2a: the island itself in the flag's bands, on slate, with the lit road. */
-export function optionIslandInFlag(rings, route) {
-  const width = 60;
-  const island = islandPaths(rings, width, 56);
-  // The bands across the island's own width, a third each: across the whole
-  // canvas the island showed almost only the gold one.
-  const x0 = (CANVAS - width) / 2;
-  const band = (i, fill) =>
-    `<rect x="${x0 + (i * width) / 3}" width="${width / 3}" height="${CANVAS}" fill="${fill}"/>`;
-  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
-  return {
-    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
-    foreground: `
-      <defs><clipPath id="island-a2a"><path d="${island.d}"/></clipPath></defs>
-      <g clip-path="url(#island-a2a)">${band(0, MADEIRA.flagBlue)}${band(1, MADEIRA.flagGold)}${band(2, MADEIRA.flagBlue)}</g>
-      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="5" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
-    monochrome: optionLitRoad(rings, route).monochrome,
-  };
-}
-
-/** A2b: A2 without the cross and the white edge: the bands, the island, the road. */
-export function optionFlagPlain(rings, route) {
-  const island = islandPaths(rings, 60, 56);
-  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
-  return {
-    background: flagBands(),
-    foreground: `
-      <path d="${island.d}" fill="${PALETTE.island}" stroke="${PALETTE.island}" stroke-width="0.8" stroke-linejoin="round"/>
-      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="5" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
-    monochrome: optionLitRoad(rings, route).monochrome,
-  };
-}
-
-/** A2c: two of the flag's colours: a gold island on its blue, and the lit road. */
-export function optionGoldOnBlue(rings, route) {
-  const island = islandPaths(rings, 60, 56);
-  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
-  return {
-    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${MADEIRA.flagBlue}"/>`,
-    foreground: `
-      <path d="${island.d}" fill="${MADEIRA.flagGold}" stroke="${MADEIRA.flagGold}" stroke-width="0.8" stroke-linejoin="round"/>
-      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="5" stroke-linecap="round"/>
       <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
     monochrome: optionLitRoad(rings, route).monochrome,
   };

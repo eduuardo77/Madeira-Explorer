@@ -100,7 +100,7 @@ permission, L3 privacy contact.
       capture (`tools/preview-home-options.mjs`, the capture passed in, never committed): A WalkNYC's
       bar ("3 de 80 lugares", %, a thin bar) in the status panel; B a ring on the passport button;
       C the nearest uncollected place as a chip (place and distance an example). **Waits on the pick.**
-- [~] **T-257** The icon. Three options drawn (`tools/preview-icon-options.mjs`, art in
+- [x] **T-257** The icon. ⚠ **Built 2026-10-07, A2; see the end of this entry.** Three options drawn (`tools/preview-icon-options.mjs`, art in
       `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a
       launcher on light and dark wallpapers. Round two (2026-10-07: the lead liked A, B not bad, and
@@ -110,7 +110,14 @@ permission, L3 privacy contact.
       B2 the lit road, a truer thatch and a stamp clear of the mask; the dropped options' code
       removed. Round four (lead: "really like A2, but it has a lot of information"): A2a the island in
       the flag's bands, A2b A2 without the cross, A2c a gold island on the flag's blue; the stamp
-      (B2) code removed. **Waits on the pick.** Found drawing it: Santa
+      (B2) code removed. **The lead chose A2.** Built by `tools/build-icon.mjs` (rasterised with
+      `@resvg/resvg-js`, a tools-only dependency in `tools/package.json`) into `app/assets/`: icon,
+      adaptive layers, themed monochrome, and a white island as the notification icon, wired with the
+      expo-notifications plugin (`notification_icon`, which expo-location's recorder notification uses
+      too). Prebuild changed only the expected manifest lines. Seen on the P30 launcher next to
+      WalkNYC; the recorder's notification confirmed on `drawable/notification_icon` (EMUI shows the
+      colour icon in the status bar regardless). Template icon checksum gone. **Left: the splash**,
+      still the template's, which needs the `expo-splash-screen` package: the lead's call. Found drawing it: Santa
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).

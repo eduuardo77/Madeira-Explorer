@@ -1,0 +1,8 @@
+{
+  "name": "bruma-tools",
+  "private": true,
+  "description": "Desk tools only; nothing here ships in the app (D-043 audits what ships).",
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}

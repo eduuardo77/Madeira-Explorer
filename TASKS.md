@@ -3435,6 +3435,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         adds purchase history.
 - [ ] **T-123** Google Play background-location review submission with demonstration video and
       written justification ⇠ T-121, T-122
+      ✅ **Pack drafted 2026-10-07: `docs/play-background-location.md`.** The description to paste
+      (one feature, why foreground-only cannot do it), each of Google's disclosure requirements
+      mapped to the app's text (all met, and `i18n.test.ts` keeps them), and a three-shot video
+      script of about 30 s. **Left:** the video (shots 1 and 2 on the emulator, which I can film;
+      shot 3 on the P30 after an outing), then the lead submits and records the answer here.
 - [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
       — Notes: `docs/task-notes.md` (T-124)
 - [x] **T-125** "Delete all my data" control ⇠ T-030, T-141

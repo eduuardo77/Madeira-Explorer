@@ -1259,7 +1259,12 @@ options as language rows; it did not search plural labels). Fixed in the script.
       `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
       on a device: view it on the emulator, not on the P30, whose data must not be wiped.
-- [~] **T-201** ✅ **Mechanism done 2026-09-24; ⚠ the content waits on the project lead's veto.**
+- [~] **T-201** ✅ **Content in 2026-10-07: 76 of 80 places have a line, in en, pt and de.** The lead
+      approved the draft whole; every `⚠` fact was checked on the web first and five lines changed
+      (the list is at the top of `docs/why-go-draft.md`); the four placeholders stay blank. Seen on
+      the P30: Pico do Areeiro's card. **Left:** the four blanks (the lead's knowledge, or stay
+      blank); the German read by a native speaker (T-160a); practical information (length, time)
+      from IFCN's official figures. ~~Mechanism done 2026-09-24; the content waits on the veto.~~
       `pois.json` places take an optional `why: { en, pt, de }`. It is parsed so that a bad line
       is dropped and its place kept, never the other way. The card shows the line in its own
       language or not at all, never another language's. `validate-content.mjs` counts coverage

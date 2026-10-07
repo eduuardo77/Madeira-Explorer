@@ -9,6 +9,11 @@
       "name": "Pico do Areeiro",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "The island's third-highest peak, 1818 m. Start of the PR1 trail to Pico Ruivo.",
+        "pt": "Terceiro pico mais alto da ilha, com 1818 m. Início do PR1 até ao Pico Ruivo.",
+        "de": "Der dritthöchste Gipfel der Insel, 1818 m. Start des Wanderwegs PR1 zum Pico Ruivo."
+      },
       "geofences": [
         {
           "id": "pico-do-areeiro-main",
@@ -23,6 +28,11 @@
       "name": "Fanal",
       "category": "viewpoint",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "Pasture with centuries-old til trees, inside the Laurisilva, a UNESCO World Heritage Site.",
+        "pt": "Pastagem com tis centenários, dentro da Laurissilva, Património Mundial da UNESCO.",
+        "de": "Weide mit jahrhundertealten Tilbäumen im Lorbeerwald, UNESCO-Welterbe."
+      },
       "geofences": [
         {
           "id": "fanal-main",
@@ -37,6 +47,11 @@
       "name": "Levada do Furado",
       "category": "levada",
       "regionId": "santana",
+      "why": {
+        "en": "PR10, from Ribeiro Frio to Portela, through the Laurisilva.",
+        "pt": "PR10, do Ribeiro Frio à Portela, pela Laurissilva.",
+        "de": "PR10, von Ribeiro Frio nach Portela, durch den Lorbeerwald."
+      },
       "geofences": [
         {
           "id": "levada-do-furado-start",
@@ -59,6 +74,11 @@
       "name": "Levada das 25 Fontes",
       "category": "levada",
       "regionId": "calheta",
+      "why": {
+        "en": "PR6, from Rabaçal. It ends at a pool fed by springs in the rock.",
+        "pt": "PR6, a partir do Rabaçal. Termina numa lagoa alimentada por nascentes na rocha.",
+        "de": "PR6, ab Rabaçal. Sie endet an einem Becken, das Quellen im Fels speisen."
+      },
       "geofences": [
         {
           "id": "levada-das-25-fontes-start",
@@ -81,6 +101,11 @@
       "name": "Porto Moniz",
       "category": "village",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A town at the north-west tip, with natural pools in the volcanic rock.",
+        "pt": "Vila no extremo noroeste, com piscinas naturais na rocha vulcânica.",
+        "de": "Ein Ort an der Nordwestspitze, mit Naturbecken im Vulkangestein."
+      },
       "geofences": [
         {
           "id": "porto-moniz-main",
@@ -95,6 +120,11 @@
       "name": "Câmara de Lobos",
       "category": "village",
       "regionId": "camara-de-lobos",
+      "why": {
+        "en": "A fishing town that Winston Churchill painted in 1950.",
+        "pt": "Vila piscatória que Winston Churchill pintou em 1950.",
+        "de": "Ein Fischerort, den Winston Churchill 1950 malte."
+      },
       "geofences": [
         {
           "id": "camara-de-lobos-main",
@@ -109,6 +139,11 @@
       "name": "Praia do Porto do Seixal",
       "category": "beach",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A black-sand beach on the north coast.",
+        "pt": "Praia de areia preta na costa norte.",
+        "de": "Ein schwarzer Sandstrand an der Nordküste."
+      },
       "geofences": [
         {
           "id": "praia-do-porto-do-seixal-main",
@@ -123,6 +158,11 @@
       "name": "Praia da Calheta",
       "category": "beach",
       "regionId": "calheta",
+      "why": {
+        "en": "A beach of imported golden sand, sheltered by breakwaters.",
+        "pt": "Praia de areia amarela, trazida de fora, protegida por quebra-mares.",
+        "de": "Ein Strand aus importiertem goldenem Sand, geschützt durch Wellenbrecher."
+      },
       "geofences": [
         {
           "id": "praia-da-calheta-main",
@@ -137,6 +177,11 @@
       "name": "Jardim Tropical Monte Palace",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A garden in Monte with tile panels, ponds and a mineral collection.",
+        "pt": "Jardim no Monte com painéis de azulejo, lagos e uma coleção de minerais.",
+        "de": "Ein Garten in Monte mit Kachelbildern, Teichen und einer Mineraliensammlung."
+      },
       "geofences": [
         {
           "id": "jardim-tropical-monte-palace-main",
@@ -151,6 +196,11 @@
       "name": "Cabo Girão",
       "category": "landmark",
       "regionId": "camara-de-lobos",
+      "why": {
+        "en": "A 580 m sea cliff with a glass platform on top.",
+        "pt": "Falésia de 580 m com uma plataforma de vidro no topo.",
+        "de": "Eine 580 m hohe Steilklippe mit einer Glasplattform oben."
+      },
       "geofences": [
         {
           "id": "cabo-girao-main",
@@ -165,6 +215,11 @@
       "name": "Achada do Teixeira",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "Start of the PR1.2 trail to Pico Ruivo. By the car park stands the Homem em Pé, a basalt column.",
+        "pt": "Início do PR1.2 até ao Pico Ruivo. Junto ao parque está o Homem em Pé, uma coluna de basalto.",
+        "de": "Start des Wanderwegs PR1.2 zum Pico Ruivo. Am Parkplatz steht der Homem em Pé, eine Basaltsäule."
+      },
       "geofences": [
         {
           "id": "achada-do-teixeira",
@@ -179,6 +234,11 @@
       "name": "Bica da Cana",
       "category": "viewpoint",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "Viewpoint at about 1580 m, on the edge of the Paul da Serra plateau.",
+        "pt": "Miradouro a cerca de 1580 m, na orla do planalto do Paul da Serra.",
+        "de": "Aussichtspunkt auf etwa 1580 m, am Rand der Hochebene Paul da Serra."
+      },
       "geofences": [
         {
           "id": "bica-da-cana",
@@ -193,6 +253,11 @@
       "name": "Chão dos Terreiros",
       "category": "viewpoint",
       "regionId": "ribeira-brava",
+      "why": {
+        "en": "A summit on the ridge between Boca da Corrida and Fontes, above Curral das Freiras.",
+        "pt": "Cume na serra entre a Boca da Corrida e as Fontes, acima do Curral das Freiras.",
+        "de": "Ein Gipfel auf dem Kamm zwischen Boca da Corrida und Fontes, über Curral das Freiras."
+      },
       "geofences": [
         {
           "id": "chao-dos-terreiros",
@@ -207,6 +272,11 @@
       "name": "Fortaleza do Pico",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A 17th-century fort above Funchal.",
+        "pt": "Forte do século XVII sobre o Funchal.",
+        "de": "Eine Festung aus dem 17. Jahrhundert über Funchal."
+      },
       "geofences": [
         {
           "id": "fortaleza-do-pico",
@@ -221,6 +291,11 @@
       "name": "Forte de São Tiago",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A yellow 17th-century fort in Funchal's old town.",
+        "pt": "Forte amarelo do século XVII na Zona Velha do Funchal.",
+        "de": "Eine gelbe Festung aus dem 17. Jahrhundert in Funchals Altstadt."
+      },
       "geofences": [
         {
           "id": "forte-de-sao-tiago",
@@ -235,6 +310,11 @@
       "name": "Forte de São João Baptista",
       "category": "landmark",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A fort beside the Porto Moniz pools; today the Madeira Aquarium.",
+        "pt": "Forte junto às piscinas do Porto Moniz; hoje é o Aquário da Madeira.",
+        "de": "Eine Festung bei den Becken von Porto Moniz; heute das Aquarium von Madeira."
+      },
       "geofences": [
         {
           "id": "forte-de-sao-joao-baptista",
@@ -249,6 +329,11 @@
       "name": "Teatro Municipal Baltazar Dias",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "Funchal's municipal theatre, opened in 1888.",
+        "pt": "Teatro municipal do Funchal, inaugurado em 1888.",
+        "de": "Das Stadttheater von Funchal, eröffnet 1888."
+      },
       "geofences": [
         {
           "id": "teatro-municipal-baltazar-dias",
@@ -263,6 +348,11 @@
       "name": "Miradouro da Rocha do Navio",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "Over the Rocha do Navio Nature Reserve in Santana, with a cable car down to the fajã.",
+        "pt": "Sobre a Reserva Natural da Rocha do Navio, em Santana, com teleférico até à fajã.",
+        "de": "Über dem Naturreservat Rocha do Navio in Santana, mit einer Seilbahn hinunter zur Fajã."
+      },
       "geofences": [
         {
           "id": "miradouro-da-rocha-do-navio-main",
@@ -277,6 +367,11 @@
       "name": "Parque Temático da Madeira",
       "category": "landmark",
       "regionId": "santana",
+      "why": {
+        "en": "A park in Santana about the island's history and culture.",
+        "pt": "Parque em Santana sobre a história e a cultura da ilha.",
+        "de": "Ein Park in Santana über Geschichte und Kultur der Insel."
+      },
       "geofences": [
         {
           "id": "parque-tematico-da-madeira",
@@ -291,6 +386,11 @@
       "name": "Quinta da Boa Vista",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "An estate in Funchal known for its orchid collection.",
+        "pt": "Quinta no Funchal conhecida pela coleção de orquídeas.",
+        "de": "Ein Landgut in Funchal, bekannt für seine Orchideensammlung."
+      },
       "geofences": [
         {
           "id": "quinta-da-boa-vista",
@@ -305,6 +405,11 @@
       "name": "Camacha",
       "category": "village",
       "regionId": "santa-cruz",
+      "why": {
+        "en": "The wicker village. Portugal's first football match was played here in 1875.",
+        "pt": "Vila do vime. Em 1875 jogou-se aqui o primeiro jogo de futebol em Portugal.",
+        "de": "Das Korbflechterdorf. Hier fand 1875 das erste Fußballspiel Portugals statt."
+      },
       "geofences": [
         {
           "id": "camacha",
@@ -319,6 +424,11 @@
       "name": "Caniçal",
       "category": "village",
       "regionId": "machico",
+      "why": {
+        "en": "A former whaling port, with the Whale Museum.",
+        "pt": "Antigo porto baleeiro, com o Museu da Baleia.",
+        "de": "Ein ehemaliger Walfanghafen, mit dem Walmuseum."
+      },
       "geofences": [
         {
           "id": "canical",
@@ -333,6 +443,11 @@
       "name": "Santa Cruz",
       "category": "village",
       "regionId": "santa-cruz",
+      "why": {
+        "en": "A town on the east coast, beside the airport, with a 16th-century parish church.",
+        "pt": "Cidade na costa leste, junto ao aeroporto, com igreja matriz do século XVI.",
+        "de": "Eine Stadt an der Ostküste, beim Flughafen, mit einer Pfarrkirche aus dem 16. Jahrhundert."
+      },
       "geofences": [
         {
           "id": "santa-cruz",
@@ -347,6 +462,11 @@
       "name": "São Vicente",
       "category": "village",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "A north-coast town with a chapel carved into a rock at the river mouth.",
+        "pt": "Vila da costa norte com uma capela escavada numa rocha, na foz da ribeira.",
+        "de": "Ein Ort an der Nordküste mit einer Kapelle, die an der Flussmündung in einen Felsen gehauen ist."
+      },
       "geofences": [
         {
           "id": "sao-vicente",
@@ -361,6 +481,11 @@
       "name": "Ribeira Brava",
       "category": "village",
       "regionId": "ribeira-brava",
+      "why": {
+        "en": "A south-coast town at the mouth of the river of the same name, with the Church of São Bento.",
+        "pt": "Vila da costa sul na foz da ribeira do mesmo nome, com a Igreja de São Bento.",
+        "de": "Ein Ort an der Südküste an der Mündung des gleichnamigen Flusses, mit der Kirche São Bento."
+      },
       "geofences": [
         {
           "id": "ribeira-brava",
@@ -375,6 +500,11 @@
       "name": "Ponta do Sol",
       "category": "village",
       "regionId": "ponta-do-sol",
+      "why": {
+        "en": "A south-coast town with a pier and a historic centre.",
+        "pt": "Vila da costa sul com cais e centro histórico.",
+        "de": "Ein Ort an der Südküste mit einer Mole und einem historischen Zentrum."
+      },
       "geofences": [
         {
           "id": "ponta-do-sol",
@@ -389,6 +519,11 @@
       "name": "Calheta",
       "category": "village",
       "regionId": "calheta",
+      "why": {
+        "en": "A town with a marina, a beach of imported sand and a working sugar-cane mill.",
+        "pt": "Vila com marina, praia de areia trazida de fora e um engenho de cana-de-açúcar em funcionamento.",
+        "de": "Ein Ort mit Jachthafen, einem Strand aus importiertem Sand und einer arbeitenden Zuckerrohrmühle."
+      },
       "geofences": [
         {
           "id": "calheta",
@@ -417,6 +552,11 @@
       "name": "Chão da Ribeira",
       "category": "village",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "An inland valley above Seixal, with slopes of Laurisilva.",
+        "pt": "Vale interior acima do Seixal, com encostas de Laurissilva.",
+        "de": "Ein Tal im Landesinneren oberhalb von Seixal, mit Hängen voller Lorbeerwald."
+      },
       "geofences": [
         {
           "id": "chao-da-ribeira",
@@ -431,6 +571,11 @@
       "name": "Praia Formosa",
       "category": "beach",
       "regionId": "funchal",
+      "why": {
+        "en": "The island's largest natural beach, west of Funchal.",
+        "pt": "A maior praia natural da ilha, a oeste do Funchal.",
+        "de": "Der größte Naturstrand der Insel, westlich von Funchal."
+      },
       "geofences": [
         {
           "id": "praia-formosa",
@@ -451,6 +596,11 @@
       "name": "Praia dos Reis Magos",
       "category": "beach",
       "regionId": "santa-cruz",
+      "why": {
+        "en": "A pebble beach in Caniço, beside a seafront promenade.",
+        "pt": "Praia de calhau no Caniço, junto a um passeio marítimo.",
+        "de": "Ein Kieselstrand in Caniço, an einer Strandpromenade."
+      },
       "geofences": [
         {
           "id": "praia-dos-reis-magos",
@@ -465,6 +615,11 @@
       "name": "Prainha",
       "category": "beach",
       "regionId": "machico",
+      "why": {
+        "en": "A beach of natural dark sand, near Caniçal.",
+        "pt": "Praia de areia escura natural, perto do Caniçal.",
+        "de": "Ein Strand aus natürlichem dunklem Sand, bei Caniçal."
+      },
       "geofences": [
         {
           "id": "prainha-main",
@@ -479,6 +634,11 @@
       "name": "Cais do Sardinha",
       "category": "beach",
       "regionId": "machico",
+      "why": {
+        "en": "A quay at the end of the PR8 trail, on Ponta de São Lourenço.",
+        "pt": "Cais no fim do PR8, na Ponta de São Lourenço.",
+        "de": "Ein Anleger am Ende des Wanderwegs PR8, auf der Ponta de São Lourenço."
+      },
       "geofences": [
         {
           "id": "cais-do-sardinha",
@@ -493,6 +653,11 @@
       "name": "Praia da Baía D'Abra",
       "category": "beach",
       "regionId": "machico",
+      "why": {
+        "en": "A bay on the São Lourenço peninsula, beside the PR8 trail.",
+        "pt": "Baía na península de São Lourenço, junto ao PR8.",
+        "de": "Eine Bucht auf der Halbinsel São Lourenço, am Wanderweg PR8."
+      },
       "geofences": [
         {
           "id": "praia-da-baia-d-abra",
@@ -507,6 +672,11 @@
       "name": "Fajã dos Padres",
       "category": "beach",
       "regionId": "ribeira-brava",
+      "why": {
+        "en": "A farmed ledge at sea level, reached by a lift down the cliff.",
+        "pt": "Fajã agrícola ao nível do mar, com acesso por elevador desde a falésia.",
+        "de": "Ein bewirtschafteter Küstenstreifen auf Meereshöhe, erreichbar mit einem Aufzug die Klippe hinab."
+      },
       "geofences": [
         {
           "id": "faja-dos-padres-main",
@@ -521,6 +691,11 @@
       "name": "Levada do Norte",
       "category": "levada",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "An irrigation channel on the south side, between Serra de Água and Estreito de Câmara de Lobos.",
+        "pt": "Levada de rega da costa sul, entre a Serra de Água e o Estreito de Câmara de Lobos.",
+        "de": "Ein Bewässerungskanal an der Südseite, zwischen Serra de Água und Estreito de Câmara de Lobos."
+      },
       "geofences": [
         {
           "id": "levada-do-norte-start",
@@ -565,6 +740,11 @@
       "name": "Levada da Ribeira da Janela",
       "category": "levada",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A levada in the Ribeira da Janela valley in the north-west, with tunnels.",
+        "pt": "Levada no vale da Ribeira da Janela, no noroeste, com túneis.",
+        "de": "Eine Levada im Tal der Ribeira da Janela im Nordwesten, mit Tunneln."
+      },
       "geofences": [
         {
           "id": "levada-da-ribeira-da-janela-start",
@@ -587,6 +767,11 @@
       "name": "Levada do Castelejo",
       "category": "levada",
       "regionId": "machico",
+      "why": {
+        "en": "A levada in the valley above Porto da Cruz, with Penha d’Águia in view.",
+        "pt": "Levada no vale acima do Porto da Cruz, com a Penha d’Águia à vista.",
+        "de": "Eine Levada im Tal oberhalb von Porto da Cruz, mit Blick auf die Penha d’Águia."
+      },
       "geofences": [
         {
           "id": "levada-do-castelejo-start",
@@ -631,6 +816,11 @@
       "name": "Levada do Caldeirão Verde",
       "category": "levada",
       "regionId": "santana",
+      "why": {
+        "en": "PR9, from Queimadas to Caldeirão Verde, a waterfall that falls into a pool.",
+        "pt": "PR9, das Queimadas ao Caldeirão Verde, uma cascata que cai numa lagoa.",
+        "de": "PR9, von Queimadas zum Caldeirão Verde, einem Wasserfall, der in ein Becken stürzt."
+      },
       "geofences": [
         {
           "id": "levada-do-caldeirao-verde-start",
@@ -653,6 +843,11 @@
       "name": "Levada dos Cedros",
       "category": "levada",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "PR14, through the Laurisilva of Fanal.",
+        "pt": "PR14, pela Laurissilva do Fanal.",
+        "de": "PR14, durch den Lorbeerwald von Fanal."
+      },
       "geofences": [
         {
           "id": "levada-dos-cedros-start",
@@ -675,6 +870,11 @@
       "name": "Levada do Rei",
       "category": "levada",
       "regionId": "santana",
+      "why": {
+        "en": "PR18, from São Jorge to the source of the Ribeiro Bonito, in the Laurisilva.",
+        "pt": "PR18, de São Jorge até à nascente do Ribeiro Bonito, na Laurissilva.",
+        "de": "PR18, von São Jorge zur Quelle des Ribeiro Bonito, im Lorbeerwald."
+      },
       "geofences": [
         {
           "id": "levada-do-rei-start",
@@ -697,6 +897,11 @@
       "name": "Levada da Rocha Vermelha",
       "category": "levada",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "PR28, part of the Rabaçal levada network, below the 25 Fontes levada.",
+        "pt": "PR28, da rede de levadas do Rabaçal, abaixo da levada das 25 Fontes.",
+        "de": "PR28, Teil des Levada-Netzes von Rabaçal, unterhalb der Levada das 25 Fontes."
+      },
       "geofences": [
         {
           "id": "levada-da-rocha-vermelha-start",
@@ -719,6 +924,11 @@
       "name": "Levada do Risco",
       "category": "levada",
       "regionId": "calheta",
+      "why": {
+        "en": "PR6.1, from Rabaçal to the Risco waterfall.",
+        "pt": "PR6.1, do Rabaçal à Cascata do Risco.",
+        "de": "PR6.1, von Rabaçal zum Wasserfall Risco."
+      },
       "geofences": [
         {
           "id": "levada-do-risco-start",
@@ -748,6 +958,11 @@
       "name": "Levada do Alecrim",
       "category": "levada",
       "regionId": "calheta",
+      "why": {
+        "en": "PR6.2, from Rabaçal to Lagoa do Vento.",
+        "pt": "PR6.2, do Rabaçal à Lagoa do Vento.",
+        "de": "PR6.2, von Rabaçal zur Lagoa do Vento."
+      },
       "geofences": [
         {
           "id": "levada-do-alecrim-start",
@@ -777,6 +992,11 @@
       "name": "Levada do Moinho",
       "category": "levada",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "PR7, in Ribeira da Cruz, in the north-west of the island.",
+        "pt": "PR7, na Ribeira da Cruz, no noroeste da ilha.",
+        "de": "PR7, in Ribeira da Cruz, im Nordwesten der Insel."
+      },
       "geofences": [
         {
           "id": "levada-do-moinho-start",
@@ -799,6 +1019,11 @@
       "name": "Levada Fajã do Rodrigues",
       "category": "levada",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "PR16, near São Vicente, with tunnels.",
+        "pt": "PR16, perto de São Vicente, com túneis.",
+        "de": "PR16, bei São Vicente, mit Tunneln."
+      },
       "geofences": [
         {
           "id": "levada-faja-do-rodrigues-start",
@@ -843,6 +1068,11 @@
       "name": "Levada dos Tornos",
       "category": "levada",
       "regionId": "funchal",
+      "why": {
+        "en": "A levada opened in 1966 that supplies Funchal, passing Monte and Camacha.",
+        "pt": "Levada inaugurada em 1966 que abastece o Funchal, passando pelo Monte e pela Camacha.",
+        "de": "Eine Levada, 1966 eröffnet, die Funchal versorgt und an Monte und Camacha vorbeiführt."
+      },
       "geofences": [
         {
           "id": "levada-dos-tornos-start",
@@ -865,6 +1095,11 @@
       "name": "Levada do Caniçal",
       "category": "levada",
       "regionId": "machico",
+      "why": {
+        "en": "A level levada on the eastern slopes, as far as the Caniçal tunnel.",
+        "pt": "Levada plana na encosta leste, até ao túnel do Caniçal.",
+        "de": "Eine ebene Levada an den Osthängen, bis zum Tunnel von Caniçal."
+      },
       "geofences": [
         {
           "id": "levada-do-canical-start",
@@ -887,6 +1122,11 @@
       "name": "Pico dos Barcelos",
       "category": "viewpoint",
       "regionId": "funchal",
+      "why": {
+        "en": "Viewpoint over Funchal, from the harbour to the hills.",
+        "pt": "Miradouro sobre o Funchal, do porto até às serras.",
+        "de": "Aussichtspunkt über Funchal, vom Hafen bis zu den Bergen."
+      },
       "geofences": [
         {
           "id": "pico-dos-barcelos-main",
@@ -901,6 +1141,11 @@
       "name": "Pico do Facho",
       "category": "viewpoint",
       "regionId": "machico",
+      "why": {
+        "en": "Viewpoint over Machico. The name comes from the watch fires once lit on top.",
+        "pt": "Miradouro sobre Machico. O nome vem das fogueiras de vigia acesas no cimo.",
+        "de": "Aussichtspunkt über Machico. Der Name kommt von den Wachfeuern, die einst oben brannten."
+      },
       "geofences": [
         {
           "id": "pico-do-facho-main",
@@ -915,6 +1160,11 @@
       "name": "Pico Grande",
       "category": "viewpoint",
       "regionId": "ribeira-brava",
+      "why": {
+        "en": "A peak of about 1654 m in the centre of the island, between Encumeada and Curral das Freiras.",
+        "pt": "Pico de cerca de 1654 m no centro da ilha, entre a Encumeada e o Curral das Freiras.",
+        "de": "Ein Gipfel von etwa 1654 m in der Inselmitte, zwischen Encumeada und Curral das Freiras."
+      },
       "geofences": [
         {
           "id": "pico-grande-main",
@@ -929,6 +1179,11 @@
       "name": "Pico Guindaste",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "Viewpoint with a glass platform on the north coast, facing Penha d’Águia.",
+        "pt": "Miradouro com plataforma de vidro na costa norte, virado para a Penha d’Águia.",
+        "de": "Aussichtspunkt mit Glasplattform an der Nordküste, gegenüber der Penha d’Águia."
+      },
       "geofences": [
         {
           "id": "pico-guindaste-main",
@@ -943,6 +1198,11 @@
       "name": "Ponta do Rosto",
       "category": "viewpoint",
       "regionId": "machico",
+      "why": {
+        "en": "Viewpoint at the start of the São Lourenço peninsula, over both the north and south coasts.",
+        "pt": "Miradouro no início da península de São Lourenço, onde se veem as costas norte e sul.",
+        "de": "Aussichtspunkt am Beginn der Halbinsel São Lourenço, über Nord- und Südküste zugleich."
+      },
       "geofences": [
         {
           "id": "ponta-do-rosto-main",
@@ -957,6 +1217,11 @@
       "name": "Ponta do Garajau",
       "category": "viewpoint",
       "regionId": "santa-cruz",
+      "why": {
+        "en": "The Cristo Rei statue, from 1927, above the Garajau Nature Reserve.",
+        "pt": "Estátua do Cristo Rei, de 1927, sobre a Reserva Natural do Garajau.",
+        "de": "Die Christusstatue Cristo Rei von 1927, über dem Naturreservat Garajau."
+      },
       "geofences": [
         {
           "id": "ponta-do-garajau-main",
@@ -971,6 +1236,11 @@
       "name": "Machico",
       "category": "village",
       "regionId": "machico",
+      "why": {
+        "en": "Where the first settlers landed, in 1419.",
+        "pt": "Onde desembarcaram os primeiros povoadores, em 1419.",
+        "de": "Hier landeten 1419 die ersten Siedler."
+      },
       "geofences": [
         {
           "id": "machico-main",
@@ -985,6 +1255,11 @@
       "name": "Curral das Freiras",
       "category": "village",
       "regionId": "camara-de-lobos",
+      "why": {
+        "en": "A village at the bottom of a valley ringed by mountains, with a chestnut festival in November.",
+        "pt": "Aldeia no fundo de um vale cercado de montanhas, com festa da castanha em novembro.",
+        "de": "Ein Dorf am Grund eines von Bergen umschlossenen Tals, mit einem Kastanienfest im November."
+      },
       "geofences": [
         {
           "id": "curral-das-freiras-main",
@@ -999,6 +1274,11 @@
       "name": "Monte",
       "category": "village",
       "regionId": "funchal",
+      "why": {
+        "en": "The Church of Nossa Senhora do Monte, and the start of the wicker toboggans down to Funchal.",
+        "pt": "Igreja de Nossa Senhora do Monte e partida dos carros de cesto até ao Funchal.",
+        "de": "Die Kirche Nossa Senhora do Monte und der Start der Korbschlitten hinunter nach Funchal."
+      },
       "geofences": [
         {
           "id": "monte-main",
@@ -1013,6 +1293,11 @@
       "name": "Seixal",
       "category": "village",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A north-coast village with a black-sand beach, natural pools and terraced vineyards.",
+        "pt": "Aldeia da costa norte com praia de areia preta, piscinas naturais e vinha em socalcos.",
+        "de": "Ein Dorf an der Nordküste mit schwarzem Sandstrand, Naturbecken und Weinterrassen."
+      },
       "geofences": [
         {
           "id": "seixal-main",
@@ -1027,6 +1312,11 @@
       "name": "Ponta de São Lourenço",
       "category": "viewpoint",
       "regionId": "machico",
+      "why": {
+        "en": "The island's eastern tip and a nature reserve, crossed by the PR8 trail.",
+        "pt": "Extremo leste da ilha e reserva natural, percorrido pelo PR8.",
+        "de": "Die Ostspitze der Insel und ein Naturreservat, durchquert vom Wanderweg PR8."
+      },
       "geofences": [
         {
           "id": "ponta-de-sao-lourenco-main",
@@ -1041,6 +1331,11 @@
       "name": "Piscinas Naturais do Porto Moniz",
       "category": "landmark",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "Seawater pools formed in the lava.",
+        "pt": "Piscinas de água do mar formadas na lava.",
+        "de": "Meerwasserbecken, in der Lava entstanden."
+      },
       "geofences": [
         {
           "id": "piscinas-naturais-do-porto-moniz-main",
@@ -1055,6 +1350,11 @@
       "name": "Balcões",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "Viewpoint at the end of the PR11 trail from Ribeiro Frio.",
+        "pt": "Miradouro no fim do PR11, que parte do Ribeiro Frio.",
+        "de": "Aussichtspunkt am Ende des Wanderwegs PR11 ab Ribeiro Frio."
+      },
       "geofences": [
         {
           "id": "balcoes-main",
@@ -1069,6 +1369,11 @@
       "name": "Pico Ruivo",
       "category": "viewpoint",
       "regionId": "santana",
+      "why": {
+        "en": "The highest point on the island, 1862 m.",
+        "pt": "O ponto mais alto da ilha, com 1862 m.",
+        "de": "Der höchste Punkt der Insel, 1862 m."
+      },
       "geofences": [
         {
           "id": "pico-ruivo-main",
@@ -1083,6 +1388,11 @@
       "name": "Eira do Serrado",
       "category": "viewpoint",
       "regionId": "camara-de-lobos",
+      "why": {
+        "en": "Viewpoint more than 1000 m up, over Curral das Freiras.",
+        "pt": "Miradouro a mais de 1000 m sobre o Curral das Freiras.",
+        "de": "Aussichtspunkt auf über 1000 m, über Curral das Freiras."
+      },
       "geofences": [
         {
           "id": "eira-do-serrado-main",
@@ -1097,6 +1407,11 @@
       "name": "Boca da Encumeada",
       "category": "viewpoint",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "A pass at 1007 m between São Vicente and Serra de Água, with both coasts in view.",
+        "pt": "Passagem a 1007 m entre São Vicente e a Serra de Água, com vista para as duas costas.",
+        "de": "Ein Pass auf 1007 m zwischen São Vicente und Serra de Água, mit Blick auf beide Küsten."
+      },
       "geofences": [
         {
           "id": "boca-da-encumeada-main",
@@ -1111,6 +1426,11 @@
       "name": "Véu da Noiva",
       "category": "viewpoint",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A waterfall dropping off the cliff into the sea, between São Vicente and Seixal.",
+        "pt": "Cascata que cai da falésia no mar, entre São Vicente e o Seixal.",
+        "de": "Ein Wasserfall, der über die Klippe ins Meer fällt, zwischen São Vicente und Seixal."
+      },
       "geofences": [
         {
           "id": "veu-da-noiva-main",
@@ -1125,6 +1445,11 @@
       "name": "Ilhéus da Ribeira da Janela",
       "category": "viewpoint",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "Sea stacks at the mouth of the Ribeira da Janela; one has an opening, the \"window\" of its name.",
+        "pt": "Ilhéus na foz da Ribeira da Janela; um deles tem uma abertura, a \"janela\" do nome.",
+        "de": "Felsinseln an der Mündung der Ribeira da Janela; eine hat eine Öffnung, das „Fenster“ ihres Namens."
+      },
       "geofences": [
         {
           "id": "ilheus-da-ribeira-da-janela-main",
@@ -1139,6 +1464,11 @@
       "name": "Santana",
       "category": "village",
       "regionId": "santana",
+      "why": {
+        "en": "The village of triangular thatched houses.",
+        "pt": "Vila das casas de colmo triangulares.",
+        "de": "Das Dorf der dreieckigen strohgedeckten Häuser."
+      },
       "geofences": [
         {
           "id": "santana-main",
@@ -1153,6 +1483,11 @@
       "name": "Porto da Cruz",
       "category": "village",
       "regionId": "machico",
+      "why": {
+        "en": "A village under Penha d’Águia, with a steam-driven sugar-cane rum mill.",
+        "pt": "Vila sob a Penha d’Águia, com um engenho de aguardente de cana movido a vapor.",
+        "de": "Ein Dorf unter der Penha d’Águia, mit einer dampfbetriebenen Zuckerrohr-Rumbrennerei."
+      },
       "geofences": [
         {
           "id": "porto-da-cruz-main",
@@ -1167,6 +1502,11 @@
       "name": "Jardim do Mar",
       "category": "village",
       "regionId": "calheta",
+      "why": {
+        "en": "A village on a coastal ledge in the south-west, known for surfing.",
+        "pt": "Aldeia numa fajã da costa sudoeste, conhecida pelo surf.",
+        "de": "Ein Dorf auf einer Küstenterrasse im Südwesten, bekannt fürs Surfen."
+      },
       "geofences": [
         {
           "id": "jardim-do-mar-main",
@@ -1181,6 +1521,11 @@
       "name": "Paul do Mar",
       "category": "village",
       "regionId": "calheta",
+      "why": {
+        "en": "A fishing village at the foot of the south-west cliffs.",
+        "pt": "Aldeia piscatória no sopé das falésias do sudoeste.",
+        "de": "Ein Fischerdorf am Fuß der Klippen im Südwesten."
+      },
       "geofences": [
         {
           "id": "paul-do-mar-main",
@@ -1195,6 +1540,11 @@
       "name": "Grutas e Centro do Vulcanismo",
       "category": "landmark",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "Lava tubes open to visitors in São Vicente, with a centre on volcanism.",
+        "pt": "Tubos de lava visitáveis em São Vicente, com um centro sobre vulcanismo.",
+        "de": "Lavaröhren in São Vicente, die man besichtigen kann, mit einem Zentrum über Vulkanismus."
+      },
       "geofences": [
         {
           "id": "grutas-e-centro-do-vulcanismo-main",
@@ -1209,6 +1559,11 @@
       "name": "Jardim Botânico da Madeira",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A botanical garden in Funchal, opened in 1960, with plants from the island and the world.",
+        "pt": "Jardim botânico no Funchal, aberto em 1960, com plantas da ilha e do mundo.",
+        "de": "Ein botanischer Garten in Funchal, eröffnet 1960, mit Pflanzen von der Insel und aus aller Welt."
+      },
       "geofences": [
         {
           "id": "jardim-botanico-da-madeira-main",
@@ -1223,6 +1578,11 @@
       "name": "Sé do Funchal",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A late 15th-century cathedral with a carved wooden ceiling.",
+        "pt": "Catedral do fim do século XV, com teto de madeira trabalhada.",
+        "de": "Eine Kathedrale vom Ende des 15. Jahrhunderts mit geschnitzter Holzdecke."
+      },
       "geofences": [
         {
           "id": "se-do-funchal-main",
@@ -1237,6 +1597,11 @@
       "name": "Mercado dos Lavradores",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "Funchal's market, from 1940, with fruit, flowers and fish.",
+        "pt": "Mercado do Funchal, de 1940, com fruta, flores e peixe.",
+        "de": "Der Markt von Funchal, von 1940, mit Obst, Blumen und Fisch."
+      },
       "geofences": [
         {
           "id": "mercado-dos-lavradores-main",
@@ -1251,6 +1616,11 @@
       "name": "Farol da Ponta do Pargo",
       "category": "landmark",
       "regionId": "calheta",
+      "why": {
+        "en": "A lighthouse from 1922 on a cliff at the western end.",
+        "pt": "Farol de 1922 numa falésia do extremo oeste.",
+        "de": "Ein Leuchtturm von 1922 auf einer Klippe am westlichen Ende."
+      },
       "geofences": [
         {
           "id": "farol-da-ponta-do-pargo-main",
@@ -1265,6 +1635,11 @@
       "name": "Museu CR7",
       "category": "landmark",
       "regionId": "funchal",
+      "why": {
+        "en": "A museum of Cristiano Ronaldo's trophies, in Funchal, where he was born.",
+        "pt": "Museu com os troféus de Cristiano Ronaldo, no Funchal, onde nasceu.",
+        "de": "Ein Museum mit Cristiano Ronaldos Trophäen, in Funchal, wo er geboren wurde."
+      },
       "geofences": [
         {
           "id": "museu-cr7-main",
@@ -1279,6 +1654,11 @@
       "name": "Teleférico das Achadas da Cruz",
       "category": "landmark",
       "regionId": "porto-moniz",
+      "why": {
+        "en": "A cable car down the cliff to the Quebrada Nova fajã.",
+        "pt": "Teleférico que desce a falésia até à fajã da Quebrada Nova.",
+        "de": "Eine Seilbahn die Klippe hinab zur Fajã da Quebrada Nova."
+      },
       "geofences": [
         {
           "id": "teleferico-das-achadas-da-cruz-main",

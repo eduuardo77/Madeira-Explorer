@@ -1,5 +1,15 @@
 # "Why go" draft: a list to veto, not to approve (T-201)
 
+> ✅ **Approved whole by the project lead, 2026-10-07, and in `content/pois.json`** (en, pt, de).
+> Before it went in, every `⚠` fact was checked on the web (Visit Madeira, the regional
+> geodiversity site, Wikipedia, the parks' trail pages). Changed: **Bica da Cana** about 1580 m, not
+> 1620; **Chão dos Terreiros** height dropped (sources say 1427 to 1436 m), located instead;
+> **Eira do Serrado** "more than 1000 m" (sources say 1050, 1094 and 1095); **Levada da Rocha
+> Vermelha** is PR28 from Fanal, below the 25 Fontes; **Machico** keeps 1419, drops "the second
+> town" (it is the third most populous). Confirmed as written: the other 18. **Left blank:** the four
+> placeholders (Levada Nova da Calheta, Levada das Faias, Levada do Barreiro, Achada do Marques),
+> which show no line until there is a fact to stand behind. The German is mine and unreviewed.
+
 **For:** the project lead. **Rewritten:** 2026-09-25, **facts only**, on their word: *"text like
 'come for sunrise above the clouds' is a no-go"*. **Method:** D-064: I draft, you strike or fix.
 

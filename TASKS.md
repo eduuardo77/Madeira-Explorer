@@ -132,6 +132,19 @@ permission, L3 privacy contact.
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).
+- [~] **T-258** An update must not stop the recorder. **Measured 2026-10-07 with EMUI's launch
+      setting on manual** (as set 2026-09-24): recorder running, app in the background, `install -r`
+      at 15:20:58. The process started for `UpdateNoticeReceiver` and Expo's `TaskService` handled
+      `MY_PACKAGE_REPLACED`; a minute later there was **no foreground service and no location request**
+      (the second blocker, T-173), and the notice was up: *"Abre o Bruma para continuar a registar"*,
+      in the new name and *tu*. **Guidance built:** on Huawei and Honor (`launchManager.ts`, by
+      `Platform.constants.Manufacturer`), first run's keep-running card and the Settings row name the
+      path, read off the P30: *Definições, Aplicações, **Iniciação de aplicações*** (the T-210 note's
+      "Iniciar aplicações" was wrong). A button straight to it is not possible: EMUI 12 refuses its
+      `HSM_STARTUPAPP_MANAGER` action and both activities to other apps (tried from the shell).
+      Seen on the P30: the Settings row. **Left:** the measurement on *automatic*, which needs the lead
+      to flip that switch (a phone setting); the first-run card unseen on the phone (onboarding is
+      behind us there); the day-after check (T-049) after an update.
 - [x] **T-262** Stats that mean something. **Done 2026-10-07, the lead's option A** (of three drawn
       by `tools/preview-stats-options.mjs --db <copy>`: a line, a row of four, a card): under
       "lugares visitados", *"47 km de estradas acesas em 2 dias"*, and *"N km em todas as viagens"* in

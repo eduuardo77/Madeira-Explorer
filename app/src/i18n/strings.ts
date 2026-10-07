@@ -192,6 +192,14 @@ export const STRINGS = {
     'Mantém o {app} acordado',
     'Halten Sie {app} wach'
   ),
+  // T-258: Huawei and Honor only (`launchManager.ts`). ⚠ The Portuguese path
+  // is read off the P30 (EMUI 12, 2026-10-07); the English and German are
+  // EMUI's usual names, not seen on a phone.
+  'onboarding.keepRunning.huawei': s(
+    'On a Huawei phone, also go to Settings, Apps, App launch, turn off the switch for {app} and leave on the three options that appear.',
+    'Num telemóvel Huawei, vai também a Definições, Aplicações, Iniciação de aplicações, desliga o interruptor do {app} e deixa ligadas as três opções que aparecem.',
+    'Auf einem Huawei-Telefon öffnen Sie außerdem Einstellungen, Apps, App-Start, schalten den Schalter für {app} aus und lassen die drei angezeigten Optionen eingeschaltet.'
+  ),
   'onboarding.keepRunning.body1': s(
     'Some phones put apps to sleep to save battery, and your map stops filling in. With one tap, you ask Android to keep {app} running.',
     'Alguns telemóveis adormecem as apps para poupar bateria, e o mapa para de se encher. Com um toque, pedes ao Android que deixe o {app} a funcionar.',
@@ -991,6 +999,11 @@ export const STRINGS = {
   // "Open phone settings", which the review could not connect to recording.
   'settings.location': s('Location access', 'Acesso à localização', 'Standortzugriff'),
   'settings.back': s('Map', 'Mapa', 'Karte'),
+  'settings.keepRunning.detailHuawei': s(
+    'Opens the battery settings. On Huawei, also Settings, Apps, App launch: turn the switch for {app} off and leave the three options on.',
+    'Abre as definições de bateria. Num Huawei, também Definições, Aplicações, Iniciação de aplicações: desliga o interruptor do {app} e deixa as três opções ligadas.',
+    'Öffnet die Akku-Einstellungen. Bei Huawei außerdem Einstellungen, Apps, App-Start: den Schalter für {app} ausschalten und die drei Optionen eingeschaltet lassen.'
+  ),
   'settings.keepRunning.detail': s(
     'If your phone pauses it to save battery. Opens the battery settings.',
     'Se o telemóvel a pausar para poupar bateria. Abre as definições de bateria.',

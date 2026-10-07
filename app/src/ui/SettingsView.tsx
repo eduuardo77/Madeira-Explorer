@@ -49,6 +49,7 @@
 import { Children, useState, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { APP_NAME } from '../brand';
+import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import { t } from '../i18n';
 import { systemLanguage } from '../i18n/deviceLocale';
 import { LANGUAGE_NAMES, LANGUAGES, type Language } from '../i18n/languages';
@@ -536,7 +537,12 @@ export default function SettingsView({
             <ListRow
               icon="battery"
               label={t('settings.keepRunning', { app: APP_NAME })}
-              detail={t('settings.keepRunning.detail')}
+              detail={
+                // T-258: the launch manager the battery screen does not reach.
+                deviceHasLaunchManager()
+                  ? t('settings.keepRunning.detailHuawei')
+                  : t('settings.keepRunning.detail')
+              }
               onPress={onOpenBatterySettings}
             />
           )}

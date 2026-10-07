@@ -30,6 +30,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
+import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import type { SystemAsk } from './systemAsk';
 import { getContentPack } from '../content/poiCatalogue';
 import type { Place } from '../content/contentPack';
@@ -146,6 +147,10 @@ function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
         art: 'keep-running',
         title: t('onboarding.keepRunning.title'),
         body: [t('onboarding.keepRunning.body1')],
+        // T-258: the launch manager the one-tap dialog does not reach.
+        note: deviceHasLaunchManager()
+          ? t('onboarding.keepRunning.huawei')
+          : undefined,
         continueLabel: t('onboarding.action.continue'),
       };
 

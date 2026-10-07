@@ -3476,6 +3476,13 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       T-094
 - [ ] **T-132** Collect and act on beta feedback ⇠ T-129
 - [ ] **T-133** Store listing — screenshots, copy, preview video ⇠ M6
+      ✅ **Copy revised 2026-10-07 (T-269), pending the lead:** `docs/marketing-plan.md` §4. The
+      Portuguese in *tu* (D-098), with a 30-character title (*Bruma: Madeira por onde passei*) and a
+      79-character short line; the privacy paragraph no longer claims "nothing measuring how you use
+      the app", which the Data safety form's *Analytics* row (the Maps SDK) contradicts; the picture
+      paragraph covers the trips list and the timelapse. **Left:** the lead's approval and the data
+      decision it depends on; 6 to 8 screenshots per language (the P30's trace is the lead's real
+      movements, so their choice which); the feature graphic; the founder line once its window exists.
 - [ ] **T-134** Verify ≥10 real week-long trips recorded end to end with no tracking failure
       ⇠ T-129
 - [ ] **T-135** Verify no beta tester reports a missing levada or a false stamp ⇠ T-132

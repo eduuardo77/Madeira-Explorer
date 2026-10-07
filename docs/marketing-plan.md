@@ -147,18 +147,19 @@ to load.
 
 YOUR TRIP STAYS ON YOUR PHONE
 There is no account, no sign-up and no server behind Bruma. Your trip is never sent to us, so
-there is nothing of yours for us to see, sell or lose. No ads, and nothing measuring how you
-use the app. The map underneath comes from Google, which sees which part of the island is on
-your screen, never your trip.
+there is nothing of yours for us to see, sell or lose. No ads, and no analytics of our own.
+The map underneath comes from Google, which sees which part of the island is on your screen and
+how you move the map, never your trip.
 
 80 PLACES WORTH GOING TO
 19 viewpoints, 18 levadas, 19 villages, 8 beaches and 16 landmarks, chosen one at a time.
 Reach one and you collect its stamp. Your passport shows what you have found and what is
 still out there.
 
-YOUR TRIP, AS A PICTURE
-At the end of your holiday, Bruma makes a picture of your roads for you to share. Where you
-slept is found and removed first, every time, so your address never goes with it.
+YOUR TRIP, DAY BY DAY
+Open any trip to see each day's roads and stamps, watch the whole trip back as a timelapse,
+and share a picture of it. Where you slept is found and removed first, every time, so your
+address never goes with it.
 
 FREE TO START
 The highlighted roads and the recording are free forever, with no limit. Your first five
@@ -183,6 +184,32 @@ promised for all time. During the
 founder window, the first 3 months after launch, a line may add that buyers also get a founder
 stamp nobody can earn later; it comes out the day the window closes.*
 
+### ⚠ Revised 2026-10-07 (T-269), pending the project lead
+
+Three changes to the approved listing, in all three languages:
+
+1. **The Portuguese now says *tu*,** as the app has since D-098; it was approved in the formal
+   voice before that. The German keeps *Sie*, as the app does.
+2. **The privacy paragraph no longer says "nothing measuring how you use the app".** Google's map
+   component measures map use (panning and zooming), and the Data safety form now declares it under
+   *Analytics* (T-268). Listing and form must not contradict each other. It says *"no analytics of
+   our own"* and that Google sees how the map is moved. ⚠ **Depends on the lead's data decision**
+   (2026-10-07): if the app starts collecting usage data for the developer, this sentence changes
+   again.
+3. **YOUR TRIP, AS A PICTURE became YOUR TRIP, DAY BY DAY:** the trips list, the day pages, the
+   timelapse and the share of any trip (T-253, T-261, T-275).
+
+**Portuguese title and short description in *tu*** (counted; Play's limits are 30 and 80):
+
+| | Draft | Length |
+|---|---|---|
+| Title, recommended | **Bruma: Madeira por onde passei** (first person, as the app's own *"Apagar tudo o que registei"*) | 30 |
+| Title, alternative | Bruma: a tua Madeira no mapa | 28 |
+| Short | **Cada estrada que fazes a pé ou de carro na Madeira, destacada. Vê onde andaste.** | 79 |
+
+Full descriptions after the revision: 2,335, 2,436, 2,744 characters (English, Portuguese, German), all
+within 4,000. The founder line is still not added: the founder window does not exist yet.
+
 ### The Portuguese (Portugal) and German listings
 
 **Translated 2026-09-26 from the approved English.** ✅ **Portuguese approved as is by the project lead the same day.** German Provisional. The project lead asked for
@@ -205,34 +232,34 @@ The FREE TO START paragraph is the compliance surface in both: no price, "no sub
 (*Sem subscrição*, *Kein Abo*) without "ever".
 
 ```
-O Bruma destaca cada estrada e trilho que percorre na Madeira, para saber sempre por onde já passou. Faça uma levada ou suba uma estrada de montanha de carro: tudo aparece.
+O Bruma destaca cada estrada e trilho que percorres na Madeira, para saberes sempre por onde já passaste. Faz uma levada ou sobe uma estrada de montanha de carro: tudo aparece.
 
-AS SUAS ESTRADAS, DESTACADAS
-Cada estrada, caminho e levada que percorre fica desenhado sobre o mapa, à medida que avança. Ao fim de poucos dias vê de relance que cantos da ilha já conhece e quais ainda lhe faltam.
+AS TUAS ESTRADAS, DESTACADAS
+Cada estrada, caminho e levada que percorres fica desenhado sobre o mapa, à medida que avanças. Ao fim de poucos dias vês de relance que cantos da ilha já conheces e quais ainda te faltam.
 
-REGISTA NO SEU BOLSO
-Ligue o registo automático uma vez e o Bruma continua a registar com a aplicação fechada. Prefere decidir? Carregue no botão para começar e terminar um passeio. Também funciona se só permitir a localização com a aplicação aberta. O GPS só é usado enquanto regista, e escolhe com que frequência o faz.
+REGISTA NO TEU BOLSO
+Liga o registo automático uma vez e o Bruma continua a registar com a aplicação fechada. Preferes decidir tu? Carrega no botão para começar e terminar um passeio. Também funciona se só permitires a localização com a aplicação aberta. O GPS só é usado enquanto regista, e escolhes com que frequência o faz.
 
 SEM REDE, CONTINUA A REGISTAR
-O registo não precisa de dados móveis. Continua debaixo da Laurissilva e no fundo dos vales, e a viagem aparece no mapa quando voltar a ter rede. O mapa, esse, precisa de ligação para carregar.
+O registo não precisa de dados móveis. Continua debaixo da Laurissilva e no fundo dos vales, e a viagem aparece no mapa quando voltares a ter rede. O mapa, esse, precisa de ligação para carregar.
 
-A SUA VIAGEM FICA NO SEU TELEMÓVEL
-Não há conta, nem inscrição, nem servidor por trás do Bruma. A sua viagem nunca nos é enviada, por isso não temos nada seu para ver, vender ou perder. Sem anúncios, e nada a medir a forma como usa a aplicação. O mapa por baixo é da Google, que vê que parte da ilha está no seu ecrã, nunca a sua viagem.
+A TUA VIAGEM FICA NO TEU TELEMÓVEL
+Não há conta, nem inscrição, nem servidor por trás do Bruma. A tua viagem nunca nos é enviada, por isso não temos nada teu para ver, vender ou perder. Sem anúncios, e sem estatísticas nossas. O mapa por baixo é da Google, que vê que parte da ilha está no teu ecrã e como mexes no mapa, nunca a tua viagem.
 
 80 LUGARES QUE VALEM A VISITA
-19 miradouros, 18 levadas, 19 aldeias, 8 praias e 16 monumentos, escolhidos um a um. Quando chega a um, ganha o seu carimbo. O passaporte mostra o que já encontrou e o que ainda falta.
+19 miradouros, 18 levadas, 19 aldeias, 8 praias e 16 monumentos, escolhidos um a um. Quando chegas a um, ganhas o seu carimbo. O passaporte mostra o que já encontraste e o que ainda falta.
 
-A SUA VIAGEM, NUMA IMAGEM
-No fim das férias, o Bruma faz uma imagem das suas estradas para partilhar, se quiser. O sítio onde dormiu é encontrado e retirado primeiro, sempre, para que a sua morada nunca vá junto.
+A TUA VIAGEM, DIA A DIA
+Abre qualquer viagem para ver as estradas e os carimbos de cada dia, revê-la inteira em timelapse e partilhar uma imagem dela. O sítio onde dormiste é encontrado e retirado primeiro, sempre, para que a tua morada nunca vá junto.
 
 GRÁTIS PARA COMEÇAR
-As estradas destacadas e o registo são grátis para sempre, sem limite. Os primeiros cinco carimbos são grátis, e a primeira levada é sempre grátis. Um único pagamento desbloqueia toda a Madeira, para sempre: todos os carimbos, e uma medalha por cada conjunto que completar. Sem subscrição.
+As estradas destacadas e o registo são grátis para sempre, sem limite. Os primeiros cinco carimbos são grátis, e a primeira levada é sempre grátis. Um único pagamento desbloqueia toda a Madeira, para sempre: todos os carimbos, e uma medalha por cada conjunto que completares. Sem subscrição.
 
-APAGUE QUANDO QUISER
+APAGA QUANDO QUISERES
 Um botão nas Definições apaga tudo, de imediato. Desinstalar a aplicação também apaga tudo.
 
 O QUE O BRUMA NÃO É
-O Bruma não dá indicações nem planeia percursos. Regista por onde passou e mostra-lho. Para indicações passo a passo nos trilhos, use também uma aplicação de caminhadas.
+O Bruma não dá indicações nem planeia percursos. Regista por onde passaste e mostra-to. Para indicações passo a passo nos trilhos, usa também uma aplicação de caminhadas.
 
 Em português, inglês e alemão. Feito na Madeira.
 ```
@@ -250,13 +277,13 @@ KEIN EMPFANG, TROTZDEM AUFZEICHNUNG
 Die Aufzeichnung braucht keine mobilen Daten. Sie läuft im Lorbeerwald und tief in den Tälern weiter, und Ihre Reise erscheint auf der Karte, sobald Sie wieder online sind. Die Karte selbst braucht zum Laden eine Verbindung.
 
 IHRE REISE BLEIBT AUF IHREM HANDY
-Kein Konto, keine Anmeldung und kein Server hinter Bruma. Ihre Reise wird nie an uns gesendet, also gibt es nichts von Ihnen, das wir sehen, verkaufen oder verlieren könnten. Keine Werbung und keine Nutzungsanalyse. Die Karte darunter stammt von Google. Google sieht, welcher Teil der Insel auf Ihrem Bildschirm ist, aber nie Ihre Reise.
+Kein Konto, keine Anmeldung und kein Server hinter Bruma. Ihre Reise wird nie an uns gesendet, also gibt es nichts von Ihnen, das wir sehen, verkaufen oder verlieren könnten. Keine Werbung und keine eigene Nutzungsanalyse. Die Karte darunter stammt von Google. Google sieht, welcher Teil der Insel auf Ihrem Bildschirm ist und wie Sie die Karte bewegen, aber nie Ihre Reise.
 
 80 ORTE, DIE SICH LOHNEN
 19 Aussichtspunkte, 18 Levadas, 19 Dörfer, 8 Strände und 16 Sehenswürdigkeiten, einzeln ausgewählt. Erreichen Sie einen Ort, erhalten Sie seinen Stempel. Ihr Reisepass zeigt, was Sie gefunden haben und was noch auf Sie wartet.
 
-IHRE REISE ALS BILD
-Am Ende Ihres Urlaubs erstellt Bruma ein Bild Ihrer Wege zum Teilen. Wo Sie übernachtet haben, wird vorher erkannt und entfernt, jedes Mal, damit Ihre Adresse nie mitgeht.
+IHRE REISE, TAG FÜR TAG
+Öffnen Sie eine Reise, um die Wege und Stempel jedes Tages zu sehen, die ganze Reise als Zeitraffer anzusehen und ein Bild davon zu teilen. Wo Sie übernachtet haben, wird vorher erkannt und entfernt, jedes Mal, damit Ihre Adresse nie mitgeht.
 
 KOSTENLOS ZUM START
 Die markierten Wege und die Aufzeichnung sind für immer kostenlos und unbegrenzt. Ihre ersten fünf Stempel sind kostenlos, und Ihre erste Levada ist immer kostenlos. Eine einmalige Zahlung schaltet ganz Madeira frei, für immer: jeden Stempel und eine Medaille für jedes Set, das Sie vervollständigen. Kein Abo.

@@ -94,7 +94,10 @@ permission, L3 privacy contact.
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a
       launcher on light and dark wallpapers. Round two (2026-10-07: the lead liked A, B not bad, and
       asked for Madeira cues): A2 island on the flag's bands, A3 island with a Santana house, A4 the
-      Santana house alone, B2 the stamp with a house and a flag band; C dropped. **Waits on the pick.** Found drawing it: Santa
+      Santana house alone, B2 the stamp with a house and a flag band; C dropped. Round three (lead: A2
+      and B2 "need a bit of work"): A2 gains the Cross of the Order of Christ and its green island,
+      B2 the lit road, a truer thatch and a stamp clear of the mask; the dropped options' code
+      removed. **Waits on the pick.** Found drawing it: Santa
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).

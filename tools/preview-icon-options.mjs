@@ -17,10 +17,7 @@ import {
   iconSvg,
   monochromeSvg,
   optionFlag,
-  optionIslandHouse,
   optionLitRoad,
-  optionSantana,
-  optionStamp,
   optionStampHouse,
 } from './lib/icon-art.mjs';
 
@@ -58,20 +55,15 @@ const ROUTE = [
   [-16.78, 32.72],
 ];
 
-/** Where Santana's houses stand, on the north coast: the island-and-house option's anchor. */
-const SANTANA = [-16.885, 32.80];
-
 /**
- * Round two (2026-10-07). The lead liked A, thought B not bad, and asked for
- * more of Madeira in it: the flag's colours, or the Santana houses.
+ * Round three (2026-10-07). The lead liked A2 and B2 "but they still need a bit
+ * of work". A2 gains the flag's cross and its green island back; B2 gains the
+ * lit road to the house, a truer thatch and a stamp that clears the mask.
  */
 const OPTIONS = [
-  ['A', 'Estrada acesa (a de ontem)', optionLitRoad(rings, ROUTE), 'Para comparar: a ilha com a estrada acesa.'],
-  ['A2', 'Estrada acesa na bandeira', optionFlag(rings, ROUTE), 'A mesma ilha, escura, sobre as faixas da bandeira da Madeira: azul, ouro, azul.'],
-  ['A3', 'Ilha com casa de Santana', optionIslandHouse(rings, ROUTE, SANTANA), 'A ilha e a estrada, com uma casa de Santana na costa norte, onde elas estão.'],
-  ['A4', 'Casa de Santana', optionSantana(), 'Só a casa de Santana, com a estrada acesa a chegar à porta. A mais legível em pequeno.'],
-  ['B2', 'Selo com casa de Santana', optionStampHouse(), 'O selo do passaporte com uma casa de Santana, e as cores da bandeira na faixa de baixo.'],
-  ['B', 'Selo (o de ontem)', optionStamp(rings, ROUTE), 'Para comparar.'],
+  ['A2', 'Estrada acesa na bandeira', optionFlag(rings, ROUTE), 'A ilha verde com a estrada acesa, sobre as faixas da bandeira, com a cruz da Ordem de Cristo por cima.'],
+  ['B2', 'Selo com casa de Santana', optionStampHouse(), 'O selo do passaporte com uma casa de Santana, a estrada acesa a chegar à porta, e a bandeira na faixa de baixo.'],
+  ['A', 'Estrada acesa (para comparar)', optionLitRoad(rings, ROUTE), 'A primeira, sem os sinais da Madeira.'],
 ];
 
 /** Neighbours: plain coloured tiles with a letter, so no real app is imitated. */
@@ -132,7 +124,7 @@ figure { margin:0; text-align:center; } figcaption { color:var(--muted); font-si
 .tile { width:52px; height:52px; border-radius:26px; display:grid; place-items:center; font-weight:700; font-size:20px; }
 details { margin-top:12px; } summary { cursor:pointer; color:var(--muted); }
 </style></head><body><main>
-<h1>O ícone do Bruma, segunda ronda</h1>
+<h1>O ícone do Bruma, terceira ronda</h1>
 <p class="lead">Três opções, nos tamanhos reais e num ecrã de telemóvel entre outras apps (letras simples, para não imitar nenhuma app real).
 "Android 13, tema" é a versão de uma só cor que o telemóvel usa quando os ícones seguem o papel de parede.
 Depois de escolheres, faço a partir dela o ícone, as camadas do Android, o ecrã de abertura e o pequeno ícone das notificações.</p>

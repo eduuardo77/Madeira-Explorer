@@ -1,10 +1,10 @@
 /**
  * The launcher icon, as pure SVG (T-257, T-188, D-086).
  *
- * Options drawn for the project lead from the app's own language: the lit road
- * (the product, D-093) and the postage stamp (the passport, D-086), and in a
- * second round Madeira's own cues, the flag and the Santana house. A postmark
- * option was drawn in the first round and dropped. Pure: geometry in, SVG strings out, so the preview page and the
+ * Drawn for the project lead in rounds: the lit road (the product, D-093) and
+ * the postage stamp (the passport, D-086); then Madeira's own cues, the flag
+ * and the Santana house. Kept here are the two the lead is choosing between,
+ * A2 and B2, and A for comparison; the rest were dropped along the way. Pure: geometry in, SVG strings out, so the preview page and the
  * final PNG export draw the same thing.
  *
  * Every icon is drawn on Android's adaptive-icon canvas: 108 x 108, of which
@@ -17,7 +17,6 @@
  */
 
 export const CANVAS = 108;
-export const SAFE = 66;
 
 export const PALETTE = {
   slate: '#1B2A33', // the adaptive icon background already in app.json
@@ -126,29 +125,6 @@ function perforatedRect(cx, cy, w, h, bite = 2.2, step = 6) {
   return `M${tl[0]},${tl[1]}${edge(tl, tr, 0)}${edge(tr, br, 0)}${edge(br, bl, 0)}${edge(bl, tl, 0)}Z`;
 }
 
-/** B: a postage stamp, tilted as the passport tilts them, the island and its road inked on it. */
-export function optionStamp(rings, route) {
-  const island = islandPaths(rings, 46, 52);
-  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
-  return {
-    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
-    foreground: `
-      <g transform="rotate(-6 54 54)">
-        <path d="${perforatedRect(54, 54, 58, 62)}" fill="${PALETTE.paper}"/>
-        <rect x="29" y="27" width="50" height="54" fill="none" stroke="${PALETTE.ink}" stroke-width="1"/>
-        <path d="${island.d}" fill="${PALETTE.island}"/>
-        <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>
-        <rect x="29" y="71" width="50" height="10" fill="${PALETTE.ink}"/>
-        <text x="54" y="78.6" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="7" letter-spacing="1.2" fill="${PALETTE.paper}">BRUMA</text>
-      </g>`,
-    monochrome: `
-      <g transform="rotate(-6 54 54)">
-        <path d="${perforatedRect(54, 54, 58, 62)}" fill="#FFFFFF"/>
-        <path d="${island.d}" fill="#000000" fill-opacity="0.6"/>
-      </g>`,
-  };
-}
-
 /**
  * One icon as the launcher shows it: background and foreground in a 108 canvas,
  * clipped to `mask` ('circle' or 'squircle'), at `size` pixels.
@@ -193,86 +169,108 @@ function flagBands() {
 }
 
 /**
- * A Santana house: a thatched A-frame to the ground, a white gable with red and
- * blue trim, a red door. `cx` is its centre, `base` its foot, `h` its height.
+ * A Santana house: a thatched A-frame down to the ground, a white gable with red
+ * and blue trim, a red door in a blue frame, a small blue window. `cx` is its
+ * centre, `base` its foot, `h` its height.
+ *
+ * Round three (2026-10-07): the thatch is drawn as layers running down each
+ * slope, as thatch lies; round two's horizontal lines read as stripes.
  */
 export function santanaHouse(cx, base, h) {
   const w = h * 1.1;
   const apex = base - h;
   const roof = `M${cx - w / 2},${base} L${cx},${apex} L${cx + w / 2},${base} Z`;
-  const gw = w * 0.62;
-  const gTop = apex + h * 0.3;
-  const gable = `M${cx - gw / 2},${base} L${cx},${gTop} L${cx + gw / 2},${base} Z`;
-  const thatchLines = [0.25, 0.5, 0.75]
+  const layers = [0.3, 0.5, 0.7, 0.9]
     .map((t) => {
+      // A short stroke along each slope, part-way down it.
       const y = apex + h * t;
       const half = (w / 2) * t;
-      return `<line x1="${cx - half}" y1="${y}" x2="${cx + half}" y2="${y}" stroke="${MADEIRA.thatchLight}" stroke-width="${h * 0.03}"/>`;
+      const len = h * 0.16;
+      const dx = (w / 2 / h) * len;
+      return `<path d="M${cx - half + dx},${y - len} L${cx - half},${y} M${cx + half - dx},${y - len} L${cx + half},${y}" stroke="${MADEIRA.thatchLight}" stroke-width="${h * 0.05}" stroke-linecap="round"/>`;
     })
     .join('');
+  const gw = w * 0.6;
+  const gTop = apex + h * 0.32;
+  const gable = `M${cx - gw / 2},${base} L${cx},${gTop} L${cx + gw / 2},${base} Z`;
+  const inset = h * 0.06;
+  const trim = `M${cx - gw / 2 + inset * 1.6},${base} L${cx},${gTop + inset * 2} L${cx + gw / 2 - inset * 1.6},${base}`;
   const dw = h * 0.2;
   const dh = h * 0.3;
-  const win = h * 0.12;
-  return `<path d="${roof}" fill="${MADEIRA.thatch}"/>${thatchLines}
-    <path d="${gable}" fill="${MADEIRA.wall}" stroke="${MADEIRA.trimRed}" stroke-width="${h * 0.05}" stroke-linejoin="round"/>
+  const win = h * 0.11;
+  return `<path d="${roof}" fill="${MADEIRA.thatch}"/>${layers}
+    <path d="${gable}" fill="${MADEIRA.wall}" stroke="${MADEIRA.trimRed}" stroke-width="${h * 0.06}" stroke-linejoin="round"/>
+    <path d="${trim}" fill="none" stroke="${MADEIRA.trimBlue}" stroke-width="${h * 0.03}"/>
     <rect x="${cx - dw / 2}" y="${base - dh}" width="${dw}" height="${dh}" fill="${MADEIRA.trimRed}" stroke="${MADEIRA.trimBlue}" stroke-width="${h * 0.035}"/>
-    <rect x="${cx - win / 2}" y="${base - dh - win * 1.9}" width="${win}" height="${win}" fill="${MADEIRA.trimBlue}"/>`;
+    <rect x="${cx - win / 2}" y="${base - dh - win * 1.8}" width="${win}" height="${win}" fill="${MADEIRA.trimBlue}"/>`;
 }
 
-/** A2: the island and its lit road over the flag's bands. */
+/**
+ * The Cross of the Order of Christ, the flag's emblem: a red cross with flared
+ * arms and a white cross inside it. Without it, blue, gold and blue is just
+ * some flag.
+ */
+export function orderOfChristCross(cx, cy, size) {
+  const arm = size / 2;
+  const inner = size * 0.14;
+  const outer = size * 0.42;
+  const arms = [0, 90, 180, 270]
+    .map(
+      (angle) =>
+        `<path transform="rotate(${angle} ${cx} ${cy})" d="M${cx - inner / 2},${cy} L${cx - outer / 2},${cy - arm} L${cx + outer / 2},${cy - arm} L${cx + inner / 2},${cy} Z"/>`
+    )
+    .join('');
+  const reach = arm * 0.78;
+  return `<g fill="${MADEIRA.trimRed}">${arms}</g>
+    <path d="M${cx},${cy - reach} L${cx},${cy + reach} M${cx - reach},${cy} L${cx + reach},${cy}" stroke="#FFFFFF" stroke-width="${size * 0.07}"/>`;
+}
+
+/**
+ * A2: the island and its lit road over the flag: the bands, and the cross above
+ * the island. Round three: the island green again with a white edge (dark
+ * slate lost what made A attractive), and the road given a white glow so it
+ * holds over the blue bands, where a blue glow vanished.
+ */
 export function optionFlag(rings, route) {
-  const island = islandPaths(rings, 60, 56);
+  const island = islandPaths(rings, 58, 66);
   const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
   return {
     background: flagBands(),
     foreground: `
-      <path d="${island.d}" fill="${PALETTE.slate}" stroke="${PALETTE.slate}" stroke-width="0.8" stroke-linejoin="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.45" stroke-width="7" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="3" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="1" stroke-linecap="round"/>`,
+      ${orderOfChristCross(54, 38, 18)}
+      <path d="${island.d}" fill="${PALETTE.island}" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="${island.d}" fill="${PALETTE.island}"/>
+      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="5" stroke-linecap="round"/>
+      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
     monochrome: optionLitRoad(rings, route).monochrome,
   };
 }
 
-/** A3: a Santana house, the lit road leading to its door. */
-export function optionSantana() {
-  const road = 'M30,90 Q42,84 50,80 T54,78';
-  return {
-    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
-    foreground: `
-      ${santanaHouse(54, 76, 38)}
-      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.4" stroke-width="7" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="3" stroke-linecap="round"/>`,
-    monochrome: `<path d="M33.1,76 L54,38 L74.9,76 Z" fill="#FFFFFF"/>`,
-  };
-}
-
-/** A4: the island and road, a Santana house standing on the north coast. */
-export function optionIslandHouse(rings, route, santana) {
-  const base = optionLitRoad(rings, route);
-  const island = islandPaths(rings, 60, 56);
-  const [x, y] = island.project(santana[0], santana[1]);
-  // 12 tall: at 20 the house was bigger than the island it stands on.
-  return { ...base, foreground: `${base.foreground}${santanaHouse(x, y + 3, 12)}` };
-}
-
-/** B2: the stamp, a Santana house inked on it, the flag's colours for its band. */
+/**
+ * B2: the passport's stamp, a Santana house on it with the lit road to its
+ * door, the flag's colours for its band. Round three: the road added (the
+ * app's heart was missing), a smaller tilt and stamp so its corners clear the
+ * circular mask, and a steadier perforation.
+ */
 export function optionStampHouse() {
+  const stamp = perforatedRect(54, 54, 54, 58, 2.4, 6.5);
+  const road = 'M31,69 Q40,68 46,65 T54,62';
+  const band = (x, fill) => `<rect x="${x}" y="70" width="${48 / 3}" height="8" fill="${fill}"/>`;
   return {
     background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
     foreground: `
-      <g transform="rotate(-6 54 54)">
-        <path d="${perforatedRect(54, 54, 58, 62)}" fill="${PALETTE.paper}"/>
-        <rect x="29" y="27" width="50" height="54" fill="none" stroke="${PALETTE.ink}" stroke-width="1"/>
-        ${santanaHouse(54, 68, 32)}
-        <rect x="29" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagBlue}"/>
-        <rect x="${29 + 50 / 3}" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagGold}"/>
-        <rect x="${29 + (2 * 50) / 3}" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagBlue}"/>
+      <g transform="rotate(-4 54 54)">
+        <path d="${stamp}" fill="${PALETTE.paper}"/>
+        <rect x="30" y="28" width="48" height="50" fill="none" stroke="${PALETTE.ink}" stroke-width="0.9"/>
+        <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-opacity="0.35" stroke-width="5" stroke-linecap="round"/>
+        <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.2" stroke-linecap="round"/>
+        ${santanaHouse(54, 62, 28)}
+        ${band(30, MADEIRA.flagBlue)}${band(30 + 48 / 3, MADEIRA.flagGold)}${band(30 + (2 * 48) / 3, MADEIRA.flagBlue)}
       </g>`,
     monochrome: `
-      <g transform="rotate(-6 54 54)">
-        <path d="${perforatedRect(54, 54, 58, 62)}" fill="#FFFFFF"/>
-        <path d="M36.4,68 L54,36 L71.6,68 Z" fill="#000000" fill-opacity="0.6"/>
+      <g transform="rotate(-4 54 54)">
+        <path d="${stamp}" fill="#FFFFFF"/>
+        <path d="M38.6,62 L54,34 L69.4,62 Z" fill="#000000" fill-opacity="0.6"/>
       </g>`,
   };
 }

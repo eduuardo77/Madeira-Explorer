@@ -121,6 +121,9 @@ export type PlaceCard = {
    * Null when the pack cannot name it, and the card then simply says one thing
    * less. A slug would read as a bug to the user and as a placeholder to a
    * store reviewer.
+   *
+   * ⚠ Null too when it is the place's own name (T-256): a village that names
+   * its municipality, *Porto Moniz* in *Porto Moniz*, read twice in a row.
    */
   regionLabel: string | null;
   collected: boolean;
@@ -267,7 +270,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
       : categoryLabel,
     // Trimmed, and whitespace becomes null: a card with an empty line where
     // the municipality should be is worse than one that never claimed to know.
-    regionLabel: regionName?.trim() || null,
+    regionLabel: regionLabelFor(name, regionName),
     collected,
     hasCourse: hasCourse(category),
     lat,
@@ -285,4 +288,13 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
         ? translate(STRINGS['placeCard.status.visitedOn'], language, { date: visitedOn })
         : translate(STRINGS['placeCard.status.visited'], language),
   };
+}
+
+/** The municipality worth saying: trimmed, and not when it only repeats the name. */
+function regionLabelFor(name: string, regionName: string | null | undefined): string | null {
+  const region = regionName?.trim() ?? '';
+  if (region === '' || region.toLocaleLowerCase() === name.trim().toLocaleLowerCase()) {
+    return null;
+  }
+  return region;
 }

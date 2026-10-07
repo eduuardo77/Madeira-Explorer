@@ -138,6 +138,12 @@ test('the region is a word too, or nothing at all (T-067)', () => {
   assert.equal(buildPlaceCard(input({ regionName: ' Machico ' })).regionLabel, 'Machico');
 });
 
+test('T-256: the region is left out when it only repeats the place’s name', () => {
+  // Seen on the P30: "Porto Moniz" in "Porto Moniz", twice in a row on the card.
+  assert.equal(buildPlaceCard(input({ name: 'Porto Moniz', regionName: 'Porto Moniz' })).regionLabel, null);
+  assert.equal(buildPlaceCard(input({ name: 'Seixal', regionName: 'Porto Moniz' })).regionLabel, 'Porto Moniz');
+});
+
 test('collected is carried through untouched — the card states it, it does not decide it', () => {
   assert.equal(buildPlaceCard(input({ collected: true })).collected, true);
   assert.equal(buildPlaceCard(input({ collected: false })).collected, false);

@@ -89,6 +89,12 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [~] **T-256** The place card. **Done 2026-10-07:** the municipality sits under the name in the
+      stamp's column (review F2: "Santana" alone under the stamp), and is left out when it only
+      repeats the name ("Porto Moniz" in "Porto Moniz", seen on the P30); tested. **Not done, on
+      purpose:** the plan's Directions button contradicts **D-055** (the lead removed it: "we aren't
+      a navigator"); the decision wins until the lead says otherwise. The distance shows only when
+      near, by the 2026-09-25 rule. Left: the lead confirms the white card next to the trophy.
 - [~] **T-254** The jank. Measured with `tools/measure-jank.sh` (the reviews' 9 pans and 2 double
       taps, made repeatable) on a **non-debuggable** build, P30, 2026-10-07. **Most of the review's
       6.3% / p99 32 ms was the debuggable flag:** the same build without it gave 0.81, 2.74 and 2.02%,

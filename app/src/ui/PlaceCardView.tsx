@@ -126,6 +126,12 @@ export default function PlaceCardView({
                 to say, in words, and saying it twice is noise. */}
             <Text style={styles.meta}>{card.categoryLabel}</Text>
             <Text style={styles.name}>{card.name}</Text>
+            {/* T-256 (third review, F2): the municipality with the name it
+                belongs to. Below the row it sat alone under the stamp, and
+                read as a caption for the artwork. */}
+            {card.regionLabel === null ? null : (
+              <Text style={styles.region}>{card.regionLabel}</Text>
+            )}
             <Text style={styles.status}>{card.statusLine}</Text>
           </View>
         </View>
@@ -146,7 +152,7 @@ export default function PlaceCardView({
           municipality is collected. Down here it is sentence case, it is the
           geography rather than the status, and it sits next to the distance,
           which is the other answer to the same question. */}
-      {card.regionLabel === null ? null : (
+      {stamp !== undefined || card.regionLabel === null ? null : (
         <Text style={styles.region}>{card.regionLabel}</Text>
       )}
 

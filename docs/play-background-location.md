@@ -51,6 +51,24 @@ lose the lead's trips). I can film them on the emulator with `adb shell screenre
 best from the P30 after an outing with the app closed: its built-in screen recorder, from the
 quick settings panel. Then join the three.
 
+## Shots 1 and 2: filmed 2026-10-07
+
+On the emulator (Android 14, English, a fresh install of the field build), 78 s:
+`tools/out/t123/shots-1-2-emulator.mp4` (not committed; regenerate as below). **Cut 12 s to 38 s**
+(about 26 s):
+
+| From | Shows |
+|---|---|
+| 12 s | Android's first location dialog; *While using the app* chosen |
+| 16 s | *"Keep your phone in your pocket"*: the disclosure, held for reading |
+| 28 s | Android's *Location permission* page; *Allow all the time* chosen at 35 s |
+| 36 s | Back in Bruma, on the next first-run card |
+
+To film it again: install on the emulator, set it to English (`adb root`, then
+`setprop persist.sys.locale en-US` and restart the framework), and record with `adb shell
+screenrecord` (in Git Bash, `MSYS_NO_PATHCONV=1`, or the `/sdcard` path is rewritten). Shot 3 is the
+lead's, on the P30, after an outing with the app closed.
+
 ## After submission
 
 Record the date submitted and Google's answer in TASKS (T-123). A rejection usually names the

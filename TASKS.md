@@ -1805,6 +1805,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046
 - [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038
+      ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
+      running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
 - [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
       — **Overlaps T-117b** (added 2026-08-11), which watches the *whole app* including FCM
       (D-043). Run them as one capture; this task is the recording-specific reading of it.
@@ -3458,6 +3460,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       mapped to the app's text (all met, and `i18n.test.ts` keeps them), and a three-shot video
       script of about 30 s. **Left:** the video (shots 1 and 2 on the emulator, which I can film;
       shot 3 on the P30 after an outing), then the lead submits and records the answer here.
+      ✅ **Shots 1 and 2 filmed 2026-10-07** on the emulator in English; the cut points are in the doc.
 - [x] **T-124** Privacy policy (short, because there is genuinely nothing to disclose) ⇠ T-117
       — Notes: `docs/task-notes.md` (T-124)
 - [x] **T-125** "Delete all my data" control ⇠ T-030, T-141

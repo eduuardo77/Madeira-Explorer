@@ -3,26 +3,29 @@
  * (T-269).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-feature-graphic.mjs
- *     → tools/out/feature-graphic/{a,b,c}.png and index.html
+ *     → tools/out/feature-graphic/{b,b1,b2,b3}.png and index.html
  *
  * Built from the icon's own art (`lib/icon-art.mjs`, A2) so the listing and the
  * launcher match. Nothing here is a person's trace (D-016): the island is the
- * regions' outline, the lit road the icon's stylised route, and option C's
- * faint roads are the shipped OpenStreetMap network, which is public map data.
+ * regions' outline and the lit road the icon's stylised route.
+ *
+ * Round two (2026-10-07). Round one drew A (the lit island on slate with the
+ * name), B (the flag, no text) and C (the island's road network); the lead
+ * chose B, "however it's a bit loud". So B as drawn, beside three quieter
+ * versions of it. A and C are in git history.
  *
  * Google shows the graphic at many sizes and may crop it, so the subject sits in
- * the middle and any text stays large and short.
+ * the middle.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
-import { islandPaths, MADEIRA, orderOfChristCross, PALETTE } from './lib/icon-art.mjs';
+import { islandPaths, MADEIRA, optionFlag, orderOfChristCross, PALETTE } from './lib/icon-art.mjs';
 import { mainIslandRings, ROUTE } from './lib/icon-geometry.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, '..');
 const W = 1024;
 const H = 500;
 
@@ -61,58 +64,50 @@ function curve(points) {
   return d;
 }
 
-const font = `font-family="Segoe UI, Roboto, Arial, sans-serif"`;
-
-/** A: the lit island on slate, the name and the Portuguese title beside it. */
-function optionA() {
-  const { svg } = islandWithRoad(100, 'translate(40 -20) scale(5.4)');
-  return `<rect width="${W}" height="${H}" fill="${PALETTE.slate}"/>
-    ${svg}
-    <text x="640" y="232" ${font} font-size="96" font-weight="700" fill="#FFFFFF">Bruma</text>
-    <text x="644" y="292" ${font} font-size="34" fill="#C9D6DE">Madeira por onde passei</text>`;
-}
-
-/** B: the flag, as in the icon: blue, gold, blue, the cross, the island and its road. No text. */
-function optionB() {
+/**
+ * B: the flag across the whole banner, as in the icon: the bands, the cross,
+ * the island and its road. `blue` and `gold` default to the flag's own.
+ */
+function flagBanner({ blue = MADEIRA.flagBlue, gold = MADEIRA.flagGold } = {}) {
   const { svg } = islandWithRoad(100, 'translate(242 10) scale(5.2)', { edge: '#FFFFFF' });
   const third = W / 3;
-  return `<rect width="${W}" height="${H}" fill="${MADEIRA.flagBlue}"/>
-    <rect x="${third}" width="${third}" height="${H}" fill="${MADEIRA.flagGold}"/>
+  return `<rect width="${W}" height="${H}" fill="${blue}"/>
+    <rect x="${third}" width="${third}" height="${H}" fill="${gold}"/>
     <g transform="translate(512 70) scale(3.2) translate(-54 -38)">${orderOfChristCross(54, 38, 18)}</g>
     ${svg}`;
 }
 
-/** C: the island's real road network, faint, with the road lit across it, and the name. */
-async function optionC() {
-  const imp = (p) => import(pathToFileURL(path.join(root, p)).href);
-  const { decodeRoadGraph } = await imp('app/src/matching/roadGraph.ts');
-  const graph = decodeRoadGraph(JSON.parse(readFileSync(path.join(root, 'content', 'roads.json'), 'utf8')));
-  // Centred: the island's middle (54, 54 in the canvas) at the banner's middle, a little high.
-  const place = 'translate(210 -72) scale(5.6)';
-  const { island, svg } = islandWithRoad(100, place);
-  // Every road on the main island, as one path, in the island's projection.
-  let roads = '';
-  for (let e = 0; e < graph.edgeCount; e += 1) {
-    const from = graph.pointStart[e];
-    const to = graph.pointStart[e + 1];
-    if (graph.lat[from] < 32.6) continue; // the Desertas and Porto Santo are not drawn
-    const points = [];
-    for (let i = from; i < to; i += 1) points.push(island.project(graph.lon[i], graph.lat[i]));
-    roads += `M${points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join('L')}`;
-  }
-  return `<rect width="${W}" height="${H}" fill="#121C22"/>
-    <g transform="${place}">
-      <path d="${island.d}" fill="#1E3A2E" stroke="#1E3A2E" stroke-width="2.4" stroke-linejoin="round"/>
-      <path d="${roads}" fill="none" stroke="#7FA0B0" stroke-opacity="0.28" stroke-width="0.12"/>
+/** B2: the launcher icon itself, its circle of flag, centred on the app's dark slate. */
+function iconOnSlate() {
+  const icon = optionFlag(rings, ROUTE);
+  // The icon's circle (r 36 at 54, 54 in its canvas) scaled to 190 px and centred.
+  const scale = 190 / 36;
+  const shift = (offset) => offset - 54 * scale;
+  return `<rect width="${W}" height="${H}" fill="${PALETTE.slate}"/>
+    <defs><clipPath id="circle"><circle cx="54" cy="54" r="36"/></clipPath></defs>
+    <g transform="translate(${shift(W / 2)} ${shift(H / 2)}) scale(${scale})">
+      <g clip-path="url(#circle)">${icon.background}${icon.foreground}</g>
+    </g>`;
+}
+
+/** B3: the flag faded into slate: the same picture, the bands at a third of their strength. */
+function fadedFlag() {
+  const third = W / 3;
+  const { svg } = islandWithRoad(100, 'translate(242 10) scale(5.2)', { edge: '#FFFFFF' });
+  return `<rect width="${W}" height="${H}" fill="${PALETTE.slate}"/>
+    <g opacity="0.35">
+      <rect width="${W}" height="${H}" fill="${MADEIRA.flagBlue}"/>
+      <rect x="${third}" width="${third}" height="${H}" fill="${MADEIRA.flagGold}"/>
     </g>
-    ${svg.replace(/<path d="[^"]*" fill="#2F6B4F"[^>]*\/>/, '')}
-    <text x="${W - 48}" y="${H - 44}" text-anchor="end" ${font} font-size="64" font-weight="700" fill="#FFFFFF">Bruma</text>`;
+    <g transform="translate(512 70) scale(3.2) translate(-54 -38)">${orderOfChristCross(54, 38, 18)}</g>
+    ${svg}`;
 }
 
 const options = [
-  ['a', 'A, the lit road on slate, with the name', 'Like the app’s dark map: the island in the icon’s green, its road lit, “Bruma” and the Portuguese title beside it. The text would be redrawn per language.', optionA()],
-  ['b', 'B, the flag, no text', 'The icon at banner size: the flag’s bands and cross, the island and its lit road. Nothing to translate, and it reads at any size.', optionB()],
-  ['c', 'C, the real road network', 'Every road on the island, faint, from the map data the app ships, and one road lit across it: what Bruma does, in one picture.', await optionC()],
+  ['b', 'B, as drawn', 'The flag at full strength: what the lead chose, and found a bit loud.', flagBanner()],
+  ['b1', 'B1, the flag, muted', 'The same picture in a deeper blue and an ochre gold: still the flag, less shout.', flagBanner({ blue: '#163E6B', gold: '#C49A2E' })],
+  ['b2', 'B2, the icon on slate', 'The launcher icon itself, centred on the app’s dark slate: the flag only inside the circle, exactly what the phone shows.', iconOnSlate()],
+  ['b3', 'B3, the flag faded into slate', 'The full picture, but the bands at a third of their strength over the dark: the island and its road lead, the flag stays as colour.', fadedFlag()],
 ];
 
 const out = path.join(here, 'out', 'feature-graphic');
@@ -121,7 +116,7 @@ mkdirSync(out, { recursive: true });
 const pngs = new Map();
 for (const [id, , , body] of options) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg>`;
-  const png = new Resvg(svg, { fitTo: { mode: 'width', value: W }, font: { loadSystemFonts: true } }).render().asPng();
+  const png = new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
   writeFileSync(path.join(out, `${id}.png`), png);
   pngs.set(id, `data:image/png;base64,${Buffer.from(png).toString('base64')}`);
 }
@@ -131,7 +126,7 @@ writeFileSync(
 <style>body{margin:0;padding:24px;background:#111;color:#eee;font-family:system-ui,sans-serif}
 figure{margin:0 0 28px}img{width:100%;max-width:1024px;display:block;border-radius:8px}
 figcaption{margin-top:8px;max-width:1024px;line-height:1.4}b{display:block;color:#fff}</style>
-<h2>T-269: the Play feature graphic, three ways (1024 × 500)</h2>
+<h2>T-269: the Play feature graphic, round two: B, quieter (1024 × 500)</h2>
 ${options.map(([id, name, note]) => `<figure><img src="${pngs.get(id)}" alt=""><figcaption><b>${name}</b>${note}</figcaption></figure>`).join('')}`
 );
 console.log('tools/out/feature-graphic/index.html');

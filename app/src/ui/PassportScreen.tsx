@@ -39,9 +39,15 @@ import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
 import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
-import type { ShareCard } from '../souvenir/shareCard';
+import { formatDateRange, type ShareCard } from '../souvenir/shareCard';
+import { listedTrips } from '../souvenir/tripList';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
-import PassportView, { type FounderCard, type MedalTile, type PassportStamp } from './PassportView';
+import PassportView, {
+  type FounderCard,
+  type MedalTile,
+  type PassportStamp,
+  type PassportTripRow,
+} from './PassportView';
 import { medalProgress, type MedalProgress } from '../progress/medals';
 import { getLockedRegionIds } from '../progress/currentProgress';
 import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
@@ -113,10 +119,13 @@ export default function PassportScreen({
   onClose,
   onShowOnMap,
   onWatch,
+  onOpenTrip,
 }: {
   onClose: () => void;
   /** Watch the trip back (T-105e). */
   onWatch: () => void;
+  /** Open one of the listed trips in the trip viewer (T-261). */
+  onOpenTrip: (tripId: number) => void;
   /**
    * The user asked to see a stamp's place on the map (T-115, D-052 revised).
    * The whole `Place` travels, because the map needs its representative
@@ -159,6 +168,7 @@ export default function PassportScreen({
    * nothing drawable was left. A resident is exactly that case.
    */
   const [canWatch, setCanWatch] = useState(false);
+  const [trips, setTrips] = useState<PassportTripRow[]>([]);
   /** The founder stamp, when this phone's purchase earned one (T-233). */
   const [founder, setFounder] = useState<FounderCard | null>(null);
   /** The set medals' shelf (T-235). */
@@ -243,6 +253,17 @@ export default function PassportScreen({
         const film = await getSouvenirComposition({ quiet: true });
         if (!cancelled) {
           setCanWatch(film.renderable);
+        }
+        // T-261: the trips worth listing, worded for the page.
+        const language = deviceLanguage();
+        const nowMs = Date.now();
+        const rows = listedTrips(await tripDao.getTripSummaries()).map((trip) => ({
+          id: trip.id,
+          dates: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs, language),
+          detail: `${n('passport.trips.days', trip.day_count)} · ${n('passport.trips.stamps', trip.stamp_count)}`,
+        }));
+        if (!cancelled) {
+          setTrips(rows);
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -464,6 +485,8 @@ export default function PassportScreen({
           onDecline={declineWalk}
           onWatch={canWatch ? onWatch : undefined}
           onEndTrip={tripOpen ? endTrip : undefined}
+          trips={trips}
+          onOpenTrip={onOpenTrip}
           waiting={stamps.filter((stamp) => stamp.locked === true)}
           // D-097, R1: the reminder, only where something can be bought.
           onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}

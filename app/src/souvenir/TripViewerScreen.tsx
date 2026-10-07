@@ -103,9 +103,12 @@ const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 type ShareScene = { runs: DayRun[]; camera: CameraFit; snapshot: string | null };
 
 export default function TripViewerScreen({
+  tripId,
   onClose,
   onReplay,
 }: {
+  /** The trip to show, from the passport's list (T-261); the trip on show when absent. */
+  tripId?: number;
   onClose: () => void;
   /** WalkNYC's Replay: the animated film of the whole trip. */
   onReplay: () => void;
@@ -132,7 +135,7 @@ export default function TripViewerScreen({
     (async () => {
       try {
         const [loaded, preference] = await Promise.all([
-          loadTripView(),
+          loadTripView(tripId),
           appStateDao.get(AppStateKey.MapStyle),
         ]);
         if (!cancelled) {
@@ -150,7 +153,7 @@ export default function TripViewerScreen({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tripId]);
 
   const viewport: Viewport = useMemo(
     () => ({
@@ -447,36 +450,42 @@ export default function TripViewerScreen({
             >
               <Text style={[styles.roundGlyph, { color: chrome.content }]}>{'←'}</Text>
             </Pressable>
+            {/* T-261: the timelapse and the share play the trip on show, so a
+                past trip from the list offers neither rather than the wrong one. */}
+            {!view.onShow ? null : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('trip.a11y.replay')}
+                onPress={onReplay}
+                hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
+                style={({ pressed }) => [
+                  styles.round,
+                  { backgroundColor: chrome.surface },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
+              </Pressable>
+            )}
+          </View>
+          {!view.onShow ? null : (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t('trip.a11y.replay')}
-              onPress={onReplay}
-              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
+              accessibilityState={{ busy: sharing }}
+              disabled={sharing}
+              onPress={() => void share()}
+              hitSlop={(MIN_TAP_TARGET - PILL) / 2}
               style={({ pressed }) => [
-                styles.round,
+                styles.pill,
                 { backgroundColor: chrome.surface },
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
+              <Text style={[styles.pillText, { color: chrome.link }]}>
+                {sharing ? t('passport.sharing') : t('trip.share')}
+              </Text>
             </Pressable>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ busy: sharing }}
-            disabled={sharing}
-            onPress={() => void share()}
-            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
-            style={({ pressed }) => [
-              styles.pill,
-              { backgroundColor: chrome.surface },
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={[styles.pillText, { color: chrome.link }]}>
-              {sharing ? t('passport.sharing') : t('trip.share')}
-            </Text>
-          </Pressable>
+          )}
         </View>
       )}
 

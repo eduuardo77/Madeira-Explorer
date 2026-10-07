@@ -126,6 +126,20 @@ export type Trip = {
   home_mask_radius_m: number | null;
 };
 
+/**
+ * A trip as the passport's list shows it (T-261): its span, and how much was
+ * recorded in it. Counted by the database, so listing every trip reads no fix.
+ */
+export type TripSummary = {
+  id: number;
+  started_ts: number;
+  ended_ts: number | null;
+  fix_count: number;
+  /** Distinct local days with at least one fix. */
+  day_count: number;
+  stamp_count: number;
+};
+
 /** A fix as it goes in. `id` is assigned by the database. */
 export type RawFixInput = {
   trip_id: number;

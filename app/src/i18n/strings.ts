@@ -601,6 +601,9 @@ export const STRINGS = {
   'trip.stat.trip': s('This trip', 'Na viagem', 'Diese Reise'),
   'trip.share.plug': s('Light up your roads with {app}', 'Acende as tuas estradas com o {app}', 'Lassen Sie Ihre Straßen mit {app} aufleuchten'),
   'trip.a11y.replay': s('Watch the trip as a timelapse', 'Ver a viagem em timelapse', 'Die Reise im Zeitraffer ansehen'),
+  // T-261: the passport's list of trips.
+  'passport.trips': s('Trips', 'Viagens', 'Reisen'),
+  'passport.trips.a11y.open': s('Opens this trip on the map', 'Abre esta viagem no mapa', 'Öffnet diese Reise auf der Karte'),
   'trip.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
   'trip.a11y.previous': s('Previous day', 'Dia anterior', 'Vorheriger Tag'),
   'trip.a11y.next': s('Next day', 'Dia seguinte', 'Nächster Tag'),
@@ -1424,6 +1427,14 @@ export const PLURALS = {
   'trip.stat.days': {
     one: s('Day', 'Dia', 'Tag'),
     other: s('Days', 'Dias', 'Tage'),
+  },
+  'passport.trips.days': {
+    one: s('{count} day', '{count} dia', '{count} Tag'),
+    other: s('{count} days', '{count} dias', '{count} Tage'),
+  },
+  'passport.trips.stamps': {
+    one: s('{count} stamp', '{count} carimbo', '{count} Stempel'),
+    other: s('{count} stamps', '{count} carimbos', '{count} Stempel'),
   },
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),

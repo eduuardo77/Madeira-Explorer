@@ -80,6 +80,8 @@ export default function App() {
    * place the user has forgotten about.
    */
   const [focusPlace, setFocusPlace] = useState<FocusPlace | null>(null);
+  /** The trip the viewer shows: one from the passport's list, or null for the trip on show (T-261). */
+  const [viewedTripId, setViewedTripId] = useState<number | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -206,7 +208,14 @@ export default function App() {
         />
       ) : screen === 'passport' ? (
         <PassportScreen
-          onWatch={() => setScreen('replay')}
+          onWatch={() => {
+            setViewedTripId(null);
+            setScreen('replay');
+          }}
+          onOpenTrip={(tripId) => {
+            setViewedTripId(tripId);
+            setScreen('replay');
+          }}
           onClose={() => setScreen('map')}
           onShowOnMap={(place: Place, collected: boolean) => {
             setFocusPlace({ place, collected });
@@ -217,6 +226,7 @@ export default function App() {
         // Back to the passport, not to the map: the trip viewer was reached
         // from the passport and that is where the user was looking.
         <TripViewerScreen
+          tripId={viewedTripId ?? undefined}
           onClose={() => setScreen('passport')}
           onReplay={() => setScreen('timelapse')}
         />

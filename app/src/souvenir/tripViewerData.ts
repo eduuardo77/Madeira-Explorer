@@ -18,6 +18,12 @@ import { tripDays, type TripDay, type ViewerStamp } from './tripDays';
 
 export type TripView = {
   tripId: number;
+  /**
+   * Whether this is the trip on show (the open one, else the latest). The
+   * timelapse and the share read that trip through the export path, so they
+   * are offered only for it (T-261).
+   */
+  onShow: boolean;
   startedTs: number;
   /** The trip's end, or now for a trip still open. */
   endTs: number;
@@ -41,9 +47,16 @@ function localStartOfDay(ts: number): number {
   return day.getTime();
 }
 
-/** The trip on show (the open one, else the latest), or null with no trip at all. */
-export async function loadTripView(nowMs: number = Date.now()): Promise<TripView | null> {
-  const trip = await tripDao.getTripOnShow();
+/**
+ * A trip for the viewer: `tripId` from the passport's list (T-261), or the trip
+ * on show when absent. Null when there is no such trip.
+ */
+export async function loadTripView(
+  tripId?: number,
+  nowMs: number = Date.now(),
+): Promise<TripView | null> {
+  const onShow = await tripDao.getTripOnShow();
+  const trip = tripId === undefined ? onShow : await tripDao.getTrip(tripId);
   if (trip === null) {
     return null;
   }
@@ -72,6 +85,7 @@ export async function loadTripView(nowMs: number = Date.now()): Promise<TripView
   const days = tripDays(runs, stamps, localStartOfDay);
   return {
     tripId: trip.id,
+    onShow: onShow !== null && onShow.id === trip.id,
     startedTs: trip.started_ts,
     endTs: trip.ended_ts ?? nowMs,
     lines: roads.lines,

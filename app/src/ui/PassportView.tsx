@@ -207,6 +207,15 @@ export type PassportStamp = {
   locked?: boolean;
 };
 
+/** One line of the passport's list of trips (T-261). */
+export type PassportTripRow = {
+  id: number;
+  /** "24 de setembro a 7 de outubro de 2026". */
+  dates: string;
+  /** "13 dias · 3 carimbos". */
+  detail: string;
+};
+
 export type PassportViewProps = {
   progress: TripProgress;
   /**
@@ -250,6 +259,13 @@ export type PassportViewProps = {
    * in the workbench. The screen owns the confirmation.
    */
   onEndTrip?: () => void;
+  /**
+   * The trips worth listing, newest first (T-261, `tripList.ts`), already
+   * worded by the screen. The section shows only with two or more: with one,
+   * *Ver a tua viagem* above is the whole list.
+   */
+  trips?: PassportTripRow[];
+  onOpenTrip?: (tripId: number) => void;
   /**
    * The locked stamps, for the reminder card under the number (D-097, R1).
    * The card shows when there is at least one and `onUnlock` is given; the
@@ -588,6 +604,8 @@ export default function PassportView({
   onDecline,
   onWatch,
   onEndTrip,
+  trips,
+  onOpenTrip,
   waiting,
   onUnlock,
   founder,
@@ -696,6 +714,37 @@ export default function PassportView({
 
       {founder === undefined && (medals === undefined || medals.length === 0) ? null : (
         <MedalsSection founder={founder} medals={medals ?? []} onUnlock={onUnlock} />
+      )}
+
+      {trips === undefined || trips.length < 2 || onOpenTrip === undefined ? null : (
+        <View style={styles.section}>
+          <View style={styles.rowHeader}>
+            <Text style={styles.rowTitle} accessibilityRole="header">
+              {t('passport.trips')}
+            </Text>
+          </View>
+          <View style={styles.tripList}>
+            {trips.map((trip, index) => (
+              <Pressable
+                key={trip.id}
+                accessibilityRole="button"
+                accessibilityHint={t('passport.trips.a11y.open')}
+                onPress={() => onOpenTrip(trip.id)}
+                style={({ pressed }) => [
+                  styles.tripRow,
+                  index > 0 && styles.tripRowDivided,
+                  pressed && styles.seeAllPressed,
+                ]}
+              >
+                <View style={styles.tripText}>
+                  <Text style={styles.tripDates}>{trip.dates}</Text>
+                  <Text style={styles.tripDetail}>{trip.detail}</Text>
+                </View>
+                <Text style={styles.tripChevron}>{'›'}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
       )}
 
       {awards.length > 0 ? (
@@ -951,6 +1000,22 @@ const styles = StyleSheet.create({
     // sticker happens to be showing through.
     backgroundColor: colors.background,
   },
+  tripList: {
+    backgroundColor: album.surface,
+    borderRadius: radius.card,
+  },
+  tripRow: {
+    minHeight: MIN_TAP_TARGET,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  tripRowDivided: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: album.hairline },
+  tripText: { flex: 1, gap: 2 },
+  tripDates: { color: album.text, fontSize: fontSize.body, fontWeight: '600' },
+  tripDetail: { color: album.textMuted, fontSize: fontSize.small },
+  tripChevron: { color: album.textMuted, fontSize: fontSize.title },
   footnote: {
     color: album.textMuted,
     fontSize: fontSize.small,

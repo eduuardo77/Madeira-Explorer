@@ -9,7 +9,7 @@
 import { getDatabase } from '../database';
 import { mayRearmNotifications } from '../../recording/recordingAdmission';
 import * as appStateDao from './appStateDao';
-import type { EndDetectionMethod, Trip } from '../types';
+import type { EndDetectionMethod, Trip, TripSummary } from '../types';
 
 export async function getActiveTrip(): Promise<Trip | null> {
   const db = await getDatabase();
@@ -94,6 +94,30 @@ export async function getMostRecentTrip(): Promise<Trip | null> {
     'SELECT * FROM trip ORDER BY started_ts DESC LIMIT 1;'
   );
   return row ?? null;
+}
+
+/** One trip by its id, or null when there is no such trip (T-261). */
+export async function getTrip(tripId: number): Promise<Trip | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<Trip>('SELECT * FROM trip WHERE id = ?;', tripId);
+  return row ?? null;
+}
+
+/**
+ * Every trip with its counts, newest first (T-261). The days are counted on
+ * the phone's local calendar, as the trip viewer's pages are.
+ */
+export async function getTripSummaries(): Promise<TripSummary[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<TripSummary>(
+    `SELECT t.id, t.started_ts, t.ended_ts,
+       (SELECT COUNT(*) FROM raw_fix f WHERE f.trip_id = t.id) AS fix_count,
+       (SELECT COUNT(DISTINCT date(f.ts / 1000, 'unixepoch', 'localtime'))
+          FROM raw_fix f WHERE f.trip_id = t.id) AS day_count,
+       (SELECT COUNT(*) FROM stamp_award s WHERE s.trip_id = t.id) AS stamp_count
+     FROM trip t
+     ORDER BY t.started_ts DESC;`
+  );
 }
 
 export async function endTrip(

@@ -89,6 +89,13 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [x] **T-261** A list of trips. **Done 2026-10-07:** a *Viagens* section in the passport (shown
+      from two trips), newest first, each with its dates, days and stamps; a tap opens it in the trip
+      viewer. Listed: a trip with a stamp or at least 100 positions (`tripList.ts`, tested); on the P30
+      that is 3 of 31, the other 28 being restarts from the first test days. Seen on the P30: the
+      August trip opened in 6 s, its roads matched for the first time, and the home map still drew
+      today's trip afterwards. A past trip offers no ▶ or *Partilhar*: both still read the trip on
+      show through the export path; making them follow the chosen trip is the next step if wanted.
 - [~] **T-260** The home shows where you stand among the 80. Three options drawn on a real P30
       capture (`tools/preview-home-options.mjs`, the capture passed in, never committed): A WalkNYC's
       bar ("3 de 80 lugares", %, a thin bar) in the status panel; B a ring on the passport button;

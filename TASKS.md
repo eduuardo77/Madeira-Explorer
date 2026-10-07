@@ -89,6 +89,9 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
+      location tracking is not on its list; the case is "core function adversely affected". Play
+      declaration drafted there; deleting the module is the fallback if Play refuses.
 - [~] **T-265** The privacy policy, complete. **Done 2026-10-07:** who is responsible ("Eduardo 7",
       `DEVELOPER_NAME` in `brand.ts`, as Play names the developer; the lead's L3), the contact, a
       purchases section (Google Play takes the payment; the app keeps the answer and the time), the

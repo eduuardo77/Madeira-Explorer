@@ -2064,6 +2064,26 @@ carries it through Play review today. Bruma keeps the one-tap dialog. **T-266 st
 Google's current policy text and write the Play declaration**; if that text excludes this use, the
 module is deleted and the settings list returns, as above.
 
+**T-266, Google's text (read 2026-10-07, developer.android.com, "Optimize for Doze and App
+Standby"):** the accepted cases are a table of messaging and calling apps that cannot use FCM,
+safety apps, task automation apps and peripheral companions. **Location and fitness tracking are
+not listed.** The test is one sentence: *"your app doesn't meet these exceptions unless Doze or App
+Standby breaks the core function of the app"*, and the Play note: *"Google Play policies prohibit
+apps from requesting direct exemption from Power Management features ... unless the core function
+of the app is adversely affected."* Third-party pages that list "health and fitness" as accepted
+are not Google's text and are not relied on.
+
+**So the case rests on "core function", and it is honest but not airtight.** Bruma's recorder is a
+foreground service, which Doze already leaves running; what the exemption buys is survival on OEM
+battery managers (Huawei, Xiaomi, Samsung), which stop it anyway (D-045 above, T-210). WalkNYC
+carries the same permission through review today. **Draft for the Play declaration:** *"Bruma's
+core function is recording the roads a traveller walks and drives, in the background, for the
+length of a holiday, with the app closed. On many phones the battery optimiser stops that
+recording within hours, so the trip map is left with gaps the user cannot recover. The exemption
+is asked once, during first run, with an explanation, and can be declined; the app works without
+it and says recording may stop."* **If Play rejects it:** delete `modules/battery-exemption`, and
+first run and Settings fall back to the settings list (one module, no other change).
+
 **Context:** CONTEXT §7 and HANDOFF both state it plainly — **Android OEMs kill background work
 regardless of the official APIs.** Xiaomi, Huawei, Samsung, Oppo and OnePlus ship battery
 managers that stop a foreground service anyway. The battery-optimisation exemption is the one

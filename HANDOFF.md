@@ -15,6 +15,15 @@ at hand-off: all work committed and pushed (`0842c22` and after), 1045 tests, th
 build (version code 3) with the lead's real data, the version 3 AAB built for internal testing
 (`Madeira-fieldwork/apks/bruma-0.1.0-vc3.aab`, not yet uploaded by the lead).
 
+## ⚠⚠⚠ 2026-10-07: where Phase 1 stands
+
+Done: T-253/T-253b (trip viewer by day, WalkNYC's way, ▶ timelapse on the dark map, Partilhar one
+PNG; D-099), T-255 (*tu*), T-265 (policy names "Eduardo 7", purchases, CNPD; lead to read the new
+PT), T-266 (battery permission kept; Google's text in D-045). **T-254 in progress**: most of the
+review's jank was the debuggable flag; one cause fixed; target not met on every run (TASKS). Next:
+T-254 profiling, T-256 place card, T-257 icon. P30: field build, data kept. `tools/measure-jank.sh`
+needs a non-debuggable build. A second AVD `madeira-play` has WalkNYC (`docs/dev-build.md`).
+
 ## ⚠⚠⚠ 2026-10-06 evening: Phase 1 started
 
 L1 *tu* (D-098), L2 keep the battery dialog (D-045 amended), L3 waiting on the lead. **T-253**

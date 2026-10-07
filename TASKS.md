@@ -3503,7 +3503,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       the app", which the Data safety form's *Analytics* row (the Maps SDK) contradicts; the picture
       paragraph covers the trips list and the timelapse. **Left:** the lead's approval and the data
       decision it depends on; 6 to 8 screenshots per language (the P30's trace is the lead's real
-      movements, so their choice which); the feature graphic; the founder line once its window exists.
+      movements, so their choice which); the feature graphic (three options drawn 2026-10-07,
+      `tools/preview-feature-graphic.mjs`, waiting on the lead's pick); the founder line once its
+      window exists.
 - [ ] **T-134** Verify ≥10 real week-long trips recorded end to end with no tracking failure
       ⇠ T-129
 - [ ] **T-135** Verify no beta tester reports a missing levada or a false stamp ⇠ T-132

@@ -171,6 +171,13 @@ permission, L3 privacy contact.
       EMUI's default an update stops recording silently, and the manual setting is what lets the
       notice through: the guidance is the fix, not a nicety. **Left:** the first-run card unseen on
       the phone (onboarding is behind us there); the day-after check (T-049) after an update.
+- [~] **Gate P1** (Phase 1 done). **Measured 2026-10-07**, store build, the review's workload:
+      janky 0.00% on every run, p99 10 to 12 ms (T-254); memory 274 to 280 MB after the workload,
+      266 to 270 settled (target 280); map with roads at 4.4 to 4.9 s from the tap (T-272). The
+      replay, the place card and the icon were seen on the P30 by the lead as each was built.
+      **Owed:** launch to first frame, `am start -W` median of three on the store build (the plan's
+      aim is under 800 ms, WalkNYC's 760 to 813); the one reading so far, 2.47 s, was a single run of
+      the debuggable field build. To measure after the battery run's figures are read.
 - [x] **T-262** Stats that mean something. **Done 2026-10-07, the lead's option A** (of three drawn
       by `tools/preview-stats-options.mjs --db <copy>`: a line, a row of four, a card): under
       "lugares visitados", *"47 km de estradas acesas em 2 dias"*, and *"N km em todas as viagens"* in
@@ -915,7 +922,11 @@ but eight (below). N9 is T-197's; N11 is T-222.
 - [~] **T-219** **A passport row shows part of the next stamp (N10).** On a 360 dp phone the
       fourth sticker began exactly at the card's edge. ✅ `passport/stripLayout.ts`: 96 where the
       cut reads, 84 on the P30, measured from the strip itself. Workbench: 44% of the fourth.
-- [ ] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
+- [x] **T-220** **One control language on the map (N7)** ⇠ judged by eye. Design first.
+      ✅ **Closed 2026-10-07 on the 2026-09-25 decision (A, today's controls, the progress line
+      quieter).** The plan asked to show it again once T-260 was in; T-260 was built in the same
+      quiet register (a small grey count on the passport button, the lead's pick), so there is
+      nothing left to build. Reopen if the lead wants the question asked again.
       2026-09-25: three options drawn for the project lead in `tools/out/screen-options.html`
       (`node tools/preview-screen-options.mjs`): today, all in the brand green, or one white
       panel at the bottom. The same page asks about the place card and the passport's top, which

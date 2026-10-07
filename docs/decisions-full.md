@@ -5495,6 +5495,30 @@ app. Two voices read as two authors.
 screens the lead approved most recently); leaving the split (rejected: a craft and localisation
 defect the review scored).
 
+## D-100 — The developer collects no data from users, for now
+
+**Status: Accepted 2026-10-07** by the project lead (*"A, at least for now"*).
+
+**The question.** The lead wants data *"for feedback and to upgrade the app"*. Option A keeps the
+promise the listing leads with (the trip never leaves the phone, no account, no server, nothing of
+ours collected) and gets feedback without collecting; option B adds anonymous usage analytics.
+
+**The decision: A.** Feedback comes from what needs no collection by us: Play Console's Android
+vitals (crashes, freezes, battery, gathered by Google Play for every app), ratings and reviews,
+the opt-in *Enviar um registo* (D-069), and *Enviar opinião*, which opens the user's own email
+to the developer with the build in the subject.
+
+**Why, and what was rejected.** B would end the headline promise and rewrite the policy, the
+listing and the Data safety form in three languages; make the lead a GDPR controller of the users'
+data (consent, deletion requests, breach duty); add a service to run and pay for and a new Play
+review; and at launch, with few users, give numbers too small to decide anything. **Reopen** when
+there are a few hundred users and a question only numbers can answer, and then only as an opt-in,
+off by default, with the policy and store forms changed before the build ships.
+
+**Follows from it.** Data safety (T-268): shared **No**, users can request deletion **No** (the only
+collected data is the Maps SDK's, held by Google). The listing's *"no analytics of our own"* stays
+true.
+
 ## D-099 — Watching a trip, WalkNYC's way: a viewer by day, a timelapse, a picture to share
 
 **Status: Accepted 2026-10-07** by the project lead. Built in T-253 and T-253b.

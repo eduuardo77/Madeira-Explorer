@@ -122,7 +122,7 @@ If one is ever changed, change both in the same piece of work.
 
 ## Google Play — Data safety (T-122, redone as T-268)
 
-> ### ⚠ DRAFT 2026-10-07 (T-268), for the project lead to answer the two marked calls and submit
+> ### ⚠ READY 2026-10-07 (T-268): both calls decided (D-100); the project lead submits
 > Built from the inventory above (T-264) and Google's text as read on 2026-10-07. **Not legal
 > advice.** Two answers are judgement calls and are marked as such; everything else follows from
 > Google's own words, quoted. The packet capture (T-264, T-117b) is still owed before submission:
@@ -150,12 +150,12 @@ the claim the listing leads with.
 | Location? | **Not declared** | The IP address is declared as location only *"where developers use IP addresses as a means to determine location"*; neither the app nor, per its disclosure, the SDK does |
 | Financial info (purchases)? | **Not declared** | *"If your app uses a payment service such as PayPal, Google Pay, Google Play's billing system, or similar services to complete payment transactions, you don't need to declare collection"* when the app never accesses the financial data. The app keeps only "owned" and the time, on the phone, which is not collection |
 | Physical activity, stamps, the trip | **Not declared** | Processed only on the phone; not transmitted, so not collected |
-| ⚠ **Shared?** (the lead's call) | **Recommended: not shared** | *"Sharing"* is *"transferring user data collected from your app to a third party"*. Here the SDK's provider is the party that collects it, through the SDK; the app transfers nothing on to anyone else. The service-provider exception (*"processes user data on behalf of the developer and based on the developer's instructions"*) is the weaker argument, because Google states its own purposes (*"improve Google services"*), so the answer should not rest on it. Google's Maps page says the developer is *"solely responsible"* for the answer and gives none. The conservative alternative: mark the same types *shared* with Google |
+| **Shared?** | **No** (decided 2026-10-07, D-100) | *"Sharing"* is *"transferring user data collected from your app to a third party"*. Here the SDK's provider is the party that collects it, through the SDK; the app transfers nothing on to anyone else. The service-provider exception (*"processes user data on behalf of the developer and based on the developer's instructions"*) is the weaker argument, because Google states its own purposes (*"improve Google services"*), so the answer should not rest on it. Google's Maps page says the developer is *"solely responsible"* for the answer and gives none. The conservative alternative: mark the same types *shared* with Google |
 | Processed ephemerally? | **No** | Ephemeral means *"only stored in memory and retained for no longer than necessary to service the specific request in real-time"*; crash metrics and a daily-user identifier are kept |
 | Required or optional? | **Required** | The map cannot be used without the SDK |
 | Purposes | **App functionality; Analytics** | The SDK's stated purposes: running the map, crash and usage measurement |
 | Encrypted in transit? | **Yes** | `usesCleartextTraffic=false` for the whole process, which the SDK runs in |
-| ⚠ **Can users request deletion?** (the lead's call) | **Recommended: No** | The question is whether *"you provide users with a mechanism to request data deletion; or automatically initiate deletion or anonymization of collected data within 90 days"*. The only collected data is the Maps SDK's, held by Google under Google's policy; the app cannot delete it. *Apagar tudo* erases everything the app keeps, but none of that is collected |
+| **Can users request deletion?** | **No** (decided 2026-10-07, D-100) | The question is whether *"you provide users with a mechanism to request data deletion; or automatically initiate deletion or anonymization of collected data within 90 days"*. The only collected data is the Maps SDK's, held by Google under Google's policy; the app cannot delete it. *Apagar tudo* erases everything the app keeps, but none of that is collected |
 | Privacy policy URL | **https://bruma.lol/privacy** | Live since 2026-10-07 (T-267), the same text as the app's (`tools/build-site.mjs`) |
 
 **The policy now says what the map sends** (2026-10-07): the map section names the phone's

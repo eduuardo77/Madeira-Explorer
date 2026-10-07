@@ -1120,7 +1120,12 @@ export const STRINGS = {
     'Automático segue o telemóvel.',
     'Automatisch folgt Ihrem Telefon.'
   ),
-  'settings.about.contact': s('Contact us', 'Contactar-nos', 'Kontakt'),
+  'settings.about.contact': s('Send feedback', 'Enviar opinião', 'Feedback senden'),
+  'settings.feedback.noMail': s(
+    'No email app opened. You can write to {email}.',
+    'Não abriu nenhuma aplicação de email. Podes escrever para {email}.',
+    'Es hat sich keine E-Mail-App geöffnet. Sie können an {email} schreiben.'
+  ),
   'settings.about.licences': s('Open-source licences', 'Licenças de código aberto', 'Open-Source-Lizenzen'),
   'settings.about.technical': s('Technical details', 'Detalhes técnicos', 'Technische Details'),
   'settings.help.send': s('Send a recording', 'Enviar um registo', 'Eine Aufzeichnung senden'),

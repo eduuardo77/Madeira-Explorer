@@ -184,7 +184,7 @@ promised for all time. During the
 founder window, the first 3 months after launch, a line may add that buyers also get a founder
 stamp nobody can earn later; it comes out the day the window closes.*
 
-### ⚠ Revised 2026-10-07 (T-269), pending the project lead
+### ⚠ Revised 2026-10-07 (T-269): the title approved, the descriptions pending the project lead
 
 Three changes to the approved listing, in all three languages:
 
@@ -193,9 +193,8 @@ Three changes to the approved listing, in all three languages:
 2. **The privacy paragraph no longer says "nothing measuring how you use the app".** Google's map
    component measures map use (panning and zooming), and the Data safety form now declares it under
    *Analytics* (T-268). Listing and form must not contradict each other. It says *"no analytics of
-   our own"* and that Google sees how the map is moved. ⚠ **Depends on the lead's data decision**
-   (2026-10-07): if the app starts collecting usage data for the developer, this sentence changes
-   again.
+   our own"* and that Google sees how the map is moved. True under D-100 (no data collected by
+   the developer); if that is ever reopened, this sentence changes with it.
 3. **YOUR TRIP, AS A PICTURE became YOUR TRIP, DAY BY DAY:** the trips list, the day pages, the
    timelapse and the share of any trip (T-253, T-261, T-275).
 
@@ -203,7 +202,7 @@ Three changes to the approved listing, in all three languages:
 
 | | Draft | Length |
 |---|---|---|
-| Title, recommended | **Bruma: Madeira por onde passei** (first person, as the app's own *"Apagar tudo o que registei"*) | 30 |
+| Title, ✅ **approved by the lead 2026-10-07** | **Bruma: Madeira por onde passei** (first person, as the app's own *"Apagar tudo o que registei"*) | 30 |
 | Title, alternative | Bruma: a tua Madeira no mapa | 28 |
 | Short | **Cada estrada que fazes a pé ou de carro na Madeira, destacada. Vê onde andaste.** | 79 |
 

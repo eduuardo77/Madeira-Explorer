@@ -140,8 +140,8 @@ permission, L3 privacy contact.
       `https://bruma.lol/privacy`. Found along the way: **the policy did not say what the map
       sends**; now it names the phone's details, the internet address, crash reports, the anonymous
       counting number and how the map is moved (en, pt; doc and site regenerated), so form and
-      policy agree. **Left for the lead:** the two marked calls (shared: recommended no; deletion:
-      recommended no, with reasons), then submit in Play Console; the packet capture (T-264).
+      policy agree. ✅ **Both calls decided 2026-10-07 (D-100):** shared No, deletion No. **Left:**
+      the lead submits in Play Console; the packet capture (T-264) before that.
 - [~] **T-258** An update must not stop the recorder. **Measured 2026-10-07 with EMUI's launch
       setting on manual** (as set 2026-09-24): recorder running, app in the background, `install -r`
       at 15:20:58. The process started for `UpdateNoticeReceiver` and Expo's `TaskService` handled

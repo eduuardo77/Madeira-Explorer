@@ -54,6 +54,7 @@ import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import { restoreBackupFile, saveBackupFile } from '../storage/backupFile';
 import { APP_NAME } from '../brand';
+import { feedbackMailto } from './feedbackMail';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
@@ -70,6 +71,21 @@ import { buildDonation, sendDonation } from '../souvenir/donateWalk';
 import { REFUSAL_KEYS } from '../souvenir/shareTrip';
 import SettingsView from './SettingsView';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
+
+/**
+ * Option A (2026-10-07): the user's own email is the feedback channel, with
+ * the build in the subject. A phone with no email app used to do nothing at
+ * all; now it shows the address.
+ */
+function sendFeedback(email: string): void {
+  const version = Constants.expoConfig?.version ?? 'unknown';
+  Linking.openURL(feedbackMailto(email, APP_NAME, version)).catch(() => {
+    Alert.alert(t('settings.about.contact'), t('settings.feedback.noMail', { email }));
+  });
+}
+
+/** Narrowed once, so the row's handler sees a string. */
+const contactEmail: string | null = CONTACT_EMAIL;
 
 export default function SettingsScreen({
   onClose,
@@ -452,13 +468,7 @@ export default function SettingsScreen({
               ? t('settings.about.betaVersion', { version: Constants.expoConfig.version })
               : Constants.expoConfig.version
         }
-        onContact={
-          CONTACT_EMAIL === null
-            ? undefined
-            : () => {
-                void Linking.openURL(`mailto:${CONTACT_EMAIL}`).catch(() => undefined);
-              }
-        }
+        onContact={contactEmail === null ? undefined : () => sendFeedback(contactEmail)}
         languageChoice={languageChoice}
         onChangeLanguage={(language) => {
           setLanguageChoiceState(language);

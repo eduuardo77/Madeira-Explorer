@@ -296,6 +296,14 @@ Bruma gibt keine Wegbeschreibungen und plant keine Routen. Es zeichnet auf, wo S
 Auf Englisch, Portugiesisch und Deutsch. Gemacht auf Madeira.
 ```
 
+## 4b. The feature graphic and the store icon (T-269)
+
+✅ **Chosen 2026-10-07: B, the flag as drawn**, the icon at banner size: blue, gold and blue, the cross,
+the island and its lit road, no text (nothing to translate). Drawn against A (the island on slate
+with the name), C (the island's road network) and three quieter versions of B
+(`tools/preview-feature-graphic.mjs`). The files Play takes are `store/feature-graphic.png` and
+`store/icon-512.png`, written by `node tools/build-icon.mjs`.
+
 ## 5. Screenshots — where the converting happens
 
 The first two are what appear in search results; most people never swipe.

@@ -12,7 +12,8 @@
  * Round two (2026-10-07). Round one drew A (the lit island on slate with the
  * name), B (the flag, no text) and C (the island's road network); the lead
  * chose B, "however it's a bit loud". So B as drawn, beside three quieter
- * versions of it. A and C are in git history.
+ * versions of it. A and C are in git history. The lead kept B as drawn; it
+ * lives in `lib/feature-graphic.mjs` and `build-icon.mjs` writes it to `store/`.
  *
  * Google shows the graphic at many sizes and may crop it, so the subject sits in
  * the middle.
@@ -22,60 +23,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
-import { islandPaths, MADEIRA, optionFlag, orderOfChristCross, PALETTE } from './lib/icon-art.mjs';
+import { MADEIRA, optionFlag, orderOfChristCross, PALETTE } from './lib/icon-art.mjs';
+import { flagBanner, H, islandWithRoad, W } from './lib/feature-graphic.mjs';
 import { mainIslandRings, ROUTE } from './lib/icon-geometry.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const W = 1024;
-const H = 500;
 
 const rings = mainIslandRings();
-
-/** The island `width` units wide in the 108 canvas, placed by `transform`, with its lit road. */
-function islandWithRoad(width, transform, { edge = null } = {}) {
-  const island = islandPaths(rings, width, 54);
-  const road = curve(ROUTE.map(([lon, lat]) => island.project(lon, lat)));
-  const outline =
-    edge === null
-      ? ''
-      : `<path d="${island.d}" fill="${PALETTE.island}" stroke="${edge}" stroke-width="4.4" stroke-linejoin="round"/>`;
-  return {
-    island,
-    svg: `<g transform="${transform}">
-      ${outline}
-      <!-- 3.2 wide in the island's own colour, a little more than the icon: the regions do not
-           quite meet, and a thinner edge showed the gaps as slivers. -->
-      <path d="${island.d}" fill="${PALETTE.island}" stroke="${PALETTE.island}" stroke-width="3.2" stroke-linejoin="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.35" stroke-width="4.5" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="0.6" stroke-linecap="round"/>
-    </g>`,
-  };
-}
-
-/** The same smooth curve the icon draws its road with. */
-function curve(points) {
-  const [first, ...rest] = points;
-  let d = `M${first[0]},${first[1]}`;
-  rest.forEach(([x, y], i) => {
-    const [px, py] = i === 0 ? first : rest[i - 1];
-    d += ` Q${px + (x - px) / 2},${py} ${x},${y}`;
-  });
-  return d;
-}
-
-/**
- * B: the flag across the whole banner, as in the icon: the bands, the cross,
- * the island and its road. `blue` and `gold` default to the flag's own.
- */
-function flagBanner({ blue = MADEIRA.flagBlue, gold = MADEIRA.flagGold } = {}) {
-  const { svg } = islandWithRoad(100, 'translate(242 10) scale(5.2)', { edge: '#FFFFFF' });
-  const third = W / 3;
-  return `<rect width="${W}" height="${H}" fill="${blue}"/>
-    <rect x="${third}" width="${third}" height="${H}" fill="${gold}"/>
-    <g transform="translate(512 70) scale(3.2) translate(-54 -38)">${orderOfChristCross(54, 38, 18)}</g>
-    ${svg}`;
-}
 
 /** B2: the launcher icon itself, its circle of flag, centred on the app's dark slate. */
 function iconOnSlate() {
@@ -93,7 +47,7 @@ function iconOnSlate() {
 /** B3: the flag faded into slate: the same picture, the bands at a third of their strength. */
 function fadedFlag() {
   const third = W / 3;
-  const { svg } = islandWithRoad(100, 'translate(242 10) scale(5.2)', { edge: '#FFFFFF' });
+  const { svg } = islandWithRoad(rings, ROUTE, 100, 'translate(242 10) scale(5.2)', { edge: '#FFFFFF' });
   return `<rect width="${W}" height="${H}" fill="${PALETTE.slate}"/>
     <g opacity="0.35">
       <rect width="${W}" height="${H}" fill="${MADEIRA.flagBlue}"/>
@@ -104,8 +58,8 @@ function fadedFlag() {
 }
 
 const options = [
-  ['b', 'B, as drawn', 'The flag at full strength: what the lead chose, and found a bit loud.', flagBanner()],
-  ['b1', 'B1, the flag, muted', 'The same picture in a deeper blue and an ochre gold: still the flag, less shout.', flagBanner({ blue: '#163E6B', gold: '#C49A2E' })],
+  ['b', 'B, as drawn', 'The flag at full strength: what the lead chose, and found a bit loud.', flagBanner(rings, ROUTE)],
+  ['b1', 'B1, the flag, muted', 'The same picture in a deeper blue and an ochre gold: still the flag, less shout.', flagBanner(rings, ROUTE, { blue: '#163E6B', gold: '#C49A2E' })],
   ['b2', 'B2, the icon on slate', 'The launcher icon itself, centred on the app’s dark slate: the flag only inside the circle, exactly what the phone shows.', iconOnSlate()],
   ['b3', 'B3, the flag faded into slate', 'The full picture, but the bands at a third of their strength over the dark: the island and its road lead, the flag stays as colour.', fadedFlag()],
 ];

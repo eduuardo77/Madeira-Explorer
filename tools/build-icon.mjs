@@ -5,7 +5,8 @@
  *     node tools/build-icon.mjs
  *     → app/assets/icon.png, android-icon-{foreground,background,monochrome}.png,
  *       notification-icon.png, splash-icon.png, app/src/ui/splashArt.ts, and
- *       site/icon.png (the website's icon, so bruma.lol shows the same one)
+ *       site/icon.png (the website's icon, so bruma.lol shows the same one), and
+ *       store/icon-512.png and store/feature-graphic.png (Play's listing, T-269)
  *
  * Then `npx expo prebuild --platform android` in `app/` turns them into the
  * launcher's mipmaps and the notification drawable.
@@ -20,6 +21,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { CANVAS, islandPaths, MADEIRA, optionFlag, PALETTE } from './lib/icon-art.mjs';
+import { featureGraphicSvg } from './lib/feature-graphic.mjs';
+import { rgbPng } from './lib/png-rgb.mjs';
 import { mainIslandRings, ROUTE } from './lib/icon-geometry.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -80,6 +83,22 @@ for (const [name, data] of Object.entries(files)) {
 const siteIcon = png(`${icon.background}${icon.foreground}`, SHOWN, 256);
 writeFileSync(path.join(here, '..', 'site', 'icon.png'), siteIcon);
 console.log(`site/icon.png  ${siteIcon.length} bytes`);
+
+// Play's listing (T-269): its 512 px icon, the launcher's square, and the
+// feature graphic the lead picked (B, the flag).
+const store = path.join(here, '..', 'store');
+mkdirSync(store, { recursive: true });
+const storeFiles = {
+  'icon-512.png': png(`${icon.background}${icon.foreground}`, SHOWN, 512),
+  // ⚠ No alpha: Play takes a feature graphic only as JPEG or 24-bit PNG.
+  'feature-graphic.png': rgbPng(
+    new Resvg(featureGraphicSvg(rings, ROUTE), { fitTo: { mode: 'width', value: 1024 } }).render()
+  ),
+};
+for (const [name, data] of Object.entries(storeFiles)) {
+  writeFileSync(path.join(store, name), data);
+  console.log(`store/${name}  ${data.length} bytes`);
+}
 
 /**
  * The same icon as plain shapes, for the animated splash in the app

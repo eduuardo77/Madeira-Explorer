@@ -17,8 +17,10 @@ import {
   iconSvg,
   monochromeSvg,
   optionFlag,
+  optionFlagPlain,
+  optionGoldOnBlue,
+  optionIslandInFlag,
   optionLitRoad,
-  optionStampHouse,
 } from './lib/icon-art.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -56,14 +58,14 @@ const ROUTE = [
 ];
 
 /**
- * Round three (2026-10-07). The lead liked A2 and B2 "but they still need a bit
- * of work". A2 gains the flag's cross and its green island back; B2 gains the
- * lit road to the house, a truer thatch and a stamp that clears the mask.
+ * Round four (2026-10-07). The lead "really likes A2, but it has a lot of
+ * information": three leaner versions of it, and A2 itself to compare.
  */
 const OPTIONS = [
-  ['A2', 'Estrada acesa na bandeira', optionFlag(rings, ROUTE), 'A ilha verde com a estrada acesa, sobre as faixas da bandeira, com a cruz da Ordem de Cristo por cima.'],
-  ['B2', 'Selo com casa de Santana', optionStampHouse(), 'O selo do passaporte com uma casa de Santana, a estrada acesa a chegar à porta, e a bandeira na faixa de baixo.'],
-  ['A', 'Estrada acesa (para comparar)', optionLitRoad(rings, ROUTE), 'A primeira, sem os sinais da Madeira.'],
+  ['A2a', 'A ilha na bandeira', optionIslandInFlag(rings, ROUTE), 'A própria ilha pintada com as faixas da bandeira, sobre o fundo escuro, com a estrada acesa. Uma só forma diz as duas coisas.'],
+  ['A2b', 'A2 sem a cruz', optionFlagPlain(rings, ROUTE), 'As faixas, a ilha verde e a estrada. Sai a cruz e a borda branca.'],
+  ['A2c', 'Duas cores', optionGoldOnBlue(rings, ROUTE), 'A ilha no dourado da bandeira, sobre o azul dela, com a estrada acesa. A mais simples.'],
+  ['A2', 'A2 (para comparar)', optionFlag(rings, ROUTE), 'A da ronda anterior.'],
 ];
 
 /** Neighbours: plain coloured tiles with a letter, so no real app is imitated. */
@@ -124,8 +126,8 @@ figure { margin:0; text-align:center; } figcaption { color:var(--muted); font-si
 .tile { width:52px; height:52px; border-radius:26px; display:grid; place-items:center; font-weight:700; font-size:20px; }
 details { margin-top:12px; } summary { cursor:pointer; color:var(--muted); }
 </style></head><body><main>
-<h1>O ícone do Bruma, terceira ronda</h1>
-<p class="lead">Três opções, nos tamanhos reais e num ecrã de telemóvel entre outras apps (letras simples, para não imitar nenhuma app real).
+<h1>O ícone do Bruma, quarta ronda</h1>
+<p class="lead">Versões mais simples da A2, nos tamanhos reais e num ecrã de telemóvel entre outras apps (letras simples, para não imitar nenhuma app real).
 "Android 13, tema" é a versão de uma só cor que o telemóvel usa quando os ícones seguem o papel de parede.
 Depois de escolheres, faço a partir dela o ícone, as camadas do Android, o ecrã de abertura e o pequeno ícone das notificações.</p>
 ${OPTIONS.map(board).join('')}

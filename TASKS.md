@@ -101,7 +101,9 @@ permission, L3 privacy contact.
       Santana house alone, B2 the stamp with a house and a flag band; C dropped. Round three (lead: A2
       and B2 "need a bit of work"): A2 gains the Cross of the Order of Christ and its green island,
       B2 the lit road, a truer thatch and a stamp clear of the mask; the dropped options' code
-      removed. **Waits on the pick.** Found drawing it: Santa
+      removed. Round four (lead: "really like A2, but it has a lot of information"): A2a the island in
+      the flag's bands, A2b A2 without the cross, A2c a gold island on the flag's blue; the stamp
+      (B2) code removed. **Waits on the pick.** Found drawing it: Santa
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).

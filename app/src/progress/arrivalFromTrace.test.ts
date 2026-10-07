@@ -15,7 +15,7 @@ import assert from 'node:assert/strict';
 
 import type { PlaceGeofence } from '../content/contentPack.ts';
 import type { TraceFix } from './levadaCoverage.ts';
-import { findArrivals, judgeArrivals, MAX_GAP_SECONDS } from './arrivalFromTrace.ts';
+import { findArrivals, indexArrivals, judgeArrivals, MAX_GAP_SECONDS } from './arrivalFromTrace.ts';
 import { MIN_DWELL_SECONDS } from './stampRules.ts';
 
 const NOW = 1_800_000_000_000;
@@ -137,4 +137,23 @@ test('an award is timestamped when the user was last measured there', () => {
   const trace = fixes(10);
   const verdict = judgeArrivals(findArrivals(place, trace));
   assert.equal(verdict.awardedTs, trace[trace.length - 1].ts);
+});
+
+test('T-254: a trace indexed once finds the same stays as the raw fixes', () => {
+  // Two stays, one fix stored twice at the same second but a few metres
+  // apart (the P30's history has such pairs: their order decides the walked
+  // distance), a fix far away, and one that is not a position.
+  const trace: TraceFix[] = [
+    ...fixes(6, { driftMPerFix: 5 }),
+    { ts: NOW + 6 * 60_000, lat: 32.7 + 40 * LAT_PER_M, lon: -17, accuracy_m: 10 },
+    { ts: NOW + 6 * 60_000, lat: 32.7 + 46 * LAT_PER_M, lon: -17, accuracy_m: 10 },
+    { ts: NOW + 7 * 60_000, lat: 33.5, lon: -16, accuracy_m: 10 },
+    { ts: NOW + 8 * 60_000, lat: Number.NaN, lon: -17, accuracy_m: 10 },
+    ...fixes(5, { startTs: NOW + 2 * MAX_GAP_SECONDS * 1000, offsetM: 120 }),
+  ];
+  const index = indexArrivals(trace);
+  for (const geofence of [place, { ...place, id: 'far', lat: 33.5, lon: -16 }, { ...place, radiusM: 30 }]) {
+    assert.deepEqual(findArrivals(geofence, index), findArrivals(geofence, trace));
+  }
+  assert.equal(findArrivals(place, index).length, 2);
 });

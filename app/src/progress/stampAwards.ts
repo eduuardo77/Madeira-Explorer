@@ -28,7 +28,7 @@ import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
-import { findArrivals, judgeArrivals } from './arrivalFromTrace';
+import { findArrivals, indexArrivals, judgeArrivals } from './arrivalFromTrace';
 import type { TraceFix } from './levadaCoverage';
 import { computeCoverage, indexTrace, judgeCoverage } from './levadaCoverage';
 import type { GeofenceCrossing } from './stampRules';
@@ -287,12 +287,14 @@ async function creditArrivalsFromTrace(
   tripId: number,
   result: AwardPassResult
 ): Promise<void> {
+  // Prepared once for every geofence (T-254), as the levadas' trace is.
+  const trace = indexArrivals(fixes);
   for (const place of candidates) {
     if (place.category === 'levada' || result.newlyAwarded.includes(place.id)) {
       continue;
     }
 
-    const arrivals = place.geofences.flatMap((geofence) => findArrivals(geofence, fixes));
+    const arrivals = place.geofences.flatMap((geofence) => findArrivals(geofence, trace));
     if (arrivals.length === 0) {
       continue;
     }

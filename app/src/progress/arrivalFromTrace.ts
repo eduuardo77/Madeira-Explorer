@@ -84,8 +84,61 @@ function isInside(fix: TraceFix, geofence: PlaceGeofence): boolean {
   return metresBetween(fix, geofence) <= geofence.radiusM + slack;
 }
 
+/** Grid cell size, in degrees: about 220 m, so a geofence reads a few cells. */
+const CELL_DEGREES = 0.002;
+
 /**
- * Every stay inside this geofence that the trace can show.
+ * A trace prepared for `findArrivals`: its fixes by grid cell (T-254). The
+ * award pass asks about every geofence, 99 of them, once a minute while
+ * recording; prepared once, each asks only the cells around it instead of
+ * reading the whole trip.
+ */
+export type ArrivalIndex = {
+  fixes: readonly TraceFix[];
+  /** Fix indices by cell, ascending. Keyed by a number, so a lookup allocates nothing. */
+  grid: Map<number, number[]>;
+};
+
+const cellKey = (latCell: number, lonCell: number) => latCell * 1_000_000 + lonCell;
+
+export function indexArrivals(fixes: readonly TraceFix[]): ArrivalIndex {
+  const grid = new Map<number, number[]>();
+  fixes.forEach((fix, index) => {
+    // A position that is not a number is in no cell, as it is inside no circle.
+    if (!Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
+    const key = cellKey(Math.floor(fix.lat / CELL_DEGREES), Math.floor(fix.lon / CELL_DEGREES));
+    const bucket = grid.get(key);
+    if (bucket === undefined) grid.set(key, [index]);
+    else bucket.push(index);
+  });
+  return { fixes, grid };
+}
+
+/** The fixes in the cells under a box, in the trace's own order. */
+function fixesInBox(
+  { fixes, grid }: ArrivalIndex,
+  lat: number,
+  lon: number,
+  latReach: number,
+  lonReach: number
+): TraceFix[] {
+  const cell = (degrees: number) => Math.floor(degrees / CELL_DEGREES);
+  const indices: number[] = [];
+  for (let latCell = cell(lat - latReach); latCell <= cell(lat + latReach); latCell += 1) {
+    for (let lonCell = cell(lon - lonReach); lonCell <= cell(lon + lonReach); lonCell += 1) {
+      const bucket = grid.get(cellKey(latCell, lonCell));
+      if (bucket !== undefined) indices.push(...bucket);
+    }
+  }
+  // ⚠ Back into the trace's order before the time sort below, so fixes stored
+  // twice at one timestamp keep the order they had: the walked distance of a
+  // stay is summed in that order, and must not change with the index.
+  return indices.sort((a, b) => a - b).map((index) => fixes[index]);
+}
+
+/**
+ * Every stay inside this geofence that the trace can show. `trace` is the
+ * trip's fixes, or the same prepared once by `indexArrivals`.
  *
  * A stay ends when the fixes leave the circle **or** when they stop arriving
  * for longer than `MAX_GAP_SECONDS` — a gap that long is the recorder going
@@ -94,7 +147,7 @@ function isInside(fix: TraceFix, geofence: PlaceGeofence): boolean {
  */
 export function findArrivals(
   geofence: PlaceGeofence,
-  fixes: readonly TraceFix[]
+  trace: readonly TraceFix[] | ArrivalIndex
 ): TraceArrival[] {
   // A box around the circle first, a little larger than it, so a degree
   // comparison rejects nearly every fix of the trip before any distance is
@@ -104,7 +157,9 @@ export function findArrivals(
   const reachM = (geofence.radiusM + MAX_ACCURACY_SLACK_M) * 1.1;
   const latReach = reachM / 110_000;
   const lonReach = reachM / (110_000 * Math.cos((geofence.lat * Math.PI) / 180));
-  const inside = fixes
+  const candidates =
+    'grid' in trace ? fixesInBox(trace, geofence.lat, geofence.lon, latReach, lonReach) : trace;
+  const inside = candidates
     .filter(
       (fix) =>
         Math.abs(fix.lat - geofence.lat) <= latReach &&

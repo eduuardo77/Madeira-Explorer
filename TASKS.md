@@ -290,8 +290,11 @@ permission, L3 privacy contact.
       18 levadas, the grid keyed by strings built per lookup and each cell copied into a new list
       per segment. Now prepared once (`indexTrace`), numeric cell keys, cells read in place. On the
       P30's 17,824-fix trip, on the PC: **314 ms to 17 ms**, every levada's figures identical
-      (compared against the previous version; a test pins it). Arrivals, after its box: 147 ms on
-      the PC for every place; left as is for now.
+      (compared against the previous version; a test pins it). ✅ **Arrivals too:** the trip is
+      indexed once by grid cell (`indexArrivals`) and each of the 101 geofences reads the cells
+      around it, back in the trace's order before the time sort, so twin fixes at one second keep
+      their order and a stay's walked distance cannot change. PC, the P30's trips: 242 ms to 6 ms
+      (17,824 fixes) and 75 to 2 ms (6,509); identical stays on both, nine of them.
 - [~] **T-264** Inventory. **Done 2026-10-07** at the top of `docs/store-privacy-answers.md`: every
       permission with what adds it (from the APK and the manifest merger report) and why; every
       table on the phone; everything that leaves it, with evidence; the August banner replaced.

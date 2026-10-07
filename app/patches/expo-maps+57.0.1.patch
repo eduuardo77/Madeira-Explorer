@@ -15,7 +15,7 @@ index e7b12c8..0eef7ff 100644
          view.selectMarker(id, options)
        }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..b9b8d0e 100644
+index 82450b6..8a2ee42 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 @@ -24,8 +24,16 @@ import com.google.android.gms.maps.LocationSource
@@ -45,7 +45,7 @@ index 82450b6..b9b8d0e 100644
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,6 +107,7 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,9 +107,11 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -53,7 +53,11 @@ index 82450b6..b9b8d0e 100644
    @Composable
    override fun ComposableScope.Content() {
      cameraState = updateCameraState()
-@@ -154,12 +166,19 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
++    CameraEvents(cameraState)
+     markerState = markerStateFromProps()
+     val locationSource = locationSourceFromProps()
+     val polylineState by polylineStateFromProps()
+@@ -154,12 +167,19 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
@@ -73,7 +77,34 @@ index 82450b6..b9b8d0e 100644
            clickable = true,
            onClick = {
              onPolylineClick(
-@@ -361,6 +380,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -234,7 +254,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+         )
+       )
+     }
++    return cameraState
++  }
+ 
++  // Bruma (T-254): the camera listeners in a composable of their own. Read in
++  // `updateCameraState`, which returns a value and so is no restart scope of
++  // its own, `cameraState.position` invalidated all of `Content` on every
++  // camera move: the whole map content recomposed 60 times a second during a
++  // pan, comparing every polyline's points, so the jank grew with the lit
++  // roads (P30: 0.00% janky with no roads drawn, about 2% with 86 lines).
++  // Here, returning Unit, a camera move recomposes only this.
++  @Composable
++  private fun CameraEvents(cameraState: CameraPositionState) {
+     LaunchedEffect(cameraState.cameraMoveStartedReason) {
+       // We should stop following the user's location when camera is moved manually.
+       if (cameraState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE || cameraState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION) {
+@@ -266,7 +297,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+         )
+       )
+     }
+-    return cameraState
+   }
+ 
+   @Composable
+@@ -361,6 +391,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  

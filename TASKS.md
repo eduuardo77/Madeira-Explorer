@@ -107,7 +107,7 @@ permission, L3 privacy contact.
       dark album "looks off"; it now matches its ground, dark over the passport (`tone="dark"`, album
       colours), white over the map. **Directions:** the lead clarified they meant "show where it is",
       which *Ver no mapa* does, the whole course for a levada (checked on the P30, Levada do Furado).
-- [~] **T-254** The jank. Measured with `tools/measure-jank.sh` (the reviews' 9 pans and 2 double
+- [x] **T-254** The jank. ⚠ **Solved 2026-10-07, see the end of this entry.** Measured with `tools/measure-jank.sh` (the reviews' 9 pans and 2 double
       taps, made repeatable) on a **non-debuggable** build, P30, 2026-10-07. **Most of the review's
       6.3% / p99 32 ms was the debuggable flag:** the same build without it gave 0.81, 2.74 and 2.02%,
       p99 15 to 19 ms. Cold start 196 to 302 ms (the review's 1,436 ms was debuggable too). Then the
@@ -122,6 +122,14 @@ permission, L3 privacy contact.
       302 MB. **No measured gain; kept as less work.** Next hypothesis: expo-maps recomposes its
       Compose map on every camera move (its `LaunchedEffect` on `cameraState.position`), which no
       JS change reaches; test by measuring with the lit roads hidden, and against an empty trip.
+      **The probe:** a store build drawing no lit roads gave 0.00% on 5 of 5 runs, so the roads were
+      the cause. **The cause:** expo-maps' `updateCameraState()` read `cameraState.position` while
+      composing, and a composable that returns a value is no restart scope, so every camera move
+      recomposed the whole map content, comparing every polyline's points. **The fix** (in the
+      expo-maps patch): the two camera listeners in their own `CameraEvents` composable. **After:**
+      0.00% janky on 5 of 5 runs, p99 9 to 10 ms (24 Sep: 0.72%, 15 ms; WalkNYC 0%, 8 ms). *Centrar*
+      still appears after a pan and goes after a tap. **Memory 286 to 320 MB: the 280 target is
+      not met** and stays open.
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.

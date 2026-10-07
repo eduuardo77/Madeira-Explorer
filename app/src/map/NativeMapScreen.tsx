@@ -96,7 +96,7 @@ import PrimaryOverlay, {
 } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
 import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
-import { isOffArchipelago, recentreTarget, zoomFloor } from './mapFence';
+import { offerRecentre, recentreTarget, zoomFloor } from './mapFence';
 import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
@@ -296,12 +296,25 @@ export default function NativeMapScreen({
   /**
    * Where the camera is looking, so *Re-centre* can know whether it is worth
    * offering. Null until the first `onCameraMove`.
+   *
+   * ⚠ T-254: a ref, not state. `onCameraMove` fires dozens of times a second
+   * during a pan, and as state it re-rendered this whole screen on each one.
+   * Only the answer it feeds, `showRecentre`, is state, and React skips a
+   * render when that answer has not changed.
    */
-  const [cameraCentre, setCameraCentre] =
-    useState<{ latitude: number; longitude: number } | null>(null);
+  const cameraCentre = useRef<{ latitude: number; longitude: number } | null>(null);
   /** The user's own position, for the same question. */
   const [userAt, setUserAt] =
     useState<{ latitude: number; longitude: number } | null>(null);
+  const [showRecentre, setShowRecentre] = useState(false);
+  /** Note where the camera is now, and offer *Centrar* if that changed the answer. */
+  const noteCameraCentre = (centre: { latitude: number; longitude: number }) => {
+    cameraCentre.current = centre;
+    setShowRecentre(offerRecentre(centre, userAt, ARCHIPELAGO_BOUNDS));
+  };
+  useEffect(() => {
+    setShowRecentre(offerRecentre(cameraCentre.current, userAt, ARCHIPELAGO_BOUNDS));
+  }, [userAt]);
 
   const darkMap = darkMapPropsFor(styleName, supportsNativeDarkMap);
   const tracePaint = TRACE_PAINT[styleName];
@@ -471,7 +484,7 @@ export default function NativeMapScreen({
               const fit = frame(traceBoundsOf(points), 'bottom');
               if (fit !== null) {
                 setCamera(fit);
-                setCameraCentre(fit.coordinates);
+                noteCameraCentre(fit.coordinates);
               }
             }
             const nextSeen = nextSeenTs(seenTs, roads.latestTs);
@@ -668,28 +681,7 @@ export default function NativeMapScreen({
     };
   }, []);
 
-  /**
-   * ⚠ Offered only when it would actually move the map. WalkNYC shows the same
-   * control the same way, and a re-centre button that is always lit is a button
-   * that does nothing most of the times it is pressed.
-   *
-   * Degrees, not metres: this is a "has the map wandered off" test, not a
-   * distance, and a haversine here would be arithmetic nobody reads. Longitude
-   * degrees shrink with latitude, which at Madeira's 32°N makes the east–west
-   * threshold about 15% tighter than the north–south one — harmless for a
-   * visibility rule, and wrong only if this ever becomes a measurement.
-   */
-  const wanderedOffUser =
-    userAt !== null &&
-    cameraCentre !== null &&
-    (Math.abs(cameraCentre.latitude - userAt.latitude) > RECENTRE_SHOW_DEGREES ||
-      Math.abs(cameraCentre.longitude - userAt.longitude) > RECENTRE_SHOW_DEGREES);
-  // T-223 (review N8): out at sea it is offered with or without a position,
-  // because it is the only way back and nothing else on screen says where the
-  // islands went.
-  const showRecentre =
-    wanderedOffUser ||
-    (cameraCentre !== null && isOffArchipelago(cameraCentre, ARCHIPELAGO_BOUNDS));
+  // `showRecentre` is kept by `noteCameraCentre` (T-254); the rule is `offerRecentre`.
 
   /** Re-read the recorder's state now, after something the user did. */
   const rereadControl = async () => {
@@ -791,7 +783,7 @@ export default function NativeMapScreen({
         }
         cameraHeldByFocus.current = true;
         setCamera(target);
-        setCameraCentre(target.coordinates);
+        noteCameraCentre(target.coordinates);
       } catch (error) {
         await recordingEventDao.logError('recentre', error);
       }
@@ -801,8 +793,9 @@ export default function NativeMapScreen({
   /**
    * ⚠⚠ T-254: the map's props keep their identity between renders.
    *
-   * Every camera movement sets `cameraCentre` (so *Centrar* knows when to
-   * show), which renders this screen dozens of times a second during a pan.
+   * Every camera movement used to set `cameraCentre` as state (so *Centrar*
+   * knew when to show), rendering this screen dozens of times a second during a
+   * pan; it is a ref now, but other state can still render mid-pan.
    * Built inline, `polylines` was a new array each time, and the native view
    * was sent every lit road, every coordinate, on every one of those renders:
    * the cost grew with the trip, which is why the jank arrived with D-093.
@@ -874,7 +867,7 @@ export default function NativeMapScreen({
           // button in the middle of the Atlantic.
           const { latitude, longitude } = event.coordinates;
           if (latitude !== undefined && longitude !== undefined) {
-            setCameraCentre({ latitude, longitude });
+            noteCameraCentre({ latitude, longitude });
           }
         }}
         // The dark/light choice, and which of the two dark maps it draws —
@@ -1004,13 +997,6 @@ const RECENTRE_MAX_AGE_MS = 2 * 60 * 1000;
 
 /** Street level — close enough to see which path you are standing on. */
 const RECENTRE_ZOOM = 16;
-
-/**
- * How far the camera may drift before *Re-centre* is worth offering, in degrees
- * of latitude. ~0.002° is roughly 200 m, which is about a screen at
- * `RECENTRE_ZOOM` — below that the button would be offering to do nothing.
- */
-const RECENTRE_SHOW_DEGREES = 0.002;
 
 /** The box around drawn trace points, reusing the trace's own rule. */
 function traceBoundsOf(points: [number, number][]): Bounds {

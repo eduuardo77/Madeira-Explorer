@@ -63,3 +63,40 @@ export function recentreTarget(
 ): 'user' | 'islands' {
   return user !== null && !isOffArchipelago(user, archipelago) ? 'user' : 'islands';
 }
+
+/**
+ * How far the camera may drift before *Re-centre* is worth offering, in degrees
+ * of latitude. ~0.002° is roughly 200 m, which is about a screen at the
+ * re-centre zoom: below that the button would be offering to do nothing.
+ */
+export const RECENTRE_SHOW_DEGREES = 0.002;
+
+/**
+ * Whether *Centrar* is worth showing, for a camera looking at `centre`.
+ *
+ * ⚠ Offered only when it would actually move the map. WalkNYC shows the same
+ * control the same way, and a re-centre button that is always lit is a button
+ * that does nothing most of the times it is pressed. Degrees, not metres: this
+ * is a "has the map wandered off" test, not a distance.
+ *
+ * T-223 (review N8): out at sea it is offered with or without a position,
+ * because it is the only way back and nothing else on screen says where the
+ * islands went.
+ *
+ * T-254: a pure answer the screen keeps as a boolean, so a pan re-renders the
+ * screen only when this changes, not on every camera move.
+ */
+export function offerRecentre(
+  centre: Coordinates | null,
+  user: Coordinates | null,
+  archipelago: Box
+): boolean {
+  if (centre === null) {
+    return false;
+  }
+  const wanderedOffUser =
+    user !== null &&
+    (Math.abs(centre.latitude - user.latitude) > RECENTRE_SHOW_DEGREES ||
+      Math.abs(centre.longitude - user.longitude) > RECENTRE_SHOW_DEGREES);
+  return wanderedOffUser || isOffArchipelago(centre, archipelago);
+}

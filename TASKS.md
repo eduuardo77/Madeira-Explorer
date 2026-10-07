@@ -98,8 +98,12 @@ permission, L3 privacy contact.
       with `properties` and `uiSettings`. After: 0.27, 0.27, 1.36, 1.90% (first run after launch,
       3.98%, excluded as warm-up), p99 14 to 20 ms. **Roughly halved, target (≤1%, p99 ≤16 every
       run) not reliably met; the spread between runs is as large as the effect.** Memory 300 to 339
-      MB, target 280 not met. Next: profile what still runs per camera move (the overlay re-render
-      for *Centrar*), and more runs per build.
+      MB, target 280 not met. Then the camera centre became a ref and only *Centrar*'s yes/no is
+      state (`offerRecentre` in `mapFence.ts`, tested), so a pan no longer re-renders the screen:
+      warm-up excluded, 0.27, 1.09, 2.73, 3.54, 2.19% (mean 2.0), p99 15 to 22 ms, memory 279 to
+      302 MB. **No measured gain; kept as less work.** Next hypothesis: expo-maps recomposes its
+      Compose map on every camera move (its `LaunchedEffect` on `cameraState.position`), which no
+      JS change reaches; test by measuring with the lit roads hidden, and against an empty trip.
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.

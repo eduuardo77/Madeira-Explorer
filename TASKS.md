@@ -89,6 +89,13 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [~] **T-257** The icon. Three options drawn (`tools/preview-icon-options.mjs`, art in
+      `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
+      with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a
+      launcher on light and dark wallpapers. **Waits on the lead's pick.** Found drawing it: Santa
+      Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
+      dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
+      icon, rasterised through the browser (no SVG library is installed).
 - [~] **T-256** The place card. **Done 2026-10-07:** the municipality sits under the name in the
       stamp's column (review F2: "Santana" alone under the stamp), and is left out when it only
       repeats the name ("Porto Moniz" in "Porto Moniz", seen on the P30); tested. **Not done, on

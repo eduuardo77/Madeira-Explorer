@@ -436,6 +436,20 @@ export default function PrimaryOverlay({
             {onOpenUnlock === undefined || waitingCount === 0 ? null : (
               <WaitingBadge count={waitingCount} onPress={onOpenUnlock} />
             )}
+            {/* T-260: where you stand among the places, quietly. The project
+                lead's pick of three drawn options (2026-10-07): no ring, no
+                coloured badge, the count at the button's bottom right (the
+                top right is the gold waiting badge's). Hidden from screen
+                readers, which hear it in the button's label above. */}
+            {progress.total === 0 ? null : (
+              <Text
+                style={[styles.count, { backgroundColor: chrome.strip, color: chrome.content }]}
+                importantForAccessibility="no"
+                accessibilityElementsHidden
+              >
+                {progress.collected}/{progress.total}
+              </Text>
+            )}
           </Pressable>
 
           <View style={styles.rowCentre} pointerEvents="box-none">
@@ -665,6 +679,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
+  },
+  count: {
+    position: 'absolute',
+    right: -2,
+    bottom: 2,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 1,
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+    fontSize: fontSize.small,
+    fontWeight: '700',
   },
   badgeHit: {
     alignItems: 'center',

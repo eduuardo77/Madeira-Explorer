@@ -119,6 +119,14 @@
           "icon": "./assets/notification-icon.png",
           "color": "#0A4FA3"
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#1B2A33"
+        }
       ]
     ]
   }

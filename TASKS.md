@@ -96,12 +96,14 @@ permission, L3 privacy contact.
       August trip opened in 6 s, its roads matched for the first time, and the home map still drew
       today's trip afterwards. A past trip offers no ▶ or *Partilhar*: both still read the trip on
       show through the export path; making them follow the chosen trip is the next step if wanted.
-- [~] **T-260** The home shows where you stand among the 80. Three options drawn on a real P30
+- [x] **T-260** The home shows where you stand among the 80. ⚠ **Built 2026-10-07, see the end.** Three options drawn on a real P30
       capture (`tools/preview-home-options.mjs`, the capture passed in, never committed): A WalkNYC's
       bar ("3 de 80 lugares", %, a thin bar) in the status panel; B a ring on the passport button;
       C the nearest uncollected place as a chip (place and distance an example). Round two (lead:
       A's line adds nothing, B too much, C not liked; "as it is, or a more discreet B"): as it is,
-      against a small muted "3/80" at the passport button's corner. **Waits on the pick.**
+      against a small muted "3/80" at the passport button's corner. **The lead chose the quiet count,
+      at the bottom right and a bit louder:** bold, on a small pill in the status line's grey, hidden
+      from screen readers (the button's label says it). Seen on the P30.
 - [x] **T-257** The icon. ⚠ **Built 2026-10-07, A2; see the end of this entry.** Three options drawn (`tools/preview-icon-options.mjs`, art in
       `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a
@@ -118,8 +120,15 @@ permission, L3 privacy contact.
       expo-notifications plugin (`notification_icon`, which expo-location's recorder notification uses
       too). Prebuild changed only the expected manifest lines. Seen on the P30 launcher next to
       WalkNYC; the recorder's notification confirmed on `drawable/notification_icon` (EMUI shows the
-      colour icon in the status bar regardless). Template icon checksum gone. **Left: the splash**,
-      still the template's, which needs the `expo-splash-screen` package: the lead's call. Found drawing it: Santa
+      colour icon in the status bar regardless). Template icon checksum gone. **Splash (2026-10-07,
+      the lead: yes, animated if worth it):** `expo-splash-screen` added; Android's still splash shows
+      the icon without its road on slate, then `ui/AnimatedSplash.tsx` lights the road west to east,
+      shows the name and fades into the map (shapes generated into `ui/splashArt.ts` by
+      `build-icon.mjs`; skipped to a fade with "remove animations"). Measured on the P30 from the tap:
+      road drawing at 2.1 s, map at 4.1 s; the finished picture holds about a second longer than
+      planned because the fade's timer fires late while the map loads. Also found: gaps between
+      municipalities showed the white edge as inner lines at splash size; closed with a 2.4 green
+      edge over a 4 white one (0.8 still shows at the coast). Found drawing it: Santa
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).

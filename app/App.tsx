@@ -1,5 +1,6 @@
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppState, LogBox, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Place } from './src/content/contentPack';
 // ⚠ The platform's own map (D-057). `src/map/MapLibreScreen.tsx` is the same
@@ -20,6 +21,7 @@ import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import TripViewerScreen from './src/souvenir/TripViewerScreen';
+import AnimatedSplash from './src/ui/AnimatedSplash';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
 import { dismissUpdateNotice, writeUpdateNotice } from './src/notify/updateNoticeFile';
@@ -58,7 +60,26 @@ LogBox.ignoreLogs([/Failed to load glyph range/]);
  * hidden third do not need one, and every dependency has to earn its place
  * (CONTEXT §6.4).
  */
+// Android's still splash stays up until the animated one replaces it (T-257).
+void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+/**
+ * The app, with the animated splash over it for its first second and a half.
+ * The screens mount underneath at once, so the map is drawing while the splash
+ * plays rather than after it.
+ */
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const onSplashDone = useCallback(() => setSplashDone(true), []);
+  return (
+    <View style={styles.root}>
+      <AppScreens />
+      {splashDone ? null : <AnimatedSplash onDone={onSplashDone} />}
+    </View>
+  );
+}
+
+function AppScreens() {
   const [screen, setScreen] = useState<AppScreen>('map');
   // T-211: Back walks the screens instead of leaving the app. Screens with
   // something open inside them (a card, the licences) register their own,

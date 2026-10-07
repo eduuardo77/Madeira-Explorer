@@ -75,6 +75,24 @@ function roadPath(points) {
   return d;
 }
 
+/** The road's length in canvas units, by sampling its curves: what a stroke animation must draw. */
+export function roadLength(points) {
+  let length = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const [px, py] = points[i - 1];
+    const [x, y] = points[i];
+    const [qx, qy] = [px + (x - px) / 2, py];
+    let [lx, ly] = [px, py];
+    for (let t = 0.05; t <= 1.0001; t += 0.05) {
+      const bx = (1 - t) ** 2 * px + 2 * (1 - t) * t * qx + t * t * x;
+      const by = (1 - t) ** 2 * py + 2 * (1 - t) * t * qy + t * t * y;
+      length += Math.hypot(bx - lx, by - ly);
+      [lx, ly] = [bx, by];
+    }
+  }
+  return length;
+}
+
 /**
  * A: the island on slate, a lit road across it.
  *
@@ -145,19 +163,42 @@ function flagBands() {
  * arms and a white cross inside it. Without it, blue, gold and blue is just
  * some flag.
  */
-export function orderOfChristCross(cx, cy, size) {
+export function orderOfChristCrossParts(cx, cy, size) {
   const arm = size / 2;
   const inner = size * 0.14;
   const outer = size * 0.42;
-  const arms = [0, 90, 180, 270]
-    .map(
-      (angle) =>
-        `<path transform="rotate(${angle} ${cx} ${cy})" d="M${cx - inner / 2},${cy} L${cx - outer / 2},${cy - arm} L${cx + outer / 2},${cy - arm} L${cx + inner / 2},${cy} Z"/>`
-    )
-    .join('');
+  // One arm pointing up, turned a quarter at a time about the centre.
+  const up = [
+    [cx - inner / 2, cy],
+    [cx - outer / 2, cy - arm],
+    [cx + outer / 2, cy - arm],
+    [cx + inner / 2, cy],
+  ];
+  const turn = ([x, y], quarter) => {
+    const dx = x - cx;
+    const dy = y - cy;
+    const [c, s] = [[1, 0], [0, 1], [-1, 0], [0, -1]][quarter];
+    return [cx + dx * c - dy * s, cy + dx * s + dy * c];
+  };
+  const arms = [0, 1, 2, 3].map(
+    (quarter) =>
+      `M${up
+        .map((point) => turn(point, quarter))
+        .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
+        .join('L')}Z`
+  );
   const reach = arm * 0.78;
-  return `<g fill="${MADEIRA.trimRed}">${arms}</g>
-    <path d="M${cx},${cy - reach} L${cx},${cy + reach} M${cx - reach},${cy} L${cx + reach},${cy}" stroke="#FFFFFF" stroke-width="${size * 0.07}"/>`;
+  return {
+    arms,
+    lines: `M${cx},${cy - reach} L${cx},${cy + reach} M${cx - reach},${cy} L${cx + reach},${cy}`,
+    lineWidth: size * 0.07,
+  };
+}
+
+export function orderOfChristCross(cx, cy, size) {
+  const { arms, lines, lineWidth } = orderOfChristCrossParts(cx, cy, size);
+  return `<g fill="${MADEIRA.trimRed}">${arms.map((d) => `<path d="${d}"/>`).join('')}</g>
+    <path d="${lines}" stroke="#FFFFFF" stroke-width="${lineWidth}"/>`;
 }
 
 /**
@@ -168,13 +209,29 @@ export function orderOfChristCross(cx, cy, size) {
  */
 export function optionFlag(rings, route) {
   const island = islandPaths(rings, 58, 66);
-  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
-  return {
-    background: flagBands(),
-    foreground: `
+  const roadPoints = route.map(([lon, lat]) => island.project(lon, lat));
+  const road = roadPath(roadPoints);
+  // The flag, its cross and the island, without the road: the splash's still
+  // frame, which the animation then lights the road across.
+  const base = `
       ${orderOfChristCross(54, 38, 18)}
-      <path d="${island.d}" fill="${PALETTE.island}" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
-      <path d="${island.d}" fill="${PALETTE.island}"/>
+      <!-- The municipalities do not quite meet, and at splash size the white
+           edge showed through their gaps as lines and one triangle. So the
+           green is edged in green 2.4 wide, closing gaps up to that, over a
+           white edge 4 wide: 0.8 of white still shows beyond the coast. -->
+      <path d="${island.d}" fill="${PALETTE.island}" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+      <path d="${island.d}" fill="${PALETTE.island}" stroke="${PALETTE.island}" stroke-width="2.4" stroke-linejoin="round"/>`;
+  return {
+    withoutRoad: base,
+    // The same shapes as plain data, for the app's animated splash (`build-icon.mjs`).
+    parts: {
+      island: island.d,
+      road,
+      roadLength: roadLength(roadPoints),
+      cross: orderOfChristCrossParts(54, 38, 18),
+    },
+    background: flagBands(),
+    foreground: `${base}
       <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="5" stroke-linecap="round"/>
       <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
     monochrome: optionLitRoad(rings, route).monochrome,

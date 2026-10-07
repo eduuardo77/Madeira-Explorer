@@ -92,7 +92,9 @@ permission, L3 privacy contact.
 - [~] **T-257** The icon. Three options drawn (`tools/preview-icon-options.mjs`, art in
       `tools/lib/icon-art.mjs`): A the island with a lit road, B a tilted postage stamp, C a postmark
       with a B; each at 48, 72, 192 and 512 px, two masks, the Android 13 themed version, and a
-      launcher on light and dark wallpapers. **Waits on the lead's pick.** Found drawing it: Santa
+      launcher on light and dark wallpapers. Round two (2026-10-07: the lead liked A, B not bad, and
+      asked for Madeira cues): A2 island on the flag's bands, A3 island with a Santana house, A4 the
+      Santana house alone, B2 the stamp with a house and a flag band; C dropped. **Waits on the pick.** Found drawing it: Santa
       Cruz's largest ring is the Desertas, so "largest ring per municipality" drew the islets and
       dropped part of the island. Then: launcher, adaptive layers, monochrome, splash, notification
       icon, rasterised through the browser (no SVG library is installed).

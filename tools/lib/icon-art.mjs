@@ -1,9 +1,10 @@
 /**
  * The launcher icon, as pure SVG (T-257, T-188, D-086).
  *
- * Three options drawn for the project lead from the app's own language: the
- * lit road (the product, D-093), the postage stamp (the passport, D-086) and a
- * postmark. Pure: geometry in, SVG strings out, so the preview page and the
+ * Options drawn for the project lead from the app's own language: the lit road
+ * (the product, D-093) and the postage stamp (the passport, D-086), and in a
+ * second round Madeira's own cues, the flag and the Santana house. A postmark
+ * option was drawn in the first round and dropped. Pure: geometry in, SVG strings out, so the preview page and the
  * final PNG export draw the same thing.
  *
  * Every icon is drawn on Android's adaptive-icon canvas: 108 x 108, of which
@@ -27,7 +28,6 @@ export const PALETTE = {
   roadGlow: '#64B5F6',
   paper: '#F4EAD5',
   ink: '#1F3A4A',
-  gold: '#E2B23A',
 };
 
 /**
@@ -149,29 +149,6 @@ export function optionStamp(rings, route) {
   };
 }
 
-/** C: a postmark, a bold B and the road through it. */
-export function optionPostmark() {
-  const road = roadPath([
-    [26, 70],
-    [42, 66],
-    [58, 70],
-    [74, 64],
-    [84, 60],
-  ]);
-  return {
-    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
-    foreground: `
-      <circle cx="54" cy="54" r="30" fill="none" stroke="${PALETTE.gold}" stroke-width="2.4"/>
-      <circle cx="54" cy="54" r="25.5" fill="none" stroke="${PALETTE.gold}" stroke-width="1" stroke-dasharray="2 2.2"/>
-      <text x="54" y="64" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="30" fill="${PALETTE.paper}">B</text>
-      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.35" stroke-width="6" stroke-linecap="round"/>
-      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="2.6" stroke-linecap="round"/>`,
-    monochrome: `
-      <circle cx="54" cy="54" r="30" fill="none" stroke="#FFFFFF" stroke-width="3"/>
-      <text x="54" y="64" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="30" fill="#FFFFFF">B</text>`,
-  };
-}
-
 /**
  * One icon as the launcher shows it: background and foreground in a 108 canvas,
  * clipped to `mask` ('circle' or 'squircle'), at `size` pixels.
@@ -192,4 +169,110 @@ export function monochromeSvg(option, size, id = 'm') {
     <defs><clipPath id="${id}"><circle cx="54" cy="54" r="36"/></clipPath></defs>
     <g clip-path="url(#${id})"><rect width="108" height="108" fill="#3C4A3F"/>
     <g style="color:#DDE8D5" fill="currentColor">${option.monochrome}</g></g></svg>`;
+}
+
+/**
+ * Madeira's own cues, asked for by the project lead (2026-10-07): the flag's
+ * colours and the Santana house. Approximate colours, chosen to read at icon
+ * size, not a heraldic specification.
+ */
+export const MADEIRA = {
+  flagBlue: '#0A4FA3',
+  flagGold: '#F7C21B',
+  thatch: '#7A5A2E',
+  thatchLight: '#A07A44',
+  wall: '#F4F1EA',
+  trimRed: '#C8262E',
+  trimBlue: '#1F5AA6',
+};
+
+/** The flag's three bands, blue, gold, blue, across the whole canvas. */
+function flagBands() {
+  return `<rect width="${CANVAS}" height="${CANVAS}" fill="${MADEIRA.flagBlue}"/>
+    <rect x="${CANVAS / 3}" width="${CANVAS / 3}" height="${CANVAS}" fill="${MADEIRA.flagGold}"/>`;
+}
+
+/**
+ * A Santana house: a thatched A-frame to the ground, a white gable with red and
+ * blue trim, a red door. `cx` is its centre, `base` its foot, `h` its height.
+ */
+export function santanaHouse(cx, base, h) {
+  const w = h * 1.1;
+  const apex = base - h;
+  const roof = `M${cx - w / 2},${base} L${cx},${apex} L${cx + w / 2},${base} Z`;
+  const gw = w * 0.62;
+  const gTop = apex + h * 0.3;
+  const gable = `M${cx - gw / 2},${base} L${cx},${gTop} L${cx + gw / 2},${base} Z`;
+  const thatchLines = [0.25, 0.5, 0.75]
+    .map((t) => {
+      const y = apex + h * t;
+      const half = (w / 2) * t;
+      return `<line x1="${cx - half}" y1="${y}" x2="${cx + half}" y2="${y}" stroke="${MADEIRA.thatchLight}" stroke-width="${h * 0.03}"/>`;
+    })
+    .join('');
+  const dw = h * 0.2;
+  const dh = h * 0.3;
+  const win = h * 0.12;
+  return `<path d="${roof}" fill="${MADEIRA.thatch}"/>${thatchLines}
+    <path d="${gable}" fill="${MADEIRA.wall}" stroke="${MADEIRA.trimRed}" stroke-width="${h * 0.05}" stroke-linejoin="round"/>
+    <rect x="${cx - dw / 2}" y="${base - dh}" width="${dw}" height="${dh}" fill="${MADEIRA.trimRed}" stroke="${MADEIRA.trimBlue}" stroke-width="${h * 0.035}"/>
+    <rect x="${cx - win / 2}" y="${base - dh - win * 1.9}" width="${win}" height="${win}" fill="${MADEIRA.trimBlue}"/>`;
+}
+
+/** A2: the island and its lit road over the flag's bands. */
+export function optionFlag(rings, route) {
+  const island = islandPaths(rings, 60, 56);
+  const road = roadPath(route.map(([lon, lat]) => island.project(lon, lat)));
+  return {
+    background: flagBands(),
+    foreground: `
+      <path d="${island.d}" fill="${PALETTE.slate}" stroke="${PALETTE.slate}" stroke-width="0.8" stroke-linejoin="round"/>
+      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.45" stroke-width="7" stroke-linecap="round"/>
+      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="3" stroke-linecap="round"/>
+      <path d="${road}" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="1" stroke-linecap="round"/>`,
+    monochrome: optionLitRoad(rings, route).monochrome,
+  };
+}
+
+/** A3: a Santana house, the lit road leading to its door. */
+export function optionSantana() {
+  const road = 'M30,90 Q42,84 50,80 T54,78';
+  return {
+    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
+    foreground: `
+      ${santanaHouse(54, 76, 38)}
+      <path d="${road}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.4" stroke-width="7" stroke-linecap="round"/>
+      <path d="${road}" fill="none" stroke="${PALETTE.road}" stroke-width="3" stroke-linecap="round"/>`,
+    monochrome: `<path d="M33.1,76 L54,38 L74.9,76 Z" fill="#FFFFFF"/>`,
+  };
+}
+
+/** A4: the island and road, a Santana house standing on the north coast. */
+export function optionIslandHouse(rings, route, santana) {
+  const base = optionLitRoad(rings, route);
+  const island = islandPaths(rings, 60, 56);
+  const [x, y] = island.project(santana[0], santana[1]);
+  // 12 tall: at 20 the house was bigger than the island it stands on.
+  return { ...base, foreground: `${base.foreground}${santanaHouse(x, y + 3, 12)}` };
+}
+
+/** B2: the stamp, a Santana house inked on it, the flag's colours for its band. */
+export function optionStampHouse() {
+  return {
+    background: `<rect width="${CANVAS}" height="${CANVAS}" fill="${PALETTE.slate}"/>`,
+    foreground: `
+      <g transform="rotate(-6 54 54)">
+        <path d="${perforatedRect(54, 54, 58, 62)}" fill="${PALETTE.paper}"/>
+        <rect x="29" y="27" width="50" height="54" fill="none" stroke="${PALETTE.ink}" stroke-width="1"/>
+        ${santanaHouse(54, 68, 32)}
+        <rect x="29" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagBlue}"/>
+        <rect x="${29 + 50 / 3}" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagGold}"/>
+        <rect x="${29 + (2 * 50) / 3}" y="71" width="${50 / 3}" height="10" fill="${MADEIRA.flagBlue}"/>
+      </g>`,
+    monochrome: `
+      <g transform="rotate(-6 54 54)">
+        <path d="${perforatedRect(54, 54, 58, 62)}" fill="#FFFFFF"/>
+        <path d="M36.4,68 L54,36 L71.6,68 Z" fill="#000000" fill-opacity="0.6"/>
+      </g>`,
+  };
 }

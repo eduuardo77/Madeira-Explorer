@@ -71,9 +71,11 @@ permission, L3 privacy contact.
       trip pale, stamp time tags, card with stamps, km that day and km on the trip. Share: masked
       roads, Google's snapshot (`takeSnapshot`, added in the expo-maps patch) under the card, one
       PNG to the share sheet; produced on the P30, but the first image lacked the card and had not
-      moved to the whole trip. Both fixed in code, **not yet seen**. Still to do: remove the
-      animated film (ReplayScreen, replayMap, frame, playback, composition, souvenirPlan),
-      D-099, and L3 for T-265: Play shows the developer as "Eduardo 7", contact slimiedu@gmail.com.
+      moved to the whole trip. Both fixed in code, **not yet seen**. ⚠ **Keep the animated film**
+      (lead, 2026-10-07): WalkNYC on iOS has a separate *Replay*, "a timelapse of every block you've
+      walked", dark map, blocks in green (the lead's iPhone screenshot); the Android walk viewer
+      studied here has none, which is why it was wrongly marked for removal. The film is now
+      unreachable (App.tsx routes to the viewer) and needs a way back in. Still to do: D-099, and L3 for T-265: Play shows the developer as "Eduardo 7", contact slimiedu@gmail.com.
 - [~] **T-253** The replay starts on the trip and ends framed on it (review D2). **Done:** the map is
       born on the establish shot (`openingCamera`, the native default was 0°, 0° at zoom 10, which is
       Côte d'Ivoire); a cover hides it until `onMapLoaded` (3 s fallback when offline) and only then

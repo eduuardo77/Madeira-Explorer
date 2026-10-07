@@ -48,3 +48,11 @@
 
 /** The app's name, as a user sees it. */
 export const APP_NAME = 'Bruma';
+
+/**
+ * Who makes the app, as Google Play names the developer: the person the privacy
+ * policy names as responsible (T-265; the lead's answer to L3, 2026-10-07,
+ * "Eduardo 7 for now"). The law asks for the controller's identity, so a fuller
+ * name may replace this before the public listing.
+ */
+export const DEVELOPER_NAME = 'Eduardo 7';

@@ -78,7 +78,7 @@
  * The date this text last changed, in ISO form. Shown to the user, and the
  * thing a returning reader checks first.
  */
-export const POLICY_VERSION = '2026-09-27';
+export const POLICY_VERSION = '2026-10-07';
 
 /**
  * The app's name as it appears to the user.
@@ -88,7 +88,7 @@ export const POLICY_VERSION = '2026-09-27';
  * for naming itself after a city's own wayfinding programme. Changing it is a
  * one-line edit here plus `app.json`.
  */
-import { APP_NAME } from '../brand.ts';
+import { APP_NAME, DEVELOPER_NAME } from '../brand.ts';
 import type { Language } from '../i18n/languages.ts';
 import { CONTACT_SECTION_PT, SECTIONS_PT } from './privacyPolicy.pt.ts';
 
@@ -189,6 +189,22 @@ const SECTIONS_EN: PolicySection[] = [
       'There is no account and no server, so there is nothing for us to delete at our end and nothing to ask us for. Deleting from your phone is the whole of it.',
       'We keep no copy anywhere, so erasing cannot be undone from our side. If your phone backup still holds a copy, that is yours to remove in your phone settings.',
       'Removing the app deletes everything too.',
+    ],
+  },
+  {
+    heading: 'Buying the full passport',
+    paragraphs: [
+      'If you unlock the passport, Google Play takes the payment, not us. We never see your card or your bank details.',
+      'Google tells the app that the purchase went through. The app keeps that answer, and the time of the purchase, on your phone, so your stamps stay unlocked.',
+      'Google Play has its own privacy policy, which covers the payment.',
+    ],
+  },
+  {
+    heading: 'Who is responsible, and your rights',
+    paragraphs: [
+      `The app is made by ${DEVELOPER_NAME}, the developer named on Google Play, who is responsible for this policy.`,
+      'Because the app keeps your trip on your phone, you can see it, copy it and erase it yourself, in the app.',
+      'If you think something here is wrong, you can complain to the data protection authority where you live. In Portugal that is the CNPD, at cnpd.pt.',
     ],
   },
   {

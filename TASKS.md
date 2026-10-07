@@ -80,7 +80,7 @@ permission, L3 privacy contact.
       studied here has none, which is why it was wrongly marked for removal. The film is now
       unreachable until ▶ (done). L3 for T-265: controller "Eduardo 7", as Play shows the developer
       (the lead, 2026-10-07, for now), contact slimiedu@gmail.com.
-- [~] **T-253** The replay starts on the trip and ends framed on it (review D2). **Done:** the map is
+- [x] **T-253** The replay starts on the trip and ends framed on it (review D2). **Done:** the map is
       born on the establish shot (`openingCamera`, the native default was 0°, 0° at zoom 10, which is
       Côte d'Ivoire); a cover hides it until `onMapLoaded` (3 s fallback when offline) and only then
       does the film start; the finale is fitted with `align: 'bottom'` so the trip rests on the
@@ -89,6 +89,11 @@ permission, L3 privacy contact.
       replay to follow **WalkNYC's** closely. Its viewer is a full map, a round back button and one
       bottom card; its replay itself could not be seen, as WalkNYC on the P30 has no walk recorded.
       The establish shot also still sits high over sea.
+- [~] **T-265** The privacy policy, complete. **Done 2026-10-07:** who is responsible ("Eduardo 7",
+      `DEVELOPER_NAME` in `brand.ts`, as Play names the developer; the lead's L3), the contact, a
+      purchases section (Google Play takes the payment; the app keeps the answer and the time), the
+      right to complain to the CNPD; EN and PT in *tu*; a test for each. Activity and per-stamp
+      notices were already in. **Left:** the lead reads the new Portuguese; hosting is T-267.
 - [x] **T-255** One Portuguese voice, *tu* (D-098). 79 strings, 35 policy sentences, "selo" made
       "carimbo"; a test fails on the *você* markers (67 hits on the old text). **Read and approved by the lead**
       2026-10-06 (OQ-8), from `tools/out/voice-review.html`. Built into the P30's field

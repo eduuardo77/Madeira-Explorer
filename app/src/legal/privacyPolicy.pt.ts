@@ -32,7 +32,7 @@
  * the map but never the trip. **If the English changes, this changes.**
  */
 
-import { APP_NAME } from '../brand.ts';
+import { APP_NAME, DEVELOPER_NAME } from '../brand.ts';
 import type { PolicySection } from './privacyPolicy.ts';
 
 export const SECTIONS_PT: PolicySection[] = [
@@ -101,6 +101,22 @@ export const SECTIONS_PT: PolicySection[] = [
       'Não há conta nem servidor, por isso não há nada para apagarmos do nosso lado nem nada para nos pedires. Apagar do teu telemóvel é tudo o que há.',
       'Não guardamos cópia em lado nenhum, por isso apagar não se pode desfazer do nosso lado. Se a cópia de segurança do teu telemóvel ainda guardar uma cópia, essa é tua para remover nas definições do telemóvel.',
       'Desinstalar a aplicação também apaga tudo.',
+    ],
+  },
+  {
+    heading: 'Comprar o passaporte completo',
+    paragraphs: [
+      'Se desbloqueares o passaporte, é o Google Play que recebe o pagamento, não nós. Nunca vemos o teu cartão nem os teus dados bancários.',
+      'A Google diz à aplicação que a compra foi feita. A aplicação guarda essa resposta, e a hora da compra, no teu telemóvel, para os teus carimbos ficarem desbloqueados.',
+      'O Google Play tem a sua própria política de privacidade, que cobre o pagamento.',
+    ],
+  },
+  {
+    heading: 'Quem é responsável, e os teus direitos',
+    paragraphs: [
+      `A aplicação é feita por ${DEVELOPER_NAME}, o programador indicado no Google Play, que é responsável por esta política.`,
+      'Como a aplicação guarda a tua viagem no teu telemóvel, podes vê-la, copiá-la e apagá-la tu mesmo, na aplicação.',
+      'Se achares que algo aqui está errado, podes apresentar queixa à autoridade de proteção de dados do sítio onde vives. Em Portugal é a CNPD, em cnpd.pt.',
     ],
   },
   {

@@ -23,7 +23,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { APP_NAME } from '../brand.ts';
+import { APP_NAME, DEVELOPER_NAME } from '../brand.ts';
 import {
   CONTACT_EMAIL,
   POLICY_VERSION,
@@ -288,4 +288,16 @@ test('the policy says where the position comes from, and what a sent recording g
   assert.ok(pt.includes('serviço de localização'), 'o serviço de localização não é referido');
   assert.ok(en.includes('send it to us'), 'the walk report is not disclosed');
   assert.ok(pt.includes('enviá-lo para nós'), 'o envio de um registo não é referido');
+});
+
+test('T-265: the policy names who is responsible, the purchase, and where to complain', () => {
+  // GDPR Art. 13: the controller's identity and contact, and the right to
+  // complain. And Play Billing arrived (T-156) with no word in the policy.
+  for (const language of ['en', 'pt'] as const) {
+    const text = policyText(language);
+    assert.ok(text.includes(DEVELOPER_NAME), `${language}: nobody is named as responsible`);
+    assert.ok(text.includes('Google Play'), `${language}: the purchase is not explained`);
+    assert.ok(text.includes('CNPD'), `${language}: no authority to complain to`);
+    assert.ok(CONTACT_EMAIL !== null && text.includes(CONTACT_EMAIL), `${language}: no contact`);
+  }
 });

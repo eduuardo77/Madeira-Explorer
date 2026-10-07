@@ -40,8 +40,8 @@ Three shots, cut together (any phone video editor, or ask me):
 1. **0 to 10 s, the disclosure.** First run's *"Keep your phone in your pocket"* card: hold it long
    enough to read, then tap *Continue*.
 2. **10 to 18 s, the runtime prompt.** Android's location screen; choose *Allow all the time*. It
-   follows the phone's language, not the app's: on a Portuguese phone it reads *Permitir sempre*,
-   which reviewers accept, but filming it on the English emulator avoids the question.
+   follows the phone's language, not the app's: on a Portuguese phone it reads *Permitir sempre*.
+   Filming it on the English emulator keeps the whole video in one language.
 3. **18 to 30 s, the feature from the background.** The home screen with Bruma closed and its
    notification *"Recording your trip"* showing; then open Bruma: the roads travelled while it was
    closed are lit, and the status line says how far today.

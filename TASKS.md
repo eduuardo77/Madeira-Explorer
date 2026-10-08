@@ -495,7 +495,7 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       ridden track** (median 1.8 m); **of what was ridden, 93.7% lit within 10 m, 95.8% within
       30 m**; the P30's fix against the iPhone's at the same second, median 4.1 m, p90 7.7 m.
       **One miss, 790 m at the start:** the outing was started at the gym, still, so the profile was
-      and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
+      `stationary`, and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
       never samples as `stationary` (`recorderControls.effectiveProfile`, tested). No tunnel was
       ridden, so the VR1 case is still open.
       — On the P30 with the T-245 build: **(1)** a 20 to 30 minute walk in Funchal as an outing

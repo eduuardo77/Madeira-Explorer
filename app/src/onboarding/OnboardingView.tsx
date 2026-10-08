@@ -33,6 +33,9 @@ import { batterySentence } from './permissionPolicy';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import type { SystemAsk } from './systemAsk';
 import { getContentPack } from '../content/poiCatalogue';
+import { getRegions } from '../content/regionCatalogue';
+import Svg, { G, Path } from 'react-native-svg';
+import { silhouettePaths } from './islandSilhouette';
 import type { Place } from '../content/contentPack';
 import { designFor } from '../passport/stampArt';
 import type { PermissionLevel } from '../recording/LocationProvider';
@@ -266,6 +269,30 @@ function StampFan() {
   );
 }
 
+const ISLAND_WIDTH = 220;
+const ISLAND_HEIGHT = 80;
+/** Pale: the island is the ground the stamps sit on, not a second picture. */
+const ISLAND_OPACITY = 0.2;
+
+/**
+ * The island under the stamps (2026-10-08, the lead's ask), from the regions'
+ * outlines (`islandSilhouette.ts`). Each municipality is filled and stroked in
+ * the same colour, so the seams between them close.
+ */
+function IslandSilhouette() {
+  const paths = useMemo(() => silhouettePaths(getRegions(), ISLAND_WIDTH, ISLAND_HEIGHT), []);
+  if (paths.length === 0) return null;
+  return (
+    <Svg width={ISLAND_WIDTH} height={ISLAND_HEIGHT} style={styles.island} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <G fill={colors.action} stroke={colors.action} strokeWidth={1} strokeLinejoin="round" opacity={ISLAND_OPACITY}>
+        {paths.map((d, index) => (
+          <Path key={index} d={d} />
+        ))}
+      </G>
+    </Svg>
+  );
+}
+
 /** The step bars and "2 de 4". */
 function Steps({ step, of }: { step: number; of: number }) {
   const label = t('onboarding.step', { step, of });
@@ -394,6 +421,7 @@ export default function OnboardingView(props: OnboardingViewProps) {
         {copy.art === 'stamps' ? (
           <Animated.View style={[styles.art, artStyle]}>
             <StampFan />
+            <IslandSilhouette />
           </Animated.View>
         ) : artSize > 0 ? (
           <Animated.View style={[styles.art, artStyle]}>
@@ -489,6 +517,7 @@ const styles = StyleSheet.create({
   },
   art: { alignItems: 'center', marginBottom: spacing.sm },
   fan: { width: '100%', height: FAN_STAMP + 34, alignItems: 'center', justifyContent: 'center' },
+  island: { marginTop: spacing.xs },
   fanStamp: {
     position: 'absolute',
     // A soft shadow lifts the paper off the page. Elevation, not a drawn glow:

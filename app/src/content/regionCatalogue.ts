@@ -64,6 +64,11 @@ export function getRegion(regionId: string): Region | null {
   return load().get(regionId) ?? null;
 }
 
+/** Every region shipped, with its outline: the welcome draws the island from them. */
+export function getRegions(): Region[] {
+  return [...load().values()];
+}
+
 /** How many regions shipped. For the debug screen and the validator. */
 export function getRegionCount(): number {
   return load().size;

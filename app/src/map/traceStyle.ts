@@ -50,15 +50,9 @@ export type TracePaint = {
   coreColor: string;
   coreWidth: number;
   /**
-   * The same line through a tunnel or on a cable car (D-093, D-094): the core colour at about a third
-   * opacity, `#RRGGBBAA`. Google fades its own tunnels; a full-strength line
-   * over blocks with no street drawn read as a line in a random place.
-   */
-  fadedColor: string;
-  /**
    * The rest of the trip, behind the day the trip viewer is showing (T-253):
-   * the core colour at a fifth opacity. Paler than `fadedColor`, so a day's
-   * tunnel never looks like another day's road.
+   * the core colour at a fifth opacity. A tunnel or a cable car is not paler
+   * but dashed, at full strength (`tunnelDashes.ts`, 2026-10-08).
    */
   otherDayColor: string;
 };
@@ -88,7 +82,6 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     casingWidth: 8,
     coreColor: '#0A5FCC',
     coreWidth: 4,
-    fadedColor: '#0A5FCC59',
     otherDayColor: '#0A5FCC33',
   },
 
@@ -107,7 +100,6 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     // trace, lifted for the opposite background.
     coreColor: '#64B5F6',
     coreWidth: 4,
-    fadedColor: '#64B5F659',
     otherDayColor: '#64B5F633',
   },
 };

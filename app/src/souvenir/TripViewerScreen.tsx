@@ -57,6 +57,7 @@ import { effectiveMapStyle, parseMapStyle } from '../map/mapStylePreference';
 import { supportsNativeDarkMap } from '../map/mapsRenderer';
 import { PLACE_MARKER_PAINT } from '../map/placeStyle';
 import { TRACE_PAINT } from '../map/traceStyle';
+import { runPolylines } from '../map/tunnelDashes';
 import { formatDistance } from '../places/placeCard';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
@@ -257,12 +258,15 @@ export default function TripViewerScreen({
       color: paint.otherDayColor,
       width: paint.coreWidth * px,
     }));
-    const today = shown.runs.map((run, index) => ({
-      id: `day-${index}`,
-      coordinates: run.points.map(([latitude, longitude]) => ({ latitude, longitude })),
-      color: run.faded ? paint.fadedColor : paint.coreColor,
-      width: paint.coreWidth * px,
-    }));
+    const today = shown.runs.flatMap((run, index) =>
+      runPolylines(
+        `day-${index}`,
+        run.points.map(([latitude, longitude]) => ({ latitude, longitude })),
+        run.faded,
+        paint.coreColor,
+        paint.coreWidth * px
+      )
+    );
     return [...behind, ...today];
   }, [view, day, paint, shareScene, shown.runs]);
 

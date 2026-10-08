@@ -110,6 +110,7 @@ import { decodeMapSnapshot, encodeMapSnapshot } from './mapSnapshot';
 import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
+import { runPolylines } from './tunnelDashes';
 
 import lightTemplate from '../../assets/map/light.json';
 import { deviceLanguage, t } from '../i18n';
@@ -363,14 +364,17 @@ export default function NativeMapScreen({
   // app starts ran the whole load twice at once (T-272, T-273).
   useEffect(() => onReturnToFront(() => setResumeCount((count) => count + 1)), []);
 
-  /** Road lines as the map's polylines; tunnels and cable cars faded, as Google draws its tunnels. */
+  /** Road lines as the map's polylines; tunnels and cable cars dashed (`tunnelDashes.ts`). */
   const toPolylines = (lines: VisitedLine[]): Polyline[] =>
-    lines.map((line, index) => ({
-      id: `trace-${index}`,
-      coordinates: line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
-      color: line.faded ? tracePaint.fadedColor : tracePaint.coreColor,
-      width: px(tracePaint.coreWidth),
-    }));
+    lines.flatMap((line, index) =>
+      runPolylines(
+        `trace-${index}`,
+        line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
+        line.faded,
+        tracePaint.coreColor,
+        px(tracePaint.coreWidth)
+      )
+    );
 
   useEffect(() => {
     let cancelled = false;

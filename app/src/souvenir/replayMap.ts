@@ -35,6 +35,7 @@ import { fitBounds, type CameraFit, type Viewport } from '../map/cameraFit.ts';
 import { metresPerPoint } from '../map/collectedMarks.ts';
 import type { MapStyleName } from '../map/mapStyle.ts';
 import { TRACE_PAINT } from '../map/traceStyle.ts';
+import { runPolylines } from '../map/tunnelDashes.ts';
 import { CATEGORY_COLOUR, stampMarkPoints } from './filmPaint.ts';
 import type { Bounds } from './composition.ts';
 import type { Film, Frame } from './frame.ts';
@@ -99,13 +100,16 @@ export function replayMapFrame(
     options.viewport
   );
 
-  const polylines = frame.strokes.map((stroke, index) => ({
-    id: `replay-trace-${index}`,
-    coordinates: stroke.map(([longitude, latitude]) => ({ latitude, longitude })),
-    // Tunnels and cable cars faded, as on the map and as Google draws tunnels.
-    color: frame.faded[index] === true ? paint.fadedColor : paint.coreColor,
-    width: paint.coreWidth * options.pixelRatio,
-  }));
+  // Tunnels and cable cars dashed, as on the map (`tunnelDashes.ts`).
+  const polylines = frame.strokes.flatMap((stroke, index) =>
+    runPolylines(
+      `replay-trace-${index}`,
+      stroke.map(([longitude, latitude]) => ({ latitude, longitude })),
+      frame.faded[index] === true,
+      paint.coreColor,
+      paint.coreWidth * options.pixelRatio
+    )
+  );
 
   // Without a camera there is no zoom, and without a zoom a ground radius
   // cannot be computed. Better no marks for a frame than marks the size of the

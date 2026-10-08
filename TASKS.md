@@ -1863,8 +1863,16 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       cannot turn that into a percentage. What it does show: Bruma's foreground service held all
       16h 20m, yet the phone was in deep idle 92.6% of the time; Bruma used the GPS once, 1 min 2 s
       (the start); 30 s CPU, 6 s of blamed wakelocks, 12 TaskJobService runs (77 canceled).
-      Asleep, the recorder costs almost nothing. **Still owed: a moving day.** The lead goes out
-      2026-10-08 afternoon: unplug at 100% (that resets the record), read on re-plug.
+      Asleep, the recorder costs almost nothing.
+      **The ride, read 2026-10-08 18:41** (record from 16:19, unplugged at 100%): 2 h 21 min on
+      battery; an outing 17:31 to 18:30 local, a motorcycle ride from 17:37 (driving profile, top
+      fix 21 m/s), 263 fixes, 199 of 201 moving fixes matched, **9,011 m newly lit** (47,176 to
+      56,187 m). The GPS was on about an hour, from the ride's start to the plug. **The level read
+      100% throughout and 99% at the plug**; voltage 4335 to 4347 mV at the start, 4274 mV before
+      the plug. By Android's own estimate Bruma was the largest user over the period, two thirds of
+      it the GPS; its CPU 2 min 21 s, wakelocks 34 min. ⚠ Still no percentage worth the name: the
+      level moved one step and EMUI holds 100% near the top, and the mAh counter is broken. **What
+      would give one:** a run started well below full (say 80%), where every step shows.
 - [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
       — **Overlaps T-117b** (added 2026-08-11), which watches the *whole app* including FCM
       (D-043). Run them as one capture; this task is the recording-specific reading of it.

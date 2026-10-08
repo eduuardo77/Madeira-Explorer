@@ -230,7 +230,10 @@ permission, L3 privacy contact.
       first draft got wrong and `migrations.test.ts` caught). On a copy of the P30's database:
       3,912 crossings to 14, visits identical for all 1,137 trip and place pairs; then on the P30
       itself, the same 14 and the same three stamps. Backup taken before, outside the repo.
-- [x] **T-272** The cold start. **Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
+- [x] **T-272** ⚠ **It broke a new visitor's first map, found and fixed 2026-10-08** (`085304c`): with
+      fixes but no road lit yet, the snapshot's whole-trip frame was null behind an `as Bounds` cast,
+      and every launch said *"The map could not start"*. Seen on a fresh emulator install; the P30,
+      whose trip always has lit roads, could not show it. **The cold start. Done 2026-10-07**, the lead's ask: *"my phone takes a bit to load,
       I'm tired of seeing a white background with blue lines circling"*. Measured on the P30 with
       timing marks (tap = 0): JavaScript at 2.9 s, the stamp pass 4.2 s (one SQL round trip per
       visit, queued behind a busy JS thread), the trip's fixes 2.6 s, the roads 6.5 s (network decode

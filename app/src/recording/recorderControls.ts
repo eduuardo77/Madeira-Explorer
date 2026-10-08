@@ -29,7 +29,7 @@
  * Pure: no storage, no Expo, no clock of its own. `recorderControls.test.ts`.
  */
 
-import type { PermissionLevel } from './LocationProvider.ts';
+import type { PermissionLevel, SamplingProfile } from './LocationProvider.ts';
 import type { SilenceState } from './recorderSilence.ts';
 import type { TrackingQuality } from './trackingPreference.ts';
 import { distanceM } from './distance.ts';
@@ -143,6 +143,21 @@ export function effectiveQuality(
   walkInProgress: boolean
 ): TrackingQuality {
   return walkInProgress ? 'precise' : userQuality;
+}
+
+/**
+ * The sampling profile the recorder should run with right now: during a walk,
+ * never `stationary`.
+ *
+ * ⚠ Found on the lead's motorcycle ride, 2026-10-08 (T-246): the outing was
+ * started at home, so the profile was `stationary` (100 m between fixes, the
+ * OS free to hold them 15 minutes), and the first 790 m ridden were never
+ * sampled: 1 min 41 s passed between the last fix at the door and the one that
+ * switched the profile. A walk is the user saying they are about to move, so
+ * it samples as if they were, until movement takes the profile further.
+ */
+export function effectiveProfile(profile: SamplingProfile, walkInProgress: boolean): SamplingProfile {
+  return walkInProgress && profile === 'stationary' ? 'walking' : profile;
 }
 
 /** What the short summary shows when a walk stops (D-087 §7). */

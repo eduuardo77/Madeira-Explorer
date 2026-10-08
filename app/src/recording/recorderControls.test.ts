@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  effectiveProfile,
   effectiveQuality,
   primaryControl,
   recorderNotice,
@@ -120,6 +121,14 @@ test('a walk takes the finest setting, and gives the user’s back when it ends'
   assert.equal(effectiveQuality('saver', true), 'precise');
   assert.equal(effectiveQuality('saver', false), 'saver');
   assert.equal(effectiveQuality('balanced', false), 'balanced');
+});
+
+test('a walk never samples as stationary: the start of the ride was lost that way (T-246)', () => {
+  assert.equal(effectiveProfile('stationary', true), 'walking');
+  assert.equal(effectiveProfile('walking', true), 'walking');
+  assert.equal(effectiveProfile('driving', true), 'driving');
+  // Without a walk, automatic recording keeps its cheap stationary profile.
+  assert.equal(effectiveProfile('stationary', false), 'stationary');
 });
 
 test('the summary counts only the walk, and only what the map would draw', () => {

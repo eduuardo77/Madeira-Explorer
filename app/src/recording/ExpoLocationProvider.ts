@@ -20,7 +20,7 @@ import type {
 } from './LocationProvider';
 import { getSamplingParameters } from './samplingPolicy';
 import { scaleForQuality } from './trackingPreference';
-import { effectiveQuality } from './recorderControls';
+import { effectiveProfile, effectiveQuality } from './recorderControls';
 import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
@@ -68,8 +68,9 @@ async function buildOptions(
   // is the one place a walk changes the recorder; `setSamplingProfile` with
   // the current profile re-applies it in place when a walk starts or stops.
   const walking = await getWalkInProgress();
+  const sampled = effectiveProfile(profile, walking);
   const parameters = scaleForQuality(
-    getSamplingParameters(profile),
+    getSamplingParameters(sampled),
     effectiveQuality(await getTrackingQuality(), walking)
   );
 
@@ -84,7 +85,7 @@ async function buildOptions(
     deferredUpdatesInterval: parameters.deferredIntervalMs,
     deferredUpdatesDistance: parameters.deferredDistanceM,
 
-    activityType: toExpoActivityType(profile),
+    activityType: toExpoActivityType(sampled),
 
     // ⚠ WATCH THIS ONE IN THE SOAK TEST (T-051).
     //

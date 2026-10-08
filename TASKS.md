@@ -490,6 +490,14 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       the mask circle** whenever a gap was short; the first decode blocked the P30's JavaScript
       thread for **1,241 ms** (now sliced, see D-093).
 - [ ] **T-246** ⚠ **The field outing that tunes D-093** ⇠ T-245 ⚠ **the project lead, outdoors**
+      ✅ **(3) partly, 2026-10-08: a motorcycle ride as an outing, against SensorLogger** (iPhone 15,
+      1 Hz, `compare-sensorlogger.mjs`, 17:32 to 18:31): **of what was lit, 99.6% within 10 m of the
+      ridden track** (median 1.8 m); **of what was ridden, 93.7% lit within 10 m, 95.8% within
+      30 m**; the P30's fix against the iPhone's at the same second, median 4.1 m, p90 7.7 m.
+      **One miss, 790 m at the start:** the outing was started at home, the profile was
+      `stationary`, and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
+      never samples as `stationary` (`recorderControls.effectiveProfile`, tested). No tunnel was
+      ridden, so the VR1 case is still open.
       — On the P30 with the T-245 build: **(1)** a 20 to 30 minute walk in Funchal as an outing
       (*Começar passeio*); **(2)** a similar walk with automatic recording only; **(3)** a drive
       that goes through at least one VR1 tunnel. Then pull the database (field build, `run-as`)

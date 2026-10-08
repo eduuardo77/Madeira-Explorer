@@ -335,15 +335,17 @@ export default function NativeMapScreen({
    * `bottom` for the lit roads: a wide, shallow trace rests just above the
    * controls instead of floating in the upper half (2026-10-04, `cameraFit.ts`).
    */
-  const frame = (bounds: Bounds, align: 'centre' | 'bottom' = 'centre'): CameraFit | null =>
-    fitBounds(bounds, {
-      width,
-      height,
-      // ⚠ Always true since 2026-08-28: the walk button is no longer
-      // conditional, so the bottom of the map is always spoken for.
-      padding: cameraPadding(true),
-      align,
-    });
+  const frame = (bounds: Bounds | null, align: 'centre' | 'bottom' = 'centre'): CameraFit | null =>
+    bounds === null
+      ? null
+      : fitBounds(bounds, {
+          width,
+          height,
+          // ⚠ Always true since 2026-08-28: the walk button is no longer
+          // conditional, so the bottom of the map is always spoken for.
+          padding: cameraPadding(true),
+          align,
+        });
 
   /**
    * ⚠ Counts the returns to the front, so the load below runs again on each.
@@ -1055,8 +1057,11 @@ const RECENTRE_MAX_AGE_MS = 2 * 60 * 1000;
 /** Street level — close enough to see which path you are standing on. */
 const RECENTRE_ZOOM = 16;
 
-/** The box around drawn trace points, reusing the trace's own rule. */
-function traceBoundsOf(points: [number, number][]): Bounds {
+/**
+ * The box around drawn trace points, reusing the trace's own rule, or null for
+ * no points: a new visitor's first map, recording but with nothing lit yet.
+ */
+function traceBoundsOf(points: [number, number][]): Bounds | null {
   return traceBounds({
     type: 'FeatureCollection',
     features: [
@@ -1066,7 +1071,7 @@ function traceBoundsOf(points: [number, number][]): Bounds {
         geometry: { type: 'LineString', coordinates: points },
       },
     ],
-  }) as Bounds;
+  });
 }
 
 /**

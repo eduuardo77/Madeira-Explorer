@@ -1289,6 +1289,14 @@ options as language rows; it did not search plural labels). Fixed in the script.
       `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
       on a device: view it on the emulator, not on the P30, whose data must not be wiped.
+- [~] **T-263** A visual pass with the lead's eye. **Prepared 2026-10-08:** `tools/capture-visual-pass.mjs`
+      walks the installed app by label (as the smoke test does, pressing nothing that changes
+      anything) and writes `tools/out/visual-pass.html`: 17 numbered captures from the P30 (map,
+      Settings in three, privacy, unlock sheet, licences, passport in four, trophy, place card, two
+      viewer days, timelapse playing and ended), WalkNYC's viewer beside Bruma's. The page shows the
+      lead's real trace, so it stays in `tools/out/` (D-016). **Left:** the lead marks by number; each
+      mark a small fix. Not captured: first run and the empty states (need a phone with no trip:
+      the emulator).
 - [~] **T-201** ✅ **Content in: 80 of 80 places have a line, in en, pt and de.** 76 on 2026-10-07:
       the lead approved the draft whole; every `⚠` fact was checked on the web first and five lines
       changed (the list is at the top of `docs/why-go-draft.md`). The four blanks on 2026-10-08,

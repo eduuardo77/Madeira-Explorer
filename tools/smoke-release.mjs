@@ -57,7 +57,7 @@
 
 import { device, pause } from './lib/device.mjs';
 import { crashLines, findNode } from './lib/uiTree.mjs';
-import { PLURALS, STRINGS } from '../app/src/i18n/strings.ts';
+import { labels, phoneLanguage } from './lib/labels.mjs';
 import { LANGUAGE_NAMES } from '../app/src/i18n/languages.ts';
 import { readFileSync } from 'node:fs';
 import { parseContentPack } from '../app/src/content/contentPack.ts';
@@ -80,34 +80,8 @@ const serialAt = process.argv.indexOf('--serial');
 const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
 const { adb, shell, screen, reach, tap, fingerprint, readable } = device(serial);
 
-// ---------------------------------------------------------------------------
-// Labels, in the phone's language
-// ---------------------------------------------------------------------------
-
-const locale = shell('getprop persist.sys.locale') || shell('getprop ro.product.locale');
-const language = ['pt', 'de'].find((code) => locale.startsWith(code)) ?? 'en';
-
-/** A catalogue string, placeholders filled. */
-function label(key, values = {}) {
-  const phrase = STRINGS[key];
-  const text = phrase[language] ?? phrase.en;
-  return text.replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? `{${name}}`));
-}
-
-/** A catalogue string as a pattern, each placeholder matching anything. */
-function pattern(...keys) {
-  const forms = keys.flatMap((key) => {
-    // Counted phrases ("1 lugar", "3 lugares") live in their own catalogue.
-    const plural = PLURALS[key];
-    return plural !== undefined ? [plural.one, plural.other] : [STRINGS[key]];
-  });
-  const escaped = forms.map((phrase) =>
-    (phrase[language] ?? phrase.en)
-      .replace(/[.*+?^$()|[\]\\]/g, '\\$&')
-      .replace(/\{\w+\}/g, '.+')
-  );
-  return new RegExp(`^(${escaped.join('|')})$`);
-}
+const language = phoneLanguage(shell);
+const { label, pattern } = labels(language);
 
 // ---------------------------------------------------------------------------
 // The run

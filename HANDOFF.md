@@ -28,12 +28,18 @@ probe waits for a real stamp). **D-100:** the developer collects no data from us
 approved). **The lead outdoors next:** a ride with *Começar passeio* and SensorLogger on the
 iPhone (T-246). P30: field build, data kept, launch setting on manual.
 
-**⚠ In flight, 2026-10-08:** the overnight battery run (T-054) is read: stationary, the level
-never left 100% and the P30's mAh counter is broken; see TASKS. The lead rides this afternoon:
-**read `dumpsys batterystats` first when the phone comes back.** The current tree is on the
-P30 (field build) and checked; Gate P1 is closed (cold start median 471 ms, store build). Also since: T-201 why-go lines (80 of 80), the store
-banner B in `store/`, the review video's emulator shots (`tools/out/t123/`). The P30 has no
-`screenrecord`: time launches with an `adb exec-out screencap` loop.
+**⚠ In flight, 2026-10-08:** the lead rides this afternoon (T-054 moving run, T-246 with
+SensorLogger): **read `dumpsys batterystats` first when the phone comes back.** The overnight run
+was stationary and gave no percentage (the P30's mAh counter is broken); see TASKS. **Closed
+today:** Gate P1 (cold start median 471 ms, store build), Phase 3 (T-201 80 of 80, T-263 visual
+pass accepted by the lead), T-265 (the lead read the Portuguese). **Found today, fixed:** a
+timelapse crash (zero camera duration, `replayMap.SNAP_MS`), the passport and first run drawn
+under the status bar, and **a new visitor's first map failing to start** (a T-272 regression; see
+its entry). The welcome now shows the island under its stamps. **Phase 4 is the lead's Play
+Console** (T-268, T-269, T-123's shot 3). **Store screenshots without the lead's trace:**
+`tools/make-demo-route.mjs` then `ANDROID_SERIAL=emulator-5554 bash tools/replay-route.sh
+tools/routes/demo-drive.txt 2`. Tools: `tools/capture-visual-pass.mjs` captures every screen from
+the phone. The P30 has no `screenrecord`; `am start -W` works for launch times.
 
 **bruma.lol on Vercel (T-267, the lead's to set up):** import the GitHub repo, Root Directory `site`,
 Framework *Other*, no build command; add `bruma.lol` under Domains and set the DNS records Vercel

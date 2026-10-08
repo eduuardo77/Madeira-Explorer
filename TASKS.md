@@ -312,11 +312,12 @@ permission, L3 privacy contact.
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.
-- [~] **T-265** The privacy policy, complete. **Done 2026-10-07:** who is responsible ("Eduardo 7",
+- [x] **T-265** The privacy policy, complete. **Done 2026-10-07:** who is responsible ("Eduardo 7",
       `DEVELOPER_NAME` in `brand.ts`, as Play names the developer; the lead's L3), the contact, a
       purchases section (Google Play takes the payment; the app keeps the answer and the time), the
       right to complain to the CNPD; EN and PT in *tu*; a test for each. Activity and per-stamp
-      notices were already in. **Left:** the lead reads the new Portuguese; hosting is T-267.
+      notices were already in. **The lead read the Portuguese 2026-10-08: "good"** (also closes T-160b's ask). Hosting is
+      T-267.
 - [x] **T-255** One Portuguese voice, *tu* (D-098). 79 strings, 35 policy sentences, "selo" made
       "carimbo"; a test fails on the *você* markers (67 hits on the old text). **Read and approved by the lead**
       2026-10-06 (OQ-8), from `tools/out/voice-review.html`. Built into the P30's field
@@ -1289,14 +1290,21 @@ options as language rows; it did not search plural labels). Fixed in the script.
       `destination`, as the reveal does. It names the stamps, the 80
       places, and *Proa* (read from `brand.ts`, never typed out). ⚠ Onboarding has never been seen
       on a device: view it on the emulator, not on the P30, whose data must not be wiped.
-- [~] **T-263** A visual pass with the lead's eye. **Prepared 2026-10-08:** `tools/capture-visual-pass.mjs`
+- [x] **T-263** A visual pass with the lead's eye. **Closed 2026-10-08 by the lead:** "good enough",
+      no marks; they will tweak with time. **Prepared 2026-10-08:** `tools/capture-visual-pass.mjs`
       walks the installed app by label (as the smoke test does, pressing nothing that changes
       anything) and writes `tools/out/visual-pass.html`: 17 numbered captures from the P30 (map,
       Settings in three, privacy, unlock sheet, licences, passport in four, trophy, place card, two
       viewer days, timelapse playing and ended), WalkNYC's viewer beside Bruma's. The page shows the
-      lead's real trace, so it stays in `tools/out/` (D-016). **Left:** the lead marks by number; each
-      mark a small fix. Not captured: first run and the empty states (need a phone with no trip:
-      the emulator).
+      lead's real trace, so it stays in `tools/out/` (D-016). **First run and the empty states,
+      2026-10-08**, from a fresh install on the emulator (`tools/out/visual-pass-first-run.html`,
+      12 captures). **Found and fixed:** the first-run step bars were drawn under the status bar's
+      clock, and the passport's `‹ Mapa` and *Partilhar* had no bar behind them, so stamps scrolled
+      through them and under the status bar (on the P30 too). Both now measure
+      `StatusBar.currentHeight`; seen fixed on the emulator and the P30. **Found by the smoke test
+      while checking that build: a crash in the timelapse**, Google's `animateCamera` refusing a
+      zero duration (`replayMap.SNAP_MS` says when it happens); 1 run in 4 crashed, 3 of 3 clean
+      after the fix, and a test now fails on any `duration: 0` in a camera move.
 - [~] **T-201** ✅ **Content in: 80 of 80 places have a line, in en, pt and de.** 76 on 2026-10-07:
       the lead approved the draft whole; every `⚠` fact was checked on the web first and five lines
       changed (the list is at the top of `docs/why-go-draft.md`). The four blanks on 2026-10-08,

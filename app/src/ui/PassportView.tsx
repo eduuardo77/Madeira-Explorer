@@ -52,6 +52,7 @@ import { useState } from 'react';
 import {
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -793,12 +794,19 @@ export default function PassportView({
 }
 
 
+/**
+ * Where the screen's navigation bar (`‹ Map`, Share) starts: below the status
+ * bar, which the app draws under (edge to edge), and never higher than it sat
+ * before the status bar was measured.
+ */
+export const PASSPORT_BAR_TOP = Math.max(spacing.xl, StatusBar.currentHeight ?? 0);
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: album.background },
   content: {
     padding: spacing.md,
     // Room for the navigation bar the screen draws above this (`‹ Map`).
-    paddingTop: spacing.xl + MIN_TAP_TARGET + spacing.sm,
+    paddingTop: PASSPORT_BAR_TOP + MIN_TAP_TARGET + spacing.sm,
     paddingBottom: spacing.xl * 2,
     // md, not lg: with five rows the inter-row gap is the largest single
     // contributor to how far a nearly-empty passport scrolls.

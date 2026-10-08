@@ -141,6 +141,22 @@ export type CameraMove = {
 };
 
 /**
+ * The shortest duration the map will take: 1 ms, which is a snap to the eye.
+ *
+ * ⚠ Never 0. Google's `animateCamera` throws on a zero duration ("durationMs
+ * must be positive"), and `expo-maps` reaches it whenever a move is sent before
+ * the map has loaded: the move waits and is then played as an animation. The
+ * P30 crashed on the timelapse that way (2026-10-08), only when it was sent
+ * early enough, which is why the smoke test had passed twice that morning.
+ */
+export const SNAP_MS = 1;
+
+/** A plan's duration as the map must be given it: whole ms, at least `SNAP_MS`. */
+export function mapDuration(durationMs: number): number {
+  return Math.max(SNAP_MS, Math.round(durationMs));
+}
+
+/**
  * The camera, as a handful of instructions rather than a value per frame.
  *
  * ⚠⚠ **THIS REPLACED A THRESHOLD, AND THE THRESHOLD WAS THE WRONG IDEA.**

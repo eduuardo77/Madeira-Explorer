@@ -27,7 +27,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
 import { batterySentence } from './permissionPolicy';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
@@ -461,6 +461,12 @@ export function needsAndroidDisclosure(): boolean {
 /** The tint behind the chosen answer: the action blue, faint. */
 const PICK_FILL = '#E3EEFA';
 
+/**
+ * The app draws under the status bar (edge to edge), so the step bars start
+ * below it: they were drawn under the clock (T-263, seen on a fresh install).
+ */
+const TOP = (StatusBar.currentHeight ?? 0) + spacing.lg;
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   steps: {
@@ -468,9 +474,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingTop: TOP,
   },
-  stepsSpacer: { height: spacing.lg },
+  stepsSpacer: { height: TOP },
   bars: { flex: 1, flexDirection: 'row', gap: 6 },
   bar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#D1D1D6' },
   barOn: { backgroundColor: colors.action },

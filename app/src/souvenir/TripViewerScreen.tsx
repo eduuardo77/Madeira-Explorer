@@ -63,6 +63,7 @@ import { AppStateKey } from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from '../ui/theme';
 import { formatDateRange } from './shareCard';
+import { SNAP_MS } from './replayMap';
 import { REFUSAL_KEYS, shareCardImage } from './shareTrip';
 import {
   boundsOf,
@@ -299,9 +300,9 @@ export default function TripViewerScreen({
         return;
       }
       setShareScene({ runs: scene.runs, camera: shareCamera, snapshot: null });
-      // ⚠ 1, not 0: Google's animateCamera refuses a zero duration, and the
-      // share's first build photographed the day it had not left (P30).
-      mapRef.current?.setCameraPosition({ ...shareCamera, duration: 1 });
+      // ⚠ Not 0 (`SNAP_MS` says why), and the share's first build
+      // photographed the day it had not left (P30).
+      mapRef.current?.setCameraPosition({ ...shareCamera, duration: SNAP_MS });
       await pause(MAP_SETTLE_MS);
       const snapshot = (await mapRef.current?.takeSnapshot()) ?? null;
       if (snapshot === null) {
@@ -325,7 +326,7 @@ export default function TripViewerScreen({
       snapshotLoaded.current = null;
       setShareScene(null);
       if (camera !== null) {
-        mapRef.current?.setCameraPosition({ ...camera, duration: 1 });
+        mapRef.current?.setCameraPosition({ ...camera, duration: SNAP_MS });
       }
       setSharing(false);
     }

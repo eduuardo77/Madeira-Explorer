@@ -18,6 +18,9 @@
  *      updating is a film that stops following the walk.
  */
 
+import { readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -30,7 +33,7 @@ import {
 } from './composition.ts';
 import { CATEGORY_COLOUR, STAMP_MARK_POINTS, stampMarkPoints } from './filmPaint.ts';
 import { frameAt, frameTimes, type Film } from './frame.ts';
-import { cameraMoveDue, cameraPlan, openingCamera, replayMapFrame } from './replayMap.ts';
+import { cameraMoveDue, cameraPlan, mapDuration, openingCamera, replayMapFrame, SNAP_MS } from './replayMap.ts';
 
 const T0 = 1_800_000_000_000;
 
@@ -371,4 +374,19 @@ test('the finale rests the whole trip on the closing card, not mid-screen over s
   // And it uses the width it was fitted by: the trip is as large as it can be.
   const span = screenX(finale.bounds.east) - screenX(finale.bounds.west);
   assert.ok(Math.abs(span - (viewport.width - 48)) < 1, `the trip spans ${Math.round(span)} pt`);
+});
+
+test('the map is never handed a zero duration: Google throws on it (2026-10-08)', () => {
+  assert.equal(mapDuration(0), SNAP_MS);
+  assert.equal(mapDuration(0.4), SNAP_MS);
+  assert.equal(mapDuration(-5), SNAP_MS);
+  assert.equal(mapDuration(1499.6), 1500);
+  // Every camera move in the app: none may pass a literal 0.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const src = path.join(here, '..');
+  const files = readdirSync(src, { recursive: true, encoding: 'utf8' }).filter((file) => file.endsWith('.tsx'));
+  const zero = files.filter((file) =>
+    /setCameraPosition\([^)]*duration:\s*0\b/s.test(readFileSync(path.join(src, file), 'utf8'))
+  );
+  assert.deepEqual(zero, []);
 });

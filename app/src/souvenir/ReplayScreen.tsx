@@ -70,7 +70,7 @@ import {
   restart,
   type Playback,
 } from './playback';
-import { cameraMoveDue, cameraPlan, openingCamera, replayMapFrame } from './replayMap';
+import { cameraMoveDue, cameraPlan, mapDuration, openingCamera, replayMapFrame, SNAP_MS } from './replayMap';
 import { formatDateRange } from './shareCard';
 import { getSouvenirComposition } from './souvenirPlan';
 import { REFUSAL_KEYS } from './shareTrip';
@@ -291,7 +291,7 @@ export default function ReplayScreen({
     if (due < issuedRef.current) {
       issuedRef.current = due;
       if (due >= 0) {
-        mapRef.current.setCameraPosition({ ...plan[due].camera, duration: 0 });
+        mapRef.current.setCameraPosition({ ...plan[due].camera, duration: SNAP_MS });
       }
       return;
     }
@@ -306,7 +306,7 @@ export default function ReplayScreen({
         ...move.camera,
         // ⚠ Paused, the film is a still picture, so a camera still gliding to
         // its target would be the one thing on screen that had not stopped.
-        duration: playing ? move.durationMs : 0,
+        duration: playing ? mapDuration(move.durationMs) : SNAP_MS,
       });
     }
   }, [plan, atMs, playing]);

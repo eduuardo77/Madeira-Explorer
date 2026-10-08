@@ -45,6 +45,7 @@ import { localStartOfDay, tripDayCount } from '../souvenir/tripDays';
 import { storedRoadsFor } from '../matching/roadNetwork';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, {
+  PASSPORT_BAR_TOP,
   type FounderCard,
   type MedalTile,
   type PassportStamp,
@@ -544,6 +545,10 @@ export default function PassportScreen({
           medals={medals}
         />
       )}
+      {/* The bar behind `‹ Map` and Share, in the album's colour, under every
+          sheet: without it the stamps scrolled through the controls and under
+          the status bar (T-263, seen in the visual pass). */}
+      <View style={styles.bar} pointerEvents="none" />
 
       {/* T-201: dim the stamps behind the card, which competed with it (review
           P1-4). Tapping the dimmed page closes the card, as a sheet's backdrop
@@ -846,10 +851,18 @@ const styles = StyleSheet.create({
   // Off the side of the screen, where it can be drawn and photographed without
   // ever being seen.
   offscreen: { position: 'absolute', left: -4000, top: 0 },
+  bar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: PASSPORT_BAR_TOP + MIN_TAP_TARGET,
+    backgroundColor: album.background,
+  },
   // Opposite the back control, where iOS puts a share action.
   share: {
     position: 'absolute',
-    top: spacing.xl,
+    top: PASSPORT_BAR_TOP,
     right: spacing.sm,
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
@@ -865,7 +878,7 @@ const styles = StyleSheet.create({
   },
   back: {
     position: 'absolute',
-    top: spacing.xl,
+    top: PASSPORT_BAR_TOP,
     left: spacing.sm,
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',

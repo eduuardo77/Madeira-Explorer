@@ -415,7 +415,8 @@ export default function PrimaryOverlay({
             accessibilityLabel={
               progress.total === 0
                 ? t('map.a11y.openPassport')
-                : n('passport.a11y.openWithCount', progress.collected, {
+                : // The noun follows the total ("1 of 80 places"), so it chooses the form.
+                  n('passport.a11y.openWithCount', progress.total, {
                     collected: progress.collected,
                     total: progress.total,
                   })

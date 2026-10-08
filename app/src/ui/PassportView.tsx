@@ -646,8 +646,9 @@ export default function PassportView({
                 too. It used to switch to "places to collect" at zero, and on
                 a Portuguese phone "0 / 80 lugares por visitar" read backwards:
                 the number counted visits and the words counted what was left
-                (review P2-3). Zero takes the plural in all three languages. */}
-            {n('passport.collected', progress.collected)}
+                (review P2-3). The noun follows the total, "1 / 80 places",
+                so the total chooses the form (2026-10-08). */}
+            {n('passport.collected', progress.total)}
           </Text>
           {stats === undefined ? null : (
             <>

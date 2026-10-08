@@ -153,7 +153,7 @@ export default function StampNewsCard({
                   </Animated.Text>
                 </View>
                 <Text style={styles.counterTotal}>
-                  {' '}/ {celebration.total} {n('passport.collected', celebration.collectedAfter)}
+                  {' '}/ {celebration.total} {n('passport.collected', celebration.total)}
                 </Text>
               </View>
               {celebration.rankUp === null ? (

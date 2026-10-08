@@ -538,6 +538,11 @@
       "name": "Achada do Marques",
       "category": "village",
       "regionId": "santana",
+      "why": {
+        "en": "A hamlet at about 846 m in Santana, a protected landscape of the Madeira Natural Park.",
+        "pt": "Lugarejo a cerca de 846 m em Santana, classificado como paisagem protegida do Parque Natural da Madeira.",
+        "de": "Ein Weiler auf etwa 846 m in Santana, geschützte Landschaft im Naturpark Madeira."
+      },
       "geofences": [
         {
           "id": "achada-do-marques",
@@ -718,6 +723,11 @@
       "name": "Levada Nova da Calheta",
       "category": "levada",
       "regionId": "calheta",
+      "why": {
+        "en": "A levada of more than 40 km across the municipality of Calheta, running at 600 to 700 m.",
+        "pt": "Levada com mais de 40 km pelo concelho da Calheta, a correr entre os 600 e os 700 m.",
+        "de": "Eine Levada von über 40 km durch den Kreis Calheta, auf 600 bis 700 m Höhe."
+      },
       "geofences": [
         {
           "id": "levada-nova-da-calheta-start",
@@ -794,6 +804,11 @@
       "name": "Levada das Faias",
       "category": "levada",
       "regionId": "sao-vicente",
+      "why": {
+        "en": "A levada on the north coast, walked from Fajã do Penedo in Boaventura.",
+        "pt": "Levada na costa norte, percorrida a partir da Fajã do Penedo, na Boaventura.",
+        "de": "Eine Levada an der Nordküste, begangen ab Fajã do Penedo in Boaventura."
+      },
       "geofences": [
         {
           "id": "levada-das-faias-start",
@@ -1046,6 +1061,11 @@
       "name": "Levada do Barreiro",
       "category": "levada",
       "regionId": "funchal",
+      "why": {
+        "en": "PR4, from the Poço da Neve, an ice house from 1813, to Casa do Barreiro in the Funchal Ecological Park.",
+        "pt": "PR4, do Poço da Neve, uma casa de gelo de 1813, até à Casa do Barreiro, no Parque Ecológico do Funchal.",
+        "de": "PR4, vom Poço da Neve, einem Eishaus von 1813, zur Casa do Barreiro im Ökologischen Park Funchal."
+      },
       "geofences": [
         {
           "id": "levada-do-barreiro-start",

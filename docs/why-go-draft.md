@@ -10,7 +10,7 @@
 > placeholders (Levada Nova da Calheta, Levada das Faias, Levada do Barreiro, Achada do Marques),
 > which show no line until there is a fact to stand behind. The German is mine and unreviewed.
 >
-> ### Proposed for the four blanks, 2026-10-07: strike or keep
+> ### The four blanks, proposed 2026-10-07, kept by the lead 2026-10-08 ("keep all"), in `pois.json`
 >
 > | Lugar | Português | English | Deutsch | Source |
 > |---|---|---|---|---|

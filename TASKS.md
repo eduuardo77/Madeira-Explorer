@@ -1833,6 +1833,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
+      **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on
+      battery, screen on 1 min. The level never left 100%, so the run gives no percentage. The
+      P30's charge counter is broken (estimated capacity "1 mAh", `charge=1`), so its 12.0 mAh
+      discharge figure is not a measurement either. Voltage fell 4339 to 4108 mV; the record
+      cannot turn that into a percentage. What it does show: Bruma's foreground service held all
+      16h 20m, yet the phone was in deep idle 92.6% of the time; Bruma used the GPS once, 1 min 2 s
+      (the start); 30 s CPU, 6 s of blamed wakelocks, 12 TaskJobService runs (77 canceled).
+      Asleep, the recorder costs almost nothing. **Still owed: a moving day.** The lead goes out
+      2026-10-08 afternoon: unplug at 100% (that resets the record), read on re-plug.
 - [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
       — **Overlaps T-117b** (added 2026-08-11), which watches the *whole app* including FCM
       (D-043). Run them as one capture; this task is the recording-specific reading of it.

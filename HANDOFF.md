@@ -28,9 +28,9 @@ probe waits for a real stamp). **D-100:** the developer collects no data from us
 approved). **The lead outdoors next:** a ride with *Começar passeio* and SensorLogger on the
 iPhone (T-246). P30: field build, data kept, launch setting on manual.
 
-**⚠ In flight, 2026-10-07 evening:** the battery run (T-054) started 16:57 at 100% with the build
-then on the phone; **read `dumpsys batterystats` first when the phone comes back**, before any
-install. Then install the current tree, which carries three unseen T-254 changes (coverage,
+**⚠ In flight, 2026-10-08:** the overnight battery run (T-054) is read: stationary, the level
+never left 100% and the P30's mAh counter is broken; see TASKS. The lead rides this afternoon:
+**read `dumpsys batterystats` first when the phone comes back.** Then install the current tree, which carries three unseen T-254 changes (coverage,
 arrivals, the trace cache): check the map's roads, the viewer and a stamp pass, then take Gate P1's
 owed `am start -W` median on the store build. Also since: T-201 why-go lines (76 of 80), the store
 banner B in `store/`, the review video's emulator shots (`tools/out/t123/`). The P30 has no

@@ -171,13 +171,17 @@ permission, L3 privacy contact.
       EMUI's default an update stops recording silently, and the manual setting is what lets the
       notice through: the guidance is the fix, not a nicety. **Left:** the first-run card unseen on
       the phone (onboarding is behind us there); the day-after check (T-049) after an update.
-- [~] **Gate P1** (Phase 1 done). **Measured 2026-10-07**, store build, the review's workload:
+- [x] **Gate P1** (Phase 1 done). **Measured 2026-10-07**, store build, the review's workload:
       janky 0.00% on every run, p99 10 to 12 ms (T-254); memory 274 to 280 MB after the workload,
       266 to 270 settled (target 280); map with roads at 4.4 to 4.9 s from the tap (T-272). The
       replay, the place card and the icon were seen on the P30 by the lead as each was built.
-      **Owed:** launch to first frame, `am start -W` median of three on the store build (the plan's
-      aim is under 800 ms, WalkNYC's 760 to 813); the one reading so far, 2.47 s, was a single run of
-      the debuggable field build. To measure after the battery run's figures are read.
+      **Launch to first frame, 2026-10-08, store build:** `am start -W`, three runs checked COLD (no
+      process before, `LaunchState: COLD`): 467, 471, 471 ms, **median 471 ms** (aim under 800,
+      WalkNYC 760 to 813). ⚠ Runs where the process was already back within 4 s of `force-stop`
+      read WARM (170 to 758 ms) and were discarded; what brings it back that fast is not known.
+      The field build's 2.47 s earlier was a single debuggable run. The T-254 changes were checked
+      on the real trip first: smoke test 12 of 12, roads 47,176 m in 86 lines and the same three
+      stamps as before the install.
 - [x] **T-262** Stats that mean something. **Done 2026-10-07, the lead's option A** (of three drawn
       by `tools/preview-stats-options.mjs --db <copy>`: a line, a row of four, a card): under
       "lugares visitados", *"47 km de estradas acesas em 2 dias"*, and *"N km em todas as viagens"* in

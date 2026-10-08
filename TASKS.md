@@ -1179,6 +1179,12 @@ options as language rows; it did not search plural labels). Fixed in the script.
       2. Read how `expo-maps` mounts its view.
       3. **Accept a fix only after 60 clean launches in a row** (upper bound under about 5%).
       4. If the cause is upstream, a remount watchdog is acceptable, but call it a workaround.
+- [~] **T-259** The blank map at startup, proven or reopened (execution plan, Phase 2). **Probe in
+      2026-10-08:** the diary had no record of whether the map drew, so nothing could be counted.
+      Now every opening of the map screen logs `map: drawn N ms after the screen opened`, or `map:
+      not drawn 20000 ms after the screen opened` (`MAP_DRAWN_WAIT_MS`). First reading on the P30:
+      drawn in 3034 ms. **Left:** read the count after several days of the lead's trip; T-177 closes
+      on none blank, or reopens with the evidence.
 - [ ] **T-196** **The location task fires before React is up** — split out of T-177.
       — **Read from source 2026-09-23 (expo-task-manager 57.0.9, `TaskService.java`), not yet measured.**
       The event is **not dropped**: with no task manager yet it is queued

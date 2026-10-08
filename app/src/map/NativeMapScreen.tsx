@@ -892,6 +892,24 @@ export default function NativeMapScreen({
     if (failure !== null) onShown?.();
   }, [failure, onShown]);
 
+  // T-259: whether the map drew, in the diary at every opening, so a blank
+  // map (T-177) is counted over the days of a trip instead of waited for.
+  const mountedAt = useRef(Date.now());
+  const drawn = useRef(false);
+  const mapDrawn = () => {
+    if (!drawn.current) {
+      drawn.current = true;
+      void recordingEventDao.log('map', `drawn ${Date.now() - mountedAt.current} ms after the screen opened`); // i18n-exempt: diary line, T-259 probe
+    }
+    onShown?.();
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!drawn.current) void recordingEventDao.log('map', `not drawn ${MAP_DRAWN_WAIT_MS} ms after the screen opened`); // i18n-exempt: diary line, T-259 probe
+    }, MAP_DRAWN_WAIT_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (failure !== null) {
     return (
       <View style={styles.centred}>
@@ -913,7 +931,7 @@ export default function NativeMapScreen({
     <View style={styles.root}>
       <GoogleMaps.View
         style={styles.map}
-        onMapLoaded={onShown}
+        onMapLoaded={mapDrawn}
         cameraPosition={camera ?? undefined}
         // The trace under the course: the course is only ever on screen in
         // answer to a direct question, so for those few seconds it wins.
@@ -1057,6 +1075,9 @@ export default function NativeMapScreen({
  * away from it. A miss simply leaves the camera alone.
  */
 const RECENTRE_MAX_AGE_MS = 2 * 60 * 1000;
+
+/** How long the map may take to draw before the diary calls it blank (T-259): 4 to 5 s is normal on the P30. */
+const MAP_DRAWN_WAIT_MS = 20_000;
 
 /** Street level — close enough to see which path you are standing on. */
 const RECENTRE_ZOOM = 16;

@@ -494,8 +494,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       1 Hz, `compare-sensorlogger.mjs`, 17:32 to 18:31): **of what was lit, 99.6% within 10 m of the
       ridden track** (median 1.8 m); **of what was ridden, 93.7% lit within 10 m, 95.8% within
       30 m**; the P30's fix against the iPhone's at the same second, median 4.1 m, p90 7.7 m.
-      **One miss, 790 m at the start:** the outing was started at home, the profile was
-      `stationary`, and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
+      **One miss, 790 m at the start:** the outing was started at the gym, still, so the profile was
+      and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
       never samples as `stationary` (`recorderControls.effectiveProfile`, tested). No tunnel was
       ridden, so the VR1 case is still open.
       — On the P30 with the T-245 build: **(1)** a 20 to 30 minute walk in Funchal as an outing
@@ -3583,7 +3583,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       on a fresh emulator install with an outing, it lit 7.8 km and earned the Forte's stamp. Four
       English candidates in `tools/out/store-candidates.html` (map, passport, place card, trophy);
       the trip viewer's map drew no tiles on the emulator after 45 s, so it is not among them.
-      Found on the way: "1 / 80 place collected" (`7b7d40c`).
+      Found on the way: "1 / 80 place collected" (`7b7d40c`). **Upload-ready:** `store/screenshots/`,
+      the four cut to 720 × 1440 (Play refuses longer than 2:1; the capture is 2.17) and saved
+      without alpha, by `tools/store-screenshots.mjs`.
       ✅ **Feature graphic chosen 2026-10-07: B, the flag as drawn** (of A, B, C, then B against three
       quieter versions; the lead: "I'll keep B"). `store/feature-graphic.png` (1024 × 500, 24-bit
       RGB: Play refuses alpha there) and `store/icon-512.png`, both written by `build-icon.mjs` from

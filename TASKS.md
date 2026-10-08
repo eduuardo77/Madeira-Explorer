@@ -3562,6 +3562,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       paragraph covers the trips list and the timelapse. **Left:** the lead's approval and the data
       decision it depends on; 6 to 8 screenshots per language (the P30's trace is the lead's real
       movements, so their choice which); the founder line once its window exists.
+      **Screenshots without the lead's trace, 2026-10-08:** `tools/make-demo-route.mjs` writes a
+      modelled drive on real roads (`tools/routes/demo-drive.txt`, 9 km from the Forte); replayed
+      on a fresh emulator install with an outing, it lit 7.8 km and earned the Forte's stamp. Four
+      English candidates in `tools/out/store-candidates.html` (map, passport, place card, trophy);
+      the trip viewer's map drew no tiles on the emulator after 45 s, so it is not among them.
+      Found on the way: "1 / 80 place collected" (`7b7d40c`).
       ✅ **Feature graphic chosen 2026-10-07: B, the flag as drawn** (of A, B, C, then B against three
       quieter versions; the lead: "I'll keep B"). `store/feature-graphic.png` (1024 × 500, 24-bit
       RGB: Play refuses alpha there) and `store/icon-512.png`, both written by `build-icon.mjs` from

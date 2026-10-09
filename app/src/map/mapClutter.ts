@@ -65,15 +65,20 @@ export type ClutterStyleRule = {
 };
 
 /**
- * ⚠⚠ **THE ONE SWITCH. Flip this line to put Google's POI pins back.**
+ * ⚠⚠ **THE ONE SWITCH, `GOOGLE_POIS` below.**
  *
- * The project lead has not settled this (2026-08-17): *"Hiding google POI's might
+ * **Settled 2026-10-09 by the project lead: `attractions`** (option B of three
+ * drawn on the P30; WalkNYC keeps every pin). Shops, restaurants and hotels go,
+ * which shows when zoomed in, where they covered the streets walked; museums,
+ * gardens and viewpoints keep Google's look. The August reasoning still holds:
+ *
+ * The project lead had not settled this (2026-08-17): *"Hiding google POI's might
  * not be definitive. I'm still considering it. I feel hiding it lowers the google
  * OEM feel."* That is a real cost and the same argument that won D-057 and the
  * native dark map — the value of the platform's map is partly that it looks like
  * the platform's map, and a stripped one looks like ours.
  *
- * So it is **one boolean**, not a decision spread across three style paths. And
+ * So it is **one setting**, not a decision spread across three style paths. And
  * because the same rules feed every path (see `POI_RULES` below), flipping it
  * cannot leave the light map and the dark map disagreeing — which was the state
  * this replaced, and which is the thing the project lead asked to be certain of:
@@ -87,7 +92,7 @@ export type GooglePois = 'all' | 'attractions' | 'none';
  * viewer): `attractions` hides only businesses, so museums, gardens and
  * viewpoints keep Google's look while the shops go.
  */
-export const GOOGLE_POIS: GooglePois = 'all';
+export const GOOGLE_POIS: GooglePois = 'attractions';
 
 /** Whether any of Google's points of interest are hidden: what the parity tests check. */
 export const HIDE_GOOGLE_POIS = GOOGLE_POIS !== 'all';

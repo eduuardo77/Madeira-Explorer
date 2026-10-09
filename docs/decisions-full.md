@@ -5579,3 +5579,20 @@ second number is a second thing to explain, and the lit roads are the product.
 **Cost.** Someone who drives Funchal and back sees half what a trip meter would say. That is the
 measure the app is about, and the label says so.
 
+## D-102 — Google's map pins: businesses off, attractions kept
+
+**Status:** Accepted — the project lead, 2026-10-09 (review F6, option B of three drawn on the P30).
+
+**The problem.** Google's points of interest crowded the home and the trip viewer (F6). In August the
+lead kept them all for the "Google OEM feel" (D-070 amended 2026-08-19); WalkNYC, the benchmark,
+also keeps every pin.
+
+**The decision.** `mapClutter.GOOGLE_POIS = 'attractions'`: shops, restaurants and hotels hidden,
+pins and footprints; museums, gardens, viewpoints and parks kept as Google draws them. Transit and
+road shields stay hidden as before. One rule list feeds the light map, the authored night style and
+Google's own dark map, so the two styles agree.
+
+**Rejected.** All pins (A): closest to WalkNYC, but at street zoom in Funchal the shop pins sit on
+the streets the user walked, which are the product. No pins (C): the cleanest, and the least like
+Google's map.
+

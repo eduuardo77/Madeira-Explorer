@@ -294,7 +294,7 @@ The scan was right: no call bypassed the guard. *Original note:* Find the *contr
 `prepareAsync` outside `withStatement` (the scan test should have caught it; find out why it did
 not), route it through, extend the scan.
 
-**D. Google's pins quieter (F6)** · S · Lead looks. In the map style: business points off, attractions
+**D. Google's pins quieter (F6)** · S · Lead looks. ✅ **Done 2026-10-09 (D-102):** the lead chose B of three drawn on the P30, businesses off, attractions kept. In the map style: business points off, attractions
 dimmed, on the home and the viewer. Options page first, as for every visual change.
 
 **E. One button treatment** · S · Lead picks. Green primary, text secondary, everywhere (place card

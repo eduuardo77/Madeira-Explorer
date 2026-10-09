@@ -47,7 +47,10 @@ import { MAX_ARRIVAL_SPEED_MPS, MIN_DWELL_SECONDS } from './stampRules.ts';
  * How long the trace may be silent inside a geofence before it stops counting
  * as one continuous stay.
  *
- * ⚠ NOT TUNED, and it has to exist: the sampling policy defers for up to 15
+ * ⚠ NOT TUNED, and the gap it allows is untested: the one stamp the P30 earned
+ * from its trace (Praia Formosa, 4 Oct 2026, on foot during an outing: 16 min
+ * inside across 53 fixes) had fixes far closer than this, so it never acted.
+ * It has to exist: the sampling policy defers for up to 15
  * minutes when it believes the user is stationary, which is *exactly* what
  * standing at a miradouro looks like. Without this, the recorder's own battery
  * saving would break every visit it was saving battery during.

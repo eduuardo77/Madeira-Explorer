@@ -285,7 +285,12 @@ a test that both screens give the same number for the same trip, checked on the 
 quiet *"sem estradas acesas"*); *dias* defined as the viewer's days, or the label changed to say so;
 *"›"* out of the content-desc. A pure test on `tripList.ts`.
 
-**C. The sqlite race, the last door (F5)** · S. Find the *control state* read that reached
+**C. The sqlite race, the last door (F5)** · S. ✅ **Closed 2026-10-09, no code change:** the
+*control state* error (7 Oct 13:14 UTC) went through `withStatement` and the retry; the race's
+message had a third wording (*"doesn't contain valid id"*) that the retry learned in `453f444`,
+committed three minutes later (14:17 local). Since then the diary has no `error`, and two
+`db_retry` lines (7 Oct 11:08 was before; 8 Oct 10:44 after) are the retry recovering, as designed.
+The scan was right: no call bypassed the guard. *Original note:* Find the *control state* read that reached
 `prepareAsync` outside `withStatement` (the scan test should have caught it; find out why it did
 not), route it through, extend the scan.
 

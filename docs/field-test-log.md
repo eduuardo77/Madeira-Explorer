@@ -14,6 +14,9 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-09 | Motorbike ride as an outing, 74 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 99.5% of the route lit within 10 m; a stamp; battery 100 to 96% |
+| 2026-10-08 | Motorbike ride as an outing, 59 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 93.7% lit within 10 m; ⚠ first 790 m lost (fixed) |
+| 2026-10-07 to 08 | Overnight on battery, phone still | P30 | Equilibrado | ✅ deep sleep 93%; ⚠ no battery percentage (level stuck at 100%) |
 | 2026-10-06 | Car to the gym and back, 2.3 km each way, iPhone there | P30 | Equilibrado | ⚠ there: 97% of the route drawn; back: nothing |
 | 2026-10-06 | Motorbike ride, 83 min, 32.7 km, iPhone alongside | P30 | Poupança | ❌ 29 points; a 33 min hole while riding |
 | 2026-10-05 | First real purchase, then refunded | P30 (Play install) | n/a | ✅ bought, unlocked, acknowledged |
@@ -28,6 +31,41 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-09: motorbike ride as an outing, the start fixed
+
+- **Setup:** P30, field build with `effectiveProfile` (an outing never samples as stationary).
+  *Começar passeio* pressed standing still at 11:56 local; iPhone 15 with Sensor Logger from 11:56
+  to 13:10. Unplugged at 100% at 11:30 local, when the battery record began.
+- **Result:** points every 5 to 15 s from the press; rode off at 12:00:39 and the first metres were
+  kept. Against the iPhone: **100.0% of what was lit within 10 m of the track**, **99.5% of the
+  track lit within 10 m** (100% within 30 m), no stretch missed. Same-second error median 6.7 m.
+- **Stamp:** Praia dos Reis Magos (268 s, confidence 0.30), notified and shown.
+- **Battery:** **100 to 96% in 2 h 03 min**, GPS on 1 h 03 min, screen on 22 min. Bruma second by
+  Android's estimate, after an app streaming over wifi. A morning, not the 12-hour day T-054 asks.
+- **Found:** the map-drawn probe (T-259) counted time in the background; fixed the same day.
+- Data: scratch copies only (`compare-sensorlogger.mjs` output outside the repo).
+
+### 2026-10-08: motorbike ride as an outing, the start lost
+
+- **Setup:** P30, *Começar passeio* pressed at the gym, standing still, at 17:31 local; rode from
+  about 17:35 to 18:30; iPhone 15 with Sensor Logger from 17:32. Unplugged at 100% at 16:19.
+- **Result:** 263 points; **99.6% of what was lit within 10 m of the track**, **93.7% of the track lit
+  within 10 m**. **One miss: the first 790 m.** The profile was still *stationary* (100 m between
+  points, the OS free to hold them 15 min) and 1 min 41 s passed unsampled. Fixed that evening:
+  an outing never samples as stationary (`30c273f`), confirmed on 2026-10-09.
+- **Battery:** the level read 100% until the plug, then 99%: one step, no figure.
+- **Also read:** the VR1 tunnels from the 4 Oct drives sit on the right carriageway each way; they
+  looked wrong drawn pale and are dashed since `679447e`.
+
+### 2026-10-07 to 08: overnight on battery, still
+
+- **Setup:** battery record reset at 100% at 16:57, then unplugged; used normally (rain, no ride), then still overnight;
+  read at 09:32 next morning, 16 h 22 min on battery.
+- **Result:** the recorder's foreground service held all night while the phone sat in deep sleep
+  92.6% of the time; GPS once, 1 min at the start; 30 s of CPU. **No percentage:** the level never
+  left 100% and the P30's charge counter is broken.
+
 
 ### 2026-10-06 (evening): car to the gym and back, Equilibrado
 
@@ -137,13 +175,15 @@ never where the lead lives.
 
 ## Never tested
 
-- **Battery.** No figure has been measured (D-041).
+- **Battery over a day.** Only a morning has moved the level (100 to 96% over 2 h with a ride);
+  the 12-hour day of T-054 is unmeasured. Start the next run near 80%.
 - **A full day or overnight in the pocket**, recording in the background.
 - **GPS under forest canopy** (T-076 to T-080).
 - **Any Android but the P30.** Huawei is among the harshest at closing background apps, so it is a
   hard test, but it is one phone.
 - **iPhone.** The app has never run on iOS.
 - **A trip recorded by the app with no one opening it.**
+- **Automatic recording while moving, no outing** (review F1): every ride since 6 Oct was an outing.
 
 ## Checklist before a ride
 
@@ -157,6 +197,8 @@ never where the lead lives.
 
 ## Next test
 
-The same kind of ride, at least 20 minutes, on **Equilibrado**, with step 1 done and the iPhone
-alongside. If it still leaves holes, Huawei is closing the recorder. If it does not, Poupança needs
-fixing.
+**F1: automatic recording, moving, untouched.** A ride or drive of 20 minutes or more with
+*registo automático* on and **no outing**: phone in a pocket with the screen off, the app not opened
+from leaving until the phone is back on the cable, iPhone alongside. Pass: 90% of the route lit
+within 10 m. If it fails, the recorder's sleep on EMUI is the work. Best started near 80% battery,
+which makes it the battery run too.

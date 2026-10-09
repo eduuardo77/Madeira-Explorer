@@ -14,7 +14,7 @@ import {
   clipOutsideCircle,
   latestMatchedTs,
   pointsSince,
-  travelledSinceM,
+  litSinceM,
   type TimedPoint,
 } from './roadTrace.ts';
 import { at, fixAt, network } from './testNetwork.ts';
@@ -157,21 +157,21 @@ test('the distance travelled since a moment counts only the road after it', () =
   const fixes = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5));
   const { chains } = matchTrace(net.graph, fixes);
   assert.equal(chains.length, 1);
-  const whole = travelledSinceM(net.graph, chains, 0);
+  const whole = litSinceM(net.graph, chains, 0);
   assert.ok(Math.abs(whole - 350) < 15, `the whole drive, got ${whole}`);
-  const half = travelledSinceM(net.graph, chains, fixes[5].ts);
+  const half = litSinceM(net.graph, chains, fixes[5].ts);
   assert.ok(Math.abs(half - 175) < 15, `the second half, got ${half}`);
-  assert.equal(travelledSinceM(net.graph, chains, fixes[10].ts + 1), 0);
+  assert.equal(litSinceM(net.graph, chains, fixes[10].ts + 1), 0);
 });
 
-test('a road driven twice counts twice: a trip meter, not the lit length', () => {
+test('a road driven there and back counts once: road lit, the passport’s measure (L6)', () => {
   const net = network({ a: [0, 0], b: [400, 0] }, [{ from: 'a', to: 'b' }]);
   // Measured speeds differ in the last digits; an exact repeat is a copy (staleSpeed.ts).
   const out = Array.from({ length: 11 }, (_, i) => fixAt(i * 10, 20 + i * 35, 1, 3.5 + i * 1e-3));
   const back = Array.from({ length: 11 }, (_, i) => fixAt(110 + i * 10, 370 - i * 35, 1, 3.4 + i * 1e-3));
   const { chains } = matchTrace(net.graph, [...out, ...back]);
-  const total = travelledSinceM(net.graph, chains, 0);
-  assert.ok(total > 600, `there and back, got ${total}`);
+  const total = litSinceM(net.graph, chains, 0);
+  assert.ok(total > 300 && total < 420, `the road once, got ${total}`);
 });
 
 test('the route since a moment is what the camera frames on return, and nothing when nothing is new', () => {

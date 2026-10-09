@@ -65,14 +65,23 @@ test('a day of stamps alone is a page, framed on its stamps', () => {
   assert.deepEqual(days[0].bounds, [-16.9, 32.65, -16.9, 32.65]);
 });
 
-test("the metres are the day's own, and add up to the whole", () => {
+test("each day's road lit is its own, each road once", () => {
   const morning = run(D0 + 9 * HOUR, 11);
   const nextDay = run(D0 + DAY + 9 * HOUR, 6);
   const days = tripDays([morning, nextDay], [], startOfDay);
 
   // 0.001° of longitude at 32.64° N is about 93.8 m.
-  assert.ok(Math.abs(days[0].metres - 10 * 93.8) < 5, `${days[0].metres}`);
-  assert.ok(Math.abs(days[1].metres - 5 * 93.8) < 5, `${days[1].metres}`);
+  assert.ok(Math.abs(days[0].litM - 10 * 93.8) < 5, `${days[0].litM}`);
+  assert.ok(Math.abs(days[1].litM - 5 * 93.8) < 5, `${days[1].litM}`);
+});
+
+test('a road driven there and back on one day is lit once that day, and again the next (L6)', () => {
+  const out = run(D0 + 9 * HOUR, 6);
+  const back: TimedRun = { faded: false, points: [...out.points].reverse().map((p, i) => ({ ...p, ts: D0 + 10 * HOUR + i * 60_000 })) };
+  const tomorrow = run(D0 + DAY + 9 * HOUR, 6);
+  const days = tripDays([out, back, tomorrow], [], startOfDay);
+  assert.ok(Math.abs(days[0].litM - 5 * 93.8) < 5, `${days[0].litM}`);
+  assert.ok(Math.abs(days[1].litM - 5 * 93.8) < 5, `${days[1].litM}`);
 });
 
 test('a run across midnight is split onto two pages, and they still meet', () => {

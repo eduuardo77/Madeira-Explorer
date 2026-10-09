@@ -527,8 +527,8 @@ export default function TripViewerScreen({
                 first
               />
               <Stat
-                value={formatDistance(view.travelledM, language)}
-                label={t('trip.stat.travelled')}
+                value={formatDistance(view.litM, language)}
+                label={t('trip.stat.lit')}
               />
               <Stat value={String(days.length)} label={n('trip.stat.days', days.length)} />
             </View>
@@ -561,8 +561,8 @@ export default function TripViewerScreen({
               label={n('trip.stat.stamps', day.stamps.length)}
               first
             />
-            <Stat value={formatDistance(day.metres, language)} label={t('trip.stat.travelled')} />
-            <Stat value={formatDistance(view.travelledM, language)} label={t('trip.stat.trip')} />
+            <Stat value={formatDistance(day.litM, language)} label={t('trip.stat.lit')} />
+            <Stat value={formatDistance(view.litM, language)} label={t('trip.stat.trip')} />
           </View>
           <View style={styles.dots} importantForAccessibility="no-hide-descendants">
             {days.map((d, index) => (

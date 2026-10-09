@@ -34,7 +34,7 @@ import {
   clipOutsideCircle,
   latestMatchedTs,
   pointsSince,
-  travelledSinceM,
+  litSinceM,
 } from './roadTrace';
 import type { TimedPoint, TimedRun } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
@@ -180,7 +180,7 @@ export async function roadLinesFor(
     const todayM =
       cached.day === startOfToday()
         ? cached.value.todayM
-        : travelledSinceM(network, cached.chains, startOfToday());
+        : litSinceM(network, cached.chains, startOfToday());
     return { ...cached.value, todayM, fresh: false };
   }
 
@@ -206,7 +206,7 @@ export async function roadLinesFor(
   const value: RoadLines = {
     lines: visitedLines(network, visited),
     lengthM: visitedLengthM(visited),
-    todayM: travelledSinceM(network, chains, startOfToday()),
+    todayM: litSinceM(network, chains, startOfToday()),
     latestTs: latestMatchedTs(chains),
     stats: run.value.stats,
     keptChains: kept.length,

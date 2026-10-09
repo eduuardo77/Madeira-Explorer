@@ -278,7 +278,7 @@ are the plan's; new work takes the next free IDs when it starts.
 
 ### Desk (me, about two days)
 
-**A. One kilometre figure (F3)** · S · ⇠ L6. Pure change in `tripViewerData.ts` / the passport stats,
+**A. One kilometre figure (F3)** · S · ⇠ L6. ✅ **Done 2026-10-09 (D-101):** home 19 km hoje, passport 65 km, viewer 19 km that day and 65 km the trip, read on the P30. Pure change in `tripViewerData.ts` / the passport stats,
 a test that both screens give the same number for the same trip, checked on the P30 copy.
 
 **B. The trip list says what it holds (F4, F7)** · S. Hide trips with no road and no stamp (or one

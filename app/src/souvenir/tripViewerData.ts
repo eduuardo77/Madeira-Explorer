@@ -24,12 +24,11 @@ export type TripView = {
   /** Every road the trip lit, once each: drawn pale behind the day on show. */
   lines: VisitedLine[];
   /**
-   * Travelled along lit roads over the whole trip, metres: the sum of the days,
-   * so the trip's figure is the same measure as each day's and never smaller
-   * than one of them. (Each road counted once, the trip lit 47 km on the P30
-   * while one day travelled 60; side by side the two read as a contradiction.)
+   * Road lit over the whole trip, metres, each road once: the passport's
+   * figure, from the same calculation (L6). A day's figure is the same measure
+   * for that day, so it is never larger than the trip's.
    */
-  travelledM: number;
+  litM: number;
   days: TripDay[];
   stampCount: number;
 };
@@ -75,7 +74,7 @@ export async function loadTripView(
     startedTs: trip.started_ts,
     endTs: trip.ended_ts ?? nowMs,
     lines: roads.lines,
-    travelledM: days.reduce((sum, day) => sum + day.metres, 0),
+    litM: roads.lengthM,
     days,
     stampCount: stamps.length,
   };

@@ -9,8 +9,8 @@
  * WHAT A DAY IS
  * -------------
  * The roads lit that day, as runs of `[lat, lon]` (a tunnel or cable car its
- * own faded run, as on the map); the metres travelled along them, as the home
- * screen's "km today" counts them; the box that frames them; and the stamps
+ * own faded run, as on the map); the road lit that day, each stretch once, as
+ * the home screen's "km today" counts it (L6); the box that frames them; and the stamps
  * earned that day. A day with neither a road nor a stamp is not a page.
  *
  * ⚠ **A run that crosses midnight is split between the two pages**, at the
@@ -27,7 +27,7 @@
  */
 
 import { metresBetween } from '../matching/roadGraph.ts';
-import type { TimedRun } from '../matching/roadTrace.ts';
+import { onceEachStretch, type TimedRun } from '../matching/roadTrace.ts';
 import { DATE_LOCALES, type Language } from '../i18n/languages.ts';
 
 /** `[west, south, east, north]`, the order `cameraFit.ts` takes. */
@@ -51,8 +51,8 @@ export type TripDay = {
   /** The day's local midnight: its key, and what its date is formatted from. */
   startTs: number;
   runs: DayRun[];
-  /** Travelled along the lit roads that day, metres. */
-  metres: number;
+  /** Road lit that day, metres, each stretch once however often travelled (L6). */
+  litM: number;
   /** Everything the day lit and stamped, or null for a day of stamps alone at one point. */
   bounds: DayBounds | null;
   /** Earned that day, in the order they were earned. */
@@ -71,11 +71,21 @@ export function tripDays(
   startOfDay: (ts: number) => number,
 ): TripDay[] {
   const days = new Map<number, TripDay>();
+  // One counter per day: a road lit on two days is that day's road on each.
+  const counters = new Map<TripDay, ReturnType<typeof onceEachStretch>>();
+  const litOnce = (day: TripDay) => {
+    let counter = counters.get(day);
+    if (counter === undefined) {
+      counter = onceEachStretch();
+      counters.set(day, counter);
+    }
+    return counter;
+  };
   const dayFor = (ts: number): TripDay => {
     const key = startOfDay(ts);
     let day = days.get(key);
     if (day === undefined) {
-      day = { startTs: key, runs: [], metres: 0, bounds: null, stamps: [] };
+      day = { startTs: key, runs: [], litM: 0, bounds: null, stamps: [] };
       days.set(key, day);
     }
     return day;
@@ -94,7 +104,7 @@ export function tripDays(
         day.runs.push(current.run);
       }
       current.run.points.push([b.lat, b.lon]);
-      day.metres += metresBetween(a.lat, a.lon, b.lat, b.lon);
+      day.litM += litOnce(day)(a, b, metresBetween(a.lat, a.lon, b.lat, b.lon));
     }
   }
 

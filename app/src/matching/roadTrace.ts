@@ -98,16 +98,36 @@ export function chainTimedRuns(graph: RoadGraph, chain: MatchedChain): TimedRun[
 }
 
 /**
- * How far the chains went along their roads after `sinceTs`, in metres: the
- * map's *"14 km today"*. A road driven twice counts twice, as a trip meter
- * does, which is why this is not the lit length. A stretch that straddles
- * `sinceTs` counts its share by time. Tunnels count: the user went through.
+ * A counter of road lit, each stretch once however often it is travelled
+ * (L6, 2026-10-09: the app shows one distance, *km de estradas acesas*, as the
+ * passport always has). A stretch is a pair of the network's own points, so a
+ * road driven there and back is the same stretch both ways. It used to be a
+ * trip meter here, a road driven twice counting twice, and the viewer's day
+ * then read 60 km beside a trip of 47.
  */
-export function travelledSinceM(
+export function onceEachStretch(): (a: { lat: number; lon: number }, b: { lat: number; lon: number }, length: number) => number {
+  const seen = new Set<string>();
+  const key = (p: { lat: number; lon: number }) => `${p.lat.toFixed(6)},${p.lon.toFixed(6)}`;
+  return (a, b, length) => {
+    const [first, second] = [key(a), key(b)].sort();
+    const stretch = `${first}|${second}`;
+    if (seen.has(stretch)) return 0;
+    seen.add(stretch);
+    return length;
+  };
+}
+
+/**
+ * Road lit after `sinceTs`, in metres, each stretch once: the map's *"14 km
+ * today"*. A stretch that straddles `sinceTs` counts its share by time.
+ * Tunnels count: the user went through.
+ */
+export function litSinceM(
   graph: RoadGraph,
   chains: readonly MatchedChain[],
   sinceTs: number
 ): number {
+  const count = onceEachStretch();
   let total = 0;
   for (const chain of chains) {
     const anchors = chain.anchors;
@@ -123,7 +143,7 @@ export function travelledSinceM(
         }
         const length = metres([a.lat, a.lon], [b.lat, b.lon]);
         const share = a.ts >= sinceTs || b.ts <= a.ts ? 1 : (b.ts - sinceTs) / (b.ts - a.ts);
-        total += length * share;
+        total += count(a, b, length * share);
       }
     }
   }

@@ -5552,3 +5552,24 @@ also has the timelapse, which is why the animated film was kept rather than remo
 **Costs taken.** The map's gestures are off in the viewer (the tags are placed by this app's own
 projection); a share waits 1.5 s for map tiles rather than a signal, which expo-maps does not give;
 `takeSnapshot` is a native addition in the project's expo-maps patch.
+
+## D-101 — One distance: road lit, each road once
+
+**Status:** Accepted — the project lead, 2026-10-09 (L6 in `docs/bruma-score-and-plan-2026-10-09.md`):
+*"show only km de estradas acesas"*.
+
+**The problem.** The app showed two distances. The passport said *47 km de estradas acesas* (each
+road once); the trip viewer's day said *Percorridos* and the home *14 km hoje*, both trip meters that
+counted a road driven twice twice. On the P30 a day read 60 km beside a trip of 47, which looks like
+an error, and the interim review (F3) scored it as one.
+
+**The decision.** Every distance is road lit, each stretch once (`roadTrace.onceEachStretch`): the
+home's *hoje*, each day in the viewer, and the trip, which is the passport's own figure from the same
+calculation. A day is never larger than its trip.
+
+**Rejected.** Keeping travelled distance with a clearer label (*percorridos, contando repetições*): a
+second number is a second thing to explain, and the lit roads are the product.
+
+**Cost.** Someone who drives Funchal and back sees half what a trip meter would say. That is the
+measure the app is about, and the label says so.
+

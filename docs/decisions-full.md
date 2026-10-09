@@ -5596,3 +5596,12 @@ Google's own dark map, so the two styles agree.
 the streets the user walked, which are the product. No pins (C): the cleanest, and the least like
 Google's map.
 
+## D-103 — Buttons stay three colours, each with a reason
+
+**Status:** Accepted — the project lead, 2026-10-09 (review item E), after seeing the home, a place
+card and the unlock sheet on the P30 three ways: as today, blue everywhere, green everywhere.
+
+**The decision.** No change: green for *Começar passeio* (red for *Terminar passeio*), blue for every
+other main button, gold for the stamp pop-up and the trophy. The review's "one button treatment"
+is answered by the rule, not by one colour.
+

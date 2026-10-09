@@ -297,7 +297,7 @@ not), route it through, extend the scan.
 **D. Google's pins quieter (F6)** · S · Lead looks. ✅ **Done 2026-10-09 (D-102):** the lead chose B of three drawn on the P30, businesses off, attractions kept. In the map style: business points off, attractions
 dimmed, on the home and the viewer. Options page first, as for every visual change.
 
-**E. One button treatment** · S · Lead picks. Green primary, text secondary, everywhere (place card
+**E. One button treatment** · S · Lead picks. ✅ **Settled 2026-10-09 (D-103): left as it is**, after blue-only and green-only were drawn on the P30. Green primary, text secondary, everywhere (place card
 *Ver no mapa* included), or the lead's other choice.
 
 **F. Docs (F8, F9)** · XS. ✅ **Done 2026-10-09:** the test log has 7 to 9 Oct and F1 as its next test (`ed6e912`); D-070 records the 4 Oct removal. The test log's entries for 7 to 8 Oct and 8 Oct; D-070 amended with the

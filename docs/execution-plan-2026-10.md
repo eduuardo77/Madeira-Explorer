@@ -358,6 +358,15 @@ Expected strict score: **15 or more** (E to 15).
 
 ### Phase 6: Launch
 
+#### ⚠ Google's gate before production (read in Play Console 2026-10-09)
+A personal developer account cannot ask for production until it has run a **closed test with at
+least 12 testers who opted in, for at least 14 days**, and then answered Google's questions about
+that test. The Console's *Solicitar a produção* stays disabled until then. So the closed beta
+(T-129, D-084: it runs unlocked) is not optional and sets the earliest launch date: 14 days after
+the twelfth tester opts in. The closed track also needs the app's setup finished first (content
+rating, government, financial, health, category and contact were open on 2026-10-09). Google
+suggests the closed track for the pre-launch report too; none ran on internal testing.
+
 #### T-137 Submit (exists), with the launch checklist
 1. Set `founderWindow.start` in `content/pois.json` to the release date (the smoke test refuses
    otherwise).

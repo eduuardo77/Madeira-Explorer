@@ -3563,6 +3563,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 ## Phase 7 — Beta and launch
 
 - [ ] **T-129** Recruit closed beta testers taking real Madeira trips ⇠ M6
+      ⚠ **Now a hard gate (Play Console, read 2026-10-09):** production access needs a closed test
+      with **12 or more testers opted in for 14 days or more**, then Google's questions about it.
+      Testers need not be in Madeira to count; Google counts opt-ins. Version 4 is on internal
+      testing (active, not reviewed, since 2026-10-08 15:31); no pre-launch report has run there.
 - [x] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
       upload ⇠ T-125
       — Done 2026-08-16 as **D-069**, Settings → *Send a walk*: the masked trace, every stamp

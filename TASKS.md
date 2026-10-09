@@ -312,6 +312,15 @@ permission, L3 privacy contact.
       permission with what adds it (from the APK and the manifest merger report) and why; every
       table on the phone; everything that leaves it, with evidence; the August banner replaced.
       **Left:** the packet capture over a launch, a map pan and the purchase sheet (T-117b).
+      **Checked without a capture app, 2026-10-09:** the kernel's socket tables
+      (`/proc/net/tcp{,6}`, `udp{,6}`) sampled about every 0.5 s while the smoke test drove every
+      screen (launch, map, Settings, unlock sheet, passport, card, viewer, timelapse, trophy), kept
+      for Bruma's uid (10242). **One remote address only: 142.251.142.142:443**, owner **Google LLC**
+      (ARIN NET-142-250-0-0-1; reverse name `…1e100.net`). ⚠ **What this cannot see:** a connection
+      shorter than the sampling gap; anything Play services or the Play Store opens on the app's
+      behalf under their own uid (the purchase itself goes through the Play Store); and contents,
+      which are encrypted. It agrees with the Data safety answers; a full capture (PCAPdroid on the
+      P30) would close those three gaps.
 - [x] **T-266** The battery permission, decided: **kept** (L2), with Google's text quoted in D-045:
       location tracking is not on its list; the case is "core function adversely affected". Play
       declaration drafted there; deleting the module is the fallback if Play refuses.

@@ -303,7 +303,7 @@ dimmed, on the home and the viewer. Options page first, as for every visual chan
 **F. Docs (F8, F9)** · XS. ✅ **Done 2026-10-09:** the test log has 7 to 9 Oct and F1 as its next test (`ed6e912`); D-070 records the 4 Oct removal. The test log's entries for 7 to 8 Oct and 8 Oct; D-070 amended with the
 4 Oct removal (or a new decision if the lead takes L4).
 
-**G. The packet capture (T-264 / T-117b)** · S. A launch, a map pan, the purchase sheet; only Google
+**G. The packet capture (T-264 / T-117b)** · S. ◐ **Partly 2026-10-09:** socket tables sampled over a smoke run: Bruma's uid talked to one Google LLC address only (TASKS T-264 has the limits); a full capture would need PCAPdroid on the P30. A launch, a map pan, the purchase sheet; only Google
 hosts expected. The Data safety answers rest on it, so before the lead submits.
 
 **H. Levada practical information (T-201 left)** · M. ✅ **Done 2026-10-09:** the eleven PR levadas show their published figures on the card (`docs/levada-practical-draft.md`, the lead's choices: distance as published, no price); every levada card says to check the trail is open (option a; PR7 and PR28 were closed that day). Length and time from IFCN's official figures

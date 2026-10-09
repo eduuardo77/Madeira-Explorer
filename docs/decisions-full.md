@@ -3502,6 +3502,12 @@ recommendation in OD-11 was this *first* rather than this *only*.
 
 ⚠ **Amended 2026-09-23 by D-085:** the map also shows the places still to collect, as faint marks, with the nearest called out. *"Nothing else"* no longer holds.
 
+⚠ **Amended again 2026-10-04 (`594d6a9`), recorded 2026-10-09 (review F9): the home map draws no
+place at all.** The project lead asked for the collected-place circles to go after seeing them on the
+P30; with them went the tap that opened a place's card. The map shows the lit roads only; a place
+is reached from the passport (*Ver no mapa*), and the stamp button shows the latest one. Whether
+the home should point to a place to go next is decision L4, still open.
+
 ### The problem, found by looking rather than by testing
 
 The primary screen said `1 / 60` in its hero and **marked nothing on the map**. Worse, Google's

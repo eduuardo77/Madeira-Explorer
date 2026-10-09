@@ -98,7 +98,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-067** | The accuracy cut is a preference, not a veto. A canopy stretch still draws. | Provisional |
 | **D-068** | A levada is credited by time as well as distance. You cannot always finish one. | Provisional |
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
-| **D-070** | The map shows the places you earned, and nothing else. Chrome follows the map. ⚠ *Amended by D-085.* | Provisional |
+| **D-070** | ~~The map shows the places you earned~~ ⚠ **Since 2026-10-04 the home map draws no place** (the lead removed the circles); places open from the passport. Chrome follows the map. | Provisional |
 | **D-071** | The map is the product. ⚠ **Partly reversed 2026-08-17: stamps are a priority again** (D-072 made them the revenue). | **Superseded in part** |
 | **D-072** | **Free on Play. Trace always free; ~~10~~ stamps + your first levada free; ~~€4.99~~ unlocks the rest.** ⚠ *Allowance and price superseded by D-089.* | **Superseded in part** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |

@@ -498,6 +498,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       `stationary`, and 1 min 41 s passed unsampled until movement switched it. **Fixed:** a walk
       never samples as `stationary` (`recorderControls.effectiveProfile`, tested). No tunnel was
       ridden, so the VR1 case is still open.
+      ✅ **Second ride, 2026-10-09, the fix confirmed** (outing started standing still at 10:56 UTC,
+      fixes every 5 to 15 s from the press; rode off 11:00:39, first metres recorded): **lit vs track
+      100.0% within 10 m** (median 1.8 m); **track vs lit 99.5% within 10 m, 100% within 30 m**, no
+      stretch missed; same-second fix error median 6.7 m. Stamp *Praia dos Reis Magos* on the way
+      (268 s, confidence 0.30). **VR1 tunnels** read from the 2026-10-04 drives: each direction on its
+      own carriageway; drawn dashed since `679447e`.
       — On the P30 with the T-245 build: **(1)** a 20 to 30 minute walk in Funchal as an outing
       (*Começar passeio*); **(2)** a similar walk with automatic recording only; **(3)** a drive
       that goes through at least one VR1 tunnel. Then pull the database (field build, `run-as`)
@@ -1183,7 +1189,10 @@ options as language rows; it did not search plural labels). Fixed in the script.
       2026-10-08:** the diary had no record of whether the map drew, so nothing could be counted.
       Now every opening of the map screen logs `map: drawn N ms after the screen opened`, or `map:
       not drawn 20000 ms after the screen opened` (`MAP_DRAWN_WAIT_MS`). First reading on the P30:
-      drawn in 3034 ms. **Left:** read the count after several days of the lead's trip; T-177 closes
+      drawn in 3034 ms. ⚠ **Fixed 2026-10-09:** it timed from the screen's mount, so an app put
+      away before its map drew logged "not drawn" and then "drawn 347028 ms"; now only time in front
+      counts (checked: home 3 s after launch, 30 s away, then "drawn 693 ms after the screen came to
+      the front", no false line). **Left:** read the count after several days of the lead's trip; T-177 closes
       on none blank, or reopens with the evidence.
 - [ ] **T-196** **The location task fires before React is up** — split out of T-177.
       — **Read from source 2026-09-23 (expo-task-manager 57.0.9, `TaskService.java`), not yet measured.**
@@ -1887,6 +1896,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       it the GPS; its CPU 2 min 21 s, wakelocks 34 min. ⚠ Still no percentage worth the name: the
       level moved one step and EMUI holds 100% near the top, and the mAh counter is broken. **What
       would give one:** a run started well below full (say 80%), where every step shows.
+      **Second ride, 2026-10-09** (unplugged 11:30 at 100%): **100 to 96% in 2 h 03 min**, the steps
+      at +46, +74, +93 and +105 min; the screen on 22 min; Bruma's GPS on 1 h 03 min. Android's
+      estimate puts Bruma second, after an app streaming over wifi. A morning with an hour's ride and
+      some phone use, not Bruma alone; still not the 12-hour day the target names.
 - [ ] **T-055** Verify zero network traffic attributable to recording ⇠ T-051
       — **Overlaps T-117b** (added 2026-08-11), which watches the *whole app* including FCM
       (D-043). Run them as one capture; this task is the recording-specific reading of it.

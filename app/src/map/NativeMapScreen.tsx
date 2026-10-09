@@ -42,6 +42,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   PixelRatio,
   StatusBar,
   StyleSheet,
@@ -894,20 +895,39 @@ export default function NativeMapScreen({
 
   // T-259: whether the map drew, in the diary at every opening, so a blank
   // map (T-177) is counted over the days of a trip instead of waited for.
-  const mountedAt = useRef(Date.now());
+  // ⚠ Only time in front counts: Google's map draws only on screen. The first
+  // version timed from the screen's mount, and an app put away before its map
+  // drew logged "not drawn" and then "drawn 347028 ms" (P30, 2026-10-09).
+  const frontSince = useRef(Date.now());
   const drawn = useRef(false);
   const mapDrawn = () => {
     if (!drawn.current) {
       drawn.current = true;
-      void recordingEventDao.log('map', `drawn ${Date.now() - mountedAt.current} ms after the screen opened`); // i18n-exempt: diary line, T-259 probe
+      void recordingEventDao.log('map', `drawn ${Date.now() - frontSince.current} ms after the screen came to the front`); // i18n-exempt: diary line, T-259 probe
     }
     onShown?.();
   };
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!drawn.current) void recordingEventDao.log('map', `not drawn ${MAP_DRAWN_WAIT_MS} ms after the screen opened`); // i18n-exempt: diary line, T-259 probe
-    }, MAP_DRAWN_WAIT_MS);
-    return () => clearTimeout(timer);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const watch = () => {
+      frontSince.current = Date.now();
+      timer = setTimeout(() => {
+        if (!drawn.current) void recordingEventDao.log('map', `not drawn ${MAP_DRAWN_WAIT_MS} ms after the screen came to the front`); // i18n-exempt: diary line, T-259 probe
+      }, MAP_DRAWN_WAIT_MS);
+    };
+    const stop = () => {
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+    };
+    watch();
+    const subscription = AppState.addEventListener('change', (next) => {
+      stop();
+      if (next === 'active' && !drawn.current) watch();
+    });
+    return () => {
+      stop();
+      subscription.remove();
+    };
   }, []);
 
   if (failure !== null) {

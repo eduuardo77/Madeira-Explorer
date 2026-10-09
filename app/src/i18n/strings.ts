@@ -746,6 +746,16 @@ export const STRINGS = {
   'date.range': s('{start} to {end}', '{start} a {end}', '{start} bis {end}'),
   // 2026-09-25: the status line under the name on the passport's card.
   'placeCard.status.notYet': s('Not visited yet', 'Ainda por visitar', 'Noch nicht besucht'),
+  // Review H (2026-10-09): an official walk's figures as published, and on
+  // every levada a reminder the app cannot know a closure.
+  'placeCard.walk.oneWayReturn': s('{oneWay} ({return} return)', '{oneWay} ({return} ida e volta)', '{oneWay} ({return} hin und zurück)'),
+  'placeCard.walk.easy': s('Easy', 'Fácil', 'Leicht'),
+  'placeCard.walk.moderate': s('Moderate', 'Médio', 'Mittel'),
+  'placeCard.trailNote': s(
+    'Check the trail is open before you go.',
+    'Confirma o estado do percurso antes de ir.',
+    'Prüfe vor dem Aufbruch, ob der Weg offen ist.'
+  ),
   'placeCard.status.visited': s('Visited', 'Já lá estiveste', 'Besucht'),
   // T-156d: the way from a locked stamp's card to the unlock sheet.
   'placeCard.unlock': s(

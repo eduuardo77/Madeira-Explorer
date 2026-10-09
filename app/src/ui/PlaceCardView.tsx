@@ -175,6 +175,11 @@ export default function PlaceCardView({
           about getting there. */}
       {card.whyLine === null ? null : <Text style={[styles.why, text]}>{card.whyLine}</Text>}
 
+      {/* Review H: the official walk's figures as published, then on every
+          levada the reminder that the app cannot know a closure. */}
+      {card.walkLine === null ? null : <Text style={[styles.walk, text]}>{card.walkLine}</Text>}
+      {card.trailNote === null ? null : <Text style={[styles.trailNote, muted]}>{card.trailNote}</Text>}
+
       {/* The municipality (T-067, D-027) — *where is this*, which is the one
           question the card could not answer.
           ⚠ **Its own line, and not appended to the line above.** Measured in
@@ -302,6 +307,15 @@ const styles = StyleSheet.create({
   status: {
     color: colors.textMuted,
     fontSize: fontSize.small,
+  },
+  walk: {
+    fontSize: fontSize.small,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  trailNote: {
+    fontSize: fontSize.small,
+    marginBottom: spacing.sm,
   },
   why: {
     color: colors.text,

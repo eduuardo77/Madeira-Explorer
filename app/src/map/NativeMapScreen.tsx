@@ -652,6 +652,7 @@ export default function NativeMapScreen({
           nowMs: Date.now(),
           language: deviceLanguage(),
           why: requestedPlace.place.why,
+          walk: requestedPlace.place.walk,
         })
       );
 

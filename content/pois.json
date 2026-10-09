@@ -52,6 +52,7 @@
         "pt": "PR10, do Ribeiro Frio à Portela, pela Laurissilva.",
         "de": "PR10, von Ribeiro Frio nach Portela, durch den Lorbeerwald."
       },
+      "walk": { "route": "PR10", "km": 11, "minutes": 300, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-do-furado-start",
@@ -79,6 +80,7 @@
         "pt": "PR6, a partir do Rabaçal. Termina numa lagoa alimentada por nascentes na rocha.",
         "de": "PR6, ab Rabaçal. Sie endet an einem Becken, das Quellen im Fels speisen."
       },
+      "walk": { "route": "PR6", "km": 4.3, "returnKm": 8.6, "minutes": 180, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-das-25-fontes-start",
@@ -836,6 +838,7 @@
         "pt": "PR9, das Queimadas ao Caldeirão Verde, uma cascata que cai numa lagoa.",
         "de": "PR9, von Queimadas zum Caldeirão Verde, einem Wasserfall, der in ein Becken stürzt."
       },
+      "walk": { "route": "PR9", "km": 8.7, "returnKm": 17.4, "minutes": 390, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-do-caldeirao-verde-start",
@@ -863,6 +866,7 @@
         "pt": "PR14, pela Laurissilva do Fanal.",
         "de": "PR14, durch den Lorbeerwald von Fanal."
       },
+      "walk": { "route": "PR14", "km": 7.2, "minutes": 180, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-dos-cedros-start",
@@ -890,6 +894,7 @@
         "pt": "PR18, de São Jorge até à nascente do Ribeiro Bonito, na Laurissilva.",
         "de": "PR18, von São Jorge zur Quelle des Ribeiro Bonito, im Lorbeerwald."
       },
+      "walk": { "route": "PR18", "km": 5.3, "returnKm": 10.6, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-do-rei-start",
@@ -917,6 +922,7 @@
         "pt": "PR28, da rede de levadas do Rabaçal, abaixo da levada das 25 Fontes.",
         "de": "PR28, Teil des Levada-Netzes von Rabaçal, unterhalb der Levada das 25 Fontes."
       },
+      "walk": { "route": "PR28", "km": 10.8, "minutes": 240 },
       "geofences": [
         {
           "id": "levada-da-rocha-vermelha-start",
@@ -944,6 +950,7 @@
         "pt": "PR6.1, do Rabaçal à Cascata do Risco.",
         "de": "PR6.1, von Rabaçal zum Wasserfall Risco."
       },
+      "walk": { "route": "PR6.1", "km": 1.5, "returnKm": 3, "minutes": 120, "difficulty": "easy" },
       "geofences": [
         {
           "id": "levada-do-risco-start",
@@ -978,6 +985,7 @@
         "pt": "PR6.2, do Rabaçal à Lagoa do Vento.",
         "de": "PR6.2, von Rabaçal zur Lagoa do Vento."
       },
+      "walk": { "route": "PR6.2", "km": 3.5, "returnKm": 7, "minutes": 150, "difficulty": "easy" },
       "geofences": [
         {
           "id": "levada-do-alecrim-start",
@@ -1012,6 +1020,7 @@
         "pt": "PR7, na Ribeira da Cruz, no noroeste da ilha.",
         "de": "PR7, in Ribeira da Cruz, im Nordwesten der Insel."
       },
+      "walk": { "route": "PR7", "km": 10.5, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-do-moinho-start",
@@ -1039,6 +1048,7 @@
         "pt": "PR16, perto de São Vicente, com túneis.",
         "de": "PR16, bei São Vicente, mit Tunneln."
       },
+      "walk": { "route": "PR16", "km": 3.9, "returnKm": 7.8, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
           "id": "levada-faja-do-rodrigues-start",
@@ -1066,6 +1076,7 @@
         "pt": "PR4, do Poço da Neve, uma casa de gelo de 1813, até à Casa do Barreiro, no Parque Ecológico do Funchal.",
         "de": "PR4, vom Poço da Neve, einem Eishaus von 1813, zur Casa do Barreiro im Ökologischen Park Funchal."
       },
+      "walk": { "route": "PR4", "km": 5.2, "minutes": 130, "difficulty": "easy" },
       "geofences": [
         {
           "id": "levada-do-barreiro-start",

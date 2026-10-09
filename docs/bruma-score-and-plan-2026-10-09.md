@@ -306,7 +306,7 @@ dimmed, on the home and the viewer. Options page first, as for every visual chan
 **G. The packet capture (T-264 / T-117b)** · S. A launch, a map pan, the purchase sheet; only Google
 hosts expected. The Data safety answers rest on it, so before the lead submits.
 
-**H. Levada practical information (T-201 left)** · M. Length and time from IFCN's official figures
+**H. Levada practical information (T-201 left)** · M. ✅ **Done 2026-10-09:** the eleven PR levadas show their published figures on the card (`docs/levada-practical-draft.md`, the lead's choices: distance as published, no price); every levada card says to check the trail is open (option a; PR7 and PR28 were closed that day). Length and time from IFCN's official figures
 for the 18 levadas, on the place card. Only published figures, each sourced (D-041's rule applies to
 facts as much as to battery).
 

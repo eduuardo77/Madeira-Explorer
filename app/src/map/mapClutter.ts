@@ -92,7 +92,7 @@ export type GooglePois = 'all' | 'attractions' | 'none';
  * viewer): `attractions` hides only businesses, so museums, gardens and
  * viewpoints keep Google's look while the shops go.
  */
-export const GOOGLE_POIS: GooglePois = 'attractions';
+export const GOOGLE_POIS = 'attractions' as GooglePois;
 
 /** Whether any of Google's points of interest are hidden: what the parity tests check. */
 export const HIDE_GOOGLE_POIS = GOOGLE_POIS !== 'all';

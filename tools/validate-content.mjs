@@ -181,9 +181,9 @@ async function main() {
 
   // Everything the app itself would drop.
   for (const problem of parsed.problems) {
-    // A bad `why` line is dropped and its place kept (T-201), so it is a
-    // warning: the error list below means "this place will not reach the app".
-    if (problem.problem.startsWith('`why')) {
+    // A bad `why` line or `walk` is dropped and its place kept (T-201, review
+    // H), so it is a warning: the error list means "this place will not reach the app".
+    if (problem.problem.startsWith('`why') || problem.problem.startsWith('`walk')) {
       warn(problem.where, problem.problem);
     } else {
       error(problem.where, problem.problem);

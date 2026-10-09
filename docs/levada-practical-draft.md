@@ -1,6 +1,6 @@
 # Levada practical information: draft for the lead's veto (review item H)
 
-**For:** the project lead. **Drafted:** 2026-10-09. **Method:** D-064, I draft and you strike or
+**For:** the project lead. **Drafted:** 2026-10-09. ✅ **Decided the same day:** (a) the check-the-trail line on every levada; distance as published; no price. In `content/pois.json` (`walk`) and on the card. **Method:** D-064, I draft and you strike or
 fix. **Rule:** only published figures, each sourced (D-041 applies to facts as to battery).
 
 **Source:** VisitMadeira, the regional tourism authority's page for each recommended walk (PR),

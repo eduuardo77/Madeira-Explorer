@@ -45,7 +45,7 @@
  * Tested in `placeCard.test.ts`.
  */
 
-import type { Category, PlaceWhy } from '../content/contentPack.ts';
+import type { Category, PlaceWalk, PlaceWhy } from '../content/contentPack.ts';
 import { hasCourse } from '../map/levadaHighlight.ts';
 import { distanceM, isUsableCoordinate } from '../recording/distance.ts';
 import { MAX_DRAWN_ACCURACY_M } from '../map/traceGeoJson.ts';
@@ -102,6 +102,8 @@ export type PlaceCardInput = {
   language: Language;
   /** The pack's "why go" lines (T-201), if it has any. */
   why?: PlaceWhy;
+  /** The official walk's published figures (review H), if it is one. */
+  walk?: PlaceWalk;
   /**
    * The day the stamp was earned, already written in the card's language
    * ("20 de setembro"), or null when it is not known. Formatted by the caller,
@@ -159,6 +161,18 @@ export type PlaceCard = {
    * collected, locked or not (D-075).
    */
   statusLine: string;
+  /**
+   * The official walk in one line, *"PR6 · 4,3 km (8,6 km ida e volta) · 3 h ·
+   * Médio"*, figures as published (review H, the lead's choice 2026-10-09).
+   * Null for a place that is not a classified walk.
+   */
+  walkLine: string | null;
+  /**
+   * On every levada: check the trail is open before going. The app is offline
+   * and cannot know a closure (two PR walks were closed on 2026-10-09; the
+   * lead's option a). Null for other places.
+   */
+  trailNote: string | null;
 };
 
 /**
@@ -244,6 +258,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     nowMs,
     language,
     why,
+    walk,
     visitedOn,
   } = input;
 
@@ -287,7 +302,42 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
       : visitedOn
         ? translate(STRINGS['placeCard.status.visitedOn'], language, { date: visitedOn })
         : translate(STRINGS['placeCard.status.visited'], language),
+    walkLine: walk === undefined ? null : walkLine(walk, language),
+    trailNote: category === 'levada' ? translate(STRINGS['placeCard.trailNote'], language) : null,
   };
+}
+
+/**
+ * A published distance as published: one decimal when it has one, none when
+ * it is whole, the decimal mark the language's. Not `formatDistance`, which
+ * rounds beyond 10 km and would turn the official 10,5 km into 11.
+ */
+export function formatPublishedKm(km: number, language: Language): string {
+  const text = Number.isInteger(km) ? String(km) : km.toFixed(1);
+  return `${language === 'en' ? text : text.replace('.', ',')} km`;
+}
+
+/** Minutes as a walk time: "5 h", "3 h 30". The same in the three languages. */
+export function formatWalkTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} min`;
+  return rest === 0 ? `${hours} h` : `${hours} h ${String(rest).padStart(2, '0')}`;
+}
+
+function walkLine(walk: PlaceWalk, language: Language): string {
+  const distance =
+    walk.returnKm === undefined
+      ? formatPublishedKm(walk.km, language)
+      : translate(STRINGS['placeCard.walk.oneWayReturn'], language, {
+          oneWay: formatPublishedKm(walk.km, language),
+          return: formatPublishedKm(walk.returnKm, language),
+        });
+  const parts = [walk.route, distance, formatWalkTime(walk.minutes)];
+  if (walk.difficulty !== undefined) {
+    parts.push(translate(STRINGS[walk.difficulty === 'easy' ? 'placeCard.walk.easy' : 'placeCard.walk.moderate'], language));
+  }
+  return parts.join(' · ');
 }
 
 /** The municipality worth saying: trimmed, and not when it only repeats the name. */

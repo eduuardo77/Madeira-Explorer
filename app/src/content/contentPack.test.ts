@@ -446,3 +446,19 @@ test('T-233: a founder window with a typo is reported and dropped, never half re
     assert.ok(result.problems.some((problem) => problem.where === 'founderWindow'), JSON.stringify(bad));
   }
 });
+
+test('review H: an official walk is read as published', () => {
+  const walk = { route: 'PR6', km: 4.3, returnKm: 8.6, minutes: 180, difficulty: 'moderate' };
+  const { pack: parsed, problems } = parseContentPack(pack([placeRow({ walk })]));
+  assert.deepEqual(problems, []);
+  assert.deepEqual(parsed.places[0].walk, walk);
+});
+
+test('⚠ review H: a malformed walk is reported and dropped; the place stays', () => {
+  for (const walk of ['PR6', { km: 4 }, { route: 'PR6', km: -1, minutes: 60 }, { route: 'PR6', km: 4, minutes: 60, difficulty: 'hard' }]) {
+    const { pack: parsed, problems } = parseContentPack(pack([placeRow({ walk })]));
+    assert.equal(parsed.places.length, 1, JSON.stringify(walk));
+    assert.equal(parsed.places[0].walk, undefined, JSON.stringify(walk));
+    assert.equal(problems.length, 1, JSON.stringify(walk));
+  }
+});

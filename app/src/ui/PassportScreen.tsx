@@ -398,6 +398,7 @@ export default function PassportScreen({
           nowMs: Date.now(),
           language,
           why: place.why,
+          walk: place.walk,
           visitedOn,
         })
       );

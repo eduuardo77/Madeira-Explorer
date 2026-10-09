@@ -15,6 +15,8 @@ import assert from 'node:assert/strict';
 import {
   buildPlaceCard,
   formatDistance,
+  formatPublishedKm,
+  formatWalkTime,
   isPositionUsable,
   MAX_POSITION_AGE_MS,
   MAX_SHOWN_DISTANCE_M,
@@ -234,3 +236,27 @@ test('the status line says where the user stands, and never un-collects a stamp'
     'Not visited yet'
   );
 });
+
+test('review H: the walk line, figures as published, in the card’s language', () => {
+  const walk = { route: 'PR6', km: 4.3, returnKm: 8.6, minutes: 180, difficulty: 'moderate' as const };
+  assert.equal(buildPlaceCard(input({ category: 'levada', walk, language: 'pt' })).walkLine, 'PR6 · 4,3 km (8,6 km ida e volta) · 3 h · Médio');
+  assert.equal(buildPlaceCard(input({ category: 'levada', walk, language: 'en' })).walkLine, 'PR6 · 4.3 km (8.6 km return) · 3 h · Moderate');
+  // No return figure, no difficulty: only what was published.
+  const closed = { route: 'PR28', km: 10.8, minutes: 240 };
+  assert.equal(buildPlaceCard(input({ category: 'levada', walk: closed, language: 'pt' })).walkLine, 'PR28 · 10,8 km · 4 h');
+  assert.equal(buildPlaceCard(input({ category: 'levada' })).walkLine, null);
+});
+
+test('review H: every levada says to check the trail; nothing else does', () => {
+  assert.equal(buildPlaceCard(input({ category: 'levada', language: 'pt' })).trailNote, 'Confirma o estado do percurso antes de ir.');
+  assert.equal(buildPlaceCard(input({ category: 'viewpoint' })).trailNote, null);
+});
+
+test('review H: a published figure is never rounded, and times read as walkers write them', () => {
+  assert.equal(formatPublishedKm(10.5, 'pt'), '10,5 km');
+  assert.equal(formatPublishedKm(11, 'en'), '11 km');
+  assert.equal(formatWalkTime(130), '2 h 10');
+  assert.equal(formatWalkTime(300), '5 h');
+  assert.equal(formatWalkTime(45), '45 min');
+});
+

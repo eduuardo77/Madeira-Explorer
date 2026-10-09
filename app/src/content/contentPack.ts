@@ -96,6 +96,25 @@ export type Place = {
    * language's line — `validate-content.mjs` reports the gap.
    */
   why?: PlaceWhy;
+  /**
+   * An official walk's published figures (review H, 2026-10-09): a levada that
+   * is a classified route (PR). Optional; most places have none, and a levada
+   * with no official route has none either (only published figures).
+   */
+  walk?: PlaceWalk;
+};
+
+/**
+ * A classified walk as its official page gives it: the route number, the
+ * distance (one way when the page also gives `returnKm`), the expected time in
+ * minutes, and the difficulty when stated. Figures exactly as published.
+ */
+export type PlaceWalk = {
+  route: string;
+  km: number;
+  returnKm?: number;
+  minutes: number;
+  difficulty?: 'easy' | 'moderate';
 };
 
 /**
@@ -471,9 +490,48 @@ function parsePlace(
   }
 
   const why = parseWhy(row.why, named, problems);
-  return why === undefined
-    ? { id, name, category, regionId, geofences }
-    : { id, name, category, regionId, geofences, why };
+  const walk = parseWalk(row.walk, named, problems);
+  return {
+    id,
+    name,
+    category,
+    regionId,
+    geofences,
+    ...(why === undefined ? {} : { why }),
+    ...(walk === undefined ? {} : { walk }),
+  };
+}
+
+/**
+ * The optional official-walk figures (review H). Like `why`, decoration: a bad
+ * one is reported and dropped, and the place is kept.
+ */
+function parseWalk(raw: unknown, where: string, problems: ContentProblem[]): PlaceWalk | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+  const bad = (problem: string) => {
+    problems.push({ where, problem: `\`walk\` ${problem}` });
+    return undefined;
+  };
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return bad('must be an object like { "route": "PR10", "km": 11, "minutes": 300 }');
+  }
+  const { route, km, returnKm, minutes, difficulty } = raw as Record<string, unknown>;
+  const positive = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  if (typeof route !== 'string' || route.trim() === '') return bad('needs a route, like "PR10"');
+  if (!positive(km) || !positive(minutes)) return bad('needs a positive km and minutes');
+  if (returnKm !== undefined && !positive(returnKm)) return bad('returnKm must be a positive number');
+  if (difficulty !== undefined && difficulty !== 'easy' && difficulty !== 'moderate') {
+    return bad('difficulty must be "easy" or "moderate"');
+  }
+  return {
+    route: route.trim(),
+    km,
+    minutes,
+    ...(returnKm === undefined ? {} : { returnKm }),
+    ...(difficulty === undefined ? {} : { difficulty }),
+  };
 }
 
 /**

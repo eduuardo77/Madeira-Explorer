@@ -6,6 +6,13 @@ Older sections further down are dated and partly superseded; trust the newest on
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
+## ⚠⚠⚠ 2026-10-09: interim review, 11.9 / 20
+
+`docs/bruma-score-and-plan-2026-10-09.md`: strict **11.9** (was 9.1), a shippable beta. Its Part 2
+is the order for what remains. **First:** a ride on automatic recording with no outing and the app
+never opened (its F1); the 8 Oct successes were both outings, and automatic failed on 6 Oct.
+Then the desk items A to H there, and the lead's console steps.
+
 ## ⚠⚠⚠ 2026-10-06: START HERE, the execution plan
 
 **Work from `docs/execution-plan-2026-10.md`, in its order.** It came from the third review

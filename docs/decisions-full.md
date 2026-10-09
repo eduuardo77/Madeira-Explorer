@@ -4622,6 +4622,14 @@ night map's other controls already use. On the light map it needed nothing (4.42
 **Status:** Accepted — the project lead, 2026-09-23 (T-182, option A). ⚠ The *beta runs unlocked*
 half came with the recommendation and was not confirmed separately. Treat that half as Provisional.
 
+⚠ **Amended 2026-10-09 by the project lead: the closed test runs the normal build, with the
+purchase.** Google requires 12 opted-in testers for 14 days before production, and the lead is
+hiring them; they will not be in Madeira, so they never reach a paid stamp and an unlocked build
+would test nothing the normal one does not. The normal build is what Google reviews and what ships,
+it matches the reviewer note (*Settings > Unlock the passport*, a row the beta build hides), and the
+purchase matrix (T-239) runs on the same track. `EXPO_PUBLIC_PROA_BETA` stays for a beta with real
+visitors, if one is ever run.
+
 **The problem.** The build locks stamp 11 onward (T-155, D-075), and nothing lets a user pay
 (T-156). A padlock with no purchase screen reads as a broken reward
 (`docs/app-review-2026-09-22.md`, P0-3).

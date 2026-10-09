@@ -68,9 +68,11 @@ export const FRAME_RATE = 30;
 /**
  * A beat on the finished island before anything is drawn.
  *
- * ⚠ NOT TUNED. Nothing about this file's timings has been watched by anybody;
- * they are reasoned guesses and the first person to see the video will have
- * better ones. They are named constants precisely so that changing them is a
+ * ⚠ NOT TUNED, but watched: the project lead has played the timelapse on the
+ * P30 on real trips since T-253 (October 2026) and accepted it in the visual
+ * pass of 2026-10-08 ("good enough"), singling out no timing. So these are
+ * reasoned guesses that survived a viewer, not measured values; the first
+ * complaint about pace is better evidence than any of them. They are named constants precisely so that changing them is a
  * one-line edit and not an archaeology exercise.
  */
 export const ESTABLISH_MS = 1_200;

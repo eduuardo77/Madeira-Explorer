@@ -20,6 +20,16 @@ import type { TripSummary } from '../storage/types.ts';
  */
 export const MIN_FIXES_TO_LIST = 100;
 
+/**
+ * Of the listed trips, those with something to open: at least one day in the
+ * viewer (road lit, or a stamp). One that recorded positions and lit nothing
+ * read *"0 dias · 0 carimbos"* and opened onto an empty map (review F4).
+ * `days` is each trip's viewer day count; a trip not in it is kept until known.
+ */
+export function withSomethingToShow(trips: readonly TripSummary[], days: ReadonlyMap<number, number>): TripSummary[] {
+  return trips.filter((trip) => (days.get(trip.id) ?? 1) > 0);
+}
+
 /** The trips worth listing, newest first. */
 export function listedTrips(trips: readonly TripSummary[]): TripSummary[] {
   return trips

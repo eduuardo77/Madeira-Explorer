@@ -213,7 +213,7 @@ export type PassportTripRow = {
   id: number;
   /** "24 de setembro a 7 de outubro de 2026". */
   dates: string;
-  /** "13 dias · 3 carimbos". */
+  /** "3 dias de passeio · 3 carimbos". */
   detail: string;
 };
 
@@ -745,6 +745,8 @@ export default function PassportView({
               <Pressable
                 key={trip.id}
                 accessibilityRole="button"
+                // Its own label: read from the children it ended in "›" (review F7).
+                accessibilityLabel={`${trip.dates}, ${trip.detail}`}
                 accessibilityHint={t('passport.trips.a11y.open')}
                 onPress={() => onOpenTrip(trip.id)}
                 style={({ pressed }) => [

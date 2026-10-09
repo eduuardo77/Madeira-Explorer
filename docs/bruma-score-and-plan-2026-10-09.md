@@ -281,7 +281,7 @@ are the plan's; new work takes the next free IDs when it starts.
 **A. One kilometre figure (F3)** · S · ⇠ L6. ✅ **Done 2026-10-09 (D-101):** home 19 km hoje, passport 65 km, viewer 19 km that day and 65 km the trip, read on the P30. Pure change in `tripViewerData.ts` / the passport stats,
 a test that both screens give the same number for the same trip, checked on the P30 copy.
 
-**B. The trip list says what it holds (F4, F7)** · S. Hide trips with no road and no stamp (or one
+**B. The trip list says what it holds (F4, F7)** · S. ✅ **Done 2026-10-09:** trips with no viewer day are not listed (`tripList.withSomethingToShow`, tested); the count reads *dias de passeio* / *days out* / *Tage unterwegs*; each row has its own spoken label, no "›". Read on the P30: two rows, the empty August one gone. Hide trips with no road and no stamp (or one
 quiet *"sem estradas acesas"*); *dias* defined as the viewer's days, or the label changed to say so;
 *"›"* out of the content-desc. A pure test on `tripList.ts`.
 

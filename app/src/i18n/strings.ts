@@ -1472,9 +1472,11 @@ export const PLURALS = {
       '{distance} Straße beleuchtet an {count} Tagen'
     ),
   },
+  // The viewer's days, those with road lit or a stamp (2026-10-07), said so:
+  // a bare "3 dias" beside a 16-day range read as a bug (review F4).
   'passport.trips.days': {
-    one: s('{count} day', '{count} dia', '{count} Tag'),
-    other: s('{count} days', '{count} dias', '{count} Tage'),
+    one: s('{count} day out', '{count} dia de passeio', '{count} Tag unterwegs'),
+    other: s('{count} days out', '{count} dias de passeio', '{count} Tage unterwegs'),
   },
   'passport.trips.stamps': {
     one: s('{count} stamp', '{count} carimbo', '{count} Stempel'),

@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { TripSummary } from '../storage/types.ts';
-import { listedTrips, MIN_FIXES_TO_LIST } from './tripList.ts';
+import { listedTrips, MIN_FIXES_TO_LIST, withSomethingToShow } from './tripList.ts';
 
 const trip = (id: number, fixes: number, stamps = 0): TripSummary => ({
   id,
@@ -35,4 +35,13 @@ test('T-261: a trip with a stamp is listed however little it recorded', () => {
 test('T-261: the threshold is inclusive', () => {
   assert.equal(listedTrips([trip(7, MIN_FIXES_TO_LIST)]).length, 1);
   assert.equal(listedTrips([trip(8, MIN_FIXES_TO_LIST - 1)]).length, 0);
+});
+
+test('F4: a listed trip that lit nothing and stamped nothing is not shown; one not yet counted stays', () => {
+  const trips = [trip(30, 6509), trip(31, 14475), trip(32, 400)];
+  const days = new Map([[30, 3], [32, 0]]);
+  assert.deepEqual(
+    withSomethingToShow(trips, days).map((t) => t.id),
+    [30, 31],
+  );
 });

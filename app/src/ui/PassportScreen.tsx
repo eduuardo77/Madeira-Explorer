@@ -40,7 +40,7 @@ import type { StampAward } from '../storage/types';
 import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
 import { formatDateRange, type ShareCard } from '../souvenir/shareCard';
-import { listedTrips } from '../souvenir/tripList';
+import { listedTrips, withSomethingToShow } from '../souvenir/tripList';
 import { localStartOfDay, tripDayCount } from '../souvenir/tripDays';
 import { storedRoadsFor } from '../matching/roadNetwork';
 import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
@@ -294,7 +294,7 @@ export default function PassportScreen({
           days.set(trip.id, await daysOf(trip.id));
         }
         if (!cancelled) {
-          setTrips(listed.map((trip) => row(trip, days.get(trip.id) ?? 0)));
+          setTrips(withSomethingToShow(listed, days).map((trip) => row(trip, days.get(trip.id) ?? 0)));
         }
 
         // T-262, the lead's option A: the trip on show in one line, and all

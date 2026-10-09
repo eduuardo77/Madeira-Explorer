@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import {
   MIN_SILENCE_BEFORE_ALARM_MS,
   SILENCE_TOLERANCE,
+  MOVED_WITHOUT_RECORDING_M,
   assessSilence,
   toleratedSilenceMs,
   type SilenceInput,
@@ -28,6 +29,9 @@ function input(overrides: Partial<SilenceInput> = {}): SilenceInput {
     profile: 'walking',
     recordingSinceTs: NOW - 60 * MINUTE,
     lastFixTs: NOW - MINUTE,
+    // A phone that travelled, so silence past the window is evidence; the
+    // resting case is tested on its own below.
+    movedSinceLastFixM: MOVED_WITHOUT_RECORDING_M,
     now: NOW,
     ...overrides,
   };
@@ -163,3 +167,20 @@ test('the detail line names the profile, because the profile was the cause', () 
   assert.equal(verdict.state, 'silent');
   assert.match(verdict.detail, /stationary/);
 });
+
+test('⚠ a phone at rest is resting, not silent: the P30 made 2 fixes in 16 hours (7 to 8 Oct 2026)', () => {
+  for (const moved of [30, null]) {
+    const verdict = assessSilence(input({ profile: 'stationary', lastFixTs: NOW - 16 * 60 * MINUTE, movedSinceLastFixM: moved }));
+    assert.equal(verdict.state, 'resting', String(moved));
+    assert.match(verdict.detail, /not been seen to move/);
+  }
+  // The 6 Oct drive home with nothing recorded: the phone moved, so it speaks.
+  const home = assessSilence(input({ profile: 'driving', lastFixTs: NOW - 26 * MINUTE, movedSinceLastFixM: 2_300 }));
+  assert.equal(home.state, 'silent');
+});
+
+test('never a fix at all stays silent, movement or not', () => {
+  const verdict = assessSilence(input({ lastFixTs: null, movedSinceLastFixM: null }));
+  assert.equal(verdict.state, 'silent');
+});
+

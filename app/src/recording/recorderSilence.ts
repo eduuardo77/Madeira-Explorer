@@ -67,6 +67,21 @@ export const SILENCE_TOLERANCE = 3;
  */
 export const MIN_SILENCE_BEFORE_ALARM_MS = 2 * 60 * 1000;
 
+/**
+ * How far the phone must be, by Android's own last-known position, from the
+ * last fix Bruma stored, for silence to count as a fault, metres. Positive
+ * evidence, as this module asks: a phone at rest is never this far from where
+ * it last recorded, and one that travelled while Bruma stayed silent is the OEM
+ * killer's signature. Shared with the day-1 check (`healthCheckPolicy.ts`).
+ *
+ * ⚠ Found 2026-10-09 from the P30's night of 7 to 8 Oct: a healthy recorder
+ * lying still made 2 fixes in 16 hours, because the OS sends nothing to a phone
+ * that does not move, and this module called that silence after an hour.
+ * ⚠ A judgement: well past GPS and network-location error, well short of any
+ * trip worth recording.
+ */
+export const MOVED_WITHOUT_RECORDING_M = 1000;
+
 export type SilenceInput = {
   isRecording: boolean;
   permission: PermissionLevel;
@@ -76,6 +91,11 @@ export type SilenceInput = {
   recordingSinceTs: number | null;
   /** The most recent fix, of any age. Null if nothing was ever recorded. */
   lastFixTs: number | null;
+  /**
+   * Metres between that fix and the position Android last knew (any app, at
+   * most an hour old). Null when either is missing: no evidence of movement.
+   */
+  movedSinceLastFixM: number | null;
   now: number;
 };
 
@@ -86,6 +106,11 @@ export type SilenceState =
   | 'warming_up'
   /** Fixes are arriving about as often as the profile leads us to expect. */
   | 'receiving'
+  /**
+   * Quiet past the tolerated window, but the phone has not been seen to move:
+   * a phone at rest, which the OS sends nothing to. Normal (2026-10-09).
+   */
+  | 'resting'
   /** Running, allowed, and nothing is coming. This is the one that matters. */
   | 'silent';
 
@@ -177,6 +202,19 @@ export function assessSilence(input: SilenceInput): SilenceVerdict {
         input.lastFixTs === null
           ? `waiting for a first fix, ${describe(silentFor)} so far`
           : `last fix ${describe(silentFor)} ago`,
+    };
+  }
+
+  // Past the window with fixes before it: silence is a fault only if the phone
+  // went somewhere meanwhile. Never a fix at all stays silent, as it was.
+  const moved =
+    input.movedSinceLastFixM !== null && input.movedSinceLastFixM >= MOVED_WITHOUT_RECORDING_M;
+  if (input.lastFixTs !== null && !moved) {
+    return {
+      state: 'resting',
+      silentForMs: silentFor,
+      toleratedMs: tolerated,
+      detail: `resting: last fix ${describe(silentFor)} ago, and the phone has not been seen to move`,
     };
   }
 

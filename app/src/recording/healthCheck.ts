@@ -27,6 +27,7 @@ import * as tripDao from '../storage/dao/tripDao';
 import { locationProvider } from './ExpoLocationProvider';
 import type { HealthCheckDecision } from './healthCheckPolicy';
 import { decideHealthCheck } from './healthCheckPolicy';
+import { movedSinceLastFixM } from './movedSinceLastFix';
 import { deviceLanguage } from '../i18n/deviceLocale';
 
 /**
@@ -88,6 +89,7 @@ export async function runHealthCheck(
       isRecording,
       fixCount,
       lastFixTs: lastFix?.ts ?? null,
+      movedSinceLastFixM: await movedSinceLastFixM(lastFix),
     });
 
     if (!decision.notify || decision.title === null) {

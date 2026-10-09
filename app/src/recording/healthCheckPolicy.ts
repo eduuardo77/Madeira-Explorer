@@ -36,6 +36,7 @@ import { STRINGS } from '../i18n/strings.ts';
 import { translate } from '../i18n/translate.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { PermissionLevel } from './LocationProvider';
+import { MOVED_WITHOUT_RECORDING_M } from './recorderSilence.ts';
 
 /**
  * How long after install to ask. D-011 says 12–24 hours; the low end of that
@@ -48,12 +49,18 @@ export const HEALTH_CHECK_DELAY_MS = 14 * 60 * 60 * 1000;
  * Fewer fixes than this in the first day, with permission granted and
  * recording started, means something is wrong.
  *
- * ⚠ NOT TUNED. Even the stationary profile defers for at most 15 minutes, so a
- * working recorder should produce dozens of fixes in fourteen hours. Ten is a
- * floor low enough that a genuinely idle phone in a hotel safe still clears
- * it.
+ * ⚠ **Measured wrong, 2026-10-09: a still phone does not clear it.** The note
+ * here said the stationary profile defers at most 15 minutes, so a working
+ * recorder makes dozens of fixes in fourteen hours. On the P30 overnight, 7 to
+ * 8 Oct 2026, a healthy recorder lying still made **2 fixes in 16 hours**: the
+ * OS sends nothing to a phone that does not move. So a count under this, or a
+ * long silence, is an alarm only with `MOVED_WITHOUT_RECORDING_M` of evidence
+ * that the phone went somewhere. Below it, the count only withholds the
+ * "filling in nicely" confirmation. Ten stays a guess.
  */
 export const MIN_HEALTHY_FIX_COUNT = 10;
+
+export { MOVED_WITHOUT_RECORDING_M } from './recorderSilence.ts';
 
 export type HealthCheckInput = {
   /** When the app first ran. */
@@ -66,6 +73,12 @@ export type HealthCheckInput = {
   fixCount: number;
   /** Null when nothing has ever been recorded. */
   lastFixTs: number | null;
+  /**
+   * Metres between Bruma's last stored fix and the position Android last knew
+   * (from any app, at most an hour old, read without powering the GPS). Null
+   * when either is missing: no evidence either way.
+   */
+  movedSinceLastFixM: number | null;
   /**
    * Which language to write the notification in (T-160).
    *
@@ -156,29 +169,44 @@ export function decideHealthCheck(
     };
   }
 
-  // Permission is granted and recording is on, but nothing has arrived. This
-  // is the OEM-battery-killer case and the one the whole check exists for
-  // (ARCHITECTURE §6.2): the app believes it is working and is not.
-  if (input.fixCount < MIN_HEALTHY_FIX_COUNT || input.lastFixTs === null) {
+  // Permission is granted and recording is on, but not a single fix ever
+  // arrived. Recording starts at onboarding and stores its first fix then, so
+  // none in fourteen hours is the OEM battery killer (ARCHITECTURE §6.2): the
+  // app believes it is working and is not.
+  if (input.lastFixTs === null) {
     return {
       notify: true,
-      reason: `only ${input.fixCount} fixes since install`,
+      reason: 'no fix since install',
       title: say('notify.title.notFilling'),
       body: say('notify.blocked.body'),
     };
   }
 
-  // A long silence from a recorder that is otherwise healthy. Judged against
-  // the check window rather than a fixed gap, because a quiet evening is
-  // normal and half a day is not.
+  // Few fixes, or a long silence: a fault only if the phone went somewhere
+  // meanwhile. A phone at rest overnight looks exactly like this (2 fixes in
+  // 16 hours on the P30) and is not broken.
+  const moved =
+    input.movedSinceLastFixM !== null && input.movedSinceLastFixM >= MOVED_WITHOUT_RECORDING_M;
   const silence = input.now - input.lastFixTs;
-  if (silence > HEALTH_CHECK_DELAY_MS / 2) {
+  if (moved && silence > HEALTH_CHECK_DELAY_MS / 2) {
     return {
       notify: true,
-      reason: `last fix ${Math.round(silence / 3600000)}h ago`,
+      reason: `last fix ${Math.round(silence / 3600000)}h ago, phone ${Math.round(input.movedSinceLastFixM ?? 0)} m away`,
       title: say('notify.title.notFilling'),
       body: say('notify.silent.body'),
     };
+  }
+  if (moved && input.fixCount < MIN_HEALTHY_FIX_COUNT) {
+    return {
+      notify: true,
+      reason: `only ${input.fixCount} fixes since install, phone ${Math.round(input.movedSinceLastFixM ?? 0)} m away`,
+      title: say('notify.title.notFilling'),
+      body: say('notify.blocked.body'),
+    };
+  }
+  if (input.fixCount < MIN_HEALTHY_FIX_COUNT || silence > HEALTH_CHECK_DELAY_MS / 2) {
+    // Not proof of a fault, and not enough to say it is filling in nicely.
+    return SILENT(`quiet: ${input.fixCount} fixes, last ${Math.round(silence / 3600000)}h ago, no sign the phone moved`);
   }
 
   // Everything is fine. D-011 promises confirmation as well as warning: the

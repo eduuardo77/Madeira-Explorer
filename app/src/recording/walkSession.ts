@@ -23,6 +23,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { locationProvider } from './ExpoLocationProvider';
+import { movedSinceLastFixM } from './movedSinceLastFix';
 import { actionForStartWalk, actionForStopWalk, type WalkState } from './manualWalk';
 import {
   describeWalkSummary,
@@ -66,6 +67,7 @@ export async function readControlInput(
     profile,
     recordingSinceTs: lastStart?.ts ?? null,
     lastFixTs: lastFix?.ts ?? null,
+    movedSinceLastFixM: await movedSinceLastFixM(lastFix),
     now: nowMs,
   });
   return {

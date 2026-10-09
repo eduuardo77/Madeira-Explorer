@@ -19,6 +19,7 @@ import type { TripProgress } from '../progress/tripProgress';
 import * as tripDao from '../storage/dao/tripDao';
 import type { RecordingEvent } from '../storage/types';
 import { locationProvider } from './ExpoLocationProvider';
+import { movedSinceLastFixM } from './movedSinceLastFix';
 import type { GeofenceStatus } from './geofenceManager';
 import { getGeofenceStatus } from './geofenceManager';
 import type { PermissionLevel, SamplingProfile } from './LocationProvider';
@@ -132,6 +133,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
         profile: samplingProfile,
         recordingSinceTs: lastStart?.ts ?? null,
         lastFixTs: null,
+        movedSinceLastFixM: null,
         now,
       }),
       recentEvents,
@@ -187,6 +189,7 @@ export async function getRecorderHealth(): Promise<RecorderHealth> {
       profile: samplingProfile,
       recordingSinceTs: lastStart?.ts ?? null,
       lastFixTs: lastFix?.ts ?? null,
+      movedSinceLastFixM: await movedSinceLastFixM(lastFix),
       now,
     }),
   };

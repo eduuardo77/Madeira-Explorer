@@ -126,7 +126,9 @@ export function recordingStatus(input: ControlInput): RecordingStatus {
   if (!input.automaticAllowed || input.permission !== 'always') {
     return null;
   }
-  return input.silence === 'receiving' || input.silence === 'warming_up' ? 'automatic' : null;
+  return input.silence === 'receiving' || input.silence === 'warming_up' || input.silence === 'resting'
+    ? 'automatic'
+    : null;
 }
 
 /**

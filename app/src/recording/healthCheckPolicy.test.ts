@@ -17,6 +17,7 @@ import {
   decideHealthCheck,
   HEALTH_CHECK_DELAY_MS,
   MIN_HEALTHY_FIX_COUNT,
+  MOVED_WITHOUT_RECORDING_M,
   type HealthCheckInput,
 } from './healthCheckPolicy.ts';
 
@@ -36,6 +37,7 @@ function healthy(overrides: Partial<HealthCheckInput> = {}): HealthCheckInput {
     isRecording: true,
     fixCount: 240,
     lastFixTs: AFTER - 5 * 60_000,
+    movedSinceLastFixM: 30,
     ...overrides,
   };
 }
@@ -107,22 +109,34 @@ test('THE CASE THIS EXISTS FOR: running, permitted, and no fixes', () => {
   assert.match(decision.title ?? '', /not filling in/);
 });
 
-test('too few fixes over fourteen hours is the same alarm', () => {
+test('too few fixes while the phone travelled is the same alarm', () => {
   const decision = decideHealthCheck(
-    healthy({ fixCount: MIN_HEALTHY_FIX_COUNT - 1 })
+    healthy({ fixCount: MIN_HEALTHY_FIX_COUNT - 1, movedSinceLastFixM: MOVED_WITHOUT_RECORDING_M })
   );
 
   assert.equal(decision.notify, true);
-  assert.match(decision.reason, /fixes since install/);
+  assert.match(decision.reason, /fixes since install, phone 1000 m away/);
 });
 
-test('a long silence from an otherwise healthy recorder is reported', () => {
+test('a long silence while the phone travelled is reported', () => {
   const decision = decideHealthCheck(
-    healthy({ lastFixTs: AFTER - 10 * 3600_000 })
+    healthy({ lastFixTs: AFTER - 10 * 3600_000, movedSinceLastFixM: 25_000 })
   );
 
   assert.equal(decision.notify, true);
   assert.match(decision.reason, /last fix 10h ago/);
+});
+
+test('⚠ a phone at rest overnight is NOT an alarm: the P30 made 2 fixes in 16 hours (7 to 8 Oct 2026)', () => {
+  // A visitor installs in the evening and sleeps at the hotel: few fixes and a
+  // long silence, and nothing broken. Neither alarms without movement.
+  for (const moved of [40, null]) {
+    const decision = decideHealthCheck(
+      healthy({ fixCount: 2, lastFixTs: AFTER - 13 * 3600_000, movedSinceLastFixM: moved })
+    );
+    assert.equal(decision.notify, false, String(moved));
+    assert.match(decision.reason, /quiet/);
+  }
 });
 
 // ---------------------------------------------------------------------------

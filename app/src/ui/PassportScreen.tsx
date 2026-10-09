@@ -18,6 +18,7 @@ import { getRegionName } from '../content/regionCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard } from '../places/placeCard';
+import { cardPosition } from '../places/cardPosition';
 import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitlementStore';
 import { founderYear, isFounder } from '../entitlement/founder';
 import { visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
@@ -359,8 +360,7 @@ export default function PassportScreen({
 
       let position = null;
       try {
-        const trip = await tripDao.getActiveTrip();
-        position = trip === null ? null : await rawFixDao.getLastFix(trip.id);
+        position = await cardPosition();
       } catch (error) {
         await recordingEventDao.logError('place card position', error);
       }

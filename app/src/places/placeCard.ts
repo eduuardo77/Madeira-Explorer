@@ -81,6 +81,22 @@ export type LastKnownPosition = {
   accuracy_m: number | null;
 };
 
+/**
+ * The newer of two positions, either possibly missing: Bruma's last stored
+ * fix and Android's own last-known position. A phone at rest stores nothing
+ * (2 fixes in 16 hours on the P30), so its last fix ages past
+ * `MAX_POSITION_AGE_MS` while the system's, kept fresh by any app, does not;
+ * the card would otherwise drop the distance from a user who has not moved.
+ */
+export function newerPosition(
+  a: LastKnownPosition | null,
+  b: LastKnownPosition | null
+): LastKnownPosition | null {
+  if (a === null) return b;
+  if (b === null) return a;
+  return b.ts > a.ts ? b : a;
+}
+
 export type PlaceCardInput = {
   placeId: string;
   name: string;

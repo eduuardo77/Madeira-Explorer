@@ -20,6 +20,7 @@ import {
   isPositionUsable,
   MAX_POSITION_AGE_MS,
   MAX_SHOWN_DISTANCE_M,
+  newerPosition,
   type LastKnownPosition,
   type PlaceCardInput,
 } from './placeCard.ts';
@@ -260,3 +261,16 @@ test('review H: a published figure is never rounded, and times read as walkers w
   assert.equal(formatWalkTime(45), '45 min');
 });
 
+
+test('a resting phone keeps its distance: the newer of the app’s last fix and Android’s position wins', () => {
+  const old = { ts: NOW - 3 * 3_600_000, lat: 32.65, lon: -16.91, accuracy_m: 8 };
+  const fresh = { ts: NOW - 60_000, lat: 32.6501, lon: -16.9101, accuracy_m: 20 };
+  assert.equal(newerPosition(old, fresh), fresh);
+  assert.equal(newerPosition(fresh, old), fresh);
+  assert.equal(newerPosition(null, old), old);
+  assert.equal(newerPosition(old, null), old);
+  assert.equal(newerPosition(null, null), null);
+  // With only the old fix the card says nothing; with the system's it measures.
+  assert.equal(buildPlaceCard(input({ position: old })).distanceM, null);
+  assert.notEqual(buildPlaceCard(input({ position: newerPosition(old, fresh) })).distanceM, null);
+});

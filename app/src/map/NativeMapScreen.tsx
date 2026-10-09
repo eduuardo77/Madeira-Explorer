@@ -56,6 +56,7 @@ import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard, formatDistance } from '../places/placeCard';
+import { cardPosition } from '../places/cardPosition';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { StampPopup } from '../progress/stampAnnouncer';
@@ -602,8 +603,7 @@ export default function NativeMapScreen({
     void (async () => {
       let position = null;
       try {
-        const trip = await tripDao.getActiveTrip();
-        position = trip === null ? null : await rawFixDao.getLastFix(trip.id);
+        position = await cardPosition();
       } catch (error) {
         await recordingEventDao.logError('place card position', error);
       }

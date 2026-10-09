@@ -79,32 +79,48 @@ export type ClutterStyleRule = {
  * this replaced, and which is the thing the project lead asked to be certain of:
  * *"Just make sure light and dark mode are the same, that's really important."*
  */
-export const HIDE_GOOGLE_POIS = false;
+export type GooglePois = 'all' | 'attractions' | 'none';
+
+/**
+ * Which of Google's points of interest the map keeps. A third answer since
+ * 2026-10-09 (review F6, the shops and cafés crowding the home and the trip
+ * viewer): `attractions` hides only businesses, so museums, gardens and
+ * viewpoints keep Google's look while the shops go.
+ */
+export const GOOGLE_POIS: GooglePois = 'all';
+
+/** Whether any of Google's points of interest are hidden: what the parity tests check. */
+export const HIDE_GOOGLE_POIS = GOOGLE_POIS !== 'all';
 
 /**
  * Hiding Google's points of interest — the part that is **under the switch**.
  *
- * Empty when the switch is off, so every style path shows Google's POIs together
- * or hides them together. `mapClutter.test.ts` asserts exactly that.
+ * One list per setting, so every style path shows or hides the same points of
+ * interest together. `darkMode.test.ts` asserts exactly that.
  */
-export const POI_RULES: readonly ClutterStyleRule[] = HIDE_GOOGLE_POIS
-  ? [
-      // Every point of interest Google knows about: no pin, no glyph, no name.
-      // `labels` covers the text and the icon together, which is what the pin is.
-      { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+const POI_RULES_BY_SETTING: Record<GooglePois, readonly ClutterStyleRule[]> = {
+  all: [],
+  // Shops, restaurants, hotels: their pins and their footprints.
+  attractions: [{ featureType: 'poi.business', stylers: [{ visibility: 'off' }] }],
+  none: [
+    // Every point of interest Google knows about: no pin, no glyph, no name.
+    // `labels` covers the text and the icon together, which is what the pin is.
+    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
 
-      // ⚠ Business POIs go entirely, geometry included. A restaurant's footprint
-      // is a coloured blob with no label on it once the rule above lands, which
-      // reads as a rendering fault rather than as a restaurant.
-      { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+    // ⚠ Business POIs go entirely, geometry included. A restaurant's footprint
+    // is a coloured blob with no label on it once the rule above lands, which
+    // reads as a rendering fault rather than as a restaurant.
+    { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
 
-      // Parks and natural features keep their shape — the green is orientation —
-      // and lose only their names. These follow the blanket rule on purpose: they
-      // put back the geometry `poi` would otherwise have taken.
-      { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
-      { featureType: 'poi.attraction', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
-    ]
-  : [];
+    // Parks and natural features keep their shape — the green is orientation —
+    // and lose only their names. These follow the blanket rule on purpose: they
+    // put back the geometry `poi` would otherwise have taken.
+    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
+    { featureType: 'poi.attraction', elementType: 'geometry', stylers: [{ visibility: 'on' }] },
+  ],
+};
+
+export const POI_RULES: readonly ClutterStyleRule[] = POI_RULES_BY_SETTING[GOOGLE_POIS];
 
 /**
  * Hidden in both styles regardless of the switch, because these are **not**

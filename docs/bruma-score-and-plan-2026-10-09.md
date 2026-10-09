@@ -268,7 +268,7 @@ are the plan's; new work takes the next free IDs when it starts.
 - Trip 31 has run since 24 Sep. End it with *Terminar viagem* in the passport (a resident has no
   airport), then make, watch and share the souvenir once. Screenshots of each.
 
-**T-246. Tune from what is in hand** · Me
+**T-246. Tune from what is in hand** · Me. ◐ **2026-10-09:** the ten notes in `mapMatch.ts` and `motionGate.ts` now cite the two rides and the overnight run where those exercised them, and say what is still untested (canopy, walks, wild fixes, a lagging label); no value changed, as nothing measured argued for one. 28 notes elsewhere remain.
 - Two SensorLogger rides exist (6 and 8 Oct). Tune what they support in `mapMatch.ts` and
   `motionGate.ts`; replace each NOT TUNED note (38 today) with a cited trace or a reason it stays.
 

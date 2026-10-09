@@ -74,7 +74,9 @@ export type GateFix = {
  * With the motion sensors saying *still*, the receiver's median speed must
  * reach this for the fix to count as moving anyway, m/s.
  *
- * ⚠ NOT TUNED. Android's label lags a change by up to a minute or so: a car
+ * ⚠ NOT TUNED, and the case it exists for is untested: on 9 Oct 2026 *driving*
+ * arrived at 11:00:29 UTC, ten seconds before the wheels turned, so no lagging
+ * label had to be overridden. Android's label lags a change by up to a minute or so: a car
  * pulling away from a light is still labelled *still* for a while, and the
  * receiver's Doppler speed is the faster witness there. 2 m/s is above
  * anything the desk's drift produced as a median and below any car in motion.
@@ -86,7 +88,9 @@ const MOVING_ACTIVITIES = new Set<Activity>(['walking', 'running', 'cycling', 'd
 /**
  * Median reported speed at or above which the phone is moving, m/s.
  *
- * ⚠ NOT TUNED. Between the desk's drift (median 0.14 m/s, 90th percentile
+ * ⚠ NOT TUNED, but checked: overnight 7 to 8 Oct 2026 the P30 lay still and
+ * 2 of 4,816 fixes counted as moving, and no road was lit; on both rides nothing
+ * was lit off the route. A slow levada walk, the other edge, is untested. Between the desk's drift (median 0.14 m/s, 90th percentile
  * 0.37 at 20 to 40 m out) and a slow walk (about 1 m/s, less on steep levada
  * steps). 0.5 sits nearer the drift on purpose: a missed slow stretch is
  * bridged by the route either side of it, and a drift let through lights a
@@ -104,7 +108,8 @@ export const MIN_SPEED_VOTES = 3;
  * Without speeds: the phone is moving if the window's first and last fixes
  * are at least this far apart for the time between them, m/s.
  *
- * ⚠ NOT TUNED, and weaker than the speed vote by nature: desk drift reached
+ * ⚠ NOT TUNED, and seldom used: every one of the P30's 22,882 fixes on its
+ * trip of Sept to Oct 2026 carries a speed, so the speed vote decides. Weaker than the speed vote by nature: desk drift reached
  * 20 m in a minute (0.33 m/s), so this sits above it.
  */
 export const DISPLACEMENT_MIN_MPS = 0.6;

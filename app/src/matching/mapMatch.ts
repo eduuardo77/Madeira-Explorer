@@ -78,7 +78,9 @@ export type MatchFix = GateFix & {
 /**
  * Fixes vaguer than this are not used at all, metres.
  *
- * ⚠ NOT TUNED. Loose on purpose: under canopy a levada walk may have nothing
+ * ⚠ NOT TUNED, and still untested where it matters: on the road the P30's fixes
+ * were ±3 to 11 m, so the cut never acted; canopy (T-076 to T-080) is where it
+ * would. Loose on purpose: under canopy a levada walk may have nothing
  * better, and the candidate radius and emission already weigh a vague fix
  * lightly. Past 100 m a fix can sit on the wrong valley's path.
  */
@@ -98,7 +100,10 @@ export const MIN_SIGMA_M = 5;
  * Candidates are searched within this many sigmas of a fix, and within these
  * bounds, metres.
  *
- * ⚠ NOT TUNED. The floor keeps a street 20 m away in reach of an optimistic
+ * ⚠ NOT TUNED, but checked on the two rides against an iPhone at 1 Hz (P30, 8 and 9 Oct 2026, `docs/field-test-log.md`): the P30's fix sat a median 4.1 and
+ * 6.7 m from the iPhone's at the same second, 90th percentile 7.7 and 11.5 m,
+ * worst 34 and 42 m, all inside this window; 99.6% and 100% of what was lit lay
+ * within 10 m of the ride. The floor keeps a street 20 m away in reach of an optimistic
  * ±3 m fix; the ceiling keeps a ±100 m canopy fix from reaching the wrong
  * valley.
  */
@@ -113,8 +118,10 @@ export const MAX_CANDIDATES = 8;
  * The transition's tolerance for road distance disagreeing with straight-line
  * distance, metres: `BETA_M + BETA_PER_M × straight-line distance`.
  *
- * ⚠ NOT TUNED. Newson and Krumm fitted theirs to ground truth; there is none
- * here yet. It grows with distance because a longer step cuts more corners:
+ * ⚠ NOT TUNED, but checked: the two rides against an iPhone at 1 Hz (P30, 8 and 9 Oct 2026, `docs/field-test-log.md`) were ground truth of a kind, and with
+ * these values 93.7% and 99.5% of the ridden road was lit within 10 m, the one
+ * miss being the unsampled start of the first. Newson
+ * and Krumm fitted theirs to ground truth; nothing here has been fitted. It grows with distance because a longer step cuts more corners:
  * two fixes 400 m apart on a hairpin road are 600 m apart by road, and that
  * is not evidence against the road.
  */
@@ -132,7 +139,8 @@ export const MAX_ROUTE_SPEED_MPS = 50;
  * between two fixes may imply at most `SPEED_FACTOR ×` the fastest speed
  * reported around them, plus `SPEED_MARGIN_MPS`.
  *
- * ⚠ NOT TUNED. This is what stops a wild fix from being reached by a detour
+ * ⚠ NOT TUNED, but checked on the two rides against an iPhone at 1 Hz (P30, 8 and 9 Oct 2026, `docs/field-test-log.md`): speeds up to 21 m/s, one chain
+ * each, none broken. This is what stops a wild fix from being reached by a detour
  * out and back: on synthetic walks in Funchal's old town it was most of the
  * wrongly lit road before it existed. Generous, because a bound tighter than
  * the truth breaks a real chain: the phone's speed is measured at the fixes
@@ -153,7 +161,9 @@ export const MAX_ROUTE_SLACK_M = 200;
 /**
  * The longest silence a route may be drawn across, seconds.
  *
- * ⚠ NOT TUNED. A tunnel on the VR1 is a minute or two of silence at driving
+ * ⚠ NOT TUNED, but checked: the 4 Oct 2026 drives through the VR1's tunnels
+ * above Funchal were drawn through on the right carriageway each way. A tunnel
+ * on the VR1 is a minute or two of silence at driving
  * speed; five minutes is well past that. Longer, and the shortest route is a
  * guess about which way the user went, so the line breaks instead (T-244's
  * lesson, kept).
@@ -218,7 +228,9 @@ export const MIN_CHAIN_FIXES = 4;
  * fix after, is this much longer than the route that skips it. Two fixes in a
  * row are judged together the same way, because bad fixes come in bursts.
  *
- * ⚠ NOT TUNED. It is what the transition model cannot see by itself: a wild
+ * ⚠ NOT TUNED, and not exercised: the diary counted no wild fix on either ride
+ * of 8 and 9 Oct 2026 (clean road GPS); walks are where it acts. It is what
+ * the transition model cannot see by itself: a wild
  * fix 100 m up a side path is 100 m from its neighbours both as the crow
  * flies and by road, so each step looks honest while the pair is an
  * out-and-back nobody made. On synthetic levada walks those excursions were
@@ -254,7 +266,9 @@ export const OUTLIER_PASSES = 3;
  * by up to a minute, and can miss one. A filter then deletes a real journey; a
  * cost only makes the wrong way dearer, and enough evidence still wins.
  *
- * ⚠ NOT TUNED. Six times dearer is strong enough to choose the road beside a
+ * ⚠ NOT TUNED; the driving side checked: both rides of 8 and 9 Oct 2026 ran
+ * under a *driving* label and lit no footway or levada (all lit road within 10 m
+ * of the ride). A walk, the other side, is untested. Six times dearer is strong enough to choose the road beside a
  * levada over the levada path for a car, and weak enough that a car label on a
  * walk up a levada (a missed transition) still follows the levada when that is
  * the only way the fixes fit.

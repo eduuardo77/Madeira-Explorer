@@ -243,7 +243,7 @@ are the plan's; new work takes the next free IDs when it starts.
 
 | # | Decision | Recommendation |
 |---|---|---|
-| L4 | **Does the home show a place to go?** It shows none since 4 Oct. B cannot reach 15 without some *where next*. | One quiet line or chip, the nearest uncollected place and its distance, only when within, say, 15 km. Drawn as options first; *no* is a legitimate answer, and then B stays near 13. |
+| L4 | ✅ **Decided 2026-10-09: no, the home stays as it is.** The lead had removed exactly this on 2026-09-24 (D-085: *"keep it simple, get inspired on WalkNYC"*) and kept that call; the next stamp is suggested on the trophy. Area B is accepted near 13 for it. **Does the home show a place to go?** It shows none since 4 Oct. B cannot reach 15 without some *where next*. | One quiet line or chip, the nearest uncollected place and its distance, only when within, say, 15 km. Drawn as options first; *no* is a legitimate answer, and then B stays near 13. |
 | L5 | **The EMUI update risk (F2):** accept it with the guidance as it is, or add a line to the listing's Huawei note. | Accept, and say it once in the listing's help text. Nothing in the app can wake on EMUI's default. |
 | L6 | **The two km figures (F3):** which number is "the trip"? | Show one: *km de estradas acesas* everywhere (it is the product), and drop travelled distance from the viewer's totals, or label it *percorridos, contando repetições*. |
 

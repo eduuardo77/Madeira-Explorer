@@ -1201,7 +1201,11 @@ options as language rows; it did not search plural labels). Fixed in the script.
       drawn in 3034 ms. ⚠ **Fixed 2026-10-09:** it timed from the screen's mount, so an app put
       away before its map drew logged "not drawn" and then "drawn 347028 ms"; now only time in front
       counts (checked: home 3 s after launch, 30 s away, then "drawn 693 ms after the screen came to
-      the front", no false line). **Left:** read the count after several days of the lead's trip; T-177 closes
+      the front", no false line). **Count 2026-10-10:** 38 openings since the fix, all drawn, median
+      1.5 s, slowest 4.0 s, none blank; most were smoke runs, not the lead's own use. ⚠ **What it
+      cannot see:** a map that blanks on a return to the front. Google's load event fires once per
+      mount, and a phone woken with Bruma on top (P30, 10 Oct, same process all night) logs nothing.
+      T-177 is about startup, so that limit stays written down rather than probed. **Left:** read the count after several days of the lead's trip; T-177 closes
       on none blank, or reopens with the evidence.
 - [ ] **T-196** **The location task fires before React is up** — split out of T-177.
       — **Read from source 2026-09-23 (expo-task-manager 57.0.9, `TaskService.java`), not yet measured.**

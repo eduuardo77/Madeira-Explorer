@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-09 to 10 | Second still night on battery, 9h53 | P30 | Equilibrado | ✅ deep idle 88%; ⚠ level stuck at 100% again |
 | 2026-10-09 | Motorbike ride as an outing, 74 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 99.5% of the route lit within 10 m; a stamp; battery 100 to 96% |
 | 2026-10-08 | Motorbike ride as an outing, 59 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 93.7% lit within 10 m; ⚠ first 790 m lost (fixed) |
 | 2026-10-07 to 08 | Overnight on battery, phone still | P30 | Equilibrado | ✅ deep sleep 93%; ⚠ no battery percentage (level stuck at 100%) |
@@ -31,6 +32,17 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-09 to 10: a second still night
+
+- **Setup:** P30 unplugged at 100% at 23:30 local, back on the cable at 09:24, untouched. Bruma
+  left on top of the screen when the phone went to sleep.
+- **Result:** 9h53 on battery, screen on 56 s, deep idle 88% of the time, light idle 11%. The
+  level never left 100%, as on 7 to 8 Oct, so a still night still gives no battery figure: the P30
+  holds a full charge at 100% and its mAh counter is broken. The day run started near 80% is the
+  only way to a number.
+- **The map probe (T-259):** waking the phone with Bruma on top left no "drawn" line, correctly: the
+  process and its map lived all night, and the probe counts openings, not returns.
 
 ### 2026-10-09: motorbike ride as an outing, the start fixed
 

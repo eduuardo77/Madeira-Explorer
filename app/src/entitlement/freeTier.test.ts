@@ -13,7 +13,9 @@ import { fileURLToPath } from 'node:url';
 import type { Category } from '../content/contentPack.ts';
 import {
   FREE_STAMP_ALLOWANCE,
+  freeStampsLeft,
   GUARANTEED_CATEGORY,
+  offerWithStamp,
   visibleStamps,
   type EarnedStamp,
 } from './freeTier.ts';
@@ -170,4 +172,20 @@ test('the recorder and the award pass never learn about the paywall', () => {
       `${relative} imports from entitlement/. Gate the DISPLAY, never the award — see D-072 and T-145.`
     );
   }
+});
+
+test('the passport counts the free stamps down to zero, never below (D-105)', () => {
+  assert.equal(freeStampsLeft(0), FREE_STAMP_ALLOWANCE);
+  assert.equal(freeStampsLeft(3), 2);
+  assert.equal(freeStampsLeft(5), 0);
+  assert.equal(freeStampsLeft(9), 0);
+});
+
+test('the third and fifth stamps offer the unlock, by earned order, and nothing once paid (D-105)', () => {
+  const five = earned(5);
+  assert.deepEqual(five.map((stamp) => offerWithStamp(stamp.placeId, five, false)), [null, null, 2, null, 0]);
+  assert.deepEqual(five.map((stamp) => offerWithStamp(stamp.placeId, five, true)), [null, null, null, null, null]);
+  // Order is by when it was earned, not by the list it arrives in.
+  assert.equal(offerWithStamp('viewpoint-2', [...five].reverse(), false), 2);
+  assert.equal(offerWithStamp('missing', five, false), null);
 });

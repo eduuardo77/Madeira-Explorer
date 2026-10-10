@@ -136,3 +136,33 @@ export function visibleStamps(
     earnedCount,
   };
 }
+
+/**
+ * How many of the free five are still to come: the passport card's countdown
+ * (D-105). Not counting the levada guarantee, which is a bonus beyond the five
+ * and would make the number a promise about which places the user visits.
+ */
+export function freeStampsLeft(earnedCount: number): number {
+  return Math.max(0, FREE_STAMP_ALLOWANCE - earnedCount);
+}
+
+/**
+ * The stamps whose pop-up offers the unlock, by their place in earned order
+ * (D-105, the lead's option 2): the third, halfway, and the fifth, the last
+ * free one. Each pop-up is shown once, so each offer is too.
+ */
+export const OFFER_AT_STAMPS: readonly number[] = [3, FREE_STAMP_ALLOWANCE];
+
+/**
+ * For a stamp's pop-up: the free stamps left after it when it is one of
+ * `OFFER_AT_STAMPS`, else null. Null once unlocked.
+ */
+export function offerWithStamp(
+  placeId: string,
+  earned: readonly EarnedStamp[],
+  unlocked: boolean
+): number | null {
+  if (unlocked) return null;
+  const ordinal = inEarnedOrder(earned).findIndex((stamp) => stamp.placeId === placeId) + 1;
+  return OFFER_AT_STAMPS.includes(ordinal) ? freeStampsLeft(ordinal) : null;
+}

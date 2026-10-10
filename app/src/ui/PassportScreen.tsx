@@ -21,7 +21,7 @@ import { buildPlaceCard } from '../places/placeCard';
 import { cardPosition } from '../places/cardPosition';
 import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitlementStore';
 import { founderYear, isFounder } from '../entitlement/founder';
-import { visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
+import { freeStampsLeft, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import {
@@ -177,6 +177,8 @@ export default function PassportScreen({
   const [stats, setStats] = useState<{ trip: string; total: string | null } | undefined>();
   /** The founder stamp, when this phone's purchase earned one (T-233). */
   const [founder, setFounder] = useState<FounderCard | null>(null);
+  /** Free stamps still to come, for the passport card; null once bought (D-105). */
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
   /** The set medals' shelf (T-235). */
   const [medals, setMedals] = useState<MedalTile[]>([]);
   /** Bumped to read everything again, after a trip is ended here. */
@@ -234,6 +236,7 @@ export default function PassportScreen({
         const locked = new Set(
           visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
         );
+        const nextFreeLeft = (await isUnlocked()) ? null : freeStampsLeft(earnedStamps(nextAwards).length);
 
         const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
         // T-235: every award of the trip, locked stamps included (D-075): a
@@ -251,6 +254,7 @@ export default function PassportScreen({
           setConfirmation(prompt?.prompt ?? null);
           setConfirmationEvidence(prompt?.evidence ?? '');
           setFounder(nextFounder);
+          setFreeLeft(nextFreeLeft);
           setMedals(nextMedals);
         }
 
@@ -540,6 +544,7 @@ export default function PassportScreen({
           stats={stats}
           onOpenTrip={onOpenTrip}
           waiting={stamps.filter((stamp) => stamp.locked === true)}
+          freeLeft={freeLeft ?? undefined}
           // D-097, R1: the reminder, only where something can be bought.
           onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
           founder={founder ?? undefined}

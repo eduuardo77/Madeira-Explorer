@@ -5651,3 +5651,30 @@ from `content/roads.json`) became a solid disc that hid the town's name.
 - The app icon and splash still draw the lit road blue (`ui/splashArt.ts`, `tools/lib/icon-art.mjs`).
 - ⚠ Found on the way: `googleNightStyle.test.ts` computed luminance with the blue channel raw (0 to
   255), so the ceiling test passed a blue trace on its blue alone. Fixed.
+
+## D-105 — The offer from the first day
+
+**Status: Accepted 2026-10-10** by the project lead, from four drawn options
+(`tools/out/paywall-options.html`, not committed: a mockup page).
+
+**The decision.** On first seeing the paywall with a sixth stamp, the lead asked for it to be *"more
+agressive... Show it more times, have it available to buy before you reach the 5 stamps"*. Before
+this, a user with five or fewer stamps could buy only from a row in Settings. Now:
+
+- **The passport card shows until the passport is bought.** With stamps locked it is D-097's R1,
+  unchanged. Before that it counts the free five down (*Faltam 3 carimbos grátis*, *Desbloqueia todos
+  os carimbos de uma vez*), or says they are used, over three places drawn in colour.
+- **The pop-ups of the 3rd and 5th stamps offer the unlock**, with *Desbloquear* and *Agora não*, the
+  way E3 does for a locked stamp. Each pop-up is shown once, so each offer is.
+- **The unlock sheet with nothing waiting shows three random places in colour**, picked anew at each
+  opening; it showed no stamp at all before.
+
+**Rejected:** an offer at the end of the first run (it asks for money before a stamp, on the pages that
+ask for location, and a refused location is an app that does nothing); the sheet opening by itself
+the first time the passport is opened each day (the passport is where people enjoy what they have,
+and a daily modal there is the one-star review D-097's lines exist to avoid).
+
+**Kept from D-097:** nothing false, no purchase notifications, nothing over the map's roads. The
+countdown leaves out the levada bonus (`freeTier.ts`), so it never promises a sixth free stamp.
+Built in `freeTier.ts` (`freeStampsLeft`, `offerWithStamp`), `UnlockNudge`, `StampNewsCard`,
+`unlockSheet.ts` (`showcase`).

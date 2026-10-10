@@ -48,7 +48,7 @@
  * *legible with 3 stamps and with 200* — in a browser, in seconds.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -69,6 +69,7 @@ import type { FounderWords, SetMedalWords } from '../passport/medalArt';
 import MedalArt from './MedalArt';
 import Padlock from './Padlock';
 import StampArt from './StampArt';
+import { showcase } from '../entitlement/unlockSheet';
 import UnlockNudge from './UnlockNudge';
 import { postmarkFor } from './postmark';
 import { n, t } from '../i18n';
@@ -275,10 +276,13 @@ export type PassportViewProps = {
   onOpenTrip?: (tripId: number) => void;
   /**
    * The locked stamps, for the reminder card under the number (D-097, R1).
-   * The card shows when there is at least one and `onUnlock` is given; the
-   * screen gives it only where something can be bought (never a beta build).
+   * The card shows when there is at least one, or `freeLeft` is given, and
+   * `onUnlock` is given; the screen gives it only where something can be
+   * bought (never a beta build).
    */
   waiting?: PassportStamp[];
+  /** Free stamps still to come; absent once the passport is bought (D-105). */
+  freeLeft?: number;
   onUnlock?: () => void;
   /**
    * The founder stamp, for a buyer inside the window (T-233), or absent. Its
@@ -615,6 +619,7 @@ export default function PassportView({
   trips,
   onOpenTrip,
   waiting,
+  freeLeft,
   onUnlock,
   founder,
   medals,
@@ -625,6 +630,12 @@ export default function PassportView({
   // Setting the same number again does not re-render.
   const [stripWidth, setStripWidth] = useState<number | null>(null);
   const stampSize = stripStampSize(stripGeometry(stripWidth, useWindowDimensions().width));
+  // D-105: the card's places while nothing is waiting, picked anew only when
+  // the passport's stamps are reloaded.
+  const nudgeShowcase = useMemo(
+    () => showcase(stamps ?? [], 3, Math.random).map((stamp) => ({ ...stamp, collected: true, locked: false })),
+    [stamps]
+  );
 
   return (
     <ScrollView
@@ -680,8 +691,8 @@ export default function PassportView({
         <Text style={styles.rowEmpty}>{t('passport.nothingCurated')}</Text>
       )}
 
-      {onUnlock === undefined || waiting === undefined || waiting.length === 0 ? null : (
-        <UnlockNudge waiting={waiting} onPress={onUnlock} />
+      {onUnlock === undefined || ((waiting ?? []).length === 0 && freeLeft === undefined) ? null : (
+        <UnlockNudge waiting={waiting ?? []} freeLeft={freeLeft ?? 0} showcase={nudgeShowcase} onPress={onUnlock} />
       )}
 
       {confirmation === undefined ? null : (

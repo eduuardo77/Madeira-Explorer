@@ -205,6 +205,11 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
+      passport card shows until the passport is bought and counts the free five down over three
+      places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the
+      sheet with nothing waiting shows three random places (`showcase`). **Left:** see the 3rd/5th
+      pop-up on a phone (the workbench has no pop-up), with a test trip or the emulator.
 - [x] **T-276** The lit roads: deep orange, thinner as the camera zooms out (D-104). **Built
       2026-10-10.** `map/traceWidth.ts` (4 dp from zoom 15, 3 from 13.5, 2.5 from 12, 2 below),
       read from `onCameraMove` on the home map only; `traceStyle.ts` `#B33A0A` / `#FF9A3C`, the

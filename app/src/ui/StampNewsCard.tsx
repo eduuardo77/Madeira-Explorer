@@ -57,13 +57,17 @@ export default function StampNewsCard({
   stamp: StampPopup;
   onClose: () => void;
   onOpenPassport: () => void;
-  /** A locked stamp's offer (E3). Absent in a beta build, which sells nothing. */
+  /**
+   * The offer, for a locked stamp (E3) and for the third and fifth (D-105).
+   * Absent in a beta build, which sells nothing.
+   */
   onUnlock?: () => void;
 }) {
   const reduceMotion = useReduceMotion();
   const anim = useTimeline(reduceMotion, stamp.locked);
   const celebration = stamp.celebration;
-  const offer = stamp.locked && onUnlock !== undefined;
+  // D-105: the third and fifth stamps offer the unlock too, as a locked one does.
+  const offer = (stamp.locked || stamp.freeLeft !== null) && onUnlock !== undefined;
   const postmark = postmarkFor(stamp.awardedTs);
 
   return (
@@ -185,6 +189,12 @@ export default function StampNewsCard({
                 </Animated.View>
               )}
             </Animated.View>
+          )}
+
+          {stamp.locked || stamp.freeLeft === null || onUnlock === undefined ? null : (
+            <Animated.Text style={[styles.lockedLine, { opacity: anim.details }]}>
+              {stamp.freeLeft > 0 ? n('freeTier.left', stamp.freeLeft) : t('stampNews.lastFree')}
+            </Animated.Text>
           )}
 
           {/* T-235: the set this stamp completed, said once, here, as the last

@@ -16,7 +16,7 @@
 import { getContentPack } from '../content/poiCatalogue';
 import type { Category } from '../content/contentPack';
 import { isUnlocked } from '../entitlement/entitlementStore';
-import { visibleStamps } from '../entitlement/freeTier';
+import { offerWithStamp, visibleStamps } from '../entitlement/freeTier';
 import { t } from '../i18n';
 import { sendStampNotification } from '../notify/sendTripNotification';
 import * as appStateDao from '../storage/dao/appStateDao';
@@ -55,6 +55,11 @@ export type StampPopup = {
   othersWaiting: number;
   /** The set medals this stamp completed (T-235); usually none. */
   medals: CompletedMedal[];
+  /**
+   * Free stamps left after this one, when its pop-up offers the unlock (the
+   * third and the fifth, D-105); null for every other stamp.
+   */
+  freeLeft: number | null;
 };
 
 /** A medal a stamp completed, ready to draw in the pop-up. */
@@ -159,6 +164,7 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
       news.announce.length === 0
         ? []
         : medalProgress(definitions, places, awards, await isUnlocked(), await getLockedRegionIds());
+    const unlocked = await isUnlocked();
     const completedBy = (placeId: string): CompletedMedal[] =>
       medalsCompletedBy(placeId, medals, awards).flatMap((medal) => {
         const definition = definitions.find((each) => each.id === medal.id);
@@ -181,6 +187,7 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
               celebration: celebrationFor(placeId, stamps.earned, places.length, categoryTotals),
               othersWaiting: stamps.locked.size - (locked ? 1 : 0),
               medals: completedBy(placeId),
+              freeLeft: locked ? null : offerWithStamp(placeId, stamps.earned, unlocked),
             },
           ];
     });

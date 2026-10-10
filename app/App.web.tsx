@@ -39,6 +39,7 @@ import { visibleStamps } from './src/entitlement/freeTier';
 import PlaceCardView from './src/ui/PlaceCardView';
 import UnlockSheetView from './src/ui/UnlockSheetView';
 import { showcase, unlockSheetModel, type UnlockState } from './src/entitlement/unlockSheet';
+import { freeStampsLeft } from './src/entitlement/freeTier';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
@@ -364,6 +365,8 @@ export default function DesignWorkbench() {
                 onSelectStamp={setPassportCard}
                 // D-097, R1: the reminder card, in the free-tier scenario.
                 waiting={stamps.filter((stamp) => stamp.locked === true)}
+                // D-105: before anything is locked, the card counts the free five down.
+                freeLeft={freeStampsLeft(stamps.filter((stamp) => stamp.collected).length)}
                 onUnlock={() => setScreen('unlock:offer')}
                 // Under the hero, and under the invitation at zero (T-217).
                 // ⚠ There is nowhere for it to go here: the replay is the real

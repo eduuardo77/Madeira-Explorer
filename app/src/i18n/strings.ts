@@ -1248,6 +1248,20 @@ export const STRINGS = {
     'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen.'
   ),
   'stampNews.unlock': s('Unlock', 'Desbloquear', 'Freischalten'),
+  // D-105: the pop-up of the fifth stamp, the last of the free five.
+  'stampNews.lastFree': s(
+    'Your last free stamp. The next ones are kept until you unlock.',
+    'O teu último carimbo grátis. Os próximos ficam guardados até desbloqueares.',
+    'Ihr letzter kostenloser Stempel. Die nächsten werden aufbewahrt, bis Sie freischalten.'
+  ),
+  // D-105: the passport card before anything is locked.
+  'passport.nudge.freeBody': s('Unlock every stamp at once', 'Desbloqueia todos os carimbos de uma vez', 'Alle Stempel auf einmal freischalten'),
+  'passport.nudge.noneLeft': s('Your free stamps are used', 'Já usaste os carimbos grátis', 'Ihre kostenlosen Stempel sind aufgebraucht'),
+  'passport.nudge.noneLeftBody': s(
+    'The next ones are kept until you unlock',
+    'Os próximos ficam guardados até desbloqueares',
+    'Die nächsten werden aufbewahrt, bis Sie freischalten'
+  ),
   // T-251: a collected stamp as a trophy (T1 layout A).
   'trophy.ribbon': s('STAMP {count} OF THIS TRIP', '{count}.º CARIMBO DA VIAGEM', '{count}. STEMPEL DIESER REISE'),
   'trophy.subtitle': s('{category} · {date}', '{category} · {date}', '{category} · {date}'),
@@ -1449,6 +1463,12 @@ export const PLURALS = {
   },
   // The lines under those two titles. One stamp is "it", not "them" (P30,
   // 2026-10-10: "1 carimbo teu à espera. Desbloqueia e vê-os a cores").
+  // D-105: the free stamps still to come, on the passport card and in the
+  // pop-up of the third stamp.
+  'freeTier.left': {
+    one: s('1 free stamp left', 'Falta 1 carimbo grátis', 'Noch 1 kostenloser Stempel'),
+    other: s('{count} free stamps left', 'Faltam {count} carimbos grátis', 'Noch {count} kostenlose Stempel'),
+  },
   'passport.nudge.body': {
     one: s('Unlock it and see it in colour', 'Desbloqueia e vê-o a cores', 'Freischalten und in Farbe sehen'),
     other: s('Unlock them and see them in colour', 'Desbloqueia e vê-os a cores', 'Freischalten und in Farbe sehen'),

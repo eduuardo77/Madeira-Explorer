@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-10 | Car and on foot as an outing, 3h21, iPhone alongside, tunnels | P30 | Equilibrado (outing: Preciso) | ✅ 95.6% of the route lit within 10 m, tunnels drawn; 2 stamps; battery 100 to 92% |
 | 2026-10-09 to 10 | Second still night on battery, 9h53 | P30 | Equilibrado | ✅ deep idle 88%; ⚠ level stuck at 100% again |
 | 2026-10-09 | Motorbike ride as an outing, 74 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 99.5% of the route lit within 10 m; a stamp; battery 100 to 96% |
 | 2026-10-08 | Motorbike ride as an outing, 59 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 93.7% lit within 10 m; ⚠ first 790 m lost (fixed) |
@@ -32,6 +33,24 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-10: car and on foot, through tunnels
+
+- **Setup:** P30 unplugged at 100% at 15:07 local; *Começar passeio* at 15:10, ended 18:31; the app
+  opened about four times, briefly (screen on 3 min in all). iPhone 15 with Sensor Logger from
+  15:11 to 18:31. Driving with several tunnels, and a walk at the Parque Temático.
+- **Result:** 697 points. 95.6% of the iPhone's route within 10 m of a lit road, 99.5% within 30 m;
+  97.9% of the lit road within 10 m of the route. Every tunnel was drawn along the road. Stamps:
+  Santana (geofence, 199 s inside) and Parque Temático (from the trace, 7 min on foot).
+- **Gaps:** points stopped for 90 to 100 s in each tunnel, at 60 to 90 km/h, as expected with no
+  sky. The longer gaps (11, 13 and 17 min) were all while the iPhone moved under 130 m: parked or
+  strolling, where the distance filter holds fixes back.
+- **Battery:** 100 to 92% in 3h26. The level read 100% for the first 1h22, then fell a point every
+  12 to 20 minutes. The app's estimated share is mostly GPS.
+- **Found:** `compare-sensorlogger.mjs` drew a straight line through each tunnel from the iPhone's
+  last fix to its next, and reported 81.8%; it now splits the reference at silences over 30 s and
+  judges only the lit road beside a reference. The 9 Oct ride reads the same either way (100% and
+  99.6%).
 
 ### 2026-10-09 to 10: a second still night
 

@@ -87,13 +87,25 @@ const resample = (poly, step) => {
 };
 
 // Thinned to points 8 m apart: at 1 Hz, standing still adds kilometres of jitter.
-const truth = [];
+// ⚠ Split wherever the good fixes stop for over 30 s. In a tunnel the iPhone
+// has no fix either, and one straight line from mouth to mouth crosses the
+// mountain: on 10 Oct 2026 that counted 7 km of tunnels, all lit by the app, as
+// "walked but not lit", and gave 81.8% for a ride that was 95.1%.
+const TRUTH_SPLIT_MS = 30_000;
+const truthRuns = [];
+const goodTs = [];
+let lastTs = -Infinity;
 for (const f of iphone) {
   if (f.accuracy_m !== null && f.accuracy_m > 20) continue;
+  goodTs.push(f.ts);
   const p = xy(f.lat, f.lon);
-  const last = truth[truth.length - 1];
-  if (last === undefined || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 8) truth.push(p);
+  if (f.ts - lastTs > TRUTH_SPLIT_MS) truthRuns.push([]);
+  lastTs = f.ts;
+  const run = truthRuns[truthRuns.length - 1];
+  const last = run[run.length - 1];
+  if (last === undefined || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 8) run.push(p);
 }
+const truth = truthRuns.flat();
 const truthT = iphone.map((f) => f.ts);
 // The walk area only: the lit lines inside the box the iPhone walk covers, plus 150 m.
 const xs = truth.map((p) => p[0]), ys = truth.map((p) => p[1]);
@@ -103,21 +115,35 @@ const litPolys = lines.map((l) => l.points.map(([lat, lon]) => xy(lat, lon)));
 // Precision from the walk's own chains only: the drive in also lit roads in this box.
 // The stretch of each chain reached during the walk, by the time along the route.
 const { chainTimedPath } = await imp('app/src/matching/roadTrace.ts');
-const walkPolys = chains
-  .map((c) => chainTimedPath(graph, c).filter((p) => p.ts >= WALK[0] && p.ts <= WALK[1]).map((p) => xy(p.lat, p.lon)))
-  .filter((poly) => poly.length >= 2);
+// And only where the iPhone had a fix: a lit tunnel has no reference beside it,
+// and judging it against none would call it a road the app invented.
+const referenced = (ts) => {
+  let lo = 0, hi = goodTs.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (goodTs[m] <= ts) lo = m; else hi = m; }
+  return ts >= goodTs[lo] && ts <= goodTs[hi] && goodTs[hi] - goodTs[lo] <= TRUTH_SPLIT_MS;
+};
+const walkPolys = [];
+for (const c of chains) {
+  let poly = [];
+  for (const p of chainTimedPath(graph, c)) {
+    if (p.ts >= WALK[0] && p.ts <= WALK[1] && referenced(p.ts)) poly.push(xy(p.lat, p.lon));
+    else if (poly.length > 0) { walkPolys.push(poly); poly = []; }
+  }
+  walkPolys.push(poly);
+}
+walkPolys.splice(0, walkPolys.length, ...walkPolys.filter((poly) => poly.length >= 2));
 const litPts = walkPolys.flatMap((poly) => resample(poly, 5)).filter(inBox);
 
 const pct = (arr, lim) => ((100 * arr.filter((d) => d <= lim).length) / arr.length).toFixed(1);
 const q = (arr, p) => [...arr].sort((a, b) => a - b)[Math.floor(arr.length * p)];
 
 // Precision: is each lit metre where the walker actually went?
-const litErr = litPts.map((p) => polyDist(p, truth));
+const litErr = litPts.map((p) => Math.min(...truthRuns.map((run) => polyDist(p, run))));
 console.log(`\nLIT vs iPhone track (walk area, ${litPts.length * 5} m of lit line):`);
 console.log(`  within 10 m ${pct(litErr, 10)}%  15 m ${pct(litErr, 15)}%  30 m ${pct(litErr, 30)}%   median ${q(litErr, 0.5).toFixed(1)} m  p90 ${q(litErr, 0.9).toFixed(1)} m`);
 
 // Recall: is each metre the walker went lit?
-const truthPts = resample(truth, 5);
+const truthPts = truthRuns.flatMap((run) => resample(run, 5));
 const recallErr = truthPts.map((p) => Math.min(...litPolys.map((poly) => polyDist(p, poly))));
 console.log(`iPhone track vs LIT (${truthPts.length * 5} m walked):`);
 console.log(`  within 10 m ${pct(recallErr, 10)}%  15 m ${pct(recallErr, 15)}%  30 m ${pct(recallErr, 30)}%   median ${q(recallErr, 0.5).toFixed(1)} m`);
@@ -133,19 +159,24 @@ const at = (ts) => {
 const rx = android.filter((f) => f.ts >= WALK[0] && f.ts <= WALK[1]).map((f) => { const p = at(f.ts); return p === null ? null : Math.hypot(xy(f.lat, f.lon)[0] - p[0], xy(f.lat, f.lon)[1] - p[1]); }).filter((d) => d !== null);
 console.log(`Android fix vs iPhone at the same second (${rx.length} fixes): median ${q(rx, 0.5).toFixed(1)} m  p90 ${q(rx, 0.9).toFixed(1)} m  max ${Math.max(...rx).toFixed(0)} m`);
 
-// Stretches walked and not lit: runs of the iPhone track over 30 m from any lit line.
-const gaps = [];
-let run = null;
-truthPts.forEach((p, i) => {
-  if (recallErr[i] > 30) { run ??= { from: i, to: i }; run.to = i; }
-  else if (run) { gaps.push(run); run = null; }
-});
-if (run) gaps.push(run);
-console.log('walked but not lit (> 30 m from a lit line, runs over 40 m):');
-for (const g of gaps.filter((g) => (g.to - g.from) * 5 > 40)) {
-  const [x, y] = truthPts[Math.floor((g.from + g.to) / 2)];
-  console.log(`  ${(g.to - g.from) * 5} m around ${(LAT0 + y / ky).toFixed(5)},${(LON0 + x / kx).toFixed(5)}`);
-}
+// Runs of points over 30 m from the other track, printed both ways: walked and
+// not lit, and lit where nobody went.
+const farRuns = (label, pts, err) => {
+  const runs = [];
+  let run = null;
+  pts.forEach((p, i) => {
+    if (err[i] > 30) { run ??= { from: i, to: i }; run.to = i; }
+    else if (run) { runs.push(run); run = null; }
+  });
+  if (run) runs.push(run);
+  console.log(`${label} (> 30 m from the other track, runs over 40 m):`);
+  for (const g of runs.filter((g) => (g.to - g.from) * 5 > 40)) {
+    const [x, y] = pts[Math.floor((g.from + g.to) / 2)];
+    console.log(`  ${(g.to - g.from) * 5} m around ${(LAT0 + y / ky).toFixed(5)},${(LON0 + x / kx).toFixed(5)}`);
+  }
+};
+farRuns('walked but not lit', truthPts, recallErr);
+farRuns('lit but not walked', litPts, litErr);
 
 // --- the picture: walk area only (D-016: nothing near where the user sleeps)
 const W = 1400, scale = W / (box[2] - box[0]), H = Math.round((box[3] - box[1]) * scale);
@@ -160,7 +191,7 @@ for (let e = 0; e < graph.edgeCount; e += 1) {
   parts.push(`<polyline points="${pts.map(P).join(' ')}" fill="none" stroke="${foot ? '#b9b2a3' : '#cfc8b8'}" stroke-width="${foot ? 1.5 : 3}" ${foot ? 'stroke-dasharray="4 3"' : ''}/>`);
 }
 for (const poly of litPolys) parts.push(`<polyline points="${poly.map(P).join(' ')}" fill="none" stroke="#1565c0" stroke-width="7" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/>`);
-parts.push(`<polyline points="${truth.map(P).join(' ')}" fill="none" stroke="#d32f2f" stroke-width="1.6"/>`);
+for (const run of truthRuns) parts.push(`<polyline points="${run.map(P).join(' ')}" fill="none" stroke="#d32f2f" stroke-width="1.6"/>`);
 for (const f of android.filter((f) => f.ts >= WALK[0] && f.ts <= WALK[1])) parts.push(`<circle cx="${P(xy(f.lat, f.lon)).split(',')[0]}" cy="${P(xy(f.lat, f.lon)).split(',')[1]}" r="3" fill="#2e7d32"/>`);
 parts.push('</svg>');
 const html = `<!doctype html><meta charset="utf-8"><title>Lit roads vs reference</title>

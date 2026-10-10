@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { stateAfterFailure, unlockSheetModel, type UnlockSheetInput } from './unlockSheet.ts';
+import { showcase, stateAfterFailure, unlockSheetModel, type UnlockSheetInput } from './unlockSheet.ts';
 
 function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   return {
@@ -178,4 +178,14 @@ test('pure: no runtime import except the strings and the translator', () => {
   for (const line of source.match(/^import .*$/gm) ?? []) {
     assert.match(line, /^import type |from '\.\.\/i18n\/(strings|translate)\.ts'/, line);
   }
+});
+
+test('with nothing waiting, the sheet shows three different places, chosen by the random source', () => {
+  const places = ['a', 'b', 'c', 'd', 'e'];
+  assert.deepEqual(showcase(places, 3, () => 0), ['a', 'b', 'c']);
+  assert.deepEqual(showcase(places, 3, () => 0.99), ['e', 'd', 'c']);
+  const picked = showcase(places, 3, Math.random);
+  assert.equal(new Set(picked).size, 3);
+  assert.deepEqual(showcase(['a', 'b'], 3, Math.random).sort(), ['a', 'b']);
+  assert.deepEqual(places, ['a', 'b', 'c', 'd', 'e'], 'the catalogue is not reordered');
 });

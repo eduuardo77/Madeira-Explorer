@@ -1,9 +1,9 @@
 /**
  * The offer to unlock the passport (T-156d, D-089).
  *
- * Opened from a locked stamp's card, and later from Settings (T-156e). Never
- * opened by the app on its own: no notification, no banner, no timer (T-157,
- * the project lead's rule against nagging).
+ * Opened from the passport's card, a locked stamp, a locked medal, the map's
+ * passport mark, the new-stamp pop-up and Settings (D-097, which replaced
+ * T-157's rule against asking more than once). Never from a notification.
  *
  * What it says in each state is `entitlement/unlockSheet.ts`, tested in Node;
  * how it looks is `UnlockSheetView`, which the workbench draws in every state.
@@ -23,7 +23,7 @@ import { getMedals } from '../content/medalCatalogue';
 import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
 import { founderWindowOpen } from '../entitlement/founder';
-import { stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
+import { SHOWCASE_COUNT, showcase, stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
 import type { PassportStamp } from './PassportView';
 import { colors, spacing } from './theme';
@@ -50,6 +50,17 @@ export default function UnlockSheet({
   const [state, setState] = useState<UnlockState>({ kind: 'offer' });
   /** Google's price, kept through every state once it has answered. */
   const [price, setPrice] = useState<string | null>(null);
+  /** With nothing waiting, a few places in colour; picked once per opening. */
+  const [shown] = useState<PassportStamp[]>(() =>
+    waiting.length > 0
+      ? []
+      : showcase(getContentPack().places, SHOWCASE_COUNT, Math.random).map((place) => ({
+          placeId: place.id,
+          name: place.name,
+          category: place.category,
+          collected: true,
+        }))
+  );
 
   useEffect(() => {
     let open = true;
@@ -127,6 +138,7 @@ export default function UnlockSheet({
         <UnlockSheetView
           model={model}
           waiting={waiting}
+          showcase={shown}
           unlocked={state.kind === 'unlocked'}
           working={state.kind === 'working'}
           onBuy={buy}

@@ -38,7 +38,7 @@ import PassportView, { type PassportStamp } from './src/ui/PassportView';
 import { visibleStamps } from './src/entitlement/freeTier';
 import PlaceCardView from './src/ui/PlaceCardView';
 import UnlockSheetView from './src/ui/UnlockSheetView';
-import { unlockSheetModel, type UnlockState } from './src/entitlement/unlockSheet';
+import { showcase, unlockSheetModel, type UnlockState } from './src/entitlement/unlockSheet';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
@@ -202,7 +202,8 @@ type Screen =
   | 'privacy'
   | 'passport-confirm'
   | `unlock:${UnlockState['kind']}`
-  | `onboarding:${OnboardingScreen}`;
+  | `onboarding:${OnboardingScreen}`
+  | 'unlock-none';
 
 /**
  * The unlock sheet in each state (T-156d). The price is a placeholder in the
@@ -233,6 +234,7 @@ const SCREENS: { id: Screen; label: string }[] = [
     id: `unlock:${kind}` as Screen,
     label: `Unlock: ${kind} (T-156d)`,
   })),
+  { id: 'unlock-none', label: 'Unlock: nothing waiting, three places shown' },
   { id: 'privacy', label: 'Privacy policy (T-124)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
@@ -407,17 +409,18 @@ export default function DesignWorkbench() {
                 </View>
               )}
             </View>
-          ) : screen.startsWith('unlock:') ? (
+          ) : screen.startsWith('unlock') ? (
             <View style={styles.unlockStage}>
               <UnlockSheetView
                 model={unlockSheetModel({
-                  state: UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
+                  state: screen === 'unlock-none' ? UNLOCK_STATES.offer : UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
                   price: '0,00 € (workbench)',
-                  waiting: stamps.filter((stamp) => stamp.locked === true).length,
+                  waiting: screen === 'unlock-none' ? 0 : stamps.filter((stamp) => stamp.locked === true).length,
                   offers: { medals: false, founder: false },
                   language: deviceLanguage(),
                 })}
-                waiting={stamps.filter((stamp) => stamp.locked === true)}
+                waiting={screen === 'unlock-none' ? [] : stamps.filter((stamp) => stamp.locked === true)}
+                showcase={showcase(stamps, 3, Math.random).map((stamp) => ({ ...stamp, collected: true, locked: false }))}
                 unlocked={screen === 'unlock:unlocked'}
                 working={screen === 'unlock:working'}
                 onBuy={() => setScreen('unlock:working')}

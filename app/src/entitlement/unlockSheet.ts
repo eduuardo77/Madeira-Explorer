@@ -132,6 +132,26 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
  * must return to the offer, never stay where it is.
  * `alreadyOwned` becomes `working`: the sheet then runs a restore, which unlocks.
  */
+/** How many stamps the sheet shows when none of the user's is locked. */
+export const SHOWCASE_COUNT = 3;
+
+/**
+ * What the sheet shows when nothing is waiting: a few places drawn in colour,
+ * picked at random each time it opens, so the offer is never an empty card
+ * (the lead, 2026-10-10: "It should show at least 3 random stamps").
+ *
+ * `random` returns [0, 1), as `Math.random` does; a test passes its own.
+ * Fewer places than `count` gives all of them.
+ */
+export function showcase<T>(places: readonly T[], count: number, random: () => number): T[] {
+  const pool = [...places];
+  const picked: T[] = [];
+  while (picked.length < count && pool.length > 0) {
+    picked.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
+  }
+  return picked;
+}
+
 export function stateAfterFailure(failure: StoreFailure): UnlockState {
   switch (failure) {
     case 'cancelled':

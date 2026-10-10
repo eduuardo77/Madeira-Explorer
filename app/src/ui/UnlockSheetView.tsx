@@ -29,6 +29,7 @@ const FAN_STAMP = 66;
 export default function UnlockSheetView({
   model,
   waiting,
+  showcase = [],
   unlocked,
   working,
   onBuy,
@@ -38,6 +39,11 @@ export default function UnlockSheetView({
   model: UnlockSheetModel;
   /** The locked stamps, the tapped one first; drawn frosted until paid for. */
   waiting: PassportStamp[];
+  /**
+   * Drawn when nothing is waiting: places in colour, sharp and with no
+   * padlock, since none of them is the user's yet.
+   */
+  showcase?: PassportStamp[];
   /** Paid: the fan is drawn sharp. */
   unlocked: boolean;
   /** Google is busy: Restore waits too. */
@@ -48,7 +54,8 @@ export default function UnlockSheetView({
 }) {
   const wobble = useLoop(2600);
   const breath = useLoop(2200);
-  const fan = waiting.slice(0, FAN);
+  const ownFan = waiting.length > 0;
+  const fan = (ownFan ? waiting : showcase).slice(0, FAN);
 
   return (
     <View style={styles.card} accessibilityViewIsModal>
@@ -89,11 +96,11 @@ export default function UnlockSheetView({
                 collected
                 postmark={null}
                 size={FAN_STAMP}
-                blur={unlocked ? undefined : 3.4}
+                blur={unlocked || !ownFan ? undefined : 3.4}
               />
             </View>
           ))}
-          {unlocked ? null : (
+          {unlocked || !ownFan ? null : (
             <Animated.View
               style={[
                 styles.padlock,

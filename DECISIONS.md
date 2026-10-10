@@ -84,7 +84,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-053** | The camera frames what you walked, not the island. | Provisional |
 | **D-054** | The app follows iOS conventions, on both platforms. | Provisional |
 | **D-055** | No Directions button. *Show on map* draws the levada's course. | Provisional |
-| **D-056** | The trace is blue, not red. | Provisional |
+| **D-056** | The trace is blue, not red. | **Superseded** by D-104 |
 | **D-057** | The app uses the platform's map. Google on Android, Apple on iOS later. | **Accepted** |
 | **D-058** | The passport shows every place. Uncollected ones are shaded, and still open. | **Accepted** |
 | **D-059** | The trace breaks where the movement was impossible, not only where time passed. | Provisional |
@@ -130,6 +130,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-101** | **One distance: road lit, each road once** (*km de estradas acesas*), on the home, the passport and the trip viewer. Travelled distance, which counted a road driven twice twice, is gone. | **Accepted** 2026-10-09 (the project lead, L6) |
 | **D-102** | **Google's map pins: businesses off, attractions kept** (`GOOGLE_POIS = 'attractions'`), on light and dark alike. WalkNYC keeps every pin; shops and cafés covered the streets walked at street zoom. | **Accepted** 2026-10-09 (the project lead, F6 option B) |
 | **D-103** | **Buttons stay three colours, each with a reason:** green starts an outing (red ends it), blue for every other main button, gold where a stamp is celebrated. | **Accepted** 2026-10-09 (the project lead, review E, after blue-only and green-only were drawn on the P30) |
+| **D-104** | **The lit roads are deep orange and thinner as the camera zooms out** (4 dp at street zoom, down to 2 dp at the island view, in steps). Blue sat on Google's location dot and route colour, and a fixed width turned a walked town into one blot. | **Accepted** 2026-10-10 (the project lead: "Go ahead with step 1"); colour and widths Provisional until seen outdoors |
 | **D-099** | **Watching a trip, WalkNYC's way:** a still trip viewer, one page per **day**, roads of the day bright over the trip pale, time tags on stamps (no S and E: the hotel is never shown), arrows between days; ▶ the timelapse on the dark map (WalkNYC's Replay); Partilhar one PNG of the whole masked trip with a card. | **Accepted** 2026-10-07 (the project lead: option B, share as drawn, keep the film); T-253, T-253b |
 | **D-098** | **The Portuguese speaks to the user as *tu*** everywhere: strings, notifications, privacy policy, listing. German stays *Sie*. Ends the *tu*/*você* split (third review F1). | **Accepted** 2026-10-06 (the project lead, L1); built in T-255 |
 

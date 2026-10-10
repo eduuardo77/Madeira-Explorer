@@ -21,9 +21,9 @@ import type { Category } from '../content/contentPack.ts';
  * is *what kind of place that was* — the job D-015 gives the emblem.
  *
  * ⚠ These are the app's own accents (`ui/theme.ts`) plus the two the stamps
- * already use. **Levada is green and the trace is blue on purpose**: the map
- * draws levada courses green (`levadaHighlight.ts`) and the user's own path
- * blue (`traceStyle.ts`, D-054), and the film must not swap them.
+ * already use. **Levada is green and the trace is orange on purpose**: the map
+ * draws levada courses green (`levadaHighlight.ts`) and the roads the user lit
+ * orange (`traceStyle.ts`, D-104), and the film must not swap them.
  */
 export const CATEGORY_COLOUR: Record<Category, string> = {
   viewpoint: '#5AA9FF',

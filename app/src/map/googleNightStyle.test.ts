@@ -35,7 +35,10 @@ function luminance(hex: string): number {
   return (
     0.2126 * channel((int >> 16) & 255) +
     0.7152 * channel((int >> 8) & 255) +
-    0.0722 * (int & 255)
+    // ⚠ The blue channel went in raw (0 to 255) until 2026-10-10, so a blue
+    // trace passed the ceiling below by its blue alone. Found when the trace
+    // turned orange (D-104).
+    0.0722 * channel(int & 255)
   );
 }
 

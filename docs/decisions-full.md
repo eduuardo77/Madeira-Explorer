@@ -2725,7 +2725,7 @@ Overpass at build time into `content/levadas.json`, keyed by **place id** so a r
 
 ## D-056 — The trace is blue, not red.
 
-**Status:** Provisional — 2026-08-13. The project lead, looking at the running app: *"the highlight
+**Status:** **Superseded by D-104** (2026-10-10: deep orange). Was: Provisional — 2026-08-13. The project lead, looking at the running app: *"the highlight
 on the map which is in red is all wrong."*
 
 **Decision:** the recorded trace is drawn in a **route blue** (`#0A5FCC` on the light style,
@@ -5605,3 +5605,49 @@ card and the unlock sheet on the P30 three ways: as today, blue everywhere, gree
 other main button, gold for the stamp pop-up and the trophy. The review's "one button treatment"
 is answered by the rule, not by one colour.
 
+## D-104 — The lit roads are deep orange, and thinner as the camera zooms out (supersedes D-056)
+
+**Status:** **Accepted**, the direction: the project lead, 2026-10-10 (*"Go ahead with step 1"*),
+after a session of drawings over the P30's own screenshots and WalkNYC's. ⚠ **The colour and every
+width are Provisional** until a walk in a town and three screenshots outdoors (island, town, street).
+
+**What prompted it.** The lead, before walking in Funchal with the app: *"I believe it will be just a
+clutter of blue everywhere."* Measured, it would have been. Google draws a polyline at the same pixel
+width at every zoom, so the 4 dp line that sits on a street at zoom 16 is about 200 m of ground wide
+at the island view; Caniço was already one knot there, and a town centre walked end to end (drawn
+from `content/roads.json`) became a solid disc that hid the town's name.
+
+**Decision.**
+
+1. **Width by zoom, in steps** (`map/traceWidth.ts`): 4 dp from zoom 15 (unchanged where *Centrar*
+   lands), 3 dp from 13.5, 2.5 dp from 12, 2 dp below. Steps, so the polylines are handed to the map
+   again only when a pinch crosses one (T-254). Home map only; the trip viewer, film and share card
+   keep their widths.
+2. **Deep orange** (`#B33A0A` light, `#FF9A3C` dark, and the share card's trace with it). Blue was
+   chosen in D-056 as *"what every maps app draws your path in"*; since D-093 the lines are roads
+   covered, not a path, and on Google's map blue collided with Google's own location dot (colour
+   difference 15: the dot vanished in the Caniço knot), Google's route line, its sea and its slate
+   blue motorways. The orange keeps the blue's contrast margins (5.00:1 land, 3.42:1 water on the
+   MapLibre style; 5.56 and 3.81 on Google's) and is 121 from the dot.
+
+**Alternatives rejected.**
+- *Keep blue, only thinner.* Fixes the clutter, not the dot or the route reading. The lead, on the
+  first sketch: thin ink *"looks like the blue line but grey"*.
+- *`#DE6E0A`*: 2.9:1 on forest, 2.1:1 over the sea. *`#C2410C`*: 2.97:1 over the MapLibre style's
+  water and quieter than a collected marker there.
+- *Magenta, crimson*: red-green colour blindness collapses both into the green levada course.
+  *Purple*: Google's transit and place colour, and near the dot for the same readers. *Green*
+  (WalkNYC's): the island, the levada course and the start button are green.
+- *A highlighter yellow*: reads as Google's own yellow roads. *A washed-out Google map with a glow*
+  (the Forza look on the light map): recolours Google's map, which D-057 and `mapClutter.ts` avoid.
+- *WalkNYC's kerb-side lines*: most Madeiran roads have no pavement on both sides.
+- *Semi-transparent lines*: crossings turn into darker blotches.
+
+**Still open.**
+- **Step 2, the road at its real width above zoom 16**, which the lead likes for a reason found
+  here: a narrow road driven both ways is two one-way edges in OSM, drawn as two lines; at the
+  road's own width they would read as one road. Stepped widths first, shapes in metres only if the
+  steps jump visibly.
+- The app icon and splash still draw the lit road blue (`ui/splashArt.ts`, `tools/lib/icon-art.mjs`).
+- ⚠ Found on the way: `googleNightStyle.test.ts` computed luminance with the blue channel raw (0 to
+  255), so the ceiling test passed a blue trace on its blue alone. Fixed.

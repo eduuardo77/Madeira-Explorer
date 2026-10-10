@@ -113,6 +113,7 @@ import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 import { runPolylines } from './tunnelDashes';
+import { traceWidthDp } from './traceWidth';
 
 import lightTemplate from '../../assets/map/light.json';
 import { deviceLanguage, t } from '../i18n';
@@ -260,7 +261,13 @@ export default function NativeMapScreen({
   const [styleName, setStyleName] = useState<MapStyleName>('light');
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  const [tracePolylines, setTracePolylines] = useState<Polyline[]>([]);
+  const [traceLines, setTraceLines] = useState<VisitedLine[]>([]);
+  /**
+   * The lit roads' width for the zoom the camera is at (D-104). State, but it
+   * changes only when a pinch crosses a step: `onCameraMove` sets it on every
+   * event and React skips the render when the number is the same (T-254).
+   */
+  const [traceWidth, setTraceWidth] = useState(() => traceWidthDp(Infinity));
   const [coursePolylines, setCoursePolylines] = useState<Polyline[]>([]);
   const [marker, setMarker] = useState<
     { coordinates: { latitude: number; longitude: number }; title: string }[]
@@ -366,17 +373,23 @@ export default function NativeMapScreen({
   // app starts ran the whole load twice at once (T-272, T-273).
   useEffect(() => onReturnToFront(() => setResumeCount((count) => count + 1)), []);
 
-  /** Road lines as the map's polylines; tunnels and cable cars dashed (`tunnelDashes.ts`). */
-  const toPolylines = (lines: VisitedLine[]): Polyline[] =>
-    lines.flatMap((line, index) =>
-      runPolylines(
-        `trace-${index}`,
-        line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
-        line.faded,
-        tracePaint.coreColor,
-        px(tracePaint.coreWidth)
-      )
-    );
+  /**
+   * Road lines as the map's polylines; tunnels and cable cars dashed
+   * (`tunnelDashes.ts`). Thinner as the camera zooms out (`traceWidth.ts`).
+   */
+  const tracePolylines = useMemo<Polyline[]>(
+    () =>
+      traceLines.flatMap((line, index) =>
+        runPolylines(
+          `trace-${index}`,
+          line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
+          line.faded,
+          tracePaint.coreColor,
+          px(traceWidth)
+        )
+      ),
+    [traceLines, traceWidth, tracePaint.coreColor]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -455,7 +468,7 @@ export default function NativeMapScreen({
             trip.id
           );
           if (snapshot !== null && !cancelled) {
-            setTracePolylines(toPolylines(snapshot.lines));
+            setTraceLines(snapshot.lines);
             setCamera(snapshot.camera);
             noteCameraCentre(snapshot.camera.coordinates);
             setReady(true);
@@ -500,7 +513,7 @@ export default function NativeMapScreen({
             setTravelledToday(
               roads.todayM >= 100 ? formatDistance(roads.todayM, deviceLanguage()) : null
             );
-            setTracePolylines(toPolylines(roads.lines));
+            setTraceLines(roads.lines);
 
             // The roads lit since the user last looked, with where they are
             // now (`returnFraming.ts`, the project lead's pick, 2026-10-04).
@@ -971,6 +984,8 @@ export default function NativeMapScreen({
           if (latitude !== undefined && longitude !== undefined) {
             noteCameraCentre({ latitude, longitude });
           }
+          // Thinner lit roads further out (D-104); a no-op inside a step.
+          setTraceWidth(traceWidthDp(event.zoom));
         }}
         // The dark/light choice, and which of the two dark maps it draws —
         // Google's own by default (T-147). `darkMode.ts` holds that decision

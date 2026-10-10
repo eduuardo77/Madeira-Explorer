@@ -112,13 +112,14 @@ export const STAMP_TEXT_SIZE = 32;
 /**
  * The souvenir's palette.
  *
- * Dark, because D-026 gave the souvenir the night style, and because a trace in
- * `traceStyle`'s blue is what the map draws (D-056) — a souvenir in different
- * colours from the app would be a souvenir of a different app.
+ * Dark, because D-026 gave the souvenir the night style, and the trace in
+ * the dark map's orange because that is what the map draws (D-104) — a
+ * souvenir in different colours from the app would be a souvenir of a
+ * different app.
  */
 const INK = '#F5F5F7';
 const MUTED = '#9A9AA2';
-const TRACE = '#4A8BEF';
+const TRACE = '#FF9A3C';
 const BACKGROUND = '#101014';
 
 /** Rough width of a string, in card units. Used only to keep text inside. */

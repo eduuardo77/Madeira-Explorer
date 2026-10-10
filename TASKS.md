@@ -205,6 +205,14 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [x] **T-276** The lit roads: deep orange, thinner as the camera zooms out (D-104). **Built
+      2026-10-10.** `map/traceWidth.ts` (4 dp from zoom 15, 3 from 13.5, 2.5 from 12, 2 below),
+      read from `onCameraMove` on the home map only; `traceStyle.ts` `#B33A0A` / `#FF9A3C`, the
+      share card's trace with it. Drawn first over the P30's own screenshots with the real lit
+      roads re-projected from `matched_chain` (scratch tools, not kept). **Left:** judged outdoors
+      on a walk in a town (island, town and street screenshots); step 2, the road at its own width
+      above zoom 16 (the lead: one road driven both ways draws as two lines); the icon and splash
+      still blue.
 - [x] **T-273** The recorder started twice at each launch. **Done 2026-10-07.** Android reports
       "active" while the app is starting, and three listeners took it for a return to the front:
       the map's load (T-272), Play's purchase query, and the recorder's sync, which re-registered

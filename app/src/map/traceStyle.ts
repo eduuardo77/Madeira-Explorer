@@ -59,47 +59,57 @@ export type TracePaint = {
 
 export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
   /**
-   * ⚠ **BLUE, NOT RED, SINCE 2026-08-13.** The project lead looked at the
-   * running app and said the red line was *"all wrong"*, and they were right
-   * for a reason worth writing down: on a pale beige-and-green ground a
-   * saturated red reads as a **warning**, not as a route. It is the colour of
-   * a closed road, and it was drawn over the user's holiday.
+   * ⚠ **DEEP ORANGE, NOT BLUE, SINCE 2026-10-10 (D-104, supersedes D-056).**
+   * Red was dropped on 2026-08-13 because it read as a warning; blue replaced
+   * it as *"what every maps app draws your path in"*. That reason went with
+   * D-093: the lines are no longer a path but the roads you have covered, and
+   * on Google's map blue then collided with three things, measured from the
+   * P30's own screenshots:
    *
-   * Blue is what every maps app on both platforms draws *your* path in, which
-   * is the association to borrow rather than fight (D-054). It also frees red
-   * entirely, and it separates the trace from the levada course, which is
-   * green (`levadaHighlight.ts`).
+   *   - **Google's location dot**, about the same blue (colour difference 15
+   *     where 50 reads as clearly different): the dot vanished inside a knot of
+   *     lit streets;
+   *   - **Google's route blue**: a heavy blue line on Google's map reads as
+   *     directions somebody suggested;
+   *   - **the sea and the motorways**, blue and slate blue on Google's palette.
    *
-   * Core 5.01:1 on land, 3.42:1 over water — better than the red it replaced
-   * on both grounds, and the water case is the one a ferry crossing exposes.
-   * The casing is opaque white and wider than before: on the light ground the
-   * line needs separating from hillshade, and at street zoom the old 55%
-   * casing was doing almost nothing.
+   * Rejected on the way: the brighter `#DE6E0A` (2.9:1 on forest, 2.1:1 over the
+   * sea), `#C2410C` (2.97:1 over the kept MapLibre style's water, and quieter
+   * than a collected place marker there), magenta and crimson (red-green colour
+   * blindness collapses both into the green levada course), purple (Google's
+   * transit and place colour, and close to the dot for the same readers), green
+   * (the island is green, and so are the levada course and the start button).
+   *
+   * Core 5.56:1 on Google's land, 3.81:1 over its sea; 5.00:1 and 3.42:1 on the
+   * MapLibre style, the blue's own margins. Its weak case: for protanopes it
+   * comes nearer the green start button and levada course, where lightness and
+   * shape still tell them apart.
+   *
+   * ⚠ Judged in drawings over the P30's screenshots, never outdoors.
    */
   light: {
     casingColor: '#ffffff',
     casingOpacity: 0.9,
     casingWidth: 8,
-    coreColor: '#0A5FCC',
+    coreColor: '#B33A0A',
     coreWidth: 4,
-    otherDayColor: '#0A5FCC33',
+    otherDayColor: '#B33A0A33',
   },
 
   /**
-   * Core 4.96:1 on land, 7.00:1 over water — bright, because on this ground
-   * brightness is what reads. The casing is **darker** than the ground on
-   * purpose: it separates a glowing line from mid-tone hillshade, which a
-   * white one cannot do without outshining the line.
+   * The light style's orange, lifted to glow on the night ground: 6.32:1 on
+   * land, 7.23:1 over water, and still the brightest colour on the map, which
+   * `googleNightStyle.test.ts` holds it to. More orange than amber on purpose,
+   * so the film's yellow village dots stay a different colour. The casing is
+   * **darker** than the ground on purpose: it separates a glowing line from
+   * mid-tone hillshade, which a white one cannot do without outshining the line.
    */
   dark: {
     casingColor: '#0d1319',
     casingOpacity: 0.7,
     casingWidth: 8,
-    // 6.31:1 on land, 8.91:1 over water. Bright rather than deep, because on
-    // this ground brightness is what reads — the same hue as the light style's
-    // trace, lifted for the opposite background.
-    coreColor: '#64B5F6',
+    coreColor: '#FF9A3C',
     coreWidth: 4,
-    otherDayColor: '#64B5F633',
+    otherDayColor: '#FF9A3C33',
   },
 };

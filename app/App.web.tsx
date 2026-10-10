@@ -40,6 +40,7 @@ import PlaceCardView from './src/ui/PlaceCardView';
 import UnlockSheetView from './src/ui/UnlockSheetView';
 import { showcase, unlockSheetModel, type UnlockState } from './src/entitlement/unlockSheet';
 import { freeStampsLeft } from './src/entitlement/freeTier';
+import StampNewsCard from './src/ui/StampNewsCard';
 import { buildPlaceCard } from './src/places/placeCard';
 import PrivacyPolicyView from './src/ui/PrivacyPolicyView';
 import SettingsView from './src/ui/SettingsView';
@@ -204,7 +205,9 @@ type Screen =
   | 'passport-confirm'
   | `unlock:${UnlockState['kind']}`
   | `onboarding:${OnboardingScreen}`
-  | 'unlock-none';
+  | 'unlock-none'
+  | 'news-third'
+  | 'news-fifth';
 
 /**
  * The unlock sheet in each state (T-156d). The price is a placeholder in the
@@ -236,6 +239,8 @@ const SCREENS: { id: Screen; label: string }[] = [
     label: `Unlock: ${kind} (T-156d)`,
   })),
   { id: 'unlock-none', label: 'Unlock: nothing waiting, three places shown' },
+  { id: 'news-third', label: 'New stamp: the 3rd, with the offer (D-105)' },
+  { id: 'news-fifth', label: 'New stamp: the 5th, the last free (D-105)' },
   { id: 'privacy', label: 'Privacy policy (T-124)' },
   { id: 'onboarding:welcome', label: 'Welcome (T-114)' },
   { id: 'onboarding:location', label: 'Location ask (T-042)' },
@@ -411,6 +416,39 @@ export default function DesignWorkbench() {
                   />
                 </View>
               )}
+            </View>
+          ) : screen === 'news-third' || screen === 'news-fifth' ? (
+            <View style={styles.fill}>
+              {(() => {
+                const after = screen === 'news-third' ? 3 : 5;
+                const place = stamps[0];
+                return place === undefined ? null : (
+                  <StampNewsCard
+                    stamp={{
+                      placeId: place.placeId,
+                      name: place.name,
+                      category: place.category,
+                      locked: false,
+                      awardedTs: Date.now(),
+                      celebration: {
+                        collectedBefore: after - 1,
+                        collectedAfter: after,
+                        total: stamps.length,
+                        category: place.category,
+                        inCategory: 1,
+                        categoryTotal: stamps.filter((each) => each.category === place.category).length,
+                        rankUp: null,
+                      },
+                      othersWaiting: 0,
+                      medals: [],
+                      freeLeft: freeStampsLeft(after),
+                    }}
+                    onClose={() => setScreen('passport')}
+                    onOpenPassport={() => setScreen('passport')}
+                    onUnlock={() => setScreen('unlock-none')}
+                  />
+                );
+              })()}
             </View>
           ) : screen.startsWith('unlock') ? (
             <View style={styles.unlockStage}>

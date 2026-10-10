@@ -39,6 +39,8 @@ test('D-097, sheet A, in Portuguese as the project lead chose it', () => {
   assert.equal(model.earned, 'Já lá estiveste. Só falta vê-los.');
   assert.equal(model.buy?.label, 'Ver os meus carimbos · 5,99 €');
   assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).title, 'Tens 1 carimbo à tua espera');
+  // One stamp is "it" (P30, 2026-10-10: the sheet said "vê-los" for one).
+  assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).earned, 'Já lá estiveste. Só falta vê-lo.');
 });
 
 test('with nothing waiting (from Settings), the plain offer names the price Google gave', () => {

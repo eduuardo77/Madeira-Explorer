@@ -28,10 +28,11 @@ export default function UnlockNudge({
   onPress: () => void;
 }) {
   const title = n('passport.nudge.title', waiting.length);
+  const body = n('passport.nudge.body', waiting.length);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${title}. ${t('passport.nudge.body')}`}
+      accessibilityLabel={`${title}. ${body}`}
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
@@ -67,7 +68,7 @@ export default function UnlockNudge({
       </View>
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.body}>{t('passport.nudge.body')}</Text>
+        <Text style={styles.body}>{body}</Text>
       </View>
       <View style={styles.button}>
         <Text style={styles.buttonText}>{t('passport.nudge.button')}</Text>

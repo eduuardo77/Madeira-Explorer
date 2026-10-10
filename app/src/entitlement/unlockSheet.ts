@@ -96,7 +96,7 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     title: waiting
       ? plural(PLURALS['unlock.title.waiting'], input.waiting, language)
       : say('unlock.title'),
-    earned: waiting ? say('unlock.lead') : say('unlock.earned.none'),
+    earned: waiting ? plural(PLURALS['unlock.lead'], input.waiting, language) : say('unlock.earned.none'),
     adds,
     notice: null,
     buy: canBuy,

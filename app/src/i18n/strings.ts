@@ -772,11 +772,6 @@ export const STRINGS = {
   'unlock.title': s('Unlock your passport', 'Desbloqueia o teu passaporte', 'Ihren Reisepass freischalten'),
   // D-097, sheet A (picked 2026-10-05): what is already theirs, not a purchase.
   'unlock.eyebrow': s('YOUR PASSPORT', 'O TEU PASSAPORTE', 'IHR REISEPASS'),
-  'unlock.lead': s(
-    "You've been there. All that's left is to see them.",
-    'Já lá estiveste. Só falta vê-los.',
-    'Sie waren schon dort. Es fehlt nur noch, sie zu sehen.'
-  ),
   'unlock.buy.see': s('See my stamps · {price}', 'Ver os meus carimbos · {price}', 'Meine Stempel ansehen · {price}'),
   'unlock.buy.see.noPrice': s('See my stamps', 'Ver os meus carimbos', 'Meine Stempel ansehen'),
   'unlock.earned.none': s(
@@ -1153,7 +1148,6 @@ export const STRINGS = {
   // T-156e: the passport group. The rows open the unlock sheet; its own words
   // are `unlock.*`. Written without a pronoun, so neither register clashes.
   'settings.section.passport': s('Passport', 'Passaporte', 'Reisepass'),
-  'passport.nudge.body': s('Unlock them and see them in colour', 'Desbloqueia e vê-os a cores', 'Freischalten und in Farbe sehen'),
   'passport.nudge.button': s('See', 'Ver', 'Ansehen'),
   'settings.passport.unlock': s('Unlock the passport', 'Desbloquear o passaporte', 'Reisepass freischalten'),
   'settings.passport.footnote.locked': s(
@@ -1452,6 +1446,24 @@ export const PLURALS = {
   'passport.nudge.title': {
     one: s('{count} of your stamps is waiting', '{count} carimbo teu à espera', '{count} Ihrer Stempel wartet'),
     other: s('{count} of your stamps are waiting', '{count} carimbos teus à espera', '{count} Ihrer Stempel warten'),
+  },
+  // The lines under those two titles. One stamp is "it", not "them" (P30,
+  // 2026-10-10: "1 carimbo teu à espera. Desbloqueia e vê-os a cores").
+  'passport.nudge.body': {
+    one: s('Unlock it and see it in colour', 'Desbloqueia e vê-o a cores', 'Freischalten und in Farbe sehen'),
+    other: s('Unlock them and see them in colour', 'Desbloqueia e vê-os a cores', 'Freischalten und in Farbe sehen'),
+  },
+  'unlock.lead': {
+    one: s(
+      "You've been there. All that's left is to see it.",
+      'Já lá estiveste. Só falta vê-lo.',
+      'Sie waren schon dort. Es fehlt nur noch, ihn zu sehen.'
+    ),
+    other: s(
+      "You've been there. All that's left is to see them.",
+      'Já lá estiveste. Só falta vê-los.',
+      'Sie waren schon dort. Es fehlt nur noch, sie zu sehen.'
+    ),
   },
   // T-156d: the unlock sheet's line on what is waiting. `{collected}` is every
   // place collected, locked included; `{count}` is how many are locked.

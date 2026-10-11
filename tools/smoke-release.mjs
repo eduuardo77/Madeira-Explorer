@@ -88,6 +88,8 @@ const { label, pattern } = labels(language);
 // ---------------------------------------------------------------------------
 
 const MAP = label('map.a11y.settings');
+/** How long the first step waits on the map for a stamp pop-up to arrive. */
+const POP_UP_SETTLE_MS = 8_000;
 /** Any stamp in the passport: on screen at whatever point the page is scrolled to. */
 const STAMP = pattern('passport.a11y.stampCollected', 'passport.a11y.stampUncollected', 'passport.locked.a11y');
 
@@ -133,7 +135,19 @@ const STEPS = [
       if (findNode(await screen(), MAP) === null) shell('input keyevent 4');
     }
     await reach(MAP);
-    return popUps === 0 ? '' : `closed ${popUps} pop-up${popUps === 1 ? '' : 's'} with Back first`;
+    // The pop-up comes after the award pass, seconds after the map: on the P30
+    // (11 Oct, the Monte stamp) it opened over Settings and the next step could
+    // read nothing. So wait it out here, closing only what cannot be read.
+    for (let waited = 0; waited < POP_UP_SETTLE_MS && popUps < 3; waited += 1000) {
+      await pause(1000);
+      if (!readable()) {
+        shell('input keyevent 4');
+        popUps += 1;
+        await pause(1200);
+      }
+    }
+    await reach(MAP);
+    return popUps === 0 ? '' : `closed ${popUps} pop-up${popUps === 1 ? '' : 's'} with Back`;
   }],
   ['Settings', async () => {
     await tap(MAP);

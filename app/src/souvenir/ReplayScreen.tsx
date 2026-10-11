@@ -106,11 +106,12 @@ export default function ReplayScreen({
   const [composition, setComposition] = useState<Composition | null>(null);
   const [caption, setCaption] = useState('');
   /**
-   * Always the dark map (T-253, 2026-10-07): WalkNYC's Replay plays on a dark
-   * map with the blocks glowing, and the lit roads read the same way here. Not
-   * the everyday map's setting: this is the one screen made to be watched.
+   * Always the light map (the lead, 2026-10-11). It was always dark from
+   * T-253 (2026-10-07), after WalkNYC's Replay; the lead found the switch to
+   * dark jarring, and the app has given up on a dark mode elsewhere. Not the
+   * everyday map's setting, which the lead also accepted, for now.
    */
-  const styleName: MapStyleName = 'dark';
+  const styleName: MapStyleName = 'light';
   const [clock, setClock] = useState<Playback>(STOPPED);
   /**
    * The wall clock, re-read once per animation frame while playing.
@@ -467,7 +468,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroNumber: {
-    // White on the dark map it always plays on; dark text vanished there.
+    // White with a shadow: made for the dark map, and the shadow is meant
+    // to carry it on the light one too (not yet seen on a phone).
     color: '#FFFFFF',
     fontSize: fontSize.hero,
     fontWeight: '700',

@@ -5542,7 +5542,8 @@ a still map framed on one **day** (the lead's option B of three drawn; a holiday
 thing to a WalkNYC walk), that day's roads bright over the rest of the trip pale, a dark time tag
 on each stamp earned that day, a round back button, a "Dia 2 de 2" pill, and one card at the
 foot with arrows between days and the day's figures. Beside the back button, **▶ opens the
-timelapse**, WalkNYC's *Replay* (seen on the lead's iPhone), always on the dark map. **Partilhar**
+timelapse**, WalkNYC's *Replay* (seen on the lead's iPhone), always on the dark map (⚠ **amended 2026-10-11:** always on the light
+map, the lead's choice; the app has no dark mode elsewhere). **Partilhar**
 sends one PNG, as WalkNYC's does: the whole trip drawn from the masked roads (D-040), Google's
 snapshot of the map under the stamp tags and a card with the dates, the figures and a line about
 the app.

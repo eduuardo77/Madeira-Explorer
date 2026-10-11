@@ -455,10 +455,10 @@ export default function ReplayScreen({
 }
 
 const styles = StyleSheet.create({
-  // Dark, like the map it always plays on (T-253): a light cover flashed first.
-  root: { flex: 1, backgroundColor: '#0d1319' },
+  // The light map's ground, so nothing dark flashes before it draws.
+  root: { flex: 1, backgroundColor: colors.background },
   centre: { alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
-  empty: { color: 'rgba(255, 255, 255, 0.7)', fontSize: fontSize.body, textAlign: 'center' },
+  empty: { color: colors.textMuted, fontSize: fontSize.body, textAlign: 'center' },
   pressed: { opacity: 0.75 },
   hero: {
     position: 'absolute',
@@ -468,23 +468,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroNumber: {
-    // White with a shadow: made for the dark map, and the shadow is meant
-    // to carry it on the light one too (not yet seen on a phone).
-    color: '#FFFFFF',
+    // Dark on the light map (2026-10-11). White with a dark shadow, kept from
+    // the dark map, left "/ 80" faint over the pale sea on the P30.
+    color: colors.text,
     fontSize: fontSize.hero,
     fontWeight: '700',
     // The map underneath can be any colour at all, so the number carries its
     // own separation rather than trusting the ground — the same problem the
     // status-bar scrim solves on the map screen.
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowColor: 'rgba(255, 255, 255, 0.85)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 8,
   },
-  heroTotal: { color: 'rgba(255, 255, 255, 0.7)', fontSize: fontSize.title, fontWeight: '700' },
+  heroTotal: { color: colors.textMuted, fontSize: fontSize.title, fontWeight: '700' },
   heroCaption: {
-    color: '#FFFFFF',
+    color: colors.text,
     fontSize: fontSize.body,
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowColor: 'rgba(255, 255, 255, 0.85)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 8,
   },
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     color: colors.tint,
     fontSize: fontSize.body,
     fontWeight: '600',
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowColor: 'rgba(255, 255, 255, 0.85)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 8,
   },

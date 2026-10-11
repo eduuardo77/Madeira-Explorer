@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-10 to 11 | Still on battery, 18h44, after swiping the app away | P30 | Equilibrado | ✅ the swipe left the recorder running; one deep idle of 17h35, no fixes needed; 100 to 98% |
 | 2026-10-10 | Car and on foot as an outing, 3h21, iPhone alongside, tunnels | P30 | Equilibrado (outing: Preciso) | ✅ 95.6% of the route lit within 10 m, tunnels drawn; 2 stamps; battery 100 to 92% |
 | 2026-10-09 to 10 | Second still night on battery, 9h53 | P30 | Equilibrado | ✅ deep idle 88%; ⚠ level stuck at 100% again |
 | 2026-10-09 | Motorbike ride as an outing, 74 min, iPhone alongside | P30 | Equilibrado (outing: Preciso) | ✅ 99.5% of the route lit within 10 m; a stamp; battery 100 to 96% |

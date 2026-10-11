@@ -50,9 +50,19 @@ never where the lead lives.
   Fixes at 15:40, 15:44 (42 km/h) and 15:49 were held, 8 s short of the 15 minutes, and handed over
   only at 17:10. The sampling gate runs on a delivery, so it never saw the drive and never left
   stationary; at 17:10 the newest fix was on foot and the old ones fell outside its window.
-- **Fixed the same day:** on Android the stationary profile now has no hold
-  (`samplingPolicy.deferralFor`); the 15:44 fix would have switched it to driving at once. The
-  moving profiles keep theirs. **Retest F1** before calling automatic recording working.
+- **Fixed the same day, in two steps** (`samplingPolicy.forPlatform`):
+  1. On Android the stationary profile has no hold.
+  2. On Android every profile asks for the GPS. The battery history shows the GPS on for only
+     7 minutes of the trip: the stationary profile asked for the low-power provider, and the
+     walking one asks for the balanced one, and with the screen off the P30 gave next to nothing
+     from either. Every trip agrees: the outings (forced to the GPS) lit 94 to 99.6%; 6 Oct on
+     Poupança and the way back from the gym on Equilibrado did not.
+- **Emulator, the same 9 km modelled drive with the app behind Home, before and after:** step 1
+  alone woke the app at 4.7 min and then stalled in walking (1 fix in the drive, walking's balanced
+  request gets nothing on an emulator); with step 2, walking at 10 min, driving at 10 min ("moved
+  1982 m at up to 27 km/h"), 35 fixes. The first 4.7 minutes are still lost, the price of the
+  stationary interval. The emulator has no doze and no Huawei, so this proves the code path only.
+  **Retest F1 on the P30** before calling automatic recording working.
 - Also seen: no *driving* event from the motion sensors during either drive; only *walking* at
   17:08. Not the cause, but worth watching on the retest.
 

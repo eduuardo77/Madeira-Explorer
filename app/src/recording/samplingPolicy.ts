@@ -93,10 +93,11 @@ export function getSamplingParameters(
 }
 
 /**
- * How long the fixes may be held before the app sees them, on this platform.
+ * The profiles as Android must run them (F1, the P30, 2026-10-11). Two
+ * changes, each found on that trip, where the lead swiped Bruma away at home,
+ * drove off, and the app recorded 10 fixes in two hours and lit nothing.
  *
- * ⚠ **On Android the hold is Expo's, not the chip's**, and it blinded the
- * stationary profile (F1, the P30, 2026-10-11). With the app off screen,
+ * **1. No hold.** ⚠ On Android the hold is Expo's, not the chip's. With the app off screen,
  * `expo-location`'s `LocationTaskConsumer` keeps every fix in memory until
  * *both* the interval and the distance since the last delivery are reached.
  * The lead swiped Bruma away at home and drove off: fixes at 15:40, 15:44 (at
@@ -110,13 +111,30 @@ export function getSamplingParameters(
  * moving profiles keep their hold: it only delays what they record, and their
  * battery was measured with it (field log, 8 and 9 Oct). ⚠ A held fix lives
  * in memory only, so a process killed while holding loses it.
+ *
+ * **2. The GPS, not the low-power provider.** `coarse` and `balanced` are Android's
+ * low-power and balanced priorities, Wi-Fi and cell towers first, and with the
+ * screen off on the P30 they give next to nothing. On F1 the battery history
+ * shows the GPS on for 2 minutes at 15:44 and 5 at 17:10, and no fix between
+ * 15:49 and 17:10 while the lead drove. Every trip agrees: the ones recorded
+ * at `high` (the outings, which force Preciso: 4, 8, 9, 10 Oct) lit 94 to
+ * 99.6% of the route; the ones that were not (6 Oct on Poupança, 29 fixes; the
+ * way back from the gym on 6 Oct on Equilibrado, nothing; F1) failed. A levada
+ * has no Wi-Fi at all. So on Android every profile asks for the GPS, in every
+ * tier; the tiers still differ by interval and distance. A phone that is truly
+ * still costs nothing for it: Android's deep idle, which it enters only when
+ * the phone lies still, held every request for 17 h 35 the night before (field
+ * log, 10 to 11 Oct). ⚠ Poupança's battery is no longer what was measured
+ * with it, and battery while moving slowly (a pocket at a café) is not
+ * measured.
  */
-export function deferralFor(
+export function forPlatform(
   platform: 'ios' | 'android',
   profile: SamplingProfile,
-  parameters: Pick<SamplingParameters, 'deferredIntervalMs' | 'deferredDistanceM'>
-): { intervalMs: number; distanceM: number } {
-  return platform === 'android' && profile === 'stationary'
-    ? { intervalMs: 0, distanceM: 0 }
-    : { intervalMs: parameters.deferredIntervalMs, distanceM: parameters.deferredDistanceM };
+  parameters: SamplingParameters
+): SamplingParameters {
+  if (platform !== 'android') return parameters;
+  return profile === 'stationary'
+    ? { ...parameters, deferredIntervalMs: 0, deferredDistanceM: 0, desiredAccuracy: 'high' }
+    : { ...parameters, desiredAccuracy: 'high' };
 }

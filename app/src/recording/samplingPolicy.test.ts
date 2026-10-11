@@ -1,5 +1,5 @@
 /**
- * Tests for how long fixes may be held before the app sees them (F1, 2026-10-11).
+ * Tests for the profiles as Android runs them (F1, 2026-10-11).
  *
  *     cd app && npm test
  */
@@ -7,23 +7,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { deferralFor, getSamplingParameters } from './samplingPolicy.ts';
+import { forPlatform, getSamplingParameters } from './samplingPolicy.ts';
+import { scaleForQuality } from './trackingPreference.ts';
 
-test('on Android the stationary profile hands over every fix: the hold hid a drive (F1)', () => {
-  assert.deepEqual(deferralFor('android', 'stationary', getSamplingParameters('stationary')), {
-    intervalMs: 0,
-    distanceM: 0,
-  });
+test('on Android the stationary profile hands over every fix and asks for the GPS (F1)', () => {
+  const adjusted = forPlatform('android', 'stationary', getSamplingParameters('stationary'));
+  assert.equal(adjusted.deferredIntervalMs, 0);
+  assert.equal(adjusted.deferredDistanceM, 0);
+  assert.equal(adjusted.desiredAccuracy, 'high');
+  // Its interval and distance are its own: still a fix at most every 5 min and 100 m.
+  assert.equal(adjusted.minTimeMs, getSamplingParameters('stationary').minTimeMs);
 });
 
-test('the moving profiles keep their hold, and iOS keeps every hold', () => {
-  for (const profile of ['walking', 'driving'] as const) {
-    const parameters = getSamplingParameters(profile);
-    assert.deepEqual(deferralFor('android', profile, parameters), {
-      intervalMs: parameters.deferredIntervalMs,
-      distanceM: parameters.deferredDistanceM,
-    });
+test('every tier, the cheapest included, gets the GPS while stationary on Android', () => {
+  for (const tier of ['saver', 'balanced', 'precise'] as const) {
+    const scaled = scaleForQuality(getSamplingParameters('stationary'), tier);
+    assert.equal(forPlatform('android', 'stationary', scaled).desiredAccuracy, 'high', tier);
   }
-  const stationary = getSamplingParameters('stationary');
-  assert.equal(deferralFor('ios', 'stationary', stationary).intervalMs, stationary.deferredIntervalMs);
+});
+
+test('on Android the moving profiles ask for the GPS in every tier and keep their hold', () => {
+  for (const profile of ['walking', 'driving'] as const) {
+    for (const tier of ['saver', 'balanced', 'precise'] as const) {
+      const scaled = scaleForQuality(getSamplingParameters(profile), tier);
+      assert.deepEqual(forPlatform('android', profile, scaled), { ...scaled, desiredAccuracy: 'high' }, `${profile} ${tier}`);
+    }
+  }
+});
+
+test('iOS is left as it is', () => {
+  for (const profile of ['stationary', 'walking', 'driving'] as const) {
+    const parameters = getSamplingParameters(profile);
+    assert.deepEqual(forPlatform('ios', profile, parameters), parameters);
+  }
 });

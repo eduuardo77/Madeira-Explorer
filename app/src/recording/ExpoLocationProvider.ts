@@ -18,7 +18,7 @@ import type {
   PermissionLevel,
   SamplingProfile,
 } from './LocationProvider';
-import { deferralFor, getSamplingParameters } from './samplingPolicy';
+import { forPlatform, getSamplingParameters } from './samplingPolicy';
 import { scaleForQuality } from './trackingPreference';
 import { effectiveProfile, effectiveQuality } from './recorderControls';
 import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
@@ -69,11 +69,13 @@ async function buildOptions(
   // the current profile re-applies it in place when a walk starts or stops.
   const walking = await getWalkInProgress();
   const sampled = effectiveProfile(profile, walking);
-  const parameters = scaleForQuality(
-    getSamplingParameters(sampled),
-    effectiveQuality(await getTrackingQuality(), walking)
+  // After the tier, on purpose: Android's stationary profile needs the GPS
+  // and no hold whatever the tier asks (`forPlatform`, F1).
+  const parameters = forPlatform(
+    Platform.OS === 'android' ? 'android' : 'ios',
+    sampled,
+    scaleForQuality(getSamplingParameters(sampled), effectiveQuality(await getTrackingQuality(), walking))
   );
-  const deferral = deferralFor(Platform.OS === 'android' ? 'android' : 'ios', sampled, parameters);
 
   return {
     accuracy: toExpoAccuracy(parameters.desiredAccuracy),
@@ -82,9 +84,9 @@ async function buildOptions(
 
     // The batching knob (ARCHITECTURE §7): fixes are held and handed over
     // every few minutes instead of one by one. ⚠ On Android the holding is
-    // Expo's, in memory, and never for the stationary profile (`deferralFor`).
-    deferredUpdatesInterval: deferral.intervalMs,
-    deferredUpdatesDistance: deferral.distanceM,
+    // Expo's, in memory, and never for the stationary profile (`forPlatform`).
+    deferredUpdatesInterval: parameters.deferredIntervalMs,
+    deferredUpdatesDistance: parameters.deferredDistanceM,
 
     activityType: toExpoActivityType(sampled),
 

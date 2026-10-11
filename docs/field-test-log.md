@@ -59,7 +59,7 @@ never where the lead lives.
      Poupança and the way back from the gym on Equilibrado did not.
 - **Emulator, the same 9 km modelled drive with the app behind Home, before and after:** step 1
   alone woke the app at 4.7 min and then stalled in walking (1 fix in the drive, walking's balanced
-  request gets nothing on an emulator); with step 2, walking at 10 min, driving at 10 min ("moved
+  request gets nothing on an emulator); with step 2, walking at 4.7 min, driving at 10 min ("moved
   1982 m at up to 27 km/h"), 35 fixes. The first 4.7 minutes are still lost, the price of the
   stationary interval. The emulator has no doze and no Huawei, so this proves the code path only.
   **Retest F1 on the P30** before calling automatic recording working.

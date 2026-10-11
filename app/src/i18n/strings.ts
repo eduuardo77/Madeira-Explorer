@@ -1440,15 +1440,16 @@ export const PLURALS = {
   },
   // T-249, E3: a locked stamp's celebration, with how many others wait.
   'stampNews.lockedMore': {
+    // Reworded 2026-10-11 with the lead's approval: "a ele e ao outro à espera" read awkwardly.
     one: s(
-      "It's yours. Unlock it to see it in colour, with the other one waiting.",
-      'É teu. Desbloqueia para o ver a cores, a ele e ao outro à espera.',
-      'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen, zusammen mit dem anderen.'
+      "It's yours, and 1 more is waiting. Unlock to see them in colour.",
+      'É teu, e há mais 1 à espera. Desbloqueia para os veres a cores.',
+      'Er gehört Ihnen, und 1 weiterer wartet. Freischalten, um sie in Farbe zu sehen.'
     ),
     other: s(
-      "It's yours. Unlock it to see it in colour, with the {count} others waiting.",
-      'É teu. Desbloqueia para o ver a cores, a ele e aos outros {count} à espera.',
-      'Er gehört Ihnen. Freischalten, um ihn in Farbe zu sehen, zusammen mit den {count} anderen.'
+      "It's yours, and {count} more are waiting. Unlock to see them in colour.",
+      'É teu, e há mais {count} à espera. Desbloqueia para os veres a cores.',
+      'Er gehört Ihnen, und {count} weitere warten. Freischalten, um sie in Farbe zu sehen.'
     ),
   },
   // D-097, R2: the gold count on the map's passport button.

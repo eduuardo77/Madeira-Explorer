@@ -42,9 +42,11 @@ today:** Gate P1 (cold start median 471 ms, store build), Phase 3 (T-201 80 of 8
 pass accepted by the lead), T-265 (the lead read the Portuguese). **Found today, fixed:** a
 timelapse crash (zero camera duration, `replayMap.SNAP_MS`), the passport and first run drawn
 under the status bar, and **a new visitor's first map failing to start** (a T-272 regression; see
-its entry). The welcome now shows the island under its stamps. **Version 4 on internal testing** (active since 2026-10-08 15:31). **Version 5 AAB built 2026-10-09**
-(`Madeira-fieldwork/apks/bruma-0.1.0-vc5.aab`, normal build per D-084 as amended) for the **closed
-track**: Google's gate is 12 opted-in testers for 14 days, sourced by the lead. The next is 6. **Phase 4 is the lead's Play
+its entry). The welcome now shows the island under its stamps. **Version 4 on internal testing** (active since 2026-10-08 15:31). ⚠ **Version 6 AAB built 2026-10-11**
+(`Madeira-fieldwork/apks/bruma-0.1.0-vc6.aab`, upload key, normal build per D-084 as amended) for the
+**closed track**, replacing version 5: **version 5 must not go to testers**, it records nothing with
+the app closed (F1, fixed in `d288a92`). Google's gate is 12 opted-in testers for 14 days, sourced
+by the lead. The next is 7. **Phase 4 is the lead's Play
 Console** (T-268, T-269, T-123's shot 3). **Store screenshots without the lead's trace:**
 `tools/make-demo-route.mjs` then `ANDROID_SERIAL=emulator-5554 bash tools/replay-route.sh
 tools/routes/demo-drive.txt 2`. Tools: `tools/capture-visual-pass.mjs` captures every screen from

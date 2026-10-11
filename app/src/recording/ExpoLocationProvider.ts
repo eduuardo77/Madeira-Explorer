@@ -18,7 +18,7 @@ import type {
   PermissionLevel,
   SamplingProfile,
 } from './LocationProvider';
-import { getSamplingParameters } from './samplingPolicy';
+import { deferralFor, getSamplingParameters } from './samplingPolicy';
 import { scaleForQuality } from './trackingPreference';
 import { effectiveProfile, effectiveQuality } from './recorderControls';
 import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
@@ -73,17 +73,18 @@ async function buildOptions(
     getSamplingParameters(sampled),
     effectiveQuality(await getTrackingQuality(), walking)
   );
+  const deferral = deferralFor(Platform.OS === 'android' ? 'android' : 'ios', sampled, parameters);
 
   return {
     accuracy: toExpoAccuracy(parameters.desiredAccuracy),
     timeInterval: parameters.minTimeMs,
     distanceInterval: parameters.minDistanceM,
 
-    // The batching knob, and the largest single battery win we have
-    // (ARCHITECTURE §7). The chip buffers fixes and wakes us every few minutes
-    // instead of every second.
-    deferredUpdatesInterval: parameters.deferredIntervalMs,
-    deferredUpdatesDistance: parameters.deferredDistanceM,
+    // The batching knob (ARCHITECTURE §7): fixes are held and handed over
+    // every few minutes instead of one by one. ⚠ On Android the holding is
+    // Expo's, in memory, and never for the stationary profile (`deferralFor`).
+    deferredUpdatesInterval: deferral.intervalMs,
+    deferredUpdatesDistance: deferral.distanceM,
 
     activityType: toExpoActivityType(sampled),
 

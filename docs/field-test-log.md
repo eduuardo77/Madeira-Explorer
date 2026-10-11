@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-11 | **F1:** car and on foot, app swiped away, no outing, iPhone alongside | P30 | Equilibrado | ❌ 10 fixes in 2h, nothing lit: Expo held the stationary profile's fixes (fixed, to retest); the Monte stamp still came |
 | 2026-10-10 to 11 | Still on battery, 18h44, after swiping the app away | P30 | Equilibrado | ✅ the swipe left the recorder running; one deep idle of 17h35, no fixes needed; 100 to 98% |
 | 2026-10-10 | Car and on foot as an outing, 3h21, iPhone alongside, tunnels | P30 | Equilibrado (outing: Preciso) | ✅ 95.6% of the route lit within 10 m, tunnels drawn; 2 stamps; battery 100 to 92% |
 | 2026-10-09 to 10 | Second still night on battery, 9h53 | P30 | Equilibrado | ✅ deep idle 88%; ⚠ level stuck at 100% again |
@@ -34,6 +35,26 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-11: F1, automatic recording with the app closed: failed
+
+- **Setup:** P30 unplugged at 97% at 15:34 local; Bruma open briefly at 15:34, then swiped away and
+  not opened again; no *Começar passeio*; Equilibrado. Sensor Logger on the iPhone 15:41 to 17:56
+  (two exports). A drive of some 15 km, an hour on foot around Monte, a drive back.
+- **Result:** 10 fixes in two hours, none lit: 0% of the route. The Monte stamp was awarded at
+  17:40 from Android's geofence (1801 s inside), the one part that worked. Battery 97 to 96% in
+  2h44, so cheap because almost nothing ran.
+- **Why, from the diary and Expo's source:** the phone left home on the stationary profile. With
+  the app off screen, `expo-location`'s Android task consumer holds fixes in memory until both the
+  profile's deferral interval (15 min) and distance (500 m) since the last delivery are reached.
+  Fixes at 15:40, 15:44 (42 km/h) and 15:49 were held, 8 s short of the 15 minutes, and handed over
+  only at 17:10. The sampling gate runs on a delivery, so it never saw the drive and never left
+  stationary; at 17:10 the newest fix was on foot and the old ones fell outside its window.
+- **Fixed the same day:** on Android the stationary profile now has no hold
+  (`samplingPolicy.deferralFor`); the 15:44 fix would have switched it to driving at once. The
+  moving profiles keep theirs. **Retest F1** before calling automatic recording working.
+- Also seen: no *driving* event from the motion sensors during either drive; only *walking* at
+  17:08. Not the cause, but worth watching on the retest.
 
 ### 2026-10-10: car and on foot, through tunnels
 
@@ -229,7 +250,7 @@ never where the lead lives.
 
 ## Next test
 
-**F1: automatic recording, moving, untouched.** A ride or drive of 20 minutes or more with
+**F1 again, after the 11 Oct fix: automatic recording, moving, untouched.** A ride or drive of 20 minutes or more with
 *registo automático* on and **no outing**: phone in a pocket with the screen off, the app not opened
 from leaving until the phone is back on the cable, iPhone alongside. Pass: 90% of the route lit
 within 10 m. If it fails, the recorder's sleep on EMUI is the work. Best started near 80% battery,

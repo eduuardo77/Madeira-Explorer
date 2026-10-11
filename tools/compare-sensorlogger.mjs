@@ -137,6 +137,12 @@ const litPts = walkPolys.flatMap((poly) => resample(poly, 5)).filter(inBox);
 const pct = (arr, lim) => ((100 * arr.filter((d) => d <= lim).length) / arr.length).toFixed(1);
 const q = (arr, p) => [...arr].sort((a, b) => a - b)[Math.floor(arr.length * p)];
 
+// Nothing lit is a result, not a crash (F1, 11 Oct 2026: 10 fixes, no chain).
+if (litPolys.length === 0) {
+  console.log('\nNothing lit in this window: the app drew no road at all.');
+  process.exit(0);
+}
+
 // Precision: is each lit metre where the walker actually went?
 const litErr = litPts.map((p) => Math.min(...truthRuns.map((run) => polyDist(p, run))));
 console.log(`\nLIT vs iPhone track (walk area, ${litPts.length * 5} m of lit line):`);

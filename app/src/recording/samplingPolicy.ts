@@ -91,3 +91,32 @@ export function getSamplingParameters(
 ): SamplingParameters {
   return SAMPLING_PROFILES[profile];
 }
+
+/**
+ * How long the fixes may be held before the app sees them, on this platform.
+ *
+ * ⚠ **On Android the hold is Expo's, not the chip's**, and it blinded the
+ * stationary profile (F1, the P30, 2026-10-11). With the app off screen,
+ * `expo-location`'s `LocationTaskConsumer` keeps every fix in memory until
+ * *both* the interval and the distance since the last delivery are reached.
+ * The lead swiped Bruma away at home and drove off: fixes at 15:40, 15:44 (at
+ * 42 km/h) and 15:49 were held, 8 s short of the 15 minutes, until 17:10. The
+ * gate (`samplingGate.ts`) only runs on a delivery, so it never saw the drive,
+ * and the whole outing was recorded as 10 fixes.
+ *
+ * So on Android the stationary profile delivers every fix. It takes one at
+ * most every 5 minutes and 100 m, so the cost is a wake that rare, and it is
+ * the profile whose one job is to notice the user has started moving. The
+ * moving profiles keep their hold: it only delays what they record, and their
+ * battery was measured with it (field log, 8 and 9 Oct). ⚠ A held fix lives
+ * in memory only, so a process killed while holding loses it.
+ */
+export function deferralFor(
+  platform: 'ios' | 'android',
+  profile: SamplingProfile,
+  parameters: Pick<SamplingParameters, 'deferredIntervalMs' | 'deferredDistanceM'>
+): { intervalMs: number; distanceM: number } {
+  return platform === 'android' && profile === 'stationary'
+    ? { intervalMs: 0, distanceM: 0 }
+    : { intervalMs: parameters.deferredIntervalMs, distanceM: parameters.deferredDistanceM };
+}

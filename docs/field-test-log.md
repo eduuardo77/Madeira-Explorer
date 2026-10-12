@@ -287,7 +287,10 @@ never where the lead lives.
    like the iPhone. ⚠ The P30 otherwise lies on a desk, so a day there measures a desk, not a
    tourist. The cost of the F1 fix is unmeasured (T-054).
 4. **Huawei's warning:** a day or two with the balanced provider at home (12 Oct) and no
-   *consumo excessivo* notification. It came at 11:41 on 12 Oct, with the GPS at home.
+   *consumo excessivo* notification. It came at 11:41 on 12 Oct, with the GPS at home. Seen at
+   19:05 the same day: the request is `@5m BALANCED_POWER_ACCURACY, minUpdateDistance=100`, the
+   profile switched to stationary at 13:56, and no warning showing; but the phone was on the cable,
+   so the test is a day off it.
 5. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080), SensorLogger
    alongside.
 6. **Poupança, one trip:** that the cheapest tier now draws a usable line.

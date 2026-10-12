@@ -269,3 +269,43 @@ test('in a vehicle by the motion sensors: the driving rate, even at walking pace
   const walk = crawl.map((sample) => ({ ...sample, activity: 'walking' }));
   assert.equal(decideProfile('walking', walk, now).profile, 'walking', 'the same crawl on foot stays on the walking rate');
 });
+
+// ---------------------------------------------------------------------------
+// leaving stationary on the first fix (F1, the P30, 2026-10-12)
+// ---------------------------------------------------------------------------
+
+test('stationary: the motion sensors saying driving switch to driving on the first fix', () => {
+  const decision = decideProfile('stationary', [{ ...fix(0, 0), activity: 'driving' }], NOW);
+  assert.equal(decision.profile, 'driving');
+  assert.equal(decision.changed, true);
+});
+
+test('stationary: walking, running or cycling by the motion sensors switch to the moving profile', () => {
+  for (const activity of ['walking', 'running', 'cycling']) {
+    assert.equal(decideProfile('stationary', [{ ...fix(0, 0), activity }], NOW).profile, 'walking', activity);
+  }
+  assert.equal(decideProfile('stationary', [{ ...fix(0, 0), activity: 'still' }], NOW).changed, false);
+});
+
+test('stationary: a first fix far from the last one at home switches, however old that was', () => {
+  // As on the ride: the home fix 73 min earlier, the first fix of the ride 3 km away.
+  const decision = decideProfile('stationary', [fix(73, 0), fix(0, 3000)], NOW);
+  assert.equal(decision.profile, 'walking');
+  assert.equal(decision.changed, true);
+});
+
+test('stationary: scatter at home within the error of both fixes never counts as leaving', () => {
+  // 150 m apart, but each fix is only good to 90 m.
+  assert.equal(decideProfile('stationary', [fix(60, 0, 90), fix(0, 150, 90)], NOW).changed, false);
+});
+
+test('the first-fix rules apply only while stationary', () => {
+  const walking = decideProfile('walking', [{ ...fix(0, 0), activity: 'driving' }], NOW);
+  assert.equal(walking.profile, 'walking');
+});
+
+test('stationary: a fast move inside the window still goes straight to driving, whatever the label', () => {
+  // 1 km in two minutes, labelled walking: speed decides, as before the first-fix rules.
+  const decision = decideProfile('stationary', [fix(2, 0), { ...fix(0, 1000), activity: 'walking' }], NOW);
+  assert.equal(decision.profile, 'driving');
+});

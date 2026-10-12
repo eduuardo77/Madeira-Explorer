@@ -36,6 +36,8 @@ import { SAMPLING_PROFILES } from './samplingPolicy';
  * (2026-10-04). Four short columns a row: a few hundred rows cost nothing.
  */
 const WINDOW_FIX_LIMIT = 400;
+/** While stationary: the newest few, enough for the window and the fix before it. */
+const STATIONARY_FIX_LIMIT = 40;
 
 /**
  * The profile we believe the provider is currently using.
@@ -105,10 +107,13 @@ export async function applySamplingGate(now: number): Promise<void> {
     // columns it reads. `getRecentFixes` would return every column of the last
     // forty rows, most of which fall outside the window on the cheap profile
     // and are discarded in JavaScript.
+    // While stationary, the newest fixes whatever their age: the last one at
+    // home is usually older than the window, and it is the one that shows the
+    // phone has left (`decideProfile`, F1).
     const samples: MovementSample[] = await rawFixDao.getMovementWindow(
       trip.id,
-      now - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS,
-      WINDOW_FIX_LIMIT
+      current === 'stationary' ? 0 : now - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS,
+      current === 'stationary' ? STATIONARY_FIX_LIMIT : WINDOW_FIX_LIMIT
     );
 
     const decision = decideProfile(current, samples, now);

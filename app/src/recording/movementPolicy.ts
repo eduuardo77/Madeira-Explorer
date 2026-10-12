@@ -171,6 +171,9 @@ export function fastestSustainedSpeedMps(samples: MovementSample[]): number {
   return fastest;
 }
 
+/** What the motion sensors call moving (`activityRecognition`, D-094). */
+const MOVING_ACTIVITIES: ReadonlySet<string> = new Set(['walking', 'running', 'cycling', 'driving']);
+
 export type MovementDecision = {
   profile: SamplingProfile;
   /** Written to the recording diary, so a profile change is explicable later. */
@@ -221,6 +224,7 @@ export function decideProfile(
   const windowStart = newest.ts - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS;
   const inWindow = trusted.filter((sample) => sample.ts >= windowStart);
 
+
   let maxDisplacementM = 0;
   let oldestTs = newest.ts;
   for (const sample of inWindow) {
@@ -256,6 +260,42 @@ export function decideProfile(
           : `moved ${Math.round(maxDisplacementM)} m`,
       changed: current !== profile,
     };
+  }
+
+  // ⚠ Two ways out of `stationary` on the first fix, both from F1 (the P30,
+  // 2026-10-12, the app closed): the first fix of the ride came at 12:04,
+  // labelled driving by the motion sensors and 3 km from the last one at home,
+  // yet the profile waited five minutes for a second fix, because the home fix
+  // was older than the window. Some 3 km went unrecorded. Both rules come after
+  // the check above on purpose: a move inside the window keeps its speed test
+  // and can still go straight to driving.
+  if (current === STATIONARY_PROFILE) {
+    // 1. The motion sensors say the phone is moving (D-094). Only ever towards
+    //    a denser rate, as everywhere else the label is used.
+    if (newest.activity !== undefined && MOVING_ACTIVITIES.has(newest.activity)) {
+      const profile: SamplingProfile = newest.activity === 'driving' ? 'driving' : MOVING_PROFILE;
+      return { profile, reason: `the motion sensors say ${newest.activity}`, changed: true };
+    }
+    // 2. The phone is far from where it last was, however long ago that was:
+    //    the fix before the window, which the check above cannot see. Both
+    //    fixes' error is allowed for, so GPS scatter at home never counts.
+    let previous: MovementSample | null = null;
+    for (const sample of trusted) {
+      if (sample.ts < newest.ts && (previous === null || sample.ts > previous.ts)) {
+        previous = sample;
+      }
+    }
+    if (previous !== null) {
+      const metres = distanceM(newest, previous);
+      const slack = (newest.accuracyM ?? 0) + (previous.accuracyM ?? 0);
+      if (metres > MOVING_THRESHOLD_M && metres > slack) {
+        return {
+          profile: MOVING_PROFILE,
+          reason: `${Math.round(metres)} m from the last fix, ${Math.round((newest.ts - previous.ts) / 60000)} min before`,
+          changed: true,
+        };
+      }
+    }
   }
 
   // Going stationary needs a full window of evidence. Two fixes a minute apart

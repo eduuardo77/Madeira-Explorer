@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-12 | **F1 retest:** motorbike, 77 min, app never opened, no outing, iPhone alongside | P30 | Equilibrado | ✅ 94.5% of the route lit within 10 m once awake; ⚠ the first ~12 min lost (85.6% overall); battery 98 to 95% |
 | 2026-10-11 | **F1:** car and on foot, app swiped away, no outing, iPhone alongside | P30 | Equilibrado | ❌ 10 fixes in 2h, nothing lit: Expo held the stationary profile's fixes (fixed, to retest); the Monte stamp still came |
 | 2026-10-10 to 11 | Still on battery, 18h44, after swiping the app away | P30 | Equilibrado | ✅ the swipe left the recorder running; one deep idle of 17h35, no fixes needed; 100 to 98% |
 | 2026-10-10 | Car and on foot as an outing, 3h21, iPhone alongside, tunnels | P30 | Equilibrado (outing: Preciso) | ✅ 95.6% of the route lit within 10 m, tunnels drawn; 2 stamps; battery 100 to 92% |
@@ -35,6 +36,25 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-12: F1 retested by motorbike: passed, with a slow start
+
+- **Setup:** P30 with the GPS build (`d288a92`), unplugged at 100% at 22:19 the night before; Bruma
+  never opened (a power-key press at 09:36 brought it forward behind the lock screen for 3.5 s,
+  which the diary logs as a launch); no outing; Equilibrado. Sensor Logger 11:57 to 13:17.
+- **Result:** 157 fixes, no gap over 90 s once awake. From 12:10: 94.5% of the route lit within
+  10 m, 97.5% within 30 m; 92% of the lit road within 10 m of the route. Over the whole ride 85.6%:
+  the start was lost.
+- **The slow start:** the first fix came at 12:04:33, labelled *driving* by the motion sensors
+  (the event at 12:04:06) and 3 km from the last fix at home. The gate waited for a second fix
+  inside its window and switched at 12:09:51 (*moved 3088 m at up to 35 km/h*). **Fixed the same
+  day:** while stationary, a moving label or a fix far from the last one switches at once
+  (`movementPolicy.decideProfile`); replayed on this database, it switches at 12:04:33.
+- **Battery:** 15 h 10 on battery, 100 to 95%. The level held 100% until 10:31 (the P30 holds a
+  full charge), then 98% at 11:57 and 95% at 13:21: about 3 points for the ride. Android
+  attributes most of the app's share to the GPS. Overnight, during light idle only, the GPS ran
+  30 s every 5 minutes (the stationary profile now asks for it); deep idle stopped it after an hour.
+  Its share of the 5% is not separable from this record.
 
 ### 2026-10-11: F1, automatic recording with the app closed: failed
 
@@ -250,12 +270,12 @@ never where the lead lives.
 
 **Failed and fixed, waiting for a retest:**
 - **Automatic recording with the app closed (F1):** nothing lit on 11 Oct; fixed the same day
-  (every Android profile on the GPS, no hold while still), proven on the emulator only.
+  (every Android profile on the GPS, no hold while still); ✅ **passed on 12 Oct by motorbike**.
 - **Poupança:** 29 points on 6 Oct; the same fix changes it.
 
 **Still to test, in this order:**
-1. **F1 again, by car:** app swiped away, no outing, Equilibrado, SensorLogger on. Pass: 90% of
-   the route lit within 10 m, the first ~5 minutes excepted.
+1. ✅ **F1 again, by motorbike (12 Oct):** 94.5% once awake. ⚠ The start took 12 minutes; the
+   first-fix rules fixed the same day need the next ride to confirm.
 2. **F1 on foot:** a walk of 20 minutes or more, app closed. Walking is the slow case to detect.
 3. **A battery day:** started near 80%, automatic recording, the phone used normally. The GPS on
    every profile makes this more urgent: the cost of the F1 fix is unmeasured (T-054).

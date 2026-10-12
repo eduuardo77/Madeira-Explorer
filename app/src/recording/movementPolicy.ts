@@ -262,7 +262,7 @@ export function decideProfile(
     };
   }
 
-  // ⚠ Two ways out of `stationary` on the first fix, both from F1 (the P30,
+  // ⚠ Two ways out of `stationary` on the first fix (D-106), both from F1 (the P30,
   // 2026-10-12, the app closed): the first fix of the ride came at 12:04,
   // labelled driving by the motion sensors and 3 km from the last one at home,
   // yet the profile waited five minutes for a second fix, because the home fix

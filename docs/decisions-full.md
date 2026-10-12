@@ -5679,3 +5679,40 @@ and a daily modal there is the one-star review D-097's lines exist to avoid).
 countdown leaves out the levada bonus (`freeTier.ts`), so it never promises a sixth free stamp.
 Built in `freeTier.ts` (`freeStampsLeft`, `offerWithStamp`), `UnlockNudge`, `StampNewsCard`,
 `unlockSheet.ts` (`showcase`).
+
+## D-106 — How Android records with the app closed
+
+**Status: Provisional 2026-10-12.** The stationary profile's provider was the project lead's choice
+from three; the rest follows from measurements. Code: `recording/samplingPolicy.forPlatform`,
+`recording/movementPolicy.decideProfile`. Evidence: the field log, 11 and 12 Oct.
+
+**The finding.** Every trip until 11 Oct that worked was an outing, which forces Preciso and so the
+GPS. F1, the first trip with the app closed, lit nothing. Three causes, each measured on the P30:
+
+1. `expo-location`'s Android task consumer holds background fixes in memory until both
+   `deferredUpdatesInterval` and `deferredUpdatesDistance` are reached (15 min and 500 m on the
+   stationary profile), so the gate never saw the drive.
+2. Android's low-power and balanced priorities give next to nothing with the screen off on the
+   P30 while moving: no fix from 15:49 to 17:10 on F1; nothing on the way back from the gym on
+   6 Oct (walking at balanced); 29 fixes on Poupança, 6 Oct.
+3. The gate compared fixes only inside its 12-minute window, so the first fix of a ride, far from
+   an older fix at home and labelled driving, waited five minutes for a second.
+
+**The rules.**
+
+- **The moving profiles ask for the GPS in every tier** on Android. The tiers keep their
+  intervals and distances. Poupança no longer means coarse accuracy there, and its battery is no
+  longer what was measured with it.
+- **The stationary profile asks for the balanced provider and keeps no hold.** For one day it
+  asked for the GPS: the retest passed (94.5% once awake), but the GPS started 38 times overnight
+  on a still phone and Huawei's phone manager warned of excessive consumption, with *Forçar
+  paragem*. Rejected with it: the GPS every 15 minutes (up to 15 minutes of each trip lost).
+- **While stationary, the first sign of movement switches at once:** a moving label from the motion
+  sensors (walking, running, cycling, driving), or a fix more than 100 m, and more than both fixes'
+  error, from the last one however old. After the in-window check, so a fast move still goes
+  straight to driving.
+
+**What would overturn it.** A ride with the app closed whose start is lost because the balanced
+provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
+at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning
+returning on the balanced provider. The battery day, carried, deciding the cost.

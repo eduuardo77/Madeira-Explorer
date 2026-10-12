@@ -93,7 +93,7 @@ export function getSamplingParameters(
 }
 
 /**
- * The profiles as Android must run them (F1, the P30, 2026-10-11 and 12).
+ * The profiles as Android must run them (D-106; F1, the P30, 2026-10-11 and 12).
  * Three rules: the first two found on 11 Oct, where the lead swiped Bruma away
  * at home, drove off, and the app recorded 10 fixes in two hours and lit
  * nothing; the third from Huawei's warning the next morning.

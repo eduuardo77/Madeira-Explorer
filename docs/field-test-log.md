@@ -50,6 +50,11 @@ never where the lead lives.
   inside its window and switched at 12:09:51 (*moved 3088 m at up to 35 km/h*). **Fixed the same
   day:** while stationary, a moving label or a fix far from the last one switches at once
   (`movementPolicy.decideProfile`); replayed on this database, it switches at 12:04:33.
+- **A wrong line, 945 m in Funchal, left as a known limit:** one fix at 12:49:15 claimed 4 m
+  accuracy and was 246 m from the iPhone (signals off buildings), and the matcher routed through it.
+  A detour rule cannot tell it apart: on the same ride, fixes 8 to 42 m from the iPhone force
+  detours almost as large (289 m against its 319 m) on hairpin roads, so any threshold that drops it
+  drops real bends. The 92% precision includes it.
 - **Huawei's warning, at 11:41 before the ride:** *"Aplicação de consumo excessivo encontrada. A
   aplicação Bruma está a drenar a bateria ao verificar a localização frequentemente"*, with *Forçar
   paragem*. The GPS had started 38 times overnight (the stationary profile on the GPS since the day

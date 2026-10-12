@@ -50,6 +50,11 @@ never where the lead lives.
   inside its window and switched at 12:09:51 (*moved 3088 m at up to 35 km/h*). **Fixed the same
   day:** while stationary, a moving label or a fix far from the last one switches at once
   (`movementPolicy.decideProfile`); replayed on this database, it switches at 12:04:33.
+- **Huawei's warning, at 11:41 before the ride:** *"Aplicação de consumo excessivo encontrada. A
+  aplicação Bruma está a drenar a bateria ao verificar a localização frequentemente"*, with *Forçar
+  paragem*. The GPS had started 38 times overnight (the stationary profile on the GPS since the day
+  before), while the phone lay on the lead's desk. The lead chose the balanced provider for the
+  stationary profile the same day (`forPlatform`, rule 3).
 - **Battery:** 15 h 10 on battery, 100 to 95%. The level held 100% until 10:31 (the P30 holds a
   full charge), then 98% at 11:57 and 95% at 13:21: about 3 points for the ride. Android
   attributes most of the app's share to the GPS. Overnight, during light idle only, the GPS ran
@@ -274,17 +279,21 @@ never where the lead lives.
 - **Poupança:** 29 points on 6 Oct; the same fix changes it.
 
 **Still to test, in this order:**
-1. ✅ **F1 again, by motorbike (12 Oct):** 94.5% once awake. ⚠ The start took 12 minutes; the
-   first-fix rules fixed the same day need the next ride to confirm.
+1. ✅ **F1 again, by motorbike (12 Oct):** 94.5% once awake. ⚠ The start took 12 minutes. The next
+   ride with the app closed checks the two changes of 12 Oct together: the first-fix rules, and
+   the balanced provider at home in place of the GPS.
 2. **F1 on foot:** a walk of 20 minutes or more, app closed. Walking is the slow case to detect.
-3. **A battery day:** started near 80%, automatic recording, the phone used normally. The GPS on
-   every profile makes this more urgent: the cost of the F1 fix is unmeasured (T-054).
-4. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080), SensorLogger
+3. **A battery day, carried:** started near 80%, automatic recording, the P30 in a pocket all day
+   like the iPhone. ⚠ The P30 otherwise lies on a desk, so a day there measures a desk, not a
+   tourist. The cost of the F1 fix is unmeasured (T-054).
+4. **Huawei's warning:** a day or two with the balanced provider at home (12 Oct) and no
+   *consumo excessivo* notification. It came at 11:41 on 12 Oct, with the GPS at home.
+5. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080), SensorLogger
    alongside.
-5. **Poupança, one trip:** that the cheapest tier now draws a usable line.
-6. **A restart of the phone,** and **an update from the Play Store:** whether recording comes back
+6. **Poupança, one trip:** that the cheapest tier now draws a usable line.
+7. **A restart of the phone,** and **an update from the Play Store:** whether recording comes back
    without opening the app (an update did not, 24 Sep, T-210).
-7. **Ending the trip** (*Terminar viagem*) and the souvenir from a real trip (T-205).
+8. **Ending the trip** (*Terminar viagem*) and the souvenir from a real trip (T-205).
 
 **Out of reach here:** any Android but the P30 (the closed-test testers and Google's pre-launch
 report are the first look), and the iPhone, where the app has never run.

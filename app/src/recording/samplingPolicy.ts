@@ -93,9 +93,10 @@ export function getSamplingParameters(
 }
 
 /**
- * The profiles as Android must run them (F1, the P30, 2026-10-11). Two
- * changes, each found on that trip, where the lead swiped Bruma away at home,
- * drove off, and the app recorded 10 fixes in two hours and lit nothing.
+ * The profiles as Android must run them (F1, the P30, 2026-10-11 and 12).
+ * Three rules: the first two found on 11 Oct, where the lead swiped Bruma away
+ * at home, drove off, and the app recorded 10 fixes in two hours and lit
+ * nothing; the third from Huawei's warning the next morning.
  *
  * **1. No hold.** ⚠ On Android the hold is Expo's, not the chip's. With the app off screen,
  * `expo-location`'s `LocationTaskConsumer` keeps every fix in memory until
@@ -120,13 +121,21 @@ export function getSamplingParameters(
  * at `high` (the outings, which force Preciso: 4, 8, 9, 10 Oct) lit 94 to
  * 99.6% of the route; the ones that were not (6 Oct on Poupança, 29 fixes; the
  * way back from the gym on 6 Oct on Equilibrado, nothing; F1) failed. A levada
- * has no Wi-Fi at all. So on Android every profile asks for the GPS, in every
- * tier; the tiers still differ by interval and distance. A phone that is truly
- * still costs nothing for it: Android's deep idle, which it enters only when
- * the phone lies still, held every request for 17 h 35 the night before (field
- * log, 10 to 11 Oct). ⚠ Poupança's battery is no longer what was measured
- * with it, and battery while moving slowly (a pocket at a café) is not
- * measured.
+ * has no Wi-Fi at all. So on Android the moving profiles ask for the GPS, in every
+ * tier; the tiers still differ by interval and distance. ⚠ Poupança's battery
+ * is no longer what was measured with it.
+ *
+ * **3. But not the stationary profile: the balanced provider, no GPS.** For a
+ * day it had the GPS too, and the ride passed (12 Oct), but before it Huawei's
+ * phone manager warned *"A aplicação Bruma está a drenar a bateria ao verificar
+ * a localização frequentemente"*, with *Forçar paragem*: the GPS had started
+ * 38 times overnight, every 5 minutes the phone was not in deep idle. A user
+ * who taps that stops the recorder. The lead chose Wi-Fi and cell positions at
+ * home: the first-fix rules (`movementPolicy.decideProfile`) need one fix 100 m
+ * away, or a moving label from the motion sensors, to wake the GPS, and the
+ * low-power provider gave three such fixes in the first 15 minutes of the
+ * failed F1 drive. ⚠ Unproven until a ride with it, and a day without the
+ * warning.
  */
 export function forPlatform(
   platform: 'ios' | 'android',
@@ -135,6 +144,6 @@ export function forPlatform(
 ): SamplingParameters {
   if (platform !== 'android') return parameters;
   return profile === 'stationary'
-    ? { ...parameters, deferredIntervalMs: 0, deferredDistanceM: 0, desiredAccuracy: 'high' }
+    ? { ...parameters, deferredIntervalMs: 0, deferredDistanceM: 0, desiredAccuracy: 'balanced' }
     : { ...parameters, desiredAccuracy: 'high' };
 }

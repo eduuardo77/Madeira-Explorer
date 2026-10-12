@@ -69,8 +69,8 @@ async function buildOptions(
   // the current profile re-applies it in place when a walk starts or stops.
   const walking = await getWalkInProgress();
   const sampled = effectiveProfile(profile, walking);
-  // After the tier, on purpose: Android's stationary profile needs the GPS
-  // and no hold whatever the tier asks (`forPlatform`, F1).
+  // After the tier, on purpose: on Android the moving profiles need the GPS,
+  // and the stationary one no hold, whatever the tier asks (`forPlatform`, F1).
   const parameters = forPlatform(
     Platform.OS === 'android' ? 'android' : 'ios',
     sampled,

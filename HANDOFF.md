@@ -42,7 +42,7 @@ today:** Gate P1 (cold start median 471 ms, store build), Phase 3 (T-201 80 of 8
 pass accepted by the lead), T-265 (the lead read the Portuguese). **Found today, fixed:** a
 timelapse crash (zero camera duration, `replayMap.SNAP_MS`), the passport and first run drawn
 under the status bar, and **a new visitor's first map failing to start** (a T-272 regression; see
-its entry). The welcome now shows the island under its stamps. **Version 4 on internal testing** (active since 2026-10-08 15:31). ⚠ **Version 7 AAB built 2026-10-12 13:54**
+its entry). The welcome now shows the island under its stamps. **Version 4 on internal testing** (active since 2026-10-08 15:31). ✅ **Version 7 uploaded to the closed track 2026-10-12** (built 13:54)
 (`Madeira-fieldwork/apks/bruma-0.1.0-vc7.aab`, upload key, normal build per D-084 as amended) for the
 **closed track**; neither 5 nor 6 was uploaded and **neither may go to testers**: 5 records nothing
 with the app closed (F1), 6 draws Huawei's battery warning at home. 7 has the GPS while moving, the

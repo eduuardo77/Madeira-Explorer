@@ -259,6 +259,12 @@ are the plan's; new work takes the next free IDs when it starts.
 - **Me:** pull the copy, `node tools/compare-sensorlogger.mjs`, write the entry in the test log.
 - **Pass:** at least 90% of the ridden route lit within 10 m. **If it fails,** it outranks every
   other item in this document: the recorder's sleep behaviour on EMUI becomes the work.
+- ✅ **Answered 2026-10-12, after one failure.** 11 Oct, by car on Equilibrado: nothing lit (Expo
+  held the stationary profile's fixes; the low-power providers gave none with the screen off).
+  Fixed the same day (D-106). 12 Oct, by motorbike, app never opened: **94.5% of the route lit
+  within 10 m once awake**; the start was slow (fixed, first-fix rules) and the GPS at home drew
+  Huawei's battery warning (fixed, balanced provider at home). Both later fixes await the next
+  ride. Version 7 carries them and is on the closed track (uploaded 2026-10-12).
 
 **T-054. Battery, a run that can show a number** · Lead
 - Start at 80% or below (the P30 holds 100% and its counter is broken), a normal day on automatic

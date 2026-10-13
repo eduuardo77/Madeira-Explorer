@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-13 | **Motion wake:** on foot and by car, 45 min, app closed, iPhone alongside | P30 | Equilibrado | ✅ 97.7% of the route lit within 10 m, start included; woken by the motion sensor; no Huawei warning |
 | 2026-10-12 | To Funchal and back by car, app never opened, no iPhone | P30 | Equilibrado | ❌ the balanced provider at home saw nothing for 75 min; only the last 1.2 km home recorded |
 | 2026-10-12 | **F1 retest:** motorbike, 77 min, app never opened, no outing, iPhone alongside | P30 | Equilibrado | ✅ 94.5% of the route lit within 10 m once awake; ⚠ the first ~12 min lost (85.6% overall); battery 98 to 95% |
 | 2026-10-11 | **F1:** car and on foot, app swiped away, no outing, iPhone alongside | P30 | Equilibrado | ❌ 10 fixes in 2h, nothing lit: Expo held the stationary profile's fixes (fixed, to retest); the Monte stamp still came |
@@ -37,6 +38,20 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-13: the motion wake, first outing: passed, start included
+
+- **Setup:** the motion-wake build (`b585fc3`): the significant-motion sensor and Google's activity
+  updates wake the recorder; the GPS every 10 minutes at home as a safety net. Bruma on screen for
+  8 s at 14:27 (swiped away), screen off from 14:27:32, not opened again. Sensor Logger 14:29 to
+  15:13. Equilibrado.
+- **Result:** woken by the motion sensor at 14:28:04 and 14:32:10; *stationary -> walking: the
+  motion sensors say walking* at 14:32:12, before the iPhone was 100 m from home (14:34:40);
+  driving at 14:37:34. **97.7% of the route lit within 10 m, 100% within 30 m; 98.9% of the lit
+  road within 10 m of the route**, nothing lit where nobody went. A later drive at 17:13 was woken
+  by Google's activity updates (*driving*) and went straight to the driving profile.
+- **Since install (about 6 hours):** 16 wakes, 6 by the motion sensor and 10 by activity updates;
+  35 GPS starts; 100 to 97% in 5 h 53 off the cable with both outings; no Huawei warning.
 
 ### 2026-10-12, evening: to Funchal and back with Wi-Fi at home: failed
 

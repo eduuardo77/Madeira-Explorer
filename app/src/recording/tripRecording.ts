@@ -51,6 +51,8 @@ import {
   type Visibility,
 } from './recordingAdmission';
 import { getCurrentSamplingProfile } from './samplingGate';
+import { ensureMotionWake, stopMotionWake } from './activityRecognition';
+import { MOTION_TASK_NAME } from './taskNames';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 
 /**
@@ -186,6 +188,8 @@ export async function syncRecordingWithPreferences(
           ? 'recording re-asserted on launch: the task was registered'
           : 'recording started automatically: background tracking is on'
       );
+      // D-106: what tells a stationary recorder the phone has started to move.
+      await ensureMotionWake(MOTION_TASK_NAME);
     }
   } catch (error) {
     await recordingEventDao.logError('recording launch sync', error);
@@ -206,6 +210,7 @@ export async function applyBackgroundTrackingChange(
   allowed: boolean
 ): Promise<void> {
   if (!allowed) {
+    await stopMotionWake(MOTION_TASK_NAME);
     await stopTrip();
     await recordingEventDao.log(
       'stop',

@@ -28,7 +28,11 @@ import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
 import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
 import { applySamplingGate } from './samplingGate';
-import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
+import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME, MOTION_TASK_NAME } from './taskNames';
+import { getCurrentSamplingProfile } from './samplingGate';
+import { nextWakeCheck, WAKE_FIX_TIMEOUT_MS } from './motionWakePolicy';
+import { locationProvider } from './ExpoLocationProvider';
+import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { loadLanguageChoice } from '../i18n/languageChoice';
 
 /**
@@ -77,8 +81,14 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     return;
   }
 
-  const samples = locations.map(toLocationSample);
+  await recordSamples(locations.map(toLocationSample));
+});
 
+/**
+ * What every batch goes through, from the OS or from a motion wake: stored,
+ * the anchor backstop, the sampling gate, the stamp announcer.
+ */
+async function recordSamples(samples: LocationSample[]): Promise<void> {
   // Storage first, always. The trace is the irreplaceable thing (D-010); the
   // geofence window can be rebuilt from nothing at any time.
   await databaseSink.onLocations(samples);
@@ -103,6 +113,44 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   // After everything above, because it can only add to it: nothing here may
   // cost a fix. On screen, the map's pop-up says it instead.
   await announceNewStamps(Date.now(), AppState.currentState === 'active');
+}
+
+/**
+ * The motion wake (D-106): the native side runs this when the phone's motion
+ * sensor fires or Google says walking, cycling or driving. While the recorder
+ * is stationary it looks for a GPS position up to three times over three
+ * minutes (`motionWakePolicy.ts`), each through the same pipeline as any batch,
+ * so the sampling gate alone decides whether the phone has left. Anything else
+ * (already recording, recording off) and it does nothing.
+ */
+TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
+  await loadLanguageChoice();
+  if (error) {
+    await databaseSink.onError(`motion wake: ${error.message}`);
+    return;
+  }
+  if (!(await locationProvider.isRecording())) {
+    return;
+  }
+  let profile = await getCurrentSamplingProfile();
+  if (profile !== 'stationary') {
+    return;
+  }
+  const { source, activity } = (data ?? {}) as { source?: string; activity?: string };
+  await recordingEventDao.log('activity', `motion wake: ${source ?? 'unknown'}${activity ? ` (${activity})` : ''}`); // i18n-exempt: diary line, D-106
+  for (let index = 0; ; index += 1) {
+    const wait = nextWakeCheck(index, profile);
+    if (wait === null) break;
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+    const fix = await Promise.race([
+      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), WAKE_FIX_TIMEOUT_MS)),
+    ]);
+    if (fix !== null) {
+      await recordSamples([toLocationSample(fix)]);
+    }
+    profile = await getCurrentSamplingProfile();
+  }
 });
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {

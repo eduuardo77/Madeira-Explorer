@@ -14,3 +14,5 @@
 
 export const LOCATION_TASK_NAME = 'madeira-location-updates';
 export const GEOFENCE_TASK_NAME = 'madeira-geofencing';
+/** The motion wake (D-106): run by the native side when the phone starts to move. */
+export const MOTION_TASK_NAME = 'madeira-motion-wake';

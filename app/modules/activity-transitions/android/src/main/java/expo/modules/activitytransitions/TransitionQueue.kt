@@ -67,6 +67,16 @@ object TransitionQueue {
     }
   }
 
+  /** The motion wake ran the JavaScript task (D-106), from which trigger, and when. */
+  fun noteWake(context: Context, source: String) {
+    note(context) { stats ->
+      val key = if (source == "activity") "wakesByActivity" else "wakesByMotionSensor"
+      stats.put(key, stats.optLong(key) + 1)
+      stats.put("lastWakeTs", System.currentTimeMillis())
+      stats.put("lastWakeSource", source)
+    }
+  }
+
   /** Registration succeeded or failed, and when. */
   fun noteRegistration(context: Context, ok: Boolean, reason: String) {
     note(context) { stats ->

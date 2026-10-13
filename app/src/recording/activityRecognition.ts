@@ -25,6 +25,8 @@ type NativeActivityTransitions = {
   stop(): Promise<boolean>;
   drain(): unknown[];
   diagnostics?(): Record<string, unknown>;
+  startMotionWake?(taskName: string): Promise<boolean>;
+  stopMotionWake?(taskName: string): Promise<boolean>;
 };
 
 const native: NativeActivityTransitions | null =
@@ -115,6 +117,38 @@ export async function ensureActivityUpdates(nowMs: number = Date.now()): Promise
 }
 
 let lastLogged: boolean | null = null;
+
+let motionWakeStarted = false;
+
+/**
+ * Arm the motion wake (D-106, `MotionWakeTaskConsumer`), once per process: the
+ * significant-motion sensor always, Google's activity updates when the motion
+ * permission is given. Registering again is harmless; the native side also
+ * re-arms on its own whenever the process starts. Logged once per process.
+ */
+export async function ensureMotionWake(taskName: string): Promise<boolean> {
+  if (motionWakeStarted || native?.startMotionWake === undefined) {
+    return motionWakeStarted;
+  }
+  try {
+    motionWakeStarted = await native.startMotionWake(taskName);
+  } catch {
+    motionWakeStarted = false;
+  }
+  const detail = motionWakeStarted ? 'motion wake armed' : 'motion wake refused'; // i18n-exempt: written to the recording diary, never shown on a screen
+  await recordingEventDao.log('activity', detail);
+  return motionWakeStarted;
+}
+
+/** Disarm the motion wake: automatic recording was switched off. */
+export async function stopMotionWake(taskName: string): Promise<void> {
+  motionWakeStarted = false;
+  try {
+    await native?.stopMotionWake?.(taskName);
+  } catch {
+    // Nothing to undo: a wake that fires finds the recorder off and does nothing.
+  }
+}
 
 /**
  * What the native side has seen since install: deliveries, the events in

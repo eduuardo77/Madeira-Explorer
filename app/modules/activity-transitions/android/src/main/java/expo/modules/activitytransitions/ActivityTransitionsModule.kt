@@ -13,6 +13,7 @@ import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
+import expo.modules.interfaces.taskManager.TaskManagerInterface
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
@@ -101,6 +102,37 @@ class ActivityTransitionsModule : Module() {
           .addOnSuccessListener { promise.resolve(true) }
           .addOnFailureListener { promise.resolve(false) }
       } catch (error: SecurityException) {
+        promise.resolve(false)
+      }
+    }
+
+    /**
+     * The motion wake (D-106, `MotionWakeTaskConsumer`): register `taskName`,
+     * defined in JavaScript with TaskManager, to run when the phone starts to
+     * move. Idempotent. Resolves false, never rejects, when it cannot. Works
+     * without the motion permission (the sensor needs none); the activity
+     * updates then stay off.
+     */
+    AsyncFunction("startMotionWake") { taskName: String, promise: Promise ->
+      try {
+        val manager = appContext.legacyModule<TaskManagerInterface>()
+        if (manager == null) {
+          promise.resolve(false)
+          return@AsyncFunction
+        }
+        manager.registerTask(taskName, MotionWakeTaskConsumer::class.java, emptyMap<String, Any>())
+        promise.resolve(true)
+      } catch (error: Exception) {
+        promise.resolve(false)
+      }
+    }
+
+    AsyncFunction("stopMotionWake") { taskName: String, promise: Promise ->
+      try {
+        appContext.legacyModule<TaskManagerInterface>()
+          ?.unregisterTask(taskName, MotionWakeTaskConsumer::class.java)
+        promise.resolve(true)
+      } catch (error: Exception) {
         promise.resolve(false)
       }
     }

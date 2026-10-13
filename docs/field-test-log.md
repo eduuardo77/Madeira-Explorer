@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-12 | To Funchal and back by car, app never opened, no iPhone | P30 | Equilibrado | ❌ the balanced provider at home saw nothing for 75 min; only the last 1.2 km home recorded |
 | 2026-10-12 | **F1 retest:** motorbike, 77 min, app never opened, no outing, iPhone alongside | P30 | Equilibrado | ✅ 94.5% of the route lit within 10 m once awake; ⚠ the first ~12 min lost (85.6% overall); battery 98 to 95% |
 | 2026-10-11 | **F1:** car and on foot, app swiped away, no outing, iPhone alongside | P30 | Equilibrado | ❌ 10 fixes in 2h, nothing lit: Expo held the stationary profile's fixes (fixed, to retest); the Monte stamp still came |
 | 2026-10-10 to 11 | Still on battery, 18h44, after swiping the app away | P30 | Equilibrado | ✅ the swipe left the recorder running; one deep idle of 17h35, no fixes needed; 100 to 98% |
@@ -36,6 +37,22 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-12, evening: to Funchal and back with Wi-Fi at home: failed
+
+- **Setup:** version 7's field build (`d944717`): the stationary profile on the balanced provider.
+  Bruma never opened; no SensorLogger. Left home before 22:00, back by 22:58.
+- **Result:** the last fix at home was 21:39; the next came at 22:54, 1.2 km from home on the way
+  back (1200, 700, 400, 200, 100 m, home at 22:58). The new first-fix rule switched at once
+  (*1202 m from the last fix, 75 min before*), but the drive out, the stay and most of the way back
+  had no fix at all and no GPS start. No *driving* label arrived on the way out either.
+- **What did see it:** the phone's significant-motion sensor (`dumpsys sensorservice`, its last 46
+  events) fired at 21:39:40. It also fired at the start of both F1 rides: 15:40:01 on 11 Oct (the
+  app never woke) and 11:55:04 on 12 Oct (the app woke at 12:04). About 3 to 4 events a day.
+- **Battery:** 15 h 10 off the cable, 100 to 94%; 6 GPS starts in all, against 38 the night
+  before. No Huawei warning.
+- **Decided the next day:** a stopgap (the GPS every 10 minutes at home), then a motion wake: the
+  significant-motion sensor and Google's activity updates trigger one GPS check (D-106 amended).
 
 ### 2026-10-12: F1 retested by motorbike: passed, with a slow start
 

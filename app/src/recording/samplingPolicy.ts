@@ -125,18 +125,21 @@ export function getSamplingParameters(
  * tier; the tiers still differ by interval and distance. ⚠ Poupança's battery
  * is no longer what was measured with it.
  *
- * **3. But not the stationary profile: the balanced provider, no GPS.** For a
- * day it had the GPS too, and the ride passed (12 Oct), but before it Huawei's
- * phone manager warned *"A aplicação Bruma está a drenar a bateria ao verificar
- * a localização frequentemente"*, with *Forçar paragem*: the GPS had started
- * 38 times overnight, every 5 minutes the phone was not in deep idle. A user
- * who taps that stops the recorder. The lead chose Wi-Fi and cell positions at
- * home: the first-fix rules (`movementPolicy.decideProfile`) need one fix 100 m
- * away, or a moving label from the motion sensors, to wake the GPS, and the
- * low-power provider gave three such fixes in the first 15 minutes of the
- * failed F1 drive. ⚠ Unproven until a ride with it, and a day without the
- * warning.
+ * **3. The stationary profile: the GPS, but at most every 10 minutes.** A
+ * stopgap until a motion wake (D-106) replaces the polling. Tried in turn:
+ *   - the GPS every 5 minutes: the ride passed (12 Oct), but Huawei's phone
+ *     manager warned *"A aplicação Bruma está a drenar a bateria ao verificar a
+ *     localização frequentemente"*, with *Forçar paragem*, after the GPS had
+ *     started 38 times in a night on the lead's desk;
+ *   - Wi-Fi and cell only: no warning, but the drive to Funchal on 12 Oct went
+ *     unseen for 75 minutes, and only the last kilometre home was recorded.
+ * Every 10 minutes halves the starts. Up to 10 minutes of a trip's start can be
+ * lost, after which the first-fix rules (`movementPolicy.decideProfile`)
+ * switch on the first fix. ⚠ Whether Huawei warns at this rate is unmeasured.
  */
+/** How often Android's stationary profile may start the GPS (rule 3). */
+export const ANDROID_STATIONARY_INTERVAL_MS = 10 * MINUTE;
+
 export function forPlatform(
   platform: 'ios' | 'android',
   profile: SamplingProfile,
@@ -144,6 +147,12 @@ export function forPlatform(
 ): SamplingParameters {
   if (platform !== 'android') return parameters;
   return profile === 'stationary'
-    ? { ...parameters, deferredIntervalMs: 0, deferredDistanceM: 0, desiredAccuracy: 'balanced' }
+    ? {
+        ...parameters,
+        minTimeMs: Math.max(parameters.minTimeMs, ANDROID_STATIONARY_INTERVAL_MS),
+        deferredIntervalMs: 0,
+        deferredDistanceM: 0,
+        desiredAccuracy: 'high',
+      }
     : { ...parameters, desiredAccuracy: 'high' };
 }

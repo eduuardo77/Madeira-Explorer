@@ -5712,6 +5712,18 @@ GPS. F1, the first trip with the app closed, lit nothing. Three causes, each mea
   error, from the last one however old. After the in-window check, so a fast move still goes
   straight to driving.
 
+⚠ **Amended 2026-10-13: the balanced provider at home was overturned the first evening.** A drive
+to Funchal and back went unseen for 75 minutes; only the last kilometre home was recorded. The
+phone's significant-motion sensor had fired at the start of that trip and of both F1 rides. Now:
+- **Stopgap:** the stationary profile asks for the GPS at most every 10 minutes (half the starts
+  that drew Huawei's warning), no hold.
+- **The fix, being built:** a motion wake. While stationary, the significant-motion sensor (a
+  hardware wake-up sensor, no permission) and Google's activity updates (with the motion
+  permission) each trigger one GPS check; a fix 100 m from the last, or moving, switches to
+  recording. The stationary location request then drops back to Wi-Fi and cell as a safety net.
+  The lead asked for a solid fix with redundancy and efficiency; this follows Google's battery
+  guide and the standard background-tracking library's design.
+
 **What would overturn it.** A ride with the app closed whose start is lost because the balanced
 provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
 at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning

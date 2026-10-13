@@ -60,7 +60,7 @@
     },
     "android": {
       "package": "com.proa.madeira",
-      "versionCode": 7,
+      "versionCode": 8,
       "allowBackup": true,
       "adaptiveIcon": {
         "backgroundColor": "#1B2A33",

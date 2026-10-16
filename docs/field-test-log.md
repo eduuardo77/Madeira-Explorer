@@ -14,6 +14,8 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
+| 2026-10-15 | Car and on foot, 1 h 45, iPhone alongside | P30 | Equilibrado | ✅ 89.6% within 10 m, 96.9% within 30 m |
 | 2026-10-13 | **Motion wake:** on foot and by car, 45 min, app closed, iPhone alongside | P30 | Equilibrado | ✅ 97.7% of the route lit within 10 m, start included; woken by the motion sensor; no Huawei warning |
 | 2026-10-12 | To Funchal and back by car, app never opened, no iPhone | P30 | Equilibrado | ❌ the balanced provider at home saw nothing for 75 min; only the last 1.2 km home recorded |
 | 2026-10-12 | **F1 retest:** motorbike, 77 min, app never opened, no outing, iPhone alongside | P30 | Equilibrado | ✅ 94.5% of the route lit within 10 m once awake; ⚠ the first ~12 min lost (85.6% overall); battery 98 to 95% |
@@ -38,6 +40,25 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-15 and 16: two days out on the motion wake, and the first battery figure
+
+- **Setup:** the motion-wake build (`b585fc3`), Equilibrado, the GPS every 10 minutes at home as a
+  safety net. The lead opened Bruma a few times on both days. Sensor Logger 15 Oct 16:21 to 18:04,
+  16 Oct 09:53 to 16:45.
+- **Route:** 15 Oct 89.6% within 10 m (96.9% within 30 m), 98.8% of the lit road on the route.
+  16 Oct **90.1% within 10 m (96.8% within 30 m)**, 91.3% of the lit road on the route. The misses
+  are short (55 to 345 m), mostly on foot in central Funchal, where the app's fixes were a median
+  22 m from the iPhone's against 9 to 13 m on open roads.
+- **Wake:** every departure woken by motion (*the motion sensors say walking / driving*). 118 wakes
+  since install three days earlier, 66 by the motion sensor, 52 by activity updates.
+- **Stamps:** Ponta do Garajau, Cabo Girão, Sé do Funchal, Teatro Municipal (from the trace),
+  Mercado dos Lavradores.
+- **Battery, the first real figure (T-054):** unplugged at 93% at 09:41, so the P30's full-charge
+  hold did not hide anything; **74% at 19:26, 19 points in 9 h 45, about 2 points an hour**, with
+  the app's GPS on for 7 h 13 and the screen on 11 minutes. One day, one phone, carried.
+- **Huawei's warning returned at 19:26**, *consumo excessivo*, after a full day of tracking rather
+  than idle checks at home.
 
 ### 2026-10-13: the motion wake, first outing: passed, start included
 
@@ -320,7 +341,7 @@ never where the lead lives.
    ride with the app closed checks the two changes of 12 Oct together: the first-fix rules, and
    the balanced provider at home in place of the GPS.
 2. **F1 on foot:** a walk of 20 minutes or more, app closed. Walking is the slow case to detect.
-3. **A battery day, carried:** started near 80%, automatic recording, the P30 in a pocket all day
+3. ✅ **A battery day, carried (16 Oct): about 2 points an hour over 9 h 45 of tracking.** Was: started near 80%, automatic recording, the P30 in a pocket all day
    like the iPhone. ⚠ The P30 otherwise lies on a desk, so a day there measures a desk, not a
    tourist. The cost of the F1 fix is unmeasured (T-054).
 4. **Huawei's warning:** a day or two with the balanced provider at home (12 Oct) and no

@@ -24,6 +24,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   couple of days without Huawei's warning. The lead sources the 12 testers (T-129).
 - **Next test (the lead):** a second carried day on Equilibrado, started below 100%, the app never
   opened, SensorLogger all day. A levada is not possible for now.
+- **Review, 16 Oct evening:** `docs/bruma-score-and-plan-2026-10-16.md`, strict **12.9 / 20** (was
+  11.9). First in its plan: confirm version 9, not 7, is on the closed track (R1). Re-measure cold
+  start (2.3 s) and memory (356 MB) the next morning before believing either (R3, R4).
 - **Traps:** the P30 has no mobile data ("Só emergência"); if adb does not see it, `adb kill-server`
   then `start-server`; read `dumpsys batterystats` first; `MSYS_NO_PATHCONV=1` before adb paths.
 

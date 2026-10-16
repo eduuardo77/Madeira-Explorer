@@ -59,6 +59,20 @@ never where the lead lives.
   the app's GPS on for 7 h 13 and the screen on 11 minutes. One day, one phone, carried.
 - **Huawei's warning returned at 19:26**, *consumo excessivo*, after a full day of tracking rather
   than idle checks at home.
+- **Read further the same evening:**
+  - **Stamps: none missed.** Every curated place the iPhone spent time in was awarded; Jardim
+    Botânico, 32 s inside while driving past, rightly was not.
+  - **The wake is cheap:** 118 native wakes in three days, but only 13 reached the JS check (the
+    rest came while already recording and cost nothing); 10 switched to recording, 3 were false
+    alarms (three GPS positions each). The pattern: a wake at the door, then 4 minutes later a
+    second with Google's *walking*, which switches at once; every time before the iPhone had left
+    home. The 4-minute gap is `MIN_GAP_MS`.
+  - **GPS while still:** about 109 of 367 minutes in a recording profile were spent still (under
+    50 m in 5 minutes). Most is the 12-minute rule at each stop; one stop of 47 minutes held the
+    driving profile because the car moved about 200 m halfway (*driving enter* at 13:27). Not
+    changed: no case of GPS jitter being taken for movement.
+  - **One fix 16.7 km off** (13:16:57, a Wi-Fi fix claiming 100 m) was dropped by the matcher as
+    an impossible jump; nothing was drawn from it.
 
 ### 2026-10-13: the motion wake, first outing: passed, start included
 

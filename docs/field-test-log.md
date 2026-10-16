@@ -336,39 +336,29 @@ never where the lead lives.
 ## The plan: what real life has proven, and what is left
 
 **Proven on the P30** (entries above):
-- **Outings record the roads:** 94 to 99.6% of the route lit within 10 m on four trips, by car,
-  motorbike and on foot, tunnels drawn along the road (4, 8, 9, 10 Oct).
-- **Stamps:** from the geofence and from the trace, on foot and by car, with the app closed too
-  (Monte, 11 Oct).
-- **A still phone costs almost nothing:** three nights and a day at rest, deep idle 88 to 94%,
-  the level barely moving.
+- **Automatic recording with the app closed** (D-106): woken by motion at every start; 97.7%,
+  89.6% and 90.1% of the route lit within 10 m on 13, 15 and 16 Oct, about 97% within 30 m.
+- **Outings record the roads:** 94 to 99.6% within 10 m on four trips; tunnels drawn along the road.
+- **Stamps:** from the geofence and from the trace, by car and on foot, with the app closed; none
+  missed on 15 and 16 Oct.
+- **Battery, one carried day:** about 2 points an hour over 9 h 45 of tracking (16 Oct).
+- **A still phone costs almost nothing:** nights in deep idle, the level barely moving.
 - **Swiping the app away does not kill the recorder** (10 Oct).
 - **A real purchase,** unlocked and acknowledged (5 Oct); backup and restore (4 Oct).
 
-**Failed and fixed, waiting for a retest:**
-- **Automatic recording with the app closed (F1):** nothing lit on 11 Oct; fixed the same day
-  (every Android profile on the GPS, no hold while still); ✅ **passed on 12 Oct by motorbike**.
-- **Poupança:** 29 points on 6 Oct; the same fix changes it.
-
 **Still to test, in this order:**
-1. ✅ **F1 again, by motorbike (12 Oct):** 94.5% once awake. ⚠ The start took 12 minutes. The next
-   ride with the app closed checks the two changes of 12 Oct together: the first-fix rules, and
-   the balanced provider at home in place of the GPS.
-2. **F1 on foot:** a walk of 20 minutes or more, app closed. Walking is the slow case to detect.
-3. ✅ **A battery day, carried (16 Oct): about 2 points an hour over 9 h 45 of tracking.** Was: started near 80%, automatic recording, the P30 in a pocket all day
-   like the iPhone. ⚠ The P30 otherwise lies on a desk, so a day there measures a desk, not a
-   tourist. The cost of the F1 fix is unmeasured (T-054).
-4. **Huawei's warning:** a day or two with the balanced provider at home (12 Oct) and no
-   *consumo excessivo* notification. It came at 11:41 on 12 Oct, with the GPS at home. Seen at
-   19:05 the same day: the request is `@5m BALANCED_POWER_ACCURACY, minUpdateDistance=100`, the
-   profile switched to stationary at 13:56, and no warning showing; but the phone was on the cable,
-   so the test is a day off it.
-5. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080), SensorLogger
-   alongside.
-6. **Poupança, one trip:** that the cheapest tier now draws a usable line.
-7. **A restart of the phone,** and **an update from the Play Store:** whether recording comes back
-   without opening the app (an update did not, 24 Sep, T-210).
-8. **Ending the trip** (*Terminar viagem*) and the souvenir from a real trip (T-205).
+1. **A second carried day** (the next test below): the battery figure confirmed, and the first day
+   with no GPS at home (`bec2c18`).
+2. **Huawei's warning:** whether it stays away with no GPS at home. It came on 12 Oct (GPS every
+   5 minutes at home) and on 16 Oct (after a full day of tracking).
+3. **A walk only, with the app closed:** walking is the slower start to detect; the motion wake
+   has so far woken walks that turned into drives.
+4. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080). Not possible
+   for the lead for now.
+5. **Poupança, one trip:** that the cheapest tier now draws a usable line.
+6. **A restart of the phone,** and **an update from the Play Store:** whether recording, and the
+   motion wake, come back without opening the app (an update did not, 24 Sep, T-210).
+7. **Ending the trip** (*Terminar viagem*) and the souvenir from a real trip (T-205).
 
 **Out of reach here:** any Android but the P30 (the closed-test testers and Google's pre-launch
 report are the first look), and the iPhone, where the app has never run.
@@ -377,7 +367,8 @@ report are the first look), and the iPhone, where the app has never run.
 
 1. **After any uninstall, set Huawei's launch setting again:** *Definições → Bateria → Iniciar
    aplicações → Bruma* → manual, all three switches on.
-2. **Choose the tier at home, before leaving, and check it stuck** (reopen Settings).
+2. **The tier is already set (Equilibrado); leave it.** For a test with the app closed, swipe Bruma
+   away before leaving and do not open it until the phone is back on the cable.
 3. **Start Sensor Logger on the iPhone** at the same moment. Share the zip afterwards.
 4. **Write down roughly when you stop and when you open the app.** Opening it changes what it
    records, so the times matter.
@@ -385,8 +376,9 @@ report are the first look), and the iPhone, where the app has never run.
 
 ## Next test
 
-**F1 again, after the 11 Oct fix: automatic recording, moving, untouched.** A ride or drive of 20 minutes or more with
-*registo automático* on and **no outing**: phone in a pocket with the screen off, the app not opened
-from leaving until the phone is back on the cable, iPhone alongside. Pass: 90% of the route lit
-within 10 m. If it fails, the recorder's sleep on EMUI is the work. Best started near 80% battery,
-which makes it the battery run too.
+**A second carried day, 2026-10-16 onwards.** Equilibrado; started below 100% (at 100% the P30
+hides the first drops); Bruma swiped away and never opened; SensorLogger on the iPhone all day;
+the P30 carried like the iPhone; plugged in only at night. It answers: the battery per hour against
+16 Oct's 2 points; whether every start is woken by motion now that the GPS at home is gone
+(`bec2c18`); whether Huawei's warning comes back (screenshot it and note the time, tap nothing).
+A levada (GPS under canopy) is not possible for the lead for now and stays open.

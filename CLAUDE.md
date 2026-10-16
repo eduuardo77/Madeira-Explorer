@@ -47,10 +47,11 @@ The documents cost more to read than the code does. In order of impact:
 ## The two things that are not yours to do
 
 1. **Getting a physical device.** No Mac, and no Android phone of this project's own.
-   ⚠ **CHANGED 2026-08-21 — the project lead has temporary access to an Android**, a few days
-   only, one handset. Battery (T-054), background survival and OEM killers (T-051/T-053), GPS
-   under canopy (T-076–T-080) and one real trip (OD-10) are **answerable for the length of that
-   loan** — ask for the measurement rather than recording it as impossible. The emulator
+   ⚠ **CHANGED 2026-08-21, and still true on 2026-10-16: the project lead has an Android**, one
+   handset, a Huawei P30 on EMUI 12, which they take out on real trips with an iPhone running
+   SensorLogger alongside (`docs/field-test-log.md`). Battery (T-054), background survival and OEM
+   killers (T-051/T-053), GPS under canopy (T-076–T-080) and real trips are **answerable**: ask
+   for the measurement rather than recording it as impossible. The emulator
    (`bash tools/run-emulator.sh`) is still legitimate for rendering, storage, UI, permissions and
    replayed routes — and **worthless for battery, background survival and GPS realism**
    (CONTEXT §6.6). See `docs/dev-build.md`.
@@ -72,11 +73,11 @@ The documents cost more to read than the code does. In order of impact:
 
 ## Honesty rules, each of which cost something here
 
-- **Be precise about which half you mean.** The app runs on an emulator and the recorder records
-  *there*; it has also run on **real hardware once** (Firebase Test Lab, Pixel 5, 2026-08-19 —
-  rendering only, nobody walked anywhere). Battery, background survival and GPS realism are
-  unverified and no emulator can answer them. 774 unit tests and a browser workbench are all the
-  verification the *logic* has.
+- **Be precise about which half you mean.** Recording, battery and background survival have been
+  measured on **one phone**, the lead's P30 (EMUI 12), against an iPhone's SensorLogger track; every
+  other Android and every iPhone is unverified, and no emulator can answer for them. One carried
+  day is the whole battery evidence (16 Oct 2026). Unit tests (1,131) and a browser workbench are
+  the rest of the verification.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not
   earned.

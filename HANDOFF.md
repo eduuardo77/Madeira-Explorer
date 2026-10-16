@@ -1,10 +1,31 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-10-05 (end of the session that
-built billing, the paywall redesign and the trophy; the section just below is the latest state).
+**For:** a session picking this project up cold. **Updated:** 2026-10-16 (automatic recording and
+the motion wake; the section just below is the latest state).
 Older sections further down are dated and partly superseded; trust the newest one.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
+
+## ⚠⚠⚠ 2026-10-16: START HERE, automatic recording works; the motion wake (D-106)
+
+- **Automatic recording with the app closed works on the P30.** It failed on 11 Oct (nothing lit)
+  and twice more as fixes were tried; the cause and the three rules are D-106. Now: the phone's
+  significant-motion sensor and Google's activity updates wake the recorder
+  (`MotionWakeTaskConsumer`, `recording/motionWakePolicy.ts`); the moving profiles use the GPS;
+  at home, Wi-Fi and cell only (the GPS every 10 minutes on a phone the wake cannot serve). Results:
+  13 Oct 97.7%, 15 Oct 89.6%, 16 Oct 90.1% of the route lit within 10 m, about 97% within 30 m,
+  every departure woken by motion. `docs/field-test-log.md` has every trip and the plan.
+- **First battery figure (T-054):** 93 to 74% in 9 h 45 of a carried day (16 Oct), about 2 points
+  an hour. One day; the lead wants a second before the app states any figure (D-041 stands).
+- **Huawei:** its phone manager warns *consumo excessivo* after heavy GPS use (12 Oct at home,
+  16 Oct after a full day). The first-run Huawei line now says not to tap *Forçar paragem*.
+- **Store:** **version 9** (`Madeira-fieldwork/apks/bruma-0.1.0-vc9.aab`, motion wake) is for the
+  closed track, in place of 7. No GPS at home (`bec2c18`) is on the P30 only; version 10 after a
+  couple of days without Huawei's warning. The lead sources the 12 testers (T-129).
+- **Next test (the lead):** a second carried day on Equilibrado, started below 100%, the app never
+  opened, SensorLogger all day. A levada is not possible for now.
+- **Traps:** the P30 has no mobile data ("Só emergência"); if adb does not see it, `adb kill-server`
+  then `start-server`; read `dumpsys batterystats` first; `MSYS_NO_PATHCONV=1` before adb paths.
 
 ## ⚠⚠⚠ 2026-10-09: interim review, 11.9 / 20
 

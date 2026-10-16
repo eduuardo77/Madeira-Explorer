@@ -512,6 +512,12 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       the mask circle** whenever a gap was short; the first decode blocked the P30's JavaScript
       thread for **1,241 ms** (now sliced, see D-093).
 - [ ] **T-246** ⚠ **The field outing that tunes D-093** ⇠ T-245 ⚠ **the project lead, outdoors**
+      ✅ **Automatic recording with the app closed, 2026-10-11 to 16 (review F1, D-106):** failed
+      on 11 Oct (Expo's background hold; no GPS from the low-power providers), passed on 12 Oct
+      with the GPS (94.5% once awake, slow start, Huawei warning), failed on 12 Oct evening with
+      Wi-Fi at home (a drive unseen), then the **motion wake**: 13 Oct 97.7%, 15 Oct 89.6%,
+      16 Oct 90.1% within 10 m, about 97% within 30 m, every start woken by motion. Field log
+      has each trip.
       ✅ **(3) partly, 2026-10-08: a motorcycle ride as an outing, against SensorLogger** (iPhone 15,
       1 Hz, `compare-sensorlogger.mjs`, 17:32 to 18:31): **of what was lit, 99.6% within 10 m of the
       ridden track** (median 1.8 m); **of what was ridden, 93.7% lit within 10 m, 95.8% within
@@ -1903,6 +1909,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
 - [ ] **T-052** iOS force-quit test — recording must resume ⇠ T-047
 - [ ] **T-053** Aggressive-OEM Android test (Xiaomi / Samsung / Oppo) ⇠ T-045, T-046
 - [ ] **T-054** Measure battery cost over a 12-hour day; target ≤5% ⇠ T-038
+      ✅ **First real figure, 2026-10-16:** a carried day out on the motion-wake build, Equilibrado,
+      unplugged at 93% (so the P30's full-charge hold hid nothing): **74% after 9 h 45, about
+      2 points an hour**, the app's GPS on 7 h 13, screen 11 min. One day, one phone. ⚠ The
+      task's "≤5%" target was for a still day and does not fit a day of tracking. **Left:** a
+      second carried day (the lead's next test); the app states no figure until then (D-041).
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
       **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on
@@ -3607,6 +3618,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Testers need not be in Madeira to count; Google counts opt-ins. Version 4 is on internal
       testing (active, not reviewed, since 2026-10-08 15:31); no pre-launch report has run there.
       **The lead sources the 12 testers themselves** (2026-10-09, outsourced); not ours to recruit.
+      **Builds:** version 7 uploaded 2026-10-12; **version 9** (motion wake, 2026-10-13) is the one
+      to have on the closed track; 5, 6, 7 and 8 must not go to testers (field log, D-106).
 - [x] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
       upload ⇠ T-125
       — Done 2026-08-16 as **D-069**, Settings → *Send a walk*: the masked trace, every stamp

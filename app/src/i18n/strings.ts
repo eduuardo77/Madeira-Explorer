@@ -195,10 +195,13 @@ export const STRINGS = {
   // T-258: Huawei and Honor only (`launchManager.ts`). ⚠ The Portuguese path
   // is read off the P30 (EMUI 12, 2026-10-07); the English and German are
   // EMUI's usual names, not seen on a phone.
+  // The second sentence, 2026-10-16: after a full day of recording, the P30's
+  // phone manager called Bruma "consumo excessivo", with a Forçar paragem
+  // button that stops the recorder. "Forçar paragem" is EMUI's own word.
   'onboarding.keepRunning.huawei': s(
-    'On a Huawei phone, also go to Settings, Apps, App launch, turn off the switch for {app} and leave on the three options that appear.',
-    'Num telemóvel Huawei, vai também a Definições, Aplicações, Iniciação de aplicações, desliga o interruptor do {app} e deixa ligadas as três opções que aparecem.',
-    'Auf einem Huawei-Telefon öffnen Sie außerdem Einstellungen, Apps, App-Start, schalten den Schalter für {app} aus und lassen die drei angezeigten Optionen eingeschaltet.'
+    'On a Huawei phone, also go to Settings, Apps, App launch, turn off the switch for {app} and leave on the three options that appear. If the phone later warns that {app} uses a lot of battery, do not tap Force stop: that stops the recording.',
+    'Num telemóvel Huawei, vai também a Definições, Aplicações, Iniciação de aplicações, desliga o interruptor do {app} e deixa ligadas as três opções que aparecem. Se o telemóvel avisar mais tarde que o {app} gasta muita bateria, não toques em Forçar paragem: isso para o registo.',
+    'Auf einem Huawei-Telefon öffnen Sie außerdem Einstellungen, Apps, App-Start, schalten den Schalter für {app} aus und lassen die drei angezeigten Optionen eingeschaltet. Wenn das Telefon später meldet, dass {app} viel Akku verbraucht, tippen Sie nicht auf Beenden erzwingen: Das stoppt die Aufzeichnung.'
   ),
   'onboarding.keepRunning.body1': s(
     'Some phones put apps to sleep to save battery, and your map stops filling in. With one tap, you ask Android to keep {app} running.',

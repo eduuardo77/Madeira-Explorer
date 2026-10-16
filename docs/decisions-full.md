@@ -5724,6 +5724,14 @@ phone's significant-motion sensor had fired at the start of that trip and of bot
   The lead asked for a solid fix with redundancy and efficiency; this follows Google's battery
   guide and the standard background-tracking library's design.
 
+⚠ **Amended 2026-10-16: the motion wake proved itself; no GPS at home on phones it serves.** It
+woke every departure on 13, 15 and 16 Oct (97.7%, 89.6% and 90.1% of the route within 10 m), and
+Huawei's warning returned after a full day of tracking. The lead chose: on a phone with the
+significant-motion sensor or the motion permission, the stationary profile asks for Wi-Fi and
+cell only, as a safety net; without either it keeps the GPS every 10 minutes
+(`samplingPolicy.forPlatform`, rule 4). And the first-run Huawei line now asks users not to tap
+*Forçar paragem* if the phone calls Bruma *consumo excessivo*.
+
 **What would overturn it.** A ride with the app closed whose start is lost because the balanced
 provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
 at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning

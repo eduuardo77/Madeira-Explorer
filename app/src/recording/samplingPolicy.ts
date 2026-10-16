@@ -135,7 +135,16 @@ export function getSamplingParameters(
  *     unseen for 75 minutes, and only the last kilometre home was recorded.
  * Every 10 minutes halves the starts. Up to 10 minutes of a trip's start can be
  * lost, after which the first-fix rules (`movementPolicy.decideProfile`)
- * switch on the first fix. ⚠ Whether Huawei warns at this rate is unmeasured.
+ * switch on the first fix.
+ *
+ * **4. With a motion wake, no GPS at home at all** (the lead, 2026-10-16). The
+ * motion wake (`MotionWakeTaskConsumer`, `motionWake: true` here) woke every
+ * departure of 13, 15 and 16 Oct, so the GPS polling only cost battery, and
+ * Huawei's warning came back after the full day of 16 Oct. The stationary
+ * profile then asks for Wi-Fi and cell positions only, a safety net that has
+ * caught a trip once (the last kilometre home, 12 Oct). Rule 3 stays for a
+ * phone the wake cannot serve: no significant-motion sensor and no motion
+ * permission.
  */
 /** How often Android's stationary profile may start the GPS (rule 3). */
 export const ANDROID_STATIONARY_INTERVAL_MS = 10 * MINUTE;
@@ -143,16 +152,18 @@ export const ANDROID_STATIONARY_INTERVAL_MS = 10 * MINUTE;
 export function forPlatform(
   platform: 'ios' | 'android',
   profile: SamplingProfile,
-  parameters: SamplingParameters
+  parameters: SamplingParameters,
+  motionWake = false
 ): SamplingParameters {
   if (platform !== 'android') return parameters;
-  return profile === 'stationary'
-    ? {
+  if (profile !== 'stationary') return { ...parameters, desiredAccuracy: 'high' };
+  return motionWake
+    ? { ...parameters, deferredIntervalMs: 0, deferredDistanceM: 0, desiredAccuracy: 'balanced' }
+    : {
         ...parameters,
         minTimeMs: Math.max(parameters.minTimeMs, ANDROID_STATIONARY_INTERVAL_MS),
         deferredIntervalMs: 0,
         deferredDistanceM: 0,
         desiredAccuracy: 'high',
-      }
-    : { ...parameters, desiredAccuracy: 'high' };
+      };
 }

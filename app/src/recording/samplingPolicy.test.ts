@@ -44,3 +44,22 @@ test('iOS is left as it is', () => {
     assert.deepEqual(forPlatform('ios', profile, parameters), parameters);
   }
 });
+
+test('with a motion wake, the stationary profile asks for Wi-Fi and cell only, no GPS (rule 4)', () => {
+  for (const tier of ['saver', 'balanced', 'precise'] as const) {
+    const scaled = scaleForQuality(getSamplingParameters('stationary'), tier);
+    const adjusted = forPlatform('android', 'stationary', scaled, true);
+    assert.equal(adjusted.desiredAccuracy, 'balanced', tier);
+    assert.equal(adjusted.deferredIntervalMs, 0, tier);
+    assert.equal(adjusted.minTimeMs, scaled.minTimeMs, tier);
+  }
+});
+
+test('the motion wake changes nothing while moving, and nothing on iOS', () => {
+  for (const profile of ['walking', 'driving'] as const) {
+    const parameters = getSamplingParameters(profile);
+    assert.deepEqual(forPlatform('android', profile, parameters, true), forPlatform('android', profile, parameters, false));
+  }
+  const stationary = getSamplingParameters('stationary');
+  assert.deepEqual(forPlatform('ios', 'stationary', stationary, true), stationary);
+});

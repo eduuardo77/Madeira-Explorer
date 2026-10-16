@@ -53,6 +53,16 @@ class ActivityTransitionsModule : Module() {
         ConnectionResult.SUCCESS
     }
 
+    /**
+     * The phone has a significant-motion sensor, the motion wake's trigger that
+     * needs no permission (D-106). Without it, and without the motion
+     * permission, the stationary profile keeps polling the GPS.
+     */
+    Function("hasSignificantMotion") {
+      val manager = context.getSystemService(Context.SENSOR_SERVICE) as? android.hardware.SensorManager
+      manager?.getDefaultSensor(android.hardware.Sensor.TYPE_SIGNIFICANT_MOTION) != null
+    }
+
     /** The "Physical activity" permission is granted (always, before Android 10). */
     Function("hasPermission") {
       hasPermission(context)

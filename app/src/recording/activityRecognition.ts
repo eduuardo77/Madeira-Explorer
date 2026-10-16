@@ -26,6 +26,7 @@ type NativeActivityTransitions = {
   drain(): unknown[];
   diagnostics?(): Record<string, unknown>;
   startMotionWake?(taskName: string): Promise<boolean>;
+  hasSignificantMotion?(): boolean;
   stopMotionWake?(taskName: string): Promise<boolean>;
 };
 
@@ -119,6 +120,20 @@ export async function ensureActivityUpdates(nowMs: number = Date.now()): Promise
 let lastLogged: boolean | null = null;
 
 let motionWakeStarted = false;
+
+/**
+ * Whether the motion wake can tell this phone has started to move (D-106): it
+ * has the significant-motion sensor, or the motion permission for Google's
+ * activity updates. When it cannot, the stationary profile keeps polling the
+ * GPS (`samplingPolicy.forPlatform`).
+ */
+export function motionWakeAvailable(): boolean {
+  try {
+    return native !== null && (native.hasSignificantMotion?.() === true || activityPermitted());
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Arm the motion wake (D-106, `MotionWakeTaskConsumer`), once per process: the

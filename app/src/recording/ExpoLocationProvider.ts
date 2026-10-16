@@ -19,6 +19,7 @@ import type {
   SamplingProfile,
 } from './LocationProvider';
 import { forPlatform, getSamplingParameters } from './samplingPolicy';
+import { motionWakeAvailable } from './activityRecognition';
 import { scaleForQuality } from './trackingPreference';
 import { effectiveProfile, effectiveQuality } from './recorderControls';
 import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
@@ -70,11 +71,13 @@ async function buildOptions(
   const walking = await getWalkInProgress();
   const sampled = effectiveProfile(profile, walking);
   // After the tier, on purpose: on Android the moving profiles need the GPS,
-  // and the stationary one no hold, whatever the tier asks (`forPlatform`, F1).
+  // and the stationary one no hold, whatever the tier asks; and no GPS at home
+  // when the motion wake can serve this phone (`forPlatform`, D-106).
   const parameters = forPlatform(
     Platform.OS === 'android' ? 'android' : 'ios',
     sampled,
-    scaleForQuality(getSamplingParameters(sampled), effectiveQuality(await getTrackingQuality(), walking))
+    scaleForQuality(getSamplingParameters(sampled), effectiveQuality(await getTrackingQuality(), walking)),
+    motionWakeAvailable()
   );
 
   return {

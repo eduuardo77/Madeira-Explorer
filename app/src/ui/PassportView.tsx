@@ -307,6 +307,10 @@ export type MedalTile = {
   detail: string;
   /** Complete on a passport not yet unlocked (D-089): frosted, and a tap opens the sheet. */
   locked: boolean;
+  /** The set's places, in content order: what a tap on the medal shows. */
+  placeIds: string[];
+  collected: number;
+  total: number;
 };
 
 /** The founder stamp's size in its card, near a passport stamp's. */
@@ -357,11 +361,26 @@ function MedalsSection({
   founder,
   medals,
   onUnlock,
+  stamps,
+  awardedAt,
+  stampSize,
+  onStripWidth,
+  onSelectStamp,
 }: {
   founder: FounderCard | undefined;
   medals: MedalTile[];
   onUnlock: (() => void) | undefined;
+  stamps: PassportStamp[];
+  awardedAt: ReadonlyMap<string, number>;
+  stampSize: number;
+  onStripWidth: (width: number) => void;
+  onSelectStamp?: (stamp: PassportStamp) => void;
 }) {
+  // The lead, 2026-10-17: tap a medal to see which of its stamps are missing.
+  // One set open at a time, under the shelf; a second tap closes it.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = medals.find((medal) => medal.id === openId) ?? null;
+  const byId = new Map(stamps.map((stamp) => [stamp.placeId, stamp]));
   return (
     <View style={styles.section}>
       <View style={styles.rowHeader}>
@@ -373,9 +392,31 @@ function MedalsSection({
       {medals.length === 0 ? null : (
         <View style={styles.shelf}>
           {medals.map((medal) => (
-            <MedalShelfTile key={medal.id} medal={medal} onUnlock={onUnlock} />
+            <MedalShelfTile
+              key={medal.id}
+              medal={medal}
+              onUnlock={onUnlock}
+              open={medal.id === openId}
+              onOpen={() => setOpenId((current) => (current === medal.id ? null : medal.id))}
+            />
           ))}
         </View>
+      )}
+      {open === null ? null : (
+        <CategoryRow
+          title={open.name}
+          seeAllLabel={t('passport.a11y.seeAll.set', { total: open.total, name: open.name })}
+          collected={open.collected}
+          total={open.total}
+          stamps={open.placeIds.flatMap((id) => {
+            const stamp = byId.get(id);
+            return stamp === undefined ? [] : [stamp];
+          })}
+          awardedAt={awardedAt}
+          stampSize={stampSize}
+          onStripWidth={onStripWidth}
+          onSelectStamp={onSelectStamp}
+        />
       )}
     </View>
   );
@@ -400,7 +441,18 @@ function FounderCardView({ founder }: { founder: FounderCard }) {
  * is frosted under the padlock, as a locked stamp is, and a tap offers the
  * unlock (D-097); every other tile is read, not pressed.
  */
-function MedalShelfTile({ medal, onUnlock }: { medal: MedalTile; onUnlock: (() => void) | undefined }) {
+function MedalShelfTile({
+  medal,
+  onUnlock,
+  open,
+  onOpen,
+}: {
+  medal: MedalTile;
+  onUnlock: (() => void) | undefined;
+  /** Its set is showing under the shelf. */
+  open: boolean;
+  onOpen: () => void;
+}) {
   const label = `${medal.name}. ${medal.detail}`;
   const body = (
     <>
@@ -436,14 +488,22 @@ function MedalShelfTile({ medal, onUnlock }: { medal: MedalTile; onUnlock: (() =
     );
   }
   return (
-    <View style={styles.shelfTile} accessible accessibilityLabel={label}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint={t('passport.medal.showStamps')}
+      accessibilityState={{ expanded: open }}
+      onPress={onOpen}
+      style={({ pressed }) => [styles.shelfTile, (pressed || open) && styles.seeAllPressed]}
+    >
       {body}
-    </View>
+    </Pressable>
   );
 }
 
 function CategoryRow({
-  category,
+  title,
+  seeAllLabel,
   collected,
   total,
   stamps,
@@ -452,7 +512,10 @@ function CategoryRow({
   onStripWidth,
   onSelectStamp,
 }: {
-  category: Category;
+  /** The row's heading: a category, or a medal's set. */
+  title: string;
+  /** What "See all" says to a screen reader. */
+  seeAllLabel: string;
   collected: number;
   total: number;
   stamps: PassportStamp[];
@@ -544,7 +607,7 @@ function CategoryRow({
     // it, instead of a full-height slab saying "0 of 1".
     <View style={styles.section}>
       <View style={styles.rowHeader}>
-        <Text style={styles.rowTitle}>{categoryLabel(category)}</Text>
+        <Text style={styles.rowTitle}>{title}</Text>
         {/* The count is text, not a bar. A progress bar at 3/40 reads as
             failure; "3 of 40" reads as a start (CONTEXT §4.1). */}
         <View style={styles.rowHeaderRight}>
@@ -561,8 +624,8 @@ function CategoryRow({
               accessibilityRole="button"
               accessibilityLabel={
                 expanded
-                  ? t('passport.a11y.collapseRow', { category: categoryLabel(category) })
-                  : t(SEE_ALL_KEYS[category], { total })
+                  ? t('passport.a11y.collapseRow', { category: title })
+                  : seeAllLabel
               }
               onPress={() => setExpanded((open) => !open)}
               // The word is small, so the tap target is grown around it
@@ -727,7 +790,8 @@ export default function PassportView({
       {progress.byCategory.map((row) => (
         <CategoryRow
           key={row.category}
-          category={row.category}
+          title={categoryLabel(row.category)}
+          seeAllLabel={t(SEE_ALL_KEYS[row.category], { total: row.total })}
           collected={row.collected}
           total={row.total}
           stamps={(stamps ?? []).filter(
@@ -741,7 +805,16 @@ export default function PassportView({
       ))}
 
       {founder === undefined && (medals === undefined || medals.length === 0) ? null : (
-        <MedalsSection founder={founder} medals={medals ?? []} onUnlock={onUnlock} />
+        <MedalsSection
+          founder={founder}
+          medals={medals ?? []}
+          onUnlock={onUnlock}
+          stamps={stamps ?? []}
+          awardedAt={awardedAt}
+          stampSize={stampSize}
+          onStripWidth={setStripWidth}
+          onSelectStamp={onSelectStamp}
+        />
       )}
 
       {trips === undefined || trips.length < 2 || onOpenTrip === undefined ? null : (

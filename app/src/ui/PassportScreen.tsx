@@ -115,6 +115,9 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
         detail,
         locked: medal.state === 'locked',
         words: setMedalWordsFor(medal),
+        placeIds: medal.placeIds,
+        collected: medal.collected,
+        total: medal.total,
       };
     });
 }

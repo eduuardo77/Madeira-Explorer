@@ -797,6 +797,13 @@ export const STRINGS = {
   // the "de 80" count or the rank (OQ-2). "While {app} was new" rather than a
   // number of months, so the window's length lives in content alone.
   'passport.medals': s('Medals', 'Medalhas', 'Medaillen'),
+  // The lead, 2026-10-17: a tap on a medal shows its set's stamps.
+  'passport.medal.showStamps': s(
+    'Shows the stamps in this set',
+    'Mostra os carimbos deste conjunto',
+    'Zeigt die Stempel dieses Sets'
+  ),
+  'passport.a11y.seeAll.set': s('See all {total} places: {name}', 'Ver os {total} lugares: {name}', 'Alle {total} Orte ansehen: {name}'),
   /** The word on the stamp's face, drawn in capitals by `medalArt.ts`. */
   'medal.founder.title': s('Founder', 'Fundador', 'Gründer'),
   'medal.founder.name': s('Founder stamp', 'Carimbo de fundador', 'Gründerstempel'),

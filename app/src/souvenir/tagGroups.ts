@@ -4,8 +4,9 @@
  * each other around Porto Moniz).
  *
  * Tags are placed by their stamp's position on screen. Any tag whose box would
- * overlap a group's first tag joins that group, which shows one tag with the
- * times in order: at most `MAX_TIMES`, then "+n". Pure; `tagGroups.test.ts`.
+ * overlap a group's first tag joins that group, which shows one tag with its
+ * first `MAX_TIMES` times in order, and no count (the lead asked for the "+n"
+ * to go, 17 Oct 2026). Pure; `tagGroups.test.ts`.
  */
 
 export type TagItem = { id: string; x: number; y: number; ts: number };
@@ -15,16 +16,16 @@ export type TagGroup = { id: string; x: number; y: number; items: TagItem[] };
 export const TAG_GAP_Y = 26;
 /** Room left between two tags side by side, in dp. */
 const TAG_SPACE = 6;
-/** Times shown in one tag before "+n". */
+/** Times shown in one tag. */
 export const MAX_TIMES = 2;
 
 /**
- * A tag's width on screen, dp, from how many times it shows: measured off the
- * P30 at the viewer's font (one time 52 dp; two 112; two and a count 140). ⚠ An
- * estimate: a larger system font draws wider tags and they may touch again.
+ * A tag's width on screen, dp, from how many times it holds: measured off the
+ * P30 at the viewer's font (one time 52 dp; two 112). ⚠ An estimate: a larger
+ * system font draws wider tags and they may touch again.
  */
 export function tagWidth(times: number): number {
-  return times <= 1 ? 52 : times === 2 ? 112 : 140;
+  return times <= 1 ? 52 : 112;
 }
 
 /**
@@ -55,8 +56,7 @@ export function groupTags(items: readonly TagItem[]): TagGroup[] {
   return groups.sort((a, b) => a.items[0].ts - b.items[0].ts);
 }
 
-/** "14:28 · 14:54", or "14:28 · 14:54 +3" for a larger group. */
+/** "14:28 · 14:54": the group's first times, however many it holds. */
 export function groupLabel(times: readonly string[]): string {
-  const shown = times.slice(0, MAX_TIMES).join(' · ');
-  return times.length > MAX_TIMES ? `${shown} +${times.length - MAX_TIMES}` : shown;
+  return times.slice(0, MAX_TIMES).join(' · ');
 }

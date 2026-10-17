@@ -12,10 +12,10 @@ test('tags that would overlap become one group, in time order; distant ones stay
   assert.deepEqual([groups[0].x, groups[0].y], [100, 200], 'the group sits at its first tag');
 });
 
-test('a group shows two times, then a count', () => {
+test('a group shows its first two times and no count (the lead, 17 Oct)', () => {
   assert.equal(groupLabel(['14:28']), '14:28');
   assert.equal(groupLabel(['14:28', '14:54']), '14:28 · 14:54');
-  assert.equal(groupLabel(['14:28', '14:54', '15:48', '16:46', '17:12']), '14:28 · 14:54 +3');
+  assert.equal(groupLabel(['14:28', '14:54', '15:48', '16:46', '17:12']), '14:28 · 14:54');
 });
 
 test('a two-time tag that would cover its neighbour takes it in too (P30, 17 Oct)', () => {

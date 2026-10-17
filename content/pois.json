@@ -39,6 +39,12 @@
           "lat": 32.8094,
           "lon": -17.1407,
           "radiusM": 300
+        },
+        {
+          "id": "fanal-forest",
+          "lat": 32.81243,
+          "lon": -17.1458,
+          "radiusM": 300
         }
       ]
     },
@@ -475,6 +481,12 @@
           "lat": 32.80228,
           "lon": -17.04718,
           "radiusM": 600
+        },
+        {
+          "id": "sao-vicente-seafront",
+          "lat": 32.80883,
+          "lon": -17.05557,
+          "radiusM": 300
         }
       ]
     },
@@ -1486,6 +1498,25 @@
           "id": "ilheus-da-ribeira-da-janela-main",
           "lat": 32.85529,
           "lon": -17.1531,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "miradouro-da-ribeira-da-janela",
+      "name": "Miradouro da Ribeira da Janela",
+      "category": "viewpoint",
+      "regionId": "porto-moniz",
+      "why": {
+        "en": "Above the village of Ribeira da Janela, looking down its valley to the sea stacks at the mouth.",
+        "pt": "Por cima da aldeia da Ribeira da Janela, com vista pelo vale abaixo até aos ilhéus da foz.",
+        "de": "Über dem Dorf Ribeira da Janela, mit Blick das Tal hinab bis zu den Felsinseln an der Mündung."
+      },
+      "geofences": [
+        {
+          "id": "miradouro-da-ribeira-da-janela-main",
+          "lat": 32.84809,
+          "lon": -17.15275,
           "radiusM": 200
         }
       ]

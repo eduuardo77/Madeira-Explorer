@@ -39,6 +39,7 @@ import {
 import type { TimedPoint, TimedRun } from './roadTrace';
 import { visitedEdges, visitedLengthM, visitedLines } from './visitedRoads';
 import type { VisitedLine } from './visitedRoads';
+import { simplifyLine } from '../map/simplifyLine';
 
 /** The longest the decoder runs before letting a frame through, ms. */
 const SLICE_MS = 12;
@@ -204,7 +205,8 @@ export async function roadLinesFor(
   const chains = [...kept.map(fromStored), ...fresh];
   const visited = visitedEdges(network, chains);
   const value: RoadLines = {
-    lines: visitedLines(network, visited),
+    // Drawn only: fewer points for the map; the lengths above are untouched.
+    lines: visitedLines(network, visited).map((line) => ({ ...line, points: simplifyLine(line.points) })),
     lengthM: visitedLengthM(visited),
     todayM: litSinceM(network, chains, startOfToday()),
     latestTs: latestMatchedTs(chains),

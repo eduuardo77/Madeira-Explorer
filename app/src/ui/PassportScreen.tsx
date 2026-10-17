@@ -57,6 +57,7 @@ import { getLockedRegionIds } from '../progress/currentProgress';
 import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
+import MedalSetSheet from './MedalSetSheet';
 import TrophyCard from './TrophyCard';
 import { trophyFacts } from '../places/trophy';
 import { getMedals } from '../content/medalCatalogue';
@@ -196,6 +197,8 @@ export default function PassportScreen({
    * closed. Locked and uncollected stamps open the place card instead.
    */
   const [trophy, setTrophy] = useState<TrophyView | null>(null);
+  /** The medal whose set is open over the passport (`MedalSetSheet`). */
+  const [openMedal, setOpenMedal] = useState<MedalTile | null>(null);
   /** Open the sheet with every locked stamp, `first` leading the fan. */
   const openUnlock = (first: PassportStamp | null) => {
     const locked = stamps.filter((stamp) => stamp.locked === true);
@@ -552,6 +555,7 @@ export default function PassportScreen({
           onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
           founder={founder ?? undefined}
           medals={medals}
+          onOpenMedal={setOpenMedal}
         />
       )}
       {/* The bar behind `‹ Map` and Share, in the album's colour, under every
@@ -613,6 +617,26 @@ export default function PassportScreen({
             if (trophy.nextPlace !== null) onShowOnMap(trophy.nextPlace, false);
           }}
           onClose={() => setTrophy(null)}
+        />
+      )}
+      {openMedal === null ? null : (
+        <MedalSetSheet
+          medal={openMedal}
+          stamps={stamps}
+          awards={awards}
+          onSelectStamp={(stamp) => {
+            setOpenMedal(null);
+            openCard(stamp);
+          }}
+          onUnlock={
+            BETA_BUILD
+              ? undefined
+              : () => {
+                  setOpenMedal(null);
+                  openUnlock(null);
+                }
+          }
+          onClose={() => setOpenMedal(null)}
         />
       )}
       {unlockWaiting === null ? null : (

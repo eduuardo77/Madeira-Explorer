@@ -88,7 +88,7 @@ import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './them
  * the strip has been laid out, the window less the page padding is the
  * estimate, and on a phone the two agree.
  */
-function stripGeometry(measuredStrip: number | null, windowWidth: number): StripGeometry {
+export function stripGeometry(measuredStrip: number | null, windowWidth: number): StripGeometry {
   return {
     stripWidth: measuredStrip ?? windowWidth - 2 * spacing.md,
     leading: spacing.md,
@@ -281,6 +281,8 @@ export type PassportViewProps = {
    * bought (never a beta build).
    */
   waiting?: PassportStamp[];
+  /** A medal was tapped: show its set (`MedalSetSheet`). */
+  onOpenMedal?: (medal: MedalTile) => void;
   /** Free stamps still to come; absent once the passport is bought (D-105). */
   freeLeft?: number;
   onUnlock?: () => void;
@@ -360,27 +362,12 @@ function LockBadge() {
 function MedalsSection({
   founder,
   medals,
-  onUnlock,
-  stamps,
-  awardedAt,
-  stampSize,
-  onStripWidth,
-  onSelectStamp,
+  onOpenMedal,
 }: {
   founder: FounderCard | undefined;
   medals: MedalTile[];
-  onUnlock: (() => void) | undefined;
-  stamps: PassportStamp[];
-  awardedAt: ReadonlyMap<string, number>;
-  stampSize: number;
-  onStripWidth: (width: number) => void;
-  onSelectStamp?: (stamp: PassportStamp) => void;
+  onOpenMedal: ((medal: MedalTile) => void) | undefined;
 }) {
-  // The lead, 2026-10-17: tap a medal to see which of its stamps are missing.
-  // One set open at a time, under the shelf; a second tap closes it.
-  const [openId, setOpenId] = useState<string | null>(null);
-  const open = medals.find((medal) => medal.id === openId) ?? null;
-  const byId = new Map(stamps.map((stamp) => [stamp.placeId, stamp]));
   return (
     <View style={styles.section}>
       <View style={styles.rowHeader}>
@@ -392,31 +379,9 @@ function MedalsSection({
       {medals.length === 0 ? null : (
         <View style={styles.shelf}>
           {medals.map((medal) => (
-            <MedalShelfTile
-              key={medal.id}
-              medal={medal}
-              onUnlock={onUnlock}
-              open={medal.id === openId}
-              onOpen={() => setOpenId((current) => (current === medal.id ? null : medal.id))}
-            />
+            <MedalShelfTile key={medal.id} medal={medal} onOpen={onOpenMedal} />
           ))}
         </View>
-      )}
-      {open === null ? null : (
-        <CategoryRow
-          title={open.name}
-          seeAllLabel={t('passport.a11y.seeAll.set', { total: open.total, name: open.name })}
-          collected={open.collected}
-          total={open.total}
-          stamps={open.placeIds.flatMap((id) => {
-            const stamp = byId.get(id);
-            return stamp === undefined ? [] : [stamp];
-          })}
-          awardedAt={awardedAt}
-          stampSize={stampSize}
-          onStripWidth={onStripWidth}
-          onSelectStamp={onSelectStamp}
-        />
       )}
     </View>
   );
@@ -443,15 +408,11 @@ function FounderCardView({ founder }: { founder: FounderCard }) {
  */
 function MedalShelfTile({
   medal,
-  onUnlock,
-  open,
   onOpen,
 }: {
   medal: MedalTile;
-  onUnlock: (() => void) | undefined;
-  /** Its set is showing under the shelf. */
-  open: boolean;
-  onOpen: () => void;
+  /** Opens the set's sheet (`MedalSetSheet`); absent where there is nowhere to go. */
+  onOpen: ((medal: MedalTile) => void) | undefined;
 }) {
   const label = `${medal.name}. ${medal.detail}`;
   const body = (
@@ -475,33 +436,30 @@ function MedalShelfTile({
       <Text style={styles.shelfDetail}>{medal.detail}</Text>
     </>
   );
-  if (medal.locked && onUnlock !== undefined) {
+  if (onOpen === undefined) {
     return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        onPress={onUnlock}
-        style={({ pressed }) => [styles.shelfTile, pressed && styles.seeAllPressed]}
-      >
+      <View style={styles.shelfTile} accessible accessibilityLabel={label}>
         {body}
-      </Pressable>
+      </View>
     );
   }
+  // The lead, 2026-10-17: any medal, a tap shows its stamps, collected and
+  // missing; a locked one's sheet offers the unlock as well (D-097).
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={t('passport.medal.showStamps')}
-      accessibilityState={{ expanded: open }}
-      onPress={onOpen}
-      style={({ pressed }) => [styles.shelfTile, (pressed || open) && styles.seeAllPressed]}
+      onPress={() => onOpen(medal)}
+      style={({ pressed }) => [styles.shelfTile, pressed && styles.seeAllPressed]}
     >
       {body}
     </Pressable>
   );
 }
 
-function CategoryRow({
+export function CategoryRow({
+  initiallyExpanded = false,
   title,
   seeAllLabel,
   collected,
@@ -512,6 +470,8 @@ function CategoryRow({
   onStripWidth,
   onSelectStamp,
 }: {
+  /** Open as the full grid, as in a medal's sheet. */
+  initiallyExpanded?: boolean;
   /** The row's heading: a category, or a medal's set. */
   title: string;
   /** What "See all" says to a screen reader. */
@@ -535,7 +495,7 @@ function CategoryRow({
   // Collapsed by default, per row, and not remembered. A passport you reopen
   // looks the way it looked the first time; the hero is at the top and the five
   // categories are all on one screen.
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(initiallyExpanded);
   const canExpand = stamps.length >= MIN_STAMPS_FOR_SEE_ALL;
 
   // ⚠ In the strip, what you earned comes first. The collapsed row shows about
@@ -684,6 +644,7 @@ export default function PassportView({
   waiting,
   freeLeft,
   onUnlock,
+  onOpenMedal,
   founder,
   medals,
 }: PassportViewProps) {
@@ -805,16 +766,7 @@ export default function PassportView({
       ))}
 
       {founder === undefined && (medals === undefined || medals.length === 0) ? null : (
-        <MedalsSection
-          founder={founder}
-          medals={medals ?? []}
-          onUnlock={onUnlock}
-          stamps={stamps ?? []}
-          awardedAt={awardedAt}
-          stampSize={stampSize}
-          onStripWidth={setStripWidth}
-          onSelectStamp={onSelectStamp}
-        />
+        <MedalsSection founder={founder} medals={medals ?? []} onOpenMedal={onOpenMedal} />
       )}
 
       {trips === undefined || trips.length < 2 || onOpenTrip === undefined ? null : (

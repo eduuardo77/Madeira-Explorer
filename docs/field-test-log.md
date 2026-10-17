@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; no Huawei warning |
 | 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
 | 2026-10-15 | Car and on foot, 1 h 45, iPhone alongside | P30 | Equilibrado | ✅ 89.6% within 10 m, 96.9% within 30 m |
 | 2026-10-13 | **Motion wake:** on foot and by car, 45 min, app closed, iPhone alongside | P30 | Equilibrado | ✅ 97.7% of the route lit within 10 m, start included; woken by the motion sensor; no Huawei warning |
@@ -40,6 +41,29 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-17: the second carried day; mode switching found wanting
+
+- **Setup:** the build with no GPS at home (`bec2c18`), Equilibrado, unplugged at 98% at 22:00
+  the night before. Bruma opened at 09:35 and 11:58. Sensor Logger 10:16 to 18:16: Santa Cruz,
+  Ribeira Brava, the north coast to Porto Moniz and back, 125 km.
+- **Battery:** the night 98 to 90% (deep idle 75%, the app's GPS on 8 minutes in all, the screen
+  9 minutes: mostly the phone's own idle drain, now visible below 100%). **The day: 84% at 10:14,
+  67% at 18:16, 17 points in 8 hours, about 2.1 an hour**, against 2 on 16 Oct. Two days now agree.
+- **No Huawei warning** after 8 hours out, the first full day with no GPS at home.
+- **Stamps:** 8, including Forte de São João Baptista from the trace on foot. Every start woken by
+  motion (113 motion-sensor and 110 activity wakes since install).
+- **Route: 83.1% within 10 m, 94.6% within 30 m; 86.5% of the lit road on the route**, the weakest
+  day since the wake. By hour, 63 to 69% at the worst (12:00, 14:00, 15:00), 80 to 87% elsewhere.
+  Of 6.2 km of misses, 1.1 km are tunnels and most of the rest footpaths around Porto Moniz.
+- **Two faults in switching modes, both fixed the same evening:**
+  1. At 12:21 a motion wake switched to walking and the same minute's batch switched back, *within
+     99 m for 12 min*, judged on the still minutes before the switch; the drive started at 12:30
+     unrecorded. Now stillness only counts from when the profile was entered
+     (`decideProfile`, `profileSinceTs`; replayed on this database, it stays walking).
+  2. 14:27 to 14:32, a drive at up to 76 km/h, was sampled at the walking rate throughout: the
+     walking profile's batch that showed the speed came after it. Now Google's *driving* raises
+     walking to driving at once (`raiseProfile`, through the motion wake).
 
 ### 2026-10-15 and 16: two days out on the motion wake, and the first battery figure
 
@@ -347,10 +371,10 @@ never where the lead lives.
 - **A real purchase,** unlocked and acknowledged (5 Oct); backup and restore (4 Oct).
 
 **Still to test, in this order:**
-1. **A second carried day** (the next test below): the battery figure confirmed, and the first day
-   with no GPS at home (`bec2c18`).
-2. **Huawei's warning:** whether it stays away with no GPS at home. It came on 12 Oct (GPS every
-   5 minutes at home) and on 16 Oct (after a full day of tracking).
+1. ✅ **A second carried day (17 Oct):** about 2.1 points an hour, against 2; no Huawei warning with
+   no GPS at home. ⚠ Route 83.1%: the mode-switching fixes of that evening need a day out.
+2. **Huawei's warning:** none on 17 Oct with no GPS at home, after 8 hours out. One day; keep
+   watching. It came on 12 Oct (GPS every 5 minutes at home) and on 16 Oct (a full day).
 3. **A walk only, with the app closed:** walking is the slower start to detect; the motion wake
    has so far woken walks that turned into drives.
 4. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080). Not possible
@@ -376,9 +400,7 @@ report are the first look), and the iPhone, where the app has never run.
 
 ## Next test
 
-**A second carried day, 2026-10-16 onwards.** Equilibrado; started below 100% (at 100% the P30
-hides the first drops); Bruma swiped away and never opened; SensorLogger on the iPhone all day;
-the P30 carried like the iPhone; plugged in only at night. It answers: the battery per hour against
-16 Oct's 2 points; whether every start is woken by motion now that the GPS at home is gone
-(`bec2c18`); whether Huawei's warning comes back (screenshot it and note the time, tap nothing).
-A levada (GPS under canopy) is not possible for the lead for now and stays open.
+**Any day out, the app closed, SensorLogger on.** It checks the two mode-switching fixes of
+17 Oct (no flip back to still after a wake; walking raised to driving by Google's *driving*):
+the route should not lose the first minutes after a stop, nor short drives. Equilibrado; start
+below 100% if the battery is to be read again.

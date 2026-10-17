@@ -116,7 +116,10 @@ export async function applySamplingGate(now: number): Promise<void> {
       current === 'stationary' ? STATIONARY_FIX_LIMIT : WINDOW_FIX_LIMIT
     );
 
-    const decision = decideProfile(current, samples, now);
+    // When the current profile was entered: out of stationary, stillness only
+    // counts from then (`decideProfile`, D-106).
+    const since = await appStateDao.getUpdatedTs(appStateDao.AppStateKey.SamplingProfile);
+    const decision = decideProfile(current, samples, now, since ?? undefined);
 
     if (!decision.changed) {
       return;
@@ -142,6 +145,33 @@ export async function applySamplingGate(now: number): Promise<void> {
       'start',
       `profile ${current} -> ${decision.profile}: ${decision.reason}`
     );
+  } catch (error) {
+    await recordingEventDao.logError('sampling gate', error);
+  }
+}
+
+/**
+ * Raise the profile on the motion sensors' word alone (D-106): walking to
+ * driving when Google says in a vehicle, without waiting for the walking
+ * profile's next batch. On 17 Oct 2026 a five-minute drive at up to 76 km/h
+ * was sampled at the walking rate throughout, because the batch that showed
+ * the speed came after it. Only ever to a denser profile, as everywhere the
+ * label is used (D-094).
+ */
+export async function raiseProfile(to: SamplingProfile, reason: string): Promise<void> {
+  try {
+    const current = await readCurrentProfile();
+    if (current === to || current === 'stationary' || to !== 'driving') {
+      return;
+    }
+    await writeCurrentProfile(to);
+    try {
+      await locationProvider.setSamplingProfile(to);
+    } catch (error) {
+      await writeCurrentProfile(current);
+      throw error;
+    }
+    await recordingEventDao.log('start', `profile ${current} -> ${to}: ${reason}`);
   } catch (error) {
     await recordingEventDao.logError('sampling gate', error);
   }

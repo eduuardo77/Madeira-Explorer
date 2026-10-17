@@ -193,7 +193,15 @@ export type MovementDecision = {
 export function decideProfile(
   current: SamplingProfile,
   recent: MovementSample[],
-  now: number
+  now: number,
+  /**
+   * When the current profile was entered. Out of `stationary`, only fixes
+   * from then on count (D-106): on 17 Oct 2026 a motion wake switched to
+   * walking at 12:21 and the same minute's batch switched back, "within 99 m
+   * for 12 min", on the twelve still minutes before the switch, so the drive
+   * that followed started unrecorded.
+   */
+  profileSinceTs?: number
 ): MovementDecision {
   const keep = (reason: string): MovementDecision => ({
     profile: current,
@@ -204,7 +212,8 @@ export function decideProfile(
   const trusted = recent.filter(
     (sample) =>
       Number.isFinite(sample.ts) &&
-      (sample.accuracyM === null || sample.accuracyM <= MAX_TRUSTED_ACCURACY_M)
+      (sample.accuracyM === null || sample.accuracyM <= MAX_TRUSTED_ACCURACY_M) &&
+      (current === STATIONARY_PROFILE || profileSinceTs === undefined || sample.ts >= profileSinceTs)
   );
 
   if (trusted.length === 0) {

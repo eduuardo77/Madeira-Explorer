@@ -29,7 +29,7 @@ import type { LocationSample } from './LocationProvider';
 import { databaseSink } from './recordingSink';
 import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME, MOTION_TASK_NAME } from './taskNames';
-import { getCurrentSamplingProfile } from './samplingGate';
+import { getCurrentSamplingProfile, raiseProfile } from './samplingGate';
 import { nextWakeCheck, WAKE_FIX_TIMEOUT_MS } from './motionWakePolicy';
 import { locationProvider } from './ExpoLocationProvider';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -133,10 +133,14 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
     return;
   }
   let profile = await getCurrentSamplingProfile();
+  const { source, activity } = (data ?? {}) as { source?: string; activity?: string };
   if (profile !== 'stationary') {
+    // Already recording: only a car can make it denser (`raiseProfile`).
+    if (profile === 'walking' && activity === 'driving') {
+      await raiseProfile('driving', 'the motion sensors say driving'); // i18n-exempt: diary reason, D-106
+    }
     return;
   }
-  const { source, activity } = (data ?? {}) as { source?: string; activity?: string };
   await recordingEventDao.log('activity', `motion wake: ${source ?? 'unknown'}${activity ? ` (${activity})` : ''}`); // i18n-exempt: diary line, D-106
   for (let index = 0; ; index += 1) {
     const wait = nextWakeCheck(index, profile);

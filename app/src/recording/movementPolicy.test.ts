@@ -309,3 +309,23 @@ test('stationary: a fast move inside the window still goes straight to driving, 
   const decision = decideProfile('stationary', [fix(2, 0), { ...fix(0, 1000), activity: 'walking' }], NOW);
   assert.equal(decision.profile, 'driving');
 });
+
+test('out of stationary, stillness from before the switch does not send it back (17 Oct, 12:21)', () => {
+  // Twelve still minutes, then a wake switched to walking one minute ago.
+  const still = stillFor(13);
+  const switchedAt = NOW - 60_000;
+  assert.equal(decideProfile('walking', still, NOW).profile, 'stationary', 'without the switch time it flips back');
+  const decision = decideProfile('walking', still, NOW, switchedAt);
+  assert.equal(decision.changed, false);
+  assert.equal(decision.profile, 'walking');
+});
+
+test('out of stationary, twelve still minutes after the switch still go back to stationary', () => {
+  const still = stillFor(13);
+  assert.equal(decideProfile('walking', still, NOW, NOW - 14 * 60_000).profile, 'stationary');
+});
+
+test('the switch time never affects leaving stationary', () => {
+  const decision = decideProfile('stationary', [fix(1, 0), fix(0, 250)], NOW, NOW);
+  assert.equal(decision.profile, 'walking');
+});

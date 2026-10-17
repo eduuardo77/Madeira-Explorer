@@ -216,6 +216,16 @@ export async function set(
   );
 }
 
+/** When `key` was last written, epoch ms, or null when it never was. */
+export async function getUpdatedTs(key: AppStateKeyName): Promise<number | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ updated_ts: number }>(
+    'SELECT updated_ts FROM app_state WHERE key = ?;',
+    key
+  );
+  return row?.updated_ts ?? null;
+}
+
 /**
  * Read a value that was stored as JSON.
  *

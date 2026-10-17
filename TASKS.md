@@ -1914,6 +1914,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       2 points an hour**, the app's GPS on 7 h 13, screen 11 min. One day, one phone. ⚠ The
       task's "≤5%" target was for a still day and does not fit a day of tracking. **Left:** a
       second carried day (the lead's next test); the app states no figure until then (D-041).
+      ✅ **Second day, 2026-10-17:** 84 to 67% in 8 hours out, **about 2.1 points an hour**. Two days
+      on one phone now agree on about 2 points an hour while tracking. Whether the app states it is
+      the lead's call (D-041).
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
       **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on

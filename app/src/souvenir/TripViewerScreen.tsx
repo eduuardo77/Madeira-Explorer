@@ -58,6 +58,7 @@ import { supportsNativeDarkMap } from '../map/mapsRenderer';
 import { PLACE_MARKER_PAINT } from '../map/placeStyle';
 import { TRACE_PAINT } from '../map/traceStyle';
 import { runPolylines } from '../map/tunnelDashes';
+import { groupLabel, groupTags } from './tagGroups';
 import { formatDistance } from '../places/placeCard';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
@@ -176,8 +177,9 @@ export default function TripViewerScreen({
       padding: {
         top: TOP_CLEARANCE,
         bottom: CARD_CLEARANCE,
-        left: spacing.xl,
-        right: spacing.xl,
+        // Tighter than the share's: a day that spans the island fills more of the width.
+        left: spacing.md,
+        right: spacing.md,
       },
     }),
     [width, height],
@@ -264,12 +266,8 @@ export default function TripViewerScreen({
     const px = PixelRatio.get();
     // The whole trip first, pale, then the day on top of it at full strength.
     // A share has no pale trip: only the masked roads may be in that picture.
-    const behind = (shareScene !== null ? [] : view.lines).map((line, index) => ({
-      id: `trip-${index}`,
-      coordinates: line.points.map(([latitude, longitude]) => ({ latitude, longitude })),
-      color: paint.otherDayColor,
-      width: paint.coreWidth * px,
-    }));
+    // Only the day shown (the lead, 17 Oct 2026): the other days' roads, drawn
+    // pale behind it, cluttered the view.
     const today = shown.runs.flatMap((run, index) =>
       runPolylines(
         `day-${index}`,
@@ -279,7 +277,7 @@ export default function TripViewerScreen({
         paint.coreWidth * px
       )
     );
-    return [...behind, ...today];
+    return today;
   }, [view, day, paint, shareScene, shown.runs]);
 
   const marks = PLACE_MARKER_PAINT[styleName].collected;
@@ -383,32 +381,40 @@ export default function TripViewerScreen({
 
   const destination = getContentPack().destination ?? t('share.fallbackTitle');
 
+  // Tags that would overlap share one (`tagGroups.ts`, the lead, 17 Oct 2026).
   const tags =
     shown.camera === null
       ? null
-      : shown.stamps.map((stamp) => {
-          const at = projectPoint(
-            { latitude: stamp.lat, longitude: stamp.lon },
-            shown.camera as CameraFit,
-            shown.viewport,
-          );
-          const time = formatClock(stamp.awardedTs, language);
+      : groupTags(
+          shown.stamps.map((stamp) => {
+            const at = projectPoint(
+              { latitude: stamp.lat, longitude: stamp.lon },
+              shown.camera as CameraFit,
+              shown.viewport,
+            );
+            return { id: stamp.placeId, x: at.x, y: at.y, ts: stamp.awardedTs };
+          })
+        ).map((group) => {
+          const named = group.items.map((item) => ({
+            name: shown.stamps.find((stamp) => stamp.placeId === item.id)?.name ?? '',
+            time: formatClock(item.ts, language),
+          }));
           return (
             <View
-              key={stamp.placeId}
+              key={group.id}
               accessible
-              accessibilityLabel={t('trip.a11y.stampAt', { name: stamp.name, time })}
+              accessibilityLabel={named.map((one) => t('trip.a11y.stampAt', one)).join('. ')}
               pointerEvents="none"
               style={[
                 styles.tagAnchor,
                 // Kept on screen: a stamp on the coast at the frame's edge pushed its tag off it.
                 {
-                  left: Math.max(TAG_HALF, Math.min(width - TAG_HALF, at.x)),
-                  top: at.y - TAG_LIFT,
+                  left: Math.max(TAG_HALF, Math.min(width - TAG_HALF, group.x)),
+                  top: group.y - TAG_LIFT,
                 },
               ]}
             >
-              <Text style={styles.tag}>{time}</Text>
+              <Text style={styles.tag}>{groupLabel(named.map((one) => one.time))}</Text>
             </View>
           );
         });
@@ -588,7 +594,6 @@ export default function TripViewerScreen({
             />
             <View style={styles.navText}>
               <Text style={styles.title}>{dayTitle(day.startTs, language)}</Text>
-              <Text style={styles.subtitle}>{t('trip.ofTrip', { range })}</Text>
             </View>
             <Arrow
               glyph={'›'}
@@ -663,7 +668,7 @@ const ARROW = 36;
 /** How far above its stamp a tag sits, so the mark stays visible under it. */
 const TAG_LIFT = 34;
 /** Half the widest tag ("12:07 PM"): how close to an edge a tag's centre may come. */
-const TAG_HALF = 44;
+const TAG_HALF = 70;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
@@ -715,8 +720,8 @@ const styles = StyleSheet.create({
   pillText: { fontSize: fontSize.small, fontWeight: '600' },
   tagAnchor: {
     position: 'absolute',
-    transform: [{ translateX: -50 }],
-    width: 100,
+    transform: [{ translateX: -80 }],
+    width: 160,
     alignItems: 'center',
   },
   tag: {

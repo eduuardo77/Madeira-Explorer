@@ -10,7 +10,6 @@
 import { getContentPack } from '../content/poiCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
 import { roadLinesFor, timedRunsFor } from '../matching/roadNetwork';
-import type { VisitedLine } from '../matching/visitedRoads';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
@@ -21,8 +20,6 @@ export type TripView = {
   startedTs: number;
   /** The trip's end, or now for a trip still open. */
   endTs: number;
-  /** Every road the trip lit, once each: drawn pale behind the day on show. */
-  lines: VisitedLine[];
   /**
    * Road lit over the whole trip, metres, each road once: the passport's
    * figure, from the same calculation (L6). A day's figure is the same measure
@@ -73,7 +70,6 @@ export async function loadTripView(
     tripId: trip.id,
     startedTs: trip.started_ts,
     endTs: trip.ended_ts ?? nowMs,
-    lines: roads.lines,
     litM: roads.lengthM,
     days,
     stampCount: stamps.length,

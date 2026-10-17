@@ -49,12 +49,6 @@ export type TracePaint = {
   /** The trace itself — the one saturated, heavy thing on the map (D-032). */
   coreColor: string;
   coreWidth: number;
-  /**
-   * The rest of the trip, behind the day the trip viewer is showing (T-253):
-   * the core colour at a fifth opacity. A tunnel or a cable car is not paler
-   * but dashed, at full strength (`tunnelDashes.ts`, 2026-10-08).
-   */
-  otherDayColor: string;
 };
 
 export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
@@ -93,7 +87,6 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     casingWidth: 8,
     coreColor: '#B33A0A',
     coreWidth: 4,
-    otherDayColor: '#B33A0A33',
   },
 
   /**
@@ -110,6 +103,5 @@ export const TRACE_PAINT: Record<MapStyleName, TracePaint> = {
     casingWidth: 8,
     coreColor: '#FF9A3C',
     coreWidth: 4,
-    otherDayColor: '#FF9A3C33',
   },
 };

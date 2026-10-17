@@ -18,8 +18,8 @@
  * All of it, except the drawing. `composition.ts` still plans the film,
  * `frame.ts` still says what is on screen at time *t*, and `playback.ts` still
  * says what *t* is. Only `ReplayView` — the SVG — was replaced, by
- * `replayMap.ts`, which turns the same frame into a camera, some polylines and
- * some circles. That is the dividend for having split the film into *what
+ * `replayMap.ts`, which turns the same frame into a camera and some polylines.
+ * That is the dividend for having split the film into *what
  * happens* and *how it is drawn*.
  *
  * ⚠ **THE APP DOES NOT MOVE THE CAMERA. IT TELLS THE MAP WHERE TO GO.**
@@ -95,12 +95,18 @@ const HERO_CLEARANCE = spacing.xl * 5;
  */
 const MAP_READY_FALLBACK_MS = 3_000;
 
+/** How often the film redraws its lines, ms: ten times a second. */
+const FRAME_MS = 100;
+
 export default function ReplayScreen({
   tripId,
+  range,
   onClose,
 }: {
   /** The trip to play (T-275); the trip on show when absent. */
   tripId?: number;
+  /** One day of it, from the trip viewer's "this day"; the whole trip when absent. */
+  range?: { fromTs: number; toTs: number };
   onClose: () => void;
 }) {
   const [composition, setComposition] = useState<Composition | null>(null);
@@ -134,14 +140,16 @@ export default function ReplayScreen({
           tripId === undefined ? await tripDao.getTripOnShow() : await tripDao.getTrip(tripId);
         // The same trip's film: the plan's own default can be a different one
         // while a trip is open and an ended one is on show.
-        const plan = await getSouvenirComposition({ tripId: trip?.id });
+        const plan = await getSouvenirComposition({ tripId: trip?.id, range });
 
         if (cancelled) {
           return;
         }
 
         setComposition(plan);
-        if (trip !== null) {
+        if (range !== undefined) {
+          setCaption(formatDateRange(range.fromTs, range.fromTs, deviceLanguage()));
+        } else if (trip !== null) {
           setCaption(formatDateRange(trip.started_ts, trip.ended_ts ?? Date.now(), deviceLanguage()));
         }
       } catch (error) {
@@ -155,7 +163,9 @@ export default function ReplayScreen({
     return () => {
       cancelled = true;
     };
-  }, [tripId]);
+    // The range arrives as a fresh object from the viewer; its numbers are what count.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tripId, range?.fromTs, range?.toTs]);
 
   const durationMs =
     composition !== null && composition.renderable ? composition.durationMs : 0;
@@ -196,8 +206,17 @@ export default function ReplayScreen({
       return;
     }
     let raf = 0;
+    let shown = 0;
+    // ⚠ At most `FRAME_MS` apart, not every animation frame (17 Oct 2026): each
+    // update hands the map every line of the trip again, and at 60 a second
+    // the film lagged on the lead's 534 lines. The camera is the map's own
+    // animation and stays smooth; the trace grows in steps too small to see.
     const tick = () => {
-      setNow(Date.now());
+      const at = Date.now();
+      if (at - shown >= FRAME_MS) {
+        shown = at;
+        setNow(at);
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -365,7 +384,6 @@ export default function ReplayScreen({
         cameraPosition={initialCamera}
         onMapLoaded={() => setMapReady(true)}
         polylines={painted.polylines}
-        circles={painted.circles}
         colorScheme={
           darkMap.dark ? GoogleMapsColorScheme.DARK : GoogleMapsColorScheme.LIGHT
         }

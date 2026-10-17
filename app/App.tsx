@@ -107,6 +107,8 @@ function AppScreens({ onShown }: { onShown: () => void }) {
   const [focusPlace, setFocusPlace] = useState<FocusPlace | null>(null);
   /** The trip the viewer shows: one from the passport's list, or null for the trip on show (T-261). */
   const [viewedTripId, setViewedTripId] = useState<number | null>(null);
+  /** The timelapse's day, when the viewer asked for one (17 Oct 2026); the whole trip when null. */
+  const [replayRange, setReplayRange] = useState<{ fromTs: number; toTs: number } | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -265,14 +267,19 @@ function AppScreens({ onShown }: { onShown: () => void }) {
         <TripViewerScreen
           tripId={viewedTripId ?? undefined}
           onClose={() => setScreen('passport')}
-          onReplay={(tripId) => {
+          onReplay={(tripId, range) => {
             setViewedTripId(tripId);
+            setReplayRange(range ?? null);
             setScreen('timelapse');
           }}
         />
       ) : screen === 'timelapse' ? (
         // WalkNYC's Replay: the whole trip as a timelapse, back to the viewer.
-        <ReplayScreen tripId={viewedTripId ?? undefined} onClose={() => setScreen('replay')} />
+        <ReplayScreen
+          tripId={viewedTripId ?? undefined}
+          range={replayRange ?? undefined}
+          onClose={() => setScreen('replay')}
+        />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

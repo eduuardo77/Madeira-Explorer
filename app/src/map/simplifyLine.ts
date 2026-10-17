@@ -17,7 +17,21 @@ export function simplifyLine(
   points: readonly [number, number][],
   toleranceM: number = DRAW_TOLERANCE_M
 ): [number, number][] {
-  if (points.length < 3) return points.slice();
+  const keep = keptIndices(points, toleranceM);
+  return points.filter((_, index) => keep[index] === 1);
+}
+
+/** The same for anything with a position: the film's timed fixes keep their times. */
+export function keepSimplified<T extends { lat: number; lon: number }>(
+  items: readonly T[],
+  toleranceM: number = DRAW_TOLERANCE_M
+): T[] {
+  const keep = keptIndices(items.map((item) => [item.lat, item.lon] as [number, number]), toleranceM);
+  return items.filter((_, index) => keep[index] === 1);
+}
+
+function keptIndices(points: readonly [number, number][], toleranceM: number): Uint8Array {
+  if (points.length < 3) return new Uint8Array(points.length).fill(1);
   const kx = 111_320 * Math.cos((points[0][0] * Math.PI) / 180);
   const ky = 110_540;
   const keep = new Uint8Array(points.length);
@@ -48,5 +62,5 @@ export function simplifyLine(
       stack.push([a, at], [at, b]);
     }
   }
-  return points.filter((_, index) => keep[index] === 1);
+  return keep;
 }

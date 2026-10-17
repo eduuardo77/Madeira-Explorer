@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { simplifyLine } from './simplifyLine.ts';
+import { keepSimplified, simplifyLine } from './simplifyLine.ts';
 
 // About 1 m of latitude, at Madeira.
 const M = 1 / 110_540;
@@ -23,4 +23,10 @@ test('lines of two points or fewer come back as they were, as a new array', () =
   const out = simplifyLine(two);
   assert.deepEqual(out, two);
   assert.notEqual(out, two);
+});
+
+test('timed fixes are thinned the same way and keep their own times', () => {
+  const fixes = Array.from({ length: 30 }, (_, i) => ({ lat: 32.65 + i * 10 * M, lon: -16.92, ts: 1000 + i }));
+  const kept = keepSimplified(fixes);
+  assert.deepEqual(kept.map((fix) => fix.ts), [1000, 1029]);
 });

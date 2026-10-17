@@ -24,6 +24,7 @@ import { GAP_THRESHOLD_MS } from '../recording/recorderHealth';
 import type { Composition, SouvenirStamp } from './composition';
 import { composeSouvenir } from './composition';
 import { exportRoadSegments } from '../matching/roadNetwork';
+import { keepSimplified } from '../map/simplifyLine';
 import { MASK_RADIUS_M } from './accommodation';
 import { exportedTrip, getExportableTrace } from './exportTrace';
 
@@ -40,7 +41,13 @@ import { exportedTrip, getExportableTrace } from './exportTrace';
 export async function getSouvenirComposition({
   quiet = false,
   tripId,
-}: { quiet?: boolean; tripId?: number } = {}): Promise<Composition> {
+  range,
+}: {
+  quiet?: boolean;
+  tripId?: number;
+  /** One day of the trip (the viewer's "this day", 17 Oct 2026); the whole trip when absent. */
+  range?: { fromTs: number; toTs: number };
+} = {}): Promise<Composition> {
   try {
     // One trip for the trace and the stamps alike (T-275).
     const trip = await exportedTrip(tripId);
@@ -56,11 +63,19 @@ export async function getSouvenirComposition({
     }
 
     const progress = await getCurrentProgress();
-    const awards = await stampAwardDao.getAwards(trip.id);
+    const inRange = (ts: number) => range === undefined || (ts >= range.fromTs && ts < range.toTs);
+    const awards = (await stampAwardDao.getAwards(trip.id)).filter((award) => inRange(award.awarded_ts));
+    const fixes = trace.fixes.filter((fix) => inRange(fix.ts));
+    // The masked export of the whole trip, then cut to the range: the guard in
+    // `traceDrawn.test.ts` holds this call to the masked trace. Drawn only, as
+    // on the map: fewer points per frame (`simplifyLine`), times unchanged.
+    const roads = (await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M))
+      .map((segment) => ({ ...segment, fixes: keepSimplified(segment.fixes.filter((fix) => inRange(fix.ts))) }))
+      .filter((segment) => segment.fixes.length >= 2);
 
     const composition = composeSouvenir({
       trace: {
-        fixes: trace.fixes,
+        fixes,
         safeToShare: trace.safeToShare,
         reason: trace.reason,
       },
@@ -71,7 +86,7 @@ export async function getSouvenirComposition({
       gapThresholdMs: GAP_THRESHOLD_MS,
       // The roads, as the map draws them (D-093): from the masked trace, cut
       // at the mask circle, because the film is made to be posted.
-      roads: await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M),
+      roads,
     });
 
     if (quiet) {

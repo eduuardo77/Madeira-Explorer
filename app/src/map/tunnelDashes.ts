@@ -14,8 +14,10 @@
  * `expo-maps` had no dash pattern, so each dash was a polyline of its own: on
  * the lead's map, 89 tunnels made about 1,900 of the 2,358 polylines, memory
  * after the pan workload was 501 MB against 274 on 7 Oct, and the map lagged.
- * Our `expo-maps` patch now takes `dashed` and asks Google's map for a dash
- * pattern. Pure; tested in `tunnelDashes.test.ts`.
+ * Our `expo-maps` patch takes `dashed` and asks Google's map for a dash
+ * pattern. ⚠ **Solid since the same evening:** the lead found the map's dashes
+ * odd-looking and asked for plain lines, the cheapest to draw. The patch keeps
+ * `dashed` for a later use. Pure; tested in `tunnelDashes.test.ts`.
  */
 
 export type LatLng = { latitude: number; longitude: number };
@@ -30,5 +32,8 @@ export function runPolylines(
   color: string,
   width: number
 ): TracePolyline[] {
-  return [faded && coordinates.length >= 2 ? { id, coordinates, color, width, dashed: true } : { id, coordinates, color, width }];
+  // Solid since 17 Oct 2026, the lead's call: the map's own dashes looked odd,
+  // and a plain line costs the least. `faded` is kept for whoever draws it.
+  void faded;
+  return [{ id, coordinates, color, width }];
 }

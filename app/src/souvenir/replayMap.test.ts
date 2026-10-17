@@ -137,37 +137,12 @@ test('coordinates are flipped into the map’s order, not passed through', () =>
   assert.ok(first.longitude < -16 && first.longitude > -18, `longitude ${first.longitude}`);
 });
 
-test('a stamp is drawn in its category colour and settles to one size', () => {
-  const stamps = [
-    { placeId: 'a', name: 'A', category: 'levada' as const, awardedTs: T0 + 20 * 60_000, lat: 32.66, lon: -16.89 },
-  ];
-  const f = film(composeSouvenir(input({ stamps })));
-  const cue = f.scenes.flatMap((s) => (s.kind === 'draw' ? s.cues : []))[0];
-
-  const landing = replayMapFrame(frameAt(f, cue.atMs), OPTIONS);
-  const settled = replayMapFrame(frameAt(f, cue.atMs + 2_000), OPTIONS);
-
-  assert.equal(landing.circles.length, 1);
-  assert.equal(landing.circles[0].color, CATEGORY_COLOUR.levada);
-  // It arrives big and shrinks — the pop the film is supposed to have.
-  assert.ok(landing.circles[0].radius > settled.circles[0].radius);
-});
 
 test('the mark settles to its resting size and stays there', () => {
   assert.equal(stampMarkPoints(10_000), STAMP_MARK_POINTS);
   assert.ok(stampMarkPoints(0) > STAMP_MARK_POINTS);
 });
 
-test('no stamps are drawn before their cue', () => {
-  const stamps = [
-    { placeId: 'a', name: 'A', category: 'viewpoint' as const, awardedTs: T0 + 10 * 60_000, lat: 32.66, lon: -16.89 },
-    { placeId: 'b', name: 'B', category: 'beach' as const, awardedTs: T0 + 40 * 60_000, lat: 32.67, lon: -16.88 },
-  ];
-  const f = film(composeSouvenir(input({ stamps })));
-
-  assert.equal(replayMapFrame(frameAt(f, 0), OPTIONS).circles.length, 0);
-  assert.equal(replayMapFrame(frameAt(f, f.durationMs), OPTIONS).circles.length, 2);
-});
 
 test('the camera is a handful of instructions, not one per frame', () => {
   // The whole point of D-076's second pass: the map animates itself, so the app
@@ -292,7 +267,7 @@ test('which instruction is due, and nothing before the first', () => {
  * D-093: the film draws matched roads, and a tunnel faded, as the map does.
  * From roads in to polyline colours out, through composition and playback.
  */
-test('a tunnel in the roads is dashed in the replay, all at full strength', () => {
+test('a tunnel in the roads is drawn plain in the replay, all at full strength', () => {
   const road = walk(30);
   const underground = walk(12, 29).map((fix) => ({ ...fix, lat: fix.lat + 0.03 }));
   const after = walk(20, 40).map((fix) => ({ ...fix, lat: fix.lat + 0.03 }));
@@ -311,10 +286,10 @@ test('a tunnel in the roads is dashed in the replay, all at full strength', () =
   assert.deepEqual(frame.faded, [false, true, false]);
   const { polylines } = replayMapFrame(frame, OPTIONS);
   assert.ok(polylines.every((line) => line.color === TRACE_PAINT.light.coreColor));
-  // The road before, one dashed line underground (dashed by the map), the road after.
+  // The road before, the tunnel and the road after: three plain lines.
   assert.deepEqual(polylines.map((line) => [line.id, line.dashed === true]), [
     ['replay-trace-0', false],
-    ['replay-trace-1', true],
+    ['replay-trace-1', false],
     ['replay-trace-2', false],
   ]);
 });

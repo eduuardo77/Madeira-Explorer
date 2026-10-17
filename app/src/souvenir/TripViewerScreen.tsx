@@ -104,6 +104,13 @@ const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 /** The share's picture: the masked trip, framed, and Google's photograph of it once taken. */
 type ShareScene = { runs: DayRun[]; camera: CameraFit; snapshot: string | null };
 
+/** The local midnight after the one at `startTs`: a day's end, daylight saving included. */
+function nextMidnight(startTs: number): number {
+  const next = new Date(startTs);
+  next.setDate(next.getDate() + 1);
+  return next.getTime();
+}
+
 export default function TripViewerScreen({
   tripId,
   onClose,
@@ -112,12 +119,17 @@ export default function TripViewerScreen({
   /** The trip to show, from the passport's list (T-261); the trip on show when absent. */
   tripId?: number;
   onClose: () => void;
-  /** WalkNYC's Replay: the animated film of the whole trip, of the trip shown. */
-  onReplay: (tripId: number) => void;
+  /**
+   * WalkNYC's Replay: the animated film of the trip shown, of one day of it
+   * when `range` is given (the lead, 17 Oct 2026: "for the day, both").
+   */
+  onReplay: (tripId: number, range?: { fromTs: number; toTs: number }) => void;
 }) {
   const [view, setView] = useState<TripView | null | 'loading'>('loading');
   const [styleName, setStyleName] = useState<MapStyleName>('light');
   const [dayIndex, setDayIndex] = useState(-1);
+  /** ▶ was pressed: this day, or the whole trip. */
+  const [choosing, setChoosing] = useState(false);
   const { width, height } = useWindowDimensions();
   const language = deviceLanguage();
   const mapRef = useRef<GoogleMaps.MapView>(null);
@@ -465,7 +477,8 @@ export default function TripViewerScreen({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('trip.a11y.replay')}
-              onPress={() => onReplay(view.tripId)}
+              accessibilityState={{ expanded: choosing }}
+              onPress={() => setChoosing((open) => !open)}
               hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
               style={({ pressed }) => [
                 styles.round,
@@ -491,6 +504,35 @@ export default function TripViewerScreen({
             <Text style={[styles.pillText, { color: chrome.link }]}>
               {sharing ? t('passport.sharing') : t('trip.share')}
             </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {shareScene !== null || !choosing ? null : (
+        <View style={styles.choiceRow} pointerEvents="box-none">
+          {day !== null ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setChoosing(false);
+                onReplay(view.tripId, { fromTs: day.startTs, toTs: nextMidnight(day.startTs) });
+              }}
+              hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+              style={({ pressed }) => [styles.pill, { backgroundColor: chrome.surface }, pressed && styles.pressed]}
+            >
+              <Text style={[styles.pillText, { color: chrome.link }]}>{t('trip.replay.day')}</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setChoosing(false);
+              onReplay(view.tripId);
+            }}
+            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+            style={({ pressed }) => [styles.pill, { backgroundColor: chrome.surface }, pressed && styles.pressed]}
+          >
+            <Text style={[styles.pillText, { color: chrome.link }]}>{t('trip.replay.trip')}</Text>
           </Pressable>
         </View>
       )}
@@ -634,6 +676,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   closeText: { color: colors.tint, fontSize: fontSize.body, fontWeight: '600' },
+  /** Under the back and play buttons: the film of this day, or of the trip. */
+  choiceRow: {
+    position: 'absolute',
+    top: spacing.xl + spacing.sm + PILL + spacing.md,
+    left: spacing.md,
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
   topRow: {
     position: 'absolute',
     top: spacing.xl + spacing.sm,

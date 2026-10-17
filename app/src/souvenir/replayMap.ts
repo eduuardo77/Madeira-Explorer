@@ -18,12 +18,13 @@
  * `frame.ts` already answers *what is on screen at time t* — the camera box,
  * the trace drawn so far, the stamps landed and how long ago. That survived the
  * change completely, which is the payoff for having made it about the film
- * rather than about the drawing. This turns one of those frames into the three
- * things `GoogleMaps.View` takes: a **camera**, some **polylines**, some
- * **circles**.
+ * rather than about the drawing. This turns one of those frames into what
+ * `GoogleMaps.View` takes: a **camera** and some **polylines**. (Stamps were
+ * drawn as circles too until 17 Oct 2026, when the lead asked for the film
+ * without them.)
  *
- * ⚠ It composes the map's own modules — `cameraFit`, `traceStyle`,
- * `collectedMarks` — rather than restating them. The replay's trace is
+ * ⚠ It composes the map's own modules — `cameraFit`, `traceStyle` — rather
+ * than restating them. The replay's trace is
  * therefore the *same blue* as the everyday map's, at the same width, and a
  * change to either follows into both.
  *
@@ -32,11 +33,9 @@
  */
 
 import { fitBounds, type CameraFit, type Viewport } from '../map/cameraFit.ts';
-import { metresPerPoint } from '../map/collectedMarks.ts';
 import type { MapStyleName } from '../map/mapStyle.ts';
 import { TRACE_PAINT } from '../map/traceStyle.ts';
 import { runPolylines } from '../map/tunnelDashes.ts';
-import { CATEGORY_COLOUR, stampMarkPoints } from './filmPaint.ts';
 import type { Bounds } from './composition.ts';
 import type { Film, Frame } from './frame.ts';
 
@@ -50,22 +49,10 @@ export type ReplayPolyline = {
   dashed?: boolean;
 };
 
-/** Mirrors `GoogleMapsCircle`, as `collectedMarks.ts` does. */
-export type ReplayCircle = {
-  id: string;
-  center: { latitude: number; longitude: number };
-  /** Ground metres, so the mark holds a constant size on screen. */
-  radius: number;
-  color: string;
-  lineColor: string;
-  lineWidth: number;
-};
-
 export type ReplayMapFrame = {
   /** Null when the box is degenerate — the caller keeps the camera it had. */
   camera: CameraFit | null;
   polylines: ReplayPolyline[];
-  circles: ReplayCircle[];
 };
 
 export type ReplayMapOptions = {
@@ -113,22 +100,8 @@ export function replayMapFrame(
     )
   );
 
-  // Without a camera there is no zoom, and without a zoom a ground radius
-  // cannot be computed. Better no marks for a frame than marks the size of the
-  // island — which is what a zoom of zero produces.
-  const circles =
-    camera === null
-      ? []
-      : frame.stamps.map((stamp) => ({
-          id: `replay-stamp-${stamp.placeId}`,
-          center: { latitude: stamp.lat, longitude: stamp.lon },
-          radius: stampMarkPoints(stamp.ageMs) * metresPerPoint(camera.zoom, stamp.lat),
-          color: CATEGORY_COLOUR[stamp.category],
-          lineColor: paint.casingColor,
-          lineWidth: 2,
-        }));
-
-  return { camera, polylines, circles };
+  // No stamp marks: the lead, 17 Oct 2026, "remove stamp icon" from the film.
+  return { camera, polylines };
 }
 
 /**

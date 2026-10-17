@@ -619,6 +619,9 @@ export const STRINGS = {
   'trip.stat.trip': s('This trip', 'Na viagem', 'Diese Reise'),
   'trip.share.plug': s('Light up your roads with {app}', 'Acende as tuas estradas com o {app}', 'Lassen Sie Ihre Straßen mit {app} aufleuchten'),
   'trip.a11y.replay': s('Watch the trip as a timelapse', 'Ver a viagem em timelapse', 'Die Reise im Zeitraffer ansehen'),
+  // The lead, 17 Oct 2026: the film of the day shown, or of the whole trip.
+  'trip.replay.day': s('This day', 'Este dia', 'Dieser Tag'),
+  'trip.replay.trip': s('The whole trip', 'Toda a viagem', 'Die ganze Reise'),
   // T-261: the passport's list of trips.
   'passport.trips': s('Trips', 'Viagens', 'Reisen'),
   'passport.trips.a11y.open': s('Opens this trip on the map', 'Abre esta viagem no mapa', 'Öffnet diese Reise auf der Karte'),

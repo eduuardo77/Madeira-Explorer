@@ -8,17 +8,10 @@ const line: LatLng[] = [
   { latitude: 32.651, longitude: -16.9186 },
 ];
 
-test('a tunnel or a cable car is one polyline, dashed by the map: never one per dash (17 Oct)', () => {
-  const dashed = runPolylines('a', line, true, '#00f', 4);
-  assert.equal(dashed.length, 1);
-  assert.equal(dashed[0].dashed, true);
-  assert.deepEqual(dashed[0].coordinates, line, 'the run keeps every point, so it follows the road');
-  assert.equal(dashed[0].color, '#00f');
-});
-
-test('a road, and a line too short to dash, stay whole and solid', () => {
-  const road = runPolylines('a', line, false, '#00f', 4);
-  assert.equal(road.length, 1);
-  assert.equal(road[0].dashed, undefined);
-  assert.equal(runPolylines('a', [line[0]], true, '#00f', 4)[0].dashed, undefined);
+test('a tunnel is one plain line, like a road (the lead, 17 Oct 2026)', () => {
+  const tunnel = runPolylines('a', line, true, '#00f', 4);
+  assert.equal(tunnel.length, 1);
+  assert.equal(tunnel[0].dashed, undefined);
+  assert.deepEqual(tunnel[0].coordinates, line, 'every point kept, so it follows the road');
+  assert.deepEqual(runPolylines('a', line, false, '#00f', 4), tunnel);
 });

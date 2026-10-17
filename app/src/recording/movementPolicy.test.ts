@@ -329,3 +329,23 @@ test('the switch time never affects leaving stationary', () => {
   const decision = decideProfile('stationary', [fix(1, 0), fix(0, 250)], NOW, NOW);
   assert.equal(decision.profile, 'walking');
 });
+
+test('still by the motion sensors for five minutes, within the threshold: stationary early (17 Oct)', () => {
+  const still = [0, 1, 2, 3, 4, 5].map((m) => ({ ...fix(m, (m % 2) * 8), activity: 'still' }));
+  const decision = decideProfile('driving', still, NOW);
+  assert.equal(decision.profile, 'stationary');
+  assert.match(decision.reason, /still by the motion sensors for 5 min/);
+});
+
+test('four still minutes are not enough, and a walk among them resets the count', () => {
+  const four = [0, 1, 2, 3, 4].map((m) => ({ ...fix(m, 0), activity: 'still' }));
+  assert.equal(decideProfile('walking', four, NOW).changed, false);
+  const broken = [0, 1, 2].map((m) => ({ ...fix(m, 0), activity: 'still' }))
+    .concat([{ ...fix(3, 0), activity: 'walking' }], [4, 5, 6].map((m) => ({ ...fix(m, 0), activity: 'still' })));
+  assert.equal(decideProfile('walking', broken, NOW).changed, false);
+});
+
+test('still labels never stop a phone that has moved past the threshold', () => {
+  const moved = [0, 1, 2, 3, 4, 5].map((m) => ({ ...fix(m, m * 60), activity: 'still' }));
+  assert.notEqual(decideProfile('walking', moved, NOW).profile, 'stationary');
+});

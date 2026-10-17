@@ -5732,6 +5732,14 @@ cell only, as a safety net; without either it keeps the GPS every 10 minutes
 (`samplingPolicy.forPlatform`, rule 4). And the first-run Huawei line now asks users not to tap
 *Forçar paragem* if the phone calls Bruma *consumo excessivo*.
 
+⚠ **Amended 2026-10-17: the motion sensors' "still" may shorten a stop** (the lead, for battery).
+A moving profile drops to stationary when the trailing fixes are all labelled still over 5 minutes,
+within the moving threshold (`STILL_CONFIRM_MS`); without labels the 12-minute window decides as
+before. This is the first use of the label towards a sparser rate, which D-094 had ruled out.
+Replayed on 17 Oct: 4 of 5 stops earlier, by 1 to 6 minutes, about 11 GPS minutes over the day.
+The larger battery factor that day was the P30 itself: with no SIM, its radio searched for a
+network all day, about half of Android's estimated drain against about a quarter for Bruma.
+
 **What would overturn it.** A ride with the app closed whose start is lost because the balanced
 provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
 at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning

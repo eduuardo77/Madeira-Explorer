@@ -84,6 +84,13 @@ export const STATIONARY_WINDOW_MS = 10 * 60 * 1000;
 export const STATIONARY_EDGE_MS = 2 * 60 * 1000;
 
 /**
+ * How long the motion sensors must say still, with the fixes agreeing, before
+ * a moving profile drops to stationary (D-106, 17 Oct 2026). Shorter than the
+ * full window, which still decides when there are no labels.
+ */
+export const STILL_CONFIRM_MS = 5 * 60 * 1000;
+
+/**
  * Fixes less accurate than this are ignored when measuring displacement.
  *
  * A fix with a ±150 m accuracy radius cannot answer a question about a 100 m
@@ -304,6 +311,30 @@ export function decideProfile(
           changed: true,
         };
       }
+    }
+  }
+
+  // ⚠ Still by the motion sensors: stationary after STILL_CONFIRM_MS, not the
+  // full window (the lead, 17 Oct 2026, for battery). About 30% of a day out
+  // was spent recording while still, mostly the twelve minutes the window asks
+  // for at every stop. When the trailing fixes are all labelled still and span
+  // five minutes, within the threshold (the moving check above has ruled out
+  // more), the phone has stopped. ⚠ This is the label's first use towards a
+  // sparser rate, which D-094 had ruled out; D-106 records the change. Without
+  // labels the full window below still decides, so it is never slower.
+  if (current !== STATIONARY_PROFILE && newest.activity === 'still' && now - newest.ts <= STATIONARY_WINDOW_MS) {
+    const byTime = [...inWindow].sort((a, b) => b.ts - a.ts);
+    let oldestStill = newest.ts;
+    for (const sample of byTime) {
+      if (sample.activity !== 'still') break;
+      oldestStill = sample.ts;
+    }
+    if (newest.ts - oldestStill >= STILL_CONFIRM_MS) {
+      return {
+        profile: STATIONARY_PROFILE,
+        reason: `still by the motion sensors for ${Math.round((newest.ts - oldestStill) / 60000)} min, within ${Math.round(maxDisplacementM)} m`,
+        changed: true,
+      };
     }
   }
 

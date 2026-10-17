@@ -46,6 +46,8 @@ export type ReplayPolyline = {
   coordinates: { latitude: number; longitude: number }[];
   color: string;
   width: number;
+  /** A tunnel or cable car, dashed by the map (`tunnelDashes.ts`). */
+  dashed?: boolean;
 };
 
 /** Mirrors `GoogleMapsCircle`, as `collectedMarks.ts` does. */

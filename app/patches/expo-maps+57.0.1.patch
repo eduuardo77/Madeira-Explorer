@@ -15,13 +15,15 @@ index e7b12c8..0eef7ff 100644
          view.selectMarker(id, options)
        }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..8a2ee42 100644
+index 82450b6..a17fadc 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-@@ -24,8 +24,16 @@ import com.google.android.gms.maps.LocationSource
+@@ -24,8 +24,18 @@ import com.google.android.gms.maps.LocationSource
  import com.google.android.gms.maps.model.BitmapDescriptor
  import com.google.android.gms.maps.model.BitmapDescriptorFactory
  import com.google.android.gms.maps.model.CameraPosition
++import com.google.android.gms.maps.model.Dash
++import com.google.android.gms.maps.model.Gap
 +import com.google.android.gms.maps.model.JointType
 +import com.google.android.gms.maps.model.RoundCap
  import com.google.android.gms.maps.model.LatLng
@@ -35,7 +37,7 @@ index 82450b6..8a2ee42 100644
  import com.google.maps.android.compose.CameraPositionState
  import com.google.maps.android.compose.GoogleMap
  import com.google.maps.android.compose.Marker
-@@ -84,6 +92,9 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -84,6 +94,9 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
    private lateinit var cameraState: CameraPositionState
    private var manualCameraControl = false
  
@@ -45,7 +47,7 @@ index 82450b6..8a2ee42 100644
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,9 +107,11 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,9 +109,11 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -57,7 +59,7 @@ index 82450b6..8a2ee42 100644
      markerState = markerStateFromProps()
      val locationSource = locationSourceFromProps()
      val polylineState by polylineStateFromProps()
-@@ -154,12 +167,19 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -154,12 +169,21 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
@@ -74,10 +76,12 @@ index 82450b6..8a2ee42 100644
 +          jointType = JointType.ROUND,
 +          startCap = RoundCap(),
 +          endCap = RoundCap(),
++          // Bruma: a tunnel, dashed by the map itself, in screen pixels.
++          pattern = if (polyline.dashed) listOf(Dash(30f), Gap(22f)) else null,
            clickable = true,
            onClick = {
              onPolylineClick(
-@@ -234,7 +254,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -234,7 +258,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -96,7 +100,7 @@ index 82450b6..8a2ee42 100644
      LaunchedEffect(cameraState.cameraMoveStartedReason) {
        // We should stop following the user's location when camera is moved manually.
        if (cameraState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE || cameraState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION) {
-@@ -266,7 +297,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -266,7 +301,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -104,7 +108,7 @@ index 82450b6..8a2ee42 100644
    }
  
    @Composable
-@@ -361,6 +391,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -361,6 +395,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  
@@ -131,11 +135,40 @@ index 82450b6..8a2ee42 100644
    suspend fun setCameraPosition(config: SetCameraPositionConfig?) {
      // Stop updating the camera position based on user location.
      manualCameraControl = true
+diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
+index 1585460..df22e3e 100644
+--- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
++++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
+@@ -103,7 +103,12 @@ data class PolylineRecord(
+   val color: Int = 0xFF0000FF.toInt(),
+ 
+   @Field
+-  val width: Float = 10f
++  val width: Float = 10f,
++
++  // Bruma (D-106 era, 17 Oct 2026): a tunnel drawn as one dashed line. Its
++  // dashes were one polyline each, 2,358 on the lead's map, and the map lagged.
++  @Field
++  val dashed: Boolean = false
+ ) : Record
+ 
+ @OptimizedRecord
 diff --git a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-index 100005c..5d0e7cd 100644
+index 100005c..884892a 100644
 --- a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
 +++ b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-@@ -435,6 +435,8 @@ export type GoogleMapsViewType = {
+@@ -82,6 +82,10 @@ export type GoogleMapsPolyline = {
+      * Whether the polyline is geodesic.
+      */
+     geodesic?: boolean;
++    /**
++     * Bruma: draw the line dashed, by the map itself (a tunnel).
++     */
++    dashed?: boolean;
+ };
+ /**
+  * @platform android
+@@ -435,6 +439,8 @@ export type GoogleMapsViewType = {
       * @param config New camera position config.
       */
      setCameraPosition: (config?: SetCameraPositionConfig) => void;

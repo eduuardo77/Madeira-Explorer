@@ -311,10 +311,12 @@ test('a tunnel in the roads is dashed in the replay, all at full strength', () =
   assert.deepEqual(frame.faded, [false, true, false]);
   const { polylines } = replayMapFrame(frame, OPTIONS);
   assert.ok(polylines.every((line) => line.color === TRACE_PAINT.light.coreColor));
-  // The road before, several dashes underground, the road after.
-  assert.equal(polylines[0].id, 'replay-trace-0');
-  assert.ok(polylines.filter((line) => line.id.startsWith('replay-trace-1-')).length > 1);
-  assert.equal(polylines[polylines.length - 1].id, 'replay-trace-2');
+  // The road before, one dashed line underground (dashed by the map), the road after.
+  assert.deepEqual(polylines.map((line) => [line.id, line.dashed === true]), [
+    ['replay-trace-0', false],
+    ['replay-trace-1', true],
+    ['replay-trace-2', false],
+  ]);
 });
 
 test('GPS strokes, with no tunnel flag, are drawn at full strength', () => {

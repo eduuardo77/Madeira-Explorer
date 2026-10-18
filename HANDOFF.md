@@ -16,6 +16,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   its real values; switched off, the map asks to record in the background (`offerAutomatic`,
   D-087 amended). **Speed:** the map stays mounted under Settings and the passport
   (`keepsMapMounted`), back in 0.6 s with no re-matching; inline requires, ~100 ms off launch.
+  The passport is prepared hidden 5 s after launch and kept (`keepsPassportMounted`), memoised,
+  stamps before the award pass, its trip line kept (`passportSummary`): no spinner, no shift;
+  costs about 24 MB (421 against 397 MB PSS, same sequence).
   Fixes stored once (`unstoredFixes`); the ferry terminal no longer a departure point.
 
 - **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,

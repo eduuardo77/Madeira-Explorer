@@ -128,6 +128,19 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
     });
 }
 
+/**
+ * A state update that keeps the current value when the new one is equal.
+ * Every read builds new lists, and the memoised page (`PassportView`) drew its
+ * 81 stamps again for each, about 300 ms, even when nothing had changed; a
+ * stamp tapped just after opening the passport waited for it (P30, 2026-10-18).
+ */
+function unlessSame<T>(next: T): (current: T) => T {
+  return (current) => (JSON.stringify(current) === JSON.stringify(next) ? current : next);
+}
+
+/** How often a return to the passport may run its slow half again. */
+const SLOW_HALF_EVERY_MS = 60_000;
+
 export default function PassportScreen({
   active = true,
   onClose,
@@ -237,8 +250,15 @@ export default function PassportScreen({
 
   /** Back in front: read everything again, in place, with no spinner. */
   const wasActive = useRef(active);
+  /** The next load is a return to the front, which may skip the slow half. */
+  const returning = useRef(false);
+  /** When the slow half of the load last finished (`SLOW_HALF_EVERY_MS`). */
+  const slowHalfAt = useRef(0);
   useEffect(() => {
-    if (active && !wasActive.current) setReloadKey((key) => key + 1);
+    if (active && !wasActive.current) {
+      returning.current = true;
+      setReloadKey((key) => key + 1);
+    }
     wasActive.current = active;
   }, [active]);
   /**
@@ -288,17 +308,17 @@ export default function PassportScreen({
       );
 
       if (cancelled) return;
-      setProgress(nextProgress);
+      setProgress(unlessSame<TripProgress | null>(nextProgress));
       setTripOpen(openTrip !== null);
-      setAwards(nextAwards);
-      setStamps(resolveStamps(awardedIds, locked));
+      setAwards(unlessSame(nextAwards));
+      setStamps(unlessSame(resolveStamps(awardedIds, locked)));
       if (prompt !== undefined) {
         setConfirmation(prompt?.prompt ?? null);
         setConfirmationEvidence(prompt?.evidence ?? '');
       }
-      setFounder(nextFounder);
+      setFounder(unlessSame(nextFounder));
       setFreeLeft(nextFreeLeft);
-      setMedals(nextMedals);
+      setMedals(unlessSame(nextMedals));
     };
 
     (async () => {
@@ -313,7 +333,7 @@ export default function PassportScreen({
             : decodePassportSummary(await appStateDao.get(appStateDao.AppStateKey.PassportSummary), shown.id);
         if (kept !== null && !cancelled) {
           setCanWatch(kept.canWatch);
-          setStats(wordStats(kept, language));
+          setStats(unlessSame(wordStats(kept, language)));
         }
 
         // What is stored, at once; then judge (T-071) behind the page, and read
@@ -323,6 +343,15 @@ export default function PassportScreen({
         // map judge too, so the pass rarely finds anything here.
         await readPage(null);
         if (!everOpened.current) return;
+        // ⚠ The slow half (the award pass, the film's offer, the trip list and
+        // the distances) took about 2.4 s of the JavaScript thread on every
+        // opening on the P30, and a stamp tapped meanwhile opened 300 ms later.
+        // On a return to the front it runs at most once a minute; the stamps
+        // above are read every time, and the recorder and the map judge new
+        // positions anyway. Ending the trip or unlocking here still runs it.
+        const recent = returning.current && Date.now() - slowHalfAt.current < SLOW_HALF_EVERY_MS;
+        returning.current = false;
+        if (recent) return;
         const pass = await runAwardPass();
         if (pass.newlyAwarded.length > 0 || pass.awaitingConfirmation.length > 0) {
           await readPage(pass.awaitingConfirmation);
@@ -352,7 +381,9 @@ export default function PassportScreen({
               : `${n('passport.trips.days', days)} · ${n('passport.trips.stamps', trip.stamp_count)}`,
         });
         if (!cancelled) {
-          setTrips(listed.map((trip) => row(trip, null)));
+          // Only the first time: on a reload the list on screen stays until the
+          // one with days replaces it, rather than losing its days for a moment.
+          setTrips((current) => (current.length > 0 ? current : listed.map((trip) => row(trip, null))));
         }
         // ⚠ The viewer's days, not the days with any recording (the lead's
         // choice, 2026-10-07): a trip spent mostly at home said "14 dias" here
@@ -371,7 +402,7 @@ export default function PassportScreen({
           days.set(trip.id, await daysOf(trip.id));
         }
         if (!cancelled) {
-          setTrips(withSomethingToShow(listed, days).map((trip) => row(trip, days.get(trip.id) ?? 0)));
+          setTrips(unlessSame(withSomethingToShow(listed, days).map((trip) => row(trip, days.get(trip.id) ?? 0))));
         }
 
         // T-262, the lead's option A: the trip on show in one line, and all
@@ -390,11 +421,12 @@ export default function PassportScreen({
                 canWatch: film.renderable,
               };
         if (!cancelled) {
-          setStats(summary === null ? undefined : wordStats(summary, language));
+          setStats(unlessSame(summary === null ? undefined : wordStats(summary, language)));
         }
         if (summary !== null) {
           await appStateDao.set(appStateDao.AppStateKey.PassportSummary, encodePassportSummary(summary));
         }
+        slowHalfAt.current = Date.now();
       } catch (error) {
         await recordingEventDao.logError('passport', error);
       }

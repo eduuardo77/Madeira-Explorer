@@ -47,7 +47,7 @@ The documents cost more to read than the code does. In order of impact:
 ## The two things that are not yours to do
 
 1. **Getting a physical device.** No Mac, and no Android phone of this project's own.
-   ⚠ **CHANGED 2026-08-21, and still true on 2026-10-16: the project lead has an Android**, one
+   ⚠ **CHANGED 2026-08-21, and still true on 2026-10-18: the project lead has an Android**, one
    handset, a Huawei P30 on EMUI 12, which they take out on real trips with an iPhone running
    SensorLogger alongside (`docs/field-test-log.md`). Battery (T-054), background survival and OEM
    killers (T-051/T-053), GPS under canopy (T-076–T-080) and real trips are **answerable**: ask
@@ -67,7 +67,7 @@ The documents cost more to read than the code does. In order of impact:
    for what the island is. What has **not** changed: a place still has to be worth going to.
    Adding a mediocre one to round a number out is still the failure D-002 exists to prevent.
    ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method; **80 since
-   2026-09-22 (T-066b/c)** — 19 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks. It is no longer scaffolding. Before editing
+   2026-09-22 (T-066b/c), 81 since 2026-10-17** (Miradouro da Ribeira da Janela) — 20 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks. It is no longer scaffolding. Before editing
    it, run `node tools/validate-content.mjs`; after editing it, run that plus
    `build-regions.mjs --assign` and `build-levadas.mjs`.
 
@@ -75,8 +75,8 @@ The documents cost more to read than the code does. In order of impact:
 
 - **Be precise about which half you mean.** Recording, battery and background survival have been
   measured on **one phone**, the lead's P30 (EMUI 12), against an iPhone's SensorLogger track; every
-  other Android and every iPhone is unverified, and no emulator can answer for them. One carried
-  day is the whole battery evidence (16 Oct 2026). Unit tests (1,131) and a browser workbench are
+  other Android and every iPhone is unverified, and no emulator can answer for them. Two carried
+  days are the whole battery evidence (16 and 17 Oct 2026). Unit tests (1,140) and a browser workbench are
   the rest of the verification.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not

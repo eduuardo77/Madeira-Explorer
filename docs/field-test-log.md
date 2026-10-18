@@ -14,7 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
-| 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; no Huawei warning |
+| 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; ⚠ Huawei warning at 10:41 (a rolling 24 h, so 16 Oct counts) |
 | 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
 | 2026-10-15 | Car and on foot, 1 h 45, iPhone alongside | P30 | Equilibrado | ✅ 89.6% within 10 m, 96.9% within 30 m |
 | 2026-10-13 | **Motion wake:** on foot and by car, 45 min, app closed, iPhone alongside | P30 | Equilibrado | ✅ 97.7% of the route lit within 10 m, start included; woken by the motion sensor; no Huawei warning |
@@ -50,7 +50,14 @@ never where the lead lives.
 - **Battery:** the night 98 to 90% (deep idle 75%, the app's GPS on 8 minutes in all, the screen
   9 minutes: mostly the phone's own idle drain, now visible below 100%). **The day: 84% at 10:14,
   67% at 18:16, 17 points in 8 hours, about 2.1 an hour**, against 2 on 16 Oct. Two days now agree.
-- **No Huawei warning** after 8 hours out, the first full day with no GPS at home.
+- **Huawei's warning came at 10:41** (the lead's screenshot; the notification had been cleared by
+  the time the phone was read, so it was first reported here as none). Its detail page judges the
+  last 24 hours, so a warning that morning still counts 16 Oct's full day. Whether a day with no
+  GPS at home draws one on its own is not known yet.
+- **Stamps missed:** lunch in São Vicente (the stamp sat on the old church, away from the
+  seafront), Floresta do Fanal and the Ribeira da Janela viewpoint. Fixed by the lead's choice:
+  a seafront area for São Vicente, a forest area for Fanal, and an 81st place, *Miradouro da
+  Ribeira da Janela* (its why-lines await the lead).
 - **Stamps:** 8, including Forte de São João Baptista from the trace on foot. Every start woken by
   motion (113 motion-sensor and 110 activity wakes since install).
 - **Route: 83.1% within 10 m, 94.6% within 30 m; 86.5% of the lit road on the route**, the weakest
@@ -64,6 +71,19 @@ never where the lead lives.
   2. 14:27 to 14:32, a drive at up to 76 km/h, was sampled at the walking rate throughout: the
      walking profile's batch that showed the speed came after it. Now Google's *driving* raises
      walking to driving at once (`raiseProfile`, through the motion wake).
+- **Changed the same evening, from the lead's notes (none of it field-tested yet):**
+  - **Stops end sooner:** five minutes the motion sensors call *still* switch to stationary
+    (`STILL_CONFIRM_MS`, D-106). Replayed on this day: 4 of 5 stops earlier, about 11 GPS minutes
+    saved. Small; most of the drain is elsewhere (below).
+  - **Where the battery goes:** batterystats puts the cell radio searching for a network (the P30
+    has no SIM) at about half the drain, Bruma at about a quarter, two thirds of that the GPS. A
+    phone with a SIM would likely do better; an airplane-mode day would show Bruma's own share.
+  - **The map was laggy:** one line per tunnel, tunnels plain again, lines simplified to 3 m.
+    Polylines 2,358 to 534, points 7,242 to 4,143, memory 501 to 315 MB on this database.
+  - **The day view decluttered:** only that day's roads, nearby time tags grouped (two times
+    shown), the day framed, the card one line. **The film** runs at 10 updates a second, without
+    stamp marks, for the day or the whole trip.
+  - **Medals:** a tap on any medal opens its set, earned and missing stamps (T-235).
 
 ### 2026-10-15 and 16: two days out on the motion wake, and the first battery figure
 
@@ -373,8 +393,9 @@ never where the lead lives.
 **Still to test, in this order:**
 1. ✅ **A second carried day (17 Oct):** about 2.1 points an hour, against 2; no Huawei warning with
    no GPS at home. ⚠ Route 83.1%: the mode-switching fixes of that evening need a day out.
-2. **Huawei's warning:** none on 17 Oct with no GPS at home, after 8 hours out. One day; keep
-   watching. It came on 12 Oct (GPS every 5 minutes at home) and on 16 Oct (a full day).
+2. **Huawei's warning:** it came on 12 Oct (GPS every 5 minutes at home), 16 Oct at 19:26 and
+   17 Oct at 10:41. It judges a rolling 24 hours, so the 17 Oct one may still be 16 Oct's day. The
+   question now: does a day out draw it on its own, and how soon after the last one.
 3. **A walk only, with the app closed:** walking is the slower start to detect; the motion wake
    has so far woken walks that turned into drives.
 4. **A levada, on automatic recording:** GPS under forest canopy (T-076 to T-080). Not possible
@@ -400,7 +421,22 @@ report are the first look), and the iPhone, where the app has never run.
 
 ## Next test
 
-**Any day out, the app closed, SensorLogger on.** It checks the two mode-switching fixes of
-17 Oct (no flip back to still after a wake; walking raised to driving by Google's *driving*):
-the route should not lose the first minutes after a stop, nor short drives. Equilibrado; start
-below 100% if the battery is to be read again.
+**A day out with stops, after at least one quiet day at home.** The build of 18 Oct on the P30.
+
+1. **The day before:** leave the phone on the desk, off the cable, so Huawei's 24 hours start
+   clean. If a warning shows that day, screenshot it: that would be the home profile's doing.
+2. **The day out:** Equilibrado, the app swiped away and never opened, SensorLogger from the
+   door. Several stops of 10 minutes or more (a café, a viewpoint) and some short drives between
+   them: that is what the 17 Oct fixes are about (no flip back to still after a wake; walking
+   raised to driving; stops ending after 5 still minutes). One walk of 15 minutes or more on its
+   own, if it fits.
+3. **Note:** the time you leave, each stop roughly, any Huawei warning (screenshot before
+   clearing it), and the battery % when you leave and come back.
+4. **Back home:** plugged in, then open the app: the day view, the film of the day, a medal.
+
+What it answers: the route within 10 m back near 90% or above, the first minutes after each stop
+recorded, a third battery figure, and whether a day out alone draws Huawei's warning.
+
+**After that, one day in airplane mode, with Wi-Fi switched back on** (location stays on, so
+does the GPS): the P30 without a SIM spends about half its battery looking for a network; with
+the cell radio off, what is left is mostly Bruma and the screen. Same route style, so it compares.

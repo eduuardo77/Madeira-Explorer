@@ -1,12 +1,28 @@
 # Session Handoff
 
-**For:** a session picking this project up cold. **Updated:** 2026-10-16 (automatic recording and
-the motion wake; the section just below is the latest state).
+**For:** a session picking this project up cold. **Updated:** 2026-10-18 (after the second
+carried day; the section just below is the latest state).
 Older sections further down are dated and partly superseded; trust the newest one.
 **Mode: EXECUTION.** Don't open research threads or propose decisions unless something is
 genuinely blocked. Grep the reference docs; do not read them whole.
 
-## ⚠⚠⚠ 2026-10-16: START HERE, automatic recording works; the motion wake (D-106)
+## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
+
+- **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,
+  fixed that evening, not yet field-tested), battery **about 2.1 points an hour** (2 on 16 Oct),
+  and **Huawei's warning at 10:41** (it judges a rolling 24 hours, so 16 Oct may be the cause).
+- **Built since, from the lead's notes** (all on the P30, `06a5206`, 1,140 tests): stops end after
+  5 still minutes (D-106); 81 places (São Vicente seafront, Fanal forest, *Miradouro da Ribeira da
+  Janela*, whose why-lines await the lead); medals open their set (T-235); tunnels plain, lines
+  simplified, the map's memory 501 to 315 MB (T-254); the day view decluttered and the film for a
+  day or the trip (T-253).
+- **Store:** version 9 is built for the closed track; a **version 10** with all of the above is
+  the next bundle, built when the lead asks.
+- **Next tests (the lead):** a day out with stops after a quiet day at home, then an airplane-mode
+  day for Bruma's own battery share. Both in `docs/field-test-log.md`, *Next test*.
+- **Open for the lead:** the new place's why-lines; whether the app states ~2 points an hour (D-041).
+
+## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 
 - **Automatic recording with the app closed works on the P30.** It failed on 11 Oct (nothing lit)
   and twice more as fixes were tried; the cause and the three rules are D-106. Now: the phone's

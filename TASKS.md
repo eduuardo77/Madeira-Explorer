@@ -517,7 +517,8 @@ Nothing that depends on one of these starts until it is made. Each becomes a D-e
       with the GPS (94.5% once awake, slow start, Huawei warning), failed on 12 Oct evening with
       Wi-Fi at home (a drive unseen), then the **motion wake**: 13 Oct 97.7%, 15 Oct 89.6%,
       16 Oct 90.1% within 10 m, about 97% within 30 m, every start woken by motion. Field log
-      has each trip.
+      has each trip. ⚠ 17 Oct 83.1%: two faults in switching modes, fixed that evening
+      (`profileSinceTs`, `raiseProfile`); **left:** a day out with stops to confirm them.
       ✅ **(3) partly, 2026-10-08: a motorcycle ride as an outing, against SensorLogger** (iPhone 15,
       1 Hz, `compare-sensorlogger.mjs`, 17:32 to 18:31): **of what was lit, 99.6% within 10 m of the
       ridden track** (median 1.8 m); **of what was ridden, 93.7% lit within 10 m, 95.8% within
@@ -1916,7 +1917,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       second carried day (the lead's next test); the app states no figure until then (D-041).
       ✅ **Second day, 2026-10-17:** 84 to 67% in 8 hours out, **about 2.1 points an hour**. Two days
       on one phone now agree on about 2 points an hour while tracking. Whether the app states it is
-      the lead's call (D-041).
+      the lead's call (D-041). batterystats puts the cell radio's search for a network (no SIM) at
+      about half the drain, Bruma at about a quarter. **Left:** an airplane-mode day with Wi-Fi on,
+      to read Bruma's own share; stops now end after 5 still minutes (about 11 GPS minutes a day).
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
       **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on

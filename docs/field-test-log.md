@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-18 | **Airplane-mode day** (Wi-Fi off too): east end, Santana, Funchal, 6 h 50, app opened 3 times, iPhone alongside | P30 | Equilibrado | ✅ 91.4% of the route within 10 m, 96.2% within 30 m; ⚠ first 3 km lost (no GPS fix in airplane mode); **battery about 1.6 points an hour**; ❌ **the trip ended at lunch** (ferry terminal, fixed); 5 stamps |
 | 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; ⚠ Huawei warning at 10:41 (a rolling 24 h, so 16 Oct counts) |
 | 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
 | 2026-10-15 | Car and on foot, 1 h 45, iPhone alongside | P30 | Equilibrado | ✅ 89.6% within 10 m, 96.9% within 30 m |
@@ -41,6 +42,34 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-18: airplane mode, and a trip ended at lunch
+
+- **Setup:** the build of `06a5206`, Equilibrado. Airplane mode at 09:54 (Wi-Fi off as well, all
+  day). Bruma opened at 09:54, 11:23 and 12:45. SensorLogger 10:05 to 16:54 (its file name says
+  09:05: SensorLogger names files in UTC). Santa Cruz, Machico, Caniçal, Ponta do Rosto, Santana,
+  lunch in Funchal 12:55 to 14:40, Praia Formosa. Plugged at 17:11.
+- **Route: 91.4% within 10 m, 96.2% within 30 m**, back to the 15 and 16 Oct level after 17 Oct's
+  83.1%. No flip back to still after a wake; walking raised to driving five times. The fixes were
+  rougher: the P30 a median 18.5 m from the iPhone at the same second, against 9 to 13 m on 16 Oct.
+- **The start, 3 km lost:** three motion wakes at home (09:55, 09:59, 10:03) got no GPS position
+  at all within 45 s each, in airplane mode with no Wi-Fi to help the GPS start. The drive began
+  at 10:05; Google's *driving* came at 10:09:48 and the fix with it switched at once. Specific to a
+  phone with no network; on every earlier day the wake's first look found a position.
+- **Battery:** 75% at 09:05, **74% at 10:14, 64% at 16:18: 10 points in 6 h 04, about 1.6 an
+  hour**, against 2.1 on 17 Oct. The GPS was on 349 of 437 minutes (433 of 482 on 17 Oct), so part
+  of the drop is less GPS, not only the cell radio: its share was smaller than batterystats'
+  estimate of half. The night before, 81 to 75% in 13 hours, still.
+- **❌ The trip ended at 15:29**, *at a departure point for 124 min*: the Funchal ferry terminal's
+  500 m circle reached the lunch spot, 465 m away, and the trip was 24 days old. The reveal
+  notification went out, and a new trip began at 15:33 (Praia Formosa landed in it). **Fixed:**
+  the ferry terminal is no longer a departure point. Its only ferry goes to Porto Santo, which
+  D-021 keeps inside the trip, so it should never have ended one; cruise passengers are day
+  visitors the 20-hour rule already excludes. `validate-content` now refuses a departure circle
+  that reaches any stamp place. The phone's own data still carries the split.
+- **Stamps:** Machico, Caniçal, Ponta do Rosto, Prainha (from the trace), Praia Formosa.
+- **Lunch cost GPS:** at 13:08 a 145 m drift indoors switched walking back to driving; stationary
+  only at 13:32, 37 minutes after sitting down.
 
 ### 2026-10-17: the second carried day; mode switching found wanting
 
@@ -437,6 +466,6 @@ report are the first look), and the iPhone, where the app has never run.
 What it answers: the route within 10 m back near 90% or above, the first minutes after each stop
 recorded, a third battery figure, and whether a day out alone draws Huawei's warning.
 
-**After that, one day in airplane mode, with Wi-Fi switched back on** (location stays on, so
+✅ *Done 18 Oct, with Wi-Fi off as well.* **After that, one day in airplane mode, with Wi-Fi switched back on** (location stays on, so
 does the GPS): the P30 without a SIM spends about half its battery looking for a network; with
 the cell radio off, what is left is mostly Bruma and the screen. Same route style, so it compares.

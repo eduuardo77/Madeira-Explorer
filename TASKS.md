@@ -1918,8 +1918,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       ✅ **Second day, 2026-10-17:** 84 to 67% in 8 hours out, **about 2.1 points an hour**. Two days
       on one phone now agree on about 2 points an hour while tracking. Whether the app states it is
       the lead's call (D-041). batterystats puts the cell radio's search for a network (no SIM) at
-      about half the drain, Bruma at about a quarter. **Left:** an airplane-mode day with Wi-Fi on,
-      to read Bruma's own share; stops now end after 5 still minutes (about 11 GPS minutes a day).
+      about half the drain, Bruma at about a quarter. ✅ **Airplane mode, 2026-10-18:** about
+      1.6 points an hour (10 points in 6 h 04), the GPS on 80% of the day against 90%, so the cell
+      radio's share is smaller than that estimate. stops now end after 5 still minutes (about 11 GPS minutes a day).
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
       **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on
@@ -2073,6 +2074,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       Porto Santo Airport, Funchal ferry terminal, coordinates from OSM. The validator had been
       warning that **no trip could ever end at an airport**, which is the primary trigger for the
       one moment D-012 calls the best in the product.
+      ⚠ **2026-10-18: the ferry terminal removed.** Its 500 m reached Funchal's marina and ended
+      the lead's 24-day trip at lunch. Its only ferry goes to Porto Santo, inside the trip (D-021).
+      `validate-content` now refuses a departure circle that reaches a stamp place.
       — Notes: `docs/task-notes.md` (T-099)
 
 - [x] **T-067** ✅ **Region boundaries, 2026-08-16 — and a third of the pack was in the wrong

@@ -304,6 +304,15 @@ async function main() {
     ) {
       error(point.id, 'departure point is outside the Madeira archipelago');
     }
+    // A departure circle over a place people stop at ends their trip there: the
+    // Funchal ferry terminal's 500 m reached the hotels and restaurants by the
+    // marina, and a two-hour lunch ended the lead's trip (18 Oct 2026).
+    for (const { place, geofence } of allGeofences) {
+      const metres = distanceM(point, geofence);
+      if (metres < point.radiusM) {
+        error(point.id, `departure circle reaches ${place.id} (${Math.round(metres)} m away): a long stop there would end the trip`);
+      }
+    }
   }
   if (parsed.pack.departurePoints.length === 0) {
     warn(

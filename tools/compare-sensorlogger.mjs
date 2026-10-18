@@ -25,7 +25,7 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : process.argv[i + 1];
 };
 const OUT = path.resolve(arg('--out'));
-if (OUT.toLowerCase().startsWith(path.resolve(root).toLowerCase())) {
+if ((OUT + path.sep).toLowerCase().startsWith((path.resolve(root) + path.sep).toLowerCase())) {
   throw new Error('--out must be outside the repository: the picture is a real trace (D-016)');
 }
 const imp = (p) => import(pathToFileURL(`${root}/${p}`).href);

@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
+  lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021
+  keeps Porto Santo inside the trip); the P30's data still carries the split (trips 31 and 32).
+
 - **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,
   fixed that evening, not yet field-tested), battery **about 2.1 points an hour** (2 on 16 Oct),
   and **Huawei's warning at 10:41** (it judges a rolling 24 hours, so 16 Oct may be the cause).

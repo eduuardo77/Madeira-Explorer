@@ -1064,9 +1064,9 @@ export const STRINGS = {
     'Öffnet die Akku-Einstellungen.'
   ),
   'settings.help.detail': s(
-    'One recording, to help tune the app. You see what it holds before it goes.',
-    'Um registo, para ajudar a afinar a aplicação. Vê o que contém antes de o enviar.',
-    'Eine Aufzeichnung, um die App zu verbessern. Sie sehen den Inhalt vor dem Senden.'
+    'Helps tune the app. You see all of it before it goes.',
+    'Ajuda a afinar a aplicação. Vês tudo antes de enviar.',
+    'Hilft, die App zu verbessern. Sie sehen alles vor dem Senden.'
   ),
   'settings.section.appearance': s('Appearance', 'Aspeto', 'Darstellung'),
   'settings.appearance.light': s('Light', 'Claro', 'Hell'),

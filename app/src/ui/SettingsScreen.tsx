@@ -139,27 +139,40 @@ export default function SettingsScreen({
     })();
   };
 
+  /**
+   * Everything the page shows, read together before its first frame
+   * (2026-10-18). Read one by one, the page drew first with placeholders:
+   * "location not set up", the switch off, no tiers, no passport group; then
+   * each arrived and the page jumped under the finger. Each read falls back
+   * to the value the placeholder had, so a failure still shows the page.
+   */
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    void locationProvider
-      .getPermissionLevel()
-      .then(setPermission)
-      .catch(() => undefined);
-
-    void appStateDao
-      .get(appStateDao.AppStateKey.MapStyle)
-      .then((raw) => setMapStyle(parseMapStyle(raw)))
-      .catch(() => undefined);
-
-    void isBackgroundTrackingAllowed()
-      .then(setBackgroundTracking)
-      .catch(() => undefined);
-
-    void getTrackingQuality().then(setQuality).catch(() => undefined);
-    readPassport();
-    void appStateDao
-      .get(appStateDao.AppStateKey.Language)
-      .then((raw) => setLanguageChoiceState(parseLanguageChoice(raw)))
-      .catch(() => undefined);
+    let cancelled = false;
+    const settle = <T,>(read: Promise<T>, fallback: T): Promise<T> => read.catch(() => fallback);
+    void Promise.all([
+      settle<PermissionLevel>(locationProvider.getPermissionLevel(), 'undetermined'),
+      settle(appStateDao.get(appStateDao.AppStateKey.MapStyle), null),
+      settle(isBackgroundTrackingAllowed(), DEFAULT_BACKGROUND_TRACKING),
+      settle(getTrackingQuality(), DEFAULT_TRACKING_QUALITY),
+      settle<PassportSettings | null>(
+        isUnlocked().then((unlocked) => passportSettings({ unlocked, beta: BETA_BUILD })),
+        null
+      ),
+      settle(appStateDao.get(appStateDao.AppStateKey.Language), null),
+    ]).then(([level, style, tracking, quality, passportRows, language]) => {
+      if (cancelled) return;
+      setPermission(level);
+      setMapStyle(parseMapStyle(style));
+      setBackgroundTracking(tracking);
+      setQuality(quality);
+      setPassport(passportRows);
+      setLanguageChoiceState(parseLanguageChoice(language));
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /**
@@ -414,6 +427,11 @@ export default function SettingsScreen({
         </View>
       </View>
     );
+  }
+
+  if (!loaded) {
+    // A frame or two of the page's own background, never a wrong value.
+    return <View style={styles.root} />;
   }
 
   return (

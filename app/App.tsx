@@ -26,7 +26,12 @@ import AnimatedSplash from './src/ui/AnimatedSplash';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
 import { dismissUpdateNotice, writeUpdateNotice } from './src/notify/updateNoticeFile';
-import { backTarget, keepsMapMounted, type AppScreen } from './src/navigation/backNavigation';
+import {
+  backTarget,
+  keepsMapMounted,
+  keepsPassportMounted,
+  type AppScreen,
+} from './src/navigation/backNavigation';
 import { useBackHandler } from './src/ui/useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
@@ -85,6 +90,11 @@ export default function App() {
 /** `onShown`: the first screen is on screen, so the splash may go (T-257). */
 function AppScreens({ onShown }: { onShown: () => void }) {
   const [screen, setScreen] = useState<AppScreen>('map');
+  /** The passport, once opened, stays mounted underneath (`keepsPassportMounted`). */
+  const [passportOpened, setPassportOpened] = useState(false);
+  useEffect(() => {
+    if (screen === 'passport') setPassportOpened(true);
+  }, [screen]);
   // T-211: Back walks the screens instead of leaving the app. Screens with
   // something open inside them (a card, the licences) register their own,
   // newer handler, which runs first.
@@ -100,7 +110,7 @@ function AppScreens({ onShown }: { onShown: () => void }) {
    * A place the passport asked the map to show (T-115, D-052 revised).
    *
    * Held here rather than in either screen because it is a *handover*: the
-   * passport is unmounted by the time the map acts on it. The map clears it
+   * passport is hidden by the time the map acts on it. The map clears it
    * once consumed, so returning to the map later does not fly the camera at a
    * place the user has forgotten about.
    */
@@ -109,6 +119,21 @@ function AppScreens({ onShown }: { onShown: () => void }) {
   const [viewedTripId, setViewedTripId] = useState<number | null>(null);
   /** The timelapse's day, when the viewer asked for one (17 Oct 2026); the whole trip when null. */
   const [replayRange, setReplayRange] = useState<{ fromTs: number; toTs: number } | null>(null);
+  // Stable, so the kept passport does not draw its page again each time the
+  // screen changes (`PassportView` is memoised).
+  const watchTrip = useCallback(() => {
+    setViewedTripId(null);
+    setScreen('replay');
+  }, []);
+  const openTrip = useCallback((tripId: number) => {
+    setViewedTripId(tripId);
+    setScreen('replay');
+  }, []);
+  const closePassport = useCallback(() => setScreen('map'), []);
+  const showOnMap = useCallback((place: Place, collected: boolean) => {
+    setFocusPlace({ place, collected });
+    setScreen('map');
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -231,9 +256,10 @@ function AppScreens({ onShown }: { onShown: () => void }) {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
-      {/* Hidden, not unmounted, under Settings and the passport, so coming
-          back is instant (`keepsMapMounted`). `display: none` stops Google's
-          view drawing while it is covered. */}
+      {/* The map and the passport are hidden, not unmounted, under the
+          screens that keep them (`keepsMapMounted`, `keepsPassportMounted`),
+          so coming back is instant. `display: none` stops Google's view
+          drawing while it is covered. */}
       {keepsMapMounted(screen) ? (
         <View style={screen === 'map' ? styles.root : styles.hidden}>
           <MapScreen
@@ -252,23 +278,18 @@ function AppScreens({ onShown }: { onShown: () => void }) {
           />
         </View>
       ) : null}
-      {screen === 'map' ? null : screen === 'passport' ? (
-        <PassportScreen
-          onWatch={() => {
-            setViewedTripId(null);
-            setScreen('replay');
-          }}
-          onOpenTrip={(tripId) => {
-            setViewedTripId(tripId);
-            setScreen('replay');
-          }}
-          onClose={() => setScreen('map')}
-          onShowOnMap={(place: Place, collected: boolean) => {
-            setFocusPlace({ place, collected });
-            setScreen('map');
-          }}
-        />
-      ) : screen === 'replay' ? (
+      {keepsPassportMounted(screen, passportOpened) ? (
+        <View style={screen === 'passport' ? styles.root : styles.hidden}>
+          <PassportScreen
+            active={screen === 'passport'}
+            onWatch={watchTrip}
+            onOpenTrip={openTrip}
+            onClose={closePassport}
+            onShowOnMap={showOnMap}
+          />
+        </View>
+      ) : null}
+      {screen === 'replay' ? (
         // Back to the passport, not to the map: the trip viewer was reached
         // from the passport and that is where the user was looking.
         <TripViewerScreen

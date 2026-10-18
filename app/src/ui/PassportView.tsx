@@ -48,7 +48,7 @@
  * *legible with 3 stamps and with 200* — in a browser, in seconds.
  */
 
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -628,7 +628,7 @@ export function CategoryRow({
   );
 }
 
-export default function PassportView({
+function PassportView({
   progress,
   awards,
   stamps,
@@ -1106,3 +1106,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+/**
+ * Memoised (2026-10-18): the passport stays mounted under the other screens,
+ * and coming back to it changes only whether it is in front. Drawing its 81
+ * stamps again for that took about 300 ms on the P30, so the page redraws only
+ * when what it shows changes; `PassportScreen` keeps its props stable for it.
+ */
+export default memo(PassportView);

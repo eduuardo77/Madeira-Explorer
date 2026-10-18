@@ -6,7 +6,7 @@
  * without a device, which is how T-081 was actually answered.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { deviceLanguage, n, t } from '../i18n';
 import { DATE_LOCALES, type Language } from '../i18n/languages';
 import type { StringKey } from '../i18n/strings';
@@ -23,7 +23,7 @@ import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitleme
 import { founderYear, isFounder } from '../entitlement/founder';
 import { freeStampsLeft, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
-import { runAwardPass } from '../progress/stampAwards';
+import { runAwardPass, type AwardPassResult } from '../progress/stampAwards';
 import {
   CONFIRMED_CONFIDENCE,
   confirmationReason,
@@ -124,11 +124,19 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
 }
 
 export default function PassportScreen({
+  active = true,
   onClose,
   onShowOnMap,
   onWatch,
   onOpenTrip,
 }: {
+  /**
+   * The screen in front. Once opened the passport stays mounted, hidden, under
+   * the other screens (`keepsPassportMounted`): its pop-ups close and its Back
+   * handling waits while covered, and it reads everything again, in place, on
+   * the way back.
+   */
+  active?: boolean;
   onClose: () => void;
   /** Watch the trip back (T-105e). */
   onWatch: () => void;
@@ -200,68 +208,101 @@ export default function PassportScreen({
   /** The medal whose set is open over the passport (`MedalSetSheet`). */
   const [openMedal, setOpenMedal] = useState<MedalTile | null>(null);
   /** Open the sheet with every locked stamp, `first` leading the fan. */
-  const openUnlock = (first: PassportStamp | null) => {
-    const locked = stamps.filter((stamp) => stamp.locked === true);
-    setUnlockWaiting(
-      first === null ? locked : [first, ...locked.filter((stamp) => stamp.placeId !== first.placeId)]
-    );
-  };
+  const waiting = useMemo(() => stamps.filter((stamp) => stamp.locked === true), [stamps]);
+  const openUnlock = useCallback(
+    (first: PassportStamp | null) =>
+      setUnlockWaiting(
+        first === null ? waiting : [first, ...waiting.filter((stamp) => stamp.placeId !== first.placeId)]
+      ),
+    [waiting]
+  );
+  const unlockFromPage = useCallback(() => openUnlock(null), [openUnlock]);
   const shareCardRef = useRef<View>(null);
+
+  /** Covered by another screen: whatever was open over the passport closes. */
+  useEffect(() => {
+    if (active) return;
+    setCard(null);
+    setCardPlace(null);
+    setCardStamp(null);
+    setTrophy(null);
+    setOpenMedal(null);
+    setUnlockWaiting(null);
+  }, [active]);
+
+  /** Back in front: read everything again, in place, with no spinner. */
+  const wasActive = useRef(active);
+  useEffect(() => {
+    if (active && !wasActive.current) setReloadKey((key) => key + 1);
+    wasActive.current = active;
+  }, [active]);
 
   useEffect(() => {
     let cancelled = false;
 
+    /**
+     * The page from what is stored: stamps, medals, the offer. `awaiting` is
+     * the award pass's walks worth asking about (T-149, D-065), or null to
+     * leave the question as it is.
+     */
+    const readPage = async (awaiting: AwardPassResult['awaitingConfirmation'] | null) => {
+      // T-204: an ended trip stays on show (tripDao.getTripOnShow).
+      const [nextProgress, trip, openTrip] = await Promise.all([
+        getCurrentProgress(),
+        tripDao.getTripOnShow(),
+        tripDao.getActiveTrip(),
+      ]);
+      const nextAwards = trip === null ? [] : await stampAwardDao.getAwards(trip.id);
+      const awardedIds =
+        trip === null ? new Set<string>() : await stampAwardDao.getAwardedPlaceIds(trip.id);
+      const prompt = awaiting === null ? undefined : await resolvePrompt(awaiting, awardedIds);
+      const unlocked = await isUnlocked();
+
+      // ⚠ The free tier is applied **here and only here** (T-155, D-072).
+      // Everything above this line ran for a paying and a non-paying user
+      // alike — the award pass, the geofence set, the writes. That is what
+      // makes "buy in month three, receive months one and two" true, and
+      // `freeTier.test.ts` fails the build if the recorder ever learns
+      // otherwise.
+      const locked = new Set(visibleStamps(earnedStamps(nextAwards), unlocked).locked);
+      const nextFreeLeft = unlocked ? null : freeStampsLeft(earnedStamps(nextAwards).length);
+
+      const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
+      // T-235: every award of the trip, locked stamps included (D-075): a
+      // set completes from what was earned, paid or not.
+      const nextMedals = medalTiles(
+        medalProgress(getMedals(), getContentPack().places, nextAwards, unlocked, await getLockedRegionIds()),
+        deviceLanguage()
+      );
+
+      if (cancelled) return;
+      setProgress(nextProgress);
+      setTripOpen(openTrip !== null);
+      setAwards(nextAwards);
+      setStamps(resolveStamps(awardedIds, locked));
+      if (prompt !== undefined) {
+        setConfirmation(prompt?.prompt ?? null);
+        setConfirmationEvidence(prompt?.evidence ?? '');
+      }
+      setFounder(nextFounder);
+      setFreeLeft(nextFreeLeft);
+      setMedals(nextMedals);
+    };
+
     (async () => {
       try {
-        // Opening the passport is the moment the user most expects it to be
-        // right, so judge before reading (T-071). Idempotent and cheap — and
-        // its result carries the walks worth asking about (T-149, D-065).
+        // What is stored, at once; then judge (T-071) behind the page, and read
+        // again only when the pass found a stamp or a walk to ask about. It
+        // judged first until 2026-10-18, which kept a spinner up for about two
+        // seconds on every opening on the P30; the recorder's batches and the
+        // map judge too, so the pass rarely finds anything here.
+        await readPage(null);
         const pass = await runAwardPass();
-
-        // T-204: an ended trip stays on show (tripDao.getTripOnShow).
-        const [nextProgress, trip, active] = await Promise.all([
-          getCurrentProgress(),
-          tripDao.getTripOnShow(),
-          tripDao.getActiveTrip(),
-        ]);
-        const nextAwards =
-          trip === null ? [] : await stampAwardDao.getAwards(trip.id);
-        const awardedIds =
-          trip === null
-            ? new Set<string>()
-            : await stampAwardDao.getAwardedPlaceIds(trip.id);
-
-        const prompt = await resolvePrompt(pass.awaitingConfirmation, awardedIds);
-
-        // ⚠ The free tier is applied **here and only here** (T-155, D-072).
-        // Everything above this line ran for a paying and a non-paying user
-        // alike — the award pass, the geofence set, the writes. That is what
-        // makes "buy in month three, receive months one and two" true, and
-        // `freeTier.test.ts` fails the build if the recorder ever learns
-        // otherwise.
-        const locked = new Set(
-          visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
-        );
-        const nextFreeLeft = (await isUnlocked()) ? null : freeStampsLeft(earnedStamps(nextAwards).length);
-
-        const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
-        // T-235: every award of the trip, locked stamps included (D-075): a
-        // set completes from what was earned, paid or not.
-        const nextMedals = medalTiles(
-          medalProgress(getMedals(), getContentPack().places, nextAwards, await isUnlocked(), await getLockedRegionIds()),
-          deviceLanguage()
-        );
-
-        if (!cancelled) {
-          setProgress(nextProgress);
-          setTripOpen(active !== null);
-          setAwards(nextAwards);
-          setStamps(resolveStamps(awardedIds, locked));
-          setConfirmation(prompt?.prompt ?? null);
-          setConfirmationEvidence(prompt?.evidence ?? '');
-          setFounder(nextFounder);
-          setFreeLeft(nextFreeLeft);
-          setMedals(nextMedals);
+        if (pass.newlyAwarded.length > 0 || pass.awaitingConfirmation.length > 0) {
+          await readPage(pass.awaitingConfirmation);
+        } else if (!cancelled) {
+          setConfirmation(null);
+          setConfirmationEvidence('');
         }
 
         // After the page is on screen: this reads and masks the whole trace,
@@ -325,6 +366,9 @@ export default function PassportScreen({
                   : t('passport.stats.total', { distance: totalDistance }),
             });
           }
+        } else if (!cancelled) {
+          // Nothing lit, or erased in Settings while the passport stayed mounted.
+          setStats(undefined);
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -337,7 +381,7 @@ export default function PassportScreen({
   }, [reloadKey]);
 
   /** T-204: confirm, then stop recording and close the trip (finishTrip.ts). */
-  const endTrip = () => {
+  const endTrip = useCallback(() => {
     Alert.alert(t('passport.endTrip.title'), t('passport.endTrip.body'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -350,7 +394,7 @@ export default function PassportScreen({
         },
       },
     ]);
-  };
+  }, []);
 
   /**
    * A stamp was tapped (T-115).
@@ -359,7 +403,7 @@ export default function PassportScreen({
    * from the pack, and the recorder's last fix, which is what decides whether
    * a distance can honestly be shown at all (`placeCard.ts`).
    */
-  const openCard = (stamp: PassportStamp) => {
+  const openCard = useCallback((stamp: PassportStamp) => {
     void (async () => {
       const place = getContentPack().places.find(
         (candidate) => candidate.id === stamp.placeId
@@ -413,7 +457,7 @@ export default function PassportScreen({
         })
       );
     })();
-  };
+  }, [awards]);
 
   /**
    * Build the card, let React draw it, photograph it, hand it to the OS.
@@ -460,7 +504,7 @@ export default function PassportScreen({
     setCardStamp(null);
   };
   // T-211: Back closes an open card before App.tsx's handler leaves the passport.
-  useBackHandler(card !== null, closeCard);
+  useBackHandler(active && card !== null, closeCard);
 
   /**
    * The user says they walked it (T-149).
@@ -469,7 +513,7 @@ export default function PassportScreen({
    * stamp is never indistinguishable from a measured one — and T-131 can read
    * these rows as "the bar was too high here".
    */
-  const confirmWalk = (placeId: string) => {
+  const confirmWalk = useCallback((placeId: string) => {
     void (async () => {
       const trip = await tripDao.getActiveTrip();
       if (trip === null) {
@@ -503,10 +547,10 @@ export default function PassportScreen({
         await recordingEventDao.logError('confirm walk', error);
       }
     })();
-  };
+  }, [confirmationEvidence]);
 
   /** The user says they did not. Remembered, so it is never asked again. */
-  const declineWalk = (placeId: string) => {
+  const declineWalk = useCallback((placeId: string) => {
     void (async () => {
       setConfirmation(null);
       try {
@@ -524,13 +568,13 @@ export default function PassportScreen({
         await recordingEventDao.logError('decline walk', error);
       }
     })();
-  };
+  }, []);
 
   return (
     <View style={styles.root}>
       {/* T-203: the passport is the dark album, so the status bar goes light
           while it is on screen; the rest of the app keeps the dark one. */}
-      <StatusBar style="light" />
+      {active ? <StatusBar style="light" /> : null}
       {progress === null ? (
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={album.tint} />
@@ -549,10 +593,10 @@ export default function PassportScreen({
           trips={trips}
           stats={stats}
           onOpenTrip={onOpenTrip}
-          waiting={stamps.filter((stamp) => stamp.locked === true)}
+          waiting={waiting}
           freeLeft={freeLeft ?? undefined}
           // D-097, R1: the reminder, only where something can be bought.
-          onUnlock={BETA_BUILD ? undefined : () => openUnlock(null)}
+          onUnlock={BETA_BUILD ? undefined : unlockFromPage}
           founder={founder ?? undefined}
           medals={medals}
           onOpenMedal={setOpenMedal}

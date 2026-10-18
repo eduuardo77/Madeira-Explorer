@@ -30,6 +30,19 @@ export function keepsMapMounted(screen: AppScreen): boolean {
   return screen === 'map' || screen === 'settings' || screen === 'passport' || screen === 'debug';
 }
 
+/**
+ * Whether the passport stays mounted, hidden, under this screen (2026-10-18):
+ * from its first opening on, under every screen.
+ *
+ * Each opening used to build it again, a spinner for about two seconds on the
+ * P30, and so did every return from the trip viewer it opens. It holds no map,
+ * so keeping it costs little; it is not built before it is first asked for, so
+ * a launch does not pay for a screen the user may not open.
+ */
+export function keepsPassportMounted(screen: AppScreen, openedBefore: boolean): boolean {
+  return openedBefore || screen === 'passport';
+}
+
 export function backTarget(screen: AppScreen): AppScreen | null {
   switch (screen) {
     case 'map':

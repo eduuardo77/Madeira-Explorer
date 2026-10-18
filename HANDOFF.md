@@ -11,6 +11,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021
   keeps Porto Santo inside the trip); the P30's trip repaired that evening (32 joined into 31).
+- **18 Oct evening, Settings after WalkNYC's** (the lead compared them): current Android switch
+  (`ui/Toggle`), arrow and title on one line (`BackBar`), shorter rows, the page drawn once with
+  its real values; switched off, the map asks to record in the background (`offerAutomatic`,
+  D-087 amended). **Speed:** the map stays mounted under Settings and the passport
+  (`keepsMapMounted`), back in 0.6 s with no re-matching; inline requires, ~100 ms off launch.
+  Fixes stored once (`unstoredFixes`); the ferry terminal no longer a departure point.
 
 - **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,
   fixed that evening, not yet field-tested), battery **about 2.1 points an hour** (2 on 16 Oct),

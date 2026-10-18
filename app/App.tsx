@@ -30,6 +30,7 @@ import {
   backTarget,
   keepsMapMounted,
   keepsPassportMounted,
+  PASSPORT_PREPARE_DELAY_MS,
   type AppScreen,
 } from './src/navigation/backNavigation';
 import { useBackHandler } from './src/ui/useBackHandler';
@@ -90,11 +91,12 @@ export default function App() {
 /** `onShown`: the first screen is on screen, so the splash may go (T-257). */
 function AppScreens({ onShown }: { onShown: () => void }) {
   const [screen, setScreen] = useState<AppScreen>('map');
-  /** The passport, once opened, stays mounted underneath (`keepsPassportMounted`). */
-  const [passportOpened, setPassportOpened] = useState(false);
+  /** The passport, once prepared or opened, stays mounted underneath (`keepsPassportMounted`). */
+  const [passportPrepared, setPassportPrepared] = useState(false);
   useEffect(() => {
-    if (screen === 'passport') setPassportOpened(true);
+    if (screen === 'passport') setPassportPrepared(true);
   }, [screen]);
+
   // T-211: Back walks the screens instead of leaving the app. Screens with
   // something open inside them (a card, the licences) register their own,
   // newer handler, which runs first.
@@ -220,6 +222,16 @@ function AppScreens({ onShown }: { onShown: () => void }) {
     []
   );
 
+  // The passport, prepared behind the map once the main screens are up, so its
+  // first opening is instant too. On a timer from here rather than from the
+  // map's "drawn", which does not always come (the diary's "not drawn" lines).
+  const mainScreens = onboarding === false && prompt === null;
+  useEffect(() => {
+    if (!mainScreens) return undefined;
+    const timer = setTimeout(() => setPassportPrepared(true), PASSPORT_PREPARE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [mainScreens]);
+
   // Onboarding and the permission prompts are on screen as soon as they
   // render; the map says so itself, once its tiles are drawn.
   const showingOnboarding = onboarding === true || prompt !== null;
@@ -278,7 +290,7 @@ function AppScreens({ onShown }: { onShown: () => void }) {
           />
         </View>
       ) : null}
-      {keepsPassportMounted(screen, passportOpened) ? (
+      {keepsPassportMounted(screen, passportPrepared) ? (
         <View style={screen === 'passport' ? styles.root : styles.hidden}>
           <PassportScreen
             active={screen === 'passport'}

@@ -31,17 +31,22 @@ export function keepsMapMounted(screen: AppScreen): boolean {
 }
 
 /**
- * Whether the passport stays mounted, hidden, under this screen (2026-10-18):
- * from its first opening on, under every screen.
+ * Whether the passport is mounted, hidden, under this screen (2026-10-18):
+ * once prepared, under every screen.
  *
  * Each opening used to build it again, a spinner for about two seconds on the
  * P30, and so did every return from the trip viewer it opens. It holds no map,
- * so keeping it costs little; it is not built before it is first asked for, so
- * a launch does not pay for a screen the user may not open.
+ * so keeping it costs little. `prepared` is set a few seconds after the main
+ * screens mount (`PASSPORT_PREPARE_DELAY_MS`), so even the first opening finds it drawn;
+ * hidden, it reads only its stored stamps, and its heavy work waits for it to
+ * be opened (`PassportScreen`).
  */
-export function keepsPassportMounted(screen: AppScreen, openedBefore: boolean): boolean {
-  return openedBefore || screen === 'passport';
+export function keepsPassportMounted(screen: AppScreen, prepared: boolean): boolean {
+  return prepared || screen === 'passport';
 }
+
+/** After the main screens mount: long enough for the map's own load to go first. */
+export const PASSPORT_PREPARE_DELAY_MS = 5000;
 
 export function backTarget(screen: AppScreen): AppScreen | null {
   switch (screen) {

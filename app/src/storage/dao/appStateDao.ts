@@ -187,6 +187,12 @@ export const AppStateKey = {
    * Private like the trip it is drawn from; absent until the map has drawn roads.
    */
   MapSnapshot: 'map_snapshot',
+  /**
+   * The passport's trip line and film offer as last worked out, as JSON
+   * (`passportSummary.ts`), so the page opens with them in place rather than
+   * shifting when they arrive (2026-10-18). Absent until first worked out.
+   */
+  PassportSummary: 'passport_summary',
 } as const;
 
 export type AppStateKeyName =

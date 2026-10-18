@@ -23,8 +23,8 @@ test('the map stays alive under Settings and the passport, not under screens wit
   assert.equal(keepsMapMounted('timelapse'), false);
 });
 
-test('the passport is built when first opened, then kept under every screen', () => {
-  assert.equal(keepsPassportMounted('map', false), false, 'not before it is asked for');
+test('the passport is mounted once prepared, or opened before that, then kept under every screen', () => {
+  assert.equal(keepsPassportMounted('map', false), false, 'not before it is prepared');
   assert.equal(keepsPassportMounted('passport', false), true);
   for (const screen of ['map', 'settings', 'replay', 'timelapse', 'debug'] as const) {
     assert.equal(keepsPassportMounted(screen, true), true, screen);

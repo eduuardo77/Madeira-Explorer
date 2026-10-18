@@ -62,6 +62,11 @@ import TrophyCard from './TrophyCard';
 import { trophyFacts } from '../places/trophy';
 import { getMedals } from '../content/medalCatalogue';
 import { formatDistance } from '../places/placeCard';
+import {
+  decodePassportSummary,
+  encodePassportSummary,
+  type PassportSummary,
+} from '../passport/passportSummary';
 import { finishTrip } from '../recording/finishTrip';
 import { useBackHandler } from './useBackHandler';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
@@ -236,6 +241,13 @@ export default function PassportScreen({
     if (active && !wasActive.current) setReloadKey((key) => key + 1);
     wasActive.current = active;
   }, [active]);
+  /**
+   * Prepared behind the map and not yet opened (`keepsPassportMounted`): the
+   * load stops after the stored page, and the award pass, the film's offer and
+   * the trip list wait for the first opening, so a launch does not pay for them.
+   */
+  const everOpened = useRef(active);
+  if (active) everOpened.current = true;
 
   useEffect(() => {
     let cancelled = false;
@@ -291,12 +303,26 @@ export default function PassportScreen({
 
     (async () => {
       try {
+        // The trip line and the film's offer as last worked out, so they are
+        // in place with the stamps instead of pushing them down on arrival.
+        const language = deviceLanguage();
+        const shown = await tripDao.getTripOnShow();
+        const kept =
+          shown === null
+            ? null
+            : decodePassportSummary(await appStateDao.get(appStateDao.AppStateKey.PassportSummary), shown.id);
+        if (kept !== null && !cancelled) {
+          setCanWatch(kept.canWatch);
+          setStats(wordStats(kept, language));
+        }
+
         // What is stored, at once; then judge (T-071) behind the page, and read
         // again only when the pass found a stamp or a walk to ask about. It
         // judged first until 2026-10-18, which kept a spinner up for about two
         // seconds on every opening on the P30; the recorder's batches and the
         // map judge too, so the pass rarely finds anything here.
         await readPage(null);
+        if (!everOpened.current) return;
         const pass = await runAwardPass();
         if (pass.newlyAwarded.length > 0 || pass.awaitingConfirmation.length > 0) {
           await readPage(pass.awaitingConfirmation);
@@ -314,7 +340,6 @@ export default function PassportScreen({
         // T-261: the trips worth listing, worded for the page. The stamps at
         // once; the days once the stored roads are read, which waits on the
         // road network if the map has not decoded it yet.
-        const language = deviceLanguage();
         const nowMs = Date.now();
         const summaries = await tripDao.getTripSummaries();
         const listed = listedTrips(summaries);
@@ -351,24 +376,24 @@ export default function PassportScreen({
 
         // T-262, the lead's option A: the trip on show in one line, and all
         // trips' road under it when that says something the first does not.
+        // Undefined when nothing is lit, which also clears the line after an
+        // erase in Settings while the passport stayed mounted.
         const onShow = await tripDao.getTripOnShow();
-        const tripLitM = onShow === null ? 0 : (roads.litM.get(onShow.id) ?? 0);
-        if (onShow !== null && tripLitM > 0) {
-          const tripDistance = formatDistance(tripLitM, language);
-          const totalDistance = formatDistance(roads.totalLitM, language);
-          const onShowDays = days.get(onShow.id) ?? (await daysOf(onShow.id));
-          if (!cancelled) {
-            setStats({
-              trip: n('passport.stats.trip', onShowDays, { distance: tripDistance }),
-              total:
-                totalDistance === tripDistance
-                  ? null
-                  : t('passport.stats.total', { distance: totalDistance }),
-            });
-          }
-        } else if (!cancelled) {
-          // Nothing lit, or erased in Settings while the passport stayed mounted.
-          setStats(undefined);
+        const summary: PassportSummary | null =
+          onShow === null
+            ? null
+            : {
+                tripId: onShow.id,
+                tripLitM: roads.litM.get(onShow.id) ?? 0,
+                totalLitM: roads.totalLitM,
+                days: days.get(onShow.id) ?? (await daysOf(onShow.id)),
+                canWatch: film.renderable,
+              };
+        if (!cancelled) {
+          setStats(summary === null ? undefined : wordStats(summary, language));
+        }
+        if (summary !== null) {
+          await appStateDao.set(appStateDao.AppStateKey.PassportSummary, encodePassportSummary(summary));
         }
       } catch (error) {
         await recordingEventDao.logError('passport', error);
@@ -750,6 +775,24 @@ export default function PassportScreen({
  * passport is a fixed set of pages to fill (CONTEXT §4.2), and a sticker that
  * moves once you earn it is a page that rearranges itself under you.
  */
+/**
+ * T-262, the lead's option A: the trip on show in one line, and all trips' road
+ * under it when that says something the first does not. Undefined while
+ * nothing is lit.
+ */
+function wordStats(
+  summary: PassportSummary,
+  language: Language
+): { trip: string; total: string | null } | undefined {
+  if (summary.tripLitM <= 0) return undefined;
+  const tripDistance = formatDistance(summary.tripLitM, language);
+  const totalDistance = formatDistance(summary.totalLitM, language);
+  return {
+    trip: n('passport.stats.trip', summary.days, { distance: tripDistance }),
+    total: totalDistance === tripDistance ? null : t('passport.stats.total', { distance: totalDistance }),
+  };
+}
+
 /**
  * Turn the award pass's list of *nearly* into one question, or nothing (T-149).
  *

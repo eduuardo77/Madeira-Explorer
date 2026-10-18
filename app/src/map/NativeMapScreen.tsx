@@ -239,12 +239,13 @@ const MAP_UI_SETTINGS = {
 
 /**
  * The user answered no to "Record in the background?" (`offerAutomatic`).
- * Module state on purpose: the map is mounted again after every visit to
- * Settings or the passport, and the answer holds until the app is closed.
+ * Module state on purpose: the map is mounted again after the trip viewer, and
+ * the answer holds until the app is closed.
  */
 let automaticOfferDeclined = false;
 
 export default function NativeMapScreen({
+  active = true,
   focusPlace,
   onFocusHandled,
   onOpenPassport,
@@ -252,6 +253,13 @@ export default function NativeMapScreen({
   onAskAlways,
   onShown,
 }: {
+  /**
+   * The screen in front. False while Settings or the passport covers the map,
+   * which stays mounted underneath (`keepsMapMounted`): its polling, its Back
+   * handling and its own pop-ups wait, and it reads everything again on the
+   * way back, as on a return to the app.
+   */
+  active?: boolean;
   focusPlace: FocusPlace | null;
   onFocusHandled: () => void;
   onOpenPassport: () => void;
@@ -382,9 +390,30 @@ export default function NativeMapScreen({
   const [stampNews, setStampNews] = useState<StampPopup[]>([]);
   /** Answered on this screen, yes or no: hidden at once, before the recorder catches up. */
   const [offerAnswered, setOfferAnswered] = useState(automaticOfferDeclined);
+  /**
+   * Whether the next load came from inside the app (back from Settings or the
+   * passport): it reads again but leaves the camera where the user left it,
+   * as the "lit since you last looked" framing is for coming back to the app.
+   */
+  const reloadInsideApp = useRef(false);
   // ⚠ A return, not every "active": counting the one Android reports as the
   // app starts ran the whole load twice at once (T-272, T-273).
-  useEffect(() => onReturnToFront(() => setResumeCount((count) => count + 1)), []);
+  useEffect(
+    () =>
+      onReturnToFront(() => {
+        reloadInsideApp.current = false;
+        setResumeCount((count) => count + 1);
+      }),
+    []
+  );
+  const wasActive = useRef(active);
+  useEffect(() => {
+    if (active && !wasActive.current) {
+      reloadInsideApp.current = true;
+      setResumeCount((count) => count + 1);
+    }
+    wasActive.current = active;
+  }, [active]);
 
   /**
    * Road lines as the map's polylines; tunnels and cable cars dashed
@@ -444,6 +473,12 @@ export default function NativeMapScreen({
           }
 
           if (trip === null) {
+            // Nothing recorded, or erased in Settings while the map stayed
+            // mounted underneath: the button goes back to its placeholder.
+            if (!cancelled) {
+              setPassportStamp(buttonStamp([], [], false, t('passport.title')));
+              setWaiting([]);
+            }
             return;
           }
 
@@ -470,6 +505,9 @@ export default function NativeMapScreen({
           }
         };
         await readStamps();
+        if (trip === null && !cancelled) {
+          setTraceLines([]);
+        }
 
         // T-272: the roads and camera the map last showed, at once on a cold
         // start; the stamp pass and the roads below run behind them and
@@ -547,7 +585,7 @@ export default function NativeMapScreen({
               user,
             });
             const latched = resumeCount === 0 && cameraHeldByFocus.current;
-            if (!cancelled && points !== null && !latched) {
+            if (!cancelled && points !== null && !latched && !reloadInsideApp.current) {
               const fit = frame(traceBoundsOf(points), 'bottom');
               if (fit !== null) {
                 setCamera(fit);
@@ -712,7 +750,7 @@ export default function NativeMapScreen({
     setCoursePolylines([]);
   };
   // T-211: Back closes an open card rather than leaving the app.
-  useBackHandler(card !== null, closeCard);
+  useBackHandler(active && card !== null, closeCard);
 
   /**
    * Keep a rough idea of where the user is, so *Re-centre* can hide when it has
@@ -724,6 +762,9 @@ export default function NativeMapScreen({
    * walks out of a 200 m circle, and this only runs while the map is on screen.
    */
   useEffect(() => {
+    if (!active) {
+      return undefined;
+    }
     let cancelled = false;
 
     const refresh = () => {
@@ -763,7 +804,7 @@ export default function NativeMapScreen({
       cancelled = true;
       clearInterval(timer);
     };
-  }, []);
+  }, [active]);
 
   // `showRecentre` is kept by `noteCameraCentre` (T-254); the rule is `offerRecentre`.
 
@@ -809,6 +850,7 @@ export default function NativeMapScreen({
 
   /** WalkNYC's question once automatic recording is off; never over another sheet. */
   const askAutomatic =
+    active &&
     controlInput !== null &&
     stampNews.length === 0 &&
     unlocking === null &&
@@ -1056,7 +1098,7 @@ export default function NativeMapScreen({
           white scrim. The map is the one screen that is not always dark, so it
           is the one screen that has to say so. Mounted here, below App's, and
           the last one mounted wins. */}
-      <ExpoStatusBar style={styleName === 'dark' ? 'light' : 'dark'} />
+      {active ? <ExpoStatusBar style={styleName === 'dark' ? 'light' : 'dark'} /> : null}
 
       <View style={styles.statusScrim} pointerEvents="none">
         {SCRIM_BANDS.map((opacity, index) => (
@@ -1092,7 +1134,7 @@ export default function NativeMapScreen({
         onRecentre={recentre}
       />
 
-      {unlocking === null ? null : (
+      {!active || unlocking === null ? null : (
         <UnlockSheet
           waiting={[
             ...waiting.filter((stamp) => stamp.placeId === unlocking.first),
@@ -1116,7 +1158,7 @@ export default function NativeMapScreen({
         />
       ) : null}
 
-      {stampNews.length === 0 ? null : (
+      {!active || stampNews.length === 0 ? null : (
         <StampNewsCard
           stamp={stampNews[0]}
           onClose={() => {

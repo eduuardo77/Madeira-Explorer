@@ -17,6 +17,19 @@
  */
 export type AppScreen = 'map' | 'passport' | 'replay' | 'timelapse' | 'settings' | 'debug';
 
+/**
+ * Whether the map stays mounted, hidden, under this screen (2026-10-18).
+ *
+ * Opening Settings or the passport used to unmount the map, so every return
+ * built it again: Google's view, about 600 road lines, the tiles, and today's
+ * matching (some 730 ms on the P30). Kept, it is back at once. Not under the
+ * trip viewer or the film: each draws a map of its own, and two Google maps
+ * alive at once is the memory the project lead's lag reports were about.
+ */
+export function keepsMapMounted(screen: AppScreen): boolean {
+  return screen === 'map' || screen === 'settings' || screen === 'passport' || screen === 'debug';
+}
+
 export function backTarget(screen: AppScreen): AppScreen | null {
   switch (screen) {
     case 'map':

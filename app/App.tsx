@@ -26,7 +26,7 @@ import AnimatedSplash from './src/ui/AnimatedSplash';
 import SettingsScreen from './src/ui/SettingsScreen';
 import { loadLanguageChoice } from './src/i18n/languageChoice';
 import { dismissUpdateNotice, writeUpdateNotice } from './src/notify/updateNoticeFile';
-import { backTarget, type AppScreen } from './src/navigation/backNavigation';
+import { backTarget, keepsMapMounted, type AppScreen } from './src/navigation/backNavigation';
 import { useBackHandler } from './src/ui/useBackHandler';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './src/ui/theme';
 
@@ -231,21 +231,28 @@ function AppScreens({ onShown }: { onShown: () => void }) {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
-      {screen === 'map' ? (
-        <MapScreen
-          focusPlace={focusPlace}
-          onFocusHandled={() => setFocusPlace(null)}
-          onShown={onShown}
-          onOpenPassport={() => setScreen('passport')}
-          onOpenSettings={() => setScreen('settings')}
-          // D-095: the notice's tap. The same screens the day-2 offer uses,
-          // disclosure first on Android (T-121); the map is mounted again
-          // when they finish and reads the new permission.
-          onAskAlways={() =>
-            setPrompt(needsAndroidDisclosure() ? 'android-disclosure' : 'always-upgrade')
-          }
-        />
-      ) : screen === 'passport' ? (
+      {/* Hidden, not unmounted, under Settings and the passport, so coming
+          back is instant (`keepsMapMounted`). `display: none` stops Google's
+          view drawing while it is covered. */}
+      {keepsMapMounted(screen) ? (
+        <View style={screen === 'map' ? styles.root : styles.hidden}>
+          <MapScreen
+            active={screen === 'map'}
+            focusPlace={focusPlace}
+            onFocusHandled={() => setFocusPlace(null)}
+            onShown={onShown}
+            onOpenPassport={() => setScreen('passport')}
+            onOpenSettings={() => setScreen('settings')}
+            // D-095: the notice's tap. The same screens the day-2 offer uses,
+            // disclosure first on Android (T-121); the map is mounted again
+            // when they finish and reads the new permission.
+            onAskAlways={() =>
+              setPrompt(needsAndroidDisclosure() ? 'android-disclosure' : 'always-upgrade')
+            }
+          />
+        </View>
+      ) : null}
+      {screen === 'map' ? null : screen === 'passport' ? (
         <PassportScreen
           onWatch={() => {
             setViewedTripId(null);
@@ -316,6 +323,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  hidden: { display: 'none' },
   switcher: {
     position: 'absolute',
     top: spacing.xl + spacing.md,

@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { backTarget } from './backNavigation.ts';
+import { backTarget, keepsMapMounted } from './backNavigation.ts';
 
 test('T-211: Back goes one step towards the map, and the map lets the OS have it', () => {
   assert.equal(backTarget('settings'), 'map');
@@ -13,4 +13,12 @@ test('T-211: Back goes one step towards the map, and the map lets the OS have it
   assert.equal(backTarget('replay'), 'passport');
   assert.equal(backTarget('timelapse'), 'replay');
   assert.equal(backTarget('map'), null);
+});
+
+test('the map stays alive under Settings and the passport, not under screens with maps of their own', () => {
+  for (const screen of ['map', 'settings', 'passport', 'debug'] as const) {
+    assert.equal(keepsMapMounted(screen), true, screen);
+  }
+  assert.equal(keepsMapMounted('replay'), false);
+  assert.equal(keepsMapMounted('timelapse'), false);
 });

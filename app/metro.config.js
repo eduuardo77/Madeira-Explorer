@@ -27,4 +27,16 @@ config.watchFolders = [path.resolve(repositoryRoot, 'content')];
 // mapAssets.ts would be a resolution error.
 config.resolver.assetExts.push('pmtiles', 'pbf');
 
+// Each module runs when it is first used, not all at launch (2026-10-18): the
+// passport, the trip viewer, the film and the billing code wait until opened.
+// React Native's own advice for start-up time; Expo leaves it off. Safe here
+// because the code that must run at launch is reached that way: the background
+// tasks are a bare import in index.ts, which is never deferred, and
+// setPoiCatalogue and registerRootComponent are called at the top of it.
+const expoTransformOptions = config.transformer.getTransformOptions;
+config.transformer.getTransformOptions = async (...args) => {
+  const options = await expoTransformOptions(...args);
+  return { ...options, transform: { ...options.transform, inlineRequires: true } };
+};
+
 module.exports = config;

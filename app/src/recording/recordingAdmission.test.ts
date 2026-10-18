@@ -26,6 +26,7 @@ import {
   shouldRefreshGeofences,
   transitionMayStartTrip,
   tripHasLapsed,
+  unstoredFixes,
 } from './recordingAdmission.ts';
 import type { Bounds } from '../progress/tripEnd.ts';
 import { reconstructVisits } from '../progress/stampRules.ts';
@@ -359,4 +360,26 @@ test('⚠ T-195 — the sink asks before it stores, on both of its write paths',
     assert.notEqual(close, -1, `${handler} never closes a lapsed trip`);
     assert.ok(close < choose, `${handler} chooses a trip before closing a lapsed one`);
   }
+});
+
+// --- unstoredFixes: one fix stored once (18 Oct 2026, 212 repeats on the P30)
+
+test('a fix already stored is dropped; one held back from earlier is kept', () => {
+  const stored = [{ ts: 1000, lat: 32.65, lon: -16.82 }];
+  const batch = [
+    { ts: 1000, lat: 32.65, lon: -16.82 },
+    { ts: 900, lat: 32.64, lon: -16.81 },
+    { ts: 1100, lat: 32.66, lon: -16.83 },
+  ];
+  assert.deepEqual(unstoredFixes(batch, stored).map((fix) => fix.ts), [900, 1100]);
+});
+
+test('a fix repeated within one batch is kept once', () => {
+  const fix = { ts: 2000, lat: 32.7, lon: -16.9 };
+  assert.equal(unstoredFixes([fix, { ...fix }, { ...fix }], []).length, 1);
+});
+
+test('the same time at another place is a different fix', () => {
+  const stored = [{ ts: 3000, lat: 32.7, lon: -16.9 }];
+  assert.equal(unstoredFixes([{ ts: 3000, lat: 32.71, lon: -16.9 }], stored).length, 1);
 });

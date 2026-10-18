@@ -170,6 +170,21 @@ function traceRows(tripId: number, afterId: number | null): Promise<TraceRow[]> 
   );
 }
 
+/** The positions stored in a trip between two times, both included: for dropping repeats. */
+export async function getFixPositionsBetween(
+  tripId: number,
+  fromTs: number,
+  toTs: number
+): Promise<{ ts: number; lat: number; lon: number }[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<{ ts: number; lat: number; lon: number }>(
+    'SELECT ts, lat, lon FROM raw_fix WHERE trip_id = ? AND ts BETWEEN ? AND ?;',
+    tripId,
+    fromTs,
+    toTs
+  );
+}
+
 export async function getRecentFixes(
   tripId: number,
   limit: number

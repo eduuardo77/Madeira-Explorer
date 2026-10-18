@@ -33,6 +33,7 @@ import {
   shouldRecordTransition,
   transitionMayStartTrip,
   tripHasLapsed,
+  unstoredFixes,
 } from './recordingAdmission';
 import { checkTripEnd } from '../progress/tripEndDetection';
 import * as activityEventDao from '../storage/dao/activityEventDao';
@@ -206,11 +207,21 @@ export const databaseSink: RecordingSink = {
             return;
           }
 
+          const times = samples.map((sample) => sample.ts);
+          const fresh = unstoredFixes(
+            samples,
+            await rawFixDao.getFixPositionsBetween(trip.id, Math.min(...times), Math.max(...times))
+          );
+          if (fresh.length === 0) {
+            await recordingEventDao.log('batch', `0 fixes (${samples.length} already stored)`);
+            return;
+          }
+
           // D-094: what the user was doing at each fix, from the phone's
           // motion sensors. Fenced off: nothing in it may cost a fix.
-          const activities = await labelActivities(samples.map((sample) => sample.ts));
+          const activities = await labelActivities(fresh.map((sample) => sample.ts));
 
-          const rows: RawFixInput[] = samples.map((sample, index) => ({
+          const rows: RawFixInput[] = fresh.map((sample, index) => ({
             trip_id: trip.id,
             ts: sample.ts,
             lat: sample.lat,

@@ -111,6 +111,33 @@ export function batchMayStartTrip(
 }
 
 /**
+ * The fixes of a batch not already stored, and not repeated within it.
+ *
+ * Two requests for a position that are open together get the same fix: on the
+ * P30 a motion wake's look and the recorder's first batch, or the app's launch,
+ * stored one fix two to four times (212 of 39,489 by 18 Oct 2026). Harmless to
+ * the map, but it counts a stay twice in the stamp rules' "across N fixes".
+ *
+ * Same time *and* place, not time alone: a held-back batch can legitimately
+ * bring fixes older than the newest one stored, and those are real.
+ *
+ * Pure: the caller reads `stored` for the batch's time range.
+ */
+export function unstoredFixes<T extends { ts: number; lat: number; lon: number }>(
+  batch: readonly T[],
+  stored: readonly { ts: number; lat: number; lon: number }[]
+): T[] {
+  const key = (fix: { ts: number; lat: number; lon: number }) => `${fix.ts}|${fix.lat}|${fix.lon}`;
+  const seen = new Set(stored.map(key));
+  return batch.filter((fix) => {
+    const k = key(fix);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+/**
  * Has the open trip lapsed before this evidence arrived? (T-195)
  *
  * ⚠ **The silence rule could never fire once recording resumed.** `tripEnd`

@@ -19,6 +19,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   The passport is prepared hidden 5 s after launch and kept (`keepsPassportMounted`), memoised,
   stamps before the award pass, its trip line kept (`passportSummary`): no spinner, no shift;
   costs about 24 MB (421 against 397 MB PSS, same sequence).
+  Trip viewer: stored roads first, matching behind (map at 1.5 to 2.0 s, was 2.5 to 2.9).
+  Unchanged re-reads no longer redraw (`ui/unlessSame`): a stamp tapped just after opening the
+  passport opens at once; the idle map draws 28 to 30 frames in 30 s, was 41.
   Fixes stored once (`unstoredFixes`); the ferry terminal no longer a departure point.
 
 - **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,

@@ -61,7 +61,6 @@ export type ControlInput = {
   walkInProgress: boolean;
   /** From `recorderSilence`: evidence, not the registration flag (T-174). */
   silence: SilenceState;
-  nowMs: number;
 };
 
 /**

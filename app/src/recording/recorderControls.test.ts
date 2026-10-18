@@ -34,7 +34,6 @@ function input(overrides: Partial<ControlInput> = {}): ControlInput {
     automaticAllowed: true,
     walkInProgress: false,
     silence: 'receiving',
-    nowMs: NOW,
     ...overrides,
   };
 }

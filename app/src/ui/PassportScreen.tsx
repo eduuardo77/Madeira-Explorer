@@ -68,6 +68,7 @@ import {
   type PassportSummary,
 } from '../passport/passportSummary';
 import { finishTrip } from '../recording/finishTrip';
+import { unlessSame } from './unlessSame';
 import { useBackHandler } from './useBackHandler';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 import { StatusBar } from 'expo-status-bar';
@@ -126,16 +127,6 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
         total: medal.total,
       };
     });
-}
-
-/**
- * A state update that keeps the current value when the new one is equal.
- * Every read builds new lists, and the memoised page (`PassportView`) drew its
- * 81 stamps again for each, about 300 ms, even when nothing had changed; a
- * stamp tapped just after opening the passport waited for it (P30, 2026-10-18).
- */
-function unlessSame<T>(next: T): (current: T) => T {
-  return (current) => (JSON.stringify(current) === JSON.stringify(next) ? current : next);
 }
 
 /** How often a return to the passport may run its slow half again. */

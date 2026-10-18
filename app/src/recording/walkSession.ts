@@ -76,7 +76,6 @@ export async function readControlInput(
       automaticAllowed,
       walkInProgress,
       silence: silence.state,
-      nowMs,
     },
     silentForMs: silence.silentForMs,
   };

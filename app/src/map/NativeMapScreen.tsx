@@ -93,6 +93,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import ChoiceDialog from '../ui/ChoiceDialog';
 import PlaceCardView from '../ui/PlaceCardView';
+import { unlessSame } from '../ui/unlessSame';
 import { useBackHandler } from '../ui/useBackHandler';
 import PrimaryOverlay, {
   PROGRESS_STRIP_HEIGHT,
@@ -468,8 +469,8 @@ export default function NativeMapScreen({
           if (!cancelled) {
             setProgress(nextProgress);
             setWalkStarted(control.input.walkInProgress);
-            setControlInput(control.input);
-            setSilentForMs(control.silentForMs);
+            setControlInput(unlessSame<ControlInput | null>(control.input));
+            setSilentForMs(toMinute(control.silentForMs));
           }
 
           if (trip === null) {
@@ -771,7 +772,7 @@ export default function NativeMapScreen({
       void (async () => {
         const fix = await locationProvider.getLastKnownPosition(RECENTRE_MAX_AGE_MS);
         if (!cancelled && fix !== null) {
-          setUserAt({ latitude: fix.lat, longitude: fix.lon });
+          setUserAt(unlessSame<typeof userAt>({ latitude: fix.lat, longitude: fix.lon }));
         }
       })();
       // D-096: a stamp earned while the map is on screen. The recorder's batch
@@ -788,8 +789,8 @@ export default function NativeMapScreen({
         try {
           const control = await readControlInput(Date.now());
           if (!cancelled) {
-            setControlInput(control.input);
-            setSilentForMs(control.silentForMs);
+            setControlInput(unlessSame<ControlInput | null>(control.input));
+            setSilentForMs(toMinute(control.silentForMs));
             setWalkStarted(control.input.walkInProgress);
           }
         } catch (error) {
@@ -811,8 +812,8 @@ export default function NativeMapScreen({
   /** Re-read the recorder's state now, after something the user did. */
   const rereadControl = async () => {
     const control = await readControlInput(Date.now());
-    setControlInput(control.input);
-    setSilentForMs(control.silentForMs);
+    setControlInput(unlessSame<ControlInput | null>(control.input));
+    setSilentForMs(toMinute(control.silentForMs));
     setWalkStarted(control.input.walkInProgress);
   };
 
@@ -1190,6 +1191,15 @@ export default function NativeMapScreen({
       )}
     </View>
   );
+}
+
+/**
+ * The silence the notice reports, to the minute it is worded in
+ * (`formatDuration`). Kept in milliseconds it changed on every 10 s poll and
+ * redrew the whole map each time for a sentence that had not changed.
+ */
+function toMinute(ms: number | null): number | null {
+  return ms === null ? null : Math.floor(ms / 60_000) * 60_000;
 }
 
 /**

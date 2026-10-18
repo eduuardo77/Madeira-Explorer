@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { TimedRun } from '../matching/roadTrace.ts';
-import { dayTitle, formatClock, openingDay, tripDayCount, tripDays, type ViewerStamp } from './tripDays.ts';
+import { dayTitle, formatClock, openingDay, sameDays, tripDayCount, tripDays, type ViewerStamp } from './tripDays.ts';
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
@@ -141,4 +141,12 @@ test('T-262: the list counts exactly the pages the viewer makes', () => {
       tripDays(runs, stamps, startOfDay).length,
     );
   }
+});
+
+test('two readings of the same trip are the same; a new run or stamp is not', () => {
+  const runs = [run(D0 + 10 * HOUR, 5), run(D0 + 15 * HOUR, 5)];
+  const first = tripDays(runs, [], startOfDay);
+  assert.equal(sameDays(first, tripDays(runs, [], startOfDay)), true);
+  assert.equal(sameDays(first, tripDays([...runs, run(D0 + 17 * HOUR, 5)], [], startOfDay)), false);
+  assert.equal(sameDays(first, tripDays(runs, [stamp('camacha', D0 + 11 * HOUR)], startOfDay)), false);
 });

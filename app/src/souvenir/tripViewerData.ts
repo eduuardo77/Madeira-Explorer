@@ -9,7 +9,7 @@
 
 import { getContentPack } from '../content/poiCatalogue';
 import { representativeGeofence } from '../map/placeMarkers';
-import { roadLinesFor, timedRunsFor } from '../matching/roadNetwork';
+import { roadLinesFor, storedRoadsFor, timedRunsFor } from '../matching/roadNetwork';
 import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
@@ -33,9 +33,16 @@ export type TripView = {
 /**
  * A trip for the viewer: `tripId` from the passport's list (T-261), or the trip
  * on show when absent. Null when there is no such trip.
+ *
+ * `stored` reads the chains the map last matched and stored: at once, but
+ * without anything recorded since the map last matched (positions arriving
+ * while the app is open). `matched` matches those too, which took 0.8 to 1.2 s
+ * on the P30 whenever any had arrived. The viewer shows the first and then
+ * the second, if it differs (`sameDays`).
  */
 export async function loadTripView(
-  tripId?: number,
+  tripId: number | undefined,
+  source: 'stored' | 'matched',
   nowMs: number = Date.now(),
 ): Promise<TripView | null> {
   const trip =
@@ -44,9 +51,16 @@ export async function loadTripView(
     return null;
   }
 
-  const fixes = await rawFixDao.getTraceFixes(trip.id);
-  const roads = await roadLinesFor(trip.id, fixes);
-  const runs = await timedRunsFor(trip.id);
+  // A trip with nothing stored under this matcher (the map has not shown it
+  // since an update changed the matcher) is matched whichever was asked for.
+  const stored = source === 'stored' ? await storedRoadsFor([trip.id]) : null;
+  let runs = stored?.runs.get(trip.id) ?? [];
+  let litM = stored?.litM.get(trip.id) ?? 0;
+  if (runs.length === 0) {
+    const roads = await roadLinesFor(trip.id, await rawFixDao.getTraceFixes(trip.id));
+    runs = await timedRunsFor(trip.id);
+    litM = roads.lengthM;
+  }
 
   const places = new Map(getContentPack().places.map((place) => [place.id, place]));
   const stamps: ViewerStamp[] = [];
@@ -70,7 +84,7 @@ export async function loadTripView(
     tripId: trip.id,
     startedTs: trip.started_ts,
     endTs: trip.ended_ts ?? nowMs,
-    litM: roads.lengthM,
+    litM,
     days,
     stampCount: stamps.length,
   };

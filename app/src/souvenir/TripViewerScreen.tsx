@@ -72,6 +72,7 @@ import {
   dayTitle,
   formatClock,
   openingDay,
+  sameDays,
   type DayRun,
   type ViewerStamp,
 } from './tripDays';
@@ -150,13 +151,20 @@ export default function TripViewerScreen({
     (async () => {
       try {
         const [loaded, preference] = await Promise.all([
-          loadTripView(tripId),
+          loadTripView(tripId, 'stored'),
           appStateDao.get(AppStateKey.MapStyle),
         ]);
         if (!cancelled) {
           setStyleName(effectiveMapStyle(parseMapStyle(preference)));
           setView(loaded);
           setDayIndex(loaded === null ? -1 : openingDay(loaded.days));
+        }
+        // What was recorded since the map last matched, behind the page; the
+        // day shown stays the day shown.
+        const matched = await loadTripView(tripId, 'matched');
+        if (!cancelled && matched !== null && (loaded === null || !sameDays(loaded.days, matched.days))) {
+          setView(matched);
+          if (loaded === null) setDayIndex(openingDay(matched.days));
         }
       } catch (error) {
         await recordingEventDao.logError('trip viewer', error);

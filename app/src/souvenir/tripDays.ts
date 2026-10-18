@@ -209,3 +209,15 @@ export function dayTitle(startTs: number, language: Language): string {
   });
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/**
+ * Whether two readings of a trip's days show the same thing: the same days,
+ * runs, road and stamps. The viewer draws the stored roads at once and then
+ * matches the latest positions behind them (2026-10-18); it redraws only when
+ * this says the second reading differs, so an unchanged trip never flickers.
+ */
+export function sameDays(a: readonly TripDay[], b: readonly TripDay[]): boolean {
+  const key = (day: TripDay) =>
+    `${day.startTs}:${day.runs.length}:${Math.round(day.litM)}:${day.stamps.length}`;
+  return a.length === b.length && a.every((day, index) => key(day) === key(b[index]));
+}

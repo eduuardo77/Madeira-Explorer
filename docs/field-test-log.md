@@ -66,7 +66,8 @@ never where the lead lives.
   the ferry terminal is no longer a departure point. Its only ferry goes to Porto Santo, which
   D-021 keeps inside the trip, so it should never have ended one; cruise passengers are day
   visitors the 20-hour rule already excludes. `validate-content` now refuses a departure circle
-  that reaches any stamp place. The phone's own data still carries the split.
+  that reaches any stamp place. **The phone repaired the same evening, at the lead's request:**
+  trip 32 joined back into 31, the reveal allowance cleared (backup in `Madeira-fieldwork`).
 - **Stamps:** Machico, Caniçal, Ponta do Rosto, Prainha (from the trace), Praia Formosa.
 - **Lunch cost GPS:** at 13:08 a 145 m drift indoors switched walking back to driving; stationary
   only at 13:32, 37 minutes after sitting down.

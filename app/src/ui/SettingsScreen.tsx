@@ -41,7 +41,6 @@ import {
 import {
   getTrackingQuality,
   isBackgroundTrackingAllowed,
-  setBackgroundTrackingAllowed,
   forgetCachedTrackingSettings,
   setTrackingQuality,
 } from '../recording/trackingSettings';
@@ -49,7 +48,7 @@ import { retuneRecorder } from '../recording/walkSession';
 import { setChosenLanguage } from '../i18n/deviceLocale';
 import { saveLanguageChoice } from '../i18n/languageChoice';
 import { parseLanguageChoice, type Language } from '../i18n/languages';
-import { applyBackgroundTrackingChange } from '../recording/tripRecording';
+import { setAutomaticRecording } from '../recording/automaticRecording';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { deleteAllUserData } from '../storage/database';
 import { restoreBackupFile, saveBackupFile } from '../storage/backupFile';
@@ -177,16 +176,9 @@ export default function SettingsScreen({
    */
   const changeBackgroundTracking = useCallback((allowed: boolean) => {
     setBackgroundTracking(allowed);
-    void (async () => {
-      try {
-        await setBackgroundTrackingAllowed(allowed);
-        await applyBackgroundTrackingChange(allowed);
-        // T-210: no update message for someone who switched recording off.
-        await writeUpdateNotice();
-      } catch (error) {
-        await recordingEventDao.logError('background tracking switch', error);
-      }
-    })();
+    setAutomaticRecording(allowed).catch((error) =>
+      recordingEventDao.logError('background tracking switch', error)
+    );
   }, []);
 
   /**

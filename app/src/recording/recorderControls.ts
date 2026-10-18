@@ -132,6 +132,26 @@ export function recordingStatus(input: ControlInput): RecordingStatus {
 }
 
 /**
+ * Whether the map asks "Record in the background?" (2026-10-18), as WalkNYC's
+ * does once its *Always Gathering* is off.
+ *
+ * Only after the user switched automatic recording off, so it is a question
+ * about their own choice and never a nag about a fault (`recorderNotice` says
+ * those). Not without location at all, where the main button already asks for
+ * it; not during an outing, which records anyway; and not again once they have
+ * answered no, which the caller remembers until the app is closed.
+ */
+export function offerAutomatic(input: ControlInput, declined: boolean): boolean {
+  return (
+    !input.automaticAllowed &&
+    !declined &&
+    !input.walkInProgress &&
+    input.permission !== 'denied' &&
+    input.permission !== 'undetermined'
+  );
+}
+
+/**
  * The quality the recorder should run at right now (D-087 §2).
  *
  * A walk takes the finest setting the app has, whatever the user chose for

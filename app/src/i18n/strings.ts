@@ -486,6 +486,39 @@ export const STRINGS = {
     'Toca para escolher “Permitir sempre”',
     'Tippen, um „Immer zulassen“ zu wählen'
   ),
+  // 2026-10-18, WalkNYC's "Track in the background?", asked on the map once
+  // automatic recording is off (`offerAutomatic`). The middle sentence is shown
+  // in bold, as theirs is; the three are joined with a space.
+  'map.offerAutomatic.title': s(
+    'Record in the background?',
+    'Registar em segundo plano?',
+    'Im Hintergrund aufzeichnen?'
+  ),
+  'map.offerAutomatic.lead': s(
+    '{app} records where you go in the background,',
+    'O {app} regista por onde andas em segundo plano,',
+    '{app} zeichnet im Hintergrund auf, wo Sie unterwegs sind,'
+  ),
+  'map.offerAutomatic.strong': s(
+    'so you do not have to press Start an outing every time.',
+    'para não teres de carregar em Começar passeio de cada vez.',
+    'damit Sie nicht jedes Mal Ausflug starten drücken müssen.'
+  ),
+  'map.offerAutomatic.rest': s(
+    'You can still start an outing yourself whenever you like.',
+    'Podes sempre começar um passeio quando quiseres.',
+    'Einen Ausflug können Sie trotzdem jederzeit selbst starten.'
+  ),
+  'map.offerAutomatic.yes': s(
+    'Yes, record in the background',
+    'Sim, registar em segundo plano',
+    'Ja, im Hintergrund aufzeichnen'
+  ),
+  'map.offerAutomatic.no': s(
+    'No, I will start each outing',
+    'Não, começo cada passeio',
+    'Nein, ich starte jeden Ausflug selbst'
+  ),
   // D-095 (option 6B): said while automatic recording is working, where the
   // progress line sits, so nobody wonders whether they must start an outing.
   'map.status.automatic': s(
@@ -1024,20 +1057,7 @@ export const STRINGS = {
     'Num Huawei, também Definições, Aplicações, Iniciação de aplicações: desliga o interruptor do {app} e deixa as três opções ligadas.',
     'Bei Huawei außerdem Einstellungen, Apps, App-Start: den Schalter für {app} ausschalten und die drei Optionen eingeschaltet lassen.'
   ),
-  // 2026-10-18, after WalkNYC's "Track in the background?": switching off asks
-  // first, and says what is lost, because nothing on the map says it afterwards.
-  'settings.recordingOff.title': s(
-    'Turn off automatic recording?',
-    'Desligar o registo automático?',
-    'Automatische Aufzeichnung ausschalten?'
-  ),
-  'settings.recordingOff.body': s(
-    '{app} will record only after you press Start an outing. The roads and stamps of the rest of your day will not be collected.',
-    'O {app} só vai registar depois de carregares em Começar passeio. As estradas e os carimbos do resto do dia ficam por recolher.',
-    '{app} zeichnet dann nur noch auf, nachdem Sie Ausflug starten gedrückt haben. Straßen und Stempel vom Rest des Tages werden nicht gesammelt.'
-  ),
-  'settings.recordingOff.keep': s('Keep it on', 'Manter ligado', 'Eingeschaltet lassen'),
-  'settings.recordingOff.confirm': s('Turn off', 'Desligar', 'Ausschalten'),
+
   'settings.keepRunning.detail': s(
     'Opens the battery settings.',
     'Abre as definições de bateria.',

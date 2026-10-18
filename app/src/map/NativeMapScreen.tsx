@@ -50,6 +50,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { APP_NAME } from '../brand';
 import type { Place } from '../content/contentPack';
 import { getLevadaCourse } from '../content/levadaCourses';
 import { getContentPack } from '../content/poiCatalogue';
@@ -75,8 +76,10 @@ import {
   restartRecording,
   startOuting,
 } from '../recording/walkSession';
+import { setAutomaticRecording } from '../recording/automaticRecording';
 import {
   formatDuration,
+  offerAutomatic,
   primaryControl,
   recorderNotice,
   recordingStatus,
@@ -88,6 +91,7 @@ import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
+import ChoiceDialog from '../ui/ChoiceDialog';
 import PlaceCardView from '../ui/PlaceCardView';
 import { useBackHandler } from '../ui/useBackHandler';
 import PrimaryOverlay, {
@@ -233,6 +237,13 @@ const MAP_UI_SETTINGS = {
   mapToolbarEnabled: false,
 };
 
+/**
+ * The user answered no to "Record in the background?" (`offerAutomatic`).
+ * Module state on purpose: the map is mounted again after every visit to
+ * Settings or the passport, and the answer holds until the app is closed.
+ */
+let automaticOfferDeclined = false;
+
 export default function NativeMapScreen({
   focusPlace,
   onFocusHandled,
@@ -369,6 +380,8 @@ export default function NativeMapScreen({
   const [travelledToday, setTravelledToday] = useState<string | null>(null);
   /** D-096: stamps earned since the map last showed one, oldest first. */
   const [stampNews, setStampNews] = useState<StampPopup[]>([]);
+  /** Answered on this screen, yes or no: hidden at once, before the recorder catches up. */
+  const [offerAnswered, setOfferAnswered] = useState(automaticOfferDeclined);
   // ⚠ A return, not every "active": counting the one Android reports as the
   // app starts ran the whole load twice at once (T-272, T-273).
   useEffect(() => onReturnToFront(() => setResumeCount((count) => count + 1)), []);
@@ -794,6 +807,28 @@ export default function NativeMapScreen({
     })();
   };
 
+  /** WalkNYC's question once automatic recording is off; never over another sheet. */
+  const askAutomatic =
+    controlInput !== null &&
+    stampNews.length === 0 &&
+    unlocking === null &&
+    offerAutomatic(controlInput, offerAnswered);
+  const answerAutomatic = (allowed: boolean) => {
+    setOfferAnswered(true);
+    if (!allowed) {
+      automaticOfferDeclined = true;
+      return;
+    }
+    void (async () => {
+      try {
+        await setAutomaticRecording(true);
+        await rereadControl();
+      } catch (error) {
+        await recordingEventDao.logError('automatic recording offer', error);
+      }
+    })();
+  };
+
   /** The notice in words, and what tapping it does (D-087 §4). */
   const noticeKind =
     controlInput === null ? null : recorderNotice(controlInput, dismissedNotices);
@@ -1068,6 +1103,18 @@ export default function NativeMapScreen({
           onUnlocked={() => setResumeCount((count) => count + 1)}
         />
       )}
+
+      {askAutomatic ? (
+        <ChoiceDialog
+          icon="recording"
+          title={t('map.offerAutomatic.title')}
+          lead={t('map.offerAutomatic.lead', { app: APP_NAME })}
+          strong={t('map.offerAutomatic.strong')}
+          rest={t('map.offerAutomatic.rest')}
+          primary={{ label: t('map.offerAutomatic.yes'), onPress: () => answerAutomatic(true) }}
+          secondary={{ label: t('map.offerAutomatic.no'), onPress: () => answerAutomatic(false) }}
+        />
+      ) : null}
 
       {stampNews.length === 0 ? null : (
         <StampNewsCard

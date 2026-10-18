@@ -36,8 +36,9 @@
  * 5. 2026-10-18, the project lead: WalkNYC's settings "work more flawless" and
  *    look better. Current Android's switch (`Toggle`), the arrow and title on
  *    one line (`BackBar`), the Huawei steps under the group rather than in a
- *    five-line row, tier names that shrink rather than cut, and switching
- *    automatic recording off asks first, as WalkNYC's does.
+ *    five-line row, and tier names that shrink rather than cut. Switching
+ *    automatic recording off is immediate, as WalkNYC's is; the map then
+ *    asks whether to switch it back on (`offerAutomatic`).
  *
  * ⚠ **Rows stay 60 dp** (D-015); the project lead confirmed the height.
  *
@@ -461,7 +462,6 @@ export default function SettingsView({
   // so the screen asks the question once and every branch below reads it.
   const recordingInBackground = backgroundTracking && permission === 'always';
   const [choosingLanguage, setChoosingLanguage] = useState(false);
-  const [confirmingOff, setConfirmingOff] = useState(false);
 
   return (
     <View style={styles.root}>
@@ -517,8 +517,7 @@ export default function SettingsView({
             icon="recording"
             label={t('settings.background.toggle')}
             value={recordingInBackground}
-            // Off asks first (WalkNYC's shape); on needs no question.
-            onChange={(next) => (next ? onChangeBackgroundTracking(true) : setConfirmingOff(true))}
+            onChange={onChangeBackgroundTracking}
             // ⚠ Disabled rather than hidden when the permission is missing: a
             // control that vanishes leaves the user hunting for it, and the row
             // above says where the real gate is.
@@ -673,35 +672,6 @@ export default function SettingsView({
         )}
       </ScrollView>
 
-      {confirmingOff ? (
-        <Modal transparent animationType="fade" onRequestClose={() => setConfirmingOff(false)} visible>
-          <Pressable style={styles.scrim} onPress={() => setConfirmingOff(false)} accessible={false} />
-          <View style={styles.dialog} accessibilityViewIsModal>
-            <Text accessibilityRole="header" style={styles.dialogTitle}>
-              {t('settings.recordingOff.title')}
-            </Text>
-            <Text style={styles.dialogBody}>{t('settings.recordingOff.body', { app: APP_NAME })}</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setConfirmingOff(false)}
-              style={({ pressed }) => [styles.dialogButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.dialogKeep}>{t('settings.recordingOff.keep')}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setConfirmingOff(false);
-                onChangeBackgroundTracking(false);
-              }}
-              style={({ pressed }) => [styles.dialogButton, pressed && styles.pressed]}
-            >
-              <Text style={styles.dialogConfirm}>{t('settings.recordingOff.confirm')}</Text>
-            </Pressable>
-          </View>
-        </Modal>
-      ) : null}
-
       {choosingLanguage && languageChoice !== undefined && onChangeLanguage !== undefined ? (
         <LanguageSheet
           choice={languageChoice}
@@ -827,25 +797,6 @@ const styles = StyleSheet.create({
   sheetTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700', marginBottom: spacing.xs },
   sheetCancel: { justifyContent: 'center' },
   sheetCancelText: { color: colors.tint, fontSize: fontSize.label, fontWeight: '600' },
-  // WalkNYC's dialog: a title, a sentence, and its answers as words on the
-  // right, the safe one first.
-  dialog: {
-    position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
-    top: '28%',
-    backgroundColor: colors.surface,
-    borderRadius: radius.sheet,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
-    gap: spacing.sm,
-  },
-  dialogTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
-  dialogBody: { color: colors.text, fontSize: fontSize.label, lineHeight: Math.round(fontSize.label * 1.4) },
-  dialogButton: { minHeight: MIN_TAP_TARGET, alignItems: 'flex-end', justifyContent: 'center' },
-  dialogKeep: { color: colors.tint, fontSize: fontSize.label, fontWeight: '700' },
-  dialogConfirm: { color: colors.bad, fontSize: fontSize.label, fontWeight: '600' },
   colophon: { color: colors.textMuted, fontSize: fontSize.small, textAlign: 'center' },
   // The hidden light/dark choice (MAP_STYLE_CHOICE_ENABLED): two labelled buttons.
   choiceRow: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },

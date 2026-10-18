@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import {
   effectiveProfile,
   effectiveQuality,
+  offerAutomatic,
   primaryControl,
   recorderNotice,
   recordingStatus,
@@ -94,6 +95,19 @@ test('⚠ D-095 — the status line and a notice are never both shown', () => {
       JSON.stringify(state)
     );
   }
+});
+
+test('switched off, the map asks once whether to record in the background (WalkNYC)', () => {
+  assert.equal(offerAutomatic(input({ automaticAllowed: false }), false), true);
+  assert.equal(offerAutomatic(input({ automaticAllowed: false, permission: 'while_using' }), false), true);
+  assert.equal(offerAutomatic(input({ automaticAllowed: false }), true), false, 'answered no');
+  assert.equal(offerAutomatic(input(), false), false, 'already on');
+});
+
+test('the question waits while an outing records, and never replaces the location request', () => {
+  assert.equal(offerAutomatic(input({ automaticAllowed: false, walkInProgress: true }), false), false);
+  assert.equal(offerAutomatic(input({ automaticAllowed: false, permission: 'denied' }), false), false);
+  assert.equal(offerAutomatic(input({ automaticAllowed: false, permission: 'undetermined' }), false), false);
 });
 
 test('switched off on purpose is not a problem, so it is not announced', () => {

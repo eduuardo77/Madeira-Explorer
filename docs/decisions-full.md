@@ -4785,6 +4785,15 @@ recording is on: then nobody could say "I'm walking now", and WalkNYC shows it t
 single mode (review option A): simpler, but it throws away the only thing the main button can
 usefully do for someone whose recorder is already running.
 
+**Amended 2026-10-18 (Provisional), the project lead: "do it like WalkNYC".** Switching automatic
+recording off in Settings is immediate, and the map then asks *Registar em segundo plano?* with two
+answers, as WalkNYC's does once *Always Gathering* is off (`recorderControls.offerAutomatic`,
+`ui/ChoiceDialog`). A no holds until the app is closed. §4's "only when something is wrong" stays
+true of the notices; this is a question about the user's own choice, not a warning. Rejected: a
+confirmation in Settings before switching off (built the same day, then removed: two questions
+for one choice), and a status line saying recording is off (WalkNYC asks instead, and a line would
+sit there for good for someone who chose outings only).
+
 ## D-088 — A trip ends three ways: the airport, three days of silence, or the user's own "End trip"
 
 **2026-09-24. Accepted** (T-185, the project lead: *"T185 I take your recommendation"*). Review P1-7:

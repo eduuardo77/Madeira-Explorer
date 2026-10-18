@@ -33,6 +33,11 @@
  *
  * 4. The same day: the pause removed (the switch already stops recording), and
  *    the chosen tier's explanation shown under the control, one at a time.
+ * 5. 2026-10-18, the project lead: WalkNYC's settings "work more flawless" and
+ *    look better. Current Android's switch (`Toggle`), the arrow and title on
+ *    one line (`BackBar`), the Huawei steps under the group rather than in a
+ *    five-line row, tier names that shrink rather than cut, and switching
+ *    automatic recording off asks first, as WalkNYC's does.
  *
  * ⚠ **Rows stay 60 dp** (D-015); the project lead confirmed the height.
  *
@@ -47,7 +52,7 @@
  */
 
 import { Children, useState, type ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { APP_NAME } from '../brand';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import { t } from '../i18n';
@@ -60,6 +65,7 @@ import { TRACKING_QUALITIES, type TrackingQuality } from '../recording/trackingP
 import type { PassportSettings } from '../entitlement/settingsPassport';
 import BackBar from './BackBar';
 import SettingsIcon, { SETTINGS_ICON_SIZE, type SettingsIconName } from './SettingsIcon';
+import Toggle from './Toggle';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 export type SettingsViewProps = {
@@ -265,16 +271,7 @@ function ToggleRow({
     <View style={[styles.row, disabled === true && styles.rowDisabled]}>
       <SettingsIcon name={icon} color={colors.tint} />
       <Text style={[styles.rowLabel, styles.rowText]}>{label}</Text>
-      <Switch
-        accessibilityLabel={label}
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        // Explicit colours: the platform default is a green that belongs to no
-        // other part of this interface.
-        trackColor={{ false: colors.surfaceRaised, true: colors.action }}
-        thumbColor={colors.actionText}
-      />
+      <Toggle accessibilityLabel={label} value={value} onChange={onChange} disabled={disabled} />
     </View>
   );
 }
@@ -344,7 +341,14 @@ function Segmented({
             ]}
           >
             {/* One line: a segment that wraps makes the control uneven. */}
-            <Text numberOfLines={1} style={[styles.segmentText, selected && styles.segmentTextActive]}>
+            {/* Shrinks rather than cuts: "Equilibrado" in bold read "Equilibra..."
+                on the P30 (2026-10-18). */}
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+              style={[styles.segmentText, selected && styles.segmentTextActive]}
+            >
               {t(QUALITY_TEXT[quality].short)}
             </Text>
           </Pressable>
@@ -457,19 +461,14 @@ export default function SettingsView({
   // so the screen asks the question once and every branch below reads it.
   const recordingInBackground = backgroundTracking && permission === 'always';
   const [choosingLanguage, setChoosingLanguage] = useState(false);
+  const [confirmingOff, setConfirmingOff] = useState(false);
 
   return (
     <View style={styles.root}>
       {/* The way back, where the passport has it (T-211 also wires Back). */}
-      <BackBar
-        label={t('settings.back')}
-        accessibilityLabel={t('settings.a11y.backToMap')}
-        onPress={onClose}
-      />
+      <BackBar title={t('settings.title')} accessibilityLabel={t('settings.a11y.backToMap')} onPress={onClose} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>{t('settings.title')}</Text>
-
         {/* First, so choosing one cannot re-flow anything above it. */}
         {languageChoice === undefined || onChangeLanguage === undefined ? null : (
           <Group>
@@ -494,9 +493,14 @@ export default function SettingsView({
         <Group
           title={t('settings.section.background')}
           footnote={
-            permission === 'always'
-              ? t('settings.recording.explain')
-              : t('settings.recording.footnoteLimited')
+            <>
+              <Text style={styles.footnote}>
+                {permission === 'always' ? t('settings.recording.explain') : t('settings.recording.footnoteLimited')}
+              </Text>
+              {onOpenBatterySettings !== null && deviceHasLaunchManager() ? (
+                <Text style={styles.footnote}>{t('settings.keepRunning.huawei', { app: APP_NAME })}</Text>
+              ) : null}
+            </>
           }
         >
           {permission === 'always' ? null : (
@@ -513,7 +517,8 @@ export default function SettingsView({
             icon="recording"
             label={t('settings.background.toggle')}
             value={recordingInBackground}
-            onChange={onChangeBackgroundTracking}
+            // Off asks first (WalkNYC's shape); on needs no question.
+            onChange={(next) => (next ? onChangeBackgroundTracking(true) : setConfirmingOff(true))}
             // ⚠ Disabled rather than hidden when the permission is missing: a
             // control that vanishes leaves the user hunting for it, and the row
             // above says where the real gate is.
@@ -537,12 +542,9 @@ export default function SettingsView({
             <ListRow
               icon="battery"
               label={t('settings.keepRunning', { app: APP_NAME })}
-              detail={
-                // T-258: the launch manager the battery screen does not reach.
-                deviceHasLaunchManager()
-                  ? t('settings.keepRunning.detailHuawei')
-                  : t('settings.keepRunning.detail')
-              }
+              // T-258: on a Huawei the launch manager, which the battery
+              // screen does not reach, is explained in the footnote below.
+              detail={t('settings.keepRunning.detail')}
               onPress={onOpenBatterySettings}
             />
           )}
@@ -671,6 +673,35 @@ export default function SettingsView({
         )}
       </ScrollView>
 
+      {confirmingOff ? (
+        <Modal transparent animationType="fade" onRequestClose={() => setConfirmingOff(false)} visible>
+          <Pressable style={styles.scrim} onPress={() => setConfirmingOff(false)} accessible={false} />
+          <View style={styles.dialog} accessibilityViewIsModal>
+            <Text accessibilityRole="header" style={styles.dialogTitle}>
+              {t('settings.recordingOff.title')}
+            </Text>
+            <Text style={styles.dialogBody}>{t('settings.recordingOff.body', { app: APP_NAME })}</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setConfirmingOff(false)}
+              style={({ pressed }) => [styles.dialogButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.dialogKeep}>{t('settings.recordingOff.keep')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setConfirmingOff(false);
+                onChangeBackgroundTracking(false);
+              }}
+              style={({ pressed }) => [styles.dialogButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.dialogConfirm}>{t('settings.recordingOff.confirm')}</Text>
+            </Pressable>
+          </View>
+        </Modal>
+      ) : null}
+
       {choosingLanguage && languageChoice !== undefined && onChangeLanguage !== undefined ? (
         <LanguageSheet
           choice={languageChoice}
@@ -692,9 +723,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     gap: spacing.lg,
   },
-  // A title, not the large title: this screen is a list, and the large one
-  // was a sixth of the first screenful.
-  heading: { color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
   group: { gap: spacing.xs },
   section: {
     backgroundColor: colors.surface,
@@ -799,6 +827,25 @@ const styles = StyleSheet.create({
   sheetTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700', marginBottom: spacing.xs },
   sheetCancel: { justifyContent: 'center' },
   sheetCancelText: { color: colors.tint, fontSize: fontSize.label, fontWeight: '600' },
+  // WalkNYC's dialog: a title, a sentence, and its answers as words on the
+  // right, the safe one first.
+  dialog: {
+    position: 'absolute',
+    left: spacing.lg,
+    right: spacing.lg,
+    top: '28%',
+    backgroundColor: colors.surface,
+    borderRadius: radius.sheet,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  dialogTitle: { color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
+  dialogBody: { color: colors.text, fontSize: fontSize.label, lineHeight: Math.round(fontSize.label * 1.4) },
+  dialogButton: { minHeight: MIN_TAP_TARGET, alignItems: 'flex-end', justifyContent: 'center' },
+  dialogKeep: { color: colors.tint, fontSize: fontSize.label, fontWeight: '700' },
+  dialogConfirm: { color: colors.bad, fontSize: fontSize.label, fontWeight: '600' },
   colophon: { color: colors.textMuted, fontSize: fontSize.small, textAlign: 'center' },
   // The hidden light/dark choice (MAP_STYLE_CHOICE_ENABLED): two labelled buttons.
   choiceRow: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },

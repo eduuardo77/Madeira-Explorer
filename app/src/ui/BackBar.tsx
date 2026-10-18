@@ -1,24 +1,27 @@
 /**
- * The way back, at the top of a screen: tinted words after a chevron, no fill
- * (2026-09-25). *‹ Mapa* on Settings, *‹ Definições* on Privacy and Licences.
+ * The top of a screen reached from another: a back arrow and the screen's own
+ * title on one line, as Android and WalkNYC draw it (2026-10-18).
  *
- * It replaced a *Concluído* bar pinned to the foot of each of those screens,
- * which the project lead found heavy; the passport already had this shape. The
- * spoken name contains the visible word (WCAG 2.5.3, `accessibility.test.ts`),
- * and Android's Back does the same thing (T-211).
+ * It was *‹ Mapa* in tinted words with the title as a large heading below it
+ * (2026-09-25), two rows for one job, and the project lead found WalkNYC's
+ * settings tidier beside ours. Before that, a *Concluído* bar at the foot.
+ *
+ * The arrow's spoken name says where it goes ("Voltar ao mapa"); the title is a
+ * header. Android's Back does the same thing (T-211).
  */
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
 export default function BackBar({
-  label,
+  title,
   accessibilityLabel,
   onPress,
 }: {
-  /** The screen it goes back to, as a word: "Mapa", "Definições". */
-  label: string;
-  /** "Voltar às definições": must contain `label`. */
+  /** This screen's name: "Definições". */
+  title: string;
+  /** Where the arrow goes: "Voltar ao mapa". */
   accessibilityLabel: string;
   onPress: () => void;
 }) {
@@ -30,22 +33,31 @@ export default function BackBar({
         onPress={onPress}
         style={({ pressed }) => [styles.back, pressed && styles.pressed]}
       >
-        <Text style={styles.text}>{`‹ ${label}`}</Text>
+        <Svg width={24} height={24} viewBox="0 0 24 24" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Path d="M20 12H5M11 5l-7 7 7 7" stroke={colors.text} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </Svg>
       </Pressable>
+      <Text accessibilityRole="header" style={styles.title} numberOfLines={1}>
+        {title}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: { paddingTop: spacing.xl, paddingHorizontal: spacing.sm },
-  back: {
-    minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    alignSelf: 'flex-start',
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: spacing.xl,
+    paddingHorizontal: spacing.xs,
+    paddingBottom: spacing.sm,
   },
-  // D-095: the label size, as every control's since the map was measured
-  // against WalkNYC's. The target is the 60 dp row, not the words.
-  text: { color: colors.tint, fontSize: fontSize.label, fontWeight: '600' },
-  pressed: { opacity: 0.75 },
+  back: {
+    width: MIN_TAP_TARGET,
+    height: MIN_TAP_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: { flex: 1, color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
+  pressed: { opacity: 0.6 },
 });

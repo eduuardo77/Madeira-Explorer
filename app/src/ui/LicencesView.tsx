@@ -77,7 +77,7 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
     <View style={styles.root}>
       {/* The way back, at the top, as on Settings and Privacy (2026-09-25). */}
       <BackBar
-        label={t('settings.title')}
+        title={t('licences.title')}
         accessibilityLabel={t('licences.a11y.back')}
         onPress={onClose}
       />
@@ -89,7 +89,6 @@ export default function LicencesView({ onClose }: { onClose: () => void }) {
         extraData={open}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.heading}>{t('licences.title')}</Text>
             <Text style={styles.note}>{t('licences.note', { count: OPEN_SOURCE_COUNT })}</Text>
             <Text style={styles.note}>{t('licences.osm')}</Text>
           </View>
@@ -135,7 +134,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   header: { gap: spacing.lg, marginBottom: spacing.lg },
-  heading: { color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
   note: { color: colors.textMuted, fontSize: fontSize.body, lineHeight: fontSize.body * 1.4 },
   sectionTitle: {
     color: colors.textMuted,

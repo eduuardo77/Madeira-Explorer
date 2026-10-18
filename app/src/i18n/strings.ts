@@ -1017,16 +1017,31 @@ export const STRINGS = {
   // the phone's settings for it: T-202 had already renamed the button from
   // "Open phone settings", which the review could not connect to recording.
   'settings.location': s('Location access', 'Acesso à localização', 'Standortzugriff'),
-  'settings.back': s('Map', 'Mapa', 'Karte'),
-  'settings.keepRunning.detailHuawei': s(
-    'Opens the battery settings. On Huawei, also Settings, Apps, App launch: turn the switch for {app} off and leave the three options on.',
-    'Abre as definições de bateria. Num Huawei, também Definições, Aplicações, Iniciação de aplicações: desliga o interruptor do {app} e deixa as três opções ligadas.',
-    'Öffnet die Akku-Einstellungen. Bei Huawei außerdem Einstellungen, Apps, App-Start: den Schalter für {app} ausschalten und die drei Optionen eingeschaltet lassen.'
+  // 2026-10-18: under the group, not inside the row, where it made the row five
+  // lines tall beside WalkNYC's one-line rows.
+  'settings.keepRunning.huawei': s(
+    'On Huawei, also Settings, Apps, App launch: turn the switch for {app} off and leave the three options on.',
+    'Num Huawei, também Definições, Aplicações, Iniciação de aplicações: desliga o interruptor do {app} e deixa as três opções ligadas.',
+    'Bei Huawei außerdem Einstellungen, Apps, App-Start: den Schalter für {app} ausschalten und die drei Optionen eingeschaltet lassen.'
   ),
+  // 2026-10-18, after WalkNYC's "Track in the background?": switching off asks
+  // first, and says what is lost, because nothing on the map says it afterwards.
+  'settings.recordingOff.title': s(
+    'Turn off automatic recording?',
+    'Desligar o registo automático?',
+    'Automatische Aufzeichnung ausschalten?'
+  ),
+  'settings.recordingOff.body': s(
+    '{app} will record only after you press Start an outing. The roads and stamps of the rest of your day will not be collected.',
+    'O {app} só vai registar depois de carregares em Começar passeio. As estradas e os carimbos do resto do dia ficam por recolher.',
+    '{app} zeichnet dann nur noch auf, nachdem Sie Ausflug starten gedrückt haben. Straßen und Stempel vom Rest des Tages werden nicht gesammelt.'
+  ),
+  'settings.recordingOff.keep': s('Keep it on', 'Manter ligado', 'Eingeschaltet lassen'),
+  'settings.recordingOff.confirm': s('Turn off', 'Desligar', 'Ausschalten'),
   'settings.keepRunning.detail': s(
-    'If your phone pauses it to save battery. Opens the battery settings.',
-    'Se o telemóvel a pausar para poupar bateria. Abre as definições de bateria.',
-    'Falls Ihr Telefon sie zum Akkusparen pausiert. Öffnet die Akku-Einstellungen.'
+    'Opens the battery settings.',
+    'Abre as definições de bateria.',
+    'Öffnet die Akku-Einstellungen.'
   ),
   'settings.help.detail': s(
     'One recording, to help tune the app. You see what it holds before it goes.',

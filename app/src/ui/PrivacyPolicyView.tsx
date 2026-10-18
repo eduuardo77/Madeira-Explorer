@@ -46,13 +46,12 @@ export default function PrivacyPolicyView({ onClose }: { onClose: () => void }) 
   return (
     <View style={styles.root}>
       <BackBar
-        label={t('settings.title')}
+        title={t('privacy.title')}
         accessibilityLabel={t('privacy.a11y.back')}
         onPress={onClose}
       />
       <ScrollView contentContainerStyle={styles.content}>
         <View>
-          <Text style={styles.heading}>{t('privacy.title')}</Text>
           <Text style={styles.dateline}>{t('privacy.lastChanged', { date: POLICY_VERSION })}</Text>
         </View>
 
@@ -111,7 +110,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     gap: spacing.lg,
   },
-  heading: { color: colors.text, fontSize: fontSize.title, fontWeight: '700' },
   dateline: { color: colors.textMuted, fontSize: fontSize.small, marginTop: spacing.xs },
   group: { gap: spacing.xs },
   groupTitle: {

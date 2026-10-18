@@ -55,7 +55,8 @@ never where the lead lives.
 - **The start, 3 km lost:** three motion wakes at home (09:55, 09:59, 10:03) got no GPS position
   at all within 45 s each, in airplane mode with no Wi-Fi to help the GPS start. The drive began
   at 10:05; Google's *driving* came at 10:09:48 and the fix with it switched at once. Specific to a
-  phone with no network; on every earlier day the wake's first look found a position.
+  phone with no network: every request from 10:03 got its first fix at 10:09:53, so the GPS
+  needed about six minutes to start, and no longer wait in the wake would have helped. Not changed.
 - **Battery:** 75% at 09:05, **74% at 10:14, 64% at 16:18: 10 points in 6 h 04, about 1.6 an
   hour**, against 2.1 on 17 Oct. The GPS was on 349 of 437 minutes (433 of 482 on 17 Oct), so part
   of the drop is less GPS, not only the cell radio: its share was smaller than batterystats'
@@ -71,6 +72,11 @@ never where the lead lives.
 - **Stamps:** Machico, Caniçal, Ponta do Rosto, Prainha (from the trace), Praia Formosa.
 - **Lunch cost GPS:** at 13:08 a 145 m drift indoors switched walking back to driving; stationary
   only at 13:32, 37 minutes after sitting down.
+  Indoors with no network the fixes jumped 20 to 140 m while claiming 5 m, so "moving wins"
+  kept firing though the sensors said still from 13:08. Tried and rejected: calling a still span
+  stopped when its fixes scatter around one place rather than travel. Replayed on 16 Oct it cut a
+  real stroll at 12:15 to 12:30 that Google had labelled still; wandering a square looks like
+  scatter. A stroll lit on the map is worth more than 20 GPS minutes at a long lunch.
 
 ### 2026-10-17: the second carried day; mode switching found wanting
 

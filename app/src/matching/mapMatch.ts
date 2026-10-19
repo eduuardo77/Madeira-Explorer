@@ -43,6 +43,11 @@
  *   - no route between consecutive fixes is plausible in the time between
  *     them, or the silence between them is longer than `MAX_BRIDGE_S`.
  *
+ * One exception, at a tunnel (T-279): two chains minutes apart are joined
+ * when the short way between them runs through one (`joinThroughTunnels`),
+ * because GPS inside a tunnel reports the roads over the hill and breaks the
+ * chain at the portal.
+ *
  * A chain too short to be evidence of a journey (`MIN_CHAIN_FIXES`) is
  * dropped. What is left is drawn as roads, and nothing is drawn where no road
  * matched: that is the honesty contract D-093 accepted in place of D-032's.
@@ -57,7 +62,7 @@
 import { distanceM } from '../recording/distance.ts';
 import { MOTION_WINDOW_S, movingMask, speedCeiling } from './motionGate.ts';
 import type { GateFix } from './motionGate.ts';
-import { KIND_COUNT, KIND_INDEX, nearbyEdges, pointAt } from './roadGraph.ts';
+import { isTunnel, KIND_COUNT, KIND_INDEX, nearbyEdges, pointAt } from './roadGraph.ts';
 import type { Candidate, RoadGraph } from './roadGraph.ts';
 import { createScratch, distancesFrom, routeBetween } from './roadRouting.ts';
 import type { EdgePiece, KindCosts, RouteScratch } from './roadRouting.ts';
@@ -68,7 +73,7 @@ import type { Activity } from '../recording/activityTimeline.ts';
  * fixes differently. Chains kept by `chainStore.ts` under another version are
  * dropped and the trip rematched.
  */
-export const MATCHER_VERSION = 4;
+export const MATCHER_VERSION = 5;
 
 /** What the matcher needs of a fix: a subset of the `raw_fix` row. */
 export type MatchFix = GateFix & {
@@ -211,6 +216,17 @@ function hopM(graph: RoadGraph, from: Candidate, to: Candidate, movedM: number):
  * a square, or a boat.
  */
 export const OFF_NETWORK_BREAK_S = 90;
+
+/**
+ * Two chains are joined through a tunnel when the shortest route between the
+ * end of one and the start of the next goes through one and is at most this
+ * many times the straight line, plus the slack (T-279). A tunnel is nearly
+ * straight; a route much longer than the line is another road.
+ */
+export const TUNNEL_JOIN_FACTOR = 1.5;
+export const TUNNEL_JOIN_SLACK_M = 300;
+/** How far from a chain's end the route through may start, metres: the other carriageway. */
+export const TUNNEL_JOIN_REACH_M = 60;
 
 /** Fixes in a row that may be skipped as impossible before the chain ends. */
 export const MAX_SKIPPED_FIXES = 2;
@@ -485,17 +501,6 @@ export function* matchTraceInSteps(
   const firstPass = yield* matchPass(graph, scratch, moving);
   let parts = firstPass.parts;
 
-  // A chain start is a safe place to resume only once nothing still to be
-  // recorded can change the decisions that led to it: its context is the
-  // minute either side.
-  const newest = usable.length === 0 ? Number.NEGATIVE_INFINITY : usable[usable.length - 1].ts;
-  let resumeTs: number | null = null;
-  for (const start of firstPass.starts) {
-    if (start <= newest - MOTION_CONTEXT_MS) {
-      resumeTs = start;
-    }
-  }
-
   // Wild fixes (`DETOUR_MAX_M`) are removed and **only the chains that held
   // them** are matched again. Rematching the whole trace for a handful of
   // wild fixes tripled the cost on the phone for nothing: a chain is matched
@@ -526,17 +531,34 @@ export function* matchTraceInSteps(
     parts = next;
   }
 
-  const chains: MatchedChain[] = [];
+  const found: MatchedChain[] = [];
   let matched = 0;
   let dropped = 0;
   for (const part of parts) {
     if (part.chain === null) {
       dropped += 1;
     } else {
-      chains.push(part.chain);
+      found.push(part.chain);
       matched += part.fixCount;
     }
   }
+  const chains = yield* joinThroughTunnels(graph, scratch, found);
+
+  // A chain start is a safe place to resume only once nothing still to be
+  // recorded can change the decisions that led to it: its context is the
+  // minute either side. And only a start that is still a chain's start: one
+  // joined through a tunnel to the chain before it would, resumed from, be
+  // matched without that chain to join to.
+  const newest = usable.length === 0 ? Number.NEGATIVE_INFINITY : usable[usable.length - 1].ts;
+  const inside = (ts: number) =>
+    chains.some((chain) => chain.anchors[0].ts < ts && ts <= chain.anchors[chain.anchors.length - 1].ts);
+  let resumeTs: number | null = null;
+  for (const start of firstPass.starts) {
+    if (start <= newest - MOTION_CONTEXT_MS && !inside(start)) {
+      resumeTs = start;
+    }
+  }
+
   return {
     chains,
     stats: {
@@ -553,6 +575,104 @@ export function* matchTraceInSteps(
 }
 
 type Moving = { fix: MatchFix; ceiling: number | null };
+
+/**
+ * Consecutive chains joined where the road between them is a tunnel (T-279).
+ *
+ * WHY THE CHAIN BREAKS AT A TUNNEL
+ * --------------------------------
+ * A tunnel with no fix inside is drawn through already: the route between
+ * the fix at each portal is the tunnel (ARCHITECTURE §8.1). But GPS in a
+ * tunnel rarely goes silent; it reports positions over the hill above, on
+ * surface roads. On the lead's trip (17 and 18 Oct 2026) such fixes broke the
+ * chain at both of the tunnels the film showed as blanks: one fix accepted on
+ * a surface road left no route onward, or the chain was on the far
+ * carriageway of a dual carriageway, from which the way through was a U-turn
+ * longer than the speed limit allowed. Either way the next chain begins at
+ * the far portal within a minute or two.
+ *
+ * So two chains less than `MAX_BRIDGE_S` apart are joined when the shortest
+ * route from near the end of the first to near the start of the second goes
+ * through a tunnel and is nearly straight (`TUNNEL_JOIN_FACTOR`). Only a
+ * tunnel: anywhere else a break is the honest answer.
+ */
+function* joinThroughTunnels(
+  graph: RoadGraph,
+  scratch: RouteScratch,
+  chains: readonly MatchedChain[]
+): Generator<void, MatchedChain[], void> {
+  const ordered = [...chains].sort((a, b) => a.anchors[0].ts - b.anchors[0].ts);
+  const joined: MatchedChain[] = [];
+  for (const chain of ordered) {
+    yield;
+    const previous = joined[joined.length - 1];
+    const through = previous === undefined ? null : tunnelBetween(graph, scratch, previous, chain);
+    if (previous === undefined || through === null) {
+      joined.push(chain);
+      continue;
+    }
+    joined[joined.length - 1] = joinChains(previous, through, chain);
+  }
+  return joined;
+}
+
+/** The route through a tunnel from the end of `a` to the start of `b`, or null. */
+function tunnelBetween(
+  graph: RoadGraph,
+  scratch: RouteScratch,
+  a: MatchedChain,
+  b: MatchedChain
+): EdgePiece[] | null {
+  const seconds = (b.anchors[0].ts - a.anchors[a.anchors.length - 1].ts) / 1000;
+  if (seconds <= 0 || seconds > MAX_BRIDGE_S) {
+    return null;
+  }
+  const end = a.pieces[a.pieces.length - 1];
+  const start = b.pieces[0];
+  const [endLat, endLon] = pointAt(graph, end.edge, end.to);
+  const [startLat, startLon] = pointAt(graph, start.edge, start.from);
+  const straight = distanceM({ lat: endLat, lon: endLon }, { lat: startLat, lon: startLon });
+  const limitM = Math.min(MAX_ROUTE_SPEED_MPS * seconds, TUNNEL_JOIN_FACTOR * straight + TUNNEL_JOIN_SLACK_M);
+
+  const near = (lat: number, lon: number, exact: EdgePiece, offset: number) => [
+    { edge: exact.edge, offset },
+    ...nearbyEdges(graph, lat, lon, TUNNEL_JOIN_REACH_M, MAX_CANDIDATES).map((c) => ({ edge: c.edge, offset: c.offset })),
+  ];
+  const sources = near(endLat, endLon, end, end.to);
+  const targets = near(startLat, startLon, start, start.from);
+
+  let best: { route: EdgePiece[]; length: number } | null = null;
+  for (const source of sources) {
+    const lengths = distancesFrom(graph, scratch, source, targets, limitM);
+    for (let t = 0; t < targets.length; t += 1) {
+      if (!Number.isFinite(lengths[t]) || (best !== null && lengths[t] >= best.length)) {
+        continue;
+      }
+      const route = routeBetween(graph, scratch, source, targets[t], limitM);
+      if (route !== null && route.some((piece) => isTunnel(graph, piece.edge))) {
+        best = { route, length: lengths[t] };
+      }
+    }
+  }
+  return best?.route ?? null;
+}
+
+/** `a`, the route through, then `b`, as one chain timed by both chains' fixes. */
+function joinChains(a: MatchedChain, through: EdgePiece[], b: MatchedChain): MatchedChain {
+  const lengthOf = (pieces: readonly EdgePiece[]) =>
+    pieces.reduce((sum, piece) => sum + Math.abs(piece.to - piece.from), 0);
+  const pieces: EdgePiece[] = a.pieces.map((piece) => ({ ...piece }));
+  for (const piece of [...through, ...b.pieces]) {
+    appendPiece(pieces, piece);
+  }
+  const shift = lengthOf(a.pieces) + lengthOf(through);
+  const count = a.anchors.length + b.anchors.length;
+  return {
+    pieces,
+    anchors: [...a.anchors, ...b.anchors.map((anchor) => ({ ts: anchor.ts, atM: anchor.atM + shift }))],
+    confidence: (a.confidence * a.anchors.length + b.confidence * b.anchors.length) / count,
+  };
+}
 
 /**
  * One pass of matching over moving fixes, chain by chain, and the time of

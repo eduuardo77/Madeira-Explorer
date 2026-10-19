@@ -12,11 +12,15 @@
  * Nothing between two targets is the map's guess.
  *
  * Each target frames the road either side of the pen's position on the
- * ground, so the viewer sees where the line is heading. Smoothing averages
- * the box's centre and the logarithm of its size over `CAMERA_SMOOTH_MS`, so
- * the zoom breathes rather than pumps. Smoothing can let the pen drift towards
- * an edge, so last of all each box is widened, if it must be, until the pen
- * sits inside it with a margin, at its own instant and at both neighbours.
+ * ground, so the viewer sees where the line is heading. The centre is that
+ * window's, averaged with a Gaussian over `CENTRE_SMOOTH_MS`. The size is what
+ * it takes to hold the window and to keep the pen `PEN_MARGIN` inside: that
+ * need is held at its largest for `SIZE_HOLD_MS` either side, then averaged
+ * (as a logarithm, so the zoom breathes rather than pumps) over
+ * `SIZE_SMOOTH_MS`. Holding before averaging is what keeps the pen in frame
+ * without widening a box after the smoothing, which was a step in the zoom
+ * (T-279, the lead: "the camera must be more smooth"). A last widening stays
+ * as a safety net; on the lead's trip it no longer acts.
  *
  * Pure: no database, no Expo, no clock. Tested in `composition.test.ts`.
  */
@@ -40,8 +44,12 @@ export type TimedPoint = { atMs: number; lat: number; lon: number; alongM: numbe
 
 /** How often the camera has a target, ms. */
 export const CAMERA_STEP_MS = 100;
-/** How long a stretch of camera the smoothing averages over, ms. */
-export const CAMERA_SMOOTH_MS = 700;
+/** The centre's Gaussian average, its standard deviation, ms. */
+export const CENTRE_SMOOTH_MS = 500;
+/** How long the size the pen needs is held at its largest either side, ms. */
+export const SIZE_HOLD_MS = 1_200;
+/** The size's Gaussian average, its standard deviation, ms. */
+export const SIZE_SMOOTH_MS = 800;
 /** How far inside the box the pen must stay, as a share of the box's half size. */
 export const PEN_MARGIN = 0.2;
 
@@ -76,22 +84,66 @@ export function followCamera(timeline: readonly TimedPoint[], startMs: number, d
   for (let at = startMs; at < endMs; at += CAMERA_STEP_MS) times.push(at);
   times.push(endMs);
 
-  const raw = times.map((at) => {
-    const pen = penAt(timeline, at);
+  const pens = times.map((at) => penAt(timeline, at));
+  const raw = pens.map((pen) => {
     const from = firstAlong(timeline, pen.alongM - halfWindowM);
     const to = firstAlong(timeline, pen.alongM + halfWindowM);
     return extend(boundsOf(timeline.slice(from, to + 1)), pen);
   });
 
-  const smoothed = smooth(raw, Math.round(CAMERA_SMOOTH_MS / CAMERA_STEP_MS / 2));
+  const steps = (ms: number) => ms / CAMERA_STEP_MS;
+  const lat = gaussian(raw.map((box) => (box.north + box.south) / 2), steps(CENTRE_SMOOTH_MS));
+  const lon = gaussian(raw.map((box) => (box.east + box.west) / 2), steps(CENTRE_SMOOTH_MS));
+
+  /** The half size each target needs, as a logarithm: its window, the pen near it, the floor. */
+  const need = (half: (box: Bounds) => number, offset: (pen: TimedPoint, i: number) => number) =>
+    raw.map((box, i) => {
+      let needed = Math.max(half(box), MIN_SPAN_DEG / 2);
+      for (const near of [pens[i - 1], pens[i], pens[i + 1]]) {
+        if (near !== undefined) needed = Math.max(needed, offset(near, i) / (1 - PEN_MARGIN));
+      }
+      return Math.log(needed);
+    });
+  const size = (logs: number[]) =>
+    gaussian(heldAtMost(logs, Math.round(steps(SIZE_HOLD_MS))), steps(SIZE_SMOOTH_MS)).map(Math.exp);
+  const halfLat = size(need((box) => (box.north - box.south) / 2, (pen, i) => Math.abs(pen.lat - lat[i])));
+  const halfLon = size(need((box) => (box.east - box.west) / 2, (pen, i) => Math.abs(pen.lon - lon[i])));
 
   return times.map((at, i) => {
-    let bounds = expandToMinimumSpan(smoothed[i]);
-    for (const near of [times[i - 1], at, times[i + 1]]) {
-      if (near !== undefined) bounds = holdInside(bounds, penAt(timeline, near));
+    let bounds = {
+      north: lat[i] + halfLat[i],
+      south: lat[i] - halfLat[i],
+      east: lon[i] + halfLon[i],
+      west: lon[i] - halfLon[i],
+    };
+    // The safety net: the hold above should already have made room.
+    for (const near of [pens[i - 1], pens[i], pens[i + 1]]) {
+      if (near !== undefined) bounds = holdInside(bounds, near);
     }
     return { atMs: at, bounds };
   });
+}
+
+/** A Gaussian average of evenly spaced values, `sigma` in steps; the ends average what they have. */
+function gaussian(values: readonly number[], sigma: number): number[] {
+  const reach = Math.ceil(3 * sigma);
+  const weights = Array.from({ length: 2 * reach + 1 }, (_, k) => Math.exp(-((k - reach) ** 2) / (2 * sigma * sigma)));
+  return values.map((_, i) => {
+    let sum = 0;
+    let total = 0;
+    for (let k = -reach; k <= reach; k += 1) {
+      const value = values[i + k];
+      if (value === undefined) continue;
+      sum += value * weights[k + reach];
+      total += weights[k + reach];
+    }
+    return sum / total;
+  });
+}
+
+/** Each value replaced by the largest within `reach` steps either side. */
+function heldAtMost(values: readonly number[], reach: number): number[] {
+  return values.map((_, i) => Math.max(...values.slice(Math.max(0, i - reach), i + reach + 1)));
 }
 
 /** Where the pen is at `atMs`: on a point, between two, or across a jump. */
@@ -127,27 +179,6 @@ function firstAlong(timeline: readonly TimedPoint[], metres: number): number {
     else high = middle;
   }
   return low;
-}
-
-/** Centres averaged, sizes averaged as logarithms, over `reach` targets either side. */
-function smooth(boxes: readonly Bounds[], reach: number): Bounds[] {
-  const shape = boxes.map((box) => ({
-    lat: (box.north + box.south) / 2,
-    lon: (box.east + box.west) / 2,
-    // Never log(0): a box of one point has a size of a millimetre.
-    logLat: Math.log(Math.max(1e-8, (box.north - box.south) / 2)),
-    logLon: Math.log(Math.max(1e-8, (box.east - box.west) / 2)),
-  }));
-  return shape.map((_, i) => {
-    const near = shape.slice(Math.max(0, i - reach), i + reach + 1);
-    const mean = (pick: (one: (typeof shape)[number]) => number) =>
-      near.reduce((sum, one) => sum + pick(one), 0) / near.length;
-    const halfLat = Math.exp(mean((one) => one.logLat));
-    const halfLon = Math.exp(mean((one) => one.logLon));
-    const lat = mean((one) => one.lat);
-    const lon = mean((one) => one.lon);
-    return { north: lat + halfLat, south: lat - halfLat, east: lon + halfLon, west: lon - halfLon };
-  });
 }
 
 /** `bounds`, widened where it must be so `pen` is `PEN_MARGIN` inside it. */

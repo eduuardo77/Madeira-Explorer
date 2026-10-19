@@ -114,6 +114,63 @@ test('a tunnel is lit from a fix at each portal', () => {
   assert.ok(litOn(visited, [net.edge('p1', 'p2')]) > 790, 'the whole tunnel');
 });
 
+/**
+ * East at 25 m/s, a fix every 10 s, except underground: three fixes there, at
+ * ±35 m, reported on the surface road 100 m north, out of the tunnel's reach.
+ * Three, one more than the matcher skips as wild, so the chain breaks.
+ */
+function drive() {
+  const fixes = [];
+  for (let t = 0; t <= 192; t += 10) {
+    const east = -1500 + t * 25;
+    if (east > 300 && east < 1500) continue;
+    fixes.push(fixAt(t, east, 2, 25));
+  }
+  fixes.push(fixAt(76, 400, 100, 25, 35), fixAt(88, 700, 100, 25, 35), fixAt(100, 1000, 100, 25, 35));
+  return fixes.sort((a, b) => a.ts - b.ts);
+}
+
+test('a tunnel is lit when GPS inside it puts the car on the road over the hill (T-279)', () => {
+  // 1.2 km of tunnel, a surface road 100 m north of it that joins the network only
+  // far up the mountain, and the receiver reporting the car on that road while
+  // underground: the lead's 17 and 18 Oct drives, which drew as two chains.
+  const net = network(
+    { w: [-1500, 0], p1: [300, 0], p2: [1500, 0], e: [3300, 0], s1: [400, 100], s2: [1400, 100], h: [900, 3000] },
+    [
+      { from: 'w', to: 'p1', kind: 'm' },
+      { from: 'p1', to: 'p2', kind: 'M' },
+      { from: 'p2', to: 'e', kind: 'm' },
+      { from: 's1', to: 's2' },
+      { from: 's1', to: 'h' },
+      { from: 's2', to: 'h' },
+    ]
+  );
+  const fixes = drive();
+  const { chains } = matchTrace(net.graph, fixes);
+  const visited = visitedEdges(net.graph, chains);
+  assert.ok(litOn(visited, [net.edge('p1', 'p2')]) > 1150, 'the whole tunnel');
+  assert.equal(litOn(visited, [net.edge('s1', 's2')]), 0, 'not the road above it');
+  assert.equal(chains.length, 1, 'one drive, one chain');
+});
+
+test('two chains a few minutes apart with no tunnel between them stay two', () => {
+  // The same layout with the tunnel an open road: a break there is a break.
+  const net = network(
+    { w: [-1500, 0], p1: [300, 0], p2: [1500, 0], e: [3300, 0], s1: [400, 100], s2: [1400, 100], h: [900, 3000] },
+    [
+      { from: 'w', to: 'p1', kind: 'm' },
+      { from: 'p1', to: 'p2', kind: 'm' },
+      { from: 'p2', to: 'e', kind: 'm' },
+      { from: 's1', to: 's2' },
+      { from: 's1', to: 'h' },
+      { from: 's2', to: 'h' },
+    ]
+  );
+  const fixes = drive();
+  const { chains } = matchTrace(net.graph, fixes);
+  assert.equal(chains.length, 2, 'a break with no tunnel in it is not joined');
+});
+
 test('a long silence is not bridged, even along a road', () => {
   const net = network({ w: [0, 0], e: [3000, 0] }, [{ from: 'w', to: 'e' }]);
   const fixes = [

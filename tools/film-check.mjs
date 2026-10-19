@@ -5,14 +5,16 @@
  *
  * Builds the film the way the app does (the matcher, the roads as timed runs,
  * simplified, `composeSouvenir`) and samples it every 50 ms, then reports the
- * four things the lead saw on 19 Oct 2026:
+ * what the lead saw on 19 Oct 2026:
  *
  *   - **pen speed**: how far along the road the pen moves per second, as
  *     percentiles. Even pacing has them close together;
  *   - **out of frame**: samples, over the whole film, whose pen tip is outside
  *     the visible map through the camera the map is given (`replayMap.cameraAt`);
  *   - **pen up**: the jumps between strokes, by length, and the time spent on them;
- *   - **repeated road**: time spent drawing road the film already drew.
+ *   - **repeated road**: time spent drawing road the film already drew;
+ *   - **camera jerk**: how much the camera's speed on screen changes from one
+ *     60 fps frame to the next, for the pan and the zoom.
  *
  * ⚠ Unmasked (the mask is a circle around the hotel and changes none of
  * this) and without stamps. It prints numbers only, never a place, so its
@@ -140,6 +142,37 @@ for (let at = 0; at <= film.durationMs; at += STEP_MS) {
   previousM = drawnM;
 }
 
+// The camera's smoothness at 60 fps: how much its speed on screen changes from
+// one frame to the next, in dp per frame per frame, for the pan and the zoom.
+// A smooth camera changes speed a little every frame; a jerky one in steps.
+const FRAME_S = 1 / 60;
+const mercator = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+const panJerk = [];
+const zoomJerk = [];
+let lastPan = null;
+let lastZoom = null;
+let lastCamera = cameraAt(path_, 0);
+let worstJerk = { value: 0, atMs: 0 };
+for (let at = FRAME_S * 1000; at <= film.durationMs; at += FRAME_S * 1000) {
+  const camera = cameraAt(path_, at);
+  const world = 256 * Math.pow(2, camera.zoom);
+  const pan = [
+    ((camera.coordinates.longitude - lastCamera.coordinates.longitude) * world) / 360,
+    ((mercator(camera.coordinates.latitude) - mercator(lastCamera.coordinates.latitude)) * world) / (2 * Math.PI),
+  ];
+  // A zoom change as the dp a point at the screen's edge moves.
+  const zoom = (Math.pow(2, camera.zoom - lastCamera.zoom) - 1) * (viewport.width / 2);
+  if (lastPan !== null) {
+    const jerk = Math.hypot(pan[0] - lastPan[0], pan[1] - lastPan[1]);
+    if (jerk > worstJerk.value) worstJerk = { value: jerk, atMs: at };
+    panJerk.push(jerk);
+    zoomJerk.push(Math.abs(zoom - lastZoom));
+  }
+  lastPan = pan;
+  lastZoom = zoom;
+  lastCamera = camera;
+}
+
 const percentile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))] ?? 0;
@@ -185,3 +218,7 @@ console.log(
     `${lifts.over1000} over 1 km; ${(lifts.ms / 1000).toFixed(2)} s with the pen up`
 );
 console.log(`repeated road: ${(repeatMs / 1000).toFixed(1)} s of ${(draw.durationMs / 1000).toFixed(1)} s`);
+console.log(
+  `camera jerk, dp per frame per frame: pan p50 ${percentile(panJerk, 50).toFixed(2)}, p99 ${percentile(panJerk, 99).toFixed(2)}, ` +
+    `max ${percentile(panJerk, 100).toFixed(2)}; zoom p50 ${percentile(zoomJerk, 50).toFixed(2)}, p99 ${percentile(zoomJerk, 99).toFixed(2)}, max ${percentile(zoomJerk, 100).toFixed(2)}; the worst pan at ${(worstJerk.atMs / 1000).toFixed(2)} s of ${(film.durationMs / 1000).toFixed(1)} s`
+);

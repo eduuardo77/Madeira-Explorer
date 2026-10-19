@@ -225,6 +225,18 @@ permission, L3 privacy contact.
       4 holes are on every pass, so the map has them too; closing them is the matcher's
       `MAX_BRIDGE_S`, a separate decision. Stamp cues and `filmPaint.ts` removed (the film shows
       no stamps since 17 Oct).
+      **Second round, same evening (the lead: "the tunnels are still skipped", "the camera must be
+      more smooth"):** the two drive-speed holes left (2.0 km in 119 s, 3.4 km in 149 s) were not
+      silences: GPS inside put the car on roads over the hill, and the chain broke at the portal
+      (an accepted surface fix with no way on, or the far carriageway). **Provisional (tier 2):**
+      the matcher now joins two chains under `MAX_BRIDGE_S` apart when the short way between them
+      runs through a tunnel (`joinThroughTunnels`, `MATCHER_VERSION` 5); on the lead's trip 2
+      joins, lit 263.3 to 267.3 km, the P30 shows 267 km after rematching; synthetic scores
+      unchanged. The camera judder was its speed changing in a step at every 100 ms target (up to 5
+      dp per frame per frame, `film-check`): now a Gaussian centre, a held-then-smoothed size, a
+      monotone cubic sampled at 60 points a second, and the pull-back begun 0.6 s before the last
+      stroke from the moving camera. p99 0.2 to 0.4, max under 0.75; pen in frame throughout; P30
+      day film 54 fps, whole trip 46.
 - [x] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
       laggy"*). **Phase 0 done, the baseline.** `gfxinfo` (T-254's 0.00% janky) cannot see this: the
       map draws on its own GL thread into a TextureView, and a slow thread produces fewer frames,

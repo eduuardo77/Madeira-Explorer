@@ -214,9 +214,14 @@ permission, L3 privacy contact.
       missed, p50 33 ms**; the field build gave the same (the flag is not the cause). **WalkNYC 59.4
       and 59.9 fps, 1.7 and 0.8% missed**, also a Google `MapView`, latest renderer on both, but with
       0 blocks walked, so an empty map. Bruma's passport scrolls at 60.4 fps, 0 missed: no app-wide
-      cap, the cost is in the map. **Next:** one build with switches (no lit roads, no camera events
-      to JS, no overlays) to say which halves the rate, then the fixes: width steps without resending
-      every road, camera events only at rest or on a zoom step, lines not clickable (nothing listens).
+      cap, the cost is in the map. **Attribution, 2026-10-19:** a temporary build read switches from a
+      file adb writes (not committed), two runs each, release build: **no lit roads 60.4 and 59.9
+      fps (0.0 and 0.8% missed)**; no camera events 29.6/29.8; no overlays 29.6/29.7; no blue dot
+      30.0/28.9; plain joints and caps, not clickable, 29.6/29.7; all four off 59.4/60.2. **The lit
+      roads alone halve the frame rate**; nothing else measured moves it, so the camera, overlay and
+      clickable fixes are not worth doing for speed. Switches seen to work (screenshot: no roads, no
+      controls, no dot). **Next:** what about the roads costs (number of polylines, points, width,
+      dashes), then draw them cheaper.
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

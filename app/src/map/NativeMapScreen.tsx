@@ -117,7 +117,7 @@ import { decodeMapSnapshot, encodeMapSnapshot } from './mapSnapshot';
 import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
-import { runPolylines } from './tunnelDashes';
+import { splitTrace } from './mergedTrace';
 import { traceWidthDp } from './traceWidth';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -193,6 +193,7 @@ type Polyline = {
   coordinates: { latitude: number; longitude: number }[];
   color: string;
   width: number;
+  gaps?: number[];
 };
 
 /**
@@ -417,22 +418,34 @@ export default function NativeMapScreen({
   }, [active]);
 
   /**
-   * Road lines as the map's polylines; tunnels and cable cars dashed
-   * (`tunnelDashes.ts`). Thinner as the camera zooms out (`traceWidth.ts`).
+   * The lit roads as **one** polyline with invisible gaps between the pieces,
+   * plus the pieces with a free end on their own, for their round caps (T-278,
+   * `mergedTrace.ts`): Google's map pays per polyline on every frame, and 636
+   * of them held a pan to 30 fps on the P30. Thinner as the camera zooms out
+   * (`traceWidth.ts`).
    */
-  const tracePolylines = useMemo<Polyline[]>(
+  const splitLines = useMemo(
     () =>
-      traceLines.flatMap((line, index) =>
-        runPolylines(
-          `trace-${index}`,
-          line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })),
-          line.faded,
-          tracePaint.coreColor,
-          px(traceWidth)
-        )
+      splitTrace(
+        traceLines.map((line) => line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })))
       ),
-    [traceLines, traceWidth, tracePaint.coreColor]
+    [traceLines]
   );
+  const tracePolylines = useMemo<Polyline[]>(() => {
+    const width = px(traceWidth);
+    const { merged, capped } = splitLines;
+    return [
+      ...(merged.coordinates.length < 2
+        ? []
+        : [{ id: 'trace', coordinates: merged.coordinates, gaps: merged.gaps, color: tracePaint.coreColor, width }]),
+      ...capped.map((coordinates, index) => ({
+        id: `trace-end-${index}`,
+        coordinates,
+        color: tracePaint.coreColor,
+        width,
+      })),
+    ];
+  }, [splitLines, traceWidth, tracePaint.coreColor]);
 
   useEffect(() => {
     let cancelled = false;

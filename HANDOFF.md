@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **19 Oct, the map at 60 fps (T-278):** `gfxinfo` could not see the map's lag; the new probe
+  `tools/measure-map-frames.sh` reads frames on screen. Bruma's pan was 30 fps, WalkNYC's 60;
+  the cause was 636 polylines (one per lit piece). Now one polyline with invisible gaps, plus
+  the 87 pieces with a free end on their own for round caps: 59 to 60 fps. On the P30 (field
+  build); the lead has not felt it yet. The replay still draws one polyline per run.
+
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021
   keeps Porto Santo inside the trip); the P30's trip repaired that evening (32 joined into 31).
@@ -27,7 +33,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **17 Oct, the west and north coast:** 83.1% of the route within 10 m (two mode-switching faults,
   fixed that evening, not yet field-tested), battery **about 2.1 points an hour** (2 on 16 Oct),
   and **Huawei's warning at 10:41** (it judges a rolling 24 hours, so 16 Oct may be the cause).
-- **Built since, from the lead's notes** (all on the P30, `06a5206`, 1,140 tests): stops end after
+- **Built since, from the lead's notes** (all on the P30, `06a5206`, 1,140 tests; 1,159 since T-278): stops end after
   5 still minutes (D-106); 81 places (São Vicente seafront, Fanal forest, *Miradouro da Ribeira da
   Janela*, whose why-lines await the lead); medals open their set (T-235); tunnels plain, lines
   simplified, the map's memory 501 to 315 MB (T-254); the day view decluttered and the film for a

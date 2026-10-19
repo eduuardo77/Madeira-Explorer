@@ -205,7 +205,7 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
-- [~] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
+- [x] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
       laggy"*). **Phase 0 done, the baseline.** `gfxinfo` (T-254's 0.00% janky) cannot see this: the
       map draws on its own GL thread into a TextureView, and a slow thread produces fewer frames,
       not late ones. New probe `tools/measure-map-frames.sh` reads SurfaceFlinger's present times
@@ -220,8 +220,20 @@ permission, L3 privacy contact.
       30.0/28.9; plain joints and caps, not clickable, 29.6/29.7; all four off 59.4/60.2. **The lit
       roads alone halve the frame rate**; nothing else measured moves it, so the camera, overlay and
       clickable fixes are not worth doing for speed. Switches seen to work (screenshot: no roads, no
-      controls, no dot). **Next:** what about the roads costs (number of polylines, points, width,
-      dashes), then draw them cheaper.
+      controls, no dot). **What about the roads, 2026-10-19:** drawing only the first N lines:
+      0, 80, 160 lines 60 fps; 320, 53; 450, 38; all 636, 30; all of them 2 px wide, 30. The points
+      are 4,603 in all and the dashes went on 17 Oct, so **the cost is the number of polylines**.
+      Joining pieces at shared ends would leave about 370 (~48 fps) and grow with every trip.
+      ✅ **Fixed** (`map/mergedTrace.ts`, tested; `expo-maps` patch: `gaps`, drawn as transparent
+      style spans): every piece whose ends touch another piece goes into **one** polyline, with
+      an invisible segment across each gap; a piece with a **free end** (87 of 636) keeps its own
+      polyline for its round caps. A merged piece stopped square beside a gap, with a notch;
+      doubling back along the end segment to force a round joint changed no pixel (Google drops
+      collinear points), and a square end only shows where nothing else covers it. Home map and
+      trip viewer; the replay still draws a polyline per run (it grows them frame by frame).
+      **After, release build, P30:** 59.7, 59.9, 59.4 fps, 1.1, 0.8, 1.7% missed (WalkNYC on an
+      empty map 0.8 to 1.7%); 288 MB after the workload. Seen: dead ends round, no stray lines
+      between pieces, the viewer's day drawn. **Not yet felt by the lead.**
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

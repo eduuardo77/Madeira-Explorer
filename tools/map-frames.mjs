@@ -12,17 +12,20 @@ const IDLE_MS = 250;
 const PENDING = '9223372036854775807';
 
 const text = readFileSync(process.argv[2], 'utf8');
-let periodNs = 0;
+// The refresh period opens each reading; one reading on the P30 said 8.4 ms
+// in the middle of a 60 Hz run, so the most common value is the one used.
+const periods = new Map();
 const presents = new Set();
 for (const line of text.split(/\r?\n/)) {
   const parts = line.trim().split(/\s+/);
   if (parts.length === 1 && /^\d+$/.test(parts[0])) {
-    periodNs = Number(parts[0]);
+    periods.set(parts[0], (periods.get(parts[0]) ?? 0) + 1);
   } else if (parts.length === 3 && parts[1] !== '0' && parts[1] !== PENDING) {
     presents.add(parts[1]);
   }
 }
 
+const periodNs = Number([...periods].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0);
 const times = [...presents].map((value) => Number(BigInt(value) / 1000n) / 1000).sort((a, b) => a - b);
 const periodMs = periodNs / 1e6;
 const intervals = [];

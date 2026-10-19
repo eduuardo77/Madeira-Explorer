@@ -427,8 +427,8 @@ never where the lead lives.
 - **A real purchase,** unlocked and acknowledged (5 Oct); backup and restore (4 Oct).
 
 **Still to test, in this order:**
-1. ✅ **A second carried day (17 Oct):** about 2.1 points an hour, against 2; no Huawei warning with
-   no GPS at home. ⚠ Route 83.1%: the mode-switching fixes of that evening need a day out.
+1. ✅ **A second carried day (17 Oct):** about 2.1 points an hour, against 2; ⚠ Huawei's warning
+   came at 10:41 (item 2), so no GPS at home did not keep it away that day. ⚠ Route 83.1%: the mode-switching fixes of that evening need a day out.
 2. **Huawei's warning:** it came on 12 Oct (GPS every 5 minutes at home), 16 Oct at 19:26 and
    17 Oct at 10:41. It judges a rolling 24 hours, so the 17 Oct one may still be 16 Oct's day. The
    question now: does a day out draw it on its own, and how soon after the last one.

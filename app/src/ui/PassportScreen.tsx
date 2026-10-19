@@ -70,6 +70,7 @@ import {
 import { finishTrip } from '../recording/finishTrip';
 import { unlessSame } from './unlessSame';
 import { useBackHandler } from './useBackHandler';
+import ChevronMark from './ChevronMark';
 import { album, colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 import { StatusBar } from 'expo-status-bar';
 
@@ -778,7 +779,10 @@ export default function PassportScreen({
         onPress={onClose}
         style={({ pressed }) => [styles.back, pressed && styles.pressed]}
       >
-        <Text style={styles.backText}>{`‹ ${t('passport.back')}`}</Text>
+        <View style={styles.backRow}>
+          <ChevronMark size={20} color={album.tint} direction="left" />
+          <Text style={styles.backText}>{t('passport.back')}</Text>
+        </View>
       </Pressable>
     </View>
   );
@@ -1027,6 +1031,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,
   },
+  // The chevron drawn, not typed (review of 19 Oct, N4): the font set "‹" thin
+  // and low beside the word, unlike the drawn mark everywhere else.
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginLeft: -4 },
   backText: {
     // Tinted text with a chevron: the iOS back button, which carries no fill.
     color: album.tint,

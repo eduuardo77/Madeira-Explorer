@@ -1340,7 +1340,12 @@ options as language rows; it did not search plural labels). Fixed in the script.
       1.5 s, slowest 4.0 s, none blank; most were smoke runs, not the lead's own use. ⚠ **What it
       cannot see:** a map that blanks on a return to the front. Google's load event fires once per
       mount, and a phone woken with Bruma on top (P30, 10 Oct, same process all night) logs nothing.
-      T-177 is about startup, so that limit stays written down rather than probed. **Left:** read the count after several days of the lead's trip; T-177 closes
+      T-177 is about startup, so that limit stays written down rather than probed. ⚠ **Fixed again
+      2026-10-19 (review N1):** since the map stays mounted under the passport (18 Oct), a map
+      mounted again under it on the way back from the trip viewer was timed while hidden: 104
+      false *not drawn* on 18 and 19 Oct. Now only time with the map in front counts (`active`).
+      Checked with the smoke test, the sequence that reproduced it: *not drawn 20000* then *drawn
+      20648 ms* before, *drawn 229 ms* after. **The count restarts from 2026-10-19 21:23.** **Left:** read the count after several days of the lead's trip; T-177 closes
       on none blank, or reopens with the evidence.
 - [ ] **T-196** **The location task fires before React is up** — split out of T-177.
       — **Read from source 2026-09-23 (expo-task-manager 57.0.9, `TaskService.java`), not yet measured.**

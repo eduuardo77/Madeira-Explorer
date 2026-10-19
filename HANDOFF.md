@@ -63,6 +63,13 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   blank-map probe counts time the map is covered (N1, 104 false *not drawn* since 18 Oct, so
   T-177's count is unreadable until fixed); memory 420 MB on the field build (N2); the passport's
   *‹ Mapa* still a typed character (N4).
+- **19 Oct night, the review's desk items:** N1 fixed (the probe times only while the map is the
+  screen in front; the smoke test's false *not drawn* is gone, seen on the P30), so the T-177
+  count restarts from 21:23 that night. N4 and N9: the passport's chevron and the viewer's back
+  and play are drawn; the viewer's stats size by their words; the day keeps 24 dp from the edges.
+  N5 corrected. Levada figures (desk E): the 7 without are not PR routes, so no signed distance
+  exists; left missing, as `levada-routes.mjs` requires. ⚠ **The P30's build is signed with the
+  upload key now**: install the gradle output as is; re-signing with the debug key is refused.
 
 ## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 

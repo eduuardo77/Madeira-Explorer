@@ -991,6 +991,10 @@ export default function NativeMapScreen({
   // ⚠ Only time in front counts: Google's map draws only on screen. The first
   // version timed from the screen's mount, and an app put away before its map
   // drew logged "not drawn" and then "drawn 347028 ms" (P30, 2026-10-09).
+  // ⚠ And only time uncovered: since the map stays mounted under the passport
+  // and Settings (2026-10-18), a map mounted again under the passport on the
+  // way back from the trip viewer was timed while hidden, and logged 104 false
+  // "not drawn" in two days, each followed by "drawn" as the passport closed.
   const frontSince = useRef(Date.now());
   const drawn = useRef(false);
   const mapDrawn = () => {
@@ -1001,8 +1005,10 @@ export default function NativeMapScreen({
     onShown?.();
   };
   useEffect(() => {
+    if (!active) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const watch = () => {
+      if (drawn.current) return;
       frontSince.current = Date.now();
       timer = setTimeout(() => {
         if (!drawn.current) void recordingEventDao.log('map', `not drawn ${MAP_DRAWN_WAIT_MS} ms after the screen came to the front`); // i18n-exempt: diary line, T-259 probe
@@ -1012,16 +1018,18 @@ export default function NativeMapScreen({
       if (timer !== null) clearTimeout(timer);
       timer = null;
     };
-    watch();
+    // Not `=== 'active'`: a launch may still read 'unknown', and missing the
+    // opening that matters (a pre-started process, T-177) is the worse fault.
+    if (AppState.currentState !== 'background') watch();
     const subscription = AppState.addEventListener('change', (next) => {
       stop();
-      if (next === 'active' && !drawn.current) watch();
+      if (next === 'active') watch();
     });
     return () => {
       stop();
       subscription.remove();
     };
-  }, []);
+  }, [active]);
 
   if (failure !== null) {
     return (

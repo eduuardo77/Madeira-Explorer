@@ -76,6 +76,7 @@ import {
   type ViewerStamp,
 } from './tripDays';
 import ChevronMark from '../ui/ChevronMark';
+import Svg, { Path } from 'react-native-svg';
 import { buildShareScene } from './tripShare';
 import { loadTripView, type TripView } from './tripViewerData';
 
@@ -188,8 +189,11 @@ export default function TripViewerScreen({
         top: TOP_CLEARANCE,
         bottom: CARD_CLEARANCE,
         // Tighter than the share's: a day that spans the island fills more of the width.
-        left: spacing.md,
-        right: spacing.md,
+        // ⚠ Not spacing.md: at 16 dp the 18 Oct day met the screen's left edge
+        // at Praia Formosa (review of 19 Oct, N9), the thick line and the
+        // stamp's mark reaching past the box their points make.
+        left: spacing.lg,
+        right: spacing.lg,
       },
     }),
     [width, height],
@@ -476,7 +480,9 @@ export default function TripViewerScreen({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.roundGlyph, { color: chrome.content }]}>{'←'}</Text>
+              <Svg width={22} height={22} viewBox="0 0 24 24" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                <Path d="M20 12H5M11 5l-7 7 7 7" stroke={chrome.content} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </Svg>
             </Pressable>
             {/* T-275: the timelapse and the share are of the trip shown, any of
                 them, through the same masked export. */}
@@ -492,7 +498,9 @@ export default function TripViewerScreen({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.playGlyph, { color: chrome.link }]}>{'▶'}</Text>
+              <Svg width={18} height={18} viewBox="0 0 24 24" style={styles.playGlyph} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                <Path d="M7 4.5 L19.5 12 L7 19.5 Z" fill={chrome.link} stroke={chrome.link} strokeWidth={2} strokeLinejoin="round" />
+              </Svg>
             </Pressable>
           </View>
           <Pressable
@@ -734,7 +742,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: mapChrome.light.elevation,
   },
-  roundGlyph: { fontSize: fontSize.title, fontWeight: '600' },
   pill: {
     height: PILL,
     paddingHorizontal: spacing.md,
@@ -744,7 +751,9 @@ const styles = StyleSheet.create({
   },
   pillCentre: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   buttonGroup: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  playGlyph: { fontSize: fontSize.label, marginLeft: 3 },
+  // Drawn, as `BackBar`'s arrow and `ChevronMark` are (review of 19 Oct, N4):
+  // the typed "←" and "▶" took their weight and height from the font.
+  playGlyph: { marginLeft: 2 },
   pillText: { fontSize: fontSize.small, fontWeight: '600' },
   tagAnchor: {
     position: 'absolute',
@@ -788,7 +797,9 @@ const styles = StyleSheet.create({
   },
   arrowOff: { opacity: 0.35 },
   stats: { flexDirection: 'row', marginTop: spacing.md },
-  stat: { flex: 1, alignItems: 'center' },
+  // Sized by its words, not a third each (review of 19 Oct, N9): an equal
+  // third broke *Estradas acesas* over two lines beside one-line neighbours.
+  stat: { flexGrow: 1, flexShrink: 1, flexBasis: 'auto', alignItems: 'center', paddingHorizontal: spacing.xs },
   statDivided: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: colors.surfaceRaised },
   statValue: { color: colors.text, fontSize: fontSize.label, fontWeight: '700' },
   statLabel: {

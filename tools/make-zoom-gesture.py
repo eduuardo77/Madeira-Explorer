@@ -16,7 +16,7 @@ taps started and ended two outings on the lead's phone.
 """
 import sys
 
-X, BOTTOM, STEP, FRAME_MS = 540, 1750, 20, 16
+X, BOTTOM, STEP, FRAME_MS = 640, 1750, 20, 16
 
 
 def main(path, top):
@@ -44,4 +44,4 @@ def main(path, top):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 530)
+    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 1100)

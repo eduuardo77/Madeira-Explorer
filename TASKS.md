@@ -269,6 +269,14 @@ permission, L3 privacy contact.
       tiles up to 2x before the next, so the width drifts (the prototype drew 1.5 to 1.8x A; centred,
       0.7 to 1.4x), soft mid-zoom, roads painted after the basemap in a new area. Shown to the lead in
       `tools/out/tiles-vs-lines.html`; **their call** whether to build it.
+      ⚠ **Then, 19 Oct afternoon, two corrections.** (1) **Every zoom test until then ran over the sea
+      south of Funchal**: the pan overshot, the anchor sat at y = 530, the roads only at the top edge.
+      Like for like with each other, not with what follows. `measure-map-zoom.sh` now pans to y = 1,100
+      and zooms there. Over the roads: lines 46.3, 57.5; tiles at 1, 1.25 and the prototype's width
+      59.0 to 59.8, width no factor. (2) **With tiles the roads vanish mid-zoom**: orange pixels in a
+      burst of screenshots through one zoom, lines 1,385 to 1,777 in every frame, tiles 1,913, 0, 0,
+      1,959 (about half a second gone). So part of the tiles' 60 is no roads to draw. Keeping them on
+      screen while zooming is untested. All of it shown to the lead in `tools/out/tiles-vs-lines.html`.
       **The replay** (whole trip, `tools/record-frames.sh`): **28 fps, 27 freezes over 100 ms in
       25 s**: every 100 ms it resent every stroke as its own polyline. Now strokes go 8 to a line
       (`replayMap.STROKES_PER_LINE`, gaps across blackouts, a `version` per line) and the screen

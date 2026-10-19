@@ -553,6 +553,9 @@ the Gradle output under `node_modules/expo-maps/android/build` has paths too lon
 `--exclude` did not keep it out (the patch swallowed 51,000 lines of it). Move that folder out of
 the package, run `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.autocrlf GIT_CONFIG_VALUE_0=false npx
 patch-package expo-maps`, move it back, and read the diff of the `.patch` before committing.
+Also tested (T-279): `npm pack expo-maps@57.0.1` into an empty scratch folder and `git diff
+--no-index` each patched file against it, prefixes fixed to `a/node_modules/...`; check it with
+`git apply` on a second clean copy and `cmp` before replacing the patch.
 
 ⚠ **Since 2026-10-04 `expo-location` is compiled from source too**, for
 `app/patches/expo-location+57.0.9.patch`: `startLocationUpdatesAsync` refused *any* call from the

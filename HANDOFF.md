@@ -58,6 +58,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **Next tests (the lead):** a day out with stops after a quiet day at home, then an airplane-mode
   day for Bruma's own battery share. Both in `docs/field-test-log.md`, *Next test*.
 - **Open for the lead:** the new place's why-lines; whether the app states ~2 points an hour (D-041).
+- **Review, 19 Oct evening:** `docs/bruma-score-and-plan-2026-10-19.md`, strict **13.3 / 20** (was
+  12.9). First in its plan: version 10 on the closed track (R1, ten days waiting). Found: the
+  blank-map probe counts time the map is covered (N1, 104 false *not drawn* since 18 Oct, so
+  T-177's count is unreadable until fixed); memory 420 MB on the field build (N2); the passport's
+  *‹ Mapa* still a typed character (N4).
 
 ## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 

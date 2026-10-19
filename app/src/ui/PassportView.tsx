@@ -74,6 +74,7 @@ import UnlockNudge from './UnlockNudge';
 import { postmarkFor } from './postmark';
 import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
+import ChevronMark from './ChevronMark';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
 /**
@@ -795,7 +796,7 @@ function PassportView({
                   <Text style={styles.tripDates}>{trip.dates}</Text>
                   <Text style={styles.tripDetail}>{trip.detail}</Text>
                 </View>
-                <Text style={styles.tripChevron}>{'›'}</Text>
+                <ChevronMark size={22} color={album.textMuted} />
               </Pressable>
             ))}
           </View>
@@ -1089,7 +1090,6 @@ const styles = StyleSheet.create({
   tripText: { flex: 1, gap: 2 },
   tripDates: { color: album.text, fontSize: fontSize.body, fontWeight: '600' },
   tripDetail: { color: album.textMuted, fontSize: fontSize.small },
-  tripChevron: { color: album.textMuted, fontSize: fontSize.title },
   footnote: {
     color: album.textMuted,
     fontSize: fontSize.small,

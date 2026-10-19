@@ -76,6 +76,7 @@ import {
   type DayRun,
   type ViewerStamp,
 } from './tripDays';
+import ChevronMark from '../ui/ChevronMark';
 import { buildShareScene } from './tripShare';
 import { loadTripView, type TripView } from './tripViewerData';
 
@@ -595,7 +596,7 @@ export default function TripViewerScreen({
         <View style={styles.card}>
           <View style={styles.nav}>
             <Arrow
-              glyph={'‹'}
+              direction="left"
               label={t('trip.a11y.previous')}
               enabled={dayIndex > 0}
               onPress={() => setDayIndex((i) => Math.max(0, i - 1))}
@@ -604,7 +605,7 @@ export default function TripViewerScreen({
               <Text style={styles.title}>{dayTitle(day.startTs, language)}</Text>
             </View>
             <Arrow
-              glyph={'›'}
+              direction="right"
               label={t('trip.a11y.next')}
               enabled={dayIndex < days.length - 1}
               onPress={() => setDayIndex((i) => Math.min(days.length - 1, i + 1))}
@@ -631,12 +632,12 @@ export default function TripViewerScreen({
 }
 
 function Arrow({
-  glyph,
+  direction,
   label,
   enabled,
   onPress,
 }: {
-  glyph: string;
+  direction: 'left' | 'right';
   label: string;
   enabled: boolean;
   onPress: () => void;
@@ -655,7 +656,7 @@ function Arrow({
         pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.arrowGlyph}>{glyph}</Text>
+      <ChevronMark size={24} color={colors.text} direction={direction} />
     </Pressable>
   );
 }
@@ -767,7 +768,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   arrowOff: { opacity: 0.35 },
-  arrowGlyph: { color: colors.text, fontSize: fontSize.title, lineHeight: fontSize.title + 2 },
   stats: { flexDirection: 'row', marginTop: spacing.md },
   stat: { flex: 1, alignItems: 'center' },
   statDivided: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: colors.surfaceRaised },

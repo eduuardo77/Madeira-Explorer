@@ -65,6 +65,7 @@ import type { PermissionLevel } from '../recording/LocationProvider';
 import { TRACKING_QUALITIES, type TrackingQuality } from '../recording/trackingPreference';
 import type { PassportSettings } from '../entitlement/settingsPassport';
 import BackBar from './BackBar';
+import ChevronMark from './ChevronMark';
 import SettingsIcon, { SETTINGS_ICON_SIZE, type SettingsIconName } from './SettingsIcon';
 import Toggle from './Toggle';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
@@ -229,9 +230,9 @@ function ListRow({
         </Text>
       )}
       {onPress === undefined || tone !== 'link' ? null : (
-        <Text style={styles.chevron} accessibilityElementsHidden importantForAccessibility="no">
-          ›
-        </Text>
+        <View style={styles.chevron}>
+          <ChevronMark size={20} color={colors.textMuted} />
+        </View>
       )}
     </>
   );
@@ -733,7 +734,7 @@ const styles = StyleSheet.create({
   },
   rowTextBeside: { flex: 0, flexShrink: 0 },
   rowValue: { flex: 1, color: colors.textMuted, fontSize: fontSize.small, textAlign: 'right' },
-  chevron: { color: colors.textMuted, fontSize: fontSize.body, marginLeft: spacing.xs },
+  chevron: { marginLeft: spacing.xs },
   rowDisabled: { opacity: 0.5 },
   // Under the label, not under the glyph: the hairline starts where words do.
   divider: {

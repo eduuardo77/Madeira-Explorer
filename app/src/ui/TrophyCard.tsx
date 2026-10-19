@@ -22,6 +22,7 @@ import { designFor } from '../passport/stampArt';
 import { REFUSAL_KEYS, shareCardImage } from '../souvenir/shareTrip';
 import StampSheen from './StampSheen';
 import StampArt from './StampArt';
+import ChevronMark from './ChevronMark';
 import { postmarkFor } from './postmark';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
 import { useReduceMotion } from './useReduceMotion';
@@ -219,7 +220,9 @@ export default function TrophyCard({
                     {next.countsForMedal ? ` · ${t('trophy.next.medal')}` : ''}
                   </Text>
                 </View>
-                <Text style={styles.nextGo}>›</Text>
+                <View style={styles.nextGo}>
+                  <ChevronMark size={22} color={reward.link} />
+                </View>
               </Pressable>
             </Animated.View>
           )}
@@ -457,11 +460,7 @@ const styles = StyleSheet.create({
     color: reward.textMuted,
     fontSize: fontSize.small,
   },
-  nextGo: {
-    color: reward.link,
-    fontSize: fontSize.title,
-    marginLeft: spacing.sm,
-  },
+  nextGo: { marginLeft: spacing.sm },
   buttons: {
     alignSelf: 'stretch',
     flexDirection: 'row',

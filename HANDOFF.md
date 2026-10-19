@@ -20,6 +20,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   Then the three leftovers: zoom 47 to 55 (Google repainting the thick roads; thinner street
   width is the lead's call, D-104); the replay 28 to 51 fps (lines sent by id, `setLines`);
   roads packed two free ends to a line (`packTrace`).
+  Lines kept over tiles (the lead). **R3, R4 re-measured** (store-configuration build, phone cool):
+  cold start 650 to 730 ms (800 just after install), memory 303 to 311 MB after the workload and
+  309 to 315 settled; neither reproduces 16 Oct's 2.3 s and 356 MB. **Desk C:** every text chevron
+  (› ‹ ⌃ ⌄) is a drawn `ui/ChevronMark`; seen on the P30 in the passport and Settings, not yet in
+  the trip viewer, the trophy card or the privacy sections.
 
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021

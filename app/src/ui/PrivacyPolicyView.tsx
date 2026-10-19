@@ -28,6 +28,7 @@ import { deviceLanguage, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
 import { POLICY_VERSION, policySections } from '../legal/privacyPolicy';
 import BackBar from './BackBar';
+import ChevronMark from './ChevronMark';
 import SettingsIcon, { type SettingsIconName } from './SettingsIcon';
 import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 
@@ -82,9 +83,7 @@ export default function PrivacyPolicyView({ onClose }: { onClose: () => void }) 
                     style={({ pressed }) => [styles.sectionRow, pressed && styles.pressed]}
                   >
                     <Text style={styles.sectionTitle}>{section.heading}</Text>
-                    <Text style={styles.chevron} accessibilityElementsHidden importantForAccessibility="no">
-                      {expanded ? '⌃' : '⌄'}
-                    </Text>
+                    <ChevronMark size={20} color={colors.textMuted} direction={expanded ? 'up' : 'down'} />
                   </Pressable>
                   {expanded
                     ? section.paragraphs.map((paragraph) => (
@@ -143,7 +142,6 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
   },
   sectionTitle: { flex: 1, color: colors.text, fontSize: fontSize.body, fontWeight: '600' },
-  chevron: { color: colors.textMuted, fontSize: fontSize.body },
   body: {
     color: colors.text,
     fontSize: fontSize.body,

@@ -277,6 +277,8 @@ permission, L3 privacy contact.
       burst of screenshots through one zoom, lines 1,385 to 1,777 in every frame, tiles 1,913, 0, 0,
       1,959 (about half a second gone). So part of the tiles' 60 is no roads to draw. Keeping them on
       screen while zooming is untested. All of it shown to the lead in `tools/out/tiles-vs-lines.html`.
+      ✅ **Decided, the lead, 19 Oct: the lines stay** (roads visible at every moment over the last few
+      zoom frames). Tiles are not to be built.
       **The replay** (whole trip, `tools/record-frames.sh`): **28 fps, 27 freezes over 100 ms in
       25 s**: every 100 ms it resent every stroke as its own polyline. Now strokes go 8 to a line
       (`replayMap.STROKES_PER_LINE`, gaps across blackouts, a `version` per line) and the screen

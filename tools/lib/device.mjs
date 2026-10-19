@@ -49,7 +49,11 @@ export function device(serial = null) {
 
   const size = () => shell('wm size').match(/(\d+)x(\d+)/).slice(1).map(Number);
 
-  /** Wait until `target` (a label, or a RegExp) is on screen, scrolling if asked. */
+  /**
+   * Wait until `target` (a label, or a RegExp) is on screen, scrolling if asked:
+   * `scroll: true` down the page, `'up'` back to its top (a page kept mounted,
+   * like the passport since 18 Oct, reopens where it was left).
+   */
   async function reach(target, { scroll = false, timeoutMs = 12_000 } = {}) {
     const until = Date.now() + timeoutMs;
     for (let swipes = 0; Date.now() < until; ) {
@@ -62,7 +66,8 @@ export function device(serial = null) {
         // middle passed over Settings' tier buttons, and a real phone is not
         // obliged to read every swipe as not a tap (2026-09-25).
         const [, height] = size();
-        shell(`input swipe ${MARGIN_X} ${height * 0.75} ${MARGIN_X} ${height * 0.35} 300`);
+        const [from, to] = scroll === 'up' ? [0.35, 0.75] : [0.75, 0.35];
+        shell(`input swipe ${MARGIN_X} ${height * from} ${MARGIN_X} ${height * to} 300`);
         swipes += 1;
         await pause(400);
       } else {

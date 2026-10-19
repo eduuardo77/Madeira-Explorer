@@ -23,8 +23,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   Lines kept over tiles (the lead). **R3, R4 re-measured** (store-configuration build, phone cool):
   cold start 650 to 730 ms (800 just after install), memory 303 to 311 MB after the workload and
   309 to 315 settled; neither reproduces 16 Oct's 2.3 s and 356 MB. **Desk C:** every text chevron
-  (› ‹ ⌃ ⌄) is a drawn `ui/ChevronMark`; seen on the P30 in the passport and Settings, not yet in
-  the trip viewer, the trophy card or the privacy sections.
+  (› ‹ ⌃ ⌄) is a drawn `ui/ChevronMark`, seen on the P30 in all five places. The smoke test passes;
+  it now scrolls the passport back to its top (kept mounted, it reopens where it was left).
 
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021

@@ -197,13 +197,13 @@ const STEPS = [
   ['back to the map', () => tap(label('settings.a11y.backToMap')).then(() => reach(MAP))],
   ['the passport', () =>
     tap(pattern('passport.a11y.openWithCount', 'map.a11y.openPassport')).then(() =>
-      reach(label('passport.title'))
+      reach(label('passport.title'), { scroll: 'up' })
     )],
   ['a stamp, its card, and Close', async () => {
     await tap(pattern('passport.a11y.stampCollected', 'passport.a11y.stampUncollected', 'passport.locked.a11y'));
     await reach(label('placeCard.showOnMap'));
     await tap(label('common.close'));
-    await reach(label('passport.title'));
+    await reach(label('passport.title'), { scroll: 'up' });
   }],
   ['the trip viewer and its timelapse, if offered (T-217, D-099)', async () => {
     const watch = findNode(await screen(), label('replay.watch'));
@@ -217,7 +217,7 @@ const STEPS = [
     await reach(label('replay.close'), { timeoutMs: 25_000 });
     await tap(label('replay.close'));
     await tap(label('trip.a11y.back'), { timeoutMs: 20_000 });
-    await reach(label('passport.title'));
+    await reach(label('passport.title'), { scroll: 'up' });
     return 'the viewer, its timelapse, and back';
   }],
   ['a collected stamp’s trophy, and Back (T-270)', async () => {

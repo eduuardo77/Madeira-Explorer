@@ -228,6 +228,10 @@ test('a control’s spoken name contains the words it shows', () => {
 
   for (const file of sources().filter((candidate) => candidate.endsWith('.tsx'))) {
     for (const block of code(file).match(/<Pressable\b[\s\S]*?<\/Pressable>/g) ?? []) {
+      // A self-closing Pressable shows no text, and the match would run on into the next one's.
+      if (openingProps(block, 0).includes('/>')) {
+        continue;
+      }
       const spoken = /accessibilityLabel=\{\s*t\(\s*'([\w.]+)'/.exec(block)?.[1];
       const shown = /<Text\b[^>]*>\s*\{\s*t\(\s*'([\w.]+)'/.exec(block)?.[1];
       if (spoken === undefined || shown === undefined || spoken === shown) {

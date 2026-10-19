@@ -12,8 +12,10 @@
  * WHAT IS ON THE MAP
  * ------------------
  * The day's lit roads at full strength, and the rest of the trip pale behind
- * them so the day is seen in its place. The day's stamps as marks, each with a
- * dark tag giving the time it was earned. **No S and E**: WalkNYC marks where a
+ * them so the day is seen in its place. The day's stamps as marks, clean: a tap
+ * on one shows a dark tag with its name and the time it was earned, and the
+ * *Horas* pill shows every time (the lead, 19 Oct 2026, the times made the
+ * picture less pleasing; the share follows the pill). **No S and E**: WalkNYC marks where a
  * walk began and ended, and a Bruma day begins and ends at the hotel, which the
  * app keeps out of everything shared (D-040).
  *
@@ -133,6 +135,10 @@ export default function TripViewerScreen({
   const [dayIndex, setDayIndex] = useState(-1);
   /** ▶ was pressed: this day, or the whole trip. */
   const [choosing, setChoosing] = useState(false);
+  /** Every stamp's time on the map, the *Horas* pill. Off, the picture is clean. */
+  const [showTimes, setShowTimes] = useState(false);
+  /** The stamp tapped (its group's id): its tag names the place as well. */
+  const [picked, setPicked] = useState<string | null>(null);
   const { width, height } = useWindowDimensions();
   const language = deviceLanguage();
   const mapRef = useRef<GoogleMaps.MapView>(null);
@@ -305,6 +311,12 @@ export default function TripViewerScreen({
     [shown.camera, shown.stamps, marks],
   );
 
+  /** Another day: a tag tapped on this one would name a stamp no longer shown. */
+  const showDay = (index: number) => {
+    setPicked(null);
+    setDayIndex(Math.max(0, Math.min(days.length - 1, index)));
+  };
+
   const share = async () => {
     if (sharing || view === null || view === 'loading') {
       return;
@@ -390,10 +402,10 @@ export default function TripViewerScreen({
 
   const destination = getContentPack().destination ?? t('share.fallbackTitle');
 
-  // Tags that would overlap share one (`tagGroups.ts`, the lead, 17 Oct 2026).
-  const tags =
+  // Stamps that would overlap share one tag and one tap (`tagGroups.ts`, the lead, 17 Oct 2026).
+  const groups =
     shown.camera === null
-      ? null
+      ? []
       : groupTags(
           shown.stamps.map((stamp) => {
             const at = projectPoint(
@@ -408,25 +420,57 @@ export default function TripViewerScreen({
             name: shown.stamps.find((stamp) => stamp.placeId === item.id)?.name ?? '',
             time: formatClock(item.ts, language),
           }));
-          return (
-            <View
-              key={group.id}
-              accessible
-              accessibilityLabel={named.map((one) => t('trip.a11y.stampAt', one)).join('. ')}
-              pointerEvents="none"
-              style={[
-                styles.tagAnchor,
-                // Kept on screen: a stamp on the coast at the frame's edge pushed its tag off it.
-                {
-                  left: Math.max(TAG_HALF, Math.min(width - TAG_HALF, group.x)),
-                  top: group.y - TAG_LIFT,
-                },
-              ]}
-            >
-              <Text style={styles.tag}>{groupLabel(named.map((one) => one.time))}</Text>
-            </View>
-          );
+          return { ...group, label: named.map((one) => t('trip.stampAt', one)).join('. '), named };
         });
+
+  const tagAt = (group: (typeof groups)[number], text: string, half: number) => (
+    <View
+      key={group.id}
+      pointerEvents="none"
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.tagAnchor,
+        // Kept on screen: a stamp on the coast at the frame's edge pushed its tag off it.
+        // By its foot, so a tag of several lines grows upwards, away from its stamp.
+        {
+          left: Math.max(half, Math.min(width - half, group.x)),
+          bottom: height - (group.y - TAG_FOOT),
+        },
+      ]}
+    >
+      <Text style={styles.tag}>{text}</Text>
+    </View>
+  );
+
+  /** A group's times, as the *Horas* pill shows them all. */
+  const timesTag = (group: (typeof groups)[number]) =>
+    tagAt(group, groupLabel(group.named.map((one) => one.time)), TAG_HALF);
+
+  /**
+   * Clean by default (the lead, 19 Oct 2026: the times made the picture less
+   * pleasing). A tapped stamp names its places as well as their times; the pill
+   * shows every time. The share shows what the pill says, never a tapped name.
+   */
+  const viewerTags = groups.map((group) =>
+    group.id === picked
+      ? tagAt(group, group.named.map((one) => t('trip.stampAt', one)).join('\n'), NAMED_TAG_HALF)
+      : showTimes
+        ? timesTag(group)
+        : null
+  );
+
+  /** Over each stamp, the 60 dp target that shows its tag (D-015). */
+  const stampTargets = groups.map((group) => (
+    <Pressable
+      key={group.id}
+      accessibilityRole="button"
+      accessibilityLabel={group.label}
+      accessibilityHint={t('trip.a11y.stampHint')}
+      accessibilityState={{ expanded: group.id === picked }}
+      onPress={() => setPicked((current) => (current === group.id ? null : group.id))}
+      style={[styles.stampTarget, { left: group.x - MIN_TAP_TARGET / 2, top: group.y - MIN_TAP_TARGET / 2 }]}
+    />
+  ));
 
   return (
     <View style={styles.root}>
@@ -434,6 +478,7 @@ export default function TripViewerScreen({
         ref={mapRef}
         style={StyleSheet.absoluteFill}
         cameraPosition={initialCamera.current}
+        onMapClick={() => setPicked(null)}
         polylines={polylines}
         circles={circles}
         colorScheme={darkMap.dark ? GoogleMapsColorScheme.DARK : GoogleMapsColorScheme.LIGHT}
@@ -460,7 +505,8 @@ export default function TripViewerScreen({
         }}
       />
 
-      {shareScene !== null ? null : tags}
+      {shareScene !== null ? null : stampTargets}
+      {shareScene !== null ? null : viewerTags}
 
       {shareScene !== null ? null : (
         <View style={styles.topRow} pointerEvents="box-none">
@@ -523,6 +569,28 @@ export default function TripViewerScreen({
         </View>
       )}
 
+      {shareScene !== null ? null : (
+        <View style={styles.timesRow} pointerEvents="box-none">
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={t('trip.times')}
+            accessibilityHint={t('trip.a11y.times')}
+            accessibilityState={{ checked: showTimes }}
+            onPress={() => setShowTimes((on) => !on)}
+            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+            style={({ pressed }) => [
+              styles.pill,
+              { backgroundColor: showTimes ? chrome.link : chrome.surface },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.pillText, { color: showTimes ? chrome.surface : chrome.link }]}>
+              {t('trip.times')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       {shareScene !== null || !choosing ? null : (
         <View style={styles.choiceRow} pointerEvents="box-none">
           {day !== null ? (
@@ -571,7 +639,7 @@ export default function TripViewerScreen({
               onLoad={() => snapshotLoaded.current?.()}
             />
           )}
-          {tags}
+          {showTimes ? groups.map(timesTag) : null}
           <View style={styles.card}>
             <View style={styles.navText}>
               <Text style={styles.title}>{range}</Text>
@@ -599,7 +667,7 @@ export default function TripViewerScreen({
               direction="left"
               label={t('trip.a11y.previous')}
               enabled={dayIndex > 0}
-              onPress={() => setDayIndex((i) => Math.max(0, i - 1))}
+              onPress={() => showDay(dayIndex - 1)}
             />
             <View style={styles.navText}>
               <Text style={styles.title}>{dayTitle(day.startTs, language)}</Text>
@@ -608,7 +676,7 @@ export default function TripViewerScreen({
               direction="right"
               label={t('trip.a11y.next')}
               enabled={dayIndex < days.length - 1}
-              onPress={() => setDayIndex((i) => Math.min(days.length - 1, i + 1))}
+              onPress={() => showDay(dayIndex + 1)}
             />
           </View>
           <View style={styles.stats}>
@@ -674,10 +742,18 @@ function Stat({ value, label, first = false }: { value: string; label: string; f
 const ROUND = 40;
 const PILL = 34;
 const ARROW = 36;
-/** How far above its stamp a tag sits, so the mark stays visible under it. */
+/** How far above its stamp a tag's top sits, so the mark stays visible under it. */
 const TAG_LIFT = 34;
-/** Half the widest tag ("12:07 PM"): how close to an edge a tag's centre may come. */
+/**
+ * How far above its stamp a tag's foot sits: `TAG_LIFT` less a one line tag's
+ * height (14 sp text and its padding, about 22 dp), so a time tag stays where
+ * it was seen right on the P30 when tags were placed by their top.
+ */
+const TAG_FOOT = TAG_LIFT - 22;
+/** Half the widest time tag ("12:07 PM"): how close to an edge a tag's centre may come. */
 const TAG_HALF = 70;
+/** Half a tag that names its place: the anchor's width, so a long name wraps inside the screen. */
+const NAMED_TAG_HALF = 120;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
@@ -697,6 +773,12 @@ const styles = StyleSheet.create({
     left: spacing.md,
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  /** Under the share pill, on the right, level with the film's choice on the left. */
+  timesRow: {
+    position: 'absolute',
+    top: spacing.xl + spacing.sm + PILL + spacing.md,
+    right: spacing.md,
   },
   topRow: {
     position: 'absolute',
@@ -729,10 +811,11 @@ const styles = StyleSheet.create({
   pillText: { fontSize: fontSize.small, fontWeight: '600' },
   tagAnchor: {
     position: 'absolute',
-    transform: [{ translateX: -80 }],
-    width: 160,
+    transform: [{ translateX: -NAMED_TAG_HALF }],
+    width: NAMED_TAG_HALF * 2,
     alignItems: 'center',
   },
+  stampTarget: { position: 'absolute', width: MIN_TAP_TARGET, height: MIN_TAP_TARGET },
   tag: {
     backgroundColor: '#1C1C1E',
     color: '#FFFFFF',
@@ -742,6 +825,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
     overflow: 'hidden',
+    textAlign: 'center',
   },
   card: {
     position: 'absolute',

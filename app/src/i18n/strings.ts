@@ -661,7 +661,12 @@ export const STRINGS = {
   'trip.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
   'trip.a11y.previous': s('Previous day', 'Dia anterior', 'Vorheriger Tag'),
   'trip.a11y.next': s('Next day', 'Dia seguinte', 'Nächster Tag'),
-  'trip.a11y.stampAt': s('{name}, at {time}', '{name}, às {time}', '{name}, um {time}'),
+  'trip.stampAt': s('{name}, at {time}', '{name}, às {time}', '{name}, um {time}'),
+  // The lead, 19 Oct 2026: the times make the picture less pleasing, so they
+  // are off until this pill or a tap on a stamp asks for them.
+  'trip.times': s('Times', 'Horas', 'Uhrzeiten'),
+  'trip.a11y.times': s('Shows the time of every stamp', 'Mostra a hora de cada carimbo', 'Zeigt die Uhrzeit jedes Stempels'),
+  'trip.a11y.stampHint': s('Shows its name and time', 'Mostra o nome e a hora', 'Zeigt Namen und Uhrzeit'),
   'replay.watch': s('Watch your trip', 'Ver a tua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
   'trip.nothingLit': s(

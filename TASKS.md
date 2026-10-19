@@ -205,6 +205,16 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [~] **T-279** *Ver a tua viagem*, the photo clean and the film smooth (the lead, 2026-10-19: the
+      times make the day photo less pleasing; the film lags, loses the line out of frame, shows
+      blanks in tunnels and lingers where more time was spent). **Photo done 2026-10-19:** no tags
+      by default, a tap on a stamp shows its name and time, the *Horas* pill shows every time, and
+      the share follows the pill. Not yet seen on the P30. **Film, open:** pen and camera on one
+      clock, by ground distance (the pen advanced a road point per step and the camera by distance,
+      so they drifted apart, and dense streets ate the time); roads driven twice drawn faster; a
+      smooth camera path played natively instead of six eased moves; the line grown 30 times a
+      second, not 10 (only the growing line is sent since T-278); the blanks measured on the
+      lead's trip before choosing a fix; the unused stamp cue code removed.
 - [x] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
       laggy"*). **Phase 0 done, the baseline.** `gfxinfo` (T-254's 0.00% janky) cannot see this: the
       map draws on its own GL thread into a TextureView, and a slow thread produces fewer frames,

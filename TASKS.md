@@ -250,6 +250,24 @@ permission, L3 privacy contact.
       31 untouched). The gesture now never touches below y = 1,750, asserted. **Left:** zoom at
       51 to 57, not 60: the capped pieces and the merged line's own cost while zooming.
       ✅ **Felt by the lead on the P30, 2026-10-19:** *"Pinching feels smooth now."*
+      **Then, the lead: "still a bit of stutter while zooming"; the three leftovers.** Zoom over
+      Funchal, switches, release build (none 46 to 55 run to run): no colour spans 50 to 52; no
+      capped pieces 49 to 54; no merged line 51 to 56; one tiny line 59; points halved (15 m
+      simplification, 4,603 to 2,450) 52 to 54; plain joints 47 to 54; all roads 2 px 56 to 57;
+      half the pieces (about 300 lines) 39 to 47. **What is left is Google repainting thick,
+      overlapping roads on every zoom frame**, plus the count once it grows. Done: `packTrace`
+      (every free end at a polyline's end, two to a line: 49 lines, not 88), which keeps the count
+      from climbing with every dead end; no zoom gain today, so not claimed. **Open for the lead:**
+      the street-zoom width (4 dp, D-104 Provisional) is the remaining lever, a few fps.
+      **The replay** (whole trip, `tools/record-frames.sh`): **28 fps, 27 freezes over 100 ms in
+      25 s**: every 100 ms it resent every stroke as its own polyline. Now strokes go 8 to a line
+      (`replayMap.STROKES_PER_LINE`, gaps across blackouts, a `version` per line) and the screen
+      sends only changed lines through a new `setLines`/`removeLines` (`expo-maps` patch): **51
+      fps, 2 freezes**. With no lines sent at all the film holds 60, so what remains is the same
+      cost as zooming with roads on screen. Tried and dropped, no measured gain: 32 strokes to a
+      line, Google's polylines changed directly instead of through Compose state. The replay's
+      `properties`/`uiSettings` were new objects at every tick; memoised (no measured gain either).
+      `tunnelDashes.ts` deleted: plain since 17 Oct, its last user was the replay.
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

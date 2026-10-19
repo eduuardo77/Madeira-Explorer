@@ -57,7 +57,7 @@ import { effectiveMapStyle, parseMapStyle } from '../map/mapStylePreference';
 import { supportsNativeDarkMap } from '../map/mapsRenderer';
 import { PLACE_MARKER_PAINT } from '../map/placeStyle';
 import { TRACE_PAINT } from '../map/traceStyle';
-import { splitTrace } from '../map/mergedTrace';
+import { packTrace } from '../map/mergedTrace';
 import { groupLabel, groupTags } from './tagGroups';
 import { formatDistance } from '../places/placeCard';
 import * as appStateDao from '../storage/dao/appStateDao';
@@ -276,18 +276,16 @@ export default function TripViewerScreen({
     // A share has no pale trip: only the masked roads may be in that picture.
     // Only the day shown (the lead, 17 Oct 2026): the other days' roads, drawn
     // pale behind it, cluttered the view.
-    // One polyline for the day with gaps between its runs, and the runs with a
-    // free end on their own for their round caps (T-278, `mergedTrace.ts`).
-    const { merged, capped } = splitTrace(
+    // As few polylines as the runs' round ends allow (T-278, `mergedTrace.ts`).
+    return packTrace(
       shown.runs.map((run) => run.points.map(([latitude, longitude]) => ({ latitude, longitude })))
-    );
-    const width = paint.coreWidth * px;
-    return [
-      ...(merged.coordinates.length < 2
-        ? []
-        : [{ id: 'day', coordinates: merged.coordinates, gaps: merged.gaps, color: paint.coreColor, width }]),
-      ...capped.map((coordinates, index) => ({ id: `day-end-${index}`, coordinates, color: paint.coreColor, width })),
-    ];
+    ).map(({ coordinates, gaps }, index) => ({
+      id: `day-${index}`,
+      coordinates,
+      gaps,
+      color: paint.coreColor,
+      width: paint.coreWidth * px,
+    }));
   }, [view, day, paint, shareScene, shown.runs]);
 
   const marks = PLACE_MARKER_PAINT[styleName].collected;

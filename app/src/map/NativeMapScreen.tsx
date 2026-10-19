@@ -117,7 +117,7 @@ import { decodeMapSnapshot, encodeMapSnapshot } from './mapSnapshot';
 import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
-import { splitTrace } from './mergedTrace';
+import { packTrace } from './mergedTrace';
 import { nativeWidthSteps, traceWidthDp } from './traceWidth';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -413,47 +413,27 @@ export default function NativeMapScreen({
   }, [active]);
 
   /**
-   * The lit roads as **one** polyline with invisible gaps between the pieces,
-   * plus the pieces with a free end on their own, for their round caps (T-278,
-   * `mergedTrace.ts`): Google's map pays per polyline on every frame, and 636
-   * of them held a pan to 30 fps on the P30. Thinner as the camera zooms out
-   * (D-104, `traceWidth.ts`): the steps go to the native map, which switches
-   * the width itself. Set from here, each step crossed in a pinch resent every
-   * road and froze the map for 100 to 200 ms (T-278).
+   * The lit roads in as few polylines as their round ends allow (T-278,
+   * `mergedTrace.ts`): Google's map pays per polyline on every frame, and one
+   * per piece (636) held a pan to 30 fps on the P30. Thinner as the camera
+   * zooms out (D-104, `traceWidth.ts`): the steps go to the native map, which
+   * switches the width itself; set from here, each step crossed in a pinch
+   * resent every road and froze the map for 100 to 200 ms.
    */
-  const splitLines = useMemo(
-    () =>
-      splitTrace(
-        traceLines.map((line) => line.points.map(([lat, lon]) => ({ latitude: lat, longitude: lon })))
-      ),
-    [traceLines]
-  );
   const tracePolylines = useMemo<Polyline[]>(() => {
     const width = px(traceWidthDp(Infinity));
     const widthSteps = nativeWidthSteps(PixelRatio.get());
-    const { merged, capped } = splitLines;
-    return [
-      ...(merged.coordinates.length < 2
-        ? []
-        : [
-            {
-              id: 'trace',
-              coordinates: merged.coordinates,
-              gaps: merged.gaps,
-              color: tracePaint.coreColor,
-              width,
-              widthSteps,
-            },
-          ]),
-      ...capped.map((coordinates, index) => ({
-        id: `trace-end-${index}`,
-        coordinates,
-        color: tracePaint.coreColor,
-        width,
-        widthSteps,
-      })),
-    ];
-  }, [splitLines, tracePaint.coreColor]);
+    return packTrace(
+      traceLines.map((line) => line.points.map(([latitude, longitude]) => ({ latitude, longitude })))
+    ).map(({ coordinates, gaps }, index) => ({
+      id: `trace-${index}`,
+      coordinates,
+      gaps,
+      color: tracePaint.coreColor,
+      width,
+      widthSteps,
+    }));
+  }, [traceLines, tracePaint.coreColor]);
 
   useEffect(() => {
     let cancelled = false;

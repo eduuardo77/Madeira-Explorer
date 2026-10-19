@@ -17,6 +17,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   native map now switches the width itself (`widthSteps`): zoom 51 to 57 fps, no freezes.
   ⚠ Measuring with `tools/measure-map-zoom.sh` once started two outings (a tap on *Começar
   passeio*); fixed, but any scripted touch on Bruma must stay above y = 1,750.
+  Then the three leftovers: zoom 47 to 55 (Google repainting the thick roads; thinner street
+  width is the lead's call, D-104); the replay 28 to 51 fps (lines sent by id, `setLines`);
+  roads packed two free ends to a line (`packTrace`).
 
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021

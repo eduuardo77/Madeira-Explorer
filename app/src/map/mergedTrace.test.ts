@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mergeTrace, splitTrace, type LatLng } from './mergedTrace.ts';
+import { mergeTrace, packTrace, type LatLng } from './mergedTrace.ts';
 
 const p = (latitude: number, longitude: number): LatLng => ({ latitude, longitude });
 
@@ -66,28 +66,54 @@ test('every segment of every piece is drawn, and only those (many pieces)', () =
   assert.ok(merged.gaps.every((gap, k) => k === 0 || gap > merged.gaps[k - 1]), 'ascending');
 });
 
-test('a piece with a free end is drawn on its own; pieces meeting others are merged', () => {
-  // A triangle (every end shared) and a spur off one corner that stops in the open.
-  const ab = [p(0, 0), p(0, 1)];
-  const bc = [p(0, 1), p(1, 1)];
-  const ca = [p(1, 1), p(0, 0)];
-  const spur = [p(0, 1), p(0, 2), p(0, 3)];
-  const { merged, capped } = splitTrace([ab, spur, bc, ca]);
-  assert.deepEqual(capped, [spur]);
-  assert.deepEqual(merged.gaps, [], 'the triangle is one continuous run');
-  assert.deepEqual(merged.coordinates, [p(0, 0), p(0, 1), p(1, 1), p(0, 0)]);
+/** A packed line's two ends: the only places its round caps are drawn. */
+const ends = (line: { coordinates: LatLng[] }) => [line.coordinates[0], line.coordinates.at(-1)!];
+
+test('packTrace: every free end is an end of a polyline, two to a polyline', () => {
+  // A triangle with three spurs off its corners, and a lone segment free at both ends.
+  const triangle = [
+    [p(0, 0), p(0, 1)],
+    [p(0, 1), p(1, 1)],
+    [p(1, 1), p(0, 0)],
+  ];
+  const spurs = [
+    [p(0, 0), p(-1, -1)],
+    [p(0, 2), p(0, 1)], // its free end first: turned round when packed
+    [p(1, 1), p(2, 2)],
+  ];
+  const lone = [p(9, 9), p(9, 8)];
+  const packed = packTrace([...triangle, ...spurs, lone]);
+  assert.equal(packed.length, 3, 'the lone piece, then the spurs two to a line');
+  const freeEnds = [p(-1, -1), p(0, 2), p(2, 2), p(9, 9), p(9, 8)].map((point) => JSON.stringify(point));
+  const lineEnds = packed.flatMap(ends).map((point) => JSON.stringify(point));
+  for (const point of freeEnds) assert.ok(lineEnds.includes(point), `${point} is a polyline end`);
 });
 
-test('an end on the middle of another piece is not free: that line covers it', () => {
-  const through = [p(0, 0), p(0, 1), p(0, 2)];
-  const tee = [p(0, 1), p(1, 1)];
-  const { capped } = splitTrace([through, tee]);
-  // The through road's own ends are free; the tee's end on it is covered, its other end free.
-  assert.deepEqual(capped, [through, tee]);
-  const closed = splitTrace([[p(0, 0), p(0, 1)], [p(0, 1), p(1, 1)], [p(1, 1), p(0, 0)]]);
-  assert.deepEqual(closed.capped, []);
+test('packTrace draws every segment of every piece, and only those', () => {
+  const lines: LatLng[][] = [
+    [p(0, 0), p(0, 1), p(0, 2)],
+    [p(0, 2), p(1, 2)],
+    [p(1, 2), p(1, 0), p(0, 0)],
+    [p(0, 1), p(5, 5)],
+    [p(1, 2), p(6, 6), p(7, 6)],
+    [p(8, 8), p(8, 9)],
+  ];
+  const undirected = (pieces: LatLng[][]) =>
+    pieces
+      .flatMap((piece) =>
+        piece.slice(1).map((end, k) => [JSON.stringify(piece[k]), JSON.stringify(end)].sort().join('|'))
+      )
+      .sort();
+  const drawn = packTrace(lines).flatMap((line) => drawnPieces(line));
+  assert.deepEqual(undirected(drawn), undirected(lines));
 });
 
-test('nothing in, nothing out; single points dropped', () => {
-  assert.deepEqual(splitTrace([[p(1, 1)], []]), { merged: { coordinates: [], gaps: [] }, capped: [] });
+test('packTrace with no free ends is the one merged line; nothing in, nothing out', () => {
+  const closed = [
+    [p(0, 0), p(0, 1)],
+    [p(0, 1), p(1, 1)],
+    [p(1, 1), p(0, 0)],
+  ];
+  assert.deepEqual(packTrace(closed), [mergeTrace(closed)]);
+  assert.deepEqual(packTrace([[p(1, 1)], []]), []);
 });

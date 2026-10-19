@@ -34,8 +34,8 @@
 
 import { fitBounds, type CameraFit, type Viewport } from '../map/cameraFit.ts';
 import type { MapStyleName } from '../map/mapStyle.ts';
+import { mergeTrace } from '../map/mergedTrace.ts';
 import { TRACE_PAINT } from '../map/traceStyle.ts';
-import { runPolylines } from '../map/tunnelDashes.ts';
 import type { Bounds } from './composition.ts';
 import type { Film, Frame } from './frame.ts';
 
@@ -43,17 +43,33 @@ import type { Film, Frame } from './frame.ts';
 export type ReplayPolyline = {
   id: string;
   coordinates: { latitude: number; longitude: number }[];
+  /** Segments not drawn, by index (`mergedTrace.ts`). */
+  gaps: number[];
   color: string;
   width: number;
-  /** A tunnel or cable car, dashed by the map (`tunnelDashes.ts`). */
-  dashed?: boolean;
+};
+
+/** One line of the film, with what it takes to tell whether it changed. */
+export type ReplayLine = {
+  polyline: ReplayPolyline;
+  /** Changes whenever the line's strokes do, and only then. */
+  version: string;
 };
 
 export type ReplayMapFrame = {
   /** Null when the box is degenerate — the caller keeps the camera it had. */
   camera: CameraFit | null;
-  polylines: ReplayPolyline[];
+  lines: ReplayLine[];
 };
+
+/**
+ * Strokes per line of the film (T-278). The strokes so far, a fixed run of
+ * them to a line: a line whose strokes are all drawn never changes again, so
+ * the screen sends the map only the line still growing. One polyline per
+ * stroke, all resent ten times a second, held the lead's whole-trip film to
+ * 28 fps with 27 freezes over 100 ms in 25 seconds.
+ */
+export const STROKES_PER_LINE = 8;
 
 export type ReplayMapOptions = {
   style: MapStyleName;
@@ -72,11 +88,12 @@ export type ReplayMapOptions = {
 /**
  * Turn one frame of the film into what the map should be showing.
  *
- * ⚠ **One polyline per stroke, never joined.** A gap between two strokes is a
+ * ⚠ **Strokes are never drawn joined.** A gap between two strokes is a
  * recording blackout, and a line across it is a road nobody proved was taken
- * (ARCHITECTURE §10). `frame.ts` keeps them apart and this must not undo it —
- * which is exactly what concatenating the coordinates into one polyline for
- * "efficiency" would do, silently.
+ * (ARCHITECTURE §10). Strokes share a polyline (`STROKES_PER_LINE`), but the
+ * segment from one to the next is a **gap**, drawn transparent
+ * (`mergedTrace.ts`); concatenating the coordinates without the gaps would
+ * draw that road, silently. `replayMap.test.ts` checks every blackout.
  */
 export function replayMapFrame(
   frame: Frame,
@@ -89,19 +106,30 @@ export function replayMapFrame(
     options.viewport
   );
 
-  // Tunnels and cable cars dashed, as on the map (`tunnelDashes.ts`).
-  const polylines = frame.strokes.flatMap((stroke, index) =>
-    runPolylines(
-      `replay-trace-${index}`,
-      stroke.map(([longitude, latitude]) => ({ latitude, longitude })),
-      frame.faded[index] === true,
-      paint.coreColor,
-      paint.coreWidth * options.pixelRatio
-    )
-  );
+  // Tunnels and cable cars plain, as on the map (the lead, 17 Oct 2026).
+  const lines: ReplayLine[] = [];
+  for (let start = 0; start < frame.strokes.length; start += STROKES_PER_LINE) {
+    const strokes = frame.strokes.slice(start, start + STROKES_PER_LINE);
+    const last = strokes[strokes.length - 1];
+    const { coordinates, gaps } = mergeTrace(
+      strokes.map((stroke) => stroke.map(([longitude, latitude]) => ({ latitude, longitude })))
+    );
+    lines.push({
+      polyline: {
+        id: `replay-trace-${start / STROKES_PER_LINE}`,
+        coordinates,
+        gaps,
+        color: paint.coreColor,
+        width: paint.coreWidth * options.pixelRatio,
+      },
+      // The last stroke is the only one that can still be growing, and a
+      // growing stroke can keep its length while its tip moves.
+      version: `${options.style}:${strokes.length}:${last.length}:${last[last.length - 1].join(',')}`,
+    });
+  }
 
   // No stamp marks: the lead, 17 Oct 2026, "remove stamp icon" from the film.
-  return { camera, polylines };
+  return { camera, lines };
 }
 
 /**

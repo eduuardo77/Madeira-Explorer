@@ -98,6 +98,26 @@ const MAP_READY_FALLBACK_MS = 3_000;
 /** How often the film redraws its lines, ms: ten times a second. */
 const FRAME_MS = 100;
 
+/**
+ * ⚠ Every gesture off, not just the chrome. For these ten seconds the film owns
+ * the camera, and a stray thumb dragging the map mid-replay would leave the
+ * walk drawing itself somewhere off screen. A constant, like `properties`
+ * below memoised: written inline, both were new objects on each of the ten
+ * renders a second, and the map was handed its settings again each time (T-278).
+ */
+const MAP_UI_SETTINGS = {
+  compassEnabled: false,
+  myLocationButtonEnabled: false,
+  zoomControlsEnabled: false,
+  scaleBarEnabled: false,
+  togglePitchEnabled: false,
+  mapToolbarEnabled: false,
+  scrollGesturesEnabled: false,
+  zoomGesturesEnabled: false,
+  rotationGesturesEnabled: false,
+  tiltGesturesEnabled: false,
+};
+
 export default function ReplayScreen({
   tripId,
   range,
@@ -268,6 +288,41 @@ export default function ReplayScreen({
 
   const mapRef = useRef<GoogleMaps.MapView>(null);
 
+  const mapProperties = useMemo(
+    () => ({
+      mapType: GoogleMapsMapType.NORMAL,
+      mapStyleOptions:
+        darkMap.mapStyleJson === undefined ? undefined : { json: darkMap.mapStyleJson },
+      isMyLocationEnabled: false,
+      isTrafficEnabled: false,
+      isBuildingEnabled: false,
+      selectionEnabled: false,
+    }),
+    [darkMap.mapStyleJson]
+  );
+
+  /**
+   * The film's lines go to the map by id, and only those that changed
+   * (`replayMap.STROKES_PER_LINE`). Passed as `polylines`, every line was
+   * resent ten times a second and the whole-trip film ran at 28 fps (T-278).
+   * A line that is no longer in the frame (the film started over) is removed.
+   */
+  const sentVersions = useRef(new Map<string, string>());
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null || painted === null) {
+      return;
+    }
+    const sent = sentVersions.current;
+    const changed = painted.lines.filter(({ polyline, version }) => sent.get(polyline.id) !== version);
+    const shown = new Set(painted.lines.map(({ polyline }) => polyline.id));
+    const gone = [...sent.keys()].filter((id) => !shown.has(id));
+    for (const { polyline, version } of changed) sent.set(polyline.id, version);
+    for (const id of gone) sent.delete(id);
+    if (changed.length > 0) void map.setLines(changed.map(({ polyline }) => polyline));
+    if (gone.length > 0) void map.removeLines(gone);
+  }, [painted]);
+
   /** The film's camera, as a handful of instructions. Six, not three hundred. */
   const plan = useMemo(
     () =>
@@ -383,36 +438,11 @@ export default function ReplayScreen({
         // `setCameraPosition`, so the map can animate itself.
         cameraPosition={initialCamera}
         onMapLoaded={() => setMapReady(true)}
-        polylines={painted.polylines}
         colorScheme={
           darkMap.dark ? GoogleMapsColorScheme.DARK : GoogleMapsColorScheme.LIGHT
         }
-        properties={{
-          mapType: GoogleMapsMapType.NORMAL,
-          mapStyleOptions:
-            darkMap.mapStyleJson === undefined
-              ? undefined
-              : { json: darkMap.mapStyleJson },
-          isMyLocationEnabled: false,
-          isTrafficEnabled: false,
-          isBuildingEnabled: false,
-          selectionEnabled: false,
-        }}
-        uiSettings={{
-          // ⚠ Every gesture off, not just the chrome. For these ten seconds the
-          // film owns the camera, and a stray thumb dragging the map mid-replay
-          // would leave the walk drawing itself somewhere off screen.
-          compassEnabled: false,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: false,
-          scaleBarEnabled: false,
-          togglePitchEnabled: false,
-          mapToolbarEnabled: false,
-          scrollGesturesEnabled: false,
-          zoomGesturesEnabled: false,
-          rotationGesturesEnabled: false,
-          tiltGesturesEnabled: false,
-        }}
+        properties={mapProperties}
+        uiSettings={MAP_UI_SETTINGS}
       />
 
       {/* Hides the map until its first picture is drawn: plain background, never

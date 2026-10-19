@@ -33,7 +33,15 @@ import {
 } from './composition.ts';
 import { CATEGORY_COLOUR, STAMP_MARK_POINTS, stampMarkPoints } from './filmPaint.ts';
 import { frameAt, frameTimes, type Film } from './frame.ts';
-import { cameraMoveDue, cameraPlan, mapDuration, openingCamera, replayMapFrame, SNAP_MS } from './replayMap.ts';
+import {
+  cameraMoveDue,
+  cameraPlan,
+  mapDuration,
+  openingCamera,
+  replayMapFrame,
+  SNAP_MS,
+  STROKES_PER_LINE,
+} from './replayMap.ts';
 
 const T0 = 1_800_000_000_000;
 
@@ -81,10 +89,10 @@ test('the camera frames the walk, and is a real zoom', () => {
 
 test('the trace is the map’s own trace, not a colour invented for the film', () => {
   const f = film(composeSouvenir(input()));
-  const { polylines } = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
+  const { lines } = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
 
-  assert.ok(polylines.length > 0);
-  for (const line of polylines) {
+  assert.ok(lines.length > 0);
+  for (const { polyline: line } of lines) {
     assert.equal(line.color, TRACE_PAINT.light.coreColor);
     // Pixels, not points — a point-width line is the hairline that shipped once.
     assert.equal(line.width, TRACE_PAINT.light.coreWidth * 3);
@@ -96,11 +104,12 @@ test('the dark style paints a different trace, as the map does', () => {
   const light = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
   const dark = replayMapFrame(frameAt(f, f.durationMs), { ...OPTIONS, style: 'dark' });
 
-  assert.notEqual(light.polylines[0].color, dark.polylines[0].color);
-  assert.equal(dark.polylines[0].color, TRACE_PAINT.dark.coreColor);
+  assert.notEqual(light.lines[0].polyline.color, dark.lines[0].polyline.color);
+  assert.equal(dark.lines[0].polyline.color, TRACE_PAINT.dark.coreColor);
+  assert.notEqual(light.lines[0].version, dark.lines[0].version, 'a style change redraws');
 });
 
-test('no polyline ever bridges a blackout', () => {
+test('no line is ever drawn across a blackout: the segment there is a gap', () => {
   const fixes = [...walk(20), ...walk(20, 140)];
   const f = film(composeSouvenir(input({ trace: { fixes, safeToShare: true, reason: 'ok' } })));
 
@@ -111,15 +120,15 @@ test('no polyline ever bridges a blackout', () => {
   const after = segments[1].coordinates[0];
 
   for (const at of frameTimes(f)) {
-    const { polylines } = replayMapFrame(frameAt(f, at), OPTIONS);
-    for (const line of polylines) {
+    const { lines } = replayMapFrame(frameAt(f, at), OPTIONS);
+    for (const { polyline: line } of lines) {
       for (let i = 1; i < line.coordinates.length; i += 1) {
         const joined =
           line.coordinates[i - 1].longitude === before[0] &&
           line.coordinates[i - 1].latitude === before[1] &&
           line.coordinates[i].longitude === after[0] &&
           line.coordinates[i].latitude === after[1];
-        assert.ok(!joined, `a polyline crossed the blackout at ${at} ms`);
+        assert.ok(!joined || line.gaps.includes(i - 1), `a line crossed the blackout at ${at} ms`);
       }
     }
   }
@@ -130,8 +139,8 @@ test('coordinates are flipped into the map’s order, not passed through', () =>
   // Getting this backwards puts a Madeira walk in Somalia and looks like a
   // blank map rather than like an error.
   const f = film(composeSouvenir(input()));
-  const { polylines } = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
-  const first = polylines[0].coordinates[0];
+  const { lines } = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
+  const first = lines[0].polyline.coordinates[0];
 
   assert.ok(first.latitude > 32 && first.latitude < 33, `latitude ${first.latitude}`);
   assert.ok(first.longitude < -16 && first.longitude > -18, `longitude ${first.longitude}`);
@@ -284,14 +293,14 @@ test('a tunnel in the roads is drawn plain in the replay, all at full strength',
   );
   const frame = frameAt(f, f.durationMs);
   assert.deepEqual(frame.faded, [false, true, false]);
-  const { polylines } = replayMapFrame(frame, OPTIONS);
-  assert.ok(polylines.every((line) => line.color === TRACE_PAINT.light.coreColor));
-  // The road before, the tunnel and the road after: three plain lines.
-  assert.deepEqual(polylines.map((line) => [line.id, line.dashed === true]), [
-    ['replay-trace-0', false],
-    ['replay-trace-1', false],
-    ['replay-trace-2', false],
-  ]);
+  const { lines } = replayMapFrame(frame, OPTIONS);
+  // The road before, the tunnel and the road after: one plain line, the tunnel in it.
+  assert.equal(lines.length, 1);
+  assert.equal(lines[0].polyline.color, TRACE_PAINT.light.coreColor);
+  const drawn = new Set(lines[0].polyline.coordinates.map((point) => `${point.longitude},${point.latitude}`));
+  for (const stroke of frame.strokes) {
+    for (const point of stroke) assert.ok(drawn.has(point.join(',')), 'every stroke point is in the line');
+  }
 });
 
 test('GPS strokes, with no tunnel flag, are drawn at full strength', () => {
@@ -366,4 +375,27 @@ test('the map is never handed a zero duration: Google throws on it (2026-10-08)'
     /setCameraPosition\([^)]*duration:\s*0\b/s.test(readFileSync(path.join(src, file), 'utf8'))
   );
   assert.deepEqual(zero, []);
+});
+
+test('the strokes go to the map a fixed run to a line, and a finished line never changes', () => {
+  // Many short strokes, each its own blackout-separated run.
+  const fixes = Array.from({ length: 80 }, (_, k) => walk(4, k * 20)).flat();
+  const roads = Array.from({ length: 80 }, (_, k) => ({ fixes: walk(4, k * 20), faded: false }));
+  const f = film(composeSouvenir(input({ trace: { fixes, safeToShare: true, reason: 'ok' }, roads })));
+  const end = replayMapFrame(frameAt(f, f.durationMs), OPTIONS);
+  const strokes = frameAt(f, f.durationMs).strokes.length;
+  assert.ok(strokes > STROKES_PER_LINE, `the fixture needs more than one line (${strokes} strokes)`);
+  assert.equal(end.lines.length, Math.ceil(strokes / STROKES_PER_LINE));
+  assert.deepEqual(
+    end.lines.map((line) => line.polyline.id),
+    end.lines.map((_, index) => `replay-trace-${index}`)
+  );
+
+  // Every frame after the first line is full shows it unchanged: nothing to resend.
+  const versions = new Set<string>();
+  for (const at of frameTimes(f)) {
+    const frame = frameAt(f, at);
+    if (frame.strokes.length > STROKES_PER_LINE) versions.add(replayMapFrame(frame, OPTIONS).lines[0].version);
+  }
+  assert.equal(versions.size, 1, 'the first line kept one version while the film drew on');
 });

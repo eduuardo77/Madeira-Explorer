@@ -263,6 +263,12 @@ permission, L3 privacy contact.
       Funchal, two runs each: A today 4/3/2.5/2 57.2, 49.8; B 3.5/3/2.5/2 47.6, 44.7; C 3/2.5/2.5/2
       45.7, 54.3; D 3/3/2.5/2 51.8, 50.9. They overlap; only 2 px (under 1 dp) was faster. The
       width is a choice about looks: `tools/out/width-options.html` shows the four for the lead.
+      The lead kept A. **Tiles prototype (throwaway, not committed):** the trace painted into 256 dp
+      tiles (a `TileProvider` in the `expo-maps` view), zoom over Funchal interleaved: **tiles 60.3,
+      59.5, 59.7; lines 53.2, 57.3, 50.3**; pans 60. Costs, seen on the P30: Google stretches a level's
+      tiles up to 2x before the next, so the width drifts (the prototype drew 1.5 to 1.8x A; centred,
+      0.7 to 1.4x), soft mid-zoom, roads painted after the basemap in a new area. Shown to the lead in
+      `tools/out/tiles-vs-lines.html`; **their call** whether to build it.
       **The replay** (whole trip, `tools/record-frames.sh`): **28 fps, 27 freezes over 100 ms in
       25 s**: every 100 ms it resent every stroke as its own polyline. Now strokes go 8 to a line
       (`replayMap.STROKES_PER_LINE`, gaps across blackouts, a `version` per line) and the screen

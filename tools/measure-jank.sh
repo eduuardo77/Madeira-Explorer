@@ -7,8 +7,9 @@
 # double-tap zooms (the workload of the 24 Sep and 6 Oct reviews), then prints
 # the frame summary and memory.
 #
-# ⚠ `gfxinfo` counts the app's own interface frames. The Google map draws on its
-# own surface and its frame rate is not in these numbers (app-review-2026-09-24).
+# ⚠ `gfxinfo` counts the app's own interface frames. The Google map's frame rate
+# is not in these numbers: 0.00% janky here while the map ran at 30 fps (T-278).
+# For the map, use `measure-map-frames.sh`.
 # ⚠ Measure on a build without the debuggable flag: ART runs a debuggable app
 # less optimised, and the 6 Oct figures were taken on one (CONTEXT, dev-build).
 set -euo pipefail

@@ -205,6 +205,18 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [~] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
+      laggy"*). **Phase 0 done, the baseline.** `gfxinfo` (T-254's 0.00% janky) cannot see this: the
+      map draws on its own GL thread into a TextureView, and a slow thread produces fewer frames,
+      not late ones. New probe `tools/measure-map-frames.sh` reads SurfaceFlinger's present times
+      for the app's window during the same 9 pans and 2 double taps. P30, release build (no
+      debuggable flag), 263 km lit: **Bruma 30.7, 30.9, 34.1 fps in motion, 44 to 50% of vsyncs
+      missed, p50 33 ms**; the field build gave the same (the flag is not the cause). **WalkNYC 59.4
+      and 59.9 fps, 1.7 and 0.8% missed**, also a Google `MapView`, latest renderer on both, but with
+      0 blocks walked, so an empty map. Bruma's passport scrolls at 60.4 fps, 0 missed: no app-wide
+      cap, the cost is in the map. **Next:** one build with switches (no lit roads, no camera events
+      to JS, no overlays) to say which halves the rate, then the fixes: width steps without resending
+      every road, camera events only at rest or on a zoom step, lines not clickable (nothing listens).
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

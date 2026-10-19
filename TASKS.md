@@ -249,6 +249,7 @@ permission, L3 privacy contact.
       ended two outings on the lead's phone (10:57, 10:58; diary only, flags back to off, trip
       31 untouched). The gesture now never touches below y = 1,750, asserted. **Left:** zoom at
       51 to 57, not 60: the capped pieces and the merged line's own cost while zooming.
+      ✅ **Felt by the lead on the P30, 2026-10-19:** *"Pinching feels smooth now."*
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

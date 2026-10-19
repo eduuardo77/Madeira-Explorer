@@ -24,7 +24,6 @@ import {
 import { RIM_PAD_UNITS, rimElements } from '../../app/src/passport/stampRim.ts';
 import { sheenStops } from '../../app/src/passport/stampSheen.ts';
 import { projector } from '../../app/src/souvenir/frame.ts';
-import { CATEGORY_COLOUR, stampMarkPoints } from '../../app/src/souvenir/filmPaint.ts';
 
 export function escapeXml(text) {
   return String(text)
@@ -150,8 +149,7 @@ export function sheenLayer(id, design, sheen) {
  * ⚠ So the ground is a **map-ish slate, deliberately not black**, and every
  * caller must say in words that the basemap is missing from the preview rather
  * than from the app. What this still answers is worth having: does the walk
- * draw in the right order, does the camera point at the right thing, does a
- * stamp land off the edge.
+ * draw in the right order, and does the camera point at the right thing.
  *
  * It takes a `Frame` from `frame.ts` and projects it with `frame.ts`'s own
  * `projector`. Nothing about *what* is on screen is decided here.
@@ -162,27 +160,15 @@ export function filmFrameSvg(frame, width, height, options = {}) {
   const strokeWidth = Math.max(1.5, width / 180);
 
   const paths = frame.strokes
-    .map((stroke, index) => {
+    .map((stroke) => {
       const d = stroke
         .map(([lon, lat], i) => {
           const [x, y] = toPixel(lon, lat);
           return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
         })
         .join(' ');
-      // Tunnels faded, as the app's replay draws them (D-093).
-      const opacity = frame.faded?.[index] === true ? ' stroke-opacity="0.35"' : '';
-      return `<path d="${d}" fill="none" stroke="${trace}"${opacity} stroke-width="${strokeWidth.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`;
-    })
-    .join('');
-
-  const marks = frame.stamps
-    .map((stamp) => {
-      const [x, y] = toPixel(stamp.lon, stamp.lat);
-      // The app's own pop curve (`filmPaint.ts`), scaled to this preview's
-      // size rather than re-invented — otherwise the marks here would settle at
-      // a different size from the ones on the map.
-      const r = (stampMarkPoints(stamp.ageMs) / 9) * strokeWidth * 1.6;
-      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${CATEGORY_COLOUR[stamp.category] ?? '#FFFFFF'}"/>`;
+      // Tunnels plain, as the app's replay draws them (the lead, 17 Oct 2026).
+      return `<path d="${d}" fill="none" stroke="${trace}" stroke-width="${strokeWidth.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`;
     })
     .join('');
 
@@ -193,6 +179,6 @@ export function filmFrameSvg(frame, width, height, options = {}) {
 
   return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${width}" height="${height}" fill="${ground}"/>
-  ${paths}${marks}${hero}
+  ${paths}${hero}
 </svg>`;
 }

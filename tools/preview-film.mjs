@@ -16,10 +16,9 @@
  * --------------------------------------
  * A contact sheet, not a video. It samples the film at N evenly spaced times
  * and draws each one, which answers *does the walk draw in the right order, is
- * the camera pointing at the right thing, do the stamps land where they should,
- * is anything cropped* — and answers **nothing at all** about motion. Whether
- * the pan feels smooth or the stamps pop too fast needs a real player, and a
- * real player needs a device.
+ * the camera pointing at the right thing, is anything cropped*, and answers
+ * **nothing at all** about motion. Whether the pan feels smooth needs a real
+ * player, and a real player needs a device.
  *
  * It composes **nothing of its own**: the times come from `frameTimes`, the
  * contents from `frameAt`, and the pixels from `lib/svg-render.mjs`, which is
@@ -84,8 +83,7 @@ if (fixes.length < 2) {
   process.exit(1);
 }
 
-// Stamps invented, but placed on the route rather than near it, so the cues
-// land where a real arrival would. Names are made up on purpose (D-017).
+// Stamps invented, for the finale's count. Names are made up on purpose (D-017).
 const stampAt = (fraction, id, name, category) => {
   const fix = fixes[Math.min(fixes.length - 1, Math.floor(fixes.length * fraction))];
   return {
@@ -132,7 +130,7 @@ for (let i = 0; i < cells; i += 1) {
 const figures = chosen
   .map((at) => {
     const frame = frameAt(composition, at);
-    const label = `${(at / 1000).toFixed(2)}s · ${frame.kind} · ${frame.strokes.length} stroke${frame.strokes.length === 1 ? '' : 's'} · ${frame.stamps.length} stamp${frame.stamps.length === 1 ? '' : 's'}`;
+    const label = `${(at / 1000).toFixed(2)}s · ${frame.kind} · ${frame.strokes.length} stroke${frame.strokes.length === 1 ? '' : 's'}`;
     return `<figure>${filmFrameSvg(frame, CELL_W, CELL_H)}<figcaption>${label}</figcaption></figure>`;
   })
   .join('\n');
@@ -174,7 +172,7 @@ for (const scene of composition.scenes) {
   console.log(
     `  ${scene.startMs.toString().padStart(6)}ms  ${scene.kind.padEnd(9)} ${scene.durationMs}ms` +
       (scene.kind === 'draw'
-        ? `  ${scene.segments.length} segment(s), ${scene.cues.length} cue(s), ${scene.camera.length} keyframe(s)`
+        ? `  ${scene.segments.length} segment(s), ${scene.camera.length} camera target(s)`
         : '')
   );
 }

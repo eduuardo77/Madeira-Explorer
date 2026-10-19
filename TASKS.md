@@ -207,14 +207,23 @@ permission, L3 privacy contact.
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
 - [~] **T-279** *Ver a tua viagem*, the photo clean and the film smooth (the lead, 2026-10-19: the
       times make the day photo less pleasing; the film lags, loses the line out of frame, shows
-      blanks in tunnels and lingers where more time was spent). **Photo done 2026-10-19:** no tags
-      by default, a tap on a stamp shows its name and time, the *Horas* pill shows every time, and
-      the share follows the pill. Not yet seen on the P30. **Film, open:** pen and camera on one
-      clock, by ground distance (the pen advanced a road point per step and the camera by distance,
-      so they drifted apart, and dense streets ate the time); roads driven twice drawn faster; a
-      smooth camera path played natively instead of six eased moves; the line grown 30 times a
-      second, not 10 (only the growing line is sent since T-278); the blanks measured on the
-      lead's trip before choosing a fix; the unused stamp cue code removed.
+      blanks in tunnels and lingers where more time was spent). **Photo done and seen on the P30
+      2026-10-19:** no tags by default, a tap on a stamp shows its name and time, the *Horas* pill
+      shows every time, the share follows the pill. **Film built and measured 2026-10-19, not yet
+      watched by the lead.** Measured on the lead's trip first (`tools/film-check.mjs`, numbers
+      only): the pen ran 10 to 60 km of road a second (it advanced a road point per step); half
+      the whole-trip film, 7 of 14 s, redrew road already drawn; 42 of 46 jumps under 1 km were
+      holes another pass had driven through (a tunnel without GPS one way). Now: the pen is paced
+      by ground (`penPath.ts`), road drawn again at a quarter of the cost, those holes filled from
+      the pass that has them; the camera is a target every 100 ms, smoothed, every box widened to
+      hold the pen (`filmCamera.ts`), played by the map on its own frame clock (`playCameraPath`
+      in the expo-maps patch) instead of six eased moves; the line grows 30 times a second, not 10.
+      After: new road at one speed (p10 = p50), redrawing 3.5 s, jumps under 1 km 6, the pen in
+      frame in every sample of the whole film. P30 (`tools/measure-film-frames.sh`): the day
+      film 56 fps, no gap over 50 ms; the whole trip 44 fps, no gap over 66 ms. **For the lead:**
+      4 holes are on every pass, so the map has them too; closing them is the matcher's
+      `MAX_BRIDGE_S`, a separate decision. Stamp cues and `filmPaint.ts` removed (the film shows
+      no stamps since 17 Oct).
 - [x] **T-278** The map at 60 fps (the lead, 2026-10-19: *"compared to WalkNYC it's a bit more
       laggy"*). **Phase 0 done, the baseline.** `gfxinfo` (T-254's 0.00% janky) cannot see this: the
       map draws on its own GL thread into a TextureView, and a slow thread produces fewer frames,

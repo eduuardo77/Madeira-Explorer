@@ -1,8 +1,8 @@
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
-index e7b12c8..4078ea1 100644
+index e7b12c8..cc2dd1a 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsModule.kt
-@@ -15,6 +15,20 @@ class GoogleMapsModule : Module() {
+@@ -15,6 +15,29 @@ class GoogleMapsModule : Module() {
          view.setCameraPosition(config)
        }
  
@@ -20,22 +20,34 @@ index e7b12c8..4078ea1 100644
 +        view.removeLines(ids)
 +      }
 +
++      // Bruma (T-279): see GoogleMapsView.playCameraPath.
++      AsyncFunction("playCameraPath") { view: GoogleMapsView, points: List<CameraPathPoint>, fromMs: Double ->
++        view.playCameraPath(points, fromMs)
++      }
++
++      AsyncFunction("stopCameraPath") { view: GoogleMapsView ->
++        view.stopCameraPath()
++      }
++
        AsyncFunction("selectMarker") Coroutine { view: GoogleMapsView, id: String?, options: SelectOptionsRecord? ->
          view.selectMarker(id, options)
        }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..ccd4e03 100644
+index 82450b6..385d05c 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-@@ -15,6 +15,7 @@ import androidx.compose.runtime.State
+@@ -15,8 +15,10 @@ import androidx.compose.runtime.State
  import androidx.compose.runtime.derivedStateOf
  import androidx.compose.runtime.getValue
  import androidx.compose.runtime.key
 +import androidx.compose.runtime.mutableStateMapOf
  import androidx.compose.runtime.mutableStateOf
  import androidx.compose.runtime.remember
++import androidx.compose.runtime.withFrameNanos
  import androidx.compose.ui.Modifier
-@@ -24,8 +25,19 @@ import com.google.android.gms.maps.LocationSource
+ import androidx.compose.ui.graphics.Color
+ import com.google.android.gms.maps.CameraUpdateFactory
+@@ -24,8 +26,19 @@ import com.google.android.gms.maps.LocationSource
  import com.google.android.gms.maps.model.BitmapDescriptor
  import com.google.android.gms.maps.model.BitmapDescriptorFactory
  import com.google.android.gms.maps.model.CameraPosition
@@ -55,7 +67,7 @@ index 82450b6..ccd4e03 100644
  import com.google.maps.android.compose.CameraPositionState
  import com.google.maps.android.compose.GoogleMap
  import com.google.maps.android.compose.Marker
-@@ -84,6 +96,13 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -84,6 +97,17 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
    private lateinit var cameraState: CameraPositionState
    private var manualCameraControl = false
  
@@ -63,13 +75,17 @@ index 82450b6..ccd4e03 100644
 +  private class SetLine(val record: PolylineRecord, val points: List<LatLng>, val spans: List<StyleSpan>)
 +  private val setLines = mutableStateMapOf<String, SetLine>()
 +
++  // Bruma (T-279): the camera path playing (`playCameraPath`), or null.
++  private class CameraPathRun(val points: List<CameraPathPoint>, val fromMs: Double)
++  private val cameraPath = mutableStateOf<CameraPathRun?>(null)
++
 +  // Bruma (T-253): the native map, held so `takeSnapshot` can photograph it.
 +  private var nativeMap: com.google.android.gms.maps.GoogleMap? = null
 +
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,12 +115,25 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,12 +120,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -78,6 +94,7 @@ index 82450b6..ccd4e03 100644
    override fun ComposableScope.Content() {
      cameraState = updateCameraState()
 +    CameraEvents(cameraState)
++    CameraPathPlayer()
      markerState = markerStateFromProps()
      val locationSource = locationSourceFromProps()
      val polylineState by polylineStateFromProps()
@@ -95,7 +112,7 @@ index 82450b6..ccd4e03 100644
      val polygonState by polygonStateFromProps()
      val circleState by circleStateFromProps()
      val mapOptions = props.mapOptions.value.mapId?.let { GoogleMapOptions().mapId(it) } ?: GoogleMapOptions()
-@@ -154,12 +186,35 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -154,12 +192,35 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
@@ -134,7 +151,7 @@ index 82450b6..ccd4e03 100644
            clickable = true,
            onClick = {
              onPolylineClick(
-@@ -234,7 +289,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -234,7 +295,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -153,7 +170,7 @@ index 82450b6..ccd4e03 100644
      LaunchedEffect(cameraState.cameraMoveStartedReason) {
        // We should stop following the user's location when camera is moved manually.
        if (cameraState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE || cameraState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION) {
-@@ -266,7 +332,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -266,7 +338,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -161,7 +178,7 @@ index 82450b6..ccd4e03 100644
    }
  
    @Composable
-@@ -319,11 +384,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -319,11 +390,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      remember {
        derivedStateOf {
          props.polylines.value.map { polyline ->
@@ -195,7 +212,7 @@ index 82450b6..ccd4e03 100644
    @Composable
    private fun polygonStateFromProps() =
      remember {
-@@ -361,6 +447,45 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -361,6 +453,89 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  
@@ -238,17 +255,76 @@ index 82450b6..ccd4e03 100644
 +    for (id in ids) setLines.remove(id)
 +  }
 +
++  /**
++   * Bruma (T-279): plays a camera path from `fromMs` into it, moving the camera
++   * on every frame the map draws, in a straight line between points (centre
++   * in degrees, zoom in levels), as `souvenir/replayMap.ts#cameraAt` computes
++   * it. Replaces a path already playing. A film's camera as one call: eased
++   * moves sent one by one started and stopped on their own curves.
++   */
++  fun playCameraPath(points: List<CameraPathPoint>, fromMs: Double) {
++    manualCameraControl = true
++    cameraPath.value = if (points.isEmpty()) null else CameraPathRun(points, fromMs)
++  }
++
++  /** Bruma (T-279): stops the path where the camera is; the camera stays there. */
++  fun stopCameraPath() {
++    cameraPath.value = null
++  }
++
++  @Composable
++  private fun CameraPathPlayer() {
++    val run = cameraPath.value ?: return
++    LaunchedEffect(run) {
++      val endMs = run.points.last().atMs
++      val startNanos = withFrameNanos { it }
++      var atMs = run.fromMs
++      while (true) {
++        cameraState.move(CameraUpdateFactory.newCameraPosition(cameraOnPath(run.points, atMs)))
++        if (atMs >= endMs) break
++        atMs = run.fromMs + (withFrameNanos { it } - startNanos) / 1_000_000.0
++      }
++    }
++  }
++
++  private fun cameraOnPath(points: List<CameraPathPoint>, atMs: Double): CameraPosition {
++    val next = points.indexOfFirst { it.atMs >= atMs }.let { if (it == -1) points.lastIndex else it }
++    val a = points[maxOf(0, next - 1)]
++    val b = points[next]
++    val span = b.atMs - a.atMs
++    val u = if (span <= 0) 1.0 else ((atMs - a.atMs) / span).coerceIn(0.0, 1.0)
++    return CameraPosition.fromLatLngZoom(
++      LatLng(a.latitude + u * (b.latitude - a.latitude), a.longitude + u * (b.longitude - a.longitude)),
++      (a.zoom + u * (b.zoom - a.zoom)).toFloat()
++    )
++  }
++
    suspend fun setCameraPosition(config: SetCameraPositionConfig?) {
      // Stop updating the camera position based on user location.
      manualCameraControl = true
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-index 1585460..3409f49 100644
+index 1585460..d79b5f7 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-@@ -88,6 +88,15 @@ data class MarkerRecord(
+@@ -88,6 +88,30 @@ data class MarkerRecord(
    val zIndex: Float = 0.0f
  ) : Record
  
++// Bruma (T-279): one point of a camera path, `atMs` from the path's start.
++data class CameraPathPoint(
++  @Field
++  val atMs: Double = 0.0,
++
++  @Field
++  val latitude: Double = 0.0,
++
++  @Field
++  val longitude: Double = 0.0,
++
++  @Field
++  val zoom: Double = 0.0
++) : Record
++
 +// Bruma (T-278): a width from a zoom up, in pixels.
 +data class WidthStep(
 +  @Field
@@ -261,7 +337,7 @@ index 1585460..3409f49 100644
  @OptimizedRecord
  data class PolylineRecord(
    @Field
-@@ -103,7 +112,24 @@ data class PolylineRecord(
+@@ -103,7 +127,24 @@ data class PolylineRecord(
    val color: Int = 0xFF0000FF.toInt(),
  
    @Field
@@ -288,7 +364,7 @@ index 1585460..3409f49 100644
  
  @OptimizedRecord
 diff --git a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-index 100005c..14c6f66 100644
+index 100005c..cefbc29 100644
 --- a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
 +++ b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
 @@ -82,6 +82,20 @@ export type GoogleMapsPolyline = {
@@ -312,7 +388,7 @@ index 100005c..14c6f66 100644
  };
  /**
   * @platform android
-@@ -435,6 +449,15 @@ export type GoogleMapsViewType = {
+@@ -435,6 +449,22 @@ export type GoogleMapsViewType = {
       * @param config New camera position config.
       */
      setCameraPosition: (config?: SetCameraPositionConfig) => void;
@@ -325,14 +401,21 @@ index 100005c..14c6f66 100644
 +    setLines: (lines: GoogleMapsPolyline[]) => Promise<void>;
 +    /** Bruma (T-278): removes lines added with `setLines`. */
 +    removeLines: (ids: string[]) => Promise<void>;
++    /**
++     * Bruma (T-279): plays a camera path on the map's own frame clock, from
++     * `fromMs` into it: straight lines between points, centre and zoom.
++     */
++    playCameraPath: (points: { atMs: number; latitude: number; longitude: number; zoom: number }[], fromMs: number) => Promise<void>;
++    /** Bruma (T-279): stops the path; the camera stays where it is. */
++    stopCameraPath: () => Promise<void>;
      /**
       * This is an async operation that animates the camera to the marker. If called
       * rapidly, a previous animation may be cancelled, causing the returned promise to reject.
 diff --git a/node_modules/expo-maps/src/google/GoogleMaps.types.ts b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
-index cc2b88f..7744cf0 100644
+index cc2b88f..bb8bc4f 100644
 --- a/node_modules/expo-maps/src/google/GoogleMaps.types.ts
 +++ b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
-@@ -512,6 +512,19 @@ export type GoogleMapsViewType = {
+@@ -512,6 +512,26 @@ export type GoogleMapsViewType = {
     */
    setCameraPosition: (config?: SetCameraPositionConfig) => void;
  
@@ -348,12 +431,19 @@ index cc2b88f..7744cf0 100644
 +  setLines: (lines: GoogleMapsPolyline[]) => Promise<void>;
 +  /** Bruma (T-278): removes lines added with `setLines`. */
 +  removeLines: (ids: string[]) => Promise<void>;
++  /**
++   * Bruma (T-279): plays a camera path on the map's own frame clock, from
++   * `fromMs` into it: straight lines between points, centre and zoom.
++   */
++  playCameraPath: (points: { atMs: number; latitude: number; longitude: number; zoom: number }[], fromMs: number) => Promise<void>;
++  /** Bruma (T-279): stops the path; the camera stays where it is. */
++  stopCameraPath: () => Promise<void>;
 +
    /**
     * This is an async operation that animates the camera to the marker. If called
     * rapidly, a previous animation may be cancelled, causing the returned promise to reject.
 diff --git a/node_modules/expo-maps/src/google/GoogleMapsView.tsx b/node_modules/expo-maps/src/google/GoogleMapsView.tsx
-index 80b2526..e7dac29 100644
+index 80b2526..66feece 100644
 --- a/node_modules/expo-maps/src/google/GoogleMapsView.tsx
 +++ b/node_modules/expo-maps/src/google/GoogleMapsView.tsx
 @@ -3,6 +3,7 @@ import * as React from 'react';
@@ -364,7 +454,7 @@ index 80b2526..e7dac29 100644
    GoogleMapsViewProps,
    GoogleMapsViewType,
    SetCameraPositionConfig,
-@@ -52,6 +53,19 @@ export const GoogleMapsView = React.forwardRef<GoogleMapsViewType, GoogleMapsVie
+@@ -52,6 +53,26 @@ export const GoogleMapsView = React.forwardRef<GoogleMapsViewType, GoogleMapsVie
        setCameraPosition(config?: SetCameraPositionConfig) {
          nativeRef.current?.setCameraPosition(config);
        },
@@ -380,6 +470,13 @@ index 80b2526..e7dac29 100644
 +      },
 +      async removeLines(ids: string[]) {
 +        await nativeRef.current?.removeLines(ids);
++      },
++      // Bruma (T-279): the replay's camera, played natively.
++      async playCameraPath(points, fromMs) {
++        await nativeRef.current?.playCameraPath(points, fromMs);
++      },
++      async stopCameraPath() {
++        await nativeRef.current?.stopCameraPath();
 +      },
        async selectMarker(id?: string, options?: { zoom?: number; moveCamera?: boolean }) {
          return nativeRef.current?.selectMarker(id, options);

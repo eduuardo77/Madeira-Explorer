@@ -127,7 +127,7 @@ const strip = Array.from({ length: FRAMES }, (_, i) => {
   const frame = frameAt(film, at);
   return `<figure class="cell">
     ${filmFrameSvg(frame, 150, 267)}
-    <figcaption>${(at / 1000).toFixed(1)}s · ${frame.kind}${frame.stamps.length > 0 ? ` · ${frame.stamps.length}` : ''}</figcaption>
+    <figcaption>${(at / 1000).toFixed(1)}s · ${frame.kind}</figcaption>
   </figure>`;
 }).join('\n');
 

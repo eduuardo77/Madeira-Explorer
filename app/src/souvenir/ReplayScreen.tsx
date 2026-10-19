@@ -13,27 +13,19 @@
  * where each one was earned. Nothing here draws a basemap of its own, because
  * the whole point is that the basemap is the part that says *where*.
  *
- * WHAT SURVIVED THE REWRITE, AND WHY THAT MATTERS
- * ----------------------------------------------
- * All of it, except the drawing. `composition.ts` still plans the film,
- * `frame.ts` still says what is on screen at time *t*, and `playback.ts` still
- * says what *t* is. Only `ReplayView` — the SVG — was replaced, by
- * `replayMap.ts`, which turns the same frame into a camera and some polylines.
- * That is the dividend for having split the film into *what
- * happens* and *how it is drawn*.
+ * `composition.ts` plans the film, `frame.ts` says what is on screen at time
+ * *t*, `playback.ts` says what *t* is, and `replayMap.ts` turns a frame into
+ * lines and the whole film into one camera path.
  *
- * ⚠ **THE APP DOES NOT MOVE THE CAMERA. IT TELLS THE MAP WHERE TO GO.**
- * A native map camera cannot be reset thirty times a second — every assignment
- * restarts its own animation, so per-frame interpolation stutters. The first
- * version answered that with a tuned throttle, which was a guess nobody could
- * judge without hardware. It is gone: `setCameraPosition` takes a **duration**,
- * `composition.ts` has emitted camera **keyframes** since T-105a, and handing
- * each keyframe over with the gap to the next as its duration lets the platform
- * do the easing. Six instructions for a ten-second film, no tunable numbers.
+ * ⚠ **THE APP DOES NOT MOVE THE CAMERA. THE MAP PLAYS ITS PATH.** On play the
+ * map is handed the whole path and the moment to start from
+ * (`playCameraPath`, in the expo-maps patch), and moves the camera on its own
+ * frame clock; on pause it is told to stop (T-279). Six eased moves sent one
+ * by one pulsed and lost the pen out of frame on the lead's phone, and
+ * moving the camera from JavaScript every frame stuttered (2026-08-18).
  *
- * ⚠ The trace and the marks still update every frame. They are cheap, they are
- * what the eye is following, and they are ordinary props rather than an
- * animation somebody else owns.
+ * ⚠ The trace updates `FRAME_MS` apart, and only the line still growing is
+ * sent to the map.
  *
  * ⚠ **The whole screen is one tap.** Tapping plays or pauses. There is no
  * scrubber and no chrome over the picture — and the map's own gestures are off,
@@ -70,7 +62,7 @@ import {
   restart,
   type Playback,
 } from './playback';
-import { cameraMoveDue, cameraPlan, mapDuration, openingCamera, replayMapFrame, SNAP_MS } from './replayMap';
+import { cameraPath, replayMapFrame } from './replayMap';
 import { formatDateRange } from './shareCard';
 import { getSouvenirComposition } from './souvenirPlan';
 import { REFUSAL_KEYS } from './shareTrip';
@@ -95,8 +87,14 @@ const HERO_CLEARANCE = spacing.xl * 5;
  */
 const MAP_READY_FALLBACK_MS = 3_000;
 
-/** How often the film redraws its lines, ms: ten times a second. */
-const FRAME_MS = 100;
+/**
+ * How often the film redraws its lines, ms: thirty times a second (T-279).
+ * ⚠ It was ten (17 Oct 2026), when every update handed the map every line of
+ * the trip and sixty a second lagged on the lead's 534 lines. Since T-278 only
+ * the line still growing is sent, and at ten a second the lead saw it grow in
+ * steps.
+ */
+const FRAME_MS = 33;
 
 /**
  * ⚠ Every gesture off, not just the chrome. For these ten seconds the film owns
@@ -227,10 +225,8 @@ export default function ReplayScreen({
     }
     let raf = 0;
     let shown = 0;
-    // ⚠ At most `FRAME_MS` apart, not every animation frame (17 Oct 2026): each
-    // update hands the map every line of the trip again, and at 60 a second
-    // the film lagged on the lead's 534 lines. The camera is the map's own
-    // animation and stays smooth; the trace grows in steps too small to see.
+    // ⚠ At most `FRAME_MS` apart, not every animation frame: each update
+    // rebuilds the frame in JavaScript, and the camera is the map's own.
     const tick = () => {
       const at = Date.now();
       if (at - shown >= FRAME_MS) {
@@ -275,16 +271,10 @@ export default function ReplayScreen({
     [width, height]
   );
 
-  const painted = useMemo(() => {
-    if (frame === null) {
-      return null;
-    }
-    return replayMapFrame(frame, {
-      style: styleName,
-      viewport,
-      pixelRatio: PixelRatio.get(),
-    });
-  }, [frame, styleName, viewport]);
+  const lines = useMemo(
+    () => (frame === null ? [] : replayMapFrame(frame, { style: styleName, pixelRatio: PixelRatio.get() })),
+    [frame, styleName]
+  );
 
   const mapRef = useRef<GoogleMaps.MapView>(null);
 
@@ -310,81 +300,58 @@ export default function ReplayScreen({
   const sentVersions = useRef(new Map<string, string>());
   useEffect(() => {
     const map = mapRef.current;
-    if (map === null || painted === null) {
+    if (map === null) {
       return;
     }
     const sent = sentVersions.current;
-    const changed = painted.lines.filter(({ polyline, version }) => sent.get(polyline.id) !== version);
-    const shown = new Set(painted.lines.map(({ polyline }) => polyline.id));
+    const changed = lines.filter(({ id, version }) => sent.get(id) !== version);
+    const shown = new Set(lines.map(({ id }) => id));
     const gone = [...sent.keys()].filter((id) => !shown.has(id));
-    for (const { polyline, version } of changed) sent.set(polyline.id, version);
+    for (const { id, version } of changed) sent.set(id, version);
     for (const id of gone) sent.delete(id);
-    if (changed.length > 0) void map.setLines(changed.map(({ polyline }) => polyline));
+    if (changed.length > 0) void map.setLines(changed.map((line) => line.polyline()));
     if (gone.length > 0) void map.removeLines(gone);
-  }, [painted]);
+  }, [lines]);
 
-  /** The film's camera, as a handful of instructions. Six, not three hundred. */
-  const plan = useMemo(
-    () =>
-      composition !== null && composition.renderable
-        ? cameraPlan(composition, viewport)
-        : [],
+  /** The film's camera, the whole of it, as the map will play it. */
+  const path = useMemo(
+    () => (composition !== null && composition.renderable ? cameraPath(composition, viewport) : []),
     [composition, viewport]
+  );
+  const nativePath = useMemo(
+    () =>
+      path.map(({ atMs, camera }) => ({
+        atMs,
+        latitude: camera.coordinates.latitude,
+        longitude: camera.coordinates.longitude,
+        zoom: camera.zoom,
+      })),
+    [path]
   );
 
   /**
-   * The map's first camera, given as a prop so the map is born on the trip.
+   * The map's first camera, given as a prop so the map is born on the trip:
+   * born with none, it showed 0°, 0° for seconds (third review, T-253).
    *
    * ⚠ Memoised, and that is load-bearing: the native view rebuilds its camera
-   * only when this value changes, so a stable value is set once and then leaves
-   * `setCameraPosition` in charge. A fresh object each render would not move
-   * the camera (the record compares by value) but would cost a prop update per
-   * frame.
+   * only when this value changes, so a stable value is set once and then
+   * leaves the path in charge.
    */
-  const initialCamera = useMemo(() => openingCamera(plan) ?? undefined, [plan]);
+  const initialCamera = useMemo(() => path[0]?.camera, [path]);
 
-  /**
-   * Which instruction the map has already been given.
-   *
-   * ⚠ A ref, not state: issuing one is a side effect on the native view, not
-   * something the React tree renders, and making it state would re-render the
-   * whole screen to record that a camera was told to move.
-   */
-  const issuedRef = useRef(-1);
-
-  const atMs = positionMs(clock, now, durationMs);
-
+  // Play the camera from where the film is, or stop it where it stands. The
+  // clock changes on every play, pause and restart, and only then.
   useEffect(() => {
-    if (mapRef.current === null || plan.length === 0) {
+    const map = mapRef.current;
+    if (map === null || nativePath.length === 0) {
       return;
     }
-
-    const due = cameraMoveDue(plan, atMs);
-
-    // Scrubbed backwards, or restarted. Re-issue from wherever we now are —
-    // and snap, because the film is not where the map thinks it is.
-    if (due < issuedRef.current) {
-      issuedRef.current = due;
-      if (due >= 0) {
-        mapRef.current.setCameraPosition({ ...plan[due].camera, duration: SNAP_MS });
-      }
-      return;
+    if (isPlaying(clock)) {
+      void map.playCameraPath(nativePath, positionMs(clock, Date.now(), durationMs));
+    } else {
+      void map.stopCameraPath();
     }
-
-    // ⚠ Only ever the newest one, and only once. Re-sending an instruction
-    // restarts an animation that is halfway through, which is the stutter this
-    // whole approach exists to avoid.
-    if (due > issuedRef.current) {
-      issuedRef.current = due;
-      const move = plan[due];
-      mapRef.current.setCameraPosition({
-        ...move.camera,
-        // ⚠ Paused, the film is a still picture, so a camera still gliding to
-        // its target would be the one thing on screen that had not stopped.
-        duration: playing ? mapDuration(move.durationMs) : SNAP_MS,
-      });
-    }
-  }, [plan, atMs, playing]);
+  }, [clock, nativePath, durationMs]);
 
   const toggle = () => {
     const at = Date.now();
@@ -404,7 +371,7 @@ export default function ReplayScreen({
     );
   }
 
-  if (!composition.renderable || frame === null || painted === null) {
+  if (!composition.renderable || frame === null) {
     // ⚠ Honest. `composition.reason` is written for the recorder's diary;
     // the person reads the share's sentence for the same refusal (T-275), so
     // a trip hidden for privacy does not claim nothing was recorded.

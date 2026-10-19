@@ -1,68 +1,23 @@
 /**
  * The film at one instant (T-105b, D-013).
  *
- * `composition.ts` answers *what is the film* — scenes, camera path, strokes,
- * the moment each stamp lands, all in absolute milliseconds. It stops there.
- * This answers the next question, which nothing did until now: **given that
- * plan and a time `t`, what is on screen?**
+ * `composition.ts` answers *what is the film*: scenes, camera targets and
+ * strokes, in absolute milliseconds. This answers the next question: **given
+ * that plan and a time `t`, what is on screen?** The replay drives it from a
+ * wall clock; the preview tools from `frameTimes`.
  *
- * WHY THIS IS WORTH ITS OWN MODULE, AND WHY IT IS NOT A BET
- * --------------------------------------------------------
- * ⚠ The project lead is undecided between a **timelapse video** to post and an
- * **in-app replay** to watch (the reference app has the replay and no video —
- * `docs/competitors.md`). This module is the half both need, and it does not
- * choose between them:
- *
- *   - a **replay** drives `frameAt` from a wall clock into the on-screen view;
- *   - a **video** drives the same `frameAt` from `frameTimes` into an encoder.
- *
- * Same arithmetic, two consumers. Building it now is not a wager on either —
- * and the replay is reachable with no device and no native code, while the
- * video needs both (`docs/video-encoder-research.md`).
- *
- * DETERMINISTIC, LIKE THE STORYBOARD ABOVE IT
- * -------------------------------------------
- * No clock and no randomness. `frameAt(film, 3000)` is the same picture today
- * and next year, which is what lets it be tested on Node and what stops a
- * re-render producing a different souvenir than the one already watched.
- *
- * ⚠ **It is sampled, not stepped.** `frameAt` takes a time, not a frame index,
- * and holds no state between calls. A renderer that dropped a frame cannot
- * drift out of sync with the plan, and the encoder and the preview tool cannot
- * disagree about what frame 47 contains.
+ * ⚠ **Sampled, not stepped.** `frameAt` takes a time, not a frame index, and
+ * holds no state between calls, so a renderer that dropped a frame cannot
+ * drift out of sync with the plan. No clock and no randomness: `frameAt(film,
+ * 3000)` is the same picture every time.
  *
  * Pure: no database, no Expo, no clock. Tested in `frame.test.ts`.
  */
 
-import type { Category } from '../content/contentPack.ts';
-import type {
-  Bounds,
-  CameraKeyframe,
-  Composition,
-  DrawnSegment,
-  Scene,
-  StampCue,
-} from './composition.ts';
+import type { Bounds, CameraKeyframe, Composition, DrawnSegment, Scene } from './composition.ts';
 
 /** A composition that exists. The refusal case has no frames by construction. */
 export type Film = Extract<Composition, { renderable: true }>;
-
-/** A stamp that has already landed, and how long ago. */
-export type LandedStamp = {
-  placeId: string;
-  name: string;
-  category: Category;
-  lat: number;
-  lon: number;
-  /**
-   * Milliseconds since it landed — 0 on the exact frame it appears.
-   *
-   * Carried rather than a `justLanded` boolean because the renderer owns the
-   * animation: a pop, a fade, a ring, or nothing at all. A boolean would put
-   * that choice here, where it cannot be looked at.
-   */
-  ageMs: number;
-};
 
 /** The closing card's numbers. Present only during the finale. */
 export type Hero = {
@@ -78,42 +33,22 @@ export type Frame = {
   kind: Scene['kind'];
   /** 0 to 1 through the current scene, for fades the renderer decides on. */
   sceneProgress: number;
-  /** What the camera sees now, eased between the storyboard's keyframes. */
+  /** What the camera sees now, between the storyboard's targets. */
   bounds: Bounds;
   /**
-   * The trace drawn so far, `[lon, lat]` — GeoJSON's order, as everywhere else.
+   * The trace drawn so far, `[lon, lat]`, GeoJSON's order, as everywhere else.
    *
-   * ⚠ **One entry per stroke, and never joined.** A gap between two segments is
-   * a pen-lift over a recording blackout (`composition.ts`), and concatenating
-   * them would draw a straight line across a road nobody proved was taken —
-   * the thing ARCHITECTURE §10 forbids the app to draw.
+   * ⚠ **One entry per stroke, and never joined.** A gap between two strokes is
+   * a pen-up over a hole (`composition.ts`), and concatenating them would draw
+   * a straight line across a road nobody proved was taken, the thing
+   * ARCHITECTURE §10 forbids the app to draw.
    */
   strokes: [number, number][][];
-  /**
-   * For each stroke, at the same index: whether it runs through a tunnel or on
-   * a cable car, and so is drawn faded (D-093). Parallel rather than folded into `strokes` so
-   * that everything reading strokes as lines stays as it is.
-   */
-  faded: boolean[];
-  /** Landed, in the order they were collected. */
-  stamps: LandedStamp[];
   hero: Hero | null;
 };
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
-}
-
-/**
- * Smoothstep.
- *
- * Linear easing between camera keyframes reads as a machine panning: the map
- * starts and stops dead, six times, and the eye catches every corner. This is
- * the cheapest curve with zero velocity at both ends, and it needs no library.
- */
-function ease(u: number): number {
-  const clamped = clamp01(u);
-  return clamped * clamped * (3 - 2 * clamped);
 }
 
 function lerp(from: number, to: number, u: number): number {
@@ -163,80 +98,55 @@ function sceneAt(film: Film, atMs: number): Scene {
   return found;
 }
 
-function cameraAt(
-  keyframes: CameraKeyframe[],
-  fallback: Bounds,
-  atMs: number
-): Bounds {
+/**
+ * The camera between two targets, in a straight line. The targets are dense
+ * and already smoothed (`filmCamera.ts`), and the map plays them the same way
+ * (`replayMap.cameraAt`), so a preview frame and the phone agree.
+ */
+function cameraAt(keyframes: CameraKeyframe[], fallback: Bounds, atMs: number): Bounds {
   if (keyframes.length === 0) {
     return fallback;
   }
   if (atMs <= keyframes[0].atMs) {
     return keyframes[0].bounds;
   }
-
   for (let i = 0; i < keyframes.length - 1; i += 1) {
     const from = keyframes[i];
     const to = keyframes[i + 1];
     if (atMs <= to.atMs) {
       const span = to.atMs - from.atMs;
-      // Two keyframes at the same instant would divide by zero; the later one
-      // is the answer, which is also what a zero-length ease would produce.
-      const u = span <= 0 ? 1 : ease((atMs - from.atMs) / span);
-      return lerpBounds(from.bounds, to.bounds, u);
+      return lerpBounds(from.bounds, to.bounds, span <= 0 ? 1 : (atMs - from.atMs) / span);
     }
   }
-
   return keyframes[keyframes.length - 1].bounds;
 }
 
 /**
- * How much of one stroke has been drawn.
- *
- * The pen advances **one recorded fix per step**, which is the pacing
- * `composition.ts` chose deliberately — elapsed-time pacing would spend a third
- * of the film parked outside a restaurant. The final point is interpolated
- * along the edge in progress rather than snapped to the next fix: the pacing
- * stays per-fix, but the line grows continuously instead of ticking, which at
- * eight fixes a segment is the difference between a drawn line and a stutter.
+ * How much of one stroke has been drawn: every point the pen has reached, and
+ * the tip interpolated along the edge in progress, so the line grows
+ * continuously rather than a point at a time.
  */
-function partialStroke(
-  segment: DrawnSegment,
-  atMs: number
-): [number, number][] | null {
+function partialStroke(segment: DrawnSegment, atMs: number): [number, number][] | null {
   if (atMs >= segment.endMs) {
-    return segment.coordinates.length >= 2 ? segment.coordinates : null;
+    return segment.coordinates;
   }
   if (atMs <= segment.startMs) {
     return null;
   }
-
-  const span = segment.endMs - segment.startMs;
-  const u = span <= 0 ? 1 : (atMs - segment.startMs) / span;
-
-  const edges = segment.coordinates.length - 1;
-  const travelled = clamp01(u) * edges;
-  const whole = Math.min(Math.floor(travelled), edges);
-  const fraction = travelled - whole;
-
-  const drawn: [number, number][] = segment.coordinates.slice(0, whole + 1);
-
-  if (whole < edges && fraction > 0) {
-    const [fromLon, fromLat] = segment.coordinates[whole];
-    const [toLon, toLat] = segment.coordinates[whole + 1];
-    drawn.push([lerp(fromLon, toLon, fraction), lerp(fromLat, toLat, fraction)]);
+  const times = segment.timesMs;
+  // The last point already reached; the pen is somewhere on the edge after it.
+  let reached = 0;
+  while (reached + 1 < times.length && times[reached + 1] <= atMs) reached += 1;
+  const drawn = segment.coordinates.slice(0, reached + 1);
+  if (reached + 1 < times.length) {
+    const span = times[reached + 1] - times[reached];
+    const u = span <= 0 ? 1 : (atMs - times[reached]) / span;
+    const [fromLon, fromLat] = segment.coordinates[reached];
+    const [toLon, toLat] = segment.coordinates[reached + 1];
+    drawn.push([lerp(fromLon, toLon, u), lerp(fromLat, toLat, u)]);
   }
-
-  // A single point is not a line. Better to show nothing for one frame than to
-  // ask every renderer to guess what a one-point stroke means.
+  // A single point is not a line.
   return drawn.length >= 2 ? drawn : null;
-}
-
-/** Every stamp cue in the film, in the order they land. */
-function allCues(film: Film): StampCue[] {
-  return film.scenes.flatMap((scene) =>
-    scene.kind === 'draw' ? scene.cues : []
-  );
 }
 
 /**
@@ -257,29 +167,15 @@ export function frameAt(film: Film, atMs: number): Frame {
       ? cameraAt(scene.camera, film.bounds, at)
       : scene.bounds;
 
-  // ⚠ Strokes come from every draw scene, not only the current one. During the
-  // finale the whole trace stays on screen — that is the picture being framed —
-  // and reading only the active scene would blank the map for the closing shot.
+  // ⚠ Strokes come from every draw scene, not only the current one: during the
+  // finale the whole trace stays on screen, which is the picture being framed.
   const strokes: [number, number][][] = [];
-  const faded: boolean[] = [];
   for (const segment of film.scenes.flatMap((each) => (each.kind === 'draw' ? each.segments : []))) {
     const stroke = partialStroke(segment, at);
     if (stroke !== null) {
       strokes.push(stroke);
-      faded.push(segment.faded);
     }
   }
-
-  const stamps: LandedStamp[] = allCues(film)
-    .filter((cue) => cue.atMs <= at)
-    .map((cue) => ({
-      placeId: cue.placeId,
-      name: cue.name,
-      category: cue.category,
-      lat: cue.lat,
-      lon: cue.lon,
-      ageMs: at - cue.atMs,
-    }));
 
   return {
     atMs: at,
@@ -287,8 +183,6 @@ export function frameAt(film: Film, atMs: number): Frame {
     sceneProgress,
     bounds,
     strokes,
-    faded,
-    stamps,
     hero:
       scene.kind === 'finale'
         ? {

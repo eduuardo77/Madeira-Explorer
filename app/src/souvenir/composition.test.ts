@@ -7,8 +7,8 @@
  *
  *   1. **An unsafe trace produces no film.** This is the D-040 guard and it is
  *      the difference between a souvenir and a published address.
- *   2. **Every stamp appears.** Stamps are the reward (D-002); a crowded
- *      collection must compress, never lose one.
+ *   2. **The pen keeps one speed** along the road, however densely the road
+ *      is drawn or however long was spent in one place (T-279).
  *   3. **The film is bounded.** A fortnight and an afternoon must both produce
  *      something a person will watch to the end.
  *   4. **A blackout stays a blackout.** No stroke may bridge one, and the
@@ -17,20 +17,18 @@
  *      same film, every time.
  *
  * Nothing here has been *watched*. These tests prove the arithmetic is
- * consistent; whether 350 ms is long enough to read a badge is a question only
- * T-105b and a pair of eyes can answer.
+ * consistent; `tools/film-check.mjs` measures it on a real trip.
  */
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { TraceFix } from '../map/traceGeoJson.ts';
+import { REPEAT_PACE } from './penPath.ts';
 import {
-  CUE_TAIL_MS,
   ESTABLISH_MS,
   FINALE_MS,
   MAX_DRAW_MS,
-  MIN_CUE_GAP_MS,
   MIN_DRAW_MS,
   MIN_SPAN_DEG,
   composeSouvenir,
@@ -58,14 +56,19 @@ function walk(count: number, fromMinute = 0): TraceFix[] {
 }
 
 function stamp(minute: number, id: string): SouvenirStamp {
-  return {
-    placeId: id,
-    name: `Place ${id}`,
-    category: 'viewpoint',
-    awardedTs: T0 + minute * 60_000,
-    lat: 32.66,
-    lon: -16.91,
-  };
+  return { placeId: id, awardedTs: T0 + minute * 60_000 };
+}
+
+/** A straight road east along 32.65°, `points` evenly spaced from `fromLon` to `toLon`. */
+function road(fromLon: number, toLon: number, points: number, fromMinute = 0): TraceFix[] {
+  return Array.from({ length: points }, (_, i) =>
+    fix(fromMinute + i, 32.65, fromLon + ((toLon - fromLon) * i) / (points - 1))
+  );
+}
+
+/** How long the pen spends on each stroke, ms. */
+function strokeTimes(draw: DrawScene): number[] {
+  return draw.segments.map((segment) => segment.endMs - segment.startMs);
 }
 
 function input(overrides: Partial<SouvenirInput> = {}): SouvenirInput {
@@ -151,72 +154,38 @@ test('a single fix cannot be a line, and is refused', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 2. Every stamp appears
+// 2. The pen keeps one speed
 // ---------------------------------------------------------------------------
 
-test('every stamp gets exactly one cue, in collection order', () => {
-  const stamps = [stamp(50, 'c'), stamp(10, 'a'), stamp(30, 'b')];
-  const draw = drawScene(composeSouvenir(input({ stamps })));
-
-  assert.deepEqual(
-    draw.cues.map((cue) => cue.placeId),
-    ['a', 'b', 'c']
+test('the pen keeps one speed, however densely a road is drawn', () => {
+  // The same length twice: a straight stretch of two points, then a stretch of
+  // fifty, as a hairpin village would be. Points once bought time.
+  const draw = drawScene(
+    composeSouvenir(
+      input({ roads: [{ fixes: road(-16.92, -16.9, 2) }, { fixes: road(-16.9, -16.88, 50, 10) }] })
+    )
   );
+  const [sparse, dense] = strokeTimes(draw);
+  assert.ok(Math.abs(sparse - dense) / sparse < 0.01, `${sparse.toFixed(0)} ms against ${dense.toFixed(0)} ms`);
 });
 
-test('a stamp lands where the line reaches it, not at a share of the clock', () => {
-  // 60 fixes, one a minute. A stamp earned at minute 30 belongs halfway.
-  const draw = drawScene(composeSouvenir(input({ stamps: [stamp(30, 'a')] })));
-  const fraction = (draw.cues[0].atMs - draw.startMs) / draw.durationMs;
-
-  assert.ok(
-    Math.abs(fraction - 30 / 59) < 0.02,
-    `cue landed at ${fraction.toFixed(3)} of the draw`
-  );
+test('road drawn again is drawn faster, since it shows nothing new', () => {
+  // There, then back along the same road: the evening drive home.
+  const there = road(-16.92, -16.88, 20);
+  const back = [...there].reverse().map((point, i) => ({ ...point, ts: T0 + (100 + i) * 60_000 }));
+  const draw = drawScene(composeSouvenir(input({ roads: [{ fixes: there }, { fixes: back }] })));
+  const [first, again] = strokeTimes(draw);
+  assert.ok(again < first * (REPEAT_PACE + 0.1), `${again.toFixed(0)} ms back against ${first.toFixed(0)} ms there`);
 });
 
-test('a crowded hour keeps every stamp, spaced apart', () => {
-  // Twelve stamps inside twelve minutes: Funchal on a cruise-ship day.
-  const stamps: SouvenirStamp[] = [];
-  for (let i = 0; i < 12; i += 1) {
-    stamps.push(stamp(20 + i / 12, `p${i}`));
-  }
-  const draw = drawScene(composeSouvenir(input({ stamps })));
-
-  assert.equal(draw.cues.length, 12);
-  for (let i = 1; i < draw.cues.length; i += 1) {
-    assert.ok(
-      draw.cues[i].atMs - draw.cues[i - 1].atMs >= MIN_CUE_GAP_MS - 0.001,
-      `cues ${i - 1} and ${i} are ${draw.cues[i].atMs - draw.cues[i - 1].atMs} ms apart`
-    );
-  }
-});
-
-test('an absurd number of stamps compresses rather than losing any', () => {
-  const stamps: SouvenirStamp[] = [];
-  for (let i = 0; i < 200; i += 1) {
-    stamps.push(stamp(i / 4, `p${i}`));
-  }
-  const draw = drawScene(composeSouvenir(input({ stamps })));
-
-  assert.equal(draw.cues.length, 200);
-  assert.equal(draw.durationMs, MAX_DRAW_MS);
-  for (let i = 1; i < draw.cues.length; i += 1) {
-    assert.ok(draw.cues[i].atMs >= draw.cues[i - 1].atMs);
-  }
-});
-
-test('no stamp lands outside the draw, or in its closing moment', () => {
-  // Awards deliberately outside the drawn window at both ends — masking can
-  // remove the fixes around a place without removing the stamp.
-  const stamps = [stamp(-500, 'before'), stamp(30, 'during'), stamp(9_000, 'after')];
-  const draw = drawScene(composeSouvenir(input({ stamps })));
-  const lastAllowed = draw.startMs + draw.durationMs - CUE_TAIL_MS;
-
-  for (const cue of draw.cues) {
-    assert.ok(cue.atMs >= draw.startMs, `${cue.placeId} cued before the draw`);
-    assert.ok(cue.atMs <= lastAllowed, `${cue.placeId} cued in the tail`);
-  }
+test('time spent standing in one place buys no time on screen', () => {
+  // A hundred fixes at one spot, as a lunch stop is recorded, then a walk on.
+  const lunch = Array.from({ length: 100 }, (_, i) => fix(i, 32.65, -16.92));
+  const walkOn = road(-16.92, -16.9, 10, 100);
+  const draw = drawScene(composeSouvenir(input({ roads: [{ fixes: [...lunch, ...walkOn.slice(1)] }] })));
+  const times = draw.segments[0].timesMs;
+  assert.equal(times[99], times[0], 'the pen moved while the phone stood still');
+  assert.equal(times[times.length - 1], draw.startMs + draw.durationMs);
 });
 
 test('the collected count is the number of stamps, and the denominator is the caller’s', () => {

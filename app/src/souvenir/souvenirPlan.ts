@@ -15,7 +15,6 @@
  */
 
 import { getContentPack } from '../content/poiCatalogue';
-import type { Place } from '../content/contentPack';
 import { getCurrentProgress } from '../progress/currentProgress';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
@@ -107,55 +106,15 @@ export async function getSouvenirComposition({
 }
 
 /**
- * Join awards to the places they were earned at.
- *
- * An award whose place is no longer in the pack is skipped rather than shown
- * nameless — a badge reading "unknown" in a video somebody is about to post is
- * worse than one fewer badge. It can only happen if the pack changed under an
- * old trip, which is exactly what a re-curation between releases does.
+ * The awards the finale counts: those whose place is still in the pack. One
+ * whose place a re-curation removed is not counted, as the passport does not
+ * show it either.
  */
 function toSouvenirStamps(
   awards: { place_id: string; awarded_ts: number }[]
 ): SouvenirStamp[] {
-  const places = new Map<string, Place>();
-  for (const place of getContentPack().places) {
-    places.set(place.id, place);
-  }
-
-  const stamps: SouvenirStamp[] = [];
-  for (const award of awards) {
-    const place = places.get(award.place_id);
-    if (place === undefined) {
-      continue;
-    }
-    const marker = stampMarker(place);
-    if (marker === null) {
-      continue;
-    }
-    stamps.push({
-      placeId: place.id,
-      name: place.name,
-      category: place.category,
-      awardedTs: award.awarded_ts,
-      lat: marker.lat,
-      lon: marker.lon,
-    });
-  }
-
-  return stamps;
-}
-
-/**
- * Where the badge lands on the map.
- *
- * Most places have exactly one geofence and the question does not arise. A
- * levada has two (D-034), and the badge belongs at the **end** — that is where
- * the walker was when they earned it, and popping the badge back at the
- * trailhead would put it somewhere the line left an hour earlier.
- */
-function stampMarker(place: Place): { lat: number; lon: number } | null {
-  const main = place.geofences.find((geofence) => geofence.role === 'main');
-  const end = place.geofences.find((geofence) => geofence.role === 'end');
-  const chosen = main ?? end ?? place.geofences[0];
-  return chosen === undefined ? null : { lat: chosen.lat, lon: chosen.lon };
+  const known = new Set(getContentPack().places.map((place) => place.id));
+  return awards
+    .filter((award) => known.has(award.place_id))
+    .map((award) => ({ placeId: award.place_id, awardedTs: award.awarded_ts }));
 }

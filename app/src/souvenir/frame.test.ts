@@ -15,7 +15,8 @@
  *      place that rule can be broken.
  *   2. **The drawing only ever grows.** A trace that shrinks between frames is
  *      a film that un-walks the holiday.
- *   3. **Every stamp is on screen by the end.** Stamps are the reward (D-002).
+ *   3. **The camera is the storyboard's**, between its targets in a straight
+ *      line, as the map plays it.
  *   4. **It is deterministic and stateless.** Sampling in a random order gives
  *      the same frames as sampling in sequence.
  *
@@ -51,14 +52,7 @@ function walk(count: number, fromMinute = 0): TraceFix[] {
 }
 
 function stamp(minute: number, id: string): SouvenirStamp {
-  return {
-    placeId: id,
-    name: `Place ${id}`,
-    category: 'viewpoint',
-    awardedTs: T0 + minute * 60_000,
-    lat: 32.66,
-    lon: -16.91,
-  };
+  return { placeId: id, awardedTs: T0 + minute * 60_000 };
 }
 
 function input(overrides: Partial<SouvenirInput> = {}): SouvenirInput {
@@ -111,7 +105,6 @@ test('the first frame is empty and the last frame holds the whole walk', () => {
   const first = frameAt(f, 0);
   assert.equal(first.kind, 'establish');
   assert.deepEqual(first.strokes, []);
-  assert.deepEqual(first.stamps, []);
   assert.equal(first.hero, null);
 
   const last = frameAt(f, f.durationMs);
@@ -201,8 +194,7 @@ test('a stroke grows smoothly rather than a fix at a time', () => {
 
   // A quarter of the way along one edge: the interpolated head must sit
   // strictly between two recorded fixes, not on either of them.
-  const edges = segment.coordinates.length - 1;
-  const quarterEdge = segment.startMs + ((segment.endMs - segment.startMs) / edges) * 0.25;
+  const quarterEdge = segment.timesMs[0] + (segment.timesMs[1] - segment.timesMs[0]) * 0.25;
 
   const stroke = frameAt(f, quarterEdge).strokes[0];
   const head = stroke[stroke.length - 1];
@@ -213,69 +205,17 @@ test('a stroke grows smoothly rather than a fix at a time', () => {
   assert.ok(head[1] > Math.min(fromLat, toLat) && head[1] < Math.max(fromLat, toLat));
 });
 
-test('every stamp has landed by the end, in collection order', () => {
-  const stamps = [stamp(5, 'a'), stamp(20, 'b'), stamp(50, 'c')];
-  const f = film(composeSouvenir(input({ stamps })));
-
-  const landed = frameAt(f, f.durationMs).stamps;
-  assert.deepEqual(
-    landed.map((s) => s.placeId),
-    ['a', 'b', 'c']
-  );
-
-  // And none of them before its cue.
-  const cues = f.scenes.flatMap((scene) => (scene.kind === 'draw' ? scene.cues : []));
-  for (const cue of cues) {
-    const justBefore = frameAt(f, cue.atMs - 1).stamps.map((s) => s.placeId);
-    assert.ok(!justBefore.includes(cue.placeId), `${cue.placeId} landed early`);
-  }
-});
-
-test('a stamp knows how long it has been on screen', () => {
-  const f = film(composeSouvenir(input({ stamps: [stamp(5, 'a')] })));
-  const cue = f.scenes.flatMap((scene) => (scene.kind === 'draw' ? scene.cues : []))[0];
-
-  assert.equal(frameAt(f, cue.atMs).stamps[0].ageMs, 0);
-  assert.equal(frameAt(f, cue.atMs + 400).stamps[0].ageMs, 400);
-});
-
-test('the stamp count never goes down', () => {
-  const stamps = [stamp(5, 'a'), stamp(20, 'b'), stamp(50, 'c')];
-  const f = film(composeSouvenir(input({ stamps })));
-
-  let previous = 0;
-  for (const at of frameTimes(f)) {
-    const count = frameAt(f, at).stamps.length;
-    assert.ok(count >= previous, `a stamp vanished at ${at} ms`);
-    previous = count;
-  }
-  assert.equal(previous, 3);
-});
-
-test('the camera moves, and eases rather than jumps', () => {
+test('the camera runs straight between its targets, as the map plays them', () => {
   const f = film(composeSouvenir(input()));
   const draw = f.scenes.find((scene) => scene.kind === 'draw');
   assert.ok(draw !== undefined && draw.camera.length >= 2);
 
-  const first = draw.camera[0];
-  const second = draw.camera[1];
-
-  // At the keyframe itself, exactly the keyframe.
+  const [first, second] = draw.camera;
   assert.deepEqual(frameAt(f, first.atMs).bounds, first.bounds);
-
-  // Smoothstep has zero velocity at both ends, so the first tenth of the way
-  // between two keyframes must cover less than a tenth of the distance. Linear
-  // easing — the thing this is here to prevent — would cover exactly a tenth.
-  const span = second.atMs - first.atMs;
-  const early = frameAt(f, first.atMs + span * 0.1).bounds;
-  const travelled = Math.abs(early.north - first.bounds.north);
-  const total = Math.abs(second.bounds.north - first.bounds.north);
-
-  // ⚠ Asserted, not guarded with an `if`. Two identical keyframes would make
-  // the real check below vacuous, and a test that quietly stops testing is the
-  // probe this project is told to suspect.
-  assert.ok(total > 0, 'the fixture must actually move the camera');
-  assert.ok(travelled < total * 0.1, 'the camera is not eased');
+  const midway = frameAt(f, (first.atMs + second.atMs) / 2).bounds;
+  assert.ok(Math.abs(midway.north - (first.bounds.north + second.bounds.north) / 2) < 1e-12);
+  // The smoothing is in the targets (`filmCamera.ts`), so they are dense.
+  assert.ok(draw.camera.length > draw.durationMs / 200, `${draw.camera.length} targets`);
 });
 
 test('times outside the film are clamped, not refused', () => {

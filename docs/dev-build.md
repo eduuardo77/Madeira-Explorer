@@ -623,6 +623,11 @@ else. `betaBuild.test.ts` fails if any committed file (`app.json`, `eas.json`, `
 
 ## The field build — a release APK we can still read, 2026-09-22
 
+⚠ **Since at least 2026-10-19 the P30's build is signed with the upload key** (SHA-1
+`87:5F:7F:…:47:61`), so the paragraph below is out of date for it: install the gradle output as
+is with `install -r`. A copy re-signed with the debug key is refused (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
+Check with `apksigner verify --print-certs` on the pulled `base.apk` before choosing.
+
 ⚠ **Since 2026-10-04 (T-117e) release builds are signed with the upload key**, from
 `~/.gradle/gradle.properties`, and the P30's copy is signed with the **debug key**: `install -r`
 fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Uninstalling would erase the phone's data, so

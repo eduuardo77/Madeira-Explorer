@@ -259,6 +259,10 @@ permission, L3 privacy contact.
       (every free end at a polyline's end, two to a line: 49 lines, not 88), which keeps the count
       from climbing with every dead end; no zoom gain today, so not claimed. **Open for the lead:**
       the street-zoom width (4 dp, D-104 Provisional) is the remaining lever, a few fps.
+      ⚠ **Measured 2026-10-19, it is not:** widths in dp at street/town/outskirts/island, zoom over
+      Funchal, two runs each: A today 4/3/2.5/2 57.2, 49.8; B 3.5/3/2.5/2 47.6, 44.7; C 3/2.5/2.5/2
+      45.7, 54.3; D 3/3/2.5/2 51.8, 50.9. They overlap; only 2 px (under 1 dp) was faster. The
+      width is a choice about looks: `tools/out/width-options.html` shows the four for the lead.
       **The replay** (whole trip, `tools/record-frames.sh`): **28 fps, 27 freezes over 100 ms in
       25 s**: every 100 ms it resent every stroke as its own polyline. Now strokes go 8 to a line
       (`replayMap.STROKES_PER_LINE`, gaps across blackouts, a `version` per line) and the screen

@@ -118,7 +118,7 @@ import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 import { splitTrace } from './mergedTrace';
-import { traceWidthDp } from './traceWidth';
+import { nativeWidthSteps, traceWidthDp } from './traceWidth';
 
 import lightTemplate from '../../assets/map/light.json';
 import { deviceLanguage, t } from '../i18n';
@@ -194,6 +194,7 @@ type Polyline = {
   color: string;
   width: number;
   gaps?: number[];
+  widthSteps?: { fromZoom: number; width: number }[];
 };
 
 /**
@@ -283,12 +284,6 @@ export default function NativeMapScreen({
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [traceLines, setTraceLines] = useState<VisitedLine[]>([]);
-  /**
-   * The lit roads' width for the zoom the camera is at (D-104). State, but it
-   * changes only when a pinch crosses a step: `onCameraMove` sets it on every
-   * event and React skips the render when the number is the same (T-254).
-   */
-  const [traceWidth, setTraceWidth] = useState(() => traceWidthDp(Infinity));
   const [coursePolylines, setCoursePolylines] = useState<Polyline[]>([]);
   const [marker, setMarker] = useState<
     { coordinates: { latitude: number; longitude: number }; title: string }[]
@@ -422,7 +417,9 @@ export default function NativeMapScreen({
    * plus the pieces with a free end on their own, for their round caps (T-278,
    * `mergedTrace.ts`): Google's map pays per polyline on every frame, and 636
    * of them held a pan to 30 fps on the P30. Thinner as the camera zooms out
-   * (`traceWidth.ts`).
+   * (D-104, `traceWidth.ts`): the steps go to the native map, which switches
+   * the width itself. Set from here, each step crossed in a pinch resent every
+   * road and froze the map for 100 to 200 ms (T-278).
    */
   const splitLines = useMemo(
     () =>
@@ -432,20 +429,31 @@ export default function NativeMapScreen({
     [traceLines]
   );
   const tracePolylines = useMemo<Polyline[]>(() => {
-    const width = px(traceWidth);
+    const width = px(traceWidthDp(Infinity));
+    const widthSteps = nativeWidthSteps(PixelRatio.get());
     const { merged, capped } = splitLines;
     return [
       ...(merged.coordinates.length < 2
         ? []
-        : [{ id: 'trace', coordinates: merged.coordinates, gaps: merged.gaps, color: tracePaint.coreColor, width }]),
+        : [
+            {
+              id: 'trace',
+              coordinates: merged.coordinates,
+              gaps: merged.gaps,
+              color: tracePaint.coreColor,
+              width,
+              widthSteps,
+            },
+          ]),
       ...capped.map((coordinates, index) => ({
         id: `trace-end-${index}`,
         coordinates,
         color: tracePaint.coreColor,
         width,
+        widthSteps,
       })),
     ];
-  }, [splitLines, traceWidth, tracePaint.coreColor]);
+  }, [splitLines, tracePaint.coreColor]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1075,8 +1083,6 @@ export default function NativeMapScreen({
           if (latitude !== undefined && longitude !== undefined) {
             noteCameraCentre({ latitude, longitude });
           }
-          // Thinner lit roads further out (D-104); a no-op inside a step.
-          setTraceWidth(traceWidthDp(event.zoom));
         }}
         // The dark/light choice, and which of the two dark maps it draws —
         // Google's own by default (T-147). `darkMode.ts` holds that decision

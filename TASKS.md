@@ -234,6 +234,21 @@ permission, L3 privacy contact.
       **After, release build, P30:** 59.7, 59.9, 59.4 fps, 1.1, 0.8, 1.7% missed (WalkNYC on an
       empty map 0.8 to 1.7%); 288 MB after the workload. Seen: dead ends round, no stray lines
       between pieces, the viewer's day drawn. **Not yet felt by the lead.**
+      **Pinch, 2026-10-19:** the lead felt it smoother, with stutters left, most in a pinch.
+      `tools/measure-map-zoom.sh` (monkey drives Google's one-finger zoom, `make-zoom-gesture.py`:
+      `input` has no pinch, /dev/input refuses writes, monkey's `PinchZoom` lands in 59 ms) over
+      Funchal, zoom about 12 to 15: **45 fps, 7 to 8 freezes over 100 ms (up to 199)**. Switches:
+      fixed width 50 to 52 fps, no freezes; no roads 60; the 87 capped pieces about 3 to 4 fps.
+      Applying the width when the camera stops only moved the freeze to the next gesture. ✅ **The
+      width steps go to the native map** (`traceWidth.nativeWidthSteps`, `expo-maps` patch
+      `widthSteps`, a derived width so the content recomposes only on a crossing): no road is
+      resent mid-pinch. **After:** 57.0, 51.0, 55.5 fps, **0 freezes over 100 ms** (max 50 to
+      83 ms); pans still 60. Widths seen unchanged at both ends. WalkNYC is no yardstick here:
+      it opens at street zoom and the gesture pinned it at maximum zoom on an empty street.
+      ⚠ **The first zoom gesture started its zoom-out on *Começar passeio*** and started and
+      ended two outings on the lead's phone (10:57, 10:58; diary only, flags back to off, trip
+      31 untouched). The gesture now never touches below y = 1,750, asserted. **Left:** zoom at
+      51 to 57, not 60: the capped pieces and the merged line's own cost while zooming.
 - [~] **T-277** The offer from the first day (D-105). **Built 2026-10-10, workbench only.** The
       passport card shows until the passport is bought and counts the free five down over three
       places in colour; the 3rd and 5th stamp pop-ups offer the unlock (`offerWithStamp`); the

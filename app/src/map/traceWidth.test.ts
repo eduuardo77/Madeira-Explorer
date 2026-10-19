@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { TRACE_PAINT } from './traceStyle.ts';
-import { TRACE_WIDTH_STEPS, traceWidthDp } from './traceWidth.ts';
+import { TRACE_WIDTH_STEPS, nativeWidthSteps, traceWidthDp } from './traceWidth.ts';
 
 test('street zoom keeps the width the map always drew', () => {
   // *Centrar* lands at 16; the line there was judged on the P30 and sits on the street.
@@ -43,4 +43,15 @@ test('a step boundary belongs to the wider step', () => {
 test('a missing zoom falls back to the thinnest line, not to an exception', () => {
   // expo-maps types the event fully, but a native NaN must not throw on a pan.
   assert.equal(traceWidthDp(Number.NaN), 2);
+});
+
+test('the native steps give the same width as traceWidthDp at every zoom, in pixels (T-278)', () => {
+  const steps = nativeWidthSteps(2.75);
+  // What the patched expo-maps does: the first step whose zoom the camera has reached, else the last.
+  const nativeWidth = (zoom: number) =>
+    (steps.find((step) => zoom >= step.fromZoom) ?? steps[steps.length - 1]).width;
+  for (let zoom = 0; zoom <= 21; zoom += 0.25) {
+    assert.equal(nativeWidth(zoom), traceWidthDp(zoom) * 2.75, `zoom ${zoom}`);
+  }
+  assert.ok(steps.every((step) => Number.isFinite(step.fromZoom)), 'no Infinity crosses to Kotlin');
 });

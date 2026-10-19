@@ -15,7 +15,7 @@ index e7b12c8..0eef7ff 100644
          view.selectMarker(id, options)
        }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..cf231c7 100644
+index 82450b6..930f236 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 @@ -24,8 +24,19 @@ import com.google.android.gms.maps.LocationSource
@@ -48,7 +48,7 @@ index 82450b6..cf231c7 100644
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,9 +110,11 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,12 +110,25 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -60,20 +60,35 @@ index 82450b6..cf231c7 100644
      markerState = markerStateFromProps()
      val locationSource = locationSourceFromProps()
      val polylineState by polylineStateFromProps()
-@@ -154,12 +170,22 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
++    // Bruma (T-278): each polyline's width for the camera's zoom. Derived, so
++    // the content recomposes only when a step is crossed, not on every frame
++    // of a pinch (the T-254 trap: reading the camera here recomposed it all).
++    val stepWidths by remember {
++      derivedStateOf {
++        val zoom = cameraState.position.zoom.toDouble()
++        polylineState.map { (polyline, _, _) ->
++          (polyline.widthSteps.firstOrNull { zoom >= it.fromZoom } ?: polyline.widthSteps.lastOrNull())?.width
++        }
++      }
++    }
+     val polygonState by polygonStateFromProps()
+     val circleState by circleStateFromProps()
+     val mapOptions = props.mapOptions.value.mapId?.let { GoogleMapOptions().mapId(it) } ?: GoogleMapOptions()
+@@ -154,12 +181,22 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
 -      polylineState.forEach { (polyline, coordinates) ->
 +      MapEffect(Unit) { map -> nativeMap = map }
-+      polylineState.forEach { (polyline, coordinates, spans) ->
++      polylineState.forEachIndexed { index, (polyline, coordinates, spans) ->
          Polyline(
            points = coordinates,
 -          color = Color(polyline.color),
 +          // Bruma (T-278): the colour comes in the spans, so gaps can be clear.
 +          spans = spans,
            geodesic = polyline.geodesic,
-           width = polyline.width,
+-          width = polyline.width,
++          width = stepWidths.getOrNull(index) ?: polyline.width,
 +          // Bruma (D-093): round joints and ends. The default mitred joint
 +          // turns a sharp bend into a long spike (T-168), and a butt end makes
 +          // a lit street stop square in the middle of a junction.
@@ -85,7 +100,7 @@ index 82450b6..cf231c7 100644
            clickable = true,
            onClick = {
              onPolylineClick(
-@@ -234,7 +260,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -234,7 +271,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -104,7 +119,7 @@ index 82450b6..cf231c7 100644
      LaunchedEffect(cameraState.cameraMoveStartedReason) {
        // We should stop following the user's location when camera is moved manually.
        if (cameraState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE || cameraState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION) {
-@@ -266,7 +303,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -266,7 +314,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -112,7 +127,7 @@ index 82450b6..cf231c7 100644
    }
  
    @Composable
-@@ -319,11 +355,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -319,11 +366,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      remember {
        derivedStateOf {
          props.polylines.value.map { polyline ->
@@ -146,7 +161,7 @@ index 82450b6..cf231c7 100644
    @Composable
    private fun polygonStateFromProps() =
      remember {
-@@ -361,6 +418,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -361,6 +429,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  
@@ -174,10 +189,26 @@ index 82450b6..cf231c7 100644
      // Stop updating the camera position based on user location.
      manualCameraControl = true
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-index 1585460..db528bd 100644
+index 1585460..3409f49 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-@@ -103,7 +103,18 @@ data class PolylineRecord(
+@@ -88,6 +88,15 @@ data class MarkerRecord(
+   val zIndex: Float = 0.0f
+ ) : Record
+ 
++// Bruma (T-278): a width from a zoom up, in pixels.
++data class WidthStep(
++  @Field
++  val fromZoom: Double = 0.0,
++
++  @Field
++  val width: Float = 0f
++) : Record
++
+ @OptimizedRecord
+ data class PolylineRecord(
+   @Field
+@@ -103,7 +112,24 @@ data class PolylineRecord(
    val color: Int = 0xFF0000FF.toInt(),
  
    @Field
@@ -193,15 +224,21 @@ index 1585460..db528bd 100644
 +  // Every lit road is one polyline with gaps between its pieces: the map pays
 +  // per polyline on every frame, and 636 of them held a pan to 30 fps.
 +  @Field
-+  val gaps: List<Int> = emptyList()
++  val gaps: List<Int> = emptyList(),
++
++  // Bruma (T-278): widths by zoom, highest zoom first; the map switches the
++  // width itself when the camera crosses a step. Set from JavaScript, every
++  // crossing resent every lit road mid-pinch and froze the map 100 to 200 ms.
++  @Field
++  val widthSteps: List<WidthStep> = emptyList()
  ) : Record
  
  @OptimizedRecord
 diff --git a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-index 100005c..f93eb9b 100644
+index 100005c..d8cf4b0 100644
 --- a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
 +++ b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-@@ -82,6 +82,15 @@ export type GoogleMapsPolyline = {
+@@ -82,6 +82,20 @@ export type GoogleMapsPolyline = {
       * Whether the polyline is geodesic.
       */
      geodesic?: boolean;
@@ -214,10 +251,15 @@ index 100005c..f93eb9b 100644
 +     * so many pieces can be one polyline.
 +     */
 +    gaps?: number[];
++    /**
++     * Bruma (T-278): widths by zoom in pixels, highest zoom first; the map
++     * switches the width itself when the camera crosses a step.
++     */
++    widthSteps?: { fromZoom: number; width: number }[];
  };
  /**
   * @platform android
-@@ -435,6 +444,8 @@ export type GoogleMapsViewType = {
+@@ -435,6 +449,8 @@ export type GoogleMapsViewType = {
       * @param config New camera position config.
       */
      setCameraPosition: (config?: SetCameraPositionConfig) => void;

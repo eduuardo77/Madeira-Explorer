@@ -13,6 +13,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   the cause was 636 polylines (one per lit piece). Now one polyline with invisible gaps, plus
   the 87 pieces with a free end on their own for round caps: 59 to 60 fps. On the P30 (field
   build); the lead has not felt it yet. The replay still draws one polyline per run.
+  Then the pinch (the lead's stutters): the width steps froze each zoom for 100 to 200 ms; the
+  native map now switches the width itself (`widthSteps`): zoom 51 to 57 fps, no freezes.
+  ⚠ Measuring with `tools/measure-map-zoom.sh` once started two outings (a tap on *Começar
+  passeio*); fixed, but any scripted touch on Bruma must stay above y = 1,750.
 
 - **18 Oct, airplane mode:** 91.4% within 10 m, about 1.6 points an hour, and **the trip ended at
   lunch** in Funchal: the ferry terminal was a departure point with a 500 m circle. Removed (D-021

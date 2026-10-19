@@ -44,3 +44,20 @@ export function traceWidthDp(zoom: number): number {
   }
   return TRACE_WIDTH_STEPS[TRACE_WIDTH_STEPS.length - 1]!.widthDp;
 }
+
+/** A width step as the map's native side takes it: in pixels, every zoom finite. */
+export type NativeWidthStep = { fromZoom: number; width: number };
+
+/**
+ * The steps for `expo-maps`' `widthSteps` (T-278): the native map switches the
+ * width itself when the zoom crosses a step. Set from JavaScript on every
+ * crossing, it rebuilt and resent every lit road mid-pinch, and each crossing
+ * froze the map for 100 to 200 ms on the P30. Highest zoom first, like
+ * `TRACE_WIDTH_STEPS`; the open-ended floor becomes zoom 0, the lowest there is.
+ */
+export function nativeWidthSteps(pixelRatio: number): NativeWidthStep[] {
+  return TRACE_WIDTH_STEPS.map((step) => ({
+    fromZoom: Number.isFinite(step.fromZoom) ? step.fromZoom : 0,
+    width: step.widthDp * pixelRatio,
+  }));
+}

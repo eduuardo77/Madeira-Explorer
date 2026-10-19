@@ -208,8 +208,9 @@ permission, L3 privacy contact.
 - [~] **T-279** *Ver a tua viagem*, the photo clean and the film smooth (the lead, 2026-10-19: the
       times make the day photo less pleasing; the film lags, loses the line out of frame, shows
       blanks in tunnels and lingers where more time was spent). **Photo done and seen on the P30
-      2026-10-19:** no tags by default, a tap on a stamp shows its name and time, the *Horas* pill
-      shows every time, the share follows the pill. **Film built and measured 2026-10-19, not yet
+      2026-10-19:** no tags and, since the same evening, no stamp dots either (the lead: "remove
+      the time dots"), so the tap that named a stamp went with them; the *Horas* pill shows
+      every time, the share follows the pill. **Film built and measured 2026-10-19, not yet
       watched by the lead.** Measured on the lead's trip first (`tools/film-check.mjs`, numbers
       only): the pen ran 10 to 60 km of road a second (it advanced a road point per step); half
       the whole-trip film, 7 of 14 s, redrew road already drawn; 42 of 46 jumps under 1 km were

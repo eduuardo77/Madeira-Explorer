@@ -663,10 +663,9 @@ export const STRINGS = {
   'trip.a11y.next': s('Next day', 'Dia seguinte', 'Nächster Tag'),
   'trip.stampAt': s('{name}, at {time}', '{name}, às {time}', '{name}, um {time}'),
   // The lead, 19 Oct 2026: the times make the picture less pleasing, so they
-  // are off until this pill or a tap on a stamp asks for them.
+  // are off until this pill asks for them.
   'trip.times': s('Times', 'Horas', 'Uhrzeiten'),
   'trip.a11y.times': s('Shows the time of every stamp', 'Mostra a hora de cada carimbo', 'Zeigt die Uhrzeit jedes Stempels'),
-  'trip.a11y.stampHint': s('Shows its name and time', 'Mostra o nome e a hora', 'Zeigt Namen und Uhrzeit'),
   'replay.watch': s('Watch your trip', 'Ver a tua viagem', 'Ihre Reise ansehen'),
   'replay.close': s('Done', 'Concluído', 'Fertig'),
   'trip.nothingLit': s(

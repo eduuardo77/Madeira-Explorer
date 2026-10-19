@@ -211,6 +211,9 @@ const STEPS = [
     await tap(label('replay.watch'));
     await reach(label('trip.a11y.back'), { timeoutMs: 20_000 });
     await tap(label('trip.a11y.replay'));
+    // Since 17 Oct the button asks: this day or the whole trip. The whole
+    // trip is the heavier film, so that is the one played.
+    await tap(label('trip.replay.trip'));
     await reach(label('replay.close'), { timeoutMs: 25_000 });
     await tap(label('replay.close'));
     await tap(label('trip.a11y.back'), { timeoutMs: 20_000 });

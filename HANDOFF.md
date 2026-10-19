@@ -45,8 +45,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   Janela*, whose why-lines await the lead); medals open their set (T-235); tunnels plain, lines
   simplified, the map's memory 501 to 315 MB (T-254); the day view decluttered and the film for a
   day or the trip (T-253).
-- **Store:** version 9 is built for the closed track; a **version 10** with all of the above is
-  the next bundle, built when the lead asks.
+- **Store:** ⚠ **version 10 built 2026-10-19 12:26** (`Madeira-fieldwork/apks/bruma-0.1.0-vc10.aab`,
+  upload key, normal build, `debuggable=false` checked on the matching APK), everything up to the
+  map work of 19 Oct (T-278); `smoke-release.mjs --internal` passes. **Not uploaded**: the lead's
+  Play Console. The P30 runs the version 10 field build.
 - **Next tests (the lead):** a day out with stops after a quiet day at home, then an airplane-mode
   day for Bruma's own battery share. Both in `docs/field-test-log.md`, *Next test*.
 - **Open for the lead:** the new place's why-lines; whether the app states ~2 points an hour (D-041).

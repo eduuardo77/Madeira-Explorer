@@ -70,6 +70,18 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   N5 corrected. Levada figures (desk E): the 7 without are not PR routes, so no signed distance
   exists; left missing, as `levada-routes.mjs` requires. ⚠ **The P30's build is signed with the
   upload key now**: install the gradle output as is; re-signing with the debug key is refused.
+- **N2, memory, one sequence on both builds** (cold launch, map 12 s, passport, trip viewer, back,
+  `measure-jank.sh`, 25 s; total PSS): **non-debuggable 285, 344, 387, 380, 377 MB; field build
+  342, 402, 416, 428, 423 MB.** So the review's 420 is the field build's overhead (45 to 60 MB of
+  code and Java at every step) plus the passport. ⚠ **The passport's first opening adds about
+  60 MB, not the 24 MB written for 18 Oct:** native heap +53 MB within 2 s of it showing, while
+  the hidden map gives back 23 MB of graphics. The page holds 122 SVG canvases (21 MB of pixels by
+  their size) and some 1,800 SVG nodes (897 paths, 150 text runs). **No native leak:** over four
+  openings, native allocations on the map return to 151 to 166 MB each time; showing the passport
+  adds a transient 25 to 30 MB. The JS heap (*Unknown*) crept 69 to 79 MB over those four, to
+  watch. Probably not the roads: the growth comes in the 2 s after the page shows and nothing in
+  the 4 s after, though when its trace and road reads finished was not logged.
+  Whether to keep the passport mounted at this price is the lead's call.
 
 ## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 

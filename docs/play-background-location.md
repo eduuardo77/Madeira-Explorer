@@ -11,7 +11,7 @@ benefits. **Not legal advice.**
 ## The feature (paste as the description)
 
 > Bruma lights up, on a map, every road and path the user has walked or driven on Madeira, and
-> collects a stamp when they visit one of 80 places. Recording happens in the background so the
+> collects a stamp when they visit one of 81 places. Recording happens in the background so the
 > map fills in while the phone stays in a pocket on a day out: a walk along a levada, a drive
 > round the island. Foreground-only location cannot do this. A walker does not keep a map app
 > open for hours, the screen turns off, and every road taken with the app closed would be missing

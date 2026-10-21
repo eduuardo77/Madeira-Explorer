@@ -3750,6 +3750,9 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       **The lead sources the 12 testers themselves** (2026-10-09, outsourced); not ours to recruit.
       **Builds:** version 7 uploaded 2026-10-12; **version 9** (motion wake, 2026-10-13) is the one
       to have on the closed track; 5, 6, 7 and 8 must not go to testers (field log, D-106).
+      **2026-10-21: version 11** (`bruma-0.1.0-vc11.aab`, from `09a6591`) replaces 9 and 10 for the
+      closed track. The console steps, and the two declarations that gate review (background
+      location, T-123; foreground service, new), are in `docs/closed-testing.md`.
 - [x] **T-130** Voluntary trace export mechanism — explicit user action only, never automatic
       upload ⇠ T-125
       — Done 2026-08-16 as **D-069**, Settings → *Send a walk*: the masked trace, every stamp

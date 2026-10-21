@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **21 Oct, closed testing:** **version 11** built from `09a6591` (`Madeira-fieldwork/apks/
+  bruma-0.1.0-vc11.aab`, upload key, `debuggable` false, 1,160 tests), for the closed track in place
+  of 7 (still there) and 10 (never uploaded). Not smoke-tested on a phone. The lead has 12 testers;
+  the click order and what to paste is `docs/closed-testing.md`. ⚠ The background-location video
+  (T-123 shot 3) gates the review, and a foreground-service declaration nobody had drafted is now
+  in that file.
 - **19 Oct, the map at 60 fps (T-278):** `gfxinfo` could not see the map's lag; the new probe
   `tools/measure-map-frames.sh` reads frames on screen. Bruma's pan was 30 fps, WalkNYC's 60;
   the cause was 636 polylines (one per lit piece). Now one polyline with invisible gaps, plus

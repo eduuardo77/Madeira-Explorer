@@ -61,7 +61,12 @@ import {
 import Svg, { Path, Rect } from 'react-native-svg';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
-import { drawnWindow, stripStampSize, type StripGeometry } from '../passport/stripLayout';
+import {
+  drawnWindow,
+  MEDAL_TILE_SIZES,
+  stripStampSize,
+  type StripGeometry,
+} from '../passport/stripLayout';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
@@ -369,6 +374,23 @@ function MedalsSection({
   medals: MedalTile[];
   onOpenMedal: ((medal: MedalTile) => void) | undefined;
 }) {
+  // One swipeable row, as the stamp strips are (the lead, 2026-10-21: four
+  // rows of medals took too much of the page), with the next medal cut at the
+  // edge and only those on screen drawn (`drawnWindow`).
+  const windowWidth = useWindowDimensions().width;
+  const [ownWidth, setOwnWidth] = useState<number | null>(null);
+  const geometry = stripGeometry(ownWidth, windowWidth);
+  const tile = stripStampSize(geometry, MEDAL_TILE_SIZES);
+  const scrollX = useRef(0);
+  const [, setWindowMoved] = useState(0);
+  const drawn = drawnWindow(scrollX.current, tile, geometry, medals.length);
+  const follow = (x: number) => {
+    scrollX.current = x;
+    const next = drawnWindow(x, tile, geometry, medals.length);
+    if (next?.first !== drawn?.first || next?.last !== drawn?.last) {
+      setWindowMoved((count) => count + 1);
+    }
+  };
   return (
     <View style={styles.section}>
       <View style={styles.rowHeader}>
@@ -379,9 +401,24 @@ function MedalsSection({
       {founder === undefined ? null : <FounderCardView founder={founder} />}
       {medals.length === 0 ? null : (
         <View style={styles.shelf}>
-          {medals.map((medal) => (
-            <MedalShelfTile key={medal.id} medal={medal} onOpen={onOpenMedal} />
-          ))}
+          <ScrollView
+            horizontal
+            onLayout={(event) => setOwnWidth(event.nativeEvent.layout.width)}
+            onScroll={(event) => follow(event.nativeEvent.contentOffset.x)}
+            scrollEventThrottle={32}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.stripContent}
+          >
+            {medals.map((medal, index) => (
+              <MedalShelfTile
+                key={medal.id}
+                medal={medal}
+                onOpen={onOpenMedal}
+                width={tile}
+                draws={drawn !== null && index >= drawn.first && index <= drawn.last}
+              />
+            ))}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -410,22 +447,30 @@ function FounderCardView({ founder }: { founder: FounderCard }) {
 function MedalShelfTile({
   medal,
   onOpen,
+  width,
+  draws,
 }: {
   medal: MedalTile;
+  /** The tile's width in the row, in dp (`stripStampSize`). */
+  width: number;
+  /** Off screen, the tile keeps its words and its place but not its drawing. */
+  draws: boolean;
   /** Opens the set's sheet (`MedalSetSheet`); absent where there is nowhere to go. */
   onOpen: ((medal: MedalTile) => void) | undefined;
 }) {
   const label = `${medal.name}. ${medal.detail}`;
   const body = (
     <>
-      <View>
-        <MedalArt
-          id={medal.id}
-          drawing={{ kind: 'set', words: medal.words }}
-          size={SHELF_MEDAL_SIZE}
-          blur={medal.locked ? 3.4 : undefined}
-        />
-        {medal.locked ? (
+      <View style={{ width: SHELF_MEDAL_SIZE, height: SHELF_MEDAL_SIZE }}>
+        {draws ? (
+          <MedalArt
+            id={medal.id}
+            drawing={{ kind: 'set', words: medal.words }}
+            size={SHELF_MEDAL_SIZE}
+            blur={medal.locked ? 3.4 : undefined}
+          />
+        ) : null}
+        {medal.locked && draws ? (
           <View style={styles.medalLock}>
             <Padlock size={30} />
           </View>
@@ -439,7 +484,7 @@ function MedalShelfTile({
   );
   if (onOpen === undefined) {
     return (
-      <View style={styles.shelfTile} accessible accessibilityLabel={label}>
+      <View style={[styles.shelfTile, { width }]} accessible accessibilityLabel={label}>
         {body}
       </View>
     );
@@ -452,7 +497,7 @@ function MedalShelfTile({
       accessibilityLabel={label}
       accessibilityHint={t('passport.medal.showStamps')}
       onPress={() => onOpen(medal)}
-      style={({ pressed }) => [styles.shelfTile, pressed && styles.seeAllPressed]}
+      style={({ pressed }) => [styles.shelfTile, { width }, pressed && styles.seeAllPressed]}
     >
       {body}
     </Pressable>
@@ -946,17 +991,13 @@ const styles = StyleSheet.create({
   },
   medalWords: { flex: 1, gap: 2 },
   shelf: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
     backgroundColor: album.surface,
     borderRadius: radius.card,
-    padding: spacing.sm,
+    // Vertical only, as `stampsStrip`: a medal scrolls to the rounded edge.
+    paddingVertical: spacing.sm,
+    overflow: 'hidden',
   },
   shelfTile: {
-    // Three to a row; the gaps take the rest.
-    flexBasis: '30%',
-    flexGrow: 1,
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     paddingVertical: spacing.xs,

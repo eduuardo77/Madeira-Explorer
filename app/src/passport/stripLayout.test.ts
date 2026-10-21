@@ -15,6 +15,7 @@ import {
   peekAt,
   stripStampSize,
   drawnWindow,
+  MEDAL_TILE_SIZES,
   type StripGeometry,
 } from './stripLayout.ts';
 
@@ -82,4 +83,14 @@ test('N2: the window never leaves the strip, and an empty strip draws nothing', 
   assert.deepEqual(drawnWindow(0, size, geometry, 2), { first: 0, last: 1 });
   assert.deepEqual(drawnWindow(99_999, size, geometry, 8), { first: 7, last: 7 });
   assert.equal(drawnWindow(0, size, geometry, 0), null);
+});
+
+test('the medals row: every phone width from 320 to 480 dp shows a clear part of the next medal', () => {
+  for (let width = 320; width <= 480; width += 2) {
+    const geometry = strip(width);
+    const size = stripStampSize(geometry, MEDAL_TILE_SIZES);
+    assert.ok(size >= MEDAL_TILE_SIZES.min && size <= MEDAL_TILE_SIZES.max, `${width} dp: ${size}`);
+    const peek = peekAt(size, geometry);
+    assert.ok(peek >= MIN_PEEK && peek <= MAX_PEEK, `${width} dp: peek ${peek.toFixed(2)} at ${size}`);
+  }
 });

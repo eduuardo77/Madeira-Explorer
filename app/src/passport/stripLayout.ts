@@ -61,21 +61,32 @@ export function peekAt(size: number, geometry: StripGeometry): number {
   return Math.min(Math.max(left / size, 0), 1);
 }
 
-export function stripStampSize(geometry: StripGeometry): number {
-  const peek = peekAt(MAX_STAMP_SIZE, geometry);
+/**
+ * The medals' row (2026-10-21, the lead: four rows of medals took too much of
+ * the page). A medal's tile carries its name on two lines under the drawing,
+ * so it needs more width than a sticker: two whole and a clear part of the
+ * third on the P30.
+ */
+export const MEDAL_TILE_SIZES = { max: 112, min: 92 } as const;
+
+export function stripStampSize(
+  geometry: StripGeometry,
+  sizes: { max: number; min: number } = { max: MAX_STAMP_SIZE, min: MIN_STAMP_SIZE }
+): number {
+  const peek = peekAt(sizes.max, geometry);
   if (peek >= MIN_PEEK && peek <= MAX_PEEK) {
-    return MAX_STAMP_SIZE;
+    return sizes.max;
   }
 
   // Keep the stickers that fit whole at full size (one more if the next was
   // nearly whole already), and size them so TARGET_PEEK of the next shows.
   const room = geometry.stripWidth - geometry.leading;
-  const pitch = MAX_STAMP_SIZE + geometry.gap;
+  const pitch = sizes.max + geometry.gap;
   const whole =
     Math.max(1, Math.floor((room + geometry.gap) / pitch)) + (peek > MAX_PEEK ? 1 : 0);
   const size = (room - whole * geometry.gap) / (whole + TARGET_PEEK);
 
-  return Math.min(MAX_STAMP_SIZE, Math.max(MIN_STAMP_SIZE, Math.floor(size)));
+  return Math.min(sizes.max, Math.max(sizes.min, Math.floor(size)));
 }
 
 /**

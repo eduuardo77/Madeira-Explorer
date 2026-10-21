@@ -82,6 +82,15 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   watch. Probably not the roads: the growth comes in the 2 s after the page shows and nothing in
   the 4 s after, though when its trace and road reads finished was not logged.
   Whether to keep the passport mounted at this price is the lead's call.
+- **21 Oct, the lead's answer: keep it mounted, draw less (option A).** Each strip draws only the
+  stickers at least partly on screen, the peeking one included, and one more each side
+  (`passport/stripLayout.ts` `drawnWindow`); every cell keeps its size, tap and label, and the
+  *Ver tudo* grid still draws all. Same sequence, field build, the same morning: **before 334,
+  395, 414, 423, 417 MB; after 289, 340, 366, 363, 359, and again 305, 330, 360, 360, 350.**
+  About 55 to 60 MB less once the passport has opened. Opening: the longest frame in the 3 s after
+  the tap was 309 to 392 ms before, 246 to 292 after (three openings each), so not slower. A fast
+  swipe captured mid-coast showed no empty slot. Smoke test passes. ⚠ That 250 to 390 ms frame at
+  each opening is a visible hitch, there before this change; not yet looked into.
 
 ## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 

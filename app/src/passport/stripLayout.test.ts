@@ -14,6 +14,7 @@ import {
   MIN_STAMP_SIZE,
   peekAt,
   stripStampSize,
+  drawnWindow,
   type StripGeometry,
 } from './stripLayout.ts';
 
@@ -53,4 +54,32 @@ test('a sticker that was nearly whole at the edge becomes a whole one, plus a cl
   assert.ok(peekAt(MAX_STAMP_SIZE, strip(444)) > MAX_PEEK);
   const size = stripStampSize(strip(444));
   assert.ok(peekAt(size, strip(444)) <= MAX_PEEK);
+});
+
+test('N2: at rest on the P30, the whole stickers, the peeking one and one ahead are drawn', () => {
+  const geometry = strip(360);
+  const size = stripStampSize(geometry);
+  const window = drawnWindow(0, size, geometry, 18);
+  assert.ok(window !== null);
+  assert.equal(window.first, 0);
+  // Three whole and the peeking fourth are on screen; one more is ready.
+  assert.equal(peekAt(size, geometry) > 0, true);
+  assert.equal(window.last, 4);
+});
+
+test('N2: the window follows a swipe, one each side of what shows', () => {
+  const geometry = strip(360);
+  const size = stripStampSize(geometry);
+  const pitch = size + geometry.gap;
+  // Scrolled so the fifth sticker (index 4) starts at the strip's left edge.
+  const window = drawnWindow(geometry.leading + 4 * pitch, size, geometry, 18);
+  assert.deepEqual(window, { first: 3, last: 8 });
+});
+
+test('N2: the window never leaves the strip, and an empty strip draws nothing', () => {
+  const geometry = strip(360);
+  const size = stripStampSize(geometry);
+  assert.deepEqual(drawnWindow(0, size, geometry, 2), { first: 0, last: 1 });
+  assert.deepEqual(drawnWindow(99_999, size, geometry, 8), { first: 7, last: 7 });
+  assert.equal(drawnWindow(0, size, geometry, 0), null);
 });

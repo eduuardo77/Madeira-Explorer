@@ -48,7 +48,7 @@
  * *legible with 3 stamps and with 200* — in a browser, in seconds.
  */
 
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -61,7 +61,7 @@ import {
 import Svg, { Path, Rect } from 'react-native-svg';
 import type { Category } from '../content/contentPack';
 import { designFor, TILT_FIT } from '../passport/stampArt';
-import { stripStampSize, type StripGeometry } from '../passport/stripLayout';
+import { drawnWindow, stripStampSize, type StripGeometry } from '../passport/stripLayout';
 import type { ConfirmationPrompt } from '../progress/stampConfirmation';
 import type { TripProgress } from '../progress/tripProgress';
 import type { StampAward } from '../storage/types';
@@ -514,7 +514,29 @@ export function CategoryRow({
         ...stamps.filter((stamp) => !stamp.collected),
       ];
 
-  const cells = ordered.map((stamp) => {
+  // Review of 19 Oct, N2: in the strip, only the stickers on screen, the
+  // peeking one and one each side are drawn (`drawnWindow`). Every cell stays,
+  // with its label and its tap, so the strip scrolls and reads as before; the
+  // grid, opened on purpose, draws them all.
+  const windowWidth = useWindowDimensions().width;
+  const [ownWidth, setOwnWidth] = useState<number | null>(null);
+  const geometry = stripGeometry(ownWidth, windowWidth);
+  // The scroll position in a ref, and a render only when the window moves,
+  // not at every scroll event. Computed at each render, so it follows the
+  // strip's measured width and the sticker size as they arrive.
+  const scrollX = useRef(0);
+  const [, setWindowMoved] = useState(0);
+  const drawn = drawnWindow(scrollX.current, stampSize, geometry, ordered.length);
+  const follow = (x: number) => {
+    scrollX.current = x;
+    const next = drawnWindow(x, stampSize, geometry, ordered.length);
+    if (next?.first !== drawn?.first || next?.last !== drawn?.last) {
+      setWindowMoved((count) => count + 1);
+    }
+  };
+
+  const cells = ordered.map((stamp, index) => {
+    const draws = expanded || (drawn !== null && index >= drawn.first && index <= drawn.last);
     // ⚠ Locked draws the muted artwork — the same drawing as an uncollected
     // place — because the artwork *is* the thing being sold (D-046), and the
     // badge is what stops that drawing being read as "you never went".
@@ -542,20 +564,22 @@ export function CategoryRow({
           pressed && styles.stampCellPressed,
         ]}
       >
-        <StampArt
-          placeId={stamp.placeId}
-          design={designFor(stamp.placeId, stamp.category)}
-          name={stamp.name}
-          collected={locked ? false : stamp.collected}
-          postmark={
-            locked || !stamp.collected ? null : postmarkFor(awardedAt.get(stamp.placeId))
-          }
-          // The cell's Pressable above says "locked" in the user's language; the
-          // sticker itself is hidden from screen readers (StampArt).
-          // Shrunk so the tilted corners stay inside the cell.
-          size={Math.floor(stampSize * TILT_FIT)}
-        />
-        {locked ? <LockBadge /> : null}
+        {draws ? (
+          <StampArt
+            placeId={stamp.placeId}
+            design={designFor(stamp.placeId, stamp.category)}
+            name={stamp.name}
+            collected={locked ? false : stamp.collected}
+            postmark={
+              locked || !stamp.collected ? null : postmarkFor(awardedAt.get(stamp.placeId))
+            }
+            // The cell's Pressable above says "locked" in the user's language; the
+            // sticker itself is hidden from screen readers (StampArt).
+            // Shrunk so the tilted corners stay inside the cell.
+            size={Math.floor(stampSize * TILT_FIT)}
+          />
+        ) : null}
+        {locked && draws ? <LockBadge /> : null}
       </Pressable>
     );
   });
@@ -588,7 +612,11 @@ export function CategoryRow({
                   ? t('passport.a11y.collapseRow', { category: title })
                   : seeAllLabel
               }
-              onPress={() => setExpanded((open) => !open)}
+              onPress={() => {
+                // A strip shown again starts at its beginning.
+                scrollX.current = 0;
+                setExpanded((open) => !open);
+              }}
               // The word is small, so the tap target is grown around it
               // rather than left at the size of the text (D-015).
               hitSlop={SEE_ALL_HIT_SLOP}
@@ -611,7 +639,13 @@ export function CategoryRow({
         <View style={styles.stampsStrip}>
           <ScrollView
             horizontal
-            onLayout={(event) => onStripWidth(event.nativeEvent.layout.width)}
+            onLayout={(event) => {
+              const width = event.nativeEvent.layout.width;
+              onStripWidth(width);
+              setOwnWidth(width);
+            }}
+            onScroll={(event) => follow(event.nativeEvent.contentOffset.x)}
+            scrollEventThrottle={32}
             // The bar would sit across the bottom of the stickers, and the
             // half-visible sticker at the edge already says "there is more".
             showsHorizontalScrollIndicator={false}

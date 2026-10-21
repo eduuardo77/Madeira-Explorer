@@ -77,3 +77,30 @@ export function stripStampSize(geometry: StripGeometry): number {
 
   return Math.min(MAX_STAMP_SIZE, Math.max(MIN_STAMP_SIZE, Math.floor(size)));
 }
+
+/**
+ * Which stickers of a strip are drawn: those at least partly on screen (the
+ * peeking one too, since it is what says "more"), and `ahead` more on each
+ * side, so a swipe usually finds the next one ready (review of 19 Oct, N2).
+ *
+ * The cells stay, at full size, with their labels; only the artwork outside
+ * this window is left out. All 81 drawn at once were most of the 60 MB the
+ * passport held, for some 16 that fit on the screen.
+ *
+ * Inclusive indices; `null` for an empty strip.
+ */
+export function drawnWindow(
+  scrollX: number,
+  size: number,
+  geometry: StripGeometry,
+  count: number,
+  ahead = 1
+): { first: number; last: number } | null {
+  if (count <= 0) return null;
+  const pitch = size + geometry.gap;
+  // Cell i spans leading + i * pitch to that plus size.
+  const firstSeen = Math.floor((scrollX - geometry.leading - size) / pitch) + 1;
+  const lastSeen = Math.ceil((scrollX + geometry.stripWidth - geometry.leading) / pitch) - 1;
+  const last = Math.min(count - 1, Math.max(lastSeen, 0) + ahead);
+  return { first: Math.min(Math.max(0, firstSeen - ahead), last), last };
+}

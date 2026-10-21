@@ -91,6 +91,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   the tap was 309 to 392 ms before, 246 to 292 after (three openings each), so not slower. A fast
   swipe captured mid-coast showed no empty slot. Smoke test passes. ⚠ That 250 to 390 ms frame at
   each opening is a visible hitch, there before this change; not yet looked into.
+  Same day: the 10 medals are one swipeable row like the strips (`MEDAL_TILE_SIZES`), not a grid
+  of four rows; the lead's ask was the space. Seen on the P30.
 
 ## ⚠⚠⚠ 2026-10-16: automatic recording works; the motion wake (D-106)
 

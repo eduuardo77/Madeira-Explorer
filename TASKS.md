@@ -2313,6 +2313,8 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `ilha-da-madeira`. What is missing is the gate — the island-level geofence, the persisted
       unlock, and passing `lockedRegionIds` into `computeTripProgress`, which has taken that
       argument since T-073 and has never been given a non-empty set.
+      — ⚠ **Paid only since D-107 (2026-10-22):** Porto Santo comes with the €5.99 purchase. Ask the
+        lead D-107's four open points before building this gate.
 - [x] **T-068a** **Coverage crediting and the second detector, 2026-08-16 (D-065).** A levada is
       credited by how much of its drawn course was walked — **60% of it, or 3 km, whichever comes
       first** — and every other place gains a **second, independent detector** that reads the raw

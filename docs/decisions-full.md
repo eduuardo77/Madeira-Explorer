@@ -763,6 +763,8 @@ measured early in Phase 4 rather than assumed.**
 
 ## D-024 — Porto Santo stays hidden until the user goes there.
 
+⚠ **Amended by D-107 (2026-10-22): Porto Santo is part of the paid passport.** The gate below stands; what a free user sees there is open in D-107.
+
 **Status:** Accepted — proposed by the project lead 2026-08-06
 
 **Decision:** The app presents itself as a Madeira app. Porto Santo does not appear in the map,
@@ -5753,3 +5755,31 @@ network all day, about half of Android's estimated drain against about a quarter
 provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
 at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning
 returning on the balanced provider. The battery day, carried, deciding the cost.
+
+## D-107 — Porto Santo comes with the €5.99 purchase
+
+**Status: Accepted 2026-10-22** by the project lead: *"Porto Santo will be a feature for the paid
+users"*, then *"Porto Santo comes with the one €5.99 purchase."* **Amends D-024** (who it unlocks
+for) and **extends D-089** (what the one purchase buys). Not v1 scope: T-067a is still open and no
+Porto Santo places are curated.
+
+**The decision.** Porto Santo is part of the paid passport. There is still one purchase and one
+price; nothing is sold separately. D-024's gate stays: the island is hidden until the user is there.
+What changes is who it opens for.
+
+**Why one purchase and not two.** D-089 is one €5.99 purchase with no subscription. A second
+product would mean a second paywall, a second restore path in `expo-iap` (D-091), and a sales
+pitch for an island that 90% of visitors never visit (D-024's own figure).
+
+**Unchanged for everyone, paid or not (D-021):** recording works on Porto Santo, the ferry and the
+flight keep the trip open, and the sea is never credited as a road.
+
+**Open, not chosen yet (ask the lead before T-067a is built):**
+- **A free user who lands on Porto Santo.** Should the island stay hidden, or should it open
+  with its stamps locked (D-075) so that the arrival itself sells the unlock?
+- **The roads walked there by a free user.** D-089 says the map of where you have been is free
+  and unlimited. If so, Porto Santo's roads light up for free users and only its stamps are paid.
+- **The free five.** Can a Porto Santo stamp count as one of the five free stamps, or is every
+  stamp there paid?
+- **Paywall copy.** It says "all of Madeira". Should it name Porto Santo, given the island is
+  meant to be a surprise (D-024)?

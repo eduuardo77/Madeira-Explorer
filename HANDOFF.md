@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **Review, 23 Oct:** `docs/bruma-score-and-plan-2026-10-23.md`, strict **13.3 / 20** (13.33,
+  was 13.25). Every 19 Oct desk item verified on the P30 (probe 79 of 79 drawn, memory 358 MB was
+  420, cold start 0.9 to 1.2 s); the score is held by no upload and no field day since 18 Oct.
+  New: two pan freezes over 100 ms in four runs (N10); *Próximo carimbo* box touching the buttons
+  (N11); the map's place card light on a dark app (N12).
 - **23 Oct, *Ver no mapa* behind the card (fixed):** a single spot was centred on the screen, and
   the place card opened over it. The map now waits for the card to lay out, measures its top edge
   and frames the spot (`centreOn` in `cameraFit.ts`) or the levada's course above it. Checked on

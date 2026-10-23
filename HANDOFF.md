@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **23 Oct, *Ver no mapa* behind the card (fixed):** a single spot was centred on the screen, and
+  the place card opened over it. The map now waits for the card to lay out, measures its top edge
+  and frames the spot (`centreOn` in `cameraFit.ts`) or the levada's course above it. Checked on
+  the P30 (Fanal, Levada do Furado), field build installed over the top.
 - **21 Oct, closed testing:** **version 11** built from `09a6591` (`Madeira-fieldwork/apks/
   bruma-0.1.0-vc11.aab`, upload key, `debuggable` false, 1,160 tests), for the closed track in place
   of 7 (still there) and 10 (never uploaded). Not smoke-tested on a phone. The lead has 12 testers;

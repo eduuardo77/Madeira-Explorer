@@ -101,7 +101,7 @@ import PrimaryOverlay, {
   type MapNotice,
 } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
-import { fitBounds, type Bounds, type CameraFit } from './cameraFit';
+import { centreOn, fitBounds, type Bounds, type CameraFit } from './cameraFit';
 import { offerRecentre, recentreTarget, zoomFloor } from './mapFence';
 import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
@@ -309,6 +309,18 @@ export default function NativeMapScreen({
     buttonStamp([], [], false, t('passport.title'))
   );
   const [card, setCard] = useState<PlaceCard | null>(null);
+  /**
+   * Where *Ver no mapa* wants the camera, held until the card has laid out
+   * and `cardTop` says how much of the map it covers (2026-10-23: centred on
+   * the screen, the place sat right behind the card).
+   */
+  const [pendingFocus, setPendingFocus] = useState<{
+    point: { latitude: number; longitude: number };
+    bounds: Bounds | null;
+  } | null>(null);
+  /** The card's top edge, in window points; null while there is no card. */
+  const [cardTop, setCardTop] = useState<number | null>(null);
+  const cardWrap = useRef<View>(null);
   /**
    * The user's own walk (2026-08-28). ⚠ Starts `false` on every launch and is
    * only ever moved by the button — see `manualWalk.ts`. Never derived from
@@ -683,6 +695,7 @@ export default function NativeMapScreen({
         : null;
 
       cameraHeldByFocus.current = true;
+      setCardTop(null);
 
       setCoursePolylines(
         course === null
@@ -728,14 +741,11 @@ export default function NativeMapScreen({
           ? null
           : courseBounds(course.features[0].geometry.coordinates);
 
-      setCamera(
-        bounds === null
-          ? {
-              coordinates: { latitude: geofence.lat, longitude: geofence.lon },
-              zoom: 13,
-            }
-          : frame(bounds)
-      );
+      // Framed by the effect below once the card's height is known.
+      setPendingFocus({
+        point: { latitude: geofence.lat, longitude: geofence.lon },
+        bounds,
+      });
 
       onFocusHandled();
     })();
@@ -746,7 +756,34 @@ export default function NativeMapScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestedPlace, ready]);
 
+  /**
+   * The place, or the whole walk, in the map left visible *above* the card.
+   * The card replaces the bottom controls' padding: it sits above them, so
+   * whatever it covers already includes them.
+   */
+  useEffect(() => {
+    if (pendingFocus === null || cardTop === null) {
+      return;
+    }
+    const padding = {
+      ...cameraPadding(true),
+      bottom: Math.max(0, height - cardTop) + spacing.md,
+    };
+    const viewport = { width, height, padding };
+    const fit =
+      pendingFocus.bounds === null
+        ? centreOn(pendingFocus.point, 13, viewport)
+        : fitBounds(pendingFocus.bounds, viewport);
+    if (fit !== null) {
+      setCamera(fit);
+    }
+    setPendingFocus(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFocus, cardTop]);
+
   const closeCard = () => {
+    setCardTop(null);
+    setPendingFocus(null);
     setCard(null);
     setMarker([]);
     setCoursePolylines([]);
@@ -1127,7 +1164,21 @@ export default function NativeMapScreen({
         mapStyle={styleName}
         // No chip naming the nearest place (removed 2026-09-24, D-085): the
         // map stays as quiet as WalkNYC's. A ring is named by tapping it.
-        bottomSlot={card !== null ? <PlaceCardView card={card} onClose={closeCard} /> : null}
+        bottomSlot={
+          card !== null ? (
+            <View
+              // A fresh view per place, so a second *Ver no mapa* over an
+              // open card measures the new card rather than the old one.
+              key={card.placeId}
+              ref={cardWrap}
+              onLayout={() =>
+                cardWrap.current?.measureInWindow((_x, y) => setCardTop(y))
+              }
+            >
+              <PlaceCardView card={card} onClose={closeCard} />
+            </View>
+          ) : null
+        }
         onOpenPassport={onOpenPassport}
         waitingCount={waiting.length}
         onOpenUnlock={BETA_BUILD ? undefined : () => setUnlocking({ first: null })}

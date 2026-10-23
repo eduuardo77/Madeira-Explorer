@@ -168,6 +168,32 @@ export function fitBounds(
 }
 
 /**
+ * The camera that puts `point` in the middle of the *usable* area at `zoom`.
+ *
+ * ⚠ Centring on the screen is the bug this exists for (2026-10-23): *Ver no
+ * mapa* put the place at the screen's middle, and the place card opened over
+ * exactly that spot. Same offset arithmetic as `fitBounds`, without a box.
+ */
+export function centreOn(
+  point: Coordinates,
+  zoom: number,
+  viewport: Viewport
+): CameraFit {
+  const padding = viewport.padding ?? {};
+  const top = padding.top ?? 0;
+  const right = padding.right ?? 0;
+  const bottom = padding.bottom ?? 0;
+  const left = padding.left ?? 0;
+  const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+  const worldPoints = TILE_SIZE * Math.pow(2, clampedZoom);
+  const y =
+    mercatorY(point.latitude) + (((top - bottom) / 2) * (2 * Math.PI)) / worldPoints;
+  const latitude = (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * (180 / Math.PI);
+  const longitude = point.longitude - (((left - right) / 2) * 360) / worldPoints;
+  return { coordinates: { latitude, longitude }, zoom: clampedZoom };
+}
+
+/**
  * Where a point lands on screen, in points from the top left, for a camera
  * `fitBounds` gave and the viewport it was given (T-253).
  *

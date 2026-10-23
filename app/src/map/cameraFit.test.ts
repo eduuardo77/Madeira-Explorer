@@ -13,7 +13,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { fitBounds, MAX_ZOOM, MIN_ZOOM, projectPoint } from './cameraFit.ts';
+import { centreOn, fitBounds, MAX_ZOOM, MIN_ZOOM, projectPoint } from './cameraFit.ts';
 
 /** A phone-ish viewport, in points. */
 const SCREEN = { width: 360, height: 780 };
@@ -148,4 +148,21 @@ test('T-253: the camera\'s own centre projects to the middle of the screen', () 
   const camera = { coordinates: { latitude: 32.65, longitude: -16.9 }, zoom: 13 };
   const p = projectPoint(camera.coordinates, camera, { width: 360, height: 780 });
   assert.deepEqual(p, { x: 180, y: 390 });
+});
+
+test('show on map: the place lands in the middle of the map left above the card, not behind it', () => {
+  const place = { latitude: 32.81, longitude: -17.14 };
+  // A card whose top edge is at 300 of 780: the free map is 0..300 tall.
+  const viewport = { ...SCREEN, padding: { top: 0, right: 0, bottom: 480, left: 0 } };
+  const camera = centreOn(place, 13, viewport);
+  const p = projectPoint(place, camera, SCREEN);
+  assert.ok(Math.abs(p.x - 180) < 0.01, `x ${p.x}`);
+  assert.ok(Math.abs(p.y - 150) < 0.01, `y ${p.y}`);
+  assert.equal(camera.zoom, 13);
+});
+
+test('show on map: with no padding the place is the screen centre, and zoom is clamped', () => {
+  const place = { latitude: 32.65, longitude: -16.9 };
+  assert.deepEqual(projectPoint(place, centreOn(place, 13, SCREEN), SCREEN), { x: 180, y: 390 });
+  assert.equal(centreOn(place, 99, SCREEN).zoom, MAX_ZOOM);
 });

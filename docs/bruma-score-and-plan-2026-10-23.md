@@ -108,7 +108,7 @@ D-107 settles the Porto Santo offer in principle but leaves four questions open.
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
 | R1 | **The closed track: still no upload recorded.** First flagged 9 Oct. Version 11 waits on the T-123 video, which gates the closed review | `HANDOFF.md`, `docs/closed-testing.md` | **P1**, carried |
-| N10 | **Pan freezes came back in 2 of 4 runs**: one gap of 199 ms and one of 165 ms, the frame rate otherwise 57 to 59. 19 Oct: none over 33 ms in two runs. Not explained; may be a collection pause, may be the medals or the strip window, which are new since | `measure-map-frames.sh` ×4 | P3 |
+| N10 | **Pan freezes came back in 2 of 4 runs**: one gap of 199 ms and one of 165 ms, the frame rate otherwise 57 to 59. 19 Oct: none over 33 ms in two runs. Not explained; may be a collection pause, may be the medals or the strip window, which are new since. ✅ **Closed 23 Oct, not real (T-280):** a trace showed the map at rest in each gap (the wait for the next swipe, or a glide's last lone frame); the probe now tells them apart, and 18 runs show no stall over 100 ms | `measure-map-frames.sh` ×4 | P3 |
 | N11 | **The stamp card's *Próximo carimbo* box runs into the button row:** its last line sits on the buttons' top edge with no gap | screenshot, Praia Formosa | P3 |
 | N12 | **The map's place card is light grey on a dark app**, and the place is a generic red Google pin, while the passport and stamp card are Bruma's own dark design. Reads as two apps | screenshot | P3 |
 | N13 | **The passport still costs when used**: 358 MB after the short sequence, 417 MB after a scroll to its end and a card. Better than 19 Oct, not gone | `meminfo` | info |
@@ -155,8 +155,9 @@ order below puts the lead first.
 
 ## 3. The desk (me, under a day)
 
-- **N10** · XS. Four more pan runs before and after opening the passport; if the freezes follow
-  the passport, look at the medals row and strip window; if not, a GC trace.
+- ✅ **N10** · XS. Four more pan runs before and after opening the passport; if the freezes follow
+  the passport, look at the medals row and strip window; if not, a GC trace. **Done 23 Oct
+  (T-280): a probe artifact, no app change.**
 - **N11** · XS. Space between the *Próximo carimbo* box and the buttons.
 - **N12** · S, the lead's eye. The map's place card in the passport's dark style, and Bruma's own
   pin. Show options before building.

@@ -39,17 +39,21 @@ $ADB shell "while true; do dumpsys SurfaceFlinger --latency '$LAYER'; echo ---; 
 READER=$!
 sleep 0.5
 
+# Each gesture logs a marker on the phone's clock just before it starts, in the
+# same shell call, so map-frames.mjs can tell a stall from the wait for the next
+# gesture (N10, 2026-10-23; see there).
+G="log -t mapframes gesture;"
 for step in 1 2 3 4 5 6 7 8 9; do
   case $((step % 4)) in
-    0) $ADB shell input swipe $X $Y $((X - 350)) $Y 250 ;;
-    1) $ADB shell input swipe $X $Y $((X + 350)) $Y 250 ;;
-    2) $ADB shell input swipe $X $Y $X $((Y + 400)) 250 ;;
-    3) $ADB shell input swipe $X $Y $X $((Y - 400)) 250 ;;
+    0) $ADB shell "$G input swipe $X $Y $((X - 350)) $Y 250" ;;
+    1) $ADB shell "$G input swipe $X $Y $((X + 350)) $Y 250" ;;
+    2) $ADB shell "$G input swipe $X $Y $X $((Y + 400)) 250" ;;
+    3) $ADB shell "$G input swipe $X $Y $X $((Y - 400)) 250" ;;
   esac
   sleep 0.6
 done
 for zoom in 1 2; do
-  $ADB shell input tap $X $Y
+  $ADB shell "$G input tap $X $Y"
   $ADB shell input tap $X $Y
   sleep 1
 done
@@ -57,5 +61,8 @@ sleep 1.5
 
 kill $READER 2>/dev/null || true
 wait $READER 2>/dev/null || true
+# The markers, as "MARK <monotonic s>": logcat's monotonic clock is the one
+# SurfaceFlinger's present times use. Old markers fall outside the run's frames.
+$ADB logcat -d -v monotonic -s mapframes:I | tr -d '\r' | awk '/mapframes: gesture/ {print "MARK " $1}' >>"$RAW"
 echo "$LABEL ($LAYER)"
 node tools/map-frames.mjs "$RAW"

@@ -13,6 +13,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   420, cold start 0.9 to 1.2 s); the score is held by no upload and no field day since 18 Oct.
   New: two pan freezes over 100 ms in four runs (N10); *Próximo carimbo* box touching the buttons
   (N11); the map's place card light on a dark app (N12).
+- **23 Oct, N10 closed, not real (T-280):** the pan probe counted still moments as freezes (the
+  wait for the next swipe, and a glide's last lone frame); `atrace` showed the map at rest in each.
+  The probe now logs a marker per gesture and labels every gap over 50 ms stall, wait or settle.
+  18 runs: no stall over 100 ms, worst 83 ms once, 56 to 60 fps. ⚠ Read its *stalls* line, not
+  *gaps > 100 ms*, which still counts both.
 - **23 Oct, *Ver no mapa* behind the card (fixed):** a single spot was centred on the screen, and
   the place card opened over it. The map now waits for the card to lay out, measures its top edge
   and frames the spot (`centreOn` in `cameraFit.ts`) or the levada's course above it. Checked on

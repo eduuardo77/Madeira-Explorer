@@ -205,6 +205,21 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [x] **T-280** The 23 Oct review's pan freezes (N10): **not real; the probe misread still
+      moments.** **Done 2026-10-23.** P30, field build, `measure-map-frames.sh` as it was: one gap
+      over 100 ms in 2 of 4 runs on a fresh launch (182, 199 ms) and 2 of 4 after opening and
+      closing the passport (133, 248 ms), so it does not follow the passport, and the medals row and
+      strip window are not involved. Traced with `atrace`: in each gap the map's GL thread sat in
+      `waitForFrame` and the app's main thread was idle with no touch arriving. Two shapes, both a
+      map already at rest: a **wait** (the next swipe began inside the gap; the `input` command
+      boots a Java VM, 306 to 326 ms between its start and its first touch) and a **settle** (one
+      lone frame 100 to 250 ms after a glide ends, then stillness). The probe counted any gap under
+      250 ms as motion. Now each gesture logs a marker on the phone's clock, and `map-frames.mjs`
+      lists every gap over 50 ms as stall, wait or settle; the fps and interval lines are unchanged.
+      **After, 18 runs with markers** (8 fresh, 6 fresh with logcat, 3 at 40 s, 1 traced) and the 12
+      earlier runs reclassified: **no stall over 100 ms; worst stall mid-motion 83 ms, once**;
+      56 to 60 fps in motion. The review's own 199 ms is a settle and its 165 ms a wait.
+      A pause of 1.2 s between swipes was tried first and dropped: it left the settles in place.
 - [~] **T-279** *Ver a tua viagem*, the photo clean and the film smooth (the lead, 2026-10-19: the
       times make the day photo less pleasing; the film lags, loses the line out of frame, shows
       blanks in tunnels and lingers where more time was spent). **Photo done and seen on the P30

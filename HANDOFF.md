@@ -13,6 +13,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   420, cold start 0.9 to 1.2 s); the score is held by no upload and no field day since 18 Oct.
   New: two pan freezes over 100 ms in four runs (N10); *Próximo carimbo* box touching the buttons
   (N11); the map's place card light on a dark app (N12).
+- **23 Oct, N11 fixed (T-281):** 16 dp above and below the *Próximo carimbo* box, the middle
+  scrolls on short screens; seen on the P30, field build installed with `install -r`. **N12 open:**
+  `tools/preview-map-card-options.mjs` drafted (3 options), not yet run or shown to the lead.
 - **23 Oct, N10 closed, not real (T-280):** the pan probe counted still moments as freezes (the
   wait for the next swipe, and a glide's last lone frame); `atrace` showed the map at rest in each.
   The probe now logs a marker per gesture and labels every gap over 50 ms stall, wait or settle.

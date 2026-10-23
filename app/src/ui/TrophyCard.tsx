@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { Alert, Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, Ellipse, LinearGradient, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { t } from '../i18n';
 import type { Category } from '../content/contentPack';
@@ -89,7 +89,13 @@ export default function TrophyCard({
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <View style={styles.screen} accessibilityViewIsModal>
-        <View style={styles.middle}>
+        {/* N11: scrolls rather than run under the buttons when a short screen
+            cannot hold the stamp, its medal and the next stamp. */}
+        <ScrollView
+          style={styles.middle}
+          contentContainerStyle={styles.middleContent}
+          showsVerticalScrollIndicator={false}
+        >
           {/* What Partilhar photographs: the stamp, its name and its medal. */}
           <View ref={shareRef} collapsable={false} style={styles.shareable}>
             <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -226,8 +232,7 @@ export default function TrophyCard({
               </Pressable>
             </Animated.View>
           )}
-
-        </View>
+        </ScrollView>
 
         <Animated.View style={[styles.buttons, { opacity: anim.buttons }]}>
           <Pressable
@@ -340,6 +345,9 @@ const styles = StyleSheet.create({
   middle: {
     flex: 1,
     alignSelf: 'stretch',
+  },
+  middleContent: {
+    flexGrow: 1,
     justifyContent: 'center',
   },
   shareable: {
@@ -429,7 +437,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: MIN_TAP_TARGET,
-    marginTop: spacing.sm,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     borderRadius: radius.sheet,
@@ -461,9 +468,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.small,
   },
   nextGo: { marginLeft: spacing.sm },
+  // N11: the card's usual gap; the next stamp's box sat on the buttons.
   buttons: {
     alignSelf: 'stretch',
     flexDirection: 'row',
+    marginTop: spacing.md,
   },
   primary: {
     flex: 1,

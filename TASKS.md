@@ -205,6 +205,11 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [x] **T-281** The stamp card's *Próximo carimbo* box no longer sits on the buttons (N11).
+      **Done 2026-10-23.** P30 pixels before: 24 dp above the box, 0 below. Now 16 dp each side (the
+      card's usual gap: the box lost its 8 dp top margin, the buttons gained 16), and the middle
+      scrolls rather than run under the buttons on a shorter screen. Seen on the P30, Praia Formosa.
+      Not yet checked on a smaller screen width.
 - [x] **T-280** The 23 Oct review's pan freezes (N10): **not real; the probe misread still
       moments.** **Done 2026-10-23.** P30, field build, `measure-map-frames.sh` as it was: one gap
       over 100 ms in 2 of 4 runs on a fresh launch (182, 199 ms) and 2 of 4 after opening and

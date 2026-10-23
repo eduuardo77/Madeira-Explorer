@@ -158,7 +158,7 @@ order below puts the lead first.
 - ✅ **N10** · XS. Four more pan runs before and after opening the passport; if the freezes follow
   the passport, look at the medals row and strip window; if not, a GC trace. **Done 23 Oct
   (T-280): a probe artifact, no app change.**
-- **N11** · XS. Space between the *Próximo carimbo* box and the buttons.
+- ✅ **N11** · XS. Space between the *Próximo carimbo* box and the buttons. **Done 23 Oct (T-281).**
 - **N12** · S, the lead's eye. The map's place card in the passport's dark style, and Bruma's own
   pin. Show options before building.
 - **Store screenshots in three languages** · S, once the listing copy is approved.

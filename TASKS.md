@@ -222,7 +222,7 @@ permission, L3 privacy contact.
       `effectiveProfile`, never stationary during an outing. The outing's notification and
       screen-reader line no longer promise "more detail". Decided on measurement 3 of
       `docs/recording-modes-proposal-2026-10-25.md`. 1,159 tests (the tier tests went with the
-      tiers).
+      tiers). On the P30 the same evening: Settings without the picker, recorder running.
 - [x] **T-282** The map's place card and pin in Bruma's own design (N12). **Done 2026-10-25,
       the lead's option 2** of five sketched rounds (`tools/preview-map-card-options.mjs`): the
       trophy's violet to black with its gold, and a gold pin for Google's red. The card is its own

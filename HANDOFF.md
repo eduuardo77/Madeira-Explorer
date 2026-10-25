@@ -13,9 +13,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   Equilibrado's (measurement 3 in `docs/recording-modes-proposal-2026-10-25.md`), so the three
   tiers are gone and *Começar passeio* records the same way (it only never sleeps at stops).
   Also measured from the desk: Bruma about 1 to 1.3% an hour on the P30; `tools/replay-stops.mjs`
-  finds about 20 GPS minutes a day at stops, not worth building. ⚠ **Built (field build,
-  20:38), not installed: the P30 was unplugged.** Install with `install -r` and look at Settings
-  (no picker under *Registar com a aplicação fechada*) and an outing's notification.
+  finds about 20 GPS minutes a day at stops, not worth building. **On the P30 since
+  20:55 (field build, `install -r`, data kept):** Settings shows only *Registar com a aplicação
+  fechada* (on), the outing button's spoken line is the new one, the recorder service runs, and in
+  the background Bruma asks for no GPS at home. An outing's notification not yet seen.
 - **Review, 23 Oct:** `docs/bruma-score-and-plan-2026-10-23.md`, strict **13.3 / 20** (13.33,
   was 13.25). Every 19 Oct desk item verified on the P30 (probe 79 of 79 drawn, memory 358 MB was
   420, cold start 0.9 to 1.2 s); the score is held by no upload and no field day since 18 Oct.

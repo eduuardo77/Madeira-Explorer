@@ -2,7 +2,7 @@
  * The map's place card and pin: options for the project lead (N12, 2026-10-23).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-map-card-options.mjs <map.png> <pinX> <pinY> [today.png]
- *     → tools/out/map-card-options-4.html (round 4; rounds 1 to 3 are in git history)
+ *     → tools/out/map-card-options-5.html (round 5; rounds 1 to 4 are in git history)
  *
  * The 23 Oct review: the card *Ver no mapa* opens over the map is light grey
  * with Google's red pin, while the passport and the stamp card are Bruma's own
@@ -82,25 +82,26 @@ const goldPin = `
 // --- The cards. ---------------------------------------------------------------
 // Round 2: shorter. No grabber, no "Fechar" row (a drawn cross, its 60 dp
 // target kept around it), the category and municipality on one line.
-// Round 3 (the lead, 2026-10-25): the curiosity is the place's existing *why*
-// line as a *Sabias que…* question. Round 4: round 3's questions dropped facts
-// (the lead: they "hide a bit the information"). The rule now: every fact in
-// today's line stays; the surprising part leads as the question, and what is
-// practical (a route, where it runs) follows as a plain sentence. A line with
-// nothing surprising keeps its plain form, without *Sabias que…*.
+// Rounds 3 and 4 turned the place's *why* line into a *Sabias que…* question;
+// the lead (2026-10-25): "let's not make it a question". Round 5: the line
+// stays exactly as the pack has it, and the "did you know" is only its label,
+// itself a short question so a statement can follow it: PT "Sabias?", EN "Did
+// you know?", DE "Schon gewusst?". No content changes. A line with nothing
+// surprising in it (a route, a plain description) shows without the label.
 
-/** [id, round 3's question, round 4's text, or null to keep today's line plain]. */
-const REWRITES = [
-  ['praia-formosa', 'esta é a maior praia natural da ilha?', 'esta é a maior praia natural da ilha, a oeste do Funchal?'],
-  ['camara-de-lobos', 'Winston Churchill pintou esta vila piscatória em 1950?', 'Winston Churchill pintou esta vila piscatória em 1950?'],
-  ['camacha', 'foi aqui que se jogou o primeiro jogo de futebol em Portugal, em 1875?', 'foi aqui, na vila do vime, que se jogou o primeiro jogo de futebol em Portugal, em 1875?'],
-  ['levada-do-barreiro', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813?', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813? É o PR4, até à Casa do Barreiro, no Parque Ecológico do Funchal.'],
-  ['pico-do-facho', 'o nome vem das fogueiras de vigia que se acendiam no cimo?', 'o nome deste miradouro sobre Machico vem das fogueiras de vigia acesas no cimo?'],
-  ['pico-ruivo', 'este é o ponto mais alto da ilha, com 1862 m?', 'este é o ponto mais alto da ilha, com 1862 m?'],
-  ['levada-do-furado', 'esta levada atravessa a Laurissilva, do Ribeiro Frio à Portela?', null],
-  ['ponta-do-sol', 'esta vila da costa sul tem cais e centro histórico?', null],
+/** The sample: [id, whether its line earns the label]. */
+const SAMPLE = [
+  ['praia-formosa', true],
+  ['camara-de-lobos', true],
+  ['camacha', true],
+  ['levada-do-barreiro', true],
+  ['pico-do-facho', true],
+  ['pico-ruivo', true],
+  ['levada-do-furado', false],
+  ['ponta-do-sol', false],
 ];
-const CURIOSITY = REWRITES[0][2];
+const CURIOSITY = place.why.pt;
+const LABEL = 'Sabias?';
 
 const cross = (color) => `
 <div class="x"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2 L12 12 M12 2 L2 12" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/></svg></div>`;
@@ -118,7 +119,7 @@ const head = (ink, size) => `
 
 const fact = (ink) => `
   <div class="fact" style="background:${ink.factFill}">
-    <div class="factLabel" style="color:${ink.label}">Sabias que…</div>
+    <div class="factLabel" style="color:${ink.label}">${LABEL}</div>
     <div class="factText" style="color:${ink.text}">${escapeXml(CURIOSITY)}</div>
   </div>`;
 
@@ -130,15 +131,6 @@ const card1 = `<div class="card" style="background:${album.surface}">${head(albu
 
 /** 2: the trophy's violet to black, its gold. */
 const card2 = `<div class="card" style="background:linear-gradient(${reward.panelTop}, ${reward.panelBottom});border:1px solid ${reward.panelEdge}">${head(rewardInk, 56)}${fact(rewardInk)}</div>`;
-
-/** 3: the smallest: one dark row; the curiosity rides on the pin. */
-const card3 = `<div class="card slim" style="background:${album.surface}">${head(rewardInk, 44)}</div>`;
-const bubble = `
-<div class="bubble" style="left:${tip.x - 100}px;top:${tip.y - 44 - 118}px;background:${album.surface}">
-  <div class="factLabel" style="color:${reward.goldInk}">Sabias que…</div>
-  <div class="factText" style="color:${album.text}">${escapeXml(CURIOSITY)}</div>
-  <div class="tail" style="border-top-color:${album.surface}"></div>
-</div>`;
 
 // --- The page. ------------------------------------------------------------------
 
@@ -170,7 +162,6 @@ const html = `<!doctype html>
   .sheet { position: absolute; left: 16px; right: 16px; bottom: 210px; }
   .card { border-radius: 20px; padding: 12px 6px 12px 12px; display: flex; flex-direction: column; gap: 10px;
           box-shadow: 0 8px 24px #000a; }
-  .card.slim { padding: 8px 6px 8px 10px; }
   .row { display: flex; align-items: center; gap: 12px; }
   .st { flex: none; display: flex; }
   .heading { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
@@ -181,40 +172,40 @@ const html = `<!doctype html>
   .fact { border-radius: 12px; padding: 8px 12px 10px; margin-right: 6px; }
   .factLabel { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
   .factText { font-size: 15px; line-height: 1.35; }
-  .bubble { position: absolute; width: 260px; box-sizing: border-box; border-radius: 14px; padding: 8px 12px 10px;
-            box-shadow: 0 6px 18px #0008; }
   h2 { font-size: 16px; margin: 32px 0 4px; }
   table { border-collapse: collapse; max-width: 1200px; }
   th, td { text-align: left; padding: 6px 12px; border-bottom: 1px solid #333; vertical-align: top; }
   th { color: #aaa; font-weight: 600; }
   tr.flat td { color: #777; }
+  .samples { display: grid; grid-template-columns: repeat(4, 280px); gap: 16px; }
+  .who { color: #aaa; margin-bottom: 4px; }
+  .sample.flat { opacity: .6; }
   td.old { color: #888; text-decoration: line-through; text-decoration-color: #555; }
   .tail { position: absolute; left: 92px; bottom: -9px; width: 0; height: 0;
           border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid; }
 </style></head><body>
-<h1>O cartão que abre no mapa, quarta ronda (N12)</h1>
-<p class="lead">As opções 1 e 2, com a frase de hoje inteira, a abrir com <i>Sabias que…</i>. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
+<h1>O cartão que abre no mapa, quinta ronda (N12)</h1>
+<p class="lead">As opções 1 e 2, com a frase de hoje tal como está, debaixo da etiqueta <i>Sabias?</i>. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
 fecha (com a mesma área de toque de 60 dp). A categoria e o concelho numa só linha. À esquerda, o cartão de hoje para comparar.</p>
 <div class="row-of">
 <figure><div class="phone" style="background-image:url(${today})"></div><figcaption><b>Hoje</b><br>O cartão claro e o pino do Google, como estão na app.</figcaption></figure>
 ${phone('1', 'Escuro, pino azul', 'O cartão do passaporte, mais baixo. A curiosidade numa caixa por baixo do nome.', bluePin, card1)}
 ${phone('2', 'Violeta e dourado, pino amarelo', 'As cores do troféu, com a mesma forma do 1.', goldPin, card2)}
 </div>
-<h2>A frase com <i>Sabias que…</i>: amostra</h2>
-<p class="lead">A ronda 3 cortava informação. Agora fica tudo o que a frase de hoje diz: a parte curiosa abre como pergunta e o
-que é prático (o percurso, por onde passa) segue numa frase normal. Um lugar sem nada de surpreendente na frase (a cinzento)
-fica com a frase de hoje, sem <i>Sabias que…</i>.</p>
-<table>
-<tr><th>Lugar</th><th>Hoje</th><th>Ronda 3</th><th>Agora: <i>Sabias que…</i></th></tr>
-${REWRITES.map(([id, short, full]) => {
+<h2>As frases de hoje, com a etiqueta: amostra</h2>
+<p class="lead">Nenhuma frase muda. A etiqueta <i>Sabias?</i> fica por cima quando a frase tem alguma coisa de curioso; quando é
+só um percurso ou uma descrição (a cinzento), a frase aparece sozinha, sem etiqueta.</p>
+<div class="samples">
+${SAMPLE.map(([id, labelled]) => {
   const each = (pack.places ?? pack).find((one) => one.id === id);
-  return `<tr class="${full === null ? 'flat' : ''}"><td>${escapeXml(each.name)}</td><td>${escapeXml(each.why.pt)}</td>` +
-    `<td class="old">${escapeXml(short)}</td><td>${full === null ? `(fica a frase de hoje) ${escapeXml(each.why.pt)}` : escapeXml(full)}</td></tr>`;
+  return `<div class="sample${labelled ? '' : ' flat'}"><div class="who">${escapeXml(each.name)}</div>` +
+    `<div class="fact" style="background:#2C2C2E">${labelled ? `<div class="factLabel" style="color:${album.tint}">${LABEL}</div>` : ''}` +
+    `<div class="factText" style="color:${album.text}">${escapeXml(each.why.pt)}</div></div></div>`;
 }).join('\n')}
-</table>
+</div>
 </body></html>`;
 
-const out = path.join(here, 'out', 'map-card-options-4.html');
+const out = path.join(here, 'out', 'map-card-options-5.html');
 mkdirSync(path.dirname(out), { recursive: true });
 writeFileSync(out, html);
 console.log(out);

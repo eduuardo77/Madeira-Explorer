@@ -504,7 +504,14 @@ async function main() {
       }
     }
   }
-  console.log(`\nWhy go (T-201): ${withWhy} of ${places.length} places have a line.`);
+  // T-283: a plain line with no line to be plain is a mistake in the pack.
+  for (const place of places) {
+    if (place.whyPlain === true && place.why === undefined) {
+      warn(place.id, '`whyPlain` is set but the place has no `why` line');
+    }
+  }
+  const plain = places.filter((place) => place.whyPlain === true).length;
+  console.log(`\nWhy go (T-201): ${withWhy} of ${places.length} places have a line, ${plain} of them plain (no label).`);
 
   if (warnings.length > 0) {
     console.log(`\n${warnings.length} warning(s):`);

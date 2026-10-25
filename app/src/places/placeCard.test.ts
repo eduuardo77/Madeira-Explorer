@@ -206,6 +206,15 @@ test('⚠ T-201: a line missing in this language is no line — never another la
   assert.equal(buildPlaceCard(input()).whyLine, null);
 });
 
+test('T-283: Sabias? goes over a line, unless the pack marks it plain', () => {
+  const why = { en: 'The view.', pt: 'A vista.' };
+  assert.equal(buildPlaceCard(input({ why, language: 'pt' })).whyLabelled, true);
+  assert.equal(buildPlaceCard(input({ why, whyPlain: true, language: 'pt' })).whyLabelled, false);
+  // No line in this language: nothing to label.
+  assert.equal(buildPlaceCard(input({ why, language: 'de' })).whyLabelled, false);
+  assert.equal(buildPlaceCard(input()).whyLabelled, false);
+});
+
 test('⚠ rule 3: across the island there is no distance, only near by (2026-09-25)', () => {
   // The P30 showed "A 39 km em linha reta" for Pico do Areeiro: true, and of
   // no use on a road that doubles back on itself for most of those 39 km.

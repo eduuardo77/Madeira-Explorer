@@ -205,6 +205,16 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [x] **T-283** *Sabias?* only over a line worth it. **Done 2026-10-25.** The lead vetoed a drafted
+      list: 25 *why* lines that are only a route or a description (13 levadas, Chão dos Terreiros,
+      Ponta do Sol, Ribeira Brava, Santa Cruz, Praia dos Reis Magos, Cais do Sardinha, Baía D'Abra,
+      Balcões, Pico dos Barcelos, Parque Temático, Chão da Ribeira, Paul do Mar) carry
+      `"whyPlain": true` in `content/pois.json` and show without the label; five borderline ones
+      (Teatro, Fortaleza do Pico, Bica da Cana, Pico Grande, Praia do Porto do Seixal) keep it. Parsed
+      like `why` (a bad value is reported and dropped, the place kept), `PlaceCard.whyLabelled`; the
+      validator counts them and warns on a flag with no line. Seen on the P30: Furado plain, 25 Fontes
+      labelled. 1,169 tests, smoke test passes. ⚠ `build-levadas.mjs` not rerun: Overpass at
+      capacity; it draws courses, which this does not touch.
 - [x] **T-282** The map's place card and pin in Bruma's own design (N12). **Done 2026-10-25,
       the lead's option 2** of five sketched rounds (`tools/preview-map-card-options.mjs`): the
       trophy's violet to black with its gold, and a gold pin for Google's red. The card is its own

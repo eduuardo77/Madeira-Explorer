@@ -58,6 +58,7 @@
         "pt": "PR10, do Ribeiro Frio à Portela, pela Laurissilva.",
         "de": "PR10, von Ribeiro Frio nach Portela, durch den Lorbeerwald."
       },
+      "whyPlain": true,
       "walk": { "route": "PR10", "km": 11, "minutes": 300, "difficulty": "moderate" },
       "geofences": [
         {
@@ -266,6 +267,7 @@
         "pt": "Cume na serra entre a Boca da Corrida e as Fontes, acima do Curral das Freiras.",
         "de": "Ein Gipfel auf dem Kamm zwischen Boca da Corrida und Fontes, über Curral das Freiras."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "chao-dos-terreiros",
@@ -380,6 +382,7 @@
         "pt": "Parque em Santana sobre a história e a cultura da ilha.",
         "de": "Ein Park in Santana über Geschichte und Kultur der Insel."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "parque-tematico-da-madeira",
@@ -456,6 +459,7 @@
         "pt": "Cidade na costa leste, junto ao aeroporto, com igreja matriz do século XVI.",
         "de": "Eine Stadt an der Ostküste, beim Flughafen, mit einer Pfarrkirche aus dem 16. Jahrhundert."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "santa-cruz",
@@ -500,6 +504,7 @@
         "pt": "Vila da costa sul na foz da ribeira do mesmo nome, com a Igreja de São Bento.",
         "de": "Ein Ort an der Südküste an der Mündung des gleichnamigen Flusses, mit der Kirche São Bento."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "ribeira-brava",
@@ -519,6 +524,7 @@
         "pt": "Vila da costa sul com cais e centro histórico.",
         "de": "Ein Ort an der Südküste mit einer Mole und einem historischen Zentrum."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "ponta-do-sol",
@@ -576,6 +582,7 @@
         "pt": "Vale interior acima do Seixal, com encostas de Laurissilva.",
         "de": "Ein Tal im Landesinneren oberhalb von Seixal, mit Hängen voller Lorbeerwald."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "chao-da-ribeira",
@@ -620,6 +627,7 @@
         "pt": "Praia de calhau no Caniço, junto a um passeio marítimo.",
         "de": "Ein Kieselstrand in Caniço, an einer Strandpromenade."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "praia-dos-reis-magos",
@@ -658,6 +666,7 @@
         "pt": "Cais no fim do PR8, na Ponta de São Lourenço.",
         "de": "Ein Anleger am Ende des Wanderwegs PR8, auf der Ponta de São Lourenço."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "cais-do-sardinha",
@@ -677,6 +686,7 @@
         "pt": "Baía na península de São Lourenço, junto ao PR8.",
         "de": "Eine Bucht auf der Halbinsel São Lourenço, am Wanderweg PR8."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "praia-da-baia-d-abra",
@@ -715,6 +725,7 @@
         "pt": "Levada de rega da costa sul, entre a Serra de Água e o Estreito de Câmara de Lobos.",
         "de": "Ein Bewässerungskanal an der Südseite, zwischen Serra de Água und Estreito de Câmara de Lobos."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "levada-do-norte-start",
@@ -769,6 +780,7 @@
         "pt": "Levada no vale da Ribeira da Janela, no noroeste, com túneis.",
         "de": "Eine Levada im Tal der Ribeira da Janela im Nordwesten, mit Tunneln."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "levada-da-ribeira-da-janela-start",
@@ -796,6 +808,7 @@
         "pt": "Levada no vale acima do Porto da Cruz, com a Penha d’Águia à vista.",
         "de": "Eine Levada im Tal oberhalb von Porto da Cruz, mit Blick auf die Penha d’Águia."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "levada-do-castelejo-start",
@@ -823,6 +836,7 @@
         "pt": "Levada na costa norte, percorrida a partir da Fajã do Penedo, na Boaventura.",
         "de": "Eine Levada an der Nordküste, begangen ab Fajã do Penedo in Boaventura."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "levada-das-faias-start",
@@ -878,6 +892,7 @@
         "pt": "PR14, pela Laurissilva do Fanal.",
         "de": "PR14, durch den Lorbeerwald von Fanal."
       },
+      "whyPlain": true,
       "walk": { "route": "PR14", "km": 7.2, "minutes": 180, "difficulty": "moderate" },
       "geofences": [
         {
@@ -906,6 +921,7 @@
         "pt": "PR18, de São Jorge até à nascente do Ribeiro Bonito, na Laurissilva.",
         "de": "PR18, von São Jorge zur Quelle des Ribeiro Bonito, im Lorbeerwald."
       },
+      "whyPlain": true,
       "walk": { "route": "PR18", "km": 5.3, "returnKm": 10.6, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
@@ -934,6 +950,7 @@
         "pt": "PR28, da rede de levadas do Rabaçal, abaixo da levada das 25 Fontes.",
         "de": "PR28, Teil des Levada-Netzes von Rabaçal, unterhalb der Levada das 25 Fontes."
       },
+      "whyPlain": true,
       "walk": { "route": "PR28", "km": 10.8, "minutes": 240 },
       "geofences": [
         {
@@ -962,6 +979,7 @@
         "pt": "PR6.1, do Rabaçal à Cascata do Risco.",
         "de": "PR6.1, von Rabaçal zum Wasserfall Risco."
       },
+      "whyPlain": true,
       "walk": { "route": "PR6.1", "km": 1.5, "returnKm": 3, "minutes": 120, "difficulty": "easy" },
       "geofences": [
         {
@@ -997,6 +1015,7 @@
         "pt": "PR6.2, do Rabaçal à Lagoa do Vento.",
         "de": "PR6.2, von Rabaçal zur Lagoa do Vento."
       },
+      "whyPlain": true,
       "walk": { "route": "PR6.2", "km": 3.5, "returnKm": 7, "minutes": 150, "difficulty": "easy" },
       "geofences": [
         {
@@ -1032,6 +1051,7 @@
         "pt": "PR7, na Ribeira da Cruz, no noroeste da ilha.",
         "de": "PR7, in Ribeira da Cruz, im Nordwesten der Insel."
       },
+      "whyPlain": true,
       "walk": { "route": "PR7", "km": 10.5, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
@@ -1060,6 +1080,7 @@
         "pt": "PR16, perto de São Vicente, com túneis.",
         "de": "PR16, bei São Vicente, mit Tunneln."
       },
+      "whyPlain": true,
       "walk": { "route": "PR16", "km": 3.9, "returnKm": 7.8, "minutes": 210, "difficulty": "moderate" },
       "geofences": [
         {
@@ -1143,6 +1164,7 @@
         "pt": "Levada plana na encosta leste, até ao túnel do Caniçal.",
         "de": "Eine ebene Levada an den Osthängen, bis zum Tunnel von Caniçal."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "levada-do-canical-start",
@@ -1170,6 +1192,7 @@
         "pt": "Miradouro sobre o Funchal, do porto até às serras.",
         "de": "Aussichtspunkt über Funchal, vom Hafen bis zu den Bergen."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "pico-dos-barcelos-main",
@@ -1398,6 +1421,7 @@
         "pt": "Miradouro no fim do PR11, que parte do Ribeiro Frio.",
         "de": "Aussichtspunkt am Ende des Wanderwegs PR11 ab Ribeiro Frio."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "balcoes-main",
@@ -1588,6 +1612,7 @@
         "pt": "Aldeia piscatória no sopé das falésias do sudoeste.",
         "de": "Ein Fischerdorf am Fuß der Klippen im Südwesten."
       },
+      "whyPlain": true,
       "geofences": [
         {
           "id": "paul-do-mar-main",

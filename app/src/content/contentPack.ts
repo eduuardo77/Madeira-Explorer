@@ -97,6 +97,13 @@ export type Place = {
    */
   why?: PlaceWhy;
   /**
+   * True when the `why` line is a plain description (a route, where a place
+   * is) rather than something surprising: the map's card then shows it without
+   * the *Sabias?* label (T-283, the project lead's veto of a drafted list,
+   * 2026-10-25). Absent means labelled.
+   */
+  whyPlain?: true;
+  /**
    * An official walk's published figures (review H, 2026-10-09): a levada that
    * is a classified route (PR). Optional; most places have none, and a levada
    * with no official route has none either (only published figures).
@@ -490,6 +497,7 @@ function parsePlace(
   }
 
   const why = parseWhy(row.why, named, problems);
+  const whyPlain = parseWhyPlain(row.whyPlain, named, problems);
   const walk = parseWalk(row.walk, named, problems);
   return {
     id,
@@ -498,8 +506,24 @@ function parsePlace(
     regionId,
     geofences,
     ...(why === undefined ? {} : { why }),
+    ...(whyPlain ? { whyPlain: true as const } : {}),
     ...(walk === undefined ? {} : { walk }),
   };
+}
+
+/**
+ * The optional `whyPlain` flag (T-283). Decoration like `why`: anything but
+ * `true` or `false` is reported and read as absent, and the place is kept.
+ */
+function parseWhyPlain(raw: unknown, where: string, problems: ContentProblem[]): boolean {
+  if (raw === undefined || raw === false) {
+    return false;
+  }
+  if (raw !== true) {
+    problems.push({ where, problem: '`whyPlain` must be true or false' });
+    return false;
+  }
+  return true;
 }
 
 /**

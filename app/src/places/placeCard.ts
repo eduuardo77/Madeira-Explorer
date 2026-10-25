@@ -118,6 +118,8 @@ export type PlaceCardInput = {
   language: Language;
   /** The pack's "why go" lines (T-201), if it has any. */
   why?: PlaceWhy;
+  /** The pack says the line is plain, not a curiosity (T-283). */
+  whyPlain?: boolean;
   /** The official walk's published figures (review H), if it is one. */
   walk?: PlaceWalk;
   /**
@@ -170,6 +172,11 @@ export type PlaceCard = {
    * no line for this place in this language — never another language's line.
    */
   whyLine: string | null;
+  /**
+   * Whether the map's card puts *Sabias?* over `whyLine` (T-283): false for a
+   * line the pack marks plain, and when there is no line at all.
+   */
+  whyLabelled: boolean;
   /**
    * Where the user stands with this place, under the name on the passport's
    * card (2026-09-25, the project lead's option B): *Ainda por visitar*, or
@@ -274,6 +281,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
     nowMs,
     language,
     why,
+    whyPlain,
     walk,
     visitedOn,
   } = input;
@@ -313,6 +321,7 @@ export function buildPlaceCard(input: PlaceCardInput): PlaceCard {
         ? null
         : translate(STRINGS['placeCard.distance'], language, { distance: distanceLabel }),
     whyLine: why?.[language]?.trim() || null,
+    whyLabelled: Boolean(why?.[language]?.trim()) && whyPlain !== true,
     statusLine: !collected
       ? translate(STRINGS['placeCard.status.notYet'], language)
       : visitedOn

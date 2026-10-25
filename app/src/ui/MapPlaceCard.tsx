@@ -11,7 +11,8 @@
  * Formosa), at the lead's ask: no grabber, no *Fechar* row (a drawn cross in
  * the corner, its target still 60 dp), the category and municipality on one
  * line. The place's *why* line is unchanged, under a *Sabias?* label: the lead
- * tried it as a question and preferred today's sentence (round 5). The walk's
+ * tried it as a question and preferred today's sentence (round 5). A line the
+ * pack marks `whyPlain` (a route, a description) shows without it. The walk's
  * figures and the trail note stay on a levada, as on the passport's card.
  *
  * Still no directions button (D-055) and no photo (`PlaceCardView` says why).
@@ -95,7 +96,8 @@ export default function MapPlaceCard({ card, category, inColour, onClose }: MapP
 
       {card.whyLine === null ? null : (
         <View style={styles.fact}>
-          <Text style={styles.factLabel}>{t('placeCard.didYouKnow')}</Text>
+          {/* T-283: a route or a plain description goes without the label. */}
+          {card.whyLabelled ? <Text style={styles.factLabel}>{t('placeCard.didYouKnow')}</Text> : null}
           <Text style={styles.factText}>{card.whyLine}</Text>
         </View>
       )}

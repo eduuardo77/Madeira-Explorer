@@ -415,6 +415,25 @@ test('⚠ T-201: a malformed "why" is reported and dropped — the place and its
   }
 });
 
+test('T-283: whyPlain true is kept; false or absent is no field', () => {
+  const { pack: plain, problems } = parseContentPack(pack([placeRow({ why: { en: 'PR10.' }, whyPlain: true })]));
+  assert.deepEqual(problems, []);
+  assert.equal(plain.places[0].whyPlain, true);
+  for (const whyPlain of [false, undefined]) {
+    const { pack: parsed } = parseContentPack(pack([placeRow({ why: { en: 'The view.' }, whyPlain })]));
+    assert.equal('whyPlain' in parsed.places[0], false, String(whyPlain));
+  }
+});
+
+test('T-283: a malformed whyPlain is reported, read as absent, and the place stays', () => {
+  for (const whyPlain of ['true', 1, null, {}]) {
+    const { pack: parsed, problems } = parseContentPack(pack([placeRow({ why: { en: 'The view.' }, whyPlain })]));
+    assert.equal(parsed.places.length, 1, JSON.stringify(whyPlain));
+    assert.equal('whyPlain' in parsed.places[0], false, JSON.stringify(whyPlain));
+    assert.equal(problems.length, 1, JSON.stringify(whyPlain));
+  }
+});
+
 test('T-201: one bad language keeps the good ones', () => {
   const { pack: parsed, problems } = parseContentPack(
     pack([placeRow({ why: { en: 'The view.', xx: 'Nope.' } })])

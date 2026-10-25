@@ -67,6 +67,39 @@ full day. One estimate, one day, one phone, but it is the number every saving is
 If it is right, a saver mode can save a few percent a day at a cost of 6 to 25% of the route. For
 the part of the app that matters most, that is a bad trade.
 
+⚠ **Rechecked the same day (measurement 1, from the desk): the 0.5% an hour is probably about
+half the real figure.** The "quarter" was a share of Android's *estimated* drain, not of the real
+one (commit `eee2462`: "about half of Android's estimated drain against about a quarter for
+Bruma"), and the cell radio's estimate is the inflated term. The raw dumps of 16 to 18 Oct were
+not saved and the phone has been charged since, so only the written summaries remain.
+
+| Source | Bruma | GPS | How sure |
+|---|---|---|---|
+| Android's estimate, 16 Oct | 664 mAh of a real 621 to 694 (1.9% an hour, about all of it) | 505 of the 664, 76% | An upper bound: the model has no idle phone, no screen, no cell radio left over |
+| Android's estimate, 17 Oct | a quarter of the *estimate* | two thirds of Bruma | Not convertible: the estimate's total was not recorded |
+| 17 Oct against 18 Oct (airplane mode, Wi-Fi off) | | | Physical, ±0.2 an hour from whole-point steps, different routes |
+| | 2.1 to 1.65% an hour: the cell radio plus Wi-Fi cost **at most 0.45 an hour**, about a fifth of 17 Oct, not half (the GPS was also on 10 points less of 18 Oct) | | |
+| 18 Oct, by subtraction | **about 1.1 to 1.3% an hour**, 65 to 80% of that day | not separable from Bruma's CPU | 1.65 minus the phone's own floor and the screen, both assumed (0.2 to 0.3 each); not measured |
+| 16 and 17 Oct, by subtraction | **about 1.2 to 1.3% an hour**, 55 to 65% of those days | | Same method, cell radio taken as 0.4 to 0.6 an hour from the 17 to 18 Oct gap and the still nights (0.46 to 0.8) |
+
+**Best reading: Bruma about 1 to 1.3% an hour on the P30 while carried, two thirds to three
+quarters of it the GPS (Android's model only), so 9 to 12% over a full day.** One phone, three
+days, and two assumed terms; a control day (below) would replace them with a measurement.
+
+**What it changes, and what it does not.** Bruma matters about twice as much as stated above, so
+cutting GPS time is worth more. It does not rescue the step-down: it touches only driving, which
+was 15 to 35% of these days by fix speed, and only while battery saver is on. Even if one fix a
+minute halved the GPS while driving, that is about 0.1 to 0.15% an hour for the hours in saver,
+under 1% of a day, for 6% of the route. The stops (item 4) touch about 30% of recording time
+for every user at no cost to the line, which makes them the larger lever by several times.
+
+**Control day, if wanted:** the 18 Oct setup (airplane mode, Wi-Fi off, unplugged around 80 to
+90%, a similar day out by car with stops, the screen used about as much) with Bruma not recording
+and no other app using location. Read afterwards: the % and time at leaving and at the plug,
+`dumpsys batterystats` saved to `Madeira-fieldwork` before anything else (screen-on time, GPS time
+per app, deep idle), and Huawei's battery screen. Bruma's cost is 18 Oct's rate minus that day's,
+to about ±0.2 an hour.
+
 ## Who it is for
 
 **Tourists in Madeira for about a week.** No settings homework, no spare days (a missed Porto

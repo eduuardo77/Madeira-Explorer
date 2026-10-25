@@ -114,6 +114,9 @@ never where the lead lives.
   - **Where the battery goes:** batterystats puts the cell radio searching for a network (the P30
     has no SIM) at about half the drain, Bruma at about a quarter, two thirds of that the GPS. A
     phone with a SIM would likely do better; an airplane-mode day would show Bruma's own share.
+    ⚠ *Both shares are of Android's estimate, not the real drain. Against 18 Oct the cell radio
+    cost at most 0.45 points an hour, and Bruma is nearer 1 to 1.3 an hour (recording-modes
+    proposal, 25 Oct).*
   - **The map was laggy:** one line per tunnel, tunnels plain again, lines simplified to 3 m.
     Polylines 2,358 to 534, points 7,242 to 4,143, memory 501 to 315 MB on this database.
   - **The day view decluttered:** only that day's roads, nearby time tags grouped (two times

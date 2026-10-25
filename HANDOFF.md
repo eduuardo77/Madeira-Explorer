@@ -15,7 +15,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   (N11); the map's place card light on a dark app (N12).
 - **23 Oct, N11 fixed (T-281):** 16 dp above and below the *Próximo carimbo* box, the middle
   scrolls on short screens; seen on the P30, field build installed with `install -r`. **N12 open:**
-  `tools/preview-map-card-options.mjs` drafted (3 options), not yet run or shown to the lead.
+  three options shown to the lead on 25 Oct (`tools/preview-map-card-options.mjs` over a P30 shot,
+  `tools/out/map-card-options.png`): A passport card + blue ring pin, B the stamp as the pin, C gold
+  as the trophy. Waiting on their pick. ⚠ A custom pin needs a marker image: `expo-image` (native)
+  or the expo-maps patch.
 - **23 Oct, N10 closed, not real (T-280):** the pan probe counted still moments as freezes (the
   wait for the next swipe, and a glide's last lone frame); `atrace` showed the map at rest in each.
   The probe now logs a marker per gesture and labels every gap over 50 ms stall, wait or settle.

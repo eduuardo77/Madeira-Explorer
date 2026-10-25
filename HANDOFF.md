@@ -22,7 +22,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   80 dp row against 250 today. **Round 3, same day** (the lead: keep the existing *why* lines, as
   *Sabias que…* questions; between 1 and 2): `tools/out/map-card-options-3.png`, cards about 150 dp,
   and 8 sample rewrites by one rule (no new fact, the most surprising part of the line, no category
-  or municipality). Two read flat (a route, a plain description). Waiting on 1 or 2 and the style. ⚠ A custom pin needs a marker image: `expo-image` (native)
+  or municipality). **Round 4** (the lead: the questions hide information, find a between):
+  `tools/out/map-card-options-4.png`, every fact of today's line kept, the surprising part as the
+  question and the practical rest (route, where it runs) as a plain sentence after it; a line with
+  nothing surprising stays plain, no *Sabias que…*. Waiting on 1 or 2 and the style. ⚠ A custom pin needs a marker image: `expo-image` (native)
   or the expo-maps patch.
 - **23 Oct, N10 closed, not real (T-280):** the pan probe counted still moments as freezes (the
   wait for the next swipe, and a glide's last lone frame); `atrace` showed the map at rest in each.

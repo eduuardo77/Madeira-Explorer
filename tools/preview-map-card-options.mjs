@@ -2,7 +2,7 @@
  * The map's place card and pin: options for the project lead (N12, 2026-10-23).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-map-card-options.mjs <map.png> <pinX> <pinY> [today.png]
- *     → tools/out/map-card-options-3.html (round 3; rounds 1 and 2 are in git history)
+ *     → tools/out/map-card-options-4.html (round 4; rounds 1 to 3 are in git history)
  *
  * The 23 Oct review: the card *Ver no mapa* opens over the map is light grey
  * with Google's red pin, while the passport and the stamp card are Bruma's own
@@ -83,24 +83,24 @@ const goldPin = `
 // Round 2: shorter. No grabber, no "Fechar" row (a drawn cross, its 60 dp
 // target kept around it), the category and municipality on one line.
 // Round 3 (the lead, 2026-10-25): the curiosity is the place's existing *why*
-// line, turned into a *Sabias que…* question. The rule drafted for all 81: no
-// new fact, only the most surprising part of the line already there, and no
-// category or municipality, which the line above the name already says.
+// line as a *Sabias que…* question. Round 4: round 3's questions dropped facts
+// (the lead: they "hide a bit the information"). The rule now: every fact in
+// today's line stays; the surprising part leads as the question, and what is
+// practical (a route, where it runs) follows as a plain sentence. A line with
+// nothing surprising keeps its plain form, without *Sabias que…*.
 
-/** The draft rewrites shown for the lead's approval of the style, PT only. */
+/** [id, round 3's question, round 4's text, or null to keep today's line plain]. */
 const REWRITES = [
-  ['praia-formosa', 'esta é a maior praia natural da ilha?'],
-  ['camara-de-lobos', 'Winston Churchill pintou esta vila piscatória em 1950?'],
-  ['camacha', 'foi aqui que se jogou o primeiro jogo de futebol em Portugal, em 1875?'],
-  ['levada-do-barreiro', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813?'],
-  ['pico-do-facho', 'o nome vem das fogueiras de vigia que se acendiam no cimo?'],
-  ['pico-ruivo', 'este é o ponto mais alto da ilha, com 1862 m?'],
-  ['levada-do-furado', 'esta levada atravessa a Laurissilva, do Ribeiro Frio à Portela?'],
-  ['ponta-do-sol', 'esta vila da costa sul tem cais e centro histórico?'],
+  ['praia-formosa', 'esta é a maior praia natural da ilha?', 'esta é a maior praia natural da ilha, a oeste do Funchal?'],
+  ['camara-de-lobos', 'Winston Churchill pintou esta vila piscatória em 1950?', 'Winston Churchill pintou esta vila piscatória em 1950?'],
+  ['camacha', 'foi aqui que se jogou o primeiro jogo de futebol em Portugal, em 1875?', 'foi aqui, na vila do vime, que se jogou o primeiro jogo de futebol em Portugal, em 1875?'],
+  ['levada-do-barreiro', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813?', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813? É o PR4, até à Casa do Barreiro, no Parque Ecológico do Funchal.'],
+  ['pico-do-facho', 'o nome vem das fogueiras de vigia que se acendiam no cimo?', 'o nome deste miradouro sobre Machico vem das fogueiras de vigia acesas no cimo?'],
+  ['pico-ruivo', 'este é o ponto mais alto da ilha, com 1862 m?', 'este é o ponto mais alto da ilha, com 1862 m?'],
+  ['levada-do-furado', 'esta levada atravessa a Laurissilva, do Ribeiro Frio à Portela?', null],
+  ['ponta-do-sol', 'esta vila da costa sul tem cais e centro histórico?', null],
 ];
-/** The two that read flat: a route or a plain description has nothing surprising in it. */
-const FLAT = new Set(['levada-do-furado', 'ponta-do-sol']);
-const CURIOSITY = REWRITES[0][1];
+const CURIOSITY = REWRITES[0][2];
 
 const cross = (color) => `
 <div class="x"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2 L12 12 M12 2 L2 12" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/></svg></div>`;
@@ -188,31 +188,33 @@ const html = `<!doctype html>
   th, td { text-align: left; padding: 6px 12px; border-bottom: 1px solid #333; vertical-align: top; }
   th { color: #aaa; font-weight: 600; }
   tr.flat td { color: #777; }
+  td.old { color: #888; text-decoration: line-through; text-decoration-color: #555; }
   .tail { position: absolute; left: 92px; bottom: -9px; width: 0; height: 0;
           border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid; }
 </style></head><body>
-<h1>O cartão que abre no mapa, terceira ronda (N12)</h1>
-<p class="lead">As opções 1 e 2, agora com a frase de hoje em forma de pergunta. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
+<h1>O cartão que abre no mapa, quarta ronda (N12)</h1>
+<p class="lead">As opções 1 e 2, com a frase de hoje inteira, a abrir com <i>Sabias que…</i>. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
 fecha (com a mesma área de toque de 60 dp). A categoria e o concelho numa só linha. À esquerda, o cartão de hoje para comparar.</p>
 <div class="row-of">
 <figure><div class="phone" style="background-image:url(${today})"></div><figcaption><b>Hoje</b><br>O cartão claro e o pino do Google, como estão na app.</figcaption></figure>
 ${phone('1', 'Escuro, pino azul', 'O cartão do passaporte, mais baixo. A curiosidade numa caixa por baixo do nome.', bluePin, card1)}
 ${phone('2', 'Violeta e dourado, pino amarelo', 'As cores do troféu, com a mesma forma do 1.', goldPin, card2)}
 </div>
-<h2>A frase como pergunta: amostra</h2>
-<p class="lead">A regra: nenhum facto novo, só a parte mais curiosa da frase que já existe, em pergunta. O tipo de lugar e o concelho
-já estão na linha de cima, por isso saem da frase. As duas a cinzento ficam fracas: são um percurso ou uma descrição, sem nada
-de surpreendente. Para essas, ou se procura um facto novo, ou fica a frase atual sem o <i>Sabias que…</i>.</p>
+<h2>A frase com <i>Sabias que…</i>: amostra</h2>
+<p class="lead">A ronda 3 cortava informação. Agora fica tudo o que a frase de hoje diz: a parte curiosa abre como pergunta e o
+que é prático (o percurso, por onde passa) segue numa frase normal. Um lugar sem nada de surpreendente na frase (a cinzento)
+fica com a frase de hoje, sem <i>Sabias que…</i>.</p>
 <table>
-<tr><th>Lugar</th><th>Hoje</th><th>Sabias que…</th></tr>
-${REWRITES.map(([id, question]) => {
+<tr><th>Lugar</th><th>Hoje</th><th>Ronda 3</th><th>Agora: <i>Sabias que…</i></th></tr>
+${REWRITES.map(([id, short, full]) => {
   const each = (pack.places ?? pack).find((one) => one.id === id);
-  return `<tr class="${FLAT.has(id) ? 'flat' : ''}"><td>${escapeXml(each.name)}</td><td>${escapeXml(each.why.pt)}</td><td>${escapeXml(question)}</td></tr>`;
+  return `<tr class="${full === null ? 'flat' : ''}"><td>${escapeXml(each.name)}</td><td>${escapeXml(each.why.pt)}</td>` +
+    `<td class="old">${escapeXml(short)}</td><td>${full === null ? `(fica a frase de hoje) ${escapeXml(each.why.pt)}` : escapeXml(full)}</td></tr>`;
 }).join('\n')}
 </table>
 </body></html>`;
 
-const out = path.join(here, 'out', 'map-card-options-3.html');
+const out = path.join(here, 'out', 'map-card-options-4.html');
 mkdirSync(path.dirname(out), { recursive: true });
 writeFileSync(out, html);
 console.log(out);

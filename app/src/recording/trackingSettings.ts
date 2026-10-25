@@ -11,6 +11,7 @@
 
 import * as appStateDao from '../storage/dao/appStateDao';
 import { parseWalkStarted } from './manualWalk';
+import type { OutingClock } from './recorderControls';
 import { DEFAULT_BACKGROUND_TRACKING, parseBackgroundTracking } from './trackingPreference';
 
 export async function isBackgroundTrackingAllowed(): Promise<boolean> {
@@ -71,6 +72,30 @@ export async function setWalkInProgress(inProgress: boolean, nowMs: number): Pro
   cachedWalk = inProgress;
   await appStateDao.set(appStateDao.AppStateKey.WalkStartedByUser, inProgress ? 'true' : 'false');
   await appStateDao.set(appStateDao.AppStateKey.WalkStartedTs, inProgress ? String(nowMs) : '');
+}
+
+/** The outing as `effectiveProfile` reads it (T-285). */
+export async function readOutingClock(nowMs: number): Promise<OutingClock> {
+  const inProgress = await getWalkInProgress();
+  return { inProgress, startedTs: inProgress ? await getWalkStartedTs() : null, nowMs };
+}
+
+/**
+ * Whether the options last applied were the outing's awake ones (T-285).
+ * Stored, because the process that applied them is often not the one whose
+ * batch finds the window closed. Unreadable is `true`: the cost of that is
+ * one redundant re-apply, and the cost of `false` is the GPS left on.
+ */
+export async function getOutingAwakeApplied(): Promise<boolean> {
+  try {
+    return (await appStateDao.get(appStateDao.AppStateKey.OutingAwakeApplied)) !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+export async function setOutingAwakeApplied(applied: boolean): Promise<void> {
+  await appStateDao.set(appStateDao.AppStateKey.OutingAwakeApplied, applied ? 'true' : 'false');
 }
 
 function parseTimestamp(raw: string | null): number | null {

@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **25 Oct, later (T-285, D-108 amended):** an outing stays awake for its first 10 minutes only,
+  then sleeps at stops like automatic recording; the motion wake is now armed by an outing too.
+  Unit tested only. **Needs the lead outdoors:** an outing with automatic off, a stop over
+  10 minutes, then walking on (T-285 in TASKS).
 - **25 Oct, one way of recording (D-108, T-284):** the lead's rule, *two modes if both can be
   worth it, otherwise one*; Preciso's points lit the same route within 0 to 2 points as
   Equilibrado's (measurement 3 in `docs/recording-modes-proposal-2026-10-25.md`), so the three

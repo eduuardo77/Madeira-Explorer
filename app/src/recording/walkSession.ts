@@ -22,7 +22,9 @@ import * as rawFixDao from '../storage/dao/rawFixDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
+import { ensureMotionWake, stopMotionWake } from './activityRecognition';
 import { locationProvider } from './ExpoLocationProvider';
+import { MOTION_TASK_NAME } from './taskNames';
 import { movedSinceLastFixM } from './movedSinceLastFix';
 import { actionForStartWalk, actionForStopWalk, type WalkState } from './manualWalk';
 import {
@@ -139,6 +141,11 @@ export async function startOuting(nowMs: number): Promise<void> {
   } else if (action === 'retune') {
     await retune();
   }
+  // T-285: after its first minutes an outing sleeps at stops, so something has
+  // to wake it. Automatic recording arms the motion wake on launch; with
+  // automatic off nothing did, and a stop would have ended the trace there.
+  // Arming twice is harmless.
+  await ensureMotionWake(MOTION_TASK_NAME);
   await recordingEventDao.log('outing', `outing started (${action})`);
 }
 
@@ -166,6 +173,8 @@ export async function endOuting(nowMs: number): Promise<{ title: string; lines: 
   const action = actionForStopWalk(await walkState(true));
   await setWalkInProgress(false, nowMs);
   if (action === 'stop') {
+    // Automatic recording is off, so the wake the outing armed goes with it.
+    await stopMotionWake(MOTION_TASK_NAME);
     await stopTrip();
   } else if (action === 'retune') {
     // Automatic recording carries on at the user's own tier (D-087 §2).

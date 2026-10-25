@@ -21,7 +21,7 @@ import type {
 import { forPlatform, getSamplingParameters } from './samplingPolicy';
 import { motionWakeAvailable } from './activityRecognition';
 import { effectiveProfile } from './recorderControls';
-import { getWalkInProgress } from './trackingSettings';
+import { readOutingClock, setOutingAwakeApplied } from './trackingSettings';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 function toExpoAccuracy(
@@ -63,12 +63,15 @@ async function buildOptions(
   profile: SamplingProfile
 ): Promise<Location.LocationTaskOptions> {
   // ⚠ D-108: an outing records the same way as the rest of the day (it took
-  // Preciso until 25 Oct 2026). What it keeps is that it never samples as
-  // stationary (`effectiveProfile`, T-246). This is the one place a walk
-  // changes the recorder; `setSamplingProfile` with the current profile
-  // re-applies it in place when a walk starts or stops.
-  const walking = await getWalkInProgress();
-  const sampled = effectiveProfile(profile, walking);
+  // Preciso until 25 Oct 2026). What it keeps is that its first minutes never
+  // sample as stationary (`effectiveProfile`, T-246, T-285). This is the one
+  // place a walk changes the recorder; `setSamplingProfile` with the current
+  // profile re-applies it in place when a walk starts or stops, and the gate
+  // re-applies it when the awake window closes (`outingAwakeOver`).
+  const outing = await readOutingClock(Date.now());
+  const walking = outing.inProgress;
+  const sampled = effectiveProfile(profile, outing);
+  await setOutingAwakeApplied(sampled !== profile);
   // On Android the moving profiles need the GPS and the stationary one no
   // hold; and no GPS at home when the motion wake can serve this phone
   // (`forPlatform`, D-106).

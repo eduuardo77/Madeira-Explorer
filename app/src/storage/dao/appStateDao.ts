@@ -139,6 +139,12 @@ export const AppStateKey = {
    * stops, for its summary. Absent when no walk is running.
    */
   WalkStartedTs: 'walk_started_ts',
+  /**
+   * Whether the recorder's options were last applied awake for an outing's
+   * first minutes, `true` or `false` (T-285). Read by the sampling gate to
+   * put the recorder back to sleep when the window closes.
+   */
+  OutingAwakeApplied: 'outing_awake_applied',
   // `paused_until` was here until 2026-09-25, when the pause was removed
   // (D-087 §6 amended). A row left on a phone is read by nothing.
   /**

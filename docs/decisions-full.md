@@ -5812,6 +5812,20 @@ condition on the evidence above. *An automatic step-down in battery saver*: unde
 6% of the route. *A stop check between batches*: about 20 GPS minutes, 0.2 to 0.4 battery points
 a day (measurements 1 and 2).
 
+**Amended 2026-10-25, the same evening (T-285), the project lead:** *"stay awake at the start of
+the outing and then behave the same way as background tracking, with no extra battery for using
+the outing"*. Never sleeping at stops kept the GPS on through every stop of an outing, a lunch,
+or an outing forgotten overnight, where automatic recording would sleep until the motion wake.
+The 8 Oct loss it fixed was at the start, so only the start stays awake: the first 10 minutes
+(`OUTING_AWAKE_MS`, a starting point, not measured). After that an outing costs what automatic
+recording costs. Two things came with it: the sampling gate re-applies the options when the
+window closes (an outing started standing still never changes the gate's profile, so nothing
+else would), and an outing arms the motion wake itself, because with automatic off nothing did,
+and a stop would have ended the trace. *Rejected:* awake until the first movement, with a cap;
+it costs the same (moving samples the same either way) and needs a stored flag. *Unverified:*
+an outing with automatic off waking after a stop (motion wake from a while-in-use foreground
+service), and the 17 Oct mode-switch fixes on a day with stops.
+
 **What would overturn it.** A levada walk under trees, with the iPhone alongside, drawn visibly
 worse than the iPhone's track. The first answer would be denser sampling when walking, for
 everyone, not a mode.

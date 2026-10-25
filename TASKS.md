@@ -215,6 +215,15 @@ permission, L3 privacy contact.
       validator counts them and warns on a flag with no line. Seen on the P30: Furado plain, 25 Fontes
       labelled. 1,169 tests, smoke test passes. ⚠ `build-levadas.mjs` not rerun: Overpass at
       capacity; it draws courses, which this does not touch.
+- [x] **T-285** An outing stays awake only at its start (D-108 amended). **Done 2026-10-25 at the
+      desk.** `effectiveProfile` forces the moving profile for the first `OUTING_AWAKE_MS`
+      (10 min) of an outing, no longer for all of it; an unreadable start time counts as asleep.
+      The gate re-applies the options when the window closes (`outingAwakeOver`, the
+      `outing_awake_applied` row), and `startOuting` arms the motion wake (with automatic off it
+      was never armed). 1,162 tests. **Open, outdoors on the P30:** (1) an outing with automatic
+      off, still for over 10 minutes then walking: the diary should show *outing awake window
+      over*, then a motion wake, and the walk drawn; (2) the day with stops already asked for
+      under T-246.
 - [x] **T-284** One way of recording (D-108). **Done 2026-10-25.** Poupança, Equilibrado and
       Preciso removed: `trackingPreference.ts` keeps only the background switch, the Settings
       picker and its strings are gone, the old `tracking_quality` row is never read.

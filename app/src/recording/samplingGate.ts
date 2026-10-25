@@ -25,6 +25,8 @@ import {
   STATIONARY_WINDOW_MS,
 } from './movementPolicy';
 import { SAMPLING_PROFILES } from './samplingPolicy';
+import { outingAwakeOver } from './recorderControls';
+import { getOutingAwakeApplied, readOutingClock } from './trackingSettings';
 
 /**
  * How many recent fixes to look at: enough to span the window and its edge
@@ -122,6 +124,15 @@ export async function applySamplingGate(now: number): Promise<void> {
     const decision = decideProfile(current, samples, now, since ?? undefined);
 
     if (!decision.changed) {
+      // T-285: an outing started standing still keeps the gate on
+      // `stationary` throughout, so its awake window has to be closed here,
+      // by re-applying the same profile, or the GPS would stay on.
+      if (
+        outingAwakeOver(current, await readOutingClock(Date.now()), await getOutingAwakeApplied())
+      ) {
+        await locationProvider.setSamplingProfile(current);
+        await recordingEventDao.log('outing', 'outing awake window over: sleeping at stops again');
+      }
       return;
     }
 

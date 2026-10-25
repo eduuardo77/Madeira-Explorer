@@ -150,18 +150,70 @@ export function offerAutomatic(input: ControlInput, declined: boolean): boolean 
 }
 
 /**
- * The sampling profile the recorder should run with right now: during a walk,
- * never `stationary`.
+ * How long an outing keeps the recorder awake after *Começar passeio*
+ * (T-285, D-108 amended). A starting point, not a measurement: long enough
+ * to leave a gym or a car park, short enough that a forgotten press at home
+ * costs ten minutes of GPS and not an evening.
+ */
+export const OUTING_AWAKE_MS = 10 * 60_000;
+
+/** What `effectiveProfile` needs to know about the outing. */
+export type OutingClock = {
+  inProgress: boolean;
+  /** When *Começar passeio* was pressed; null when unreadable. */
+  startedTs: number | null;
+  nowMs: number;
+};
+
+/**
+ * Whether the outing is still in its first minutes.
+ *
+ * ⚠ An unreadable start time is **not** awake: the old rule, awake for the
+ * whole outing, is what this replaced, and a broken row must not bring it
+ * back. Without the window the outing records as automatic recording does.
+ */
+export function outingKeepsAwake(outing: OutingClock): boolean {
+  if (!outing.inProgress || outing.startedTs === null) return false;
+  const elapsed = outing.nowMs - outing.startedTs;
+  return elapsed >= 0 && elapsed < OUTING_AWAKE_MS;
+}
+
+/**
+ * The sampling profile the recorder should run with right now: at the start
+ * of an outing, never `stationary`; after that, whatever the gate chose.
  *
  * ⚠ Found on the lead's motorcycle ride, 2026-10-08 (T-246): the outing was
  * started at home, so the profile was `stationary` (100 m between fixes, the
  * OS free to hold them 15 minutes), and the first 790 m ridden were never
  * sampled: 1 min 41 s passed between the last fix at the door and the one that
  * switched the profile. A walk is the user saying they are about to move, so
- * it samples as if they were, until movement takes the profile further.
+ * it samples as if they were.
+ *
+ * ⚠ Only for `OUTING_AWAKE_MS` since T-285. Awake for the whole outing kept
+ * the GPS on through every stop, a lunch or a forgotten outing overnight,
+ * where automatic recording would sleep and wait for the motion wake. The
+ * 8 Oct loss was at the start, so the start is all that stays awake: after
+ * it, an outing costs what automatic recording costs.
  */
-export function effectiveProfile(profile: SamplingProfile, walkInProgress: boolean): SamplingProfile {
-  return walkInProgress && profile === 'stationary' ? 'walking' : profile;
+export function effectiveProfile(profile: SamplingProfile, outing: OutingClock): SamplingProfile {
+  return profile === 'stationary' && outingKeepsAwake(outing) ? 'walking' : profile;
+}
+
+/**
+ * Whether the recorder is still on the outing's awake options after the
+ * window has closed, and has to be re-applied as `stationary` (T-285).
+ *
+ * The gate only touches the recorder when its own profile changes. An outing
+ * started standing still leaves the gate on `stationary` the whole time, so
+ * nothing would re-apply the options when the window ends, and the GPS would
+ * stay on exactly as before. `awakeApplied` is what the provider last applied.
+ */
+export function outingAwakeOver(
+  current: SamplingProfile,
+  outing: OutingClock,
+  awakeApplied: boolean
+): boolean {
+  return awakeApplied && current === 'stationary' && !outingKeepsAwake(outing);
 }
 
 /** What the short summary shows when a walk stops (D-087 §7). */

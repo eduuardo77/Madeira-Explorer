@@ -8,6 +8,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   effectiveProfile,
+  OUTING_AWAKE_MS,
+  outingAwakeOver,
+  outingKeepsAwake,
   offerAutomatic,
   primaryControl,
   recorderNotice,
@@ -125,12 +128,47 @@ test('⚠⚠ T-174 — a silent recorder is announced, and cannot be dismissed',
   );
 });
 
-test('a walk never samples as stationary: the start of the ride was lost that way (T-246)', () => {
-  assert.equal(effectiveProfile('stationary', true), 'walking');
-  assert.equal(effectiveProfile('walking', true), 'walking');
-  assert.equal(effectiveProfile('driving', true), 'driving');
+test('an outing never samples as stationary at its start: the ride was lost that way (T-246)', () => {
+  const justStarted = { inProgress: true, startedTs: NOW, nowMs: NOW + 60_000 };
+  assert.equal(effectiveProfile('stationary', justStarted), 'walking');
+  assert.equal(effectiveProfile('walking', justStarted), 'walking');
+  assert.equal(effectiveProfile('driving', justStarted), 'driving');
   // Without a walk, automatic recording keeps its cheap stationary profile.
-  assert.equal(effectiveProfile('stationary', false), 'stationary');
+  const none = { inProgress: false, startedTs: null, nowMs: NOW };
+  assert.equal(effectiveProfile('stationary', none), 'stationary');
+});
+
+test('after its first minutes an outing sleeps at stops like automatic recording (T-285)', () => {
+  const at = (elapsedMs: number) => ({ inProgress: true, startedTs: NOW, nowMs: NOW + elapsedMs });
+  assert.equal(effectiveProfile('stationary', at(OUTING_AWAKE_MS - 1)), 'walking');
+  assert.equal(effectiveProfile('stationary', at(OUTING_AWAKE_MS)), 'stationary');
+  // A forgotten outing, the evening after: asleep, as automatic would be.
+  assert.equal(effectiveProfile('stationary', at(6 * HOUR)), 'stationary');
+  // Moving is untouched either way.
+  assert.equal(effectiveProfile('walking', at(6 * HOUR)), 'walking');
+  // The probe moves: the same outing, same profile, flips on the clock alone.
+  assert.notEqual(
+    effectiveProfile('stationary', at(0)),
+    effectiveProfile('stationary', at(OUTING_AWAKE_MS))
+  );
+});
+
+test('an unreadable outing start is asleep, not awake for ever (T-285)', () => {
+  assert.equal(outingKeepsAwake({ inProgress: true, startedTs: null, nowMs: NOW }), false);
+  // A clock that went backwards is not a fresh outing either.
+  assert.equal(outingKeepsAwake({ inProgress: true, startedTs: NOW, nowMs: NOW - 1 }), false);
+});
+
+test('the gate puts an outing started standing still back to sleep when the window closes (T-285)', () => {
+  const after = { inProgress: true, startedTs: NOW, nowMs: NOW + OUTING_AWAKE_MS };
+  const during = { inProgress: true, startedTs: NOW, nowMs: NOW + 60_000 };
+  assert.equal(outingAwakeOver('stationary', after, true), true);
+  // Still inside the window, already re-applied, or moving: nothing to do.
+  assert.equal(outingAwakeOver('stationary', during, true), false);
+  assert.equal(outingAwakeOver('stationary', after, false), false);
+  assert.equal(outingAwakeOver('walking', after, true), false);
+  // An outing ended while awake: the next batch tidies up too.
+  assert.equal(outingAwakeOver('stationary', { inProgress: false, startedTs: null, nowMs: NOW }, true), true);
 });
 
 test('the summary counts only the walk, and only what the map would draw', () => {

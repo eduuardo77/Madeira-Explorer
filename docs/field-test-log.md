@@ -154,6 +154,8 @@ never where the lead lives.
     50 m in 5 minutes). Most is the 12-minute rule at each stop; one stop of 47 minutes held the
     driving profile because the car moved about 200 m halfway (*driving enter* at 13:27). Not
     changed: no case of GPS jitter being taken for movement.
+    *Replayed 25 Oct (`tools/replay-stops.mjs`): about 20 of those minutes a day can be cut
+    safely, and only with a check between batches (recording-modes proposal).*
   - **One fix 16.7 km off** (13:16:57, a Wi-Fi fix claiming 100 m) was dropped by the matcher as
     an impossible jump; nothing was drawn from it.
 

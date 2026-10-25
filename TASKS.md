@@ -2086,6 +2086,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       about half the drain, Bruma at about a quarter. ✅ **Airplane mode, 2026-10-18:** about
       1.6 points an hour (10 points in 6 h 04), the GPS on 80% of the day against 90%, so the cell
       radio's share is smaller than that estimate. stops now end after 5 still minutes (about 11 GPS minutes a day).
+      ✅ **Bruma's own share, 25 Oct (desk, no control day, the lead's choice):** about **1 to 1.3
+      points an hour** while carried, not the 0.5 the "quarter" implied (that was a share of
+      Android's estimated total). The radios cost at most 0.45 an hour (17 against 18 Oct). A
+      stop replay (`tools/replay-stops.mjs`) finds about 20 more GPS minutes a day at most.
+      Detail: `docs/recording-modes-proposal-2026-10-25.md`. ⚠ The raw batterystats of 16 to 18 Oct
+      were never saved: save the dump to `Madeira-fieldwork` next time.
       ⏱ **Run started 2026-10-07 16:57:** `dumpsys batterystats --reset` at 100%, still on USB, recorder
       running; the lead unplugs and uses the phone normally (a rainy day, no ride). Read on re-plug.
       **Read 2026-10-08 09:32: a stationary night, not the day this task asks for.** 16h 22m on

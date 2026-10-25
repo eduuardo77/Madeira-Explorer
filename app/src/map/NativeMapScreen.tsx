@@ -51,7 +51,7 @@ import {
   View,
 } from 'react-native';
 import { APP_NAME } from '../brand';
-import type { Place } from '../content/contentPack';
+import type { Category, Place } from '../content/contentPack';
 import { getLevadaCourse } from '../content/levadaCourses';
 import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
@@ -92,7 +92,7 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as tripDao from '../storage/dao/tripDao';
 import ChoiceDialog from '../ui/ChoiceDialog';
-import PlaceCardView from '../ui/PlaceCardView';
+import MapPlaceCard from '../ui/MapPlaceCard';
 import { unlessSame } from '../ui/unlessSame';
 import { useBackHandler } from '../ui/useBackHandler';
 import PrimaryOverlay, {
@@ -108,6 +108,7 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { representativeGeofence } from './placeMarkers';
+import { PLACE_PIN_PNG_BASE64 } from './placePinPng';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { traceBounds } from './traceGeoJson';
@@ -185,6 +186,8 @@ const EMPTY_PROGRESS: TripProgress = {
 export type FocusPlace = {
   place: Place;
   collected: boolean;
+  /** Collected but withheld by a free passport (D-097): its stamp is drawn muted. */
+  locked?: boolean;
 };
 
 /** A polyline as `expo-maps` wants it. */
@@ -286,7 +289,7 @@ export default function NativeMapScreen({
   const [traceLines, setTraceLines] = useState<VisitedLine[]>([]);
   const [coursePolylines, setCoursePolylines] = useState<Polyline[]>([]);
   const [marker, setMarker] = useState<
-    { coordinates: { latitude: number; longitude: number }; title: string }[]
+    { coordinates: { latitude: number; longitude: number }; title: string; iconPng?: string }[]
   >([]);
   const [camera, setCamera] = useState<CameraFit | null>(null);
   /**
@@ -309,6 +312,8 @@ export default function NativeMapScreen({
     buttonStamp([], [], false, t('passport.title'))
   );
   const [card, setCard] = useState<PlaceCard | null>(null);
+  /** The open card's stamp: its category, and whether it is drawn in colour. */
+  const [cardArt, setCardArt] = useState<{ category: Category; inColour: boolean } | null>(null);
   /**
    * Where *Ver no mapa* wants the camera, held until the card has laid out
    * and `cardTop` says how much of the map it covers (2026-10-23: centred on
@@ -715,9 +720,15 @@ export default function NativeMapScreen({
         {
           coordinates: { latitude: geofence.lat, longitude: geofence.lon },
           title: requestedPlace.place.name,
+          // N12: Bruma's gold pin, not Google's red (`placePin.ts`).
+          iconPng: PLACE_PIN_PNG_BASE64,
         },
       ]);
 
+      setCardArt({
+        category: requestedPlace.place.category,
+        inColour: requestedPlace.collected && requestedPlace.locked !== true,
+      });
       setCard(
         buildPlaceCard({
           placeId: requestedPlace.place.id,
@@ -1175,7 +1186,12 @@ export default function NativeMapScreen({
                 cardWrap.current?.measureInWindow((_x, y) => setCardTop(y))
               }
             >
-              <PlaceCardView card={card} onClose={closeCard} />
+              <MapPlaceCard
+                card={card}
+                category={cardArt?.category ?? 'landmark'}
+                inColour={cardArt?.inColour ?? false}
+                onClose={closeCard}
+              />
             </View>
           ) : null
         }

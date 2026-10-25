@@ -785,6 +785,9 @@ export const STRINGS = {
     '{distance} entfernt, Luftlinie'
   ),
   'placeCard.showOnMap': s('Show on map', 'Ver no mapa', 'Auf der Karte zeigen'),
+  // N12 (2026-10-25): the label over the place's line on the map's card. A
+  // question of its own, so the unchanged sentence can follow it.
+  'placeCard.didYouKnow': s('Did you know?', 'Sabias?', 'Schon gewusst?'),
   // 2026-09-25: two dates joined by a word, never a dash (shareCard.formatDateRange).
   'date.range': s('{start} to {end}', '{start} a {end}', '{start} bis {end}'),
   // 2026-09-25: the status line under the name on the passport's card.

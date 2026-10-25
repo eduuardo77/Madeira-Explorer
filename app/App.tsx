@@ -132,8 +132,8 @@ function AppScreens({ onShown }: { onShown: () => void }) {
     setScreen('replay');
   }, []);
   const closePassport = useCallback(() => setScreen('map'), []);
-  const showOnMap = useCallback((place: Place, collected: boolean) => {
-    setFocusPlace({ place, collected });
+  const showOnMap = useCallback((place: Place, collected: boolean, locked?: boolean) => {
+    setFocusPlace({ place, collected, locked });
     setScreen('map');
   }, []);
 

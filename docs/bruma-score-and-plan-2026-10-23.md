@@ -110,7 +110,7 @@ D-107 settles the Porto Santo offer in principle but leaves four questions open.
 | R1 | **The closed track: still no upload recorded.** First flagged 9 Oct. Version 11 waits on the T-123 video, which gates the closed review | `HANDOFF.md`, `docs/closed-testing.md` | **P1**, carried |
 | N10 | **Pan freezes came back in 2 of 4 runs**: one gap of 199 ms and one of 165 ms, the frame rate otherwise 57 to 59. 19 Oct: none over 33 ms in two runs. Not explained; may be a collection pause, may be the medals or the strip window, which are new since. ✅ **Closed 23 Oct, not real (T-280):** a trace showed the map at rest in each gap (the wait for the next swipe, or a glide's last lone frame); the probe now tells them apart, and 18 runs show no stall over 100 ms | `measure-map-frames.sh` ×4 | P3 |
 | N11 | **The stamp card's *Próximo carimbo* box runs into the button row:** its last line sits on the buttons' top edge with no gap | screenshot, Praia Formosa | P3 |
-| N12 | **The map's place card is light grey on a dark app**, and the place is a generic red Google pin, while the passport and stamp card are Bruma's own dark design. Reads as two apps | screenshot | P3 |
+| N12 | **The map's place card is light grey on a dark app**, and the place is a generic red Google pin, while the passport and stamp card are Bruma's own dark design. Reads as two apps. ✅ **Fixed 25 Oct (T-282):** the trophy's violet and gold, a gold pin, a shorter card | screenshot | P3 |
 | N13 | **The passport still costs when used**: 358 MB after the short sequence, 417 MB after a scroll to its end and a card. Better than 19 Oct, not gone | `meminfo` | info |
 | N14 | **Five days without a field day.** A review on unchanged field evidence cannot move A, and A is the heaviest area | database copy | info |
 | R7, R8, R9 | 36 NOT TUNED notes; the August fixture row; Risco and Alecrim 0 m apart. All unchanged | `grep`, validator | info |
@@ -159,7 +159,7 @@ order below puts the lead first.
   the passport, look at the medals row and strip window; if not, a GC trace. **Done 23 Oct
   (T-280): a probe artifact, no app change.**
 - ✅ **N11** · XS. Space between the *Próximo carimbo* box and the buttons. **Done 23 Oct (T-281).**
-- **N12** · S, the lead's eye. The map's place card in the passport's dark style, and Bruma's own
+- ✅ **N12** · S, the lead's eye. **Done 25 Oct (T-282), the lead's option 2.** The map's place card in the passport's dark style, and Bruma's own
   pin. Show options before building.
 - **Store screenshots in three languages** · S, once the listing copy is approved.
 - **The packet capture** (T-264) · S, if the lead allows PCAPdroid on the P30.

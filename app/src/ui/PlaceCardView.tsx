@@ -39,9 +39,10 @@
  * first and the project lead preferred the white one (T-218); seen next to the
  * dark trophy, they found the white sheet over the dark album "looks off", and
  * took the recommendation that the card match its ground: dark over the
- * passport (`tone="dark"`, the album's own colours), white over the map. Over
- * the map the card has no stamp, because the mark you tapped is still on
- * screen behind it.
+ * passport (`tone="dark"`, the album's own colours), white over the map.
+ * ⚠ **Since 2026-10-25 the map has its own card, `MapPlaceCard`** (N12: the
+ * light sheet over the map read as a second app). This one is the passport's;
+ * its `light` tone and the stampless layout are no longer shown in the app.
  *
  * Presentational: props in, pixels out, so the workbench (D-038) can mount it
  * without a map, a database or a location.

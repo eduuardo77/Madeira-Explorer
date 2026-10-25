@@ -33,10 +33,20 @@ index e7b12c8..cc2dd1a 100644
          view.selectMarker(id, options)
        }
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-index 82450b6..385d05c 100644
+index 82450b6..75de0d4 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/GoogleMapsView.kt
-@@ -15,8 +15,10 @@ import androidx.compose.runtime.State
+@@ -3,6 +3,9 @@ package expo.modules.maps
+ import android.annotation.SuppressLint
+ import android.content.Context
+ import android.graphics.Bitmap
++import android.graphics.BitmapFactory
++import android.util.Base64
++import android.util.DisplayMetrics
+ import android.graphics.Point
+ import android.graphics.drawable.Drawable
+ import android.view.MotionEvent
+@@ -15,8 +18,10 @@ import androidx.compose.runtime.State
  import androidx.compose.runtime.derivedStateOf
  import androidx.compose.runtime.getValue
  import androidx.compose.runtime.key
@@ -47,7 +57,7 @@ index 82450b6..385d05c 100644
  import androidx.compose.ui.Modifier
  import androidx.compose.ui.graphics.Color
  import com.google.android.gms.maps.CameraUpdateFactory
-@@ -24,8 +26,19 @@ import com.google.android.gms.maps.LocationSource
+@@ -24,8 +29,19 @@ import com.google.android.gms.maps.LocationSource
  import com.google.android.gms.maps.model.BitmapDescriptor
  import com.google.android.gms.maps.model.BitmapDescriptorFactory
  import com.google.android.gms.maps.model.CameraPosition
@@ -67,7 +77,7 @@ index 82450b6..385d05c 100644
  import com.google.maps.android.compose.CameraPositionState
  import com.google.maps.android.compose.GoogleMap
  import com.google.maps.android.compose.Marker
-@@ -84,6 +97,17 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -84,6 +100,17 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
    private lateinit var cameraState: CameraPositionState
    private var manualCameraControl = false
  
@@ -85,7 +95,7 @@ index 82450b6..385d05c 100644
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,12 +120,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,12 +123,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -112,7 +122,7 @@ index 82450b6..385d05c 100644
      val polygonState by polygonStateFromProps()
      val circleState by circleStateFromProps()
      val mapOptions = props.mapOptions.value.mapId?.let { GoogleMapOptions().mapId(it) } ?: GoogleMapOptions()
-@@ -154,12 +192,35 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -154,12 +195,35 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
@@ -151,7 +161,16 @@ index 82450b6..385d05c 100644
            clickable = true,
            onClick = {
              onPolylineClick(
-@@ -234,7 +295,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -194,7 +258,7 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+ 
+       for ((marker, state) in markerState.value) {
+         key(marker.id) {
+-          val icon = remember(marker.icon) { getIconDescriptor(marker) }
++          val icon = remember(marker.icon, marker.iconPng) { getIconDescriptor(marker) }
+ 
+           Marker(
+             state = state,
+@@ -234,7 +298,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -170,7 +189,7 @@ index 82450b6..385d05c 100644
      LaunchedEffect(cameraState.cameraMoveStartedReason) {
        // We should stop following the user's location when camera is moved manually.
        if (cameraState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE || cameraState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION) {
-@@ -266,7 +338,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -266,7 +341,6 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
          )
        )
      }
@@ -178,7 +197,7 @@ index 82450b6..385d05c 100644
    }
  
    @Composable
-@@ -319,11 +390,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -319,11 +393,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      remember {
        derivedStateOf {
          props.polylines.value.map { polyline ->
@@ -212,7 +231,7 @@ index 82450b6..385d05c 100644
    @Composable
    private fun polygonStateFromProps() =
      remember {
-@@ -361,6 +453,89 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -361,6 +456,89 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  
@@ -302,11 +321,42 @@ index 82450b6..385d05c 100644
    suspend fun setCameraPosition(config: SetCameraPositionConfig?) {
      // Stop updating the camera position based on user location.
      manualCameraControl = true
+@@ -415,6 +593,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+   }
+ 
+   private fun getIconDescriptor(marker: MarkerRecord): BitmapDescriptor? {
++    // Bruma (N12): a base64 PNG at 480 dpi, scaled to this screen's density.
++    marker.iconPng?.let { encoded ->
++      val bytes = Base64.decode(encoded, Base64.DEFAULT)
++      val options = BitmapFactory.Options().apply {
++        inDensity = DisplayMetrics.DENSITY_XXHIGH
++        inTargetDensity = context.resources.displayMetrics.densityDpi
++        inScaled = true
++      }
++      BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)?.let {
++        return BitmapDescriptorFactory.fromBitmap(it)
++      }
++    }
+     return marker.icon?.let { icon ->
+       val bitmap = if (icon.`is`(toKClass<SharedRef<Drawable>>())) {
+         icon.get(toKClass<SharedRef<Drawable>>()).ref.toBitmap()
 diff --git a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-index 1585460..d79b5f7 100644
+index 1585460..f1c76f0 100644
 --- a/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
 +++ b/node_modules/expo-maps/android/src/main/java/expo/modules/maps/Records.kt
-@@ -88,6 +88,30 @@ data class MarkerRecord(
+@@ -78,6 +78,11 @@ data class MarkerRecord(
+   @Field
+   val icon: Either<SharedRef<Drawable>, SharedRef<Bitmap>>? = null,
+ 
++  // Bruma (N12): an icon as a base64 PNG drawn at 480 dpi (3 px per dp), so an
++  // app without expo-image can still show its own pin. Scaled to the screen.
++  @Field
++  val iconPng: String? = null,
++
+   @Field
+   val showCallout: Boolean = true,
+ 
+@@ -88,6 +93,30 @@ data class MarkerRecord(
    val zIndex: Float = 0.0f
  ) : Record
  
@@ -337,7 +387,7 @@ index 1585460..d79b5f7 100644
  @OptimizedRecord
  data class PolylineRecord(
    @Field
-@@ -103,7 +127,24 @@ data class PolylineRecord(
+@@ -103,7 +132,24 @@ data class PolylineRecord(
    val color: Int = 0xFF0000FF.toInt(),
  
    @Field
@@ -364,10 +414,21 @@ index 1585460..d79b5f7 100644
  
  @OptimizedRecord
 diff --git a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-index 100005c..cefbc29 100644
+index 100005c..9b14e77 100644
 --- a/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
 +++ b/node_modules/expo-maps/build/google/GoogleMaps.types.d.ts
-@@ -82,6 +82,20 @@ export type GoogleMapsPolyline = {
+@@ -47,6 +47,10 @@ export type GoogleMapsMarker = {
+      * The custom icon to display for the marker.
+      */
+     icon?: SharedRefType<'image'>;
++    /**
++     * Bruma (N12): the icon as a base64 PNG drawn at 3 px per dp; Android only.
++     */
++    iconPng?: string;
+     /**
+      * The anchor used to position the anchor relative to its coordinates.
+      * @default bottom-center of the icon
+@@ -82,6 +86,20 @@ export type GoogleMapsPolyline = {
       * Whether the polyline is geodesic.
       */
      geodesic?: boolean;
@@ -388,7 +449,7 @@ index 100005c..cefbc29 100644
  };
  /**
   * @platform android
-@@ -435,6 +449,22 @@ export type GoogleMapsViewType = {
+@@ -435,6 +453,22 @@ export type GoogleMapsViewType = {
       * @param config New camera position config.
       */
      setCameraPosition: (config?: SetCameraPositionConfig) => void;
@@ -412,10 +473,21 @@ index 100005c..cefbc29 100644
       * This is an async operation that animates the camera to the marker. If called
       * rapidly, a previous animation may be cancelled, causing the returned promise to reject.
 diff --git a/node_modules/expo-maps/src/google/GoogleMaps.types.ts b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
-index cc2b88f..bb8bc4f 100644
+index cc2b88f..f465245 100644
 --- a/node_modules/expo-maps/src/google/GoogleMaps.types.ts
 +++ b/node_modules/expo-maps/src/google/GoogleMaps.types.ts
-@@ -512,6 +512,26 @@ export type GoogleMapsViewType = {
+@@ -57,6 +57,10 @@ export type GoogleMapsMarker = {
+    * The custom icon to display for the marker.
+    */
+   icon?: SharedRefType<'image'>;
++  /**
++   * Bruma (N12): the icon as a base64 PNG drawn at 3 px per dp; Android only.
++   */
++  iconPng?: string;
+ 
+   /**
+    * The anchor used to position the anchor relative to its coordinates.
+@@ -512,6 +516,26 @@ export type GoogleMapsViewType = {
     */
    setCameraPosition: (config?: SetCameraPositionConfig) => void;
  

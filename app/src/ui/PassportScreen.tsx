@@ -157,7 +157,7 @@ export default function PassportScreen({
    * The whole `Place` travels, because the map needs its representative
    * geofence and the rule for picking that lives in one module.
    */
-  onShowOnMap: (place: Place, collected: boolean) => void;
+  onShowOnMap: (place: Place, collected: boolean, locked?: boolean) => void;
 }) {
   const [progress, setProgress] = useState<TripProgress | null>(null);
   const [awards, setAwards] = useState<StampAward[]>([]);
@@ -679,7 +679,7 @@ export default function PassportScreen({
             onShowOnMap={
               cardPlace === null || cardStamp === null
                 ? undefined
-                : () => onShowOnMap(cardPlace, cardStamp.collected)
+                : () => onShowOnMap(cardPlace, cardStamp.collected, cardStamp.locked === true)
             }
             onUnlock={
               cardStamp?.locked === true && !BETA_BUILD

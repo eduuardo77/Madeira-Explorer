@@ -13,6 +13,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   420, cold start 0.9 to 1.2 s); the score is held by no upload and no field day since 18 Oct.
   New: two pan freezes over 100 ms in four runs (N10); *Próximo carimbo* box touching the buttons
   (N11); the map's place card light on a dark app (N12).
+- **25 Oct, N12 built (T-282), the lead's option 2:** the map's place card is the trophy's violet
+  and gold (`ui/MapPlaceCard.tsx`), shorter, with the place's line under *Sabias?*, and a gold pin
+  (`map/placePin.ts`, PNG via `tools/build-place-pin.mjs`, expo-maps patch `iconPng`). On the P30
+  (field build, `install -r`), smoke test passes. **Open for the lead:** which route-only or plain
+  *why* lines drop the *Sabias?* label (about 20 drafted; needs a content field once vetoed).
 - **23 Oct, N11 fixed (T-281):** 16 dp above and below the *Próximo carimbo* box, the middle
   scrolls on short screens; seen on the P30, field build installed with `install -r`. **N12 open:**
   three options shown to the lead on 25 Oct (`tools/preview-map-card-options.mjs` over a P30 shot,

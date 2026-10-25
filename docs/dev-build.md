@@ -545,7 +545,8 @@ from `app/`, then check the APK: `aapt dump permissions app-release.apk` must li
 ## ⚠ Three Expo modules are compiled from source — T-242, 2026-09-26; expo-maps since T-245
 
 ⚠ **Since 2026-09-27 `expo-maps` is compiled from source too**, for
-`app/patches/expo-maps+57.0.1.patch`: round joints and caps on every polyline (D-093, T-168). To
+`app/patches/expo-maps+57.0.1.patch`: round joints and caps on every polyline (D-093, T-168);
+since T-282 also `iconPng` on a marker (a base64 PNG at 480 dpi, the gold place pin). To
 check a build has it: `javap -c -p` on `GoogleMapsView$Content$8.class` under
 `app/node_modules/expo-maps/android/build` must mention `RoundCap`.
 ⚠ **Regenerating that patch (T-278):** `npx patch-package expo-maps` fails on this checkout:

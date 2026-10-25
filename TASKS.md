@@ -205,6 +205,21 @@ permission, L3 privacy contact.
       the app"*. A trip with positions but no lit road (the August day, 128 fixes) says so
       (`trip.nothingLit`). ⚠ **For the lead:** the list counts days with any recording ("14 dias"),
       the viewer pages days with lit roads ("Dia 2 de 2") on the same trip.
+- [x] **T-282** The map's place card and pin in Bruma's own design (N12). **Done 2026-10-25,
+      the lead's option 2** of five sketched rounds (`tools/preview-map-card-options.mjs`): the
+      trophy's violet to black with its gold, and a gold pin for Google's red. The card is its own
+      component, `ui/MapPlaceCard.tsx`, shorter at the lead's ask (about 185 dp for Praia Formosa
+      against 250 on the P30): no grabber, a drawn cross for *Fechar* (60 dp target), category and
+      municipality on one line, the stamp beside the name (muted when not collected or withheld).
+      The place's *why* line is unchanged under a *Sabias?* label (`placeCard.didYouKnow`; the lead
+      tried questions and dropped them). Walk figures and the trail note kept on a levada.
+      The pin: `map/placePin.ts` (pure drawing), rendered by `tools/build-place-pin.mjs` into
+      `placePinPng.ts` as base64, because a bundled image in a release build is an Android
+      resource the map cannot open by path; the expo-maps patch gained `iconPng`, decoded at 480 dpi
+      and scaled to the screen. No expo-image. Seen on the P30 (field build): Praia Formosa, Levada
+      do Furado, the cross; smoke test passes; 1,166 tests. **Open for the lead:** which *why*
+      lines are only a route or a description and should show without the label (needs a content
+      field once vetoed).
 - [x] **T-281** The stamp card's *Próximo carimbo* box no longer sits on the buttons (N11).
       **Done 2026-10-23.** P30 pixels before: 24 dp above the box, 0 below. Now 16 dp each side (the
       card's usual gap: the box lost its 8 dp top margin, the buttons gained 16), and the middle

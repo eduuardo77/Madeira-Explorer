@@ -98,7 +98,10 @@ for every user at no cost to the line, which makes them the larger lever by seve
 and no other app using location. Read afterwards: the % and time at leaving and at the plug,
 `dumpsys batterystats` saved to `Madeira-fieldwork` before anything else (screen-on time, GPS time
 per app, deep idle), and Huawei's battery screen. Bruma's cost is 18 Oct's rate minus that day's,
-to about ±0.2 an hour.
+to about ±0.2 an hour. *Not run: the lead chose the desk estimate on 25 Oct. Neither the
+step-down nor the saver question changes anywhere between 0.5 and 1.3 an hour, so it is only
+worth a day if Bruma's absolute cost itself becomes the question (a store listing, Huawei's
+warning).*
 
 ## Who it is for
 

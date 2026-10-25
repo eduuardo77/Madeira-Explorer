@@ -610,6 +610,33 @@ So: a fixed opening view, the view kept on return, and the user's position only 
 a position outside its map, so Midtown may be its out-of-area fallback rather than its rule. Ask
 someone in New York, or mock a location there, before quoting it as "WalkNYC never opens on you".
 
+### 19. Version 1.2.1, now *Sidewalk*: one switch where the tier list was — **evidence**, 2026-10-25
+
+Read on the P30 (installed 17 Oct, `versionName=1.2.1`, versionCode 11) for the recording-modes
+proposal: the settings screen as text (`uiautomator dump`) and the strings in the APK. Nothing on
+the phone was changed; background location is still refused there, so passive capture is off.
+
+- **The app calls itself Sidewalk** everywhere inside (the package is still `com.walknyc.app`).
+- **Settings shows one switch, *Always Gathering***, under *Passive Capture*, where 1.1.6 showed a
+  named list. The tiers are still in the code (`PassiveTrackingMode`: OFF, DEFAULT, AGGRESSIVE,
+  BATTERY_SAVER, ALWAYS) with a sentence each: *"Default may miss some walks"*, *"Aggressive
+  should catch all your walks"*, *"Battery Saver may miss the first 2-3 blocks of your walks, but
+  battery use is significantly reduced"*. Whether the list appears once the switch is on could
+  not be seen without granting background location.
+- **The GPS is gated on the pedometer in every tier:** *"only records your location when the
+  pedometer detects that you're walking"*. Their tiers trade how fast a walk is noticed, not how
+  dense the line is.
+- **A Huawei-type warning at launch** (`isAggressiveOem`): *"Don't swipe Sidewalk away"*, with a
+  button to the auto-start settings. And *"Your phone's Battery Saver is limiting background
+  activity. Tap to manage it."*
+- ***Start Walk* ends itself after 7 minutes still**, with a notification offering to keep walking.
+
+**For Bruma:** a walking app with one mode of travel still moved from a visible tier list to one
+switch, which supports one mode (proposal of 25 Oct). The stop rule (7 minutes, with an offer to
+carry on) is close to Bruma's 5 still minutes.
+
+---
+
 ## Not worth taking
 
 - **Six system dialogs in one minute** — decomposed at the top of this file. Four of the six are OS

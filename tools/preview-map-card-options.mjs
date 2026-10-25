@@ -2,7 +2,7 @@
  * The map's place card and pin: options for the project lead (N12, 2026-10-23).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-map-card-options.mjs <map.png> <pinX> <pinY> [today.png]
- *     → tools/out/map-card-options-2.html (round 2; round 1, three full cards, is in git history)
+ *     → tools/out/map-card-options-3.html (round 3; rounds 1 and 2 are in git history)
  *
  * The 23 Oct review: the card *Ver no mapa* opens over the map is light grey
  * with Google's red pin, while the passport and the stamp card are Bruma's own
@@ -81,17 +81,26 @@ const goldPin = `
 
 // --- The cards. ---------------------------------------------------------------
 // Round 2: shorter. No grabber, no "Fechar" row (a drawn cross, its 60 dp
-// target kept around it), the category and municipality on one line, and the
-// reason to go replaced by a curiosity.
+// target kept around it), the category and municipality on one line.
+// Round 3 (the lead, 2026-10-25): the curiosity is the place's existing *why*
+// line, turned into a *Sabias que…* question. The rule drafted for all 81: no
+// new fact, only the most surprising part of the line already there, and no
+// category or municipality, which the line above the name already says.
 
-/**
- * ⚠ A sketch's sentence, not content: the pack has no curiosity field yet, and
- * this one is from memory (the 1566 French corsair raid on Funchal landed at
- * Praia Formosa). It must be checked before anything ships, and the 81 lines
- * would be drafted and vetoed like the rest of the pack (D-064).
- */
-const CURIOSITY =
-  'Em outubro de 1566, corsários franceses desembarcaram nesta praia antes de atacarem o Funchal.';
+/** The draft rewrites shown for the lead's approval of the style, PT only. */
+const REWRITES = [
+  ['praia-formosa', 'esta é a maior praia natural da ilha?'],
+  ['camara-de-lobos', 'Winston Churchill pintou esta vila piscatória em 1950?'],
+  ['camacha', 'foi aqui que se jogou o primeiro jogo de futebol em Portugal, em 1875?'],
+  ['levada-do-barreiro', 'esta levada começa no Poço da Neve, uma casa de gelo de 1813?'],
+  ['pico-do-facho', 'o nome vem das fogueiras de vigia que se acendiam no cimo?'],
+  ['pico-ruivo', 'este é o ponto mais alto da ilha, com 1862 m?'],
+  ['levada-do-furado', 'esta levada atravessa a Laurissilva, do Ribeiro Frio à Portela?'],
+  ['ponta-do-sol', 'esta vila da costa sul tem cais e centro histórico?'],
+];
+/** The two that read flat: a route or a plain description has nothing surprising in it. */
+const FLAT = new Set(['levada-do-furado', 'ponta-do-sol']);
+const CURIOSITY = REWRITES[0][1];
 
 const cross = (color) => `
 <div class="x"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2 L12 12 M12 2 L2 12" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/></svg></div>`;
@@ -174,22 +183,36 @@ const html = `<!doctype html>
   .factText { font-size: 15px; line-height: 1.35; }
   .bubble { position: absolute; width: 260px; box-sizing: border-box; border-radius: 14px; padding: 8px 12px 10px;
             box-shadow: 0 6px 18px #0008; }
+  h2 { font-size: 16px; margin: 32px 0 4px; }
+  table { border-collapse: collapse; max-width: 1200px; }
+  th, td { text-align: left; padding: 6px 12px; border-bottom: 1px solid #333; vertical-align: top; }
+  th { color: #aaa; font-weight: 600; }
+  tr.flat td { color: #777; }
   .tail { position: absolute; left: 92px; bottom: -9px; width: 0; height: 0;
           border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid; }
 </style></head><body>
-<h1>O cartão que abre no mapa, segunda ronda (N12)</h1>
-<p class="lead">Mais baixos, e com um <i>Sabias que…</i> sobre o lugar. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
-fecha (com a mesma área de toque de 60 dp). A categoria e o concelho numa só linha. O texto da curiosidade é um exemplo, ainda por
-confirmar. À esquerda, o cartão de hoje para comparar.</p>
+<h1>O cartão que abre no mapa, terceira ronda (N12)</h1>
+<p class="lead">As opções 1 e 2, agora com a frase de hoje em forma de pergunta. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto
+fecha (com a mesma área de toque de 60 dp). A categoria e o concelho numa só linha. À esquerda, o cartão de hoje para comparar.</p>
 <div class="row-of">
 <figure><div class="phone" style="background-image:url(${today})"></div><figcaption><b>Hoje</b><br>O cartão claro e o pino do Google, como estão na app.</figcaption></figure>
 ${phone('1', 'Escuro, pino azul', 'O cartão do passaporte, mais baixo. A curiosidade numa caixa por baixo do nome.', bluePin, card1)}
 ${phone('2', 'Violeta e dourado, pino amarelo', 'As cores do troféu, com a mesma forma do 1.', goldPin, card2)}
-${phone('3', 'Uma linha só, a curiosidade no pino', 'O cartão fica numa linha. O <i>Sabias que…</i> aparece num balão por cima do pino amarelo.', goldPin, card3, bubble)}
 </div>
+<h2>A frase como pergunta: amostra</h2>
+<p class="lead">A regra: nenhum facto novo, só a parte mais curiosa da frase que já existe, em pergunta. O tipo de lugar e o concelho
+já estão na linha de cima, por isso saem da frase. As duas a cinzento ficam fracas: são um percurso ou uma descrição, sem nada
+de surpreendente. Para essas, ou se procura um facto novo, ou fica a frase atual sem o <i>Sabias que…</i>.</p>
+<table>
+<tr><th>Lugar</th><th>Hoje</th><th>Sabias que…</th></tr>
+${REWRITES.map(([id, question]) => {
+  const each = (pack.places ?? pack).find((one) => one.id === id);
+  return `<tr class="${FLAT.has(id) ? 'flat' : ''}"><td>${escapeXml(each.name)}</td><td>${escapeXml(each.why.pt)}</td><td>${escapeXml(question)}</td></tr>`;
+}).join('\n')}
+</table>
 </body></html>`;
 
-const out = path.join(here, 'out', 'map-card-options-2.html');
+const out = path.join(here, 'out', 'map-card-options-3.html');
 mkdirSync(path.dirname(out), { recursive: true });
 writeFileSync(out, html);
 console.log(out);

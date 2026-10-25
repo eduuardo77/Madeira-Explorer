@@ -2928,6 +2928,8 @@ project. T-131 is where they get tuned against a real trip.
 
 ## D-060 — The battery tiers are named by what they do, not by a percentage
 
+⚠ **Superseded 2026-10-25 by D-108: there are no tiers any more.** D-041 still holds.
+
 **Status: Provisional** — 2026-08-15. The project lead asked for three tiers labelled *~3%*,
 *medium* and *~15–20%*. They ship as **Battery saver / Balanced / Best detail**, each with a
 sentence describing its behaviour, and no number anywhere.
@@ -4745,7 +4747,9 @@ in Settings. The button can be the main control because pressing it has a conseq
 1. **Two names, never shared.** A **walk** (*passeio*, *Spaziergang*) is what the main button
    starts. **Automatic recording** (*registo automático*) is the background recorder, and it lives
    in Settings. The verb *registar* leaves the main button.
-2. **A walk changes the recorder.** For its duration the recorder samples at the finest setting
+2. **A walk changes the recorder.** ⚠ *Amended by D-108 (25 Oct 2026): an outing records the
+   same way as the rest of the day; it only never drops to the stationary profile.* For its
+   duration the recorder samples at the finest setting
    the app has, then drops back to the user's own level. ⚠ The walk interval is a tuning
    question: today's floor is 10 s (`trackingPreference.ts`). Going lower is a battery cost
    nobody has measured (T-054), so any number waits for a measurement. **Stamps are awarded the
@@ -5783,3 +5787,31 @@ flight keep the trip open, and the sea is never credited as a road.
   stamp there paid?
 - **Paywall copy.** It says "all of Madeira". Should it name Porto Santo, given the island is
   meant to be a surprise (D-024)?
+
+## D-108 — One way of recording; *Começar passeio* records the same way
+
+**Status: Accepted** — 2026-10-25, the project lead: *"at least two modes, if you can make two
+worth it; if not, only one"*, then, after measurement 3, *"record one mode as the decision and
+build it, with Começar passeio recording the same way as Settings"*. Supersedes D-060; amends
+D-087 §2. The case is `docs/recording-modes-proposal-2026-10-25.md`.
+
+**The decision.** The three tiers (Poupança, Equilibrado, Preciso) go. The app records one way,
+today's Equilibrado. Settings keeps the one choice with a real difference: record with the app
+closed, yes or no. *Começar passeio* no longer switches to the finest tier; it keeps only that
+an outing never samples as stationary (T-246, the start of the 8 Oct ride).
+
+**Why one and not two.** Since D-106 every tier used the GPS while moving, so the tiers differed
+only in how far apart the kept points were. Two Preciso outings with the iPhone alongside (4 and
+10 Oct), thinned to Equilibrado's spacing, lit the same route within 10 m to within 0 to 2 points
+(97.9 and 97.9%, 95.6 and 95.0%), with a quarter of the fixes; the check was made to move (a fix
+every 3 minutes gives 85.3%). A second mode would have cost battery (no pause at stops) for a
+difference nobody would see. The lead could not tell the three apart.
+
+**Rejected.** *Two modes, Normal and Detalhado*: the lead's preference, rejected by the lead's own
+condition on the evidence above. *An automatic step-down in battery saver*: under 1% of a day for
+6% of the route. *A stop check between batches*: about 20 GPS minutes, 0.2 to 0.4 battery points
+a day (measurements 1 and 2).
+
+**What would overturn it.** A levada walk under trees, with the iPhone alongside, drawn visibly
+worse than the iPhone's track. The first answer would be denser sampling when walking, for
+everyone, not a mode.

@@ -62,7 +62,6 @@ import { LANGUAGE_NAMES, LANGUAGES, type Language } from '../i18n/languages';
 import type { StringKey } from '../i18n/strings';
 import { MAP_STYLE_CHOICE_ENABLED } from '../map/mapStylePreference';
 import type { PermissionLevel } from '../recording/LocationProvider';
-import { TRACKING_QUALITIES, type TrackingQuality } from '../recording/trackingPreference';
 import type { PassportSettings } from '../entitlement/settingsPassport';
 import BackBar from './BackBar';
 import ChevronMark from './ChevronMark';
@@ -77,9 +76,6 @@ export type SettingsViewProps = {
   /** May the app record while it is closed (T-146)? */
   backgroundTracking: boolean;
   onChangeBackgroundTracking: (allowed: boolean) => void;
-  /** How closely, when it may. Only shown when the switch above is on. */
-  trackingQuality: TrackingQuality;
-  onChangeTrackingQuality: (quality: TrackingQuality) => void;
   onChangeMapStyle: (style: 'light' | 'dark') => void;
   onOpenSystemSettings: () => void;
   /**
@@ -278,87 +274,6 @@ function ToggleRow({
   );
 }
 
-/**
- * How far the chosen chip sits inside the grey track, in dp. Each segment's
- * target is grown back by the same amount above and below, so it stays 60 dp
- * (D-015) while the chip draws smaller than the track around it.
- */
-const SEGMENT_INSET = 3;
-/**
- * The chip as drawn (D-095, 2026-09-27): 44 dp, a 50 dp track. It was the
- * full 60 less the inset, the tallest control on the screen for a choice made
- * once. The target is still 60: hitSlop makes up the rest above and below.
- */
-const SEGMENT_HEIGHT = 44;
-const SEGMENT_HIT_SLOP = {
-  top: (MIN_TAP_TARGET - SEGMENT_HEIGHT) / 2,
-  bottom: (MIN_TAP_TARGET - SEGMENT_HEIGHT) / 2,
-  left: 0,
-  right: 0,
-};
-
-/**
- * The three tiers, three segments wide: a grey track with the chosen tier as a
- * raised white chip, the platforms' own segmented control. ⚠ Was an outlined
- * pill with round ends (WalkNYC's) until 2026-09-25; the project lead found it
- * odd, and asked for it tidier.
- *
- * `short` is the word on the segment and what the screen reader says (review
- * N4, WCAG 2.5.3: a segment reading *Preciso* was once spoken *Máximo
- * detalhe*); `detail` is its hint, so a screen-reader user hears what a tier
- * does before choosing it. A `Record` keyed by the type, so a new tier in
- * `trackingPreference.ts` fails the build here rather than rendering blank; the
- * order comes from `TRACKING_QUALITIES`, which owns it.
- */
-const QUALITY_TEXT: Record<TrackingQuality, { short: StringKey; detail: StringKey }> = {
-  saver: { short: 'settings.quality.short.saver', detail: 'settings.quality.detail.saver' },
-  balanced: { short: 'settings.quality.short.balanced', detail: 'settings.quality.detail.balanced' },
-  precise: { short: 'settings.quality.short.best', detail: 'settings.quality.detail.best' },
-};
-
-function Segmented({
-  value,
-  onChange,
-}: {
-  value: TrackingQuality;
-  onChange: (next: TrackingQuality) => void;
-}) {
-  return (
-    <View style={styles.segmented} accessibilityRole="radiogroup">
-      {TRACKING_QUALITIES.map((quality) => {
-        const selected = quality === value;
-        return (
-          <Pressable
-            key={quality}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: selected }}
-            accessibilityLabel={t(QUALITY_TEXT[quality].short)}
-            accessibilityHint={t(QUALITY_TEXT[quality].detail)}
-            onPress={() => onChange(quality)}
-            hitSlop={SEGMENT_HIT_SLOP}
-            style={({ pressed }) => [
-              styles.segment,
-              selected && styles.segmentActive,
-              pressed && styles.pressed,
-            ]}
-          >
-            {/* One line: a segment that wraps makes the control uneven. */}
-            {/* Shrinks rather than cuts: "Equilibrado" in bold read "Equilibra..."
-                on the P30 (2026-10-18). */}
-            <Text
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}
-              style={[styles.segmentText, selected && styles.segmentTextActive]}
-            >
-              {t(QUALITY_TEXT[quality].short)}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 /**
  * The language list, over the screen (2026-09-25). A sheet rather than rows in
@@ -435,8 +350,6 @@ export default function SettingsView({
   mapStyle,
   backgroundTracking,
   onChangeBackgroundTracking,
-  trackingQuality,
-  onChangeTrackingQuality,
   onChangeMapStyle,
   onOpenSystemSettings,
   onOpenBatterySettings,
@@ -524,18 +437,6 @@ export default function SettingsView({
             // above says where the real gate is.
             disabled={permission !== 'always'}
           />
-          {/* The tiers, and what the chosen one does, in words (D-015): the
-              line changes as another is tapped. The project lead asked for
-              each option explained on its own, not all three at once. */}
-          {recordingInBackground ? (
-            <View style={styles.segmentRow}>
-              <Segmented value={trackingQuality} onChange={onChangeTrackingQuality} />
-              <Text style={styles.rowDetail}>
-                <Text style={styles.detailStrong}>{t(QUALITY_TEXT[trackingQuality].short)}</Text>
-                {`: ${t(QUALITY_TEXT[trackingQuality].detail)}`}
-              </Text>
-            </View>
-          ) : null}
           {/* Android only. The label says what it achieves; the detail uses the
               phone's own word, so the screen it opens is recognisable. */}
           {onOpenBatterySettings === null ? null : (
@@ -742,39 +643,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginLeft: SETTINGS_ICON_SIZE + spacing.md,
   },
-  segmentRow: {
-    paddingBottom: spacing.md,
-    paddingLeft: SETTINGS_ICON_SIZE + spacing.md,
-    gap: spacing.sm,
-  },
-  segmented: {
-    flexDirection: 'row',
-    padding: SEGMENT_INSET,
-    borderRadius: radius.control,
-    backgroundColor: colors.surfaceRaised,
-  },
-  segment: {
-    // Equal thirds whatever the word's length in this language.
-    flex: 1,
-    minHeight: SEGMENT_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-    borderRadius: radius.control - SEGMENT_INSET,
-  },
-  // Raised, not filled with colour: the words under the control say which
-  // tier it is, so the chip only has to be findable (D-015).
-  segmentActive: {
-    backgroundColor: colors.surface,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  segmentText: { color: colors.textMuted, fontSize: fontSize.small, fontWeight: '600', textAlign: 'center' },
-  segmentTextActive: { color: colors.text, fontWeight: '700' },
-  detailStrong: { color: colors.text, fontWeight: '700' },
   radioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

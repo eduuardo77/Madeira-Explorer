@@ -31,7 +31,6 @@
 
 import type { PermissionLevel, SamplingProfile } from './LocationProvider.ts';
 import type { SilenceState } from './recorderSilence.ts';
-import type { TrackingQuality } from './trackingPreference.ts';
 import { distanceM } from './distance.ts';
 import type { Language } from '../i18n/languages.ts';
 import { PLURALS, STRINGS } from '../i18n/strings.ts';
@@ -148,22 +147,6 @@ export function offerAutomatic(input: ControlInput, declined: boolean): boolean 
     input.permission !== 'denied' &&
     input.permission !== 'undetermined'
   );
-}
-
-/**
- * The quality the recorder should run at right now (D-087 §2).
- *
- * A walk takes the finest setting the app has, whatever the user chose for
- * automatic recording, and gives it back when the walk ends. ⚠ The finest
- * setting is still bounded by `trackingPreference`'s floor. Whether a walk
- * should go *below* that floor, as WalkNYC's 1 s does, is a battery cost nobody
- * has measured (T-054), so it waits for the measurement.
- */
-export function effectiveQuality(
-  userQuality: TrackingQuality,
-  walkInProgress: boolean
-): TrackingQuality {
-  return walkInProgress ? 'precise' : userQuality;
 }
 
 /**

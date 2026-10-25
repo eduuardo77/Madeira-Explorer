@@ -20,9 +20,8 @@ import type {
 } from './LocationProvider';
 import { forPlatform, getSamplingParameters } from './samplingPolicy';
 import { motionWakeAvailable } from './activityRecognition';
-import { scaleForQuality } from './trackingPreference';
-import { effectiveProfile, effectiveQuality } from './recorderControls';
-import { getTrackingQuality, getWalkInProgress } from './trackingSettings';
+import { effectiveProfile } from './recorderControls';
+import { getWalkInProgress } from './trackingSettings';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME } from './taskNames';
 
 function toExpoAccuracy(
@@ -55,28 +54,28 @@ function toExpoActivityType(profile: SamplingProfile): Location.ActivityType {
 }
 
 /**
- * ⚠ Async, because the user's tier is stored (T-146).
+ * ⚠ Async, because whether an outing is running is stored.
  *
- * The activity profile says what the *app* wants; `scaleForQuality` then
- * applies what the *user* allowed. In that order, never the reverse: a tier is
- * a ceiling on cost, and a ceiling applied before the request is not a ceiling.
+ * One way of recording since D-108: the activity profile as authored, adjusted
+ * for the platform. There is no user tier any more.
  */
 async function buildOptions(
   profile: SamplingProfile
 ): Promise<Location.LocationTaskOptions> {
-  // ⚠ D-087 §2: a walk takes the finest tier the app has, whatever the user
-  // chose for automatic recording, and hands theirs back when it ends. This
-  // is the one place a walk changes the recorder; `setSamplingProfile` with
-  // the current profile re-applies it in place when a walk starts or stops.
+  // ⚠ D-108: an outing records the same way as the rest of the day (it took
+  // Preciso until 25 Oct 2026). What it keeps is that it never samples as
+  // stationary (`effectiveProfile`, T-246). This is the one place a walk
+  // changes the recorder; `setSamplingProfile` with the current profile
+  // re-applies it in place when a walk starts or stops.
   const walking = await getWalkInProgress();
   const sampled = effectiveProfile(profile, walking);
-  // After the tier, on purpose: on Android the moving profiles need the GPS,
-  // and the stationary one no hold, whatever the tier asks; and no GPS at home
-  // when the motion wake can serve this phone (`forPlatform`, D-106).
+  // On Android the moving profiles need the GPS and the stationary one no
+  // hold; and no GPS at home when the motion wake can serve this phone
+  // (`forPlatform`, D-106).
   const parameters = forPlatform(
     Platform.OS === 'android' ? 'android' : 'ios',
     sampled,
-    scaleForQuality(getSamplingParameters(sampled), effectiveQuality(await getTrackingQuality(), walking)),
+    getSamplingParameters(sampled),
     motionWakeAvailable()
   );
 

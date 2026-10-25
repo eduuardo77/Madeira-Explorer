@@ -6,12 +6,8 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   effectiveProfile,
-  effectiveQuality,
   offerAutomatic,
   primaryControl,
   recorderNotice,
@@ -23,7 +19,6 @@ import {
   type ControlInput,
 } from './recorderControls.ts';
 
-const srcRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const NOW = Date.parse('2026-09-23T10:00:00Z');
 const HOUR = 3_600_000;
@@ -130,12 +125,6 @@ test('⚠⚠ T-174 — a silent recorder is announced, and cannot be dismissed',
   );
 });
 
-test('a walk takes the finest setting, and gives the user’s back when it ends', () => {
-  assert.equal(effectiveQuality('saver', true), 'precise');
-  assert.equal(effectiveQuality('saver', false), 'saver');
-  assert.equal(effectiveQuality('balanced', false), 'balanced');
-});
-
 test('a walk never samples as stationary: the start of the ride was lost that way (T-246)', () => {
   assert.equal(effectiveProfile('stationary', true), 'walking');
   assert.equal(effectiveProfile('walking', true), 'walking');
@@ -213,17 +202,5 @@ test('no stamps and no distance are both said, not left blank', () => {
     'en'
   );
   assert.deepEqual(described.lines, ['10 min · distance not measured', 'No new stamps on this outing.']);
-});
-
-test('⚠ T-198 — a new tier is applied to the running recorder, not only stored', () => {
-  // Found on the P30: Preciso -> Equilibrado left the GPS request at +10 s
-  // until the app was relaunched. Storing without retuning is the bug.
-  const source = readFileSync(path.join(srcRoot, 'ui/SettingsScreen.tsx'), 'utf8');
-  const change = source.slice(source.indexOf('const changeTrackingQuality'));
-  const body = change.slice(0, change.indexOf('}, [])'));
-  assert.match(body, /setTrackingQuality\(next\)/);
-  // The call, not the word: the comment above it names the function too, and
-  // the first version of this test passed with the call removed.
-  assert.match(body, /\.then\(retuneRecorder\)/);
 });
 

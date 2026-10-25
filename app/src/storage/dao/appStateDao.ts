@@ -39,15 +39,8 @@ export const AppStateKey = {
    * "Start walk" instead.
    */
   BackgroundTracking: 'background_tracking',
-  /**
-   * How closely to follow, when background recording is allowed (T-146):
-   * `saver` / `balanced` / `precise`.
-   *
-   * ⚠ The settings screen names these by what they do, never by a battery
-   * percentage. No figure in this project has been measured on real hardware
-   * and D-041 keeps the reported one null on purpose.
-   */
-  TrackingQuality: 'tracking_quality',
+  // `tracking_quality` held the user's recording tier until D-108 (25 Oct
+  // 2026, one way of recording). Older installs keep the row; nothing reads it.
   /**
    * When the "Physical activity" permission was asked for, if ever (D-094).
    * Android cannot say whether a permission has been asked, only whether it

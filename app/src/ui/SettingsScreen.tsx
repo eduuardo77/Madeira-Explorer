@@ -33,16 +33,10 @@ import {
 import { locationProvider } from '../recording/ExpoLocationProvider';
 import type { PermissionLevel } from '../recording/LocationProvider';
 import { parseMapStyle } from '../map/mapStylePreference';
-import type { TrackingQuality } from '../recording/trackingPreference';
+import { DEFAULT_BACKGROUND_TRACKING } from '../recording/trackingPreference';
 import {
-  DEFAULT_BACKGROUND_TRACKING,
-  DEFAULT_TRACKING_QUALITY,
-} from '../recording/trackingPreference';
-import {
-  getTrackingQuality,
   isBackgroundTrackingAllowed,
   forgetCachedTrackingSettings,
-  setTrackingQuality,
 } from '../recording/trackingSettings';
 import { retuneRecorder } from '../recording/walkSession';
 import { setChosenLanguage } from '../i18n/deviceLocale';
@@ -99,9 +93,6 @@ export default function SettingsScreen({
   const [backgroundTracking, setBackgroundTracking] = useState(
     DEFAULT_BACKGROUND_TRACKING
   );
-  const [trackingQuality, setQuality] = useState<TrackingQuality>(
-    DEFAULT_TRACKING_QUALITY
-  );
   const [confirmingErase, setConfirmingErase] = useState(false);
   const [erased, setErased] = useState(false);
   const [showingPolicy, setShowingPolicy] = useState(false);
@@ -154,18 +145,16 @@ export default function SettingsScreen({
       settle<PermissionLevel>(locationProvider.getPermissionLevel(), 'undetermined'),
       settle(appStateDao.get(appStateDao.AppStateKey.MapStyle), null),
       settle(isBackgroundTrackingAllowed(), DEFAULT_BACKGROUND_TRACKING),
-      settle(getTrackingQuality(), DEFAULT_TRACKING_QUALITY),
       settle<PassportSettings | null>(
         isUnlocked().then((unlocked) => passportSettings({ unlocked, beta: BETA_BUILD })),
         null
       ),
       settle(appStateDao.get(appStateDao.AppStateKey.Language), null),
-    ]).then(([level, style, tracking, quality, passportRows, language]) => {
+    ]).then(([level, style, tracking, passportRows, language]) => {
       if (cancelled) return;
       setPermission(level);
       setMapStyle(parseMapStyle(style));
       setBackgroundTracking(tracking);
-      setQuality(quality);
       setPassport(passportRows);
       setLanguageChoiceState(parseLanguageChoice(language));
       setLoaded(true);
@@ -192,25 +181,6 @@ export default function SettingsScreen({
     setAutomaticRecording(allowed).catch((error) =>
       recordingEventDao.logError('background tracking switch', error)
     );
-  }, []);
-
-  /**
-   * The tier (T-146).
-   *
-   * Stored only. The recorder picks it up the next time it sets a sampling
-   * profile, which `samplingGate` does on every OS wake-up — within minutes,
-   * without restarting location updates and so without ending the trip. A
-   * restart here would cost the user the continuity of a walk in progress to
-   * apply a preference about battery, which is the wrong trade in both
-   * directions.
-   */
-  const changeTrackingQuality = useCallback((next: TrackingQuality) => {
-    setQuality(next);
-    // ⚠ T-198: stored AND applied. Storing alone left a running recorder on the
-    // old tier until the next launch (walkSession.retuneRecorder).
-    void setTrackingQuality(next)
-      .then(retuneRecorder)
-      .catch(() => undefined);
   }, []);
 
   /**
@@ -445,8 +415,6 @@ export default function SettingsScreen({
         onChangeMapStyle={changeMapStyle}
         backgroundTracking={backgroundTracking}
         onChangeBackgroundTracking={changeBackgroundTracking}
-        trackingQuality={trackingQuality}
-        onChangeTrackingQuality={changeTrackingQuality}
         onOpenSystemSettings={() => {
           void Linking.openSettings().catch(() => undefined);
         }}

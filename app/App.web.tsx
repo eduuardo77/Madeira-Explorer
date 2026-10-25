@@ -477,8 +477,6 @@ export default function DesignWorkbench() {
               mapStyle="light"
               backgroundTracking
               onChangeBackgroundTracking={() => undefined}
-              trackingQuality="balanced"
-              onChangeTrackingQuality={() => undefined}
               onChangeMapStyle={() => undefined}
               onOpenSystemSettings={() => undefined}
               // Forced on so the row can be looked at (D-038). On the web

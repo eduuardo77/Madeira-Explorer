@@ -1,8 +1,9 @@
 # Recording modes: a proposal (25 Oct 2026)
 
-**Status: proposed, not decided.** It replaces the three tiers of T-146 (D-041 on battery figures
-stays as it is), so it needs the project lead's approval before it
-becomes a decision or touches the app. Nothing in the app has changed.
+**Status: decided the same day, narrower than proposed: D-108, one way of recording.** The three
+tiers go; *Começar passeio* records the same way as the rest of the day; no step-down, no second
+mode, no stop check. Measurements 1 to 3 at the end are what decided it. The proposal below is
+kept as written, for the reasoning.
 
 ## The problem
 

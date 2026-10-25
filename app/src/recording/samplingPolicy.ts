@@ -121,9 +121,9 @@ export function getSamplingParameters(
  * at `high` (the outings, which force Preciso: 4, 8, 9, 10 Oct) lit 94 to
  * 99.6% of the route; the ones that were not (6 Oct on Poupança, 29 fixes; the
  * way back from the gym on 6 Oct on Equilibrado, nothing; F1) failed. A levada
- * has no Wi-Fi at all. So on Android the moving profiles ask for the GPS, in every
- * tier; the tiers still differ by interval and distance. ⚠ Poupança's battery
- * is no longer what was measured with it.
+ * has no Wi-Fi at all. So on Android the moving profiles ask for the GPS. (The
+ * user's three tiers, which then differed only by interval and distance, were
+ * removed by D-108: one way of recording.)
  *
  * **3. The stationary profile: the GPS, but at most every 10 minutes.** A
  * stopgap until a motion wake (D-106) replaces the polling. Tried in turn:

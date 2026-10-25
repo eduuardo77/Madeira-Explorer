@@ -8,7 +8,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { ANDROID_STATIONARY_INTERVAL_MS, forPlatform, getSamplingParameters } from './samplingPolicy.ts';
-import { scaleForQuality } from './trackingPreference.ts';
 
 test('on Android the stationary profile hands over every fix, from the GPS at most every 10 minutes (F1)', () => {
   const adjusted = forPlatform('android', 'stationary', getSamplingParameters('stationary'));
@@ -18,23 +17,12 @@ test('on Android the stationary profile hands over every fix, from the GPS at mo
   // 38 GPS starts in a night drew Huawei's battery warning.
   assert.equal(adjusted.desiredAccuracy, 'high');
   assert.equal(adjusted.minTimeMs, ANDROID_STATIONARY_INTERVAL_MS);
-  // A tier that asks for longer keeps it.
-  assert.equal(forPlatform('android', 'stationary', scaleForQuality(getSamplingParameters('stationary'), 'saver')).minTimeMs, 20 * 60_000);
 });
 
-test('every tier, the cheapest included, gets the GPS while stationary on Android', () => {
-  for (const tier of ['saver', 'balanced', 'precise'] as const) {
-    const scaled = scaleForQuality(getSamplingParameters('stationary'), tier);
-    assert.equal(forPlatform('android', 'stationary', scaled).desiredAccuracy, 'high', tier);
-  }
-});
-
-test('on Android the moving profiles ask for the GPS in every tier and keep their hold', () => {
+test('on Android the moving profiles ask for the GPS and keep their hold', () => {
   for (const profile of ['walking', 'driving'] as const) {
-    for (const tier of ['saver', 'balanced', 'precise'] as const) {
-      const scaled = scaleForQuality(getSamplingParameters(profile), tier);
-      assert.deepEqual(forPlatform('android', profile, scaled), { ...scaled, desiredAccuracy: 'high' }, `${profile} ${tier}`);
-    }
+    const parameters = getSamplingParameters(profile);
+    assert.deepEqual(forPlatform('android', profile, parameters), { ...parameters, desiredAccuracy: 'high' }, profile);
   }
 });
 
@@ -46,13 +34,11 @@ test('iOS is left as it is', () => {
 });
 
 test('with a motion wake, the stationary profile asks for Wi-Fi and cell only, no GPS (rule 4)', () => {
-  for (const tier of ['saver', 'balanced', 'precise'] as const) {
-    const scaled = scaleForQuality(getSamplingParameters('stationary'), tier);
-    const adjusted = forPlatform('android', 'stationary', scaled, true);
-    assert.equal(adjusted.desiredAccuracy, 'balanced', tier);
-    assert.equal(adjusted.deferredIntervalMs, 0, tier);
-    assert.equal(adjusted.minTimeMs, scaled.minTimeMs, tier);
-  }
+  const parameters = getSamplingParameters('stationary');
+  const adjusted = forPlatform('android', 'stationary', parameters, true);
+  assert.equal(adjusted.desiredAccuracy, 'balanced');
+  assert.equal(adjusted.deferredIntervalMs, 0);
+  assert.equal(adjusted.minTimeMs, parameters.minTimeMs);
 });
 
 test('the motion wake changes nothing while moving, and nothing on iOS', () => {

@@ -456,9 +456,9 @@ export const STRINGS = {
   // German said "Wanderung", which is a *hike*, and was the most wrong of the
   // three for somebody in a car.
   'map.a11y.startRecording': s(
-    'Start an outing. The app follows it more closely until you end it.',
-    'Começar um passeio. A aplicação acompanha-te com mais detalhe até o terminares.',
-    'Einen Ausflug starten. Die App verfolgt ihn genauer, bis Sie ihn beenden.'
+    'Start an outing. The app follows it until you end it, then shows its summary.',
+    'Começar um passeio. A aplicação acompanha-o até o terminares e depois mostra o resumo.',
+    'Einen Ausflug starten. Die App begleitet ihn, bis Sie ihn beenden, und zeigt dann die Zusammenfassung.'
   ),
   'map.a11y.stopRecording': s(
     'End this outing and see its summary',
@@ -1114,49 +1114,20 @@ export const STRINGS = {
     '{collected} de {total}',
     '{collected} von {total}'
   ),
-  // The tier names, short enough for a three-across control in Portuguese and
-  // German. ⚠ These are also what the screen reader says (review N4): there is
-  // no separate spoken name, because one that differs from the visible word
-  // cannot be matched to it (WCAG 2.5.3).
-  'settings.quality.short.saver': s('Saver', 'Poupança', 'Sparen'),
-  'settings.quality.short.balanced': s('Balanced', 'Equilibrado', 'Ausgewogen'),
-  'settings.quality.short.best': s('Precise', 'Preciso', 'Genau'),
-  // ⚠⚠ These three were **hardcoded English inside SettingsView** until
-  // 2026-08-28 — three paragraphs of prose passed as a prop, which is the blind
-  // spot `i18nCoverage.test.ts` documents and now covers. A Portuguese user was
-  // reading English in the one place the app explains what it costs them.
-  // ⚠ No percentages, by D-041: they say what each tier *does*, never what it
-  // spends, because no battery figure in this project has been measured.
+  // ⚠⚠ The recording copy was **hardcoded English inside SettingsView** until
+  // 2026-08-28, the blind spot `i18nCoverage.test.ts` documents and now covers.
   // 2026-09-25, after WalkNYC's Passive Capture: the switch, and one sentence
-  // under the tiers saying what automatic recording is for and what they cost.
+  // saying what automatic recording is for. (The tiers under it went with D-108.)
   'settings.background.toggle': s(
     'Record while the app is closed',
     'Registar com a aplicação fechada',
     'Aufzeichnen, wenn die App geschlossen ist'
   ),
-  // The sentence before the three tiers' own lines (2026-09-25, the project
-  // lead: "we need an explanation for each option, just like WalkNYC").
+  // What automatic recording is for (2026-09-25, after WalkNYC).
   'settings.recording.explain': s(
     'Collects your stamps in the background, so you do not have to press Start an outing every time.',
     'Recolhe os teus carimbos em segundo plano, sem teres de carregar em Começar passeio.',
     'Sammelt Ihre Stempel im Hintergrund, ohne dass Sie jedes Mal Ausflug starten drücken müssen.'
-  ),
-  // Each tier's line says what it does, spoken as the segment's hint; none
-  // quotes a battery figure, because none has been measured (D-041).
-  'settings.quality.detail.saver': s(
-    'Least battery. Places still count; the line on the map is rougher.',
-    'Menos bateria. Os lugares contam na mesma; a linha no mapa fica mais grosseira.',
-    'Wenigster Akku. Orte zählen trotzdem; die Linie auf der Karte ist gröber.'
-  ),
-  'settings.quality.detail.balanced': s(
-    'The usual choice. Enough detail to recognise your route, without following every step.',
-    'A escolha habitual. Detalhe suficiente para reconhecer o caminho, sem seguir cada passo.',
-    'Die übliche Wahl. Genug Detail, um Ihren Weg zu erkennen, ohne jedem Schritt zu folgen.'
-  ),
-  'settings.quality.detail.best': s(
-    'The most faithful line, and by far the most battery.',
-    'A linha mais fiel, e a que mais bateria gasta, de longe.',
-    'Die genaueste Linie, und mit Abstand der meiste Akku.'
   ),
   'settings.section.about': s('About', 'Sobre', 'Über'),
   'settings.about.footnote': s(
@@ -1398,11 +1369,13 @@ export const STRINGS = {
   ),
   // D-087 §5: the same ongoing notification while a walk is running. No timer:
   // expo-location's foreground-service options take a title and a body only.
+  // ⚠ D-108 (25 Oct 2026): no "in more detail" any more; an outing records the
+  // same way as the rest of the day.
   'notify.walk.title': s('Walk in progress', 'Passeio em curso', 'Spaziergang läuft'),
   'notify.walk.body': s(
-    '{app} is recording this walk in more detail until you end it.',
-    'O {app} está a registar este passeio com mais detalhe até o terminares.',
-    '{app} zeichnet diesen Spaziergang genauer auf, bis Sie ihn beenden.'
+    '{app} is recording this outing until you end it.',
+    'O {app} está a registar este passeio até o terminares.',
+    '{app} zeichnet diesen Ausflug auf, bis Sie ihn beenden.'
   ),
   'notify.recording.body': s(
     '{app} is noting where you have been.',

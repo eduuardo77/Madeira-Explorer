@@ -215,6 +215,14 @@ permission, L3 privacy contact.
       validator counts them and warns on a flag with no line. Seen on the P30: Furado plain, 25 Fontes
       labelled. 1,169 tests, smoke test passes. ⚠ `build-levadas.mjs` not rerun: Overpass at
       capacity; it draws courses, which this does not touch.
+- [x] **T-284** One way of recording (D-108). **Done 2026-10-25.** Poupança, Equilibrado and
+      Preciso removed: `trackingPreference.ts` keeps only the background switch, the Settings
+      picker and its strings are gone, the old `tracking_quality` row is never read.
+      *Começar passeio* no longer forces Preciso (`effectiveQuality` gone); it keeps
+      `effectiveProfile`, never stationary during an outing. The outing's notification and
+      screen-reader line no longer promise "more detail". Decided on measurement 3 of
+      `docs/recording-modes-proposal-2026-10-25.md`. 1,159 tests (the tier tests went with the
+      tiers).
 - [x] **T-282** The map's place card and pin in Bruma's own design (N12). **Done 2026-10-25,
       the lead's option 2** of five sketched rounds (`tools/preview-map-card-options.mjs`): the
       trophy's violet to black with its gold, and a gold pin for Google's red. The card is its own

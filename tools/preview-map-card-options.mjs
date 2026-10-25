@@ -181,8 +181,6 @@ const html = `<!doctype html>
   .who { color: #aaa; margin-bottom: 4px; }
   .sample.flat { opacity: .6; }
   td.old { color: #888; text-decoration: line-through; text-decoration-color: #555; }
-  .tail { position: absolute; left: 92px; bottom: -9px; width: 0; height: 0;
-          border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid; }
 </style></head><body>
 <h1>O cartão que abre no mapa, quinta ronda (N12)</h1>
 <p class="lead">As opções 1 e 2, com a frase de hoje tal como está, debaixo da etiqueta <i>Sabias?</i>. Sem a pega e sem a linha <i>Fechar</i>: uma cruz no canto

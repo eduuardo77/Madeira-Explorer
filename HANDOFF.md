@@ -17,7 +17,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   scrolls on short screens; seen on the P30, field build installed with `install -r`. **N12 open:**
   three options shown to the lead on 25 Oct (`tools/preview-map-card-options.mjs` over a P30 shot,
   `tools/out/map-card-options.png`): A passport card + blue ring pin, B the stamp as the pin, C gold
-  as the trophy. Waiting on their pick. ⚠ A custom pin needs a marker image: `expo-image` (native)
+  as the trophy. **25 Oct, round 2** (the lead: cards too big, add a *Did you know?*, keep the
+  blue and the gold pins): `tools/out/map-card-options-2.png`, three compact cards, 195 dp or one
+  80 dp row against 250 today. Waiting on their pick. ⚠ The curiosity is a sketch sentence from
+  memory (1566 corsairs at Praia Formosa), unchecked; the pack has no such field (D-017, D-064). ⚠ A custom pin needs a marker image: `expo-image` (native)
   or the expo-maps patch.
 - **23 Oct, N10 closed, not real (T-280):** the pan probe counted still moments as freezes (the
   wait for the next swipe, and a glide's last lone frame); `atrace` showed the map at rest in each.

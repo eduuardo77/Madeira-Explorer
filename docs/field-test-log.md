@@ -368,8 +368,9 @@ never where the lead lives.
   14 min. Driving up to 120 km/h was recorded. Stamps: Praia Formosa (on foot, 16 min) and Câmara de
   Lobos.
 - Also proven that day: *Guardar uma cópia* and *Restaurar* on the real trip (17,075 points).
-- **Not yet done:** a point by point comparison against the iPhone track, the way the 2026-10-06
-  ride was compared. Data: `Madeira-fieldwork/p30-2026-10-04/` (iPhone zip inside).
+- **Compared 25 Oct:** 97.9% of the route lit within 10 m (on foot 95.6%, by car 98.7%), and the
+  same with only Equilibrado's spacing kept (recording-modes proposal, measurement 3). Data:
+  `Madeira-fieldwork/p30-2026-10-04/` (iPhone zip inside).
 
 ### 2026-09-27: the phone's own speed tells rest from movement
 

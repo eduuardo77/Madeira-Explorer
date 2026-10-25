@@ -208,3 +208,29 @@ Why most of the 140 to 210 minutes at stops cannot be cut:
 mostly while moving, which is the product. With measurement 1 (Bruma about 1 to 1.3% an hour),
 neither the stop check (about 0.3 points a day) nor the step-down (under 1 point, only in battery
 saver) changes a tourist's day. Neither is worth building before the store and the field work.
+
+## Measurement 3: what Preciso adds over Equilibrado (25 Oct, desk)
+
+The two outings recorded in Preciso with the iPhone alongside, scored as recorded and again with
+only the fixes Equilibrado would have kept (on foot 30 s and 20 m apart, by car 15 s and 50 m;
+`tools/compare-sensorlogger.mjs --thin 30,20,15,50`). Route lit within 10 m:
+
+| | Fixes | All | On foot | By car |
+|---|---|---|---|---|
+| 4 Oct (promenade and roads, 24 km), as recorded | 1,199 | 97.9% | 95.6% (6.6 km) | 98.7% |
+| 4 Oct, Equilibrado's spacing | 247 | 97.9% | 95.6% | 98.7% |
+| 10 Oct (car and on foot, tunnels), as recorded | 888 | 95.6% | 84.3% (2.6 km) | 96.1% |
+| 10 Oct, Equilibrado's spacing | 212 | 95.0% | 82.2% | 95.6% |
+
+**The check moves where it should:** 4 Oct at a fix a minute gives 94.6%, at one every 3
+minutes 85.3%. So the flat first rows are the result, not a probe that did not run.
+
+**Four times the fixes buy 0 to 2 points**, invisible on the map: the matcher draws along the
+road between fixes, so past about one fix every 30 s there is little left to add. Equilibrado's
+weaker carried days (84 to 91%) are not a density problem either; Preciso would not have fixed
+them. Kind to Equilibrado in one way: every thinned fix was taken with the GPS already on, as it
+is in both modes while moving (D-106). Not covered: a levada under trees, where fixes drop out.
+
+**What it means: two modes are not worth it on this evidence.** A second mode would cost more
+battery (no pause at stops) for a difference nobody would see. One mode, by the lead's rule of
+25 Oct ("at least two if they can be worth it, otherwise one"); a levada walk can reopen it.

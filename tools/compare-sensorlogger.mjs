@@ -34,6 +34,7 @@ const { matchTrace } = await imp('app/src/matching/mapMatch.ts');
 const { visitedEdges, visitedLines, visitedLengthM } = await imp('app/src/matching/visitedRoads.ts');
 const { activitiesAt } = await imp('app/src/recording/activityTimeline.ts');
 const { parseSensorLoggerExport, summariseFixes } = await imp('tools/lib/sensorLogger.mjs');
+const { distanceM } = await imp('app/src/recording/distance.ts');
 
 const graph = decodeRoadGraph(JSON.parse(readFileSync(arg('--roads', `${root}/content/roads.json`), 'utf8')));
 const DAY_ISO = arg('--day');
@@ -55,7 +56,28 @@ const raw = db
   .all(DAY[0], DAY[1]);
 const events = db.prepare('SELECT ts, activity, transition FROM activity_event ORDER BY ts').all();
 const labels = activitiesAt(events, raw.map((f) => f.ts));
-const android = raw.map((f, i) => ({ ...f, activity: labels[i] }));
+const labelled = raw.map((f, i) => ({ ...f, activity: labels[i] }));
+// --thin walkS,walkM,carS,carM: keep only the fixes a sparser mode would have
+// been given (a fix once both the time and the distance since the last kept
+// one are reached; car spacing when the motion sensors say driving or the
+// receiver says over 7 m/s). Used 25 Oct 2026 to ask what Preciso adds over
+// Equilibrado on the same outing. Too kind to the sparser mode in one way
+// only: every fix was taken with the GPS already on, as it is in both modes
+// while moving since D-106.
+const THIN = arg('--thin', null)?.split(',').map(Number);
+const android = THIN === undefined || THIN === null ? labelled : (() => {
+  const [walkMs, walkM, carMs, carM] = [THIN[0] * 1000, THIN[1], THIN[2] * 1000, THIN[3]];
+  const kept = [];
+  for (const f of labelled) {
+    const last = kept[kept.length - 1];
+    if (!last) { kept.push(f); continue; }
+    const car = f.activity === 'driving' || (f.speed_mps ?? 0) > 7;
+    const [ms, m] = car ? [carMs, carM] : [walkMs, walkM];
+    if (f.ts - last.ts >= ms && distanceM(last, f) >= m) kept.push(f);
+  }
+  console.log(`thinned to ${THIN.join(',')}: ${kept.length} of ${labelled.length} fixes`);
+  return kept;
+})();
 const { chains } = matchTrace(graph, android);
 const visited = visitedEdges(graph, chains);
 const lines = visitedLines(graph, visited);
@@ -93,17 +115,18 @@ const resample = (poly, step) => {
 // "walked but not lit", and gave 81.8% for a ride that was 95.1%.
 const TRUTH_SPLIT_MS = 30_000;
 const truthRuns = [];
+const truthRunTs = [];
 const goodTs = [];
 let lastTs = -Infinity;
 for (const f of iphone) {
   if (f.accuracy_m !== null && f.accuracy_m > 20) continue;
   goodTs.push(f.ts);
   const p = xy(f.lat, f.lon);
-  if (f.ts - lastTs > TRUTH_SPLIT_MS) truthRuns.push([]);
+  if (f.ts - lastTs > TRUTH_SPLIT_MS) { truthRuns.push([]); truthRunTs.push([]); }
   lastTs = f.ts;
   const run = truthRuns[truthRuns.length - 1];
   const last = run[run.length - 1];
-  if (last === undefined || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 8) run.push(p);
+  if (last === undefined || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 8) { run.push(p); truthRunTs[truthRunTs.length - 1].push(f.ts); }
 }
 const truth = truthRuns.flat();
 const truthT = iphone.map((f) => f.ts);
@@ -153,6 +176,22 @@ const truthPts = truthRuns.flatMap((run) => resample(run, 5));
 const recallErr = truthPts.map((p) => Math.min(...litPolys.map((poly) => polyDist(p, poly))));
 console.log(`iPhone track vs LIT (${truthPts.length * 5} m walked):`);
 console.log(`  within 10 m ${pct(recallErr, 10)}%  15 m ${pct(recallErr, 15)}%  30 m ${pct(recallErr, 30)}%   median ${q(recallErr, 0.5).toFixed(1)} m`);
+// The same, on foot and by car: each 5 m piece takes the iPhone's speed over
+// the 8 m step it lies on, car above 3 m/s (11 km/h).
+const truthCar = truthRuns.flatMap((run, r) => {
+  const out = [];
+  for (let i = 1; i < run.length; i += 1) {
+    const [a, b] = [run[i - 1], run[i]];
+    const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 5));
+    const speed = Math.hypot(b[0] - a[0], b[1] - a[1]) / Math.max(1, (truthRunTs[r][i] - truthRunTs[r][i - 1]) / 1000);
+    for (let k = 0; k < n; k += 1) out.push(speed > 3);
+  }
+  return out;
+});
+for (const [name, car] of [['on foot', false], ['by car', true]]) {
+  const e = recallErr.filter((_, i) => truthCar[i] === car);
+  if (e.length) console.log(`  ${name}: ${e.length * 5} m, within 10 m ${pct(e, 10)}%  30 m ${pct(e, 30)}%`);
+}
 
 // The Android receiver against the iPhone at the same instant.
 const at = (ts) => {

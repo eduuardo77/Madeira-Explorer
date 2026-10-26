@@ -2403,8 +2403,11 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         and the paywall line wait for at least one, and the island medal for three.
         **Places added 2026-10-26** (`docs/curation-draft-porto-santo.md`, all eight kept plus
         Pico Branco e Terra Chã): 9 places, the beach with five circles, the island medal
-        `region-porto-santo`. Next on the P30: the card, the page, Back; and on Porto Santo
-        itself, one free stamp and the rest padlocked.
+        `region-porto-santo`. **Seen on the P30 the same day** (field build, `install -r`, data
+        kept): the card under the number (*Porto Santo, 0 de 9 lugares*), Madeira still 26 / 81,
+        the island page (0 / 9, *Falta 1 carimbo grátis*), and both Backs return to Madeira's
+        passport. ⚠ Shots came out white once: the screen had gone to sleep, not a bug.
+        **Still needs Porto Santo itself:** one free stamp, the rest padlocked, the medal.
       — **Built 2026-10-26, unit tested only (1,181 tests).** The lead answered D-107's four points
         (all as recommended): the island opens on arrival **for everyone**, stamps padlocked for a
         free user; roads free; never in the free five; the paywall names it only after arrival.

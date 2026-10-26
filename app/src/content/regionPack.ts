@@ -42,6 +42,11 @@ export type Region = {
    */
   islandId: string | null;
   /**
+   * The island's display name, `"Porto Santo"`, for the paywall line D-107
+   * adds once the user has been there. Null when the file does not say.
+   */
+  islandName: string | null;
+  /**
    * The municipality's shape, `[lon, lat]` around its largest polygon, for its
    * medal (T-235): the main body, not an islet. Null when the file has no
    * usable geometry, which costs the medal its picture and nothing else.
@@ -92,7 +97,7 @@ export function parseRegionPack(raw: unknown): ParsedRegionPack {
       return;
     }
 
-    const { id, name, islandId } = properties as Record<string, unknown>;
+    const { id, name, islandId, islandName } = properties as Record<string, unknown>;
     const geometry = (feature as { geometry?: unknown } | null)?.geometry;
 
     if (typeof id !== 'string' || id.length === 0) {
@@ -116,6 +121,7 @@ export function parseRegionPack(raw: unknown): ParsedRegionPack {
       id,
       name,
       islandId: typeof islandId === 'string' && islandId.length > 0 ? islandId : null,
+      islandName: typeof islandName === 'string' && islandName.length > 0 ? islandName : null,
       outline: largestRing(geometry),
     });
   });

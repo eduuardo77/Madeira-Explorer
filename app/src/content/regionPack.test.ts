@@ -24,6 +24,7 @@ function feature(properties: Record<string, unknown> = {}): unknown {
       id: 'machico',
       name: 'Machico',
       islandId: 'ilha-da-madeira',
+      islandName: 'Madeira',
       ...properties,
     },
     // Nonsense on purpose: since T-235 the outline is read, and a geometry the
@@ -40,7 +41,7 @@ test('a region becomes an id, a name and an island', () => {
   const { regions, problems } = parseRegionPack(collection([feature()]));
   assert.deepEqual(problems, []);
   assert.deepEqual(regions, [
-    { id: 'machico', name: 'Machico', islandId: 'ilha-da-madeira', outline: null },
+    { id: 'machico', name: 'Machico', islandId: 'ilha-da-madeira', islandName: 'Madeira', outline: null },
   ]);
 });
 

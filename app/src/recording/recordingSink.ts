@@ -36,6 +36,7 @@ import {
   unstoredFixes,
 } from './recordingAdmission';
 import { checkTripEnd } from '../progress/tripEndDetection';
+import { noteFixes } from '../progress/islandGateStore';
 import * as activityEventDao from '../storage/dao/activityEventDao';
 import * as geofenceEventDao from '../storage/dao/geofenceEventDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -238,6 +239,10 @@ export const databaseSink: RecordingSink = {
           // two, we would rather have the trace without the barometer than the
           // other way round.
           const inserted = await rawFixDao.insertFixes(rows);
+
+          // T-067a: the hidden island's arrival, from the fixes just stored.
+          // After the insert, and it never throws: the fixes are safe first.
+          await noteFixes(fresh);
 
           // ⚠ `captureSensorsFor(trip.id, trip.started_ts, samples.at(-1).ts)`
           // used to run here and does not in v1 (D-050). Nothing in v1 reads the

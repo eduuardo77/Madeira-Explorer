@@ -25,6 +25,9 @@
  *   favoured five places, and it never asks the user to nominate five out of
  *   their own holiday; being asked which memories to keep is a worse screen
  *   than a paywall. So the free five are simply the first five earned.
+ * - **A stamp on a hidden island is paid only** (D-107 point 3): it neither
+ *   fills nor uses up a free slot, and the levada guarantee skips it. The
+ *   caller passes those place ids (`islandGate.paidOnlyPlaceIds`).
  * - **The first levada stamp is always shown, in addition to the five**,
  *   whenever it is earned, even if it arrives at 5/5. So the free tier is at
  *   most **six** visible stamps, one of them guaranteed to be a levada.
@@ -82,6 +85,16 @@ export type StampVisibility = {
   earnedCount: number;
 };
 
+const NONE: ReadonlySet<string> = new Set();
+
+/** How many earned stamps may count toward the free five (D-107 point 3). */
+export function freeEligibleCount(
+  earned: readonly EarnedStamp[],
+  paidOnly: ReadonlySet<string> = NONE
+): number {
+  return earned.filter((stamp) => !paidOnly.has(stamp.placeId)).length;
+}
+
 /**
  * Earliest first, ties broken by id.
  *
@@ -106,7 +119,8 @@ function inEarnedOrder(earned: readonly EarnedStamp[]): EarnedStamp[] {
  */
 export function visibleStamps(
   earned: readonly EarnedStamp[],
-  unlocked: boolean
+  unlocked: boolean,
+  paidOnly: ReadonlySet<string> = NONE
 ): StampVisibility {
   const ordered = inEarnedOrder(earned);
   const earnedCount = ordered.length;
@@ -115,8 +129,9 @@ export function visibleStamps(
     return { visible: ordered.map((stamp) => stamp.placeId), locked: [], earnedCount };
   }
 
-  const free = ordered.slice(0, FREE_STAMP_ALLOWANCE);
-  const beyond = ordered.slice(FREE_STAMP_ALLOWANCE);
+  const eligible = ordered.filter((stamp) => !paidOnly.has(stamp.placeId));
+  const free = eligible.slice(0, FREE_STAMP_ALLOWANCE);
+  const beyond = eligible.slice(FREE_STAMP_ALLOWANCE);
 
   const shown = new Set(free.map((stamp) => stamp.placeId));
 
@@ -160,9 +175,13 @@ export const OFFER_AT_STAMPS: readonly number[] = [3, FREE_STAMP_ALLOWANCE];
 export function offerWithStamp(
   placeId: string,
   earned: readonly EarnedStamp[],
-  unlocked: boolean
+  unlocked: boolean,
+  paidOnly: ReadonlySet<string> = NONE
 ): number | null {
-  if (unlocked) return null;
-  const ordinal = inEarnedOrder(earned).findIndex((stamp) => stamp.placeId === placeId) + 1;
+  if (unlocked || paidOnly.has(placeId)) return null;
+  const ordinal =
+    inEarnedOrder(earned)
+      .filter((stamp) => !paidOnly.has(stamp.placeId))
+      .findIndex((stamp) => stamp.placeId === placeId) + 1;
   return OFFER_AT_STAMPS.includes(ordinal) ? freeStampsLeft(ordinal) : null;
 }

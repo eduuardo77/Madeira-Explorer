@@ -466,6 +466,17 @@ test('T-233: a founder window with a typo is reported and dropped, never half re
   }
 });
 
+test('T-067a: hiddenIslands lists island ids; absent hides nothing; nonsense is reported and dropped', () => {
+  assert.deepEqual(parseContentPack({ formatVersion: 1, places: [] }).pack.hiddenIslands, []);
+  const set = parseContentPack({ formatVersion: 1, hiddenIslands: ['porto-santo', 'porto-santo'], places: [] });
+  assert.deepEqual(set.pack.hiddenIslands, ['porto-santo']);
+  assert.deepEqual(set.problems, []);
+  const bad = parseContentPack({ formatVersion: 1, hiddenIslands: ['ok', '', 7], places: [] });
+  assert.deepEqual(bad.pack.hiddenIslands, ['ok']);
+  assert.equal(bad.problems.filter((problem) => problem.where.startsWith('hiddenIslands')).length, 2);
+  assert.deepEqual(parseContentPack({ formatVersion: 1, hiddenIslands: 'porto-santo', places: [] }).pack.hiddenIslands, []);
+});
+
 test('review H: an official walk is read as published', () => {
   const walk = { route: 'PR6', km: 4.3, returnKm: 8.6, minutes: 180, difficulty: 'moderate' };
   const { pack: parsed, problems } = parseContentPack(pack([placeRow({ walk })]));

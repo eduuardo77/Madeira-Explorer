@@ -14,6 +14,7 @@ const region = (id: string, islandId: string | null, outline: Array<[number, num
   id,
   name: id,
   islandId,
+  islandName: islandId,
   outline,
 });
 

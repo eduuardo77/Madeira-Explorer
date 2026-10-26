@@ -73,6 +73,12 @@ test('⚠ it never offers what the app does not have yet', () => {
   assert.match(full, /founder/i);
 });
 
+test('D-107 point 4: a hidden island is named only once the user has been there', () => {
+  assert.doesNotMatch(unlockSheetModel(input()).adds.join(' '), /Every stamp on/);
+  const after = unlockSheetModel(input({ offers: { medals: false, founder: false, islands: ['Porto Santo'] } }));
+  assert.equal(after.adds[1], 'Every stamp on Porto Santo');
+});
+
 test('every list says it is one payment and no subscription', () => {
   assert.ok(unlockSheetModel(input()).adds.some((line) => /One payment\. No subscription\./.test(line)));
 });

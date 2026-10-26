@@ -108,6 +108,7 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { representativeGeofence } from './placeMarkers';
+import { getPaidOnlyPlaceIds } from '../progress/islandGateStore';
 import { PLACE_PIN_PNG_BASE64 } from './placePinPng';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
@@ -508,7 +509,8 @@ export default function NativeMapScreen({
             awards.map((award) => ({ placeId: award.place_id, awardedTs: award.awarded_ts })),
             pack.places,
             await isUnlocked(),
-            t('passport.title')
+            t('passport.title'),
+            getPaidOnlyPlaceIds()
           );
           if (!cancelled) {
             setPassportStamp(nextStamp);

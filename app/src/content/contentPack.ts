@@ -182,6 +182,12 @@ export type ContentPack = {
    * (`entitlement/founder.ts` has the rule).
    */
   founderWindow: FounderWindow | null;
+  /**
+   * Islands hidden until the user has been there (D-024, T-067a), by the
+   * `islandId` of `content/regions.json`. Empty when the pack hides nothing.
+   * Since D-107 their stamps are also paid only, never one of the free five.
+   */
+  hiddenIslands: string[];
   places: Place[];
   /** Optional: a pack with none simply never ends a trip by airport. */
   departurePoints: DeparturePoint[];
@@ -282,6 +288,7 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
       destination: parseDestination(root.destination, problems),
       productId: parseProductId(root.productId, problems),
       founderWindow: parseFounderWindow(root.founderWindow, problems),
+      hiddenIslands: parseHiddenIslands(root.hiddenIslands, problems),
       places,
       departurePoints,
     },
@@ -312,6 +319,30 @@ function parseDestination(
     return null;
   }
   return raw.trim();
+}
+
+/**
+ * `hiddenIslands`: island ids, as `regions.json` spells them. Absent hides
+ * nothing. A wrong entry is reported and dropped, which shows that island
+ * rather than hiding it: a visible island is a smaller mistake than a missing one.
+ */
+function parseHiddenIslands(raw: unknown, problems: ContentProblem[]): string[] {
+  if (raw === undefined || raw === null) {
+    return [];
+  }
+  if (!Array.isArray(raw)) {
+    problems.push({ where: 'hiddenIslands', problem: 'must be an array of island ids' });
+    return [];
+  }
+  const ids: string[] = [];
+  raw.forEach((id, index) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+      problems.push({ where: `hiddenIslands[${index}]`, problem: 'must be a non-empty string' });
+    } else if (!ids.includes(id.trim())) {
+      ids.push(id.trim());
+    }
+  });
+  return ids;
 }
 
 /** Play's rule for a product ID: a lowercase letter or digit, then those, `_` or `.`. */

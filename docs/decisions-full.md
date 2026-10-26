@@ -763,7 +763,7 @@ measured early in Phase 4 rather than assumed.**
 
 ## D-024 — Porto Santo stays hidden until the user goes there.
 
-⚠ **Amended by D-107 (2026-10-22): Porto Santo is part of the paid passport.** The gate below stands; what a free user sees there is open in D-107.
+⚠ **Amended by D-107 (2026-10-22, answered 26 Oct): Porto Santo is part of the paid passport.** The gate below stands and opens on arrival for everyone; its stamps are paid and never in the free five (D-107).
 
 **Status:** Accepted — proposed by the project lead 2026-08-06
 
@@ -5778,15 +5778,28 @@ pitch for an island that 90% of visitors never visit (D-024's own figure).
 **Unchanged for everyone, paid or not (D-021):** recording works on Porto Santo, the ferry and the
 flight keep the trip open, and the sea is never credited as a road.
 
-**Open, not chosen yet (ask the lead before T-067a is built):**
-- **A free user who lands on Porto Santo.** Should the island stay hidden, or should it open
-  with its stamps locked (D-075) so that the arrival itself sells the unlock?
-- **The roads walked there by a free user.** D-089 says the map of where you have been is free
-  and unlimited. If so, Porto Santo's roads light up for free users and only its stamps are paid.
-- **The free five.** Can a Porto Santo stamp count as one of the five free stamps, or is every
-  stamp there paid?
-- **Paywall copy.** It says "all of Madeira". Should it name Porto Santo, given the island is
-  meant to be a surprise (D-024)?
+**The four open points, answered 2026-10-26** by the project lead, each the recommended option
+(T-067a was built on them):
+1. **A free user who lands on Porto Santo: it opens, with its stamps locked** (D-075). Hiding the
+   island the user is standing on would be the app denying where they are, and the arrival itself
+   sells the unlock. So the gate (D-024) keys on *been there* alone; payment decides only whether
+   the island's stamps are drawn or padlocked.
+2. **Their roads there light up for free.** D-089 rule 1 holds everywhere: the map of where you
+   have been is free and unlimited. Only stamps are paid.
+3. **No Porto Santo stamp is one of the free five.** Every stamp on a hidden-until-visited island
+   is paid: it neither uses up nor fills a free slot, and the levada guarantee skips it too.
+4. **The paywall names Porto Santo only after arrival.** On Madeira it lists what it always did,
+   so the surprise holds; once the user has been there, it adds a line for the island's stamps.
+   The name comes from `content/regions.json` (`islandName`), never from `app/` (D-017).
+
+**How the gate is built (T-067a).** Which island is hidden is content: `hiddenIslands` in
+`content/pois.json`. Arrival is a recorded fix (accuracy 100 m or better) inside that island's
+outline from `content/regions.json`, checked as each batch is stored and once over the fixes
+already stored. That is the island-level geofence: a polygon test on the recorder's own fixes
+rather than an OS geofence circle, because an OS circle around the island is mostly sea, takes a
+slot from the places' monitored set (`geofenceSelection`), and fires only while monitoring is
+armed; the recorder is already running on any trip there (D-021). The flag is permanent: the
+same `porto_santo_unlocked` row in `app_state`, holding the visited island ids.
 
 ## D-108 — One way of recording; *Começar passeio* records the same way
 

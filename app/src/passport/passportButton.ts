@@ -59,7 +59,9 @@ export function buttonStamp(
   awards: readonly { placeId: string; awardedTs: number }[],
   places: readonly { id: string; name: string; category: Category }[],
   unlocked: boolean,
-  placeholderName: string
+  placeholderName: string,
+  /** Hidden-island stamps, never free (D-107 point 3). */
+  paidOnly: ReadonlySet<string> = new Set()
 ): ButtonStamp {
   const byId = new Map(places.map((place) => [place.id, place]));
 
@@ -72,7 +74,7 @@ export function buttonStamp(
       : [{ placeId: award.placeId, category: place.category, awardedTs: award.awardedTs }];
   });
 
-  const { visible } = visibleStamps(earned, unlocked);
+  const { visible } = visibleStamps(earned, unlocked, paidOnly);
   // Earliest first, so the latest is the last.
   const latest = visible.length === 0 ? undefined : byId.get(visible[visible.length - 1]);
 

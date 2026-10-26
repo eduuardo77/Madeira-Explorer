@@ -830,6 +830,13 @@ export const STRINGS = {
     'Todos os carimbos, nesta e nas próximas visitas',
     'Alle Stempel, jetzt und bei jedem Besuch, für immer'
   ),
+  // D-107 point 4: only once the user has been to a hidden island, named from
+  // content (D-017). Never shown before, so the island stays a surprise.
+  'unlock.adds.island': s(
+    'Every stamp on {island}',
+    'Todos os carimbos de {island}',
+    'Alle Stempel auf {island}'
+  ),
   'unlock.adds.medals': s(
     'A medal for each set you complete',
     'Uma medalha por cada conjunto que completares',

@@ -58,6 +58,8 @@ export type RecordingEventKind =
   | 'backup'
   /** The trip was detected as over, and by which signal (T-099, D-012). */
   | 'trip_end'
+  /** A hidden island opened, and from which fixes (T-067a, D-024). */
+  | 'island'
   /**
    * An outing started or ended, a pause, or a restart from the silence notice
    * (D-087, T-198). ⚠ Its own kind, **not** `start`/`stop`: `recorderSilence`

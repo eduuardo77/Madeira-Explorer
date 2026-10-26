@@ -12,7 +12,12 @@ import { getDatabase } from '../database';
  * name is otherwise a silent "setting did not stick" bug.
  */
 export const AppStateKey = {
-  /** Set once the user has actually been to Porto Santo. Permanent (D-024). */
+  /**
+   * The hidden islands the user has been to, a JSON array of island ids
+   * (T-067a, D-024). Permanent: added to, never cleared but by erase-all. The
+   * key's name predates the gate and stays, since renaming a stored key loses it;
+   * which island is hidden is content (`hiddenIslands`), not this name.
+   */
   PortoSantoUnlocked: 'porto_santo_unlocked',
   /** Timestamp of the day-1 health check notification, so it fires once (T-049). */
   HealthCheckSentTs: 'health_check_sent_ts',

@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import type { Category } from '../content/contentPack.ts';
 import {
   FREE_STAMP_ALLOWANCE,
+  freeEligibleCount,
   freeStampsLeft,
   GUARANTEED_CATEGORY,
   offerWithStamp,
@@ -30,6 +31,37 @@ function earned(n: number, category: Category = 'viewpoint', from = 0): EarnedSt
     awardedTs: (from + i) * HOUR,
   }));
 }
+
+test('D-107: a hidden-island stamp never fills a free slot, and is locked until paid', () => {
+  // The island's stamp is earned second; the free five are still five others.
+  const island: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 1.5 * HOUR };
+  const all = [...earned(6), island];
+  const paidOnly = new Set(['island-beach']);
+  const result = visibleStamps(all, false, paidOnly);
+  assert.deepEqual(result.visible, ['viewpoint-0', 'viewpoint-1', 'viewpoint-2', 'viewpoint-3', 'viewpoint-4']);
+  assert.deepEqual(result.locked, ['island-beach', 'viewpoint-5']);
+  assert.equal(result.earnedCount, 7, 'still counted as earned');
+  assert.equal(freeEligibleCount(all, paidOnly), 6);
+  // Without the set, it would have taken the second free slot: the check moves.
+  assert.ok(visibleStamps(all, false).visible.includes('island-beach'));
+  // Paid: shown like any other.
+  assert.ok(visibleStamps(all, true, paidOnly).visible.includes('island-beach'));
+});
+
+test('D-107: the levada guarantee skips a hidden-island levada', () => {
+  const islandLevada: EarnedStamp = { placeId: 'island-levada', category: 'levada', awardedTs: 10 * HOUR };
+  const result = visibleStamps([...earned(5), islandLevada], false, new Set(['island-levada']));
+  assert.deepEqual(result.locked, ['island-levada']);
+});
+
+test('D-107: a hidden-island stamp brings no offer and does not move the ordinals', () => {
+  const island: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 0.5 * HOUR };
+  const all = [...earned(5), island];
+  const paidOnly = new Set(['island-beach']);
+  assert.equal(offerWithStamp('island-beach', all, false, paidOnly), null);
+  // viewpoint-2 is the third free-eligible stamp, though fourth earned.
+  assert.equal(offerWithStamp('viewpoint-2', all, false, paidOnly), freeStampsLeft(3));
+});
 
 test('everything is visible once the passport is unlocked', () => {
   const result = visibleStamps(earned(37), true);

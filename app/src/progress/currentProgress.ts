@@ -11,26 +11,20 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { TripProgress } from './tripProgress';
 import { computeTripProgress } from './tripProgress';
+import { getLockedRegionIds as lockedFromGate } from './islandGateStore';
 
 /**
- * Which regions are hidden from the user right now.
+ * Which regions are hidden from the user right now: those on a hidden island
+ * (`hiddenIslands` in the content pack) the user has not been to (T-067a,
+ * D-024). One function feeds trip progress, the medals and the stamp tiers, so
+ * a locked region leaves both halves of every count.
  *
- * ⚠ **Empty, and correctly so — for now.** D-024 hides Porto Santo until the
- * user goes there, and D-021 defers curating any Porto Santo places at all, so
- * today there is nothing to hide. The set is threaded through anyway rather
- * than hardcoded to empty inside the arithmetic, because the moment a locked
- * region does exist the denominator must already be built to exclude it —
- * HANDOFF is explicit that getting this wrong breaks the headline number in
- * exactly the way D-024 exists to prevent.
- *
- * **T-067a fills this in**, from an island-level geofence and the permanent
- * unlock flag already reserved in `app_state`. Since D-107 the island opens
- * only for paid users, so "been there" alone is not enough: the purchase
- * (`entitlementStore.isUnlocked()`) gates it too. This one function feeds trip
- * progress, the medals and the stamp tiers, so filling it locks all three.
+ * ⚠ **Been there alone opens it, paid or not** (D-107, answered 26 Oct 2026):
+ * a free user sees the island with its stamps padlocked. Payment is
+ * `freeTier.ts`'s business, through `getPaidOnlyPlaceIds`.
  */
 export async function getLockedRegionIds(): Promise<Set<string>> {
-  return new Set();
+  return lockedFromGate();
 }
 
 const EMPTY: TripProgress = {

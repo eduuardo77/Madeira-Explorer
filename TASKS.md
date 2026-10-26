@@ -2394,6 +2394,24 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         hold, or whatever the answers to D-107 make of the free user's case. Unchanged for
         everyone: recording works there and the trip stays open across the ferry (D-021).
         Places for Porto Santo come after the gate, by draft-and-veto (D-064), as their own task.
+      — **Built 2026-10-26, unit tested only (1,181 tests).** The lead answered D-107's four points
+        (all as recommended): the island opens on arrival **for everyone**, stamps padlocked for a
+        free user; roads free; never in the free five; the paywall names it only after arrival.
+        So the gate keys on *been there* alone, and payment stays in `freeTier.ts`.
+        Pure `progress/islandGate.ts` (+ test, including the shipped content: Porto Santo's airport
+        is inside the outline, Madeira's is not), impure `progress/islandGateStore.ts`. Which island
+        is hidden is content: `hiddenIslands` in `pois.json`, checked by `validate-content.mjs`.
+        Arrival is a stored fix of 100 m or better inside the island's outline, checked by
+        `recordingSink` after each insert and once per process over every stored fix (diary kind
+        `island`). The flag is the reserved `porto_santo_unlocked` row, now a JSON array of island
+        ids. Hidden while locked: passport stamps, trophy suggestions, region rows, medals, the
+        unlock sheet's showcase, onboarding's count and stamp fan. The map draws no place marks
+        since 2026-10-04, so it needed nothing. `freeTier` takes a `paidOnly` set; the unlock sheet
+        adds *Every stamp on {island}* once visited.
+        ⚠ **Not done:** the camera's zoom floor still fits both islands (`mapFence`), against
+        D-024's *Madeira-only until unlocked*; Google's base map shows Porto Santo regardless, so
+        it was left for the lead's eye. **Needs:** an emulator pass (`adb emu geo fix` on the
+        island, diary line and `app_state` row), then the P30 on a real trip there.
 - [x] **T-068a** **Coverage crediting and the second detector, 2026-08-16 (D-065).** A levada is
       credited by how much of its drawn course was walked — **60% of it, or 3 km, whichever comes
       first** — and every other place gains a **second, independent detector** that reads the raw

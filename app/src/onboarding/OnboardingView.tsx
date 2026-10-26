@@ -33,6 +33,7 @@ import { batterySentence } from './permissionPolicy';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import type { SystemAsk } from './systemAsk';
 import { getContentPack } from '../content/poiCatalogue';
+import { visiblePlacesNow } from '../progress/islandGateStore';
 import { getRegions } from '../content/regionCatalogue';
 import Svg, { G, Path } from 'react-native-svg';
 import { silhouettePaths } from './islandSilhouette';
@@ -93,7 +94,8 @@ function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
           // The pack's own facts (D-017): never the island's name in app/.
           t('onboarding.welcome.body1', {
             destination: getContentPack().destination ?? t('share.fallbackTitle'),
-            count: getContentPack().places.length,
+            // T-067a: a hidden island's places are not promised before it opens.
+            count: visiblePlacesNow().length,
           }),
           t('onboarding.welcome.body2'),
         ],
@@ -239,7 +241,7 @@ const ART_CHROME = spacing.sm * 2 + spacing.sm;
 const FAN_STAMP = 118;
 
 function StampFan() {
-  const stamps = useMemo(() => welcomeStamps(getContentPack().places), []);
+  const stamps = useMemo(() => welcomeStamps(visiblePlacesNow()), []);
   const tilt = ['-11deg', '0deg', '11deg'];
   const shift = [-78, 0, 78];
   return (

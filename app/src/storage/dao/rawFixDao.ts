@@ -185,6 +185,28 @@ export async function getFixPositionsBetween(
   );
 }
 
+/**
+ * Every stored fix inside a box, across every trip, no vaguer than
+ * `maxAccuracyM`: the hidden island's catch-up check (T-067a). A full scan, run
+ * at most once per process and only while an island is still hidden.
+ */
+export async function getFixesInBox(
+  box: { west: number; south: number; east: number; north: number },
+  maxAccuracyM: number
+): Promise<{ lat: number; lon: number; accuracyM: number }[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<{ lat: number; lon: number; accuracyM: number }>(
+    `SELECT lat, lon, accuracy_m AS accuracyM FROM raw_fix
+      WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
+        AND accuracy_m IS NOT NULL AND accuracy_m <= ?;`,
+    box.south,
+    box.north,
+    box.west,
+    box.east,
+    maxAccuracyM
+  );
+}
+
 export async function getRecentFixes(
   tripId: number,
   limit: number

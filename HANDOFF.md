@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **26 Oct, the Porto Santo gate (T-067a, D-107 answered):** built and unit tested, not run on a
+  phone. The island opens on arrival for everyone (a recorded fix inside its outline), stamps
+  padlocked until paid and never in the free five; the paywall names it only after arrival.
+  Which island hides is `hiddenIslands` in `pois.json`. Open: the zoom floor still fits both
+  islands; emulator pass and a real trip on the P30 (T-067a in TASKS).
 - **25 Oct, later (T-285, D-108 amended):** an outing stays awake for its first 10 minutes only,
   then sleeps at stops like automatic recording; the motion wake is now armed by an outing too.
   Unit tested only. **Needs the lead outdoors:** an outing with automatic off, a stop over

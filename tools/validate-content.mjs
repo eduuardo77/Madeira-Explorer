@@ -118,7 +118,7 @@ async function readRegions() {
   }
 
   return (raw.features ?? []).flatMap((feature) => {
-    const { id, name } = feature?.properties ?? {};
+    const { id, name, islandId } = feature?.properties ?? {};
     const geometry = feature?.geometry;
     if (typeof id !== 'string' || typeof name !== 'string') {
       return [];
@@ -130,7 +130,7 @@ async function readRegions() {
         : geometry?.type === 'MultiPolygon'
           ? geometry.coordinates
           : [];
-    return polygons.length === 0 ? [] : [{ id, name, polygons }];
+    return polygons.length === 0 ? [] : [{ id, name, islandId, polygons }];
   });
 }
 
@@ -388,6 +388,14 @@ async function main() {
   // build — not that somebody made a judgement call.
   const regions = await readRegions();
   const regionNames = new Map(regions.map((region) => [region.id, region.name]));
+
+  // A hidden island (D-024, T-067a) must be one regions.json knows, or the
+  // gate has nothing to hide and nothing to detect arrival on.
+  for (const islandId of parsed.pack.hiddenIslands) {
+    if (regions.length > 0 && !regions.some((region) => region.islandId === islandId)) {
+      error('hiddenIslands', `"${islandId}" is no region's islandId in regions.json`);
+    }
+  }
 
   for (const place of places) {
     if (regions.length === 0) {

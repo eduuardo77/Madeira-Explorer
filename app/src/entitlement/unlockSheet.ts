@@ -51,7 +51,15 @@ export interface UnlockSheetInput {
   /** How many earned stamps are locked: the headline's count (D-097, sheet A). */
   waiting: number;
   /** What paying adds beyond the stamps, once each exists. */
-  offers: { medals: boolean; founder: boolean };
+  offers: {
+    medals: boolean;
+    founder: boolean;
+    /**
+     * Hidden islands the user has been to, by name (D-107 point 4). Empty
+     * until then, so the sheet never names an island the user has not seen.
+     */
+    islands?: readonly string[];
+  };
   language: Language;
 }
 
@@ -74,6 +82,7 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     translate(STRINGS[key], language, values);
 
   const adds = [say('unlock.adds.stamps')];
+  for (const island of input.offers.islands ?? []) adds.push(say('unlock.adds.island', { island }));
   if (input.offers.medals) adds.push(say('unlock.adds.medals'));
   if (input.offers.founder) adds.push(say('unlock.adds.founder'));
   adds.push(say('unlock.adds.once'));

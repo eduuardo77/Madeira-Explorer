@@ -29,6 +29,7 @@ import { getMedals } from '../content/medalCatalogue';
 import { medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import type { SetMedalWords } from '../passport/medalArt';
 import { getLockedRegionIds } from './currentProgress';
+import { getPaidOnlyPlaceIds } from './islandGateStore';
 import { medalProgress, medalsCompletedBy } from './medals';
 import { parseTold, stampNews } from './stampNews';
 
@@ -96,7 +97,7 @@ export async function earnedStamps(): Promise<{ earned: Earned[]; locked: Set<st
       });
     }
   }
-  const { locked } = visibleStamps(earned, await isUnlocked());
+  const { locked } = visibleStamps(earned, await isUnlocked(), getPaidOnlyPlaceIds());
   return { earned, locked: new Set(locked) };
 }
 
@@ -187,7 +188,7 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
               celebration: celebrationFor(placeId, stamps.earned, places.length, categoryTotals),
               othersWaiting: stamps.locked.size - (locked ? 1 : 0),
               medals: completedBy(placeId),
-              freeLeft: locked ? null : offerWithStamp(placeId, stamps.earned, unlocked),
+              freeLeft: locked ? null : offerWithStamp(placeId, stamps.earned, unlocked, getPaidOnlyPlaceIds()),
             },
           ];
     });

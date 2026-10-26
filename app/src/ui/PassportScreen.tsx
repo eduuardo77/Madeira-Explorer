@@ -21,7 +21,7 @@ import { buildPlaceCard } from '../places/placeCard';
 import { cardPosition } from '../places/cardPosition';
 import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitlementStore';
 import { founderYear, isFounder } from '../entitlement/founder';
-import { freeStampsLeft, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
+import { freeEligibleCount, freeStampsLeft, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass, type AwardPassResult } from '../progress/stampAwards';
 import {
@@ -54,6 +54,7 @@ import PassportView, {
 } from './PassportView';
 import { medalProgress, type MedalProgress } from '../progress/medals';
 import { getLockedRegionIds } from '../progress/currentProgress';
+import { getPaidOnlyPlaceIds, visiblePlacesNow } from '../progress/islandGateStore';
 import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
@@ -288,8 +289,12 @@ export default function PassportScreen({
       // makes "buy in month three, receive months one and two" true, and
       // `freeTier.test.ts` fails the build if the recorder ever learns
       // otherwise.
-      const locked = new Set(visibleStamps(earnedStamps(nextAwards), unlocked).locked);
-      const nextFreeLeft = unlocked ? null : freeStampsLeft(earnedStamps(nextAwards).length);
+      // D-107 point 3: a hidden island's stamps are paid only, never free.
+      const paidOnly = getPaidOnlyPlaceIds();
+      const locked = new Set(visibleStamps(earnedStamps(nextAwards), unlocked, paidOnly).locked);
+      const nextFreeLeft = unlocked
+        ? null
+        : freeStampsLeft(freeEligibleCount(earnedStamps(nextAwards), paidOnly));
 
       const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
       // T-235: every award of the trip, locked stamps included (D-075): a
@@ -586,7 +591,7 @@ export default function PassportScreen({
         // can be the stamp that claims D-072's guaranteed exemption and
         // un-locks nothing else. Patching the previous set would miss that.
         const locked = new Set(
-          visibleStamps(earnedStamps(nextAwards), await isUnlocked()).locked
+          visibleStamps(earnedStamps(nextAwards), await isUnlocked(), getPaidOnlyPlaceIds()).locked
         );
         setConfirmation(null);
         setAwards(nextAwards);
@@ -876,7 +881,9 @@ function resolveStamps(
   awarded: Set<string>,
   locked: Set<string>
 ): PassportStamp[] {
-  return getContentPack().places.map((place) => ({
+  // T-067a: a hidden island's places are not in the passport until the user
+  // has been there. The gate was read just before (`getCurrentProgress`).
+  return visiblePlacesNow().map((place) => ({
     placeId: place.id,
     name: place.name,
     category: place.category,
@@ -927,7 +934,8 @@ type TrophyView = {
 };
 
 function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], language: Language): TrophyView {
-  const places = getContentPack().places;
+  // Never suggests a place on an island still hidden (T-067a).
+  const places = visiblePlacesNow();
   // The trip's stamps in the order they were earned.
   const order = [...awards].sort((a, b) => a.awarded_ts - b.awarded_ts).map((award) => award.place_id);
   const facts = trophyFacts(place.id, places, order, getMedals());

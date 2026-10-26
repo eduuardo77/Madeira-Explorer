@@ -2426,6 +2426,20 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         D-024's *Madeira-only until unlocked*; Google's base map shows Porto Santo regardless, so
         it was left for the lead's eye. **Needs:** an emulator pass (`adb emu geo fix` on the
         island, diary line and `app_state` row), then the P30 on a real trip there.
+      — **Emulator pass, 2026-10-26** (build from `8bdd5ac`, x86_64 field build, same JS bundle
+        byte for byte as the P30's; a modelled route from the harbour into Vila Baleira, then the
+        beach, with two still stops; no app change, the lead had asked for none). **Works:** the
+        jump from Funchal kept the trip; Vila Baleira stamped by the trace detector (180 s, on foot)
+        and shown in colour, the island's one free stamp; Praia do Porto Santo stamped and shown
+        padlocked (*Unlock it to see it in colour*); Madeira's passport still **0 / 81**, its card
+        *Porto Santo, 2 of 9*, the island page **2 / 9** with *1 of your stamps is waiting*.
+        No `porto_santo_unlocked` row and no `island` diary line, as expected while
+        `hiddenIslands` is empty. ⚠ **Bug, not fixed (no app changes, 26 Oct):** the new stamp
+        pop-up reads **"1 / 90 places collected"** and **"Bronze passport!"** for a Porto Santo
+        stamp. `stampAnnouncer.ts` passes `places.length` and every earned stamp, both islands
+        together, to `celebrationFor`, against D-109 point 1 (its own count, Madeira's 81 apart).
+        The category line (*n of total*) is probably mixed the same way. Fix: count within the
+        stamp's own passport. **Still needs:** a real trip there (none planned, the lead, 26 Oct).
 - [x] **T-068a** **Coverage crediting and the second detector, 2026-08-16 (D-065).** A levada is
       credited by how much of its drawn course was walked — **60% of it, or 3 km, whichever comes
       first** — and every other place gains a **second, independent detector** that reads the raw

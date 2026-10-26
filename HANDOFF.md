@@ -8,6 +8,16 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **26 Oct, the lead: the T-123 background-location video is done and closed testing is running,
+  day 3 of 14 on 26 Oct.** The 21 Oct line below that says the video gates the review is out of
+  date. Which version code testers have was not said; ask before assuming 11. ⚠ The lead: **no app
+  changes** for now (26 Oct); docs only unless they say otherwise. **No trip to Porto Santo is
+  planned**, so T-067a's real-trip check is not coming; the emulator with a replayed route is the
+  most it can get for now. **Emulator pass done the same day** (T-067a in TASKS): the gate,
+  the free stamp, the padlock and both passports work; ⚠ the new stamp pop-up counts both islands
+  (*1 / 90*, *Bronze passport!* for a Porto Santo stamp), not fixed while the lead wants no app
+  changes. ⚠ `app/android/.../apk/release/app-release.apk` is now an **x86_64** build for the
+  emulator; rebuild for arm64 before installing anything on the P30.
 - **26 Oct, later: D-109, option B, built.** Porto Santo has its own passport: a card in
   Madeira's passport from day one, its own count apart from the 81, one free stamp, named on the
   paywall. The hiding is switched off by content (`hiddenIslands` empty). Invisible in the app

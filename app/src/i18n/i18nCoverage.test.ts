@@ -298,6 +298,7 @@ const DIARY_ONLY: Record<string, string> = {
   'recording/recorderSilence.ts':
     'the silence verdict detail, whose only reader is the debug screen (recorderHealth)',
   'recording/movementPolicy.ts': 'sampling decisions, written to the diary only',
+  'recording/motionWakePolicy.ts': 'still check reasons (T-286), written to the diary only',
   'recording/locationProbe.ts': 'the location probe behind a debug-screen button',
   'recording/ExpoLocationProvider.ts': 'recorder warnings, written to the diary only',
   'recording/recordingSink.ts': 'batch diary lines, written to the diary only',

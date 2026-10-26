@@ -25,12 +25,17 @@ import { announceNewStamps } from '../progress/stampAnnouncer';
 import { checkTripEnd, isDeparturePoint } from '../progress/tripEndDetection';
 import { handleAnchorExit, noteRecordedPosition } from './geofenceManager';
 import { ANCHOR_REGION_ID, isMechanismRegionId } from './geofenceSelection';
-import type { LocationSample } from './LocationProvider';
+import type { LocationSample, SamplingProfile } from './LocationProvider';
 import { databaseSink } from './recordingSink';
 import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME, MOTION_TASK_NAME } from './taskNames';
-import { getCurrentSamplingProfile, raiseProfile } from './samplingGate';
-import { nextWakeCheck, WAKE_FIX_TIMEOUT_MS } from './motionWakePolicy';
+import { getCurrentSamplingProfile, lowerProfile, raiseProfile } from './samplingGate';
+import {
+  decideStillCheck,
+  nextWakeCheck,
+  STILL_CHECK_WAIT_MS,
+  WAKE_FIX_TIMEOUT_MS,
+} from './motionWakePolicy';
 import { locationProvider } from './ExpoLocationProvider';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { loadLanguageChoice } from '../i18n/languageChoice';
@@ -134,6 +139,20 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
   }
   let profile = await getCurrentSamplingProfile();
   const { source, activity } = (data ?? {}) as { source?: string; activity?: string };
+  if (activity !== undefined && activity !== 'still') {
+    lastMovingSignalMs = Date.now();
+  }
+  if (activity === 'still') {
+    if (profile !== 'stationary' && !stillCheckRunning) {
+      stillCheckRunning = true;
+      try {
+        await runStillCheck(profile);
+      } finally {
+        stillCheckRunning = false;
+      }
+    }
+    return;
+  }
   if (profile !== 'stationary') {
     // Already recording: only a car can make it denser (`raiseProfile`).
     if (profile === 'walking' && activity === 'driving') {
@@ -146,16 +165,54 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
     const wait = nextWakeCheck(index, profile);
     if (wait === null) break;
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-    const fix = await Promise.race([
-      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), WAKE_FIX_TIMEOUT_MS)),
-    ]);
+    const fix = await wakePosition();
     if (fix !== null) {
-      await recordSamples([toLocationSample(fix)]);
+      await recordSamples([fix]);
     }
     profile = await getCurrentSamplingProfile();
   }
 });
+
+/** The newest moving label from the motion wake, for the still check (T-286). */
+let lastMovingSignalMs: number | null = null;
+let stillCheckRunning = false;
+
+/** One GPS position for a wake, or null when none comes in time. */
+async function wakePosition(): Promise<LocationSample | null> {
+  const fix = await Promise.race([
+    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), WAKE_FIX_TIMEOUT_MS)),
+  ]);
+  return fix === null ? null : toLocationSample(fix);
+}
+
+/**
+ * T-286: the sensors say still while on a moving profile. A position now and
+ * one five minutes later, each recorded like any batch, and the pure check
+ * decides (`decideStillCheck`). Any fix that arrives meanwhile goes through
+ * the gate as usual, which may already have decided.
+ */
+async function runStillCheck(profile: SamplingProfile): Promise<void> {
+  await recordingEventDao.log('activity', `still check: started on ${profile}`); // i18n-exempt: diary line, T-286
+  const first = await wakePosition();
+  if (first !== null) await recordSamples([first]);
+  if (first === null) {
+    await recordingEventDao.log('activity', 'still check: stay, no position'); // i18n-exempt: diary line, T-286
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, STILL_CHECK_WAIT_MS));
+  const now = await getCurrentSamplingProfile();
+  if (now === 'stationary') return; // the gate got there first
+  const second = await wakePosition();
+  if (second !== null) await recordSamples([second]);
+  const after = await getCurrentSamplingProfile();
+  const check = decideStillCheck(after, first, second, lastMovingSignalMs);
+  if (check.sleep) {
+    await lowerProfile(check.reason);
+  } else {
+    await recordingEventDao.log('activity', `still check: stay, ${check.reason}`); // i18n-exempt: diary line, T-286
+  }
+}
 
 TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
   await loadLanguageChoice();

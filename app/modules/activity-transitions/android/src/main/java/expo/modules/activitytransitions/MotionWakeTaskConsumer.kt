@@ -37,6 +37,10 @@ import expo.modules.interfaces.taskManager.TaskManagerUtilsInterface
  *    with the "Physical activity" permission. Paused by Play services while
  *    the phone is still, so a still phone costs nothing.
  *
+ * Google's *still* runs the task too (T-286), on its own 10 minute gap, so a
+ * stop that begins on driving can sleep: there no fix passes the 50 m filter
+ * and the recorder would never notice it had stopped.
+ *
  * Either one runs the JavaScript task, which takes a GPS position and lets the
  * sampling gate decide (`recording/motionWake.ts`). The two can fire together;
  * `MIN_GAP_MS` keeps that to one wake.
@@ -53,6 +57,9 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
   private var task: TaskInterface? = null
   private var trigger: TriggerEventListener? = null
   private var lastWakeMs = 0L
+  private var lastStillWakeMs = 0L
+  /** Whether the newest label passed on was still, so the next moving one goes at once. */
+  private var lastWasStill = false
 
   override fun taskType(): String = "motionWake"
 
@@ -72,15 +79,33 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
   override fun didReceiveBroadcast(intent: Intent) {
     if (!ActivityRecognitionResult.hasResult(intent)) return
     val best = ActivityRecognitionResult.extractResult(intent)?.mostProbableActivity ?: return
-    val activity = movingName(best.type) ?: return
     if (best.confidence < MIN_CONFIDENCE) return
+    if (best.type == DetectedActivity.STILL) {
+      // T-286: on driving no fix passes the 50 m filter while still, so the
+      // recorder cannot see a stop by itself; the JavaScript checks it.
+      val now = System.currentTimeMillis()
+      if (now - lastStillWakeMs < STILL_GAP_MS) return
+      lastStillWakeMs = now
+      lastWasStill = true
+      run("activity", "still")
+      return
+    }
+    val activity = movingName(best.type) ?: return
     wake("activity", activity)
   }
 
   private fun wake(source: String, activity: String?) {
     val now = System.currentTimeMillis()
-    if (now - lastWakeMs < MIN_GAP_MS) return
+    // A move right after a still label goes at once: a still check may be
+    // waiting on it, and it must not be held back by the gap.
+    if (now - lastWakeMs < MIN_GAP_MS && !lastWasStill) return
     lastWakeMs = now
+    lastWasStill = false
+    run(source, activity)
+  }
+
+  private fun run(source: String, activity: String?) {
+    val now = System.currentTimeMillis()
     val current = task ?: return
     val data = Bundle().apply {
       putString("source", source)
@@ -154,6 +179,9 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
 
     /** One wake at most this often, whichever trigger fires: the JS checks take ~3 min. */
     private const val MIN_GAP_MS = 4 * 60_000L
+
+    /** One still wake at most this often: its check takes five minutes (T-286). */
+    private const val STILL_GAP_MS = 10 * 60_000L
 
     private fun movingName(type: Int): String? = when (type) {
       DetectedActivity.WALKING, DetectedActivity.ON_FOOT -> "walking"

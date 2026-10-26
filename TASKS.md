@@ -218,8 +218,11 @@ permission, L3 privacy contact.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when
-      a fix arrives. The sensors' *still enter* (17:49) was there and nothing acted on it. Same in
-      automatic recording. ⚠ The lead asked for no app changes on 26 Oct: not started. Ask first.
+      a fix arrives. **Built 2026-10-26 at the desk (D-106 amended, Provisional):** Google's *still*
+      now wakes the motion task (`MotionWakeTaskConsumer`), which checks two GPS positions five
+      minutes apart (`decideStillCheck`) and drops to stationary through `lowerProfile`. 1,188
+      tests. ⚠ Open until seen on the P30: a stop begun on driving, and *still check* lines in the
+      diary; none means Google's still never arrives there.
 - [x] **T-285** An outing stays awake only at its start (D-108 amended). **Done 2026-10-25 at the
       desk.** `effectiveProfile` forces the moving profile for the first `OUTING_AWAKE_MS`
       (10 min) of an outing, no longer for all of it; an unreadable start time counts as asleep.

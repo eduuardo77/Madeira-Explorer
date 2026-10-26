@@ -5755,6 +5755,16 @@ Replayed on 17 Oct: 4 of 5 stops earlier, by 1 to 6 minutes, about 11 GPS minute
 The larger battery factor that day was the P30 itself: with no SIM, its radio searched for a
 network all day, about half of Android's estimated drain against about a quarter for Bruma.
 
+⚠ **Amended 2026-10-26 (T-286, Provisional): the sensors' *still* wakes the app too.** On
+*driving* the 50 m distance filter lets no fix through while still, and the gate runs only on a
+fix, so a stop that begins on driving never slept (a 29 minute sit-down, 26 Oct, Huawei's warning
+at 17:28). Google's still (confidence 70 or more, one wake per 10 minutes) now runs the motion
+task, which takes a GPS position, waits `STILL_CONFIRM_MS` and takes another; within 100 m, with
+no moving label between, the profile drops to stationary (`decideStillCheck`). Rejected: a looser
+distance filter on driving, which would cost fixes on every drive to cover a stop. Unseen: whether
+the P30 delivers a still activity update at all (its transitions never arrive); the diary's
+*still check* lines will say.
+
 **What would overturn it.** A ride with the app closed whose start is lost because the balanced
 provider gave no fix and no motion label arrived; then the stationary profile needs the GPS back
 at a longer interval, or a wake from the motion sensors that needs no fix. Huawei's warning

@@ -188,6 +188,31 @@ export async function raiseProfile(to: SamplingProfile, reason: string): Promise
   }
 }
 
+/**
+ * Drop a moving profile to stationary on the still check's word (T-286),
+ * for the stop the gate cannot see: on *driving* no fix passes the 50 m filter
+ * while still, so `applySamplingGate` never runs. An outing's awake window
+ * still holds, because the provider applies it to every profile (T-285).
+ */
+export async function lowerProfile(reason: string): Promise<void> {
+  try {
+    const current = await readCurrentProfile();
+    if (current === 'stationary') {
+      return;
+    }
+    await writeCurrentProfile('stationary');
+    try {
+      await locationProvider.setSamplingProfile('stationary');
+    } catch (error) {
+      await writeCurrentProfile(current);
+      throw error;
+    }
+    await recordingEventDao.log('start', `profile ${current} -> stationary: ${reason}`);
+  } catch (error) {
+    await recordingEventDao.logError('sampling gate', error);
+  }
+}
+
 /** For the debug screen: what the gate thinks it has set. */
 export async function getCurrentSamplingProfile(): Promise<SamplingProfile> {
   try {

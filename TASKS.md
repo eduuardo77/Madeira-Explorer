@@ -2394,6 +2394,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         hold, or whatever the answers to D-107 make of the free user's case. Unchanged for
         everyone: recording works there and the trip stays open across the ferry (D-021).
         Places for Porto Santo come after the gate, by draft-and-veto (D-064), as their own task.
+      — ⚠ **Overtaken the same day by D-109 (Provisional):** Porto Santo gets its own passport,
+        sold from day one, one free stamp there, one island medal. Whether it shows from install
+        is open (options in `tools/out/porto-santo-options.html`). Do not build further on the
+        hiding below until the lead picks; the arrival check may go unused.
       — **Built 2026-10-26, unit tested only (1,181 tests).** The lead answered D-107's four points
         (all as recommended): the island opens on arrival **for everyone**, stamps padlocked for a
         free user; roads free; never in the free five; the paywall names it only after arrival.

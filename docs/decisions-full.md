@@ -5801,6 +5801,36 @@ slot from the places' monitored set (`geofenceSelection`), and fires only while 
 armed; the recorder is already running on any trip there (D-021). The flag is permanent: the
 same `porto_santo_unlocked` row in `app_state`, holding the visited island ids.
 
+## D-109 — Porto Santo has its own passport, sold to people on Madeira
+
+**Status: Provisional** — 2026-10-26, the project lead, the same day T-067a was built on D-107's
+answers: *"I want to use Porto Santo as a selling point for people in Madeira even though it is
+not everybody that goes to Porto Santo. Porto Santo features must be way more limited too."*
+Then, point by point. **Amends D-107's answers of the same morning, D-024 and D-089.** Nothing
+built on it yet; one point is open.
+
+**Agreed:**
+1. **Its own passport, never mixed with Madeira's.** Its own places, its own count ("0 de 6");
+   Madeira's headline number (*de 81*) does not include it.
+2. **A few places**, about 5 to 8, by draft-and-veto (D-064).
+3. **One medal for the whole island**, for collecting every Porto Santo stamp. No region or
+   category sets there.
+4. **One free stamp on Porto Santo**, apart from Madeira's five and the first levada. Replaces
+   D-107 point 3 (none free).
+5. **The €5.99 includes everything**, both islands; still one purchase (D-089, D-107).
+6. **The paywall names Porto Santo from day one**, as a selling point. Replaces D-107 point 4.
+7. **Roads there are free for now.** The lead is still weighing paid roads on Porto Santo. If
+   chosen, the trace is still recorded in full and only its drawing is withheld, so buying lights
+   up what was already walked; it would break D-089 rule 1 (*the map is free, unlimited,
+   forever*), which costs nothing before the public release (D-084) and is a rug pull after it.
+   Build it free, with paid roads as a switch to decide before release.
+
+**Open: is it visible from install?** The lead wants to see it first. Three options drawn in
+`tools/out/porto-santo-options.html` (`tools/preview-porto-santo-options.mjs`): **A** two tabs at
+the top of the passport; **B** a card in Madeira's passport that opens Porto Santo's at any time
+(recommended: it sells without a second number at the top); **C** hidden until arrival, as T-067a
+built it. A or B ends D-024's hiding, and the arrival check built in T-067a goes unused.
+
 ## D-108 — One way of recording; *Começar passeio* records the same way
 
 **Status: Accepted** — 2026-10-25, the project lead: *"at least two modes, if you can make two

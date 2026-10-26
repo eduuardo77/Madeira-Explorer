@@ -11,7 +11,8 @@ import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { TripProgress } from './tripProgress';
 import { computeTripProgress } from './tripProgress';
-import { getLockedRegionIds as lockedFromGate } from './islandGateStore';
+import { getIslandByRegion, getLockedRegionIds as lockedFromGate } from './islandGateStore';
+import { placesIn } from './islandPassports';
 
 /**
  * Which regions are hidden from the user right now: those on a hidden island
@@ -19,9 +20,9 @@ import { getLockedRegionIds as lockedFromGate } from './islandGateStore';
  * D-024). One function feeds trip progress, the medals and the stamp tiers, so
  * a locked region leaves both halves of every count.
  *
- * ⚠ **Been there alone opens it, paid or not** (D-107, answered 26 Oct 2026):
- * a free user sees the island with its stamps padlocked. Payment is
- * `freeTier.ts`'s business, through `getPaidOnlyPlaceIds`.
+ * ⚠ **Been there alone opens it, paid or not** (D-107). Since D-109 nothing is
+ * hidden (`hiddenIslands` is empty); an island with its own passport is kept
+ * out of the main count by `getCurrentProgress` instead, not by this.
  */
 export async function getLockedRegionIds(): Promise<Set<string>> {
   return lockedFromGate();
@@ -51,5 +52,23 @@ export async function getCurrentProgress(): Promise<TripProgress> {
     return EMPTY;
   }
 
-  return computeTripProgress(pack, awarded, await getLockedRegionIds());
+  // D-109: the main passport counts the main island only.
+  return computeTripProgress(
+    { ...pack, places: placesIn(pack.places, getIslandByRegion(), null) },
+    awarded,
+    await getLockedRegionIds()
+  );
+}
+
+/** One island passport's progress (D-109): its places only, its own count. */
+export async function getIslandProgress(islandId: string): Promise<TripProgress> {
+  const pack = getContentPack();
+  const trip = await tripDao.getTripOnShow();
+  const awarded =
+    trip === null ? new Set<string>() : await stampAwardDao.getAwardedPlaceIds(trip.id);
+  return computeTripProgress(
+    { ...pack, places: placesIn(pack.places, getIslandByRegion(), islandId) },
+    awarded,
+    await getLockedRegionIds()
+  );
 }

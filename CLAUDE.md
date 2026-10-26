@@ -76,7 +76,7 @@ The documents cost more to read than the code does. In order of impact:
 - **Be precise about which half you mean.** Recording, battery and background survival have been
   measured on **one phone**, the lead's P30 (EMUI 12), against an iPhone's SensorLogger track; every
   other Android and every iPhone is unverified, and no emulator can answer for them. Two carried
-  days are the whole battery evidence (16 and 17 Oct 2026). Unit tests (1,181) and a browser workbench are
+  days are the whole battery evidence (16 and 17 Oct 2026). Unit tests (1,183) and a browser workbench are
   the rest of the verification.
 - **Never state a measured-sounding number that was not measured.** The battery figure is `null`
   on purpose and a test keeps it that way (D-041). A plausible guess is a promise the app has not

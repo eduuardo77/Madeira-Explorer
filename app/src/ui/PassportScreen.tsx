@@ -21,7 +21,7 @@ import { buildPlaceCard } from '../places/placeCard';
 import { cardPosition } from '../places/cardPosition';
 import { BETA_BUILD, isUnlocked, purchaseTimeMs } from '../entitlement/entitlementStore';
 import { founderYear, isFounder } from '../entitlement/founder';
-import { freeEligibleCount, freeStampsLeft, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
+import { freeLeftIn, visibleStamps, type EarnedStamp } from '../entitlement/freeTier';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass, type AwardPassResult } from '../progress/stampAwards';
 import {
@@ -53,8 +53,16 @@ import PassportView, {
   type PassportTripRow,
 } from './PassportView';
 import { medalProgress, type MedalProgress } from '../progress/medals';
-import { getLockedRegionIds } from '../progress/currentProgress';
-import { getPaidOnlyPlaceIds, visiblePlacesNow } from '../progress/islandGateStore';
+import { getIslandProgress, getLockedRegionIds } from '../progress/currentProgress';
+import {
+  getIslandByPlace,
+  getIslandByRegion,
+  getOpenIslandPassports,
+  visiblePlacesNow,
+} from '../progress/islandGateStore';
+import { inPassport, islandMedalIds, placesIn } from '../progress/islandPassports';
+import { getRegions } from '../content/regionCatalogue';
+import type { IslandCard } from './PassportView';
 import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import PlaceCardView from './PlaceCardView';
 import UnlockSheet from './UnlockSheet';
@@ -134,6 +142,16 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
 /** How often a return to the passport may run its slow half again. */
 const SLOW_HALF_EVERY_MS = 60_000;
 
+/** One island's own passport page (D-109), read with the main page. */
+type IslandPage = {
+  id: string;
+  name: string;
+  progress: TripProgress;
+  medals: MedalTile[];
+  /** Its own free stamps still to come; null once bought. */
+  freeLeft: number | null;
+};
+
 export default function PassportScreen({
   active = true,
   onClose,
@@ -204,6 +222,13 @@ export default function PassportScreen({
   const [freeLeft, setFreeLeft] = useState<number | null>(null);
   /** The set medals' shelf (T-235). */
   const [medals, setMedals] = useState<MedalTile[]>([]);
+  /**
+   * Islands with a passport of their own (D-109): each one's count, medal and
+   * free stamps, read with the main page. Empty when the pack has none.
+   */
+  const [islandPages, setIslandPages] = useState<IslandPage[]>([]);
+  /** The island whose passport is open over the main one, or null. */
+  const [openIsland, setOpenIsland] = useState<string | null>(null);
   /** Bumped to read everything again, after a trip is ended here. */
   const [reloadKey, setReloadKey] = useState(0);
   /**
@@ -289,20 +314,44 @@ export default function PassportScreen({
       // makes "buy in month three, receive months one and two" true, and
       // `freeTier.test.ts` fails the build if the recorder ever learns
       // otherwise.
-      // D-107 point 3: a hidden island's stamps are paid only, never free.
-      const paidOnly = getPaidOnlyPlaceIds();
-      const locked = new Set(visibleStamps(earnedStamps(nextAwards), unlocked, paidOnly).locked);
-      const nextFreeLeft = unlocked
-        ? null
-        : freeStampsLeft(freeEligibleCount(earnedStamps(nextAwards), paidOnly));
+      // D-109: an island with its own passport has its own free stamps.
+      const islands = getIslandByPlace();
+      const earnedNow = earnedStamps(nextAwards);
+      const locked = new Set(visibleStamps(earnedNow, unlocked, islands).locked);
+      const nextFreeLeft = unlocked ? null : freeLeftIn(earnedNow, islands, null);
 
       const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
       // T-235: every award of the trip, locked stamps included (D-075): a
       // set completes from what was earned, paid or not.
+      // D-109: the main shelf from the main island's places only, so a
+      // category set never takes in an island's; each island shows its one.
+      const lockedRegions = await getLockedRegionIds();
+      const byRegion = getIslandByRegion();
+      const places = getContentPack().places;
       const nextMedals = medalTiles(
-        medalProgress(getMedals(), getContentPack().places, nextAwards, unlocked, await getLockedRegionIds()),
+        medalProgress(getMedals(), placesIn(places, byRegion, null), nextAwards, unlocked, lockedRegions),
         deviceLanguage()
       );
+      const nextIslandPages: IslandPage[] = [];
+      for (const island of await getOpenIslandPassports()) {
+        const own = islandMedalIds(getMedals(), byRegion, island.id);
+        nextIslandPages.push({
+          id: island.id,
+          name: island.name,
+          progress: await getIslandProgress(island.id),
+          medals: medalTiles(
+            medalProgress(
+              getMedals().filter((medal) => own.has(medal.id)),
+              placesIn(places, byRegion, island.id),
+              nextAwards,
+              unlocked,
+              lockedRegions
+            ),
+            deviceLanguage()
+          ),
+          freeLeft: unlocked ? null : freeLeftIn(earnedNow, islands, island.id),
+        });
+      }
 
       if (cancelled) return;
       setProgress(unlessSame<TripProgress | null>(nextProgress));
@@ -316,6 +365,7 @@ export default function PassportScreen({
       setFounder(unlessSame(nextFounder));
       setFreeLeft(nextFreeLeft);
       setMedals(unlessSame(nextMedals));
+      setIslandPages(unlessSame(nextIslandPages));
     };
 
     (async () => {
@@ -557,6 +607,10 @@ export default function PassportScreen({
     setCardPlace(null);
     setCardStamp(null);
   };
+  // D-109: Back on an island's page returns to the main passport. Registered
+  // before the card's, so an open card still closes first.
+  const closeIsland = useCallback(() => setOpenIsland(null), []);
+  useBackHandler(active && openIsland !== null, closeIsland);
   // T-211: Back closes an open card before App.tsx's handler leaves the passport.
   useBackHandler(active && card !== null, closeCard);
 
@@ -591,7 +645,7 @@ export default function PassportScreen({
         // can be the stamp that claims D-072's guaranteed exemption and
         // un-locks nothing else. Patching the previous set would miss that.
         const locked = new Set(
-          visibleStamps(earnedStamps(nextAwards), await isUnlocked(), getPaidOnlyPlaceIds()).locked
+          visibleStamps(earnedStamps(nextAwards), await isUnlocked(), getIslandByPlace()).locked
         );
         setConfirmation(null);
         setAwards(nextAwards);
@@ -624,6 +678,38 @@ export default function PassportScreen({
     })();
   }, []);
 
+  // D-109: the page on show, the main passport's or an island's, from one load.
+  const islandPage = openIsland === null ? null : islandPages.find((page) => page.id === openIsland) ?? null;
+  const passportId = islandPage?.id ?? null;
+  const pageStamps = useMemo(
+    () => stamps.filter((stamp) => inPassport(stamp.placeId, getIslandByPlace(), passportId)),
+    [stamps, passportId]
+  );
+  const pageWaiting = useMemo(() => pageStamps.filter((stamp) => stamp.locked === true), [pageStamps]);
+  const islandCards = useMemo<IslandCard[]>(
+    () =>
+      islandPages
+        // An island with no places yet has nothing to sell.
+        .filter((page) => page.progress.total > 0)
+        .map((page) => ({
+          id: page.id,
+          name: page.name,
+          count: n('passport.island.count', page.progress.total, { collected: page.progress.collected }),
+          emblem: {
+            emblem: {
+              kind: 'outline',
+              points: getRegions().find((region) => region.islandId === page.id)?.outline ?? [],
+            },
+            name: page.name,
+            collected: page.progress.collected,
+            total: page.progress.total,
+            look: page.progress.collected === page.progress.total ? 'gold' : 'silver',
+          },
+          onOpen: () => setOpenIsland(page.id),
+        })),
+    [islandPages]
+  );
+
   return (
     <View style={styles.root}>
       {/* T-203: the passport is the dark album, so the status bar goes light
@@ -634,10 +720,27 @@ export default function PassportScreen({
           <ActivityIndicator size="large" color={album.tint} />
         </View>
       ) : (
+        islandPage !== null ? (
+          <PassportView
+            // Its own scroll, from the top, and back to the main one's on return.
+            key={islandPage.id}
+            title={islandPage.name}
+            progress={islandPage.progress}
+            awards={awards}
+            stamps={pageStamps}
+            onSelectStamp={openCard}
+            waiting={pageWaiting}
+            freeLeft={islandPage.freeLeft ?? undefined}
+            onUnlock={BETA_BUILD ? undefined : unlockFromPage}
+            medals={islandPage.medals}
+            onOpenMedal={setOpenMedal}
+          />
+        ) : (
         <PassportView
           progress={progress}
           awards={awards}
-          stamps={stamps}
+          stamps={pageStamps}
+          islands={islandCards}
           onSelectStamp={openCard}
           confirmation={confirmation ?? undefined}
           onConfirm={confirmWalk}
@@ -647,7 +750,7 @@ export default function PassportScreen({
           trips={trips}
           stats={stats}
           onOpenTrip={onOpenTrip}
-          waiting={waiting}
+          waiting={pageWaiting}
           freeLeft={freeLeft ?? undefined}
           // D-097, R1: the reminder, only where something can be bought.
           onUnlock={BETA_BUILD ? undefined : unlockFromPage}
@@ -655,6 +758,7 @@ export default function PassportScreen({
           medals={medals}
           onOpenMedal={setOpenMedal}
         />
+        )
       )}
       {/* The bar behind `‹ Map` and Share, in the album's colour, under every
           sheet: without it the stamps scrolled through the controls and under
@@ -757,6 +861,7 @@ export default function PassportScreen({
 
       {/* ⚠ T-192: nothing to share before the first stamp. It used to share
           at 0 / 80, and the image was almost entirely black (review P1-5). */}
+      {islandPage !== null ? null : (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('passport.a11y.share')}
@@ -772,6 +877,7 @@ export default function PassportScreen({
       >
         <Text style={styles.shareText}>{sharing ? t('passport.sharing') : t('passport.share')}</Text>
       </Pressable>
+      )}
 
       {/* ⚠ **Top-left, in a navigation bar, not floating bottom-right.**
           A floating pill sat on top of the last category row — the scroll's
@@ -780,13 +886,13 @@ export default function PassportScreen({
           iOS puts it above the large title, and so does this. */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('passport.a11y.backToMap')}
-        onPress={onClose}
+        accessibilityLabel={islandPage === null ? t('passport.a11y.backToMap') : t('passport.island.a11y.back')}
+        onPress={islandPage === null ? onClose : closeIsland}
         style={({ pressed }) => [styles.back, pressed && styles.pressed]}
       >
         <View style={styles.backRow}>
           <ChevronMark size={20} color={album.tint} direction="left" />
-          <Text style={styles.backText}>{t('passport.back')}</Text>
+          <Text style={styles.backText}>{islandPage === null ? t('passport.back') : t('passport.title')}</Text>
         </View>
       </Pressable>
     </View>
@@ -934,8 +1040,9 @@ type TrophyView = {
 };
 
 function trophyView(stamp: PassportStamp, place: Place, awards: StampAward[], language: Language): TrophyView {
-  // Never suggests a place on an island still hidden (T-067a).
-  const places = visiblePlacesNow();
+  // Suggests only places in the same passport (D-109), and none on an island
+  // still hidden (T-067a).
+  const places = placesIn(visiblePlacesNow(), getIslandByRegion(), getIslandByRegion().get(place.regionId) ?? null);
   // The trip's stamps in the order they were earned.
   const order = [...awards].sort((a, b) => a.awarded_ts - b.awarded_ts).map((award) => award.place_id);
   const facts = trophyFacts(place.id, places, order, getMedals());

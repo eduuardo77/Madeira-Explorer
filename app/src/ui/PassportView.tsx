@@ -300,6 +300,24 @@ export type PassportViewProps = {
   founder?: FounderCard;
   /** The set medals (T-235), in the order to show them; absent or empty shows none. */
   medals?: MedalTile[];
+  /** The page's name: the passport's own, or an island's (D-109). */
+  title?: string;
+  /**
+   * Islands with a passport of their own, as cards under the number (D-109,
+   * option B): the island sold from day one, apart from this page's count.
+   */
+  islands?: IslandCard[];
+};
+
+/** A card that opens an island's own passport (D-109). */
+export type IslandCard = {
+  id: string;
+  name: string;
+  /** "0 de 6 lugares", worded by the screen. */
+  count: string;
+  /** The island's outline as a medal, silver while unfinished. */
+  emblem: SetMedalWords;
+  onOpen: () => void;
 };
 
 /** The founder stamp's card: what its face says, and the purchase day, written out. */
@@ -727,6 +745,8 @@ function PassportView({
   onOpenMedal,
   founder,
   medals,
+  title,
+  islands,
 }: PassportViewProps) {
   const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
@@ -748,7 +768,7 @@ function PassportView({
       // The header is the hero; let it scroll away rather than pin it. There
       // is only one number and the user has already read it.
     >
-      <Text style={styles.heading}>{t('passport.title')}</Text>
+      <Text style={styles.heading}>{title ?? t('passport.title')}</Text>
 
       {hasContent ? (
         <View style={styles.hero}>
@@ -828,7 +848,26 @@ function PassportView({
         </View>
       )}
 
-      {progress.byCategory.map((row) => (
+      {(islands ?? []).map((island) => (
+        <Pressable
+          key={island.id}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('passport.island.a11y.open', { island: island.name })}, ${island.count}`}
+          onPress={island.onOpen}
+          style={({ pressed }) => [styles.island, pressed && styles.seeAllPressed]}
+        >
+          <MedalArt id={`island-${island.id}`} drawing={{ kind: 'set', words: island.emblem }} size={ISLAND_EMBLEM} />
+          <View style={styles.islandText}>
+            <Text style={styles.islandName}>{island.name}</Text>
+            <Text style={styles.islandCount}>{island.count}</Text>
+            <Text style={styles.islandIncluded}>{t('passport.island.included')}</Text>
+          </View>
+          <ChevronMark size={22} color={album.textMuted} />
+        </Pressable>
+      ))}
+
+      {/* An island's own page may lack a category (D-109): no empty row for it. */}
+      {progress.byCategory.filter((row) => row.total > 0).map((row) => (
         <CategoryRow
           key={row.category}
           title={categoryLabel(row.category)}
@@ -920,8 +959,25 @@ function PassportView({
  */
 export const PASSPORT_BAR_TOP = Math.max(spacing.xl, StatusBar.currentHeight ?? 0);
 
+/** The island card's emblem, in dp. */
+const ISLAND_EMBLEM = 56;
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: album.background },
+  island: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    minHeight: MIN_TAP_TARGET + 16,
+    backgroundColor: album.surface,
+    borderRadius: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  islandText: { flex: 1 },
+  islandName: { color: album.text, fontSize: fontSize.body, fontWeight: '700' },
+  islandCount: { color: album.textMuted, fontSize: fontSize.small },
+  islandIncluded: { color: album.tint, fontSize: fontSize.small },
   content: {
     padding: spacing.md,
     // Room for the navigation bar the screen draws above this (`‹ Map`).

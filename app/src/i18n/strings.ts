@@ -562,6 +562,11 @@ export const STRINGS = {
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────
   'passport.title': s('Passport', 'Passaporte', 'Reisepass'),
   'passport.back': s('Map', 'Mapa', 'Karte'),
+  // D-109: an island with a passport of its own, reached from a card in the
+  // main passport. Its name comes from content (D-017).
+  'passport.island.included': s('Included in your passport', 'Incluído no teu passaporte', 'In Ihrem Reisepass enthalten'),
+  'passport.island.a11y.open': s('Open the {island} passport', 'Abrir o passaporte de {island}', 'Den Reisepass {island} öffnen'),
+  'passport.island.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
   'passport.seeAll': s('See all', 'Ver tudo', 'Alle ansehen'),
   // T-202: under the rows, the date of the newest stamp.
   'passport.mostRecent': s('Most recent: {date}', 'Mais recente: {date}', 'Zuletzt: {date}'),
@@ -1559,6 +1564,11 @@ export const PLURALS = {
   'passport.trips.stamps': {
     one: s('{count} stamp', '{count} carimbo', '{count} Stempel'),
     other: s('{count} stamps', '{count} carimbos', '{count} Stempel'),
+  },
+  // D-109: the island card's count, "0 of 6 places".
+  'passport.island.count': {
+    one: s('{collected} of {count} place', '{collected} de {count} lugar', '{collected} von {count} Ort'),
+    other: s('{collected} of {count} places', '{collected} de {count} lugares', '{collected} von {count} Orten'),
   },
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),

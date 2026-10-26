@@ -475,6 +475,9 @@ test('T-067a: hiddenIslands lists island ids; absent hides nothing; nonsense is 
   assert.deepEqual(bad.pack.hiddenIslands, ['ok']);
   assert.equal(bad.problems.filter((problem) => problem.where.startsWith('hiddenIslands')).length, 2);
   assert.deepEqual(parseContentPack({ formatVersion: 1, hiddenIslands: 'porto-santo', places: [] }).pack.hiddenIslands, []);
+  const own = parseContentPack({ formatVersion: 1, islandPassports: ['porto-santo'], places: [] });
+  assert.deepEqual(own.pack.islandPassports, ['porto-santo']);
+  assert.deepEqual(own.pack.hiddenIslands, [], 'its own passport does not hide it');
 });
 
 test('review H: an official walk is read as published', () => {

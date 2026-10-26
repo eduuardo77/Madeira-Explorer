@@ -22,7 +22,7 @@ import {
 import { getMedals } from '../content/medalCatalogue';
 import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
-import { getVisitedIslandNames, visiblePlacesNow } from '../progress/islandGateStore';
+import { getOpenIslandPassports, visiblePlacesNow } from '../progress/islandGateStore';
 import { founderWindowOpen } from '../entitlement/founder';
 import { SHOWCASE_COUNT, showcase, stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
@@ -51,7 +51,7 @@ export default function UnlockSheet({
   const [state, setState] = useState<UnlockState>({ kind: 'offer' });
   /** Google's price, kept through every state once it has answered. */
   const [price, setPrice] = useState<string | null>(null);
-  /** Hidden islands the user has been to, by name: the sheet names only those (D-107). */
+  /** Island passports open to the user, by name: named from day one (D-109). */
   const [islands, setIslands] = useState<string[]>([]);
   /** With nothing waiting, a few places in colour; picked once per opening. */
   const [shown] = useState<PassportStamp[]>(() =>
@@ -80,8 +80,8 @@ export default function UnlockSheet({
       }
     });
     if (startWithRestore) void restore();
-    void getVisitedIslandNames().then(
-      (names) => open && setIslands(names),
+    void getOpenIslandPassports().then(
+      (passports) => open && setIslands(passports.map((passport) => passport.name)),
       () => undefined
     );
     void (async () => {

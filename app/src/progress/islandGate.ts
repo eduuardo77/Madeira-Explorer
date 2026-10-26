@@ -7,12 +7,12 @@
  * the region list and the passport until the user has been there. Arrival is
  * permanent: once set, the island stays open on every later trip.
  *
- * Since D-107 (answered 26 Oct 2026) the gate keys on **been there alone**. A
- * free user who lands there sees the island too, its stamps padlocked, so the
- * arrival sells the unlock; payment decides only whether those stamps are drawn.
- * The island's stamps are paid only: never one of the free five
- * (`paidOnlyPlaceIds`, read by `freeTier.ts`). Roads light up for everyone
- * (D-089 rule 1), so nothing here touches the trace.
+ * The gate keys on **been there alone**, paid or not (D-107). Roads light up
+ * for everyone (D-089 rule 1), so nothing here touches the trace.
+ *
+ * ⚠ **Switched off by content since D-109** (26 Oct 2026): Porto Santo has its
+ * own passport, shown from day one, so `hiddenIslands` is empty and this hides
+ * nothing. Kept so that going back to hiding it is a one-line content change.
  *
  * ⚠ It gates a display, never an award. Places on a hidden island are still
  * monitored and still awarded, the same rule as `freeTier.ts`.
@@ -35,7 +35,7 @@
 export type GateRegion = {
   id: string;
   islandId: string | null;
-  islandName: string | null;
+  islandName?: string | null;
   /** `[lon, lat]` around the region's largest polygon, or null. */
   outline: ReadonlyArray<readonly [number, number]> | null;
 };
@@ -188,40 +188,4 @@ export function visiblePlaces<T extends { regionId: string }>(
   locked: ReadonlySet<string>
 ): T[] {
   return locked.size === 0 ? [...places] : places.filter((place) => !locked.has(place.regionId));
-}
-
-/**
- * The places whose stamps are paid only (D-107 point 3): every place on a
- * hidden island, visited or not. They never fill or use up a free slot.
- */
-export function paidOnlyPlaceIds(
-  places: ReadonlyArray<{ id: string; regionId: string }>,
-  regions: readonly GateRegion[],
-  hiddenIslands: readonly string[]
-): Set<string> {
-  const hidden = new Set(hiddenIslands);
-  const regionsOnHidden = new Set(
-    regions
-      .filter((region) => region.islandId !== null && hidden.has(region.islandId))
-      .map((region) => region.id)
-  );
-  return new Set(places.filter((place) => regionsOnHidden.has(place.regionId)).map((place) => place.id));
-}
-
-/**
- * The names of the hidden islands the user has been to, for the paywall's line
- * (D-107 point 4: named only after arrival). An island with no name in the
- * file is left out rather than shown as its id.
- */
-export function visitedIslandNames(
-  regions: readonly GateRegion[],
-  hiddenIslands: readonly string[],
-  visited: ReadonlySet<string>
-): string[] {
-  return hiddenIslands
-    .filter((islandId) => visited.has(islandId))
-    .flatMap((islandId) => {
-      const name = regions.find((region) => region.islandId === islandId && region.islandName !== null)?.islandName;
-      return name === undefined || name === null ? [] : [name];
-    });
 }

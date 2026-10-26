@@ -55,8 +55,9 @@ export interface UnlockSheetInput {
     medals: boolean;
     founder: boolean;
     /**
-     * Hidden islands the user has been to, by name (D-107 point 4). Empty
-     * until then, so the sheet never names an island the user has not seen.
+     * Islands with a passport of their own, by name (D-109): named from day
+     * one as part of what the purchase covers. An island still hidden
+     * (`hiddenIslands`) is left out by the caller.
      */
     islands?: readonly string[];
   };

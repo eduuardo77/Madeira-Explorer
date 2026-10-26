@@ -8,9 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
-- **26 Oct, later: D-109 (Provisional) overtakes the gate's hiding.** Porto Santo gets its own
-  passport, sold from day one; visible from install or not is open, three options drawn in
-  `tools/out/porto-santo-options.html`. Wait for the lead's pick before building.
+- **26 Oct, later: D-109, option B, built.** Porto Santo has its own passport: a card in
+  Madeira's passport from day one, its own count apart from the 81, one free stamp, named on the
+  paywall. The hiding is switched off by content (`hiddenIslands` empty). Invisible in the app
+  until Porto Santo has places; next is drafting them for the lead's veto (T-067a in TASKS).
 - **26 Oct, the Porto Santo gate (T-067a, D-107 answered):** built and unit tested, not run on a
   phone. The island opens on arrival for everyone (a recorded fix inside its outline), stamps
   padlocked until paid and never in the free five; the paywall names it only after arrival.

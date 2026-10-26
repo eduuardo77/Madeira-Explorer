@@ -391,9 +391,14 @@ async function main() {
 
   // A hidden island (D-024, T-067a) must be one regions.json knows, or the
   // gate has nothing to hide and nothing to detect arrival on.
-  for (const islandId of parsed.pack.hiddenIslands) {
-    if (regions.length > 0 && !regions.some((region) => region.islandId === islandId)) {
-      error('hiddenIslands', `"${islandId}" is no region's islandId in regions.json`);
+  for (const [where, ids] of [
+    ['hiddenIslands', parsed.pack.hiddenIslands],
+    ['islandPassports', parsed.pack.islandPassports],
+  ]) {
+    for (const islandId of ids) {
+      if (regions.length > 0 && !regions.some((region) => region.islandId === islandId)) {
+        error(where, `"${islandId}" is no region's islandId in regions.json`);
+      }
     }
   }
 

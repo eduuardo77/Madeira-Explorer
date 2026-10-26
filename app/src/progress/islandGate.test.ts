@@ -15,12 +15,10 @@ import {
   insideRing,
   islandsReached,
   lockedRegionIds,
-  paidOnlyPlaceIds,
   parseVisited,
   pendingIslands,
   serialiseVisited,
   visiblePlaces,
-  visitedIslandNames,
   type GateRegion,
 } from './islandGate.ts';
 
@@ -101,29 +99,17 @@ test('visiblePlaces drops the locked regions only', () => {
   assert.deepEqual(visiblePlaces(places, new Set()).map((p) => p.id), ['a', 'b']);
 });
 
-test('D-107 point 3: every place on a hidden island is paid only, visited or not', () => {
-  const places = [
-    { id: 'a', regionId: 'big-west' },
-    { id: 'b', regionId: 'small' },
-  ];
-  assert.deepEqual([...paidOnlyPlaceIds(places, regions, ['small'])], ['b']);
-  assert.deepEqual([...paidOnlyPlaceIds(places, regions, [])], []);
-});
-
-test('D-107 point 4: the paywall names a hidden island only once visited', () => {
-  assert.deepEqual(visitedIslandNames(regions, ['small'], new Set()), []);
-  assert.deepEqual(visitedIslandNames(regions, ['small'], new Set(['small'])), ['Small']);
-});
-
-test('the shipped content: the hidden island is real, holds its own airport and not the other', () => {
+test('the shipped content: the island outline holds its own airport and not the other', () => {
   const read = (file: string) =>
     JSON.parse(readFileSync(new URL(`../../../content/${file}`, import.meta.url), 'utf8'));
   const pack = parseContentPack(read('pois.json')).pack;
   const shipped = parseRegionPack(read('regions.json')).regions;
 
-  assert.ok(pack.hiddenIslands.length > 0, 'the pack hides an island');
-  const hidden = pack.hiddenIslands[0];
-  const locked = lockedRegionIds(shipped, pack.hiddenIslands, new Set());
+  // D-109 shows the island from day one, so the pack hides nothing; the gate is
+  // checked against the island that has its own passport, the one it would hide.
+  assert.deepEqual(pack.hiddenIslands, []);
+  const hidden = pack.islandPassports[0];
+  const locked = lockedRegionIds(shipped, [hidden], new Set());
   assert.ok(locked.size > 0, 'the hidden island has regions');
   assert.ok(locked.size < shipped.length, 'and it is not every region');
 
@@ -133,6 +119,4 @@ test('the shipped content: the hidden island is real, holds its own airport and 
     islandsReached([{ lat: point.lat, lon: point.lon, accuracyM: 10 }], shipped, [hidden]).length
   );
   assert.deepEqual([...reached].sort(), [0, 1]);
-
-  assert.equal(visitedIslandNames(shipped, pack.hiddenIslands, new Set([hidden])).length, 1);
 });

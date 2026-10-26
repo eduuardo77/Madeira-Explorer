@@ -5825,7 +5825,21 @@ built on it yet; one point is open.
    forever*), which costs nothing before the public release (D-084) and is a rug pull after it.
    Build it free, with paid roads as a switch to decide before release.
 
-**Open: is it visible from install?** The lead wants to see it first. Three options drawn in
+**Visibility, 2026-10-26: B, a card in Madeira's passport, shown from day one** ("we can try B
+then, I'll assess it later"). The lead first picked C (hidden until arrival), then kept the
+paywall naming Porto Santo from day one, and asked whether that clashed: it did, a purchase
+screen selling an island the app hides, so B. A was rejected outright. **D-024's hiding is
+switched off, not deleted:** `hiddenIslands` in `pois.json` is empty, and putting the island back
+in it restores C with T-067a's arrival check.
+
+**Built 2026-10-26 (T-067a):** `islandPassports` in `pois.json`; `progress/islandPassports.ts`
+(which passport a place is in); Madeira's count and medals leave the island out; the island's
+page is the same `PassportView` fed its own places, reached from a card under the number and
+shown only once the island has places; `freeTier` gives it `ISLAND_FREE_ALLOWANCE` (1) apart from
+the five; the unlock sheet names it. The island medal (`region-porto-santo`) waits for the places:
+`validate-content` refuses a set under 3.
+
+*As first written:* **Open: is it visible from install?** The lead wants to see it first. Three options drawn in
 `tools/out/porto-santo-options.html` (`tools/preview-porto-santo-options.mjs`): **A** two tabs at
 the top of the passport; **B** a card in Madeira's passport that opens Porto Santo's at any time
 (recommended: it sells without a second number at the top); **C** hidden until arrival, as T-067a

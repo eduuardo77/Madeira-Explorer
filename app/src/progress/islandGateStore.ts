@@ -25,14 +25,13 @@ import {
   islandsReached,
   lockedRegionIds,
   outlinesBox,
-  paidOnlyPlaceIds,
   parseVisited,
   pendingIslands,
   serialiseVisited,
   visiblePlaces,
-  visitedIslandNames,
   type GateFix,
 } from './islandGate';
+import { islandByPlace, islandByRegion, islandNames, placesIn } from './islandPassports';
 
 /** Held after the first read: the flag only ever grows, and only here. */
 let visited: Set<string> | null = null;
@@ -126,12 +125,46 @@ export function visiblePlacesNow() {
   return visiblePlaces(getContentPack().places, lockedRegionIdsNow());
 }
 
-/** Places whose stamps are paid only (D-107 point 3). Content alone decides. */
-export function getPaidOnlyPlaceIds(): Set<string> {
-  return paidOnlyPlaceIds(getContentPack().places, getRegions(), hiddenIslands());
+/**
+ * Which island passport each region and place is on (D-109). Content alone
+ * decides, so these are worked out once.
+ */
+let passportMaps: { byRegion: Map<string, string>; byPlace: Map<string, string> } | null = null;
+function maps() {
+  if (passportMaps === null) {
+    const byRegion = islandByRegion(getRegions(), getContentPack().islandPassports);
+    passportMaps = { byRegion, byPlace: islandByPlace(getContentPack().places, byRegion) };
+  }
+  return passportMaps;
 }
 
-/** The hidden islands the user has been to, by name, for the paywall (D-107 point 4). */
-export async function getVisitedIslandNames(): Promise<string[]> {
-  return visitedIslandNames(getRegions(), hiddenIslands(), await getVisitedIslands());
+/** Island passport by place id; a main-island place is absent. For `freeTier`. */
+export function getIslandByPlace(): ReadonlyMap<string, string> {
+  return maps().byPlace;
+}
+
+/** Island passport by region id; a main-island region is absent. */
+export function getIslandByRegion(): ReadonlyMap<string, string> {
+  return maps().byRegion;
+}
+
+/** The places of one passport that may be shown now: `null` the main island's. */
+export function passportPlacesNow(passport: string | null) {
+  return placesIn(visiblePlacesNow(), maps().byRegion, passport);
+}
+
+/**
+ * The island passports open to the user now, by id and name: every one with
+ * places, unless the island is also hidden and not yet visited (`hiddenIslands`).
+ */
+export async function getOpenIslandPassports(): Promise<Array<{ id: string; name: string }>> {
+  const locked = await getLockedRegionIds();
+  const regions = getRegions();
+  return getContentPack().islandPassports.flatMap((id) => {
+    const open = regions.some((region) => region.islandId === id && !locked.has(region.id));
+    // An island with no places yet has nothing to sell or show.
+    const hasPlaces = placesIn(getContentPack().places, maps().byRegion, id).length > 0;
+    const [name] = islandNames(regions, [id]);
+    return open && hasPlaces && name !== undefined ? [{ id, name }] : [];
+  });
 }

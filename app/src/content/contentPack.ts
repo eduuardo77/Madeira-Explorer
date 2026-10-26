@@ -188,6 +188,12 @@ export type ContentPack = {
    * Since D-107 their stamps are also paid only, never one of the free five.
    */
   hiddenIslands: string[];
+  /**
+   * Islands with a passport of their own (D-109): their places are counted,
+   * collected and given free stamps apart from the main island's, and they
+   * earn one medal for the island. Empty when the pack has one passport.
+   */
+  islandPassports: string[];
   places: Place[];
   /** Optional: a pack with none simply never ends a trip by airport. */
   departurePoints: DeparturePoint[];
@@ -288,7 +294,8 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
       destination: parseDestination(root.destination, problems),
       productId: parseProductId(root.productId, problems),
       founderWindow: parseFounderWindow(root.founderWindow, problems),
-      hiddenIslands: parseHiddenIslands(root.hiddenIslands, problems),
+      hiddenIslands: parseIslandList(root.hiddenIslands, 'hiddenIslands', problems),
+      islandPassports: parseIslandList(root.islandPassports, 'islandPassports', problems),
       places,
       departurePoints,
     },
@@ -322,22 +329,23 @@ function parseDestination(
 }
 
 /**
- * `hiddenIslands`: island ids, as `regions.json` spells them. Absent hides
- * nothing. A wrong entry is reported and dropped, which shows that island
- * rather than hiding it: a visible island is a smaller mistake than a missing one.
+ * `hiddenIslands` and `islandPassports`: island ids, as `regions.json` spells
+ * them. Absent means none. A wrong entry is reported and dropped, which shows
+ * that island rather than hiding it: a visible island is a smaller mistake than
+ * a missing one.
  */
-function parseHiddenIslands(raw: unknown, problems: ContentProblem[]): string[] {
+function parseIslandList(raw: unknown, where: string, problems: ContentProblem[]): string[] {
   if (raw === undefined || raw === null) {
     return [];
   }
   if (!Array.isArray(raw)) {
-    problems.push({ where: 'hiddenIslands', problem: 'must be an array of island ids' });
+    problems.push({ where, problem: 'must be an array of island ids' });
     return [];
   }
   const ids: string[] = [];
   raw.forEach((id, index) => {
     if (typeof id !== 'string' || id.trim() === '') {
-      problems.push({ where: `hiddenIslands[${index}]`, problem: 'must be a non-empty string' });
+      problems.push({ where: `${where}[${index}]`, problem: 'must be a non-empty string' });
     } else if (!ids.includes(id.trim())) {
       ids.push(id.trim());
     }

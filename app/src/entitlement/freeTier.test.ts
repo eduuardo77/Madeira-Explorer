@@ -13,8 +13,9 @@ import { fileURLToPath } from 'node:url';
 import type { Category } from '../content/contentPack.ts';
 import {
   FREE_STAMP_ALLOWANCE,
-  freeEligibleCount,
+  freeLeftIn,
   freeStampsLeft,
+  ISLAND_FREE_ALLOWANCE,
   GUARANTEED_CATEGORY,
   offerWithStamp,
   visibleStamps,
@@ -32,35 +33,39 @@ function earned(n: number, category: Category = 'viewpoint', from = 0): EarnedSt
   }));
 }
 
-test('D-107: a hidden-island stamp never fills a free slot, and is locked until paid', () => {
-  // The island's stamp is earned second; the free five are still five others.
-  const island: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 1.5 * HOUR };
-  const all = [...earned(6), island];
-  const paidOnly = new Set(['island-beach']);
-  const result = visibleStamps(all, false, paidOnly);
-  assert.deepEqual(result.visible, ['viewpoint-0', 'viewpoint-1', 'viewpoint-2', 'viewpoint-3', 'viewpoint-4']);
-  assert.deepEqual(result.locked, ['island-beach', 'viewpoint-5']);
-  assert.equal(result.earnedCount, 7, 'still counted as earned');
-  assert.equal(freeEligibleCount(all, paidOnly), 6);
-  // Without the set, it would have taken the second free slot: the check moves.
-  assert.ok(visibleStamps(all, false).visible.includes('island-beach'));
-  // Paid: shown like any other.
-  assert.ok(visibleStamps(all, true, paidOnly).visible.includes('island-beach'));
+test('D-109: an island with its own passport has one free stamp, apart from the five', () => {
+  // Two island stamps, earned second and eighth; the main five are still five.
+  const first: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 1.5 * HOUR };
+  const second: EarnedStamp = { placeId: 'island-peak', category: 'viewpoint', awardedTs: 7.5 * HOUR };
+  const all = [...earned(6), first, second];
+  const islands = new Map([['island-beach', 'small'], ['island-peak', 'small']]);
+  const result = visibleStamps(all, false, islands);
+  assert.deepEqual(result.visible, ['viewpoint-0', 'viewpoint-1', 'island-beach', 'viewpoint-2', 'viewpoint-3', 'viewpoint-4']);
+  assert.deepEqual(result.locked, ['viewpoint-5', 'island-peak']);
+  assert.equal(result.earnedCount, 8, 'every stamp still counted as earned');
+  assert.equal(freeLeftIn(all, islands, null), 0);
+  assert.equal(freeLeftIn(all, islands, 'small'), 0);
+  assert.equal(freeLeftIn(earned(2), islands, 'small'), ISLAND_FREE_ALLOWANCE);
+  // Without the map the island stamp would take a main slot: the check moves.
+  assert.ok(visibleStamps(all, false).locked.includes('viewpoint-4'));
+  assert.deepEqual(visibleStamps(all, true, islands).locked, []);
 });
 
-test('D-107: the levada guarantee skips a hidden-island levada', () => {
+test('D-109: the levada guarantee is the main island only', () => {
   const islandLevada: EarnedStamp = { placeId: 'island-levada', category: 'levada', awardedTs: 10 * HOUR };
-  const result = visibleStamps([...earned(5), islandLevada], false, new Set(['island-levada']));
+  const islandFirst: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 9 * HOUR };
+  const islands = new Map([['island-levada', 'small'], ['island-beach', 'small']]);
+  const result = visibleStamps([...earned(5), islandFirst, islandLevada], false, islands);
   assert.deepEqual(result.locked, ['island-levada']);
 });
 
-test('D-107: a hidden-island stamp brings no offer and does not move the ordinals', () => {
+test('D-109: an island stamp brings no offer and does not move the main ordinals', () => {
   const island: EarnedStamp = { placeId: 'island-beach', category: 'beach', awardedTs: 0.5 * HOUR };
   const all = [...earned(5), island];
-  const paidOnly = new Set(['island-beach']);
-  assert.equal(offerWithStamp('island-beach', all, false, paidOnly), null);
-  // viewpoint-2 is the third free-eligible stamp, though fourth earned.
-  assert.equal(offerWithStamp('viewpoint-2', all, false, paidOnly), freeStampsLeft(3));
+  const islands = new Map([['island-beach', 'small']]);
+  assert.equal(offerWithStamp('island-beach', all, false, islands), null);
+  // viewpoint-2 is the third main stamp, though fourth earned.
+  assert.equal(offerWithStamp('viewpoint-2', all, false, islands), freeStampsLeft(3));
 });
 
 test('everything is visible once the passport is unlocked', () => {

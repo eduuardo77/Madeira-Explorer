@@ -73,7 +73,7 @@ test('⚠ it never offers what the app does not have yet', () => {
   assert.match(full, /founder/i);
 });
 
-test('D-107 point 4: a hidden island is named only once the user has been there', () => {
+test('D-109: an island with its own passport is named when the caller gives it', () => {
   assert.doesNotMatch(unlockSheetModel(input()).adds.join(' '), /Every stamp on/);
   const after = unlockSheetModel(input({ offers: { medals: false, founder: false, islands: ['Porto Santo'] } }));
   assert.equal(after.adds[1], 'Every stamp on Porto Santo');

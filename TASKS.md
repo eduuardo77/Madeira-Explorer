@@ -2394,10 +2394,15 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         hold, or whatever the answers to D-107 make of the free user's case. Unchanged for
         everyone: recording works there and the trip stays open across the ferry (D-021).
         Places for Porto Santo come after the gate, by draft-and-veto (D-064), as their own task.
-      — ⚠ **Overtaken the same day by D-109 (Provisional):** Porto Santo gets its own passport,
-        sold from day one, one free stamp there, one island medal. Whether it shows from install
-        is open (options in `tools/out/porto-santo-options.html`). Do not build further on the
-        hiding below until the lead picks; the arrival check may go unused.
+      — **Rebuilt the same day for D-109 (option B):** Porto Santo has its own passport, a card
+        in Madeira's passport from day one, its own count apart from the 81, one free stamp of
+        its own (`ISLAND_FREE_ALLOWANCE`), named on the paywall. `islandPassports` in `pois.json`;
+        `hiddenIslands` is empty, so the hiding below is off (putting the island back restores
+        it). Seen in the workbench (*Passport with an island card*, *Island passport page*, with
+        an invented island). **Nothing shows in the app until Porto Santo has places:** the card
+        and the paywall line wait for at least one, and the island medal for three.
+        **Next: draft Porto Santo's 5 to 8 places for the lead's veto (D-064).** Then on the P30:
+        the card, the page, one free stamp, Back from the island page.
       — **Built 2026-10-26, unit tested only (1,181 tests).** The lead answered D-107's four points
         (all as recommended): the island opens on arrival **for everyone**, stamps padlocked for a
         free user; roads free; never in the free five; the paywall names it only after arrival.

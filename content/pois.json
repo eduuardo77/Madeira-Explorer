@@ -3,7 +3,7 @@
   "destination": "Madeira",
   "productId": "passport_madeira",
   "founderWindow": { "start": null, "months": 3 },
-  "hiddenIslands": ["porto-santo"],
+  "islandPassports": ["porto-santo"],
   "places": [
     {
       "id": "pico-do-areeiro",

@@ -26,7 +26,7 @@
  */
 
 import { useState } from 'react';
-import { deviceLanguage, t } from './src/i18n';
+import { deviceLanguage, n, t } from './src/i18n';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CATEGORIES } from './src/content/contentPack';
 import type { StampAward } from './src/storage/types';
@@ -203,6 +203,8 @@ type Screen =
   | 'settings'
   | 'privacy'
   | 'passport-confirm'
+  | 'passport-island-card'
+  | 'passport-island'
   | `unlock:${UnlockState['kind']}`
   | `onboarding:${OnboardingScreen}`
   | 'unlock-none'
@@ -224,9 +226,49 @@ const UNLOCK_STATES: Record<UnlockState['kind'], UnlockState> = {
   nothingToRestore: { kind: 'nothingToRestore' },
 };
 
+/**
+ * An island with its own passport (D-109), invented as every workbench name is
+ * (D-017): six places, the first earned and shown free, two more earned and
+ * locked. The outline is a made-up blob.
+ */
+const ISLAND = (() => {
+  const places: Array<{ name: string; category: (typeof CATEGORIES)[number]; collected: boolean; locked: boolean }> = [
+    { name: 'Long Beach', category: 'beach', collected: true, locked: false },
+    { name: 'Cove', category: 'beach', collected: true, locked: true },
+    { name: 'Fire Peak', category: 'viewpoint', collected: false, locked: false },
+    { name: 'North Cliffs', category: 'viewpoint', collected: true, locked: true },
+    { name: 'Harbour Town', category: 'village', collected: false, locked: false },
+    { name: 'Old Mill', category: 'landmark', collected: false, locked: false },
+  ];
+  const stamps: PassportStamp[] = places.map((place, index) => ({
+    placeId: `island-${index}`,
+    name: place.name,
+    category: place.category,
+    collected: place.collected,
+    locked: place.locked,
+  }));
+  const progress: TripProgress = {
+    collected: places.filter((place) => place.collected).length,
+    total: places.length,
+    byCategory: CATEGORIES.map((category) => ({
+      category,
+      collected: places.filter((place) => place.category === category && place.collected).length,
+      total: places.filter((place) => place.category === category).length,
+    })),
+    byRegion: [],
+    lockedRegionCount: 0,
+  };
+  const outline: Array<[number, number]> = [
+    [0, 0], [0.06, -0.02], [0.12, 0.01], [0.16, 0.05], [0.13, 0.08], [0.07, 0.07], [0.02, 0.05], [0, 0],
+  ];
+  return { name: 'Sand Island', stamps, progress, outline };
+})();
+
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'passport', label: 'Passport (T-074)' },
   { id: 'passport-confirm', label: 'Passport — "did you walk it?" (T-149)' },
+  { id: 'passport-island-card', label: 'Passport with an island card (D-109)' },
+  { id: 'passport-island', label: 'Island passport page (D-109)' },
   { id: 'primary', label: 'Primary — Always (T-075)' },
   { id: 'primary-while-using', label: 'Primary — While-Using, on an outing' },
   { id: 'primary-silent', label: 'Primary — nothing recorded (T-198)' },
@@ -361,6 +403,44 @@ export default function DesignWorkbench() {
               onContinue={() => undefined}
               onSkip={() => undefined}
             />
+          ) : screen === 'passport-island-card' || screen === 'passport-island' ? (
+            <View style={styles.fill}>
+              {screen === 'passport-island' ? (
+                <PassportView
+                  title={ISLAND.name}
+                  progress={ISLAND.progress}
+                  awards={awards}
+                  stamps={ISLAND.stamps}
+                  waiting={ISLAND.stamps.filter((stamp) => stamp.locked === true)}
+                  freeLeft={0}
+                  onUnlock={() => setScreen('unlock:offer')}
+                />
+              ) : (
+                <PassportView
+                  progress={progress}
+                  awards={awards}
+                  stamps={stamps}
+                  waiting={stamps.filter((stamp) => stamp.locked === true)}
+                  freeLeft={freeStampsLeft(stamps.filter((stamp) => stamp.collected).length)}
+                  onUnlock={() => setScreen('unlock:offer')}
+                  islands={[
+                    {
+                      id: 'sand-island',
+                      name: ISLAND.name,
+                      count: n('passport.island.count', ISLAND.progress.total, { collected: ISLAND.progress.collected }),
+                      emblem: {
+                        emblem: { kind: 'outline', points: ISLAND.outline },
+                        name: ISLAND.name,
+                        collected: ISLAND.progress.collected,
+                        total: ISLAND.progress.total,
+                        look: 'silver',
+                      },
+                      onOpen: () => setScreen('passport-island'),
+                    },
+                  ]}
+                />
+              )}
+            </View>
           ) : screen === 'passport' || screen === 'passport-confirm' ? (
             <View style={styles.fill}>
               <PassportView

@@ -1131,6 +1131,14 @@ section's definition of done.
       ✅ **Live 2026-10-07 (T-267):** the lead set up Vercel and Namecheap's DNS; `https://bruma.lol/privacy`
       redirects to `www.bruma.lol/privacy` and serves policy 2026-10-07 with the contact, as the app
       shows. Left for T-267: `privacy@bruma.lol` forwarding (Namecheap Email Forwarding), later.
+      ✅ **Screenshots 2026-10-26:** the five slots hold emulator captures (`site/screenshots/*.jpg`,
+      540 x 1170) of the fort stop, then the demo drive from it (nobody's movements, D-016): the live
+      map, the day viewer, the passport (1 / 81, the Porto Santo card), the fort's stamp page and the
+      share picture. Text brought up to date: 81 places, Porto Santo's own passport and free stamp,
+      and the battery answer no longer offers a recording choice (D-108 removed it). Not used: the
+      new-stamp pop-up (it still says *1 / 90*, T-067a) and the film, which does not play on the
+      emulator. ⚠ `replay-route.sh` crawled here (about 10 s a point with the P30 also attached);
+      a Python loop calling `adb -s emulator-5554 emu geo fix` every 2 s kept time.
 
 ### The second review's findings, as tasks (`docs/app-review-2026-09-24.md`, 6.7/20)
 

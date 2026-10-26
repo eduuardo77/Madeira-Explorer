@@ -11,7 +11,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **26 Oct, later: D-109, option B, built.** Porto Santo has its own passport: a card in
   Madeira's passport from day one, its own count apart from the 81, one free stamp, named on the
   paywall. The hiding is switched off by content (`hiddenIslands` empty). Invisible in the app
-  until Porto Santo has places; next is drafting them for the lead's veto (T-067a in TASKS).
+  until Porto Santo has places. **Places added the same day:** 9 on Porto Santo (draft and veto,
+  `docs/curation-draft-porto-santo.md`) and its medal, so the card now shows.
 - **26 Oct, the Porto Santo gate (T-067a, D-107 answered):** built and unit tested, not run on a
   phone. The island opens on arrival for everyone (a recorded fix inside its outline), stamps
   padlocked until paid and never in the free five; the paywall names it only after arrival.

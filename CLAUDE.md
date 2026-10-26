@@ -67,7 +67,9 @@ The documents cost more to read than the code does. In order of impact:
    for what the island is. What has **not** changed: a place still has to be worth going to.
    Adding a mediocre one to round a number out is still the failure D-002 exists to prevent.
    ⚠ **CURATED 2026-08-16 (T-066a): 60 places**, drafted and vetoed by that method; **80 since
-   2026-09-22 (T-066b/c), 81 since 2026-10-17** (Miradouro da Ribeira da Janela) — 20 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks. It is no longer scaffolding. Before editing
+   2026-09-22 (T-066b/c), 81 since 2026-10-17** (Miradouro da Ribeira da Janela) — 20 viewpoints · 18 levadas · 19 villages · 8 beaches · 16 landmarks.
+   **Plus 9 on Porto Santo since 2026-10-26**, its own passport (D-109): 4 viewpoints, 2 beaches,
+   1 village, 2 landmarks. It is no longer scaffolding. Before editing
    it, run `node tools/validate-content.mjs`; after editing it, run that plus
    `build-regions.mjs --assign` and `build-levadas.mjs`.
 

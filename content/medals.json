@@ -19,6 +19,8 @@
       "title": { "en": "Ribeira Brava medal", "pt": "Medalha da Ribeira Brava", "de": "Medaille Ribeira Brava" } },
     { "id": "region-santa-cruz", "rule": { "region": "santa-cruz" },
       "title": { "en": "Santa Cruz medal", "pt": "Medalha de Santa Cruz", "de": "Medaille Santa Cruz" } },
+    { "id": "region-porto-santo", "rule": { "region": "porto-santo" },
+      "title": { "en": "Porto Santo medal", "pt": "Medalha de Porto Santo", "de": "Medaille Porto Santo" } },
     { "id": "category-levada", "rule": { "category": "levada" },
       "title": { "en": "Levadas medal", "pt": "Medalha das Levadas", "de": "Levada-Medaille" } }
   ]

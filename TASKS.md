@@ -2401,8 +2401,10 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
         it). Seen in the workbench (*Passport with an island card*, *Island passport page*, with
         an invented island). **Nothing shows in the app until Porto Santo has places:** the card
         and the paywall line wait for at least one, and the island medal for three.
-        **Next: draft Porto Santo's 5 to 8 places for the lead's veto (D-064).** Then on the P30:
-        the card, the page, one free stamp, Back from the island page.
+        **Places added 2026-10-26** (`docs/curation-draft-porto-santo.md`, all eight kept plus
+        Pico Branco e Terra Chã): 9 places, the beach with five circles, the island medal
+        `region-porto-santo`. Next on the P30: the card, the page, Back; and on Porto Santo
+        itself, one free stamp and the rest padlocked.
       — **Built 2026-10-26, unit tested only (1,181 tests).** The lead answered D-107's four points
         (all as recommended): the island opens on arrival **for everyone**, stamps padlocked for a
         free user; roads free; never in the free five; the paywall names it only after arrival.

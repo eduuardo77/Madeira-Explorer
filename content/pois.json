@@ -1755,6 +1755,207 @@
           "radiusM": 100
         }
       ]
+    },
+    {
+      "id": "praia-do-porto-santo",
+      "name": "Praia do Porto Santo",
+      "category": "beach",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Nine kilometres of golden sand along the whole south coast.",
+        "pt": "Nove quilómetros de areia dourada ao longo de toda a costa sul.",
+        "de": "Neun Kilometer goldener Sand entlang der ganzen Südküste."
+      },
+      "geofences": [
+        {
+          "id": "praia-do-porto-santo-pedras-pretas",
+          "lat": 33.052,
+          "lon": -16.3429,
+          "radiusM": 250
+        },
+        {
+          "id": "praia-do-porto-santo-ribeiro-cochino",
+          "lat": 33.04755,
+          "lon": -16.34772,
+          "radiusM": 250
+        },
+        {
+          "id": "praia-do-porto-santo-ribeiro-salgado",
+          "lat": 33.04083,
+          "lon": -16.35561,
+          "radiusM": 250
+        },
+        {
+          "id": "praia-do-porto-santo-cabeco",
+          "lat": 33.03425,
+          "lon": -16.36339,
+          "radiusM": 250
+        },
+        {
+          "id": "praia-do-porto-santo-lagoa",
+          "lat": 33.02877,
+          "lon": -16.37176,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "ponta-da-calheta",
+      "name": "Ponta da Calheta",
+      "category": "beach",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Where the long beach ends in rocks, facing the islet of Ilhéu de Baixo, and where people go for the sunset.",
+        "pt": "Onde a praia termina em rochas, de frente para o Ilhéu de Baixo, e onde se vai ver o pôr do sol.",
+        "de": "Wo der lange Strand in Felsen endet, gegenüber dem Ilhéu de Baixo, und wo man den Sonnenuntergang ansieht."
+      },
+      "geofences": [
+        {
+          "id": "ponta-da-calheta-main",
+          "lat": 33.0247,
+          "lon": -16.38,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-do-facho-porto-santo",
+      "name": "Pico do Facho",
+      "category": "viewpoint",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Porto Santo's highest point, 516 m, where beacon fires once warned of pirates.",
+        "pt": "O ponto mais alto de Porto Santo, com 516 m, onde se acendiam fogueiras para avisar dos piratas.",
+        "de": "Der höchste Punkt von Porto Santo, 516 m, wo einst Signalfeuer vor Piraten warnten."
+      },
+      "geofences": [
+        {
+          "id": "pico-do-facho-porto-santo-main",
+          "lat": 33.08433,
+          "lon": -16.32359,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-do-castelo",
+      "name": "Pico do Castelo",
+      "category": "viewpoint",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "The ruins of the refuge islanders fled to from pirates, in a planted pine wood above the town.",
+        "pt": "As ruínas do abrigo onde os habitantes fugiam dos piratas, num pinhal plantado sobre a vila.",
+        "de": "Die Ruinen der Zuflucht, in die sich die Bewohner vor Piraten retteten, in einem angelegten Kiefernwald über dem Ort."
+      },
+      "geofences": [
+        {
+          "id": "pico-do-castelo-main",
+          "lat": 33.0794,
+          "lon": -16.334,
+          "radiusM": 300
+        }
+      ]
+    },
+    {
+      "id": "miradouro-da-portela",
+      "name": "Miradouro da Portela",
+      "category": "viewpoint",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Windmills, and the view of the whole beach curving away to the west.",
+        "pt": "Moinhos de vento e a vista de toda a praia a curvar para oeste.",
+        "de": "Windmühlen und der Blick über den ganzen Strand, der nach Westen schwingt."
+      },
+      "geofences": [
+        {
+          "id": "miradouro-da-portela-main",
+          "lat": 33.0663,
+          "lon": -16.3174,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "vila-baleira",
+      "name": "Vila Baleira",
+      "category": "village",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Porto Santo's only town, with the house where Columbus is said to have lived.",
+        "pt": "A única vila de Porto Santo, com a casa onde se diz que Colombo viveu.",
+        "de": "Der einzige Ort auf Porto Santo, mit dem Haus, in dem Kolumbus gelebt haben soll."
+      },
+      "geofences": [
+        {
+          "id": "vila-baleira-main",
+          "lat": 33.05931,
+          "lon": -16.33366,
+          "radiusM": 450
+        }
+      ]
+    },
+    {
+      "id": "pico-de-ana-ferreira",
+      "name": "Pico de Ana Ferreira",
+      "category": "landmark",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Columns of basalt standing like organ pipes in an old quarry, a protected geosite.",
+        "pt": "Colunas de basalto como tubos de órgão numa antiga pedreira, um geossítio protegido.",
+        "de": "Basaltsäulen wie Orgelpfeifen in einem alten Steinbruch, ein geschütztes Geotop."
+      },
+      "geofences": [
+        {
+          "id": "pico-de-ana-ferreira-main",
+          "lat": 33.04916,
+          "lon": -16.36775,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "fonte-da-areia",
+      "name": "Fonte da Areia",
+      "category": "landmark",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "Sandstone cliffs carved by the wind, and a spring said to keep you young.",
+        "pt": "Falésias de arenito esculpidas pelo vento e uma fonte que, diz a lenda, faz rejuvenescer.",
+        "de": "Vom Wind geformte Sandsteinklippen und eine Quelle, die der Legende nach jung hält."
+      },
+      "geofences": [
+        {
+          "id": "fonte-da-areia-main",
+          "lat": 33.08705,
+          "lon": -16.3553,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "pico-branco-e-terra-cha",
+      "name": "Pico Branco e Terra Chã",
+      "category": "viewpoint",
+      "regionId": "porto-santo",
+      "why": {
+        "en": "The PR 1 trail along the wild north-east cliffs, from Pico Branco to the bay of Terra Chã.",
+        "pt": "O trilho PR 1 pelas falésias selvagens do nordeste, do Pico Branco à enseada da Terra Chã.",
+        "de": "Der Wanderweg PR 1 entlang der wilden Nordostklippen, vom Pico Branco zur Bucht von Terra Chã."
+      },
+      "geofences": [
+        {
+          "id": "pico-branco",
+          "lat": 33.09368,
+          "lon": -16.30338,
+          "radiusM": 250
+        },
+        {
+          "id": "terra-cha",
+          "lat": 33.09725,
+          "lon": -16.29584,
+          "radiusM": 250
+        }
+      ]
     }
   ],
   "departurePoints": [

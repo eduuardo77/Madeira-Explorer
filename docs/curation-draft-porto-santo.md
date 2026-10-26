@@ -1,5 +1,11 @@
 # Porto Santo: a list to veto, not to approve
 
+> ✅ **Applied 2026-10-26, all eight, plus Pico Branco e Terra Chã** (the lead: "keep all eight
+> ... or even add more if you think it's worth it"). Nine places, the beach with five circles
+> along it. Facho's id is `pico-do-facho-porto-santo`: Machico already has a `pico-do-facho`.
+> ⚠ **Correction:** "No levada" below is wrong. OSM has a walk named *PR 3 Levada do Pico do
+> Castelo*. Not added: unseen, and the lead has not been asked.
+
 **For:** the project lead. **Written:** 2026-10-26. **Method:** D-064 draft and veto, for D-109
 (Porto Santo's own passport, "a few places"). Marks as in [`curation-draft.md`](curation-draft.md):
 `[osm ...]` is what OpenStreetMap tags it as, `[wiki N]` the number of Wikipedia languages with an

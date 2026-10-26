@@ -178,7 +178,7 @@ in the local database, with no user interaction after install.
   differentiated by **weight plus brightness/darkness**, never hue alone
 - Respect system font scaling for labels
 - Camera defaults: sensible island-wide framing, gentle constraints on pan/zoom bounds.
-  Madeira-only until Porto Santo unlocks (D-024).
+  Madeira-only until Porto Santo unlocks (D-024; since D-107 it unlocks for paid users only).
 
 ### Success criteria
 

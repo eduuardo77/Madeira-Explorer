@@ -2381,8 +2381,19 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       `ilha-da-madeira`. What is missing is the gate — the island-level geofence, the persisted
       unlock, and passing `lockedRegionIds` into `computeTripProgress`, which has taken that
       argument since T-073 and has never been given a non-empty set.
+      — **State on 2026-10-26.** One seam feeds every consumer: `getLockedRegionIds()` in
+        `progress/currentProgress.ts`, still a stub returning an empty set. Trip progress, the
+        medals (`medalProgress`, T-234) and the stamp tiers (`stampTier.ts`) already drop locked
+        regions from both halves of every count, so filling that one function locks them all.
+        The unlock key `porto_santo_unlocked` is reserved in `appStateDao.ts` but nothing reads
+        or writes it. No geofence, no UI hiding (map, region list, passport) and no Porto Santo
+        places yet (D-021 still defers them; the airport in `pois.json` is a departure point).
       — ⚠ **Paid only since D-107 (2026-10-22):** Porto Santo comes with the €5.99 purchase. Ask the
-        lead D-107's four open points before building this gate.
+        lead D-107's four open points before building this gate. So the region is unlocked only
+        when **been there** (the permanent flag) **and paid** (`entitlementStore.isUnlocked()`)
+        hold, or whatever the answers to D-107 make of the free user's case. Unchanged for
+        everyone: recording works there and the trip stays open across the ferry (D-021).
+        Places for Porto Santo come after the gate, by draft-and-veto (D-064), as their own task.
 - [x] **T-068a** **Coverage crediting and the second detector, 2026-08-16 (D-065).** A levada is
       credited by how much of its drawn course was walked — **60% of it, or 3 km, whichever comes
       first** — and every other place gains a **second, independent detector** that reads the raw

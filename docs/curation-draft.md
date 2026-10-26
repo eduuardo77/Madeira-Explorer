@@ -144,7 +144,8 @@ are where OSM stopped drawing). That is the next pass, not this one.
 ## Beaches — 11 now, 7 proposed
 
 ⚠ **Madeira is not a beach island, and a thin beach row is honest.** Porto Santo — which is the
-actual answer — is deliberately out of scope (D-024).
+actual answer — is deliberately out of scope for curation (D-021), hidden until visited (D-024)
+and paid-only since D-107. Its beaches are the first thing to draft once T-067a's gate exists.
 
 **Keep**
 

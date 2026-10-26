@@ -24,7 +24,10 @@ import { computeTripProgress } from './tripProgress';
  * exactly the way D-024 exists to prevent.
  *
  * **T-067a fills this in**, from an island-level geofence and the permanent
- * unlock flag already reserved in `app_state`.
+ * unlock flag already reserved in `app_state`. Since D-107 the island opens
+ * only for paid users, so "been there" alone is not enough: the purchase
+ * (`entitlementStore.isUnlocked()`) gates it too. This one function feeds trip
+ * progress, the medals and the stamp tiers, so filling it locks all three.
  */
 export async function getLockedRegionIds(): Promise<Set<string>> {
   return new Set();

@@ -13,7 +13,8 @@
  *
  * THE DENOMINATOR IS THE DANGEROUS PART
  * -------------------------------------
- * D-024 hides Porto Santo until the user actually goes there, and HANDOFF
+ * D-024 hides Porto Santo until the user actually goes there (and, since
+ * D-107, has paid; the caller decides, not this module), and HANDOFF
  * states the consequence bluntly: **the stamp denominator must count unlocked
  * regions only**, or the headline number breaks in exactly the way D-024
  * exists to prevent. A tourist who never leaves Madeira would otherwise see

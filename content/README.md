@@ -59,8 +59,10 @@ not a rewrite.
 
 ## Curating `pois.json` (T-066)
 
-**The target is ~80 places (band 60–100, D-049) on Madeira only.** Porto Santo is deliberately
-deferred (D-021, D-024) — do not spend effort on it.
+**The target is ~80 places (band 60–100, D-049) on Madeira only; 81 today.** Porto Santo places
+are deliberately deferred (D-021) — do not spend effort on them yet. The island is hidden until
+the user is there (D-024) and, since D-107, opens only with the €5.99 purchase. Its places come
+after the gate (T-067a), by draft-and-veto (D-064).
 
 ⚠ **This was 150–250 until 2026-08-12.** It was cut because a 7-day trip takes in 25–45 places,
 so against 250 a visitor finished with a passport about a tenth full and a souvenir reading

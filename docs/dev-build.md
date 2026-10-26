@@ -630,7 +630,9 @@ is with `install -r`. A copy re-signed with the debug key is refused (`INSTALL_F
 Check with `apksigner verify --print-certs` on the pulled `base.apk` before choosing.
 
 ⚠ **Since 2026-10-04 (T-117e) release builds are signed with the upload key**, from
-`~/.gradle/gradle.properties`, and the P30's copy is signed with the **debug key**: `install -r`
+`~/.gradle/gradle.properties`. ⚠ **Since at least 26 Oct 2026 the P30 is on the upload key too**
+(certificate `75e4b738…`): install the Gradle output as it is, and check with `apksigner verify
+--print-certs` on the pulled `base.apk` first. Before that, the P30's copy was signed with the **debug key**: `install -r`
 fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Uninstalling would erase the phone's data, so
 re-sign the field APK with the debug key and install that:
 

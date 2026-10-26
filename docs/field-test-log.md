@@ -75,6 +75,11 @@ never where the lead lives.
 - **Battery:** batterystats from the unplug at 15:24: 100%, 99% at 17:35, 98% at 18:07, 97% at
   18:37. Three points in about 3 h, but the P30 holds 100% for an hour or more (9 and 10 Oct), so
   not a rate.
+- **Huawei's warning, a third time, at 17:28** (mid-mall, during the T-286 window of GPS on
+  high accuracy): *consumo excessivo*, "verifica a localização frequentemente". Its page for
+  25 Oct 20:00 to 26 Oct 20:12: foreground 2 h 59 / 395.83 mAh, background 3 min 9 / 73.47 mAh.
+  The 395 mAh is about 11% of the P30's 3,650 mAh while batterystats saw 100 to 97%, so it is
+  Huawei's estimate from GPS time, not a measurement; the warning tracks how long GPS is held.
 - **T-285 (1) still open:** it needs the stop to begin on *walking* or *stationary*, for example
   a walk into a café, still for over 10 minutes, then walking on.
 

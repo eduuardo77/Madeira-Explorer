@@ -222,7 +222,7 @@ permission, L3 privacy contact.
       `outing_awake_applied` row), and `startOuting` arms the motion wake (with automatic off it
       was never armed). 1,162 tests. **Open, outdoors on the P30:** (1) an outing with automatic
       off, still for over 10 minutes then walking: the diary should show *outing awake window
-      over*, then a motion wake, and the walk drawn; (2) the day with stops already asked for
+      over*, then a motion wake, and the walk drawn; **26 Oct, not answered:** the outing lit 95.3% of the route, but the stop began on *driving*, whose 50 m filter held every fix back, so the profile never went stationary and the window row never came (field log, 26 Oct). Needs a stop that begins on foot; (2) the day with stops already asked for
       under T-246.
 - [x] **T-284** One way of recording (D-108). **Done 2026-10-25.** Poupança, Equilibrado and
       Preciso removed: `trackingPreference.ts` keeps only the background switch, the Settings

@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, a stop of about 1 h 40 with some time on foot, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; ⚠ on foot only 51.9% (about 1.3 km); ⚠ **never slept at the stop**: no stationary profile in the whole outing, so T-285's check is still open; battery 100 to 97% (coarse); no stamps |
 | 2026-10-18 | **Airplane-mode day** (Wi-Fi off too): east end, Santana, Funchal, 6 h 50, app opened 3 times, iPhone alongside | P30 | Equilibrado | ✅ 91.4% of the route within 10 m, 96.2% within 30 m; ⚠ first 3 km lost (no GPS fix in airplane mode); **battery about 1.6 points an hour**; ❌ **the trip ended at lunch** (ferry terminal, fixed); 5 stamps |
 | 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; ⚠ Huawei warning at 10:41 (a rolling 24 h, so 16 Oct counts) |
 | 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
@@ -42,6 +43,39 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-26: an outing with automatic off, and a stop it never slept through
+
+- **Setup:** the field build of 25 Oct (T-285), *Registar com a aplicação fechada* switched off at
+  16:12, *Começar passeio* at 16:13:50 (a first tap ended at once and was retapped), ended at
+  18:56:44. SensorLogger 16:14 to 18:56 (Madeira on UTC since 25 Oct, so its file name is local
+  time today). By car west of Funchal 16:14 to about 16:37, a stop of about 1 h 40 with some time
+  on foot, by car home 18:15 to 18:56. Backup in `Madeira-fieldwork/p30-2026-10-26`.
+- **Route: 95.3% within 10 m, 98.1% within 30 m** of 37.5 km; by car 96.9%, the best since the
+  outings of 9 and 10 Oct. Lit line 97.0% within 10 m of the route. The P30 a median 17 m from the
+  iPhone at the same second.
+- **On foot, 51.9% of about 1.3 km:** the stop, around one spot west of Funchal. The motion
+  sensors said *walking* from 16:34:50 to 17:40, but the profile stayed *driving* (50 m filter)
+  until a fix landed 192 m away at 17:41, so no fix at all from 16:40 to 17:10. The iPhone moved
+  little in that hour (net under 25 m per 5 minutes, accuracy about 17 m), so some of the 1.3 km
+  is its own scatter.
+- **❌ It never slept.** No *profile -> stationary* row in the 2 h 43, so the diary never shows
+  *outing awake window over*: that row is written only when the window closes on a stationary
+  profile, and here the window closed at 16:23:50 on *driving*. The clearest stretch: still by
+  the motion sensors 17:49 to 18:18 (the iPhone within 25 m), but at 17:52 a false *in a vehicle*
+  had raised walking to driving, and on *driving* the 50 m filter holds every fix back, so
+  `movementPolicy` (run only when a fix arrives) never ran: GPS on high accuracy for 26 still
+  minutes. On 18 Oct both long stops slept (*still by the motion sensors for 10 min*) because they
+  began on *walking*, whose 20 m filter lets scatter through. Not an outing bug: automatic
+  recording has the same hole whenever a stop begins on *driving*. Not changed (no app changes,
+  26 Oct).
+- **Mode faults:** *driving* by the motion sensors 17:40 to 17:49 while on foot; *still* at
+  18:20 logged after the drive home had begun (18:18 *driving enter*).
+- **Battery:** batterystats from the unplug at 15:24: 100%, 99% at 17:35, 98% at 18:07, 97% at
+  18:37. Three points in about 3 h, but the P30 holds 100% for an hour or more (9 and 10 Oct), so
+  not a rate.
+- **T-285 (1) still open:** it needs the stop to begin on *walking* or *stationary*, for example
+  a walk into a café, still for over 10 minutes, then walking on.
 
 ### 2026-10-18: airplane mode, and a trip ended at lunch
 

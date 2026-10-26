@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **26 Oct, evening: an outing with automatic off** (T-285 check 1): 95.3% of the route within
+  10 m, on foot 51.9%. ❌ **It never slept at a 1 h 40 stop:** a stop that begins on the
+  *driving* profile gets no fixes through its 50 m filter, so `movementPolicy` never runs and GPS
+  stays on high accuracy (26 still minutes at 17:49). Automatic recording has the same hole. Not
+  fixed (no app changes). T-285 check 1 still open. , 26 Oct.
 - **26 Oct, the lead: the T-123 background-location video is done and closed testing is running,
   day 3 of 14 on 26 Oct.** The 21 Oct line below that says the video gates the review is out of
   date. Which version code testers have was not said; ask before assuming 11. ⚠ The lead: **no app

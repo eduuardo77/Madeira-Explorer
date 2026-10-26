@@ -14,7 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
-| 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, 1 h 40 on foot in a shopping centre, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; on foot 51.9%, all indoors (no reference there); ⚠ never stationary, so T-285's check is still open; a 29 min still spell stayed on *driving*; battery 100 to 97% (coarse); no stamps |
+| 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, 1 h 40 on foot in a shopping centre, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; on foot 51.9%, all indoors (no reference there); ⚠ never stationary, so T-285's check is still open; ❌ a 29 min sit-down stayed on *driving* (T-286); battery 100 to 97% (coarse); no stamps |
 | 2026-10-18 | **Airplane-mode day** (Wi-Fi off too): east end, Santana, Funchal, 6 h 50, app opened 3 times, iPhone alongside | P30 | Equilibrado | ✅ 91.4% of the route within 10 m, 96.2% within 30 m; ⚠ first 3 km lost (no GPS fix in airplane mode); **battery about 1.6 points an hour**; ❌ **the trip ended at lunch** (ferry terminal, fixed); 5 stamps |
 | 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; ⚠ Huawei warning at 10:41 (a rolling 24 h, so 16 Oct counts) |
 | 2026-10-16 | **A full day out:** car and on foot, 7 h, the app opened a few times, iPhone alongside | P30 | Equilibrado | ✅ 90.1% of the route lit within 10 m, 96.8% within 30 m; 5 stamps; **battery 93 to 74% in 9 h 45**; ⚠ Huawei warning at the end |
@@ -63,11 +63,11 @@ never where the lead lives.
 - **Awake through the mall, mostly rightly.** No *profile -> stationary* row in the 2 h 43, so the
   diary never shows *outing awake window over*: that row is written only when the window closes
   on a stationary profile, and here it closed at 16:23:50 on *driving*. Walking the mall, awake
-  is correct. ⚠ **Open, 17:49 to 18:18:** still by the motion sensors for 29 minutes (whether
-  the lead sat down then is asked), but at 17:52 *in a vehicle* (possibly a lift or the car park)
+  is correct. ⚠ **Open, 17:49 to 18:18:** still by the motion sensors for 29 minutes (the lead
+  confirmed they sat down then), but at 17:52 *in a vehicle* (possibly a lift or the car park)
   had raised walking to driving, and on *driving* the 50 m filter holds every fix back, so
-  `movementPolicy` (run only when a fix arrives) never ran. If that was a real sit-down, GPS was
-  on high accuracy for it, and automatic recording has the same hole whenever a stop begins on
+  `movementPolicy` (run only when a fix arrives) never ran. **So GPS stayed on high accuracy for a
+  real sit-down (T-286).** Automatic recording has the same hole whenever a stop begins on
   *driving*; 18 Oct's stops slept because they began on *walking*. Not changed (no app changes,
   26 Oct).
 - **Mode faults:** *driving* by the motion sensors 17:40 to 17:49 inside the mall; *still* at

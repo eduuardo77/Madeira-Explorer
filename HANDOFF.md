@@ -12,7 +12,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   shopping centre: 95.3% of the route within 10 m; on foot 51.9%, all indoors, where the iPhone is
   no reference. Never stationary, so check 1 is still open. ⚠ 17:49 to 18:18 still by the sensors
   on the *driving* profile, whose 50 m filter lets no fix through, so `movementPolicy` never ran:
-  a real hole if the lead sat down then (asked). Not fixed (no app changes). Field log, 26 Oct.
+  a real hole: the lead confirmed they sat down then (T-286). Not fixed (no app changes). Field log, 26 Oct.
 - **26 Oct, the lead: the T-123 background-location video is done and closed testing is running,
   day 3 of 14 on 26 Oct.** The 21 Oct line below that says the video gates the review is out of
   date. Which version code testers have was not said; ask before assuming 11. ⚠ The lead: **no app

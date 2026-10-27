@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **Review, 27 Oct:** `docs/bruma-score-and-plan-2026-10-27.md`, strict **13.6 / 20** (13.63,
+  was 13.33). Up for closed testing running, the first run seen again (emulator, clean), German
+  read, N12 and Porto Santo. ⚠ **N15, P1:** the P30 has asked for GPS every 5 s at home since the
+  26 Oct 20:37 install: recording restarted on the stored *driving* profile, and T-286's still
+  check ended *"stay, no position"* twice indoors (airplane mode), so nothing lowered it. Not
+  fixed (no app changes); the lead decides. Also N16, German breaks at 130% text.
 - **26 Oct, evening: an outing with automatic off** (T-285 check 1), car and 1 h 40 on foot in a
   shopping centre: 95.3% of the route within 10 m; on foot 51.9%, all indoors, where the iPhone is
   no reference. Never stationary, so check 1 is still open. ⚠ 17:49 to 18:18 still by the sensors

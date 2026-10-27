@@ -222,6 +222,19 @@ permission, L3 privacy contact.
       permission refused: no crash on three launches, *Allow location* shown; location granted in
       Android's app page, back to Bruma in the same process: the blue dot. ⚠ Testers on version 11
       still have the crash until a new build reaches them.
+- [ ] **T-288** **N15 (P1): GPS held at home after an install or restart.** **Built 2026-10-27**, three
+      changes, pure ones in `motionWakePolicy.ts` and tested: (1) `launchProfile`: a launch keeps a
+      moving profile only with a fix in the last 5 min, otherwise starts on stationary
+      (`settleLaunchProfile`); (2) `decideStillCheck`: no position after the sensors said still, and
+      nothing since said moving, counts as still after 5 min; (3) found on the P30 while checking:
+      `readCurrentProfile`'s late database read overwrote a newer write, so the launch's drop was
+      undone a second later and the recorder re-asserted on driving. The driving filter is unchanged.
+      **On the P30 (read only, `install -r`):** 12:11 *driving to stationary: restart with no recent fix
+      (last fix 1037 min ago)*, but driving re-asserted (the race); 12:17 *still by the motion sensors
+      for 6 min, no position (indoors)*; after the race fix, at home: only the stationary request
+      (5 min, balanced, 100 m). ⚠ **Open:** the restart from driving with the race fixed is not yet
+      seen on the P30 (needs a drive, then an install or restart at home), and a night at home off
+      the cable (the lead's go-ahead first).
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

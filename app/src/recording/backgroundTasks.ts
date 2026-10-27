@@ -191,22 +191,22 @@ async function wakePosition(): Promise<LocationSample | null> {
  * one five minutes later, each recorded like any batch, and the pure check
  * decides (`decideStillCheck`). Any fix that arrives meanwhile goes through
  * the gate as usual, which may already have decided.
+ *
+ * ⚠ N15: it waits the five minutes even when the first look finds nothing.
+ * It used to give up there, and indoors that is every time.
  */
 async function runStillCheck(profile: SamplingProfile): Promise<void> {
+  const wakeMs = Date.now();
   await recordingEventDao.log('activity', `still check: started on ${profile}`); // i18n-exempt: diary line, T-286
   const first = await wakePosition();
   if (first !== null) await recordSamples([first]);
-  if (first === null) {
-    await recordingEventDao.log('activity', 'still check: stay, no position'); // i18n-exempt: diary line, T-286
-    return;
-  }
   await new Promise((resolve) => setTimeout(resolve, STILL_CHECK_WAIT_MS));
   const now = await getCurrentSamplingProfile();
   if (now === 'stationary') return; // the gate got there first
   const second = await wakePosition();
   if (second !== null) await recordSamples([second]);
   const after = await getCurrentSamplingProfile();
-  const check = decideStillCheck(after, first, second, lastMovingSignalMs);
+  const check = decideStillCheck(after, first, second, lastMovingSignalMs, wakeMs, Date.now());
   if (check.sleep) {
     await lowerProfile(check.reason);
   } else {

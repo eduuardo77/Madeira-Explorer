@@ -50,7 +50,7 @@ import {
   shouldRefreshGeofences,
   type Visibility,
 } from './recordingAdmission';
-import { getCurrentSamplingProfile } from './samplingGate';
+import { getCurrentSamplingProfile, settleLaunchProfile } from './samplingGate';
 import { ensureMotionWake, stopMotionWake } from './activityRecognition';
 import { MOTION_TASK_NAME } from './taskNames';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
@@ -181,7 +181,9 @@ export async function syncRecordingWithPreferences(
       // runs when the OS delivers fixes (`backgroundTasks.ts`), so it could be
       // many minutes before it climbed back down — and on the `precise` tier,
       // where `pauseWhenStationary` is false, that is continuous GPS.
-      await startTrip(await getCurrentSamplingProfile());
+      // ⚠ N15: but not a stale moving one. An install or restart at home after
+      // a drive resumed *driving*, which nothing at home could lower.
+      await startTrip(await settleLaunchProfile(Date.now()));
       await recordingEventDao.log(
         'start',
         recording

@@ -140,7 +140,7 @@ Santo. No purchase matrix on a Play install.
 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
-| N15 | **The P30 has held the GPS at home since 20:41 last night.** The install restarted recording on the stored profile, *driving*. Two still checks ran (20:41 and 06:45) and both ended *"stay, no position"*: indoors, in airplane mode, no GPS position came within the wait, and `runStillCheck` returns without lowering the profile. On *driving* the 50 m filter lets no fix through at home, so nothing else lowers it either. Right now: `ACCURACY_FINE gps requested=+5s` on behalf of Bruma; since the 09:48 battery reset, GPS held 21 min 37 s of 21 min 37 s; no fix stored since 18:53 yesterday. Two causes, both needed: a restart resumes a moving profile, and the still check treats "no position" as "keep moving", when indoors "no position while still" is the normal case. Likely in the testers' build too (the restart part predates T-286). Not fixed: this is a review | diary rows, `dumpsys location`, `batterystats`, `backgroundTasks.ts:195` | **P1** |
+| N15 | **The P30 has held the GPS at home since 20:41 last night.** The install restarted recording on the stored profile, *driving*. Two still checks ran (20:41 and 06:45) and both ended *"stay, no position"*: indoors, in airplane mode, no GPS position came within the wait, and `runStillCheck` returns without lowering the profile. On *driving* the 50 m filter lets no fix through at home, so nothing else lowers it either. Right now: `ACCURACY_FINE gps requested=+5s` on behalf of Bruma; since the 09:48 battery reset, GPS held 21 min 37 s of 21 min 37 s; no fix stored since 18:53 yesterday. Two causes, both needed: a restart resumes a moving profile, and the still check treats "no position" as "keep moving", when indoors "no position while still" is the normal case. Likely in the testers' build too (the restart part predates T-286). Not fixed: this is a review | diary rows, `dumpsys location`, `batterystats`, `backgroundTasks.ts:195` | **P1, fixed 27 Oct (T-288), a night at home to see** |
 | N16 | **German at 130% text on a 360 dp screen breaks:** the unlock banner splits words (*Noch 5 k / ostenlose*, *freischalte / n*), the map's status line is cut (*Automatische Aufzeichnung lä…*), *Alle ansehen* runs off the edge | emulator, screenshot | P2 |
 | N17 | ~~Zoom gaps over 100 ms are back.~~ **Withdrawn after recheck:** a copy of the probe that runs each zoom stroke separately with a marker before it gave **no gap over 100 ms in four runs**, worst 83 ms, 46 to 53 fps, the same as 23 Oct. The morning's 116 to 132 ms gaps came from the probe running all six strokes as one script | four marked runs | withdrawn |
 | N18 | The background-location step's drawing of Android's page **cuts its fourth option** (*Don't allow*) behind the button on a 360 × 780 dp phone | emulator, screenshot | P3 |
@@ -215,6 +215,10 @@ The lead lifted the no-app-changes rule for these fixes only. One commit each.
 - **N23, fixed (T-287).** The blue dot only with a location permission (`showsMyLocation`).
   Emulator, clean install, all refused: three launches, no crash, *Allow location* shown; granted
   in Android's settings and back: the blue dot. Testers need a new build.
+- **N15, fixed (T-288), on the P30.** A launch starts on stationary unless a fix came in the last
+  5 min; a still check with no position counts as still. A third cause found on the P30: a late read
+  of the stored profile undid the launch's write. After the fix, at home, Bruma asks Android only for
+  the stationary request. Still to see: a restart after a real drive, and a night at home.
 
 ## 6. MVP and publishing
 

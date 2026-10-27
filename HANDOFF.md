@@ -10,6 +10,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 - **27 Oct, afternoon: the review's fixes, app changes allowed for these only.** Done so far:
   **N23 fixed** (T-287): the blue dot only with location granted; emulator refusal path clean.
+  **N15 fixed** (T-288), on the P30 since 12:18 (field build, `install -r`, backups in
+  `Madeira-fieldwork/backups/p30-2026-10-27-*`): restart on stationary without a fresh fix, no
+  position while still counts as still, and a profile cache race fixed. At home now: no fine GPS.
   ⚠ Version 11 on the testers' phones still crashes on refusal until a new build is uploaded.
 - **27 Oct, extended testing and rechecks, revised to 13.3 / 20 (13.28):** ⚠ **N23, P0: refuse location in the first
   run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,

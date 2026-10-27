@@ -25,6 +25,7 @@ import {
   STATIONARY_WINDOW_MS,
 } from './movementPolicy';
 import { SAMPLING_PROFILES } from './samplingPolicy';
+import { launchProfile } from './motionWakePolicy';
 import { outingAwakeOver } from './recorderControls';
 import { getOutingAwakeApplied, readOutingClock } from './trackingSettings';
 
@@ -62,6 +63,14 @@ async function readCurrentProfile(): Promise<SamplingProfile> {
   // Membership is checked against the profile table rather than a list of
   // string literals, so adding a fourth profile cannot leave this line quietly
   // refusing to read it back and resetting every relaunch to the default.
+  // ⚠ N15, found on the P30 2026-10-27: a read begun before a write and
+  // finished after it must not undo the write. At launch the motion wake
+  // started this read on an empty cache, the launch then wrote *stationary*,
+  // and the late read put the stale *driving* back: the recorder was
+  // re-asserted on driving one second after the diary said stationary.
+  if (cachedProfile !== null) {
+    return cachedProfile;
+  }
   cachedProfile =
     stored !== null && stored in SAMPLING_PROFILES
       ? (stored as SamplingProfile)
@@ -211,6 +220,28 @@ export async function lowerProfile(reason: string): Promise<void> {
   } catch (error) {
     await recordingEventDao.logError('sampling gate', error);
   }
+}
+
+/**
+ * N15: before the launch re-asserts the recorder, drop a stored moving
+ * profile to stationary unless a fix in the last five minutes says the phone
+ * is moving now (`launchProfile`). Returns the profile to start on.
+ */
+export async function settleLaunchProfile(nowMs: number): Promise<SamplingProfile> {
+  try {
+    const raw = await appStateDao.get(appStateDao.AppStateKey.SamplingProfile);
+    const stored = raw !== null && raw in SAMPLING_PROFILES ? (raw as SamplingProfile) : null;
+    const trip = await tripDao.getActiveTrip();
+    const lastFix = trip === null ? null : await rawFixDao.getLastFix(trip.id);
+    const decision = launchProfile(stored, lastFix?.ts ?? null, nowMs);
+    if (stored !== null && decision.profile !== null) {
+      await writeCurrentProfile(decision.profile);
+      await recordingEventDao.log('start', `profile ${stored} -> ${decision.profile}: ${decision.reason}`);
+    }
+  } catch (error) {
+    await recordingEventDao.logError('sampling gate', error);
+  }
+  return getCurrentSamplingProfile();
 }
 
 /** For the debug screen: what the gate thinks it has set. */

@@ -11,8 +11,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **27 Oct, extended testing, revised to 13.2 / 20:** ⚠ **N23, P0: refuse location in the first
   run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,
   `NativeMapScreen.tsx:1023`, since 28 Aug; Google's map throws `SecurityException`). Very likely
-  in the testers' version 11. ⚠ **N24: a new user's first stamp is never announced** (the *shown*
-  record is seeded only once a trip exists, so the first stamp is filed as backlog). Also the
+  in the testers' version 11. ⚠ **N24: a stamp earned with the map open went unannounced once on
+  the emulator**, cause not known (the first explanation was wrong); rerun on a debuggable build. Also the
   film's last frame cuts the island (N25), a divider through *no subscription* at 160% (N26).
   §5 of the review. Not fixed.
 - **Review, 27 Oct:** `docs/bruma-score-and-plan-2026-10-27.md`, morning pass **13.6 / 20** (13.63,

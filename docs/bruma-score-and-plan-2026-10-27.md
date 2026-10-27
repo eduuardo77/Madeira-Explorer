@@ -9,7 +9,7 @@ is left to reach 15.
 > **Revised the same day after extended testing: 13.2 / 20** (13.20). The morning pass below scored
 > 13.6. The extension (§6) refused every permission on a clean install and **the app crashes on
 > every launch once location is refused** (N23, P0), present since 28 Aug, so earlier scores were
-> too high on B and D as well. It also found **a new user's first stamp is never announced** (N24)
+> too high on B and D as well. It also saw **a stamp earned with the map open go unannounced** once on the emulator (N24, cause not known yet)
 > and the film's last frame cuts the island (N25). Fix N23 before anything else, then N15.
 
 - **Score, morning pass:** 13.6 / 20 strict (13.63; 13.33 on 23 Oct, 13.25 on 19 Oct, 11.9 on 9 Oct).
@@ -164,7 +164,7 @@ the frame probe; a label and touch-size audit of the map, Settings and passport 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
 | N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`, two relaunches | **P0** |
-| N24 | **A new user's first stamp is never announced.** Stamp earned at the fort with the map open: no pop-up, no notification, the badge at 0/81 until the passport was opened; only the outing summary named it, and no pop-up after a restart either. Cause in the code: `earnedStamps()` returns null while no trip exists, so the *shown* record is never seeded; the first pass after a trip exists seeds it with the stamp already in it, which files it as backlog (`stampAnnouncer.ts:144`, `stampNews.ts:25`). The notification is skipped because the app is on screen. The moment the welcome promises (*the stamp appears by itself*) is silent the first time | emulator, code | **P1** |
+| N24 | **A stamp earned with the map open was not announced, once, on the emulator.** At the fort: no pop-up, no notification, the badge at 0/81 until the passport was opened; only the outing summary named it, and no pop-up after a restart. ⚠ **Cause not known.** The first explanation given here (the *shown* record seeded only after the stamp) is contradicted by the map's own poll while on screen (`NativeMapScreen.tsx:832`), which should have seeded it empty during the outing. Needs a rerun on a debuggable emulator build with the database read, before it is called a bug of the app rather than of the emulator or the replay | emulator, once | P1 if it reproduces |
 | N25 | **The whole-trip film ends on a frame that cuts the island**: Madeira in the bottom half, the top half empty sea, the west cut (*orto Moniz*), the Porto Moniz roads off the edge. This is the frame people share | P30 screenshot | P2 |
 | N26 | At 160% text a **divider line runs through the payment note**: *"with ~~no subscription~~"* in English, *"einma~~lige Zahlung~~"* in German, reading as if the promise were struck out. And German at 160% breaks the unlock banner into *kostenl / ose Ste / mpel* (N16, worse) | emulator screenshots | P2 |
 | N27 | **Four touch targets under 48 dp** on the P30: the gold count badge 19 × 22 dp (over the passport button, which does something else), *Ver tudo* 19 dp tall, *Ver a tua viagem* 31 dp, the Settings switch 32 dp. Play's pre-launch report flags these. For: **every touchable control has a spoken label** on the three screens | `uiautomator`, 480 dpi | P3 |
@@ -181,7 +181,7 @@ skips the background step, as it should; English at 160% holds up in the passpor
 | Area | Morning | **Revised** | Why |
 |---|---:|---:|---|
 | A | 15 | **15** | Unchanged; N24 is the app, not the field |
-| B | 13.5 | **12.5** | N23 turns the refusal path of the first run into a crash loop; N24 silences the first stamp |
+| B | 13.5 | **12.5** | N23 turns the refusal path of the first run into a crash loop (N24 not counted until it reproduces) |
 | C | 13.5 | **13** | N25 on the shareable film; N29 |
 | D | 14 | **13** | A crash on every launch for a whole class of users, unseen for two months |
 | E | 12.5 | **12.5** | |
@@ -220,9 +220,8 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 ## 2. Decisions for the lead
 
 1. **N23 and N24 need app changes too, and N23 first.** N23 is one line: turn the blue dot on only
-   when location is granted (re-read when the app returns to the front). N24: seed the *shown* and
-   *notified* records as empty when there is no trip yet, so the first stamp counts as news. Both
-   with a test. Then a build for the testers, since a tester who said no to location cannot open
+   when location is granted (re-read when the app returns to the front). N24 is to be reproduced
+   first (desk, below). N23 with a test. Then a build for the testers, since a tester who said no to location cannot open
    the app at all.
 2. **N15 needs app changes**, and the standing rule since 26 Oct is none. With N23 it is the
    reason to lift it: it drains testers' phones at home and invites Huawei's warning. Two small changes,
@@ -245,8 +244,8 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 
 - **N23** · XS, once allowed. The blue dot only with permission; a unit test that the map
   properties never ask for it without; the refusal path rerun on the emulator.
-- **N24** · XS. Seed on no trip; a `stampNews` test for "first stamp after the first trip begins";
-  the fort replay again, expecting the pop-up.
+- **N24** · S. First reproduce: a debuggable x86_64 build, a clean install, the fort replay, then read
+  `stamp_award`, the *shown* record and the diary. Fix only what that shows.
 - **N25** · S. The film's closing camera fits the trip's lines with the overlay's height reserved.
 - **N26, N27, N28** · XS each.
 - **N15** · S, once allowed. The two changes above, tests for both, then the P30 overnight.

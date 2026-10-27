@@ -6,10 +6,10 @@ is left to reach 15.
 
 ## At a glance
 
-> **Revised the same day after extended testing: 13.2 / 20** (13.20). The morning pass below scored
+> **Revised the same day after extended testing and rechecks: 13.3 / 20** (13.28). The morning pass below scored
 > 13.6. The extension (§6) refused every permission on a clean install and **the app crashes on
 > every launch once location is refused** (N23, P0), present since 28 Aug, so earlier scores were
-> too high on B and D as well. It also saw **a stamp earned with the map open go unannounced** once on the emulator (N24, cause not known yet)
+> too high on B and D as well. Two morning findings did not survive a recheck: the zoom gaps (N17) and an unannounced stamp (N24)
 > and the film's last frame cuts the island (N25). Fix N23 before anything else, then N15.
 
 - **Score, morning pass:** 13.6 / 20 strict (13.63; 13.33 on 23 Oct, 13.25 on 19 Oct, 11.9 on 9 Oct).
@@ -142,13 +142,13 @@ Santo. No purchase matrix on a Play install.
 |---|---|---|---|
 | N15 | **The P30 has held the GPS at home since 20:41 last night.** The install restarted recording on the stored profile, *driving*. Two still checks ran (20:41 and 06:45) and both ended *"stay, no position"*: indoors, in airplane mode, no GPS position came within the wait, and `runStillCheck` returns without lowering the profile. On *driving* the 50 m filter lets no fix through at home, so nothing else lowers it either. Right now: `ACCURACY_FINE gps requested=+5s` on behalf of Bruma; since the 09:48 battery reset, GPS held 21 min 37 s of 21 min 37 s; no fix stored since 18:53 yesterday. Two causes, both needed: a restart resumes a moving profile, and the still check treats "no position" as "keep moving", when indoors "no position while still" is the normal case. Likely in the testers' build too (the restart part predates T-286). Not fixed: this is a review | diary rows, `dumpsys location`, `batterystats`, `backgroundTasks.ts:195` | **P1** |
 | N16 | **German at 130% text on a 360 dp screen breaks:** the unlock banner splits words (*Noch 5 k / ostenlose*, *freischalte / n*), the map's status line is cut (*Automatische Aufzeichnung lä…*), *Alle ansehen* runs off the edge | emulator, screenshot | P2 |
-| N17 | **Zoom gaps over 100 ms are back:** 1, 3 and 2 in three runs, worst 132, 116, 116 ms, at 46 to 51 fps. 23 Oct: none over 100. The zoom probe writes no gesture markers, so some may be pauses between gestures, the same trap as N10 on the pan. Unexplained; the gold pin and 9 more places are new since | `measure-map-zoom.sh` ×3 | P3 |
+| N17 | ~~Zoom gaps over 100 ms are back.~~ **Withdrawn after recheck:** a copy of the probe that runs each zoom stroke separately with a marker before it gave **no gap over 100 ms in four runs**, worst 83 ms, 46 to 53 fps, the same as 23 Oct. The morning's 116 to 132 ms gaps came from the probe running all six strokes as one script | four marked runs | withdrawn |
 | N18 | The background-location step's drawing of Android's page **cuts its fourth option** (*Don't allow*) behind the button on a 360 × 780 dp phone | emulator, screenshot | P3 |
 | N19 | English Settings: the button says *Restore purchase*, the note under it *Recover purchase*. Portuguese and German agree | `strings.ts:901`, `:1192` | P3 |
 | N20 | The paywall's stamp art cuts *JARDIM BOTÂNICO DA…* | emulator, screenshot | P3 |
 | N21 | Twice on 26 Oct an outing **ended 2 and 9 seconds after it started** (16:13:45 to :47, 19:38:01 to :10). The first is the field log's "retap"; the second is unexplained. A start that reads as a stop to a second tap would cost a tester a whole outing | diary | P3, to check |
 | N22 | The Porto Santo card says *Incluído no teu passaporte* in link blue to a user who has not paid, just under the unlock banner. May read as "free". The lead's call | P30 screenshot | info |
-| carried | The new-stamp pop-up counts both islands (*1 / 90*, found 26 Oct); the passport's opening hitch; Risco and Alecrim 0 m apart; `founderWindow` null | `HANDOFF.md`, validator | P3 / info |
+| carried | The new-stamp pop-up counts both islands (*1 / 90 places collected*, *Bronze passport!* for a Madeira stamp; found 26 Oct, **seen today** on both reruns); the passport's opening hitch; Risco and Alecrim 0 m apart; `founderWindow` null | `HANDOFF.md`, validator | P3 / info |
 
 ## 5. Extended testing, 10:30 to 11:00
 
@@ -163,8 +163,8 @@ the frame probe; a label and touch-size audit of the map, Settings and passport 
 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
-| N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`, two relaunches | **P0** |
-| N24 | **A stamp earned with the map open was not announced, once, on the emulator.** At the fort: no pop-up, no notification, the badge at 0/81 until the passport was opened; only the outing summary named it, and no pop-up after a restart. ⚠ **Cause not known.** The first explanation given here (the *shown* record seeded only after the stamp) is contradicted by the map's own poll while on screen (`NativeMapScreen.tsx:832`), which should have seeded it empty during the outing. Needs a rerun on a debuggable emulator build with the database read, before it is called a bug of the app rather than of the emulator or the replay | emulator, once | P1 if it reproduces |
+| N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`; **reproduced** on a second build (debuggable) from a second clean install | **P0** |
+| N24 | ~~A stamp earned with the map open was not announced.~~ **Withdrawn after recheck.** On a debuggable build, reading the database: with automatic recording the stamp was awarded at 11:19:07 and *New stamp!* was on screen within a minute; on a clean outing it was awarded at 11:36:00 and the pop-up opened within 13 s. The text dumps used in the first run cannot see the pop-up, which opens in its own window; that run also had location refused then granted by command and two walks back to back | two reruns, database and screenshots | withdrawn |
 | N25 | **The whole-trip film ends on a frame that cuts the island**: Madeira in the bottom half, the top half empty sea, the west cut (*orto Moniz*), the Porto Moniz roads off the edge. This is the frame people share | P30 screenshot | P2 |
 | N26 | At 160% text a **divider line runs through the payment note**: *"with ~~no subscription~~"* in English, *"einma~~lige Zahlung~~"* in German, reading as if the promise were struck out. And German at 160% breaks the unlock banner into *kostenl / ose Ste / mpel* (N16, worse) | emulator screenshots | P2 |
 | N27 | **Four touch targets under 48 dp** on the P30: the gold count badge 19 × 22 dp (over the passport button, which does something else), *Ver tudo* 19 dp tall, *Ver a tua viagem* 31 dp, the Settings switch 32 dp. Play's pre-launch report flags these. For: **every touchable control has a spoken label** on the three screens | `uiautomator`, 480 dpi | P3 |
@@ -180,18 +180,33 @@ skips the background step, as it should; English at 160% holds up in the passpor
 
 | Area | Morning | **Revised** | Why |
 |---|---:|---:|---|
-| A | 15 | **15** | Unchanged; N24 is the app, not the field |
-| B | 13.5 | **12.5** | N23 turns the refusal path of the first run into a crash loop (N24 not counted until it reproduces) |
+| A | 15 | **15** | Unchanged |
+| B | 13.5 | **12.5** | N23 turns the refusal path of the first run into a crash loop |
 | C | 13.5 | **13** | N25 on the shareable film; N29 |
-| D | 14 | **13** | A crash on every launch for a whole class of users, unseen for two months |
+| D | 14 | **13.5** | A crash on every launch for a whole class of users, unseen for two months; N17 withdrawn on recheck |
 | E | 12.5 | **12.5** | |
 | F | 12 | **11.5** | N26 at 160%; for, every control labelled |
 | G | 14.5 | **14.5** | The film and viewer hold up on real data |
 | H | 11.5 | **11.5** | |
-| **Weighted** | **13.63** | **13.20** | 3.0 + 1.875 + 1.95 + 1.95 + 1.25 + 1.15 + 1.45 + 0.575 |
+| **Weighted** | **13.63** | **13.28** | 3.0 + 1.875 + 1.95 + 2.025 + 1.25 + 1.15 + 1.45 + 0.575 |
 
-13.2 is under 23 Oct's 13.33, but the drop is not new damage: N23 was there on 23 Oct too, and
+13.3 (13.28) is level with 23 Oct's 13.33, but the drop is not new damage: N23 was there on 23 Oct too, and
 that score would have been about as low had the refusal path been tried.
+
+### Rechecks, 11:10 to 11:40
+
+The lead asked how solid the emulator findings were. Each weak one was run again with a better
+instrument: a debuggable emulator build whose database can be read, screenshots instead of text
+dumps, a zoom probe with markers, and the P30 read again an hour later.
+
+| Finding | Recheck | Verdict |
+|---|---|---|
+| N23, crash on refusal | Second build, second clean install, refuse all: `FATAL` again | **Holds** |
+| N15, GPS at home | P30 at 11:11: still *driving*, fine GPS requested (now every 15 s), GPS held 5 min 27 s of 5 min 27 s since the battery reset, no fix all day | **Holds** |
+| N17, zoom gaps | Four marked runs: none over 100 ms | **Withdrawn** |
+| N24, silent stamp | Automatic and outing runs both showed *New stamp!* within seconds of the award | **Withdrawn** |
+| N16, N26, large text | The emulator is 360 dp wide, like the P30, so the layout carries over; Huawei's font may move a word | Holds, emulator only |
+| First run | Seen on Android 14; the P30 runs Android 10, whose permission screens differ | Unverified on Android 10 |
 
 ## 6. MVP and publishing
 
@@ -208,20 +223,19 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 | Area | Today | Target | What moves it |
 |---|---:|---:|---|
 | A | 15 | 16 | F5 passed (a day out after a quiet day, no warning), after N15; a trip ended with its souvenir |
-| B | 12.5 | 14 | N23, N24; a tester's first run from Play; N18 |
+| B | 12.5 | 14 | N23; a tester's first run from Play; N18 |
 | C | 13 | 14 | N25; testers' remarks on the screens recorded; N19, N20 |
-| D | 13 | 15 | N23; N15 fixed and seen on the P30 overnight; N17 understood; the pre-launch report |
+| D | 13.5 | 15 | N23; N15 fixed and seen on the P30 overnight; N17 understood; the pre-launch report |
 | E | 12.5 | 15 | Data safety, listing, screenshots in three languages; the 14 days complete |
 | F | 11.5 | 14 | N16, N26, N27; a TalkBack pass |
 | G | 14.5 | 15 | An ended trip |
 | H | 11.5 | 14 | The purchase matrix on a Play install |
-| **Weighted** | **13.2** | **≈ 15.0** | |
+| **Weighted** | **13.3** | **≈ 15.0** | |
 
 ## 2. Decisions for the lead
 
-1. **N23 and N24 need app changes too, and N23 first.** N23 is one line: turn the blue dot on only
-   when location is granted (re-read when the app returns to the front). N24 is to be reproduced
-   first (desk, below). N23 with a test. Then a build for the testers, since a tester who said no to location cannot open
+1. **N23 needs an app change too, and first.** N23 is one line: turn the blue dot on only
+   when location is granted (re-read when the app returns to the front). N23 with a test. Then a build for the testers, since a tester who said no to location cannot open
    the app at all.
 2. **N15 needs app changes**, and the standing rule since 26 Oct is none. With N23 it is the
    reason to lift it: it drains testers' phones at home and invites Huawei's warning. Two small changes,
@@ -244,15 +258,14 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 
 - **N23** · XS, once allowed. The blue dot only with permission; a unit test that the map
   properties never ask for it without; the refusal path rerun on the emulator.
-- **N24** · S. First reproduce: a debuggable x86_64 build, a clean install, the fort replay, then read
-  `stamp_award`, the *shown* record and the diary. Fix only what that shows.
+- **The pop-up's island count** · XS. *1 / 90* and *Bronze passport!* for a Madeira stamp (carried).
 - **N25** · S. The film's closing camera fits the trip's lines with the overlay's height reserved.
 - **N26, N27, N28** · XS each.
 - **N15** · S, once allowed. The two changes above, tests for both, then the P30 overnight.
 - **N16** · S. The banner and the map's status line wrap or shrink cleanly at 130%; check German
   and Portuguese at 130% and 160% on the emulator.
 - **N19, N20, N18** · XS each.
-- **N17** · XS. Add gesture markers to the zoom probe, then rerun before blaming the app.
+- **N17** · XS. Give `measure-map-zoom.sh` a marker per stroke (the scratch copy used today showed the need).
 - **N21** · XS. Read the outing button's start and stop path for a second tap during start.
 
 ## 5. Release verification, for the next build to testers
@@ -260,15 +273,15 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 The smoke test on the P30; one night at home with the diary showing *stationary* within minutes;
 the first run on the emulator in all three languages at 130% text; **the first run with every
 permission refused, then the app opened twice**; a replayed stamp on a clean install, expecting
-the pop-up. The last two would have caught N23 and N24, and the smoke test, which always runs on
+the pop-up. The first would have caught N23, and the smoke test, which always runs on
 a phone with every permission granted, never could.
 
 ## 6. Expected scores
 
 | Step | Strict score |
 |---|---:|
-| Today, revised | 13.2 |
-| N23, N24 fixed and rerun on the emulator | ≈ 13.5 (B 13.5, D 13.5) |
+| Today, revised | 13.3 |
+| N23 fixed and the refusal path rerun on the emulator | ≈ 13.6 (B 13.5, D 14) |
 | N15 fixed and a night at home clean | ≈ 13.7 (D 14.5) |
 | N16 to N20, N17 understood | ≈ 14.0 (C, D, F) |
 | F5 passes, a trip ended | ≈ 14.4 (A 16, G 15) |

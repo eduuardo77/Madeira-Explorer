@@ -230,7 +230,7 @@ Data safety and the listing; the pre-launch report; the purchase matrix; one tri
 | F | 11.5 | 14 | N16, N26, N27; a TalkBack pass |
 | G | 14.5 | 15 | An ended trip |
 | H | 11.5 | 14 | The purchase matrix on a Play install |
-| **Weighted** | **13.3** | **≈ 15.0** | |
+| **Weighted** | **13.3** | **14.75** | ⚠ These targets sum to 14.75, not 15.0 as the 23 Oct plan said: 15 also needs A 17 and B, C 14.5 (§7) |
 
 ## 2. Decisions for the lead
 
@@ -286,7 +286,8 @@ a phone with every permission granted, never could.
 | N16 to N20, N17 understood | ≈ 14.0 (C, D, F) |
 | F5 passes, a trip ended | ≈ 14.4 (A 16, G 15) |
 | Data safety, listing, screenshots, the 14 days done | ≈ 14.7 (E 15) |
-| TalkBack, pre-launch report clean, purchase matrix | **≈ 15.1** |
+| TalkBack, pre-launch report clean, purchase matrix | **≈ 14.75** |
+| A 17 (several carried days, a levada, an update survived), B and C 14.5 (testers' first runs and remarks) | **≈ 15.1** |
 
 ## 7. Appendix: raw evidence
 

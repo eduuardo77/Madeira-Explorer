@@ -115,6 +115,24 @@ export const CAMERA_IN_MS = 1_000;
 export const CAMERA_OUT_MS = 1_500;
 /** How long before the last stroke ends the pull-back begins, ms. */
 export const CAMERA_OUT_LEAD_MS = 600;
+/**
+ * The closing frame's margin at each side, dp (N25, 2026-10-27). With the
+ * following camera's 24 a whole-island trip ended with its westmost road at
+ * the screen's edge and Porto Moniz's name cut, on the frame people share.
+ * The pull-back eases into it, so the frame widens rather than jumps.
+ */
+export const CLOSING_SIDE_MARGIN = 40;
+
+/** The viewport with its side margins widened toward the closing frame's by `u`, 0 to 1. */
+export function closingViewport(viewport: Viewport, u: number): Viewport {
+  const padding = viewport.padding ?? {};
+  const side = (value: number | undefined) => {
+    const base = value ?? 0;
+    return base + (Math.max(base, CLOSING_SIDE_MARGIN) - base) * Math.min(1, Math.max(0, u));
+  };
+  return { ...viewport, padding: { ...padding, left: side(padding.left), right: side(padding.right) } };
+}
+
 /** How far apart the points of the path the map plays are, ms: one a frame at 60 fps. */
 export const PATH_STEP_MS = 1000 / 60;
 
@@ -141,8 +159,8 @@ export const PATH_STEP_MS = 1000 / 60;
  * lines between samples are too short to see.
  */
 export function cameraPath(film: Film, viewport: Viewport): CameraPoint[] {
-  const fit = (bounds: Bounds, align?: Viewport['align']): CameraFit | null =>
-    fitBounds([bounds.west, bounds.south, bounds.east, bounds.north], { ...viewport, align });
+  const fit = (bounds: Bounds, align?: Viewport['align'], u = 0): CameraFit | null =>
+    fitBounds([bounds.west, bounds.south, bounds.east, bounds.north], { ...closingViewport(viewport, u), align });
 
   const whole = fit(film.bounds);
   const draw = film.scenes.find((scene) => scene.kind === 'draw');
@@ -155,7 +173,7 @@ export function cameraPath(film: Film, viewport: Viewport): CameraPoint[] {
   }
   // T-253: the closing caption sits at the foot of the screen, so the whole
   // trip rests on it rather than floating mid-screen with sea between them.
-  const resting = fit(finale.bounds, 'bottom') ?? whole;
+  const resting = fit(finale.bounds, 'bottom', 1) ?? whole;
 
   // ⚠ The moves in and out blend **boxes**, not cameras. A box between two
   // boxes that both hold the pen holds it too; a camera mixed by zoom and
@@ -170,8 +188,8 @@ export function cameraPath(film: Film, viewport: Viewport): CameraPoint[] {
     const u = ease((atMs - outStartMs) / CAMERA_OUT_MS);
     const pulled = lerpBounds(box, finale.bounds, u);
     // One box at one zoom placed two ways, so mixing them only slides it.
-    const centred = fit(pulled);
-    const low = fit(pulled, 'bottom');
+    const centred = fit(pulled, undefined, u);
+    const low = fit(pulled, 'bottom', u);
     return centred === null || low === null ? null : u > 0 ? mix(centred, low, u) : centred;
   };
 

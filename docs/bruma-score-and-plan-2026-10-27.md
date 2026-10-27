@@ -165,7 +165,7 @@ the frame probe; a label and touch-size audit of the map, Settings and passport 
 |---|---|---|---|
 | N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`; **reproduced** on a second build (debuggable) from a second clean install | **P0, fixed 27 Oct (T-287)** |
 | N24 | ~~A stamp earned with the map open was not announced.~~ **Withdrawn after recheck.** On a debuggable build, reading the database: with automatic recording the stamp was awarded at 11:19:07 and *New stamp!* was on screen within a minute; on a clean outing it was awarded at 11:36:00 and the pop-up opened within 13 s. The text dumps used in the first run cannot see the pop-up, which opens in its own window; that run also had location refused then granted by command and two walks back to back | two reruns, database and screenshots | withdrawn |
-| N25 | **The whole-trip film ends on a frame that cuts the island**: Madeira in the bottom half, the top half empty sea, the west cut (*orto Moniz*), the Porto Moniz roads off the edge. This is the frame people share | P30 screenshot | P2 |
+| N25 | **The whole-trip film ends on a frame that cuts the island**: Madeira in the bottom half, the top half empty sea, the west cut (*orto Moniz*), the Porto Moniz roads off the edge. This is the frame people share | P30 screenshot | P2, fixed 27 Oct (T-290), the empty top the lead's call |
 | N26 | At 160% text a **divider line runs through the payment note**: *"with ~~no subscription~~"* in English, *"einma~~lige Zahlung~~"* in German, reading as if the promise were struck out. And German at 160% breaks the unlock banner into *kostenl / ose Ste / mpel* (N16, worse) | emulator screenshots | P2; banner fixed (T-289), the line not reproduced |
 | N27 | **Four touch targets under 48 dp** on the P30: the gold count badge 19 × 22 dp (over the passport button, which does something else), *Ver tudo* 19 dp tall, *Ver a tua viagem* 31 dp, the Settings switch 32 dp. Play's pre-launch report flags these. For: **every touchable control has a spoken label** on the three screens | `uiautomator`, 480 dpi | P3 |
 | N28 | Refusing location still leads to step 5 (*Keep Bruma awake*) and the *don't close Bruma from recent apps* line, both pointless without location | emulator | P3 |
@@ -223,6 +223,8 @@ The lead lifted the no-app-changes rule for these fixes only. One commit each.
   the status line shrinks to fit, the passport headers wrap. Seen in three languages at 130% and
   160%. N26's divider through the payment note did not come back in English or German at 160%,
   cold or with a live size change; nothing was changed for it.
+- **N25 fixed (T-290), on the P30.** The closing frame widens its side margins from 24 to 40 dp,
+  so the roads and *Porto Moniz* clear the edges. The top half is still sea: the lead's call.
 
 ## 6. MVP and publishing
 

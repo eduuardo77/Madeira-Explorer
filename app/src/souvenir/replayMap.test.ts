@@ -26,7 +26,7 @@ import { TRACE_PAINT } from '../map/traceStyle.ts';
 import type { TraceFix } from '../map/traceGeoJson.ts';
 import { composeSouvenir, type Composition, type SouvenirInput } from './composition.ts';
 import { frameAt, frameTimes, type Film } from './frame.ts';
-import { cameraAt, cameraPath, replayMapFrame, STROKES_PER_LINE } from './replayMap.ts';
+import { cameraAt, cameraPath, CLOSING_SIDE_MARGIN, replayMapFrame, STROKES_PER_LINE } from './replayMap.ts';
 
 const T0 = 1_800_000_000_000;
 
@@ -267,7 +267,7 @@ test('the finale rests the whole trip on the closing card, not mid-screen over s
   const east = projectPoint({ latitude: finale.bounds.south, longitude: finale.bounds.east }, resting, VIEWPORT);
   const foot = VIEWPORT.height - VIEWPORT.padding.bottom;
   assert.ok(Math.abs(south.y - foot) < 1, `the trip ends ${Math.round(foot - south.y)} pt above the card`);
-  assert.ok(Math.abs(east.x - south.x - (VIEWPORT.width - 48)) < 1, `the trip spans ${Math.round(east.x - south.x)} pt`);
+  assert.ok(Math.abs(east.x - south.x - (VIEWPORT.width - 2 * CLOSING_SIDE_MARGIN)) < 1, `the trip spans ${Math.round(east.x - south.x)} pt`);
 });
 
 test('no camera move in the app is handed a zero duration: Google throws on it (2026-10-08)', () => {
@@ -278,4 +278,42 @@ test('no camera move in the app is handed a zero duration: Google throws on it (
     /setCameraPosition\([^)]*duration:\s*0\b/s.test(readFileSync(path.join(src, file), 'utf8'))
   );
   assert.deepEqual(zero, []);
+});
+
+test('the closing frame keeps a whole-island trip off the edges and above the card (N25)', () => {
+  // The lead's trip on 27 Oct 2026: −17.169 to −16.706, 32.635 to 32.868.
+  const corners: [number, number][] = [
+    [32.868, -17.169],
+    [32.635, -17.05],
+    [32.64, -16.9],
+    [32.75, -16.706],
+  ];
+  const fixes: TraceFix[] = [];
+  for (let leg = 0; leg < corners.length - 1; leg += 1) {
+    const [lat0, lon0] = corners[leg];
+    const [lat1, lon1] = corners[leg + 1];
+    // Dense enough to pass as a real trace: about 60 m a fix, a fix a minute.
+    for (let i = 0; i < 400; i += 1) {
+      const u = i / 400;
+      fixes.push({ ts: T0 + fixes.length * 60_000, lat: lat0 + (lat1 - lat0) * u, lon: lon0 + (lon1 - lon0) * u, accuracy_m: 10 });
+    }
+  }
+  const f = film(composeSouvenir(input({ trace: { fixes, safeToShare: true, reason: 'nothing to mask' } })));
+  const finale = f.scenes.find((scene) => scene.kind === 'finale');
+  assert.ok(finale !== undefined && finale.bounds.west < -17.16 && finale.bounds.east > -16.71, 'the film kept the whole trip');
+  const path = cameraPath(f, VIEWPORT);
+  const closing = path[path.length - 1].camera;
+  for (const fix of fixes) {
+    const { x, y } = projectPoint({ latitude: fix.lat, longitude: fix.lon }, closing, VIEWPORT);
+    assert.ok(x >= 40 - 0.5 && x <= VIEWPORT.width - 40 + 0.5, `x ${x.toFixed(1)} too near an edge`);
+    assert.ok(y <= VIEWPORT.height - VIEWPORT.padding.bottom + 0.5, `y ${y.toFixed(1)} under the card`);
+  }
+});
+
+test('the pull-back widens the margins gradually, with no jump at its end', () => {
+  const f = film(composeSouvenir(input({ trace: { fixes: winding(200), safeToShare: true, reason: 'nothing to mask' } })));
+  const path = cameraPath(f, VIEWPORT);
+  for (let i = 1; i < path.length; i += 1) {
+    assert.ok(Math.abs(path[i].camera.zoom - path[i - 1].camera.zoom) < 0.1, `zoom jumps at ${path[i].atMs} ms`);
+  }
 });

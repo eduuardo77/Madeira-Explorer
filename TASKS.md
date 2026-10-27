@@ -241,6 +241,14 @@ permission, L3 privacy contact.
       the count and *Ver tudo* to a second line. **N26's line through the payment note not
       reproduced:** English and German at 160%, cold launch and a live size change, both clean;
       not changed blind. ⚠ Huawei's font may still move a word on the P30.
+- [x] **T-290** **N25: the film's closing frame.** **Done 2026-10-27, seen on the P30** (field build,
+      `install -r`, the lead's real trip): the closing frame already fitted the drawn lines over the
+      card, but with the following camera's 24 dp side margin the westmost road sat at the edge and
+      *Porto Moniz* was cut. Now 40 dp (`CLOSING_SIDE_MARGIN`), eased in during the pull-back; a test
+      on a whole-island trip keeps every point 40 dp in (fails at 24). Before and after:
+      `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
+      since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
+      choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

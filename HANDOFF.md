@@ -8,7 +8,14 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
-- **Review, 27 Oct:** `docs/bruma-score-and-plan-2026-10-27.md`, strict **13.6 / 20** (13.63,
+- **27 Oct, extended testing, revised to 13.2 / 20:** ⚠ **N23, P0: refuse location in the first
+  run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,
+  `NativeMapScreen.tsx:1023`, since 28 Aug; Google's map throws `SecurityException`). Very likely
+  in the testers' version 11. ⚠ **N24: a new user's first stamp is never announced** (the *shown*
+  record is seeded only once a trip exists, so the first stamp is filed as backlog). Also the
+  film's last frame cuts the island (N25), a divider through *no subscription* at 160% (N26).
+  §5 of the review. Not fixed.
+- **Review, 27 Oct:** `docs/bruma-score-and-plan-2026-10-27.md`, morning pass **13.6 / 20** (13.63,
   was 13.33). Up for closed testing running, the first run seen again (emulator, clean), German
   read, N12 and Porto Santo. ⚠ **N15, P1:** the P30 has asked for GPS every 5 s at home since the
   26 Oct 20:37 install: recording restarted on the stored *driving* profile, and T-286's still

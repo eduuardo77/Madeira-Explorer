@@ -21,9 +21,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   on one page: `tools/out/review-fixes-2026-10-27/index.html`.
   The P30 has all of it (field build, `install -r`, 13:28). 1,210 tests.
   ⚠ Version 11 on the testers' phones still crashes on refusal until a new build is uploaded.
+  **16:10, after a 38 km drive with an outing (92.3% within 10 m, field log):** the P30 has T-292
+  too (field build, `install -r`, backup `p30-2026-10-27-before-t292`); switching automatic on and
+  the install both kept stationary, so N15's race is seen fixed on the P30. T-285 (1) and T-286's
+  sleep are still open: no stop over 90 s.
   **Open, the lead's:** the night at home of 27 to 28 Oct, read by a scheduled task at 08:30 on
-  28 Oct (`bruma-p30-night-check`, read only); a restart straight after a real drive (the
-  cache-race half of N15 is unseen on the P30); N22 (*Incluído no teu passaporte* to a user who
+  28 Oct (`bruma-p30-night-check`, read only); N22 (*Incluído no teu passaporte* to a user who
   has not paid); the gold badge at 31 × 26 dp; the film's empty top half; 12 of 90 stamp names cut
   on their bands.
 - **27 Oct, extended testing and rechecks, revised to 13.3 / 20 (13.28):** ⚠ **N23, P0: refuse location in the first

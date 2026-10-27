@@ -232,9 +232,10 @@ permission, L3 privacy contact.
       **On the P30 (read only, `install -r`):** 12:11 *driving to stationary: restart with no recent fix
       (last fix 1037 min ago)*, but driving re-asserted (the race); 12:17 *still by the motion sensors
       for 6 min, no position (indoors)*; after the race fix, at home: only the stationary request
-      (5 min, balanced, 100 m). ⚠ **Open:** the restart from driving with the race fixed is not yet
-      seen on the P30 (needs a drive, then an install or restart at home), and a night at home off
-      the cable (the lead's go-ahead first).
+      (5 min, balanced, 100 m). **Seen 27 Oct, 16:10, after a 38 km drive:** switching automatic on
+      at home logged *driving -> stationary: restart with no recent fix (last fix 20 min ago)*, and
+      the `install -r` of T-292 a minute later kept stationary; in the background no fine GPS for
+      Bruma, recorder service in the foreground. ⚠ **Open:** a night at home off the cable.
 - [x] **T-289** **N16 and N26: large text.** **Done 2026-10-27, emulator (360 dp), EN, PT, DE at 130% and
       160%.** The unlock card puts *Ver* under its words from 115% text (`ui/textScale.ts`, tested);
       the map's status line shrinks to fit (`adjustsFontSizeToFit`); the passport's row headers wrap

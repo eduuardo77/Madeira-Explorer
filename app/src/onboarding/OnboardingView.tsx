@@ -32,6 +32,7 @@ import { deviceLanguage, t } from '../i18n';
 import { batterySentence, locationGranted } from './permissionPolicy';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import type { SystemAsk } from './systemAsk';
+import { replicaOverflows } from './replicaFit';
 import { getContentPack } from '../content/poiCatalogue';
 import { passportPlacesNow } from '../progress/islandGateStore';
 import { getRegions } from '../content/regionCatalogue';
@@ -237,6 +238,8 @@ function welcomeStamps(places: readonly Place[]): Place[] {
 const ART_SIZE = 112;
 /** Below this the drawing is a smudge, and the card is better without it. */
 const ART_MIN = 64;
+/** The scrolling content's padding above and below. */
+const CONTENT_PADDING = spacing.sm;
 /** The scroll content's vertical padding and the drawing's margin, around the drawing. */
 const ART_CHROME = spacing.sm * 2 + spacing.sm;
 const FAN_STAMP = 118;
@@ -315,13 +318,13 @@ function Steps({ step, of }: { step: number; of: number }) {
  * A small replica of Android's dialog, or of its settings page, with the
  * answer to choose filled in and labelled.
  */
-function SystemReplica({ ask }: { ask: SystemAsk }) {
+function SystemReplica({ ask, dense }: { ask: SystemAsk; dense: boolean }) {
   const lead = ask.kind === 'settings' ? t('onboarding.next.settings') : t('onboarding.next.dialog');
   const pickLabel = t('onboarding.next.pick');
   return (
     <View style={styles.replicaWrap}>
       <Text style={styles.replicaLead}>{lead}</Text>
-      <View style={[styles.replica, ask.kind === 'buttons' && styles.replicaButtons]}>
+      <View style={[styles.replica, ask.kind === 'buttons' && styles.replicaButtons, dense && styles.replicaDense]}>
         {ask.options.map((option, index) => {
           const picked = index === ask.pick;
           return (
@@ -331,6 +334,7 @@ function SystemReplica({ ask }: { ask: SystemAsk }) {
                 ask.kind === 'settings' ? styles.radioRow : styles.optionRow,
                 ask.kind === 'buttons' && styles.optionSideBySide,
                 !picked && styles.optionCompact,
+                !picked && dense && styles.optionDense,
                 picked && styles.optionPicked,
               ]}
               accessible
@@ -377,6 +381,13 @@ export default function OnboardingView(props: OnboardingViewProps) {
   // card with room to spare).
   const [viewportHeight, setViewportHeight] = useState(0);
   const [wordsHeight, setWordsHeight] = useState(0);
+  // N18: once a card's words overflow, its replica stays dense for that card,
+  // so the smaller drawing cannot measure as fitting and flip back.
+  const [denseFor, setDenseFor] = useState<string | null>(null);
+  const dense = denseFor === screen;
+  useEffect(() => {
+    if (!dense && replicaOverflows(viewportHeight, wordsHeight, CONTENT_PADDING)) setDenseFor(screen);
+  }, [dense, viewportHeight, wordsHeight, screen]);
   const room = viewportHeight - wordsHeight - ART_CHROME;
   const artSize =
     viewportHeight === 0 || wordsHeight === 0
@@ -445,7 +456,7 @@ export default function OnboardingView(props: OnboardingViewProps) {
             </Text>
           ))}
           {copy.note !== undefined ? <Text style={styles.note}>{copy.note}</Text> : null}
-          {systemAsk != null ? <SystemReplica ask={systemAsk} /> : null}
+          {systemAsk != null ? <SystemReplica ask={systemAsk} dense={dense} /> : null}
         </Animated.View>
       </ScrollView>
 
@@ -516,7 +527,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingVertical: CONTENT_PADDING,
   },
   art: { alignItems: 'center', marginBottom: spacing.sm },
   fan: { width: '100%', height: FAN_STAMP + 34, alignItems: 'center', justifyContent: 'center' },
@@ -573,6 +584,9 @@ const styles = StyleSheet.create({
   optionSideBySide: { flex: 1 },
   /** The answers not to pick are drawn smaller, so a three-option dialog still fits. */
   optionCompact: { minHeight: 40, paddingVertical: 6 },
+  /** N18: closer still when the card would not otherwise fit. */
+  optionDense: { minHeight: 30, paddingVertical: 3 },
+  replicaDense: { gap: 2 },
   optionRow: {
     minHeight: 48,
     borderRadius: 24,

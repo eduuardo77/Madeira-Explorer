@@ -255,6 +255,7 @@ permission, L3 privacy contact.
       - N27: *Ver tudo* 56 × 49 dp, *Ver a tua viagem* 133 × 49, the Settings switch 52 × 48, measured on the P30 (`ui/touchArea.ts`, padding with an equal negative margin, tested; nothing moved). ⚠ **The gold badge only 31 × 26** (was 19 × 22): Android reports it clipped to the passport stamp it sits on, and 48 dp would give a quarter of the stamp's face to the unlock sheet. **The lead's call.**
       - N28: refusing location skips step 5 and the recent-apps line (`locationGranted`, tested); emulator, clean install, all refused.
       - N20: the paywall picks sample stamps whose names print whole (`labelFitsBand`, tested); three openings on the emulator. ⚠ 12 of 90 names are cut on their own stamps everywhere (Monte Palace, Teatro Baltazar Dias, Jardim Botânico and nine more): a band design question for the lead.
+      - N18: the background-location card's replica goes dense when the words overflow (`replicaOverflows`, tested); all four options seen on the emulator at 360 × 780.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

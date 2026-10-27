@@ -163,7 +163,7 @@ the frame probe; a label and touch-size audit of the map, Settings and passport 
 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
-| N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`; **reproduced** on a second build (debuggable) from a second clean install | **P0** |
+| N23 | **Refuse location in the first run and the app crashes when the map opens, on every launch.** `java.lang.SecurityException: my location requires permission ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION` from Google's map: `isMyLocationEnabled: true` is set unconditionally (`NativeMapScreen.tsx:1023`, since 28 Aug). The user can never reach the in-app *grant location* button. Also expected for anyone who chose *Only this time* once that grant lapses, and anyone who revokes location later. Granting by command, the app opens again. The testers' version 11 very likely has it (same line, same map library); not checked, which would need an uninstall on the P30 | emulator, `logcat -b crash`; **reproduced** on a second build (debuggable) from a second clean install | **P0, fixed 27 Oct (T-287)** |
 | N24 | ~~A stamp earned with the map open was not announced.~~ **Withdrawn after recheck.** On a debuggable build, reading the database: with automatic recording the stamp was awarded at 11:19:07 and *New stamp!* was on screen within a minute; on a clean outing it was awarded at 11:36:00 and the pop-up opened within 13 s. The text dumps used in the first run cannot see the pop-up, which opens in its own window; that run also had location refused then granted by command and two walks back to back | two reruns, database and screenshots | withdrawn |
 | N25 | **The whole-trip film ends on a frame that cuts the island**: Madeira in the bottom half, the top half empty sea, the west cut (*orto Moniz*), the Porto Moniz roads off the edge. This is the frame people share | P30 screenshot | P2 |
 | N26 | At 160% text a **divider line runs through the payment note**: *"with ~~no subscription~~"* in English, *"einma~~lige Zahlung~~"* in German, reading as if the promise were struck out. And German at 160% breaks the unlock banner into *kostenl / ose Ste / mpel* (N16, worse) | emulator screenshots | P2 |
@@ -207,6 +207,14 @@ dumps, a zoom probe with markers, and the P30 read again an hour later.
 | N24, silent stamp | Automatic and outing runs both showed *New stamp!* within seconds of the award | **Withdrawn** |
 | N16, N26, large text | The emulator is 360 dp wide, like the P30, so the layout carries over; Huawei's font may move a word | Holds, emulator only |
 | First run | Seen on Android 14; the P30 runs Android 10, whose permission screens differ | Unverified on Android 10 |
+
+### Fixed, 27 Oct afternoon
+
+The lead lifted the no-app-changes rule for these fixes only. One commit each.
+
+- **N23, fixed (T-287).** The blue dot only with a location permission (`showsMyLocation`).
+  Emulator, clean install, all refused: three launches, no crash, *Allow location* shown; granted
+  in Android's settings and back: the blue dot. Testers need a new build.
 
 ## 6. MVP and publishing
 

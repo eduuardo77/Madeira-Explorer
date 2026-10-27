@@ -215,6 +215,13 @@ permission, L3 privacy contact.
       validator counts them and warns on a flag with no line. Seen on the P30: Furado plain, 25 Fontes
       labelled. 1,169 tests, smoke test passes. ⚠ `build-levadas.mjs` not rerun: Overpass at
       capacity; it draws courses, which this does not touch.
+- [x] **T-287** **N23 (P0): refusing location crashed the app on every launch.** **Fixed 2026-10-27**
+      (review `docs/bruma-score-and-plan-2026-10-27.md`). Google's blue dot is on only when location
+      is granted (`map/myLocation.ts`, `showsMyLocation`, tested), read with the recorder's state
+      every 10 s and again when the app comes back to the front. Emulator, clean install, every
+      permission refused: no crash on three launches, *Allow location* shown; location granted in
+      Android's app page, back to Bruma in the same process: the blue dot. ⚠ Testers on version 11
+      still have the crash until a new build reaches them.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

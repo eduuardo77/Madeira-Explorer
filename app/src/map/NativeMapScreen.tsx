@@ -58,6 +58,7 @@ import { getRegionName } from '../content/regionCatalogue';
 import type { PlaceCard } from '../places/placeCard';
 import { buildPlaceCard, formatDistance } from '../places/placeCard';
 import { cardPosition } from '../places/cardPosition';
+import { showsMyLocation } from './myLocation';
 import { getCurrentProgress } from '../progress/currentProgress';
 import { runAwardPass } from '../progress/stampAwards';
 import type { StampPopup } from '../progress/stampAnnouncer';
@@ -853,9 +854,15 @@ export default function NativeMapScreen({
 
     refresh();
     const timer = setInterval(refresh, 10_000);
+    // N23: location may have been granted in Android's settings while the app
+    // was away; read it again at once so the blue dot does not wait 10 s.
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') refresh();
+    });
     return () => {
       cancelled = true;
       clearInterval(timer);
+      subscription.remove();
     };
   }, [active]);
 
@@ -1006,6 +1013,7 @@ export default function NativeMapScreen({
     () => [...tracePolylines, ...coursePolylines],
     [tracePolylines, coursePolylines]
   );
+  const blueDot = showsMyLocation(controlInput?.permission);
   const mapProperties = useMemo(
     () => ({
       mapType: GoogleMapsMapType.NORMAL,
@@ -1020,7 +1028,10 @@ export default function NativeMapScreen({
       // wedge and the accuracy halo that come with it for free.
       // ⚠ Google's own re-centre button stays off below; ours is a
       // labelled control, because D-015 forbids an icon alone.
-      isMyLocationEnabled: true,
+      // ⚠ N23 (2026-10-27): only with a location permission. Google's map
+      // throws without one, and a user who refused location crashed on
+      // every launch before reaching the *grant location* button.
+      isMyLocationEnabled: blueDot,
       // T-223: no further out than the archipelago and a margin. The
       // default is 3, half the planet (`mapFence.ts`).
       minZoomPreference: minZoom ?? undefined,
@@ -1028,7 +1039,7 @@ export default function NativeMapScreen({
       isBuildingEnabled: false,
       selectionEnabled: false,
     }),
-    [darkMap.mapStyleJson, minZoom]
+    [darkMap.mapStyleJson, minZoom, blueDot]
   );
 
   // A map that failed to start never reports its tiles: lift the splash from

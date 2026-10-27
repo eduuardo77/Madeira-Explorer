@@ -8,6 +8,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **27 Oct, afternoon: the review's fixes, app changes allowed for these only.** Done so far:
+  **N23 fixed** (T-287): the blue dot only with location granted; emulator refusal path clean.
+  ⚠ Version 11 on the testers' phones still crashes on refusal until a new build is uploaded.
 - **27 Oct, extended testing and rechecks, revised to 13.3 / 20 (13.28):** ⚠ **N23, P0: refuse location in the first
   run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,
   `NativeMapScreen.tsx:1023`, since 28 Aug; Google's map throws `SecurityException`). Very likely

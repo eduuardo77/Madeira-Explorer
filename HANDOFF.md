@@ -25,9 +25,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   too (field build, `install -r`, backup `p30-2026-10-27-before-t292`); switching automatic on and
   the install both kept stationary, so N15's race is seen fixed on the P30. T-285 (1) and T-286's
   sleep are still open: no stop over 90 s.
+  **Porto Santo at the foot (T-293, D-109 amended):** the card sits under *Medalhas*; before
+  buying it says *1 carimbo grátis, os outros com o passaporte* in grey (N22). On the P30.
   **Open, the lead's:** the night at home of 27 to 28 Oct, read by a scheduled task at 08:30 on
-  28 Oct (`bruma-p30-night-check`, read only); N22 (*Incluído no teu passaporte* to a user who
-  has not paid); the gold badge at 31 × 26 dp; the film's empty top half; 12 of 90 stamp names cut
+  28 Oct (`bruma-p30-night-check`, read only); the gold badge at 31 × 26 dp; the film's empty top half; 12 of 90 stamp names cut
   on their bands.
 - **27 Oct, extended testing and rechecks, revised to 13.3 / 20 (13.28):** ⚠ **N23, P0: refuse location in the first
   run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,

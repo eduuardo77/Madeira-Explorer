@@ -428,6 +428,9 @@ export default function DesignWorkbench() {
                       id: 'sand-island',
                       name: ISLAND.name,
                       count: n('passport.island.count', ISLAND.progress.total, { collected: ISLAND.progress.collected }),
+                      // The workbench shows the unpaid look (N22).
+                      line: n('passport.island.freeLeft', 1),
+                      lineMuted: true,
                       emblem: {
                         emblem: { kind: 'outline', points: ISLAND.outline },
                         name: ISLAND.name,

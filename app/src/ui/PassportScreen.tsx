@@ -62,6 +62,7 @@ import {
 } from '../progress/islandGateStore';
 import { inPassport, islandMedalIds, placesIn } from '../progress/islandPassports';
 import { getRegions } from '../content/regionCatalogue';
+import { islandCardLine, type IslandCardLine } from '../passport/islandCardLine';
 import type { IslandCard } from './PassportView';
 import { medalSetName, medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import PlaceCardView from './PlaceCardView';
@@ -143,6 +144,11 @@ function medalTiles(progress: readonly MedalProgress[], language: Language): Med
 const SLOW_HALF_EVERY_MS = 60_000;
 
 /** One island's own passport page (D-109), read with the main page. */
+/** The words for an island card's last line (N22, `islandCardLine`). */
+function lineFor(line: IslandCardLine): string {
+  return line.key === 'passport.island.freeLeft' ? n(line.key, line.count) : t(line.key);
+}
+
 type IslandPage = {
   id: string;
   name: string;
@@ -705,6 +711,8 @@ export default function PassportScreen({
             total: page.progress.total,
             look: page.progress.collected === page.progress.total ? 'gold' : 'silver',
           },
+          line: lineFor(islandCardLine(page.freeLeft)),
+          lineMuted: islandCardLine(page.freeLeft).tone === 'muted',
           onOpen: () => setOpenIsland(page.id),
         })),
     [islandPages]

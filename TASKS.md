@@ -250,6 +250,13 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [x] **T-293** **Porto Santo's card at the foot of the passport, and N22's line** (D-109 amended,
+      the lead, 2026-10-27). **Done, seen on the P30** (field build, `install -r`, database backed up):
+      the card under *Medalhas*, above *Mais recente*; the top goes from the unlock banner straight to
+      *Miradouros*. Before buying, its last line in grey from `islandCardLine` (tested): *1 carimbo
+      grátis, os outros com o passaporte*, then *Os outros carimbos com o passaporte*; after buying,
+      *Incluído no teu passaporte* in link blue. Tapping it still opens Porto Santo's passport.
+      Shot: `tools/out/porto-santo-foot-p30.png`.
 - [x] **T-292** **N21: ending an outing asks first once it has run 3 minutes** (the lead, 2026-10-27:
       *"we can add a confirmation to end an outing when it exceeds a few minutes"*). **Done the same
       day, emulator.** `endNeedsConfirm` (tested) returns how long the outing ran from

@@ -304,8 +304,9 @@ export type PassportViewProps = {
   /** The page's name: the passport's own, or an island's (D-109). */
   title?: string;
   /**
-   * Islands with a passport of their own, as cards under the number (D-109,
-   * option B): the island sold from day one, apart from this page's count.
+   * Islands with a passport of their own, as cards at the foot of the page,
+   * under the medals (D-109, option B, amended 2026-10-27): the island shown
+   * from day one, apart from this page's count.
    */
   islands?: IslandCard[];
 };
@@ -318,6 +319,10 @@ export type IslandCard = {
   count: string;
   /** The island's outline as a medal, silver while unfinished. */
   emblem: SetMedalWords;
+  /** The last line, worded by the screen (`islandCardLine`, N22). */
+  line: string;
+  /** Grey before buying; link blue once the island is included. */
+  lineMuted: boolean;
   onOpen: () => void;
 };
 
@@ -849,24 +854,6 @@ function PassportView({
         </View>
       )}
 
-      {(islands ?? []).map((island) => (
-        <Pressable
-          key={island.id}
-          accessibilityRole="button"
-          accessibilityLabel={`${t('passport.island.a11y.open', { island: island.name })}, ${island.count}`}
-          onPress={island.onOpen}
-          style={({ pressed }) => [styles.island, pressed && styles.seeAllPressed]}
-        >
-          <MedalArt id={`island-${island.id}`} drawing={{ kind: 'set', words: island.emblem }} size={ISLAND_EMBLEM} />
-          <View style={styles.islandText}>
-            <Text style={styles.islandName}>{island.name}</Text>
-            <Text style={styles.islandCount}>{island.count}</Text>
-            <Text style={styles.islandIncluded}>{t('passport.island.included')}</Text>
-          </View>
-          <ChevronMark size={22} color={album.textMuted} />
-        </Pressable>
-      ))}
-
       {/* An island's own page may lack a category (D-109): no empty row for it. */}
       {progress.byCategory.filter((row) => row.total > 0).map((row) => (
         <CategoryRow
@@ -888,6 +875,27 @@ function PassportView({
       {founder === undefined && (medals === undefined || medals.length === 0) ? null : (
         <MedalsSection founder={founder} medals={medals ?? []} onOpenMedal={onOpenMedal} />
       )}
+
+      {/* D-109, amended 2026-10-27 (the lead): at the foot, under the medals.
+          Few tourists reach Porto Santo; the card is there to show what the
+          purchase also opens, not to sit between the banner and the places. */}
+      {(islands ?? []).map((island) => (
+        <Pressable
+          key={island.id}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('passport.island.a11y.open', { island: island.name })}, ${island.count}`}
+          onPress={island.onOpen}
+          style={({ pressed }) => [styles.island, pressed && styles.seeAllPressed]}
+        >
+          <MedalArt id={`island-${island.id}`} drawing={{ kind: 'set', words: island.emblem }} size={ISLAND_EMBLEM} />
+          <View style={styles.islandText}>
+            <Text style={styles.islandName}>{island.name}</Text>
+            <Text style={styles.islandCount}>{island.count}</Text>
+            <Text style={island.lineMuted ? styles.islandLineMuted : styles.islandIncluded}>{island.line}</Text>
+          </View>
+          <ChevronMark size={22} color={album.textMuted} />
+        </Pressable>
+      ))}
 
       {trips === undefined || trips.length < 2 || onOpenTrip === undefined ? null : (
         <View style={styles.section}>
@@ -979,6 +987,7 @@ const styles = StyleSheet.create({
   islandName: { color: album.text, fontSize: fontSize.body, fontWeight: '700' },
   islandCount: { color: album.textMuted, fontSize: fontSize.small },
   islandIncluded: { color: album.tint, fontSize: fontSize.small },
+  islandLineMuted: { color: album.textMuted, fontSize: fontSize.small },
   content: {
     padding: spacing.md,
     // Room for the navigation bar the screen draws above this (`‹ Map`).

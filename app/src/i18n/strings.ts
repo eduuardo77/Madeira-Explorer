@@ -572,6 +572,8 @@ export const STRINGS = {
   // D-109: an island with a passport of its own, reached from a card in the
   // main passport. Its name comes from content (D-017).
   'passport.island.included': s('Included in your passport', 'Incluído no teu passaporte', 'In Ihrem Reisepass enthalten'),
+  // N22 (2026-10-27): before buying, in grey, once the island's free stamp is used.
+  'passport.island.freeUsed': s('The other stamps with the passport', 'Os outros carimbos com o passaporte', 'Die anderen Stempel mit dem Reisepass'),
   'passport.island.a11y.open': s('Open the {island} passport', 'Abrir o passaporte de {island}', 'Den Reisepass {island} öffnen'),
   'passport.island.a11y.back': s('Back to the passport', 'Voltar ao passaporte', 'Zurück zum Reisepass'),
   'passport.seeAll': s('See all', 'Ver tudo', 'Alle ansehen'),
@@ -1513,6 +1515,11 @@ export const PLURALS = {
   // 2026-10-10: "1 carimbo teu à espera. Desbloqueia e vê-os a cores").
   // D-105: the free stamps still to come, on the passport card and in the
   // pop-up of the third stamp.
+  // N22 (2026-10-27): an island's card before buying, while its free stamp is to come.
+  'passport.island.freeLeft': {
+    one: s('1 free stamp, the rest with the passport', '1 carimbo grátis, os outros com o passaporte', '1 Stempel gratis, die anderen mit dem Reisepass'),
+    other: s('{count} free stamps, the rest with the passport', '{count} carimbos grátis, os outros com o passaporte', '{count} Stempel gratis, die anderen mit dem Reisepass'),
+  },
   'freeTier.left': {
     one: s('1 free stamp left', 'Falta 1 carimbo grátis', 'Noch 1 kostenloser Stempel'),
     other: s('{count} free stamps left', 'Faltam {count} carimbos grátis', 'Noch {count} kostenlose Stempel'),

@@ -147,7 +147,7 @@ Santo. No purchase matrix on a Play install.
 | N19 | English Settings: the button says *Restore purchase*, the note under it *Recover purchase*. Portuguese and German agree | `strings.ts:901`, `:1192` | P3 |
 | N20 | The paywall's stamp art cuts *JARDIM BOTÂNICO DA…* | emulator, screenshot | P3 |
 | N21 | Twice on 26 Oct an outing **ended 2 and 9 seconds after it started** (16:13:45 to :47, 19:38:01 to :10). The first is the field log's "retap"; the second is unexplained. A start that reads as a stop to a second tap would cost a tester a whole outing | diary | P3, to check |
-| N22 | The Porto Santo card says *Incluído no teu passaporte* in link blue to a user who has not paid, just under the unlock banner. May read as "free". The lead's call | P30 screenshot | info |
+| N22 | The Porto Santo card says *Incluído no teu passaporte* in link blue to a user who has not paid, just under the unlock banner. May read as "free". The lead's call | P30 screenshot | info; **fixed 27 Oct (T-293)**: the card moved to the foot, its line before buying *1 carimbo grátis, os outros com o passaporte* in grey |
 | carried | The new-stamp pop-up counts both islands (*1 / 90 places collected*, *Bronze passport!* for a Madeira stamp; found 26 Oct, **seen today** on both reruns); the passport's opening hitch; Risco and Alecrim 0 m apart; `founderWindow` null | `HANDOFF.md`, validator | P3 / info |
 
 ## 5. Extended testing, 10:30 to 11:00

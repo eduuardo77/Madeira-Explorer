@@ -5842,6 +5842,18 @@ screen selling an island the app hides, so B. A was rejected outright. **D-024's
 switched off, not deleted:** `hiddenIslands` in `pois.json` is empty, and putting the island back
 in it restores C with T-067a's arrival check.
 
+**Amended 2026-10-27, the card moves to the foot (the lead):** *"Porto Santo shouldn't have so
+much space on that main page... maybe on the bottom of the page. Because statistically just a
+really small percentage of tourists will go to Porto Santo. Porto Santo is just another way to
+convince the user that the pay version is worth it."* Drawn two ways on the P30
+(`tools/out/porto-santo-placement.png`): the same card under the medals, or one compact row
+there. **The lead chose the card**, under *Medalhas*, above *Mais recente*. Its last line is no
+longer *Incluído no teu passaporte* before buying, which read as "free" just under the unlock
+banner (review N22): in the card's grey, *1 carimbo grátis, os outros com o passaporte*, then
+*Os outros carimbos com o passaporte* once the free stamp is used; after buying, *Incluído* in
+link blue as before (`passport/islandCardLine.ts`). The paywall still names the island (point 6).
+Built in T-293. Still B in kind (shown from day one); the lead may assess it again.
+
 **Built 2026-10-26 (T-067a):** `islandPassports` in `pois.json`; `progress/islandPassports.ts`
 (which passport a place is in); Madeira's count and medals leave the island out; the island's
 page is the same `PassportView` fed its own places, reached from a card under the number and

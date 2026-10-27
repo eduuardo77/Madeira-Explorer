@@ -228,6 +228,7 @@ The lead lifted the no-app-changes rule for these fixes only. One commit each.
 
 - **Small fixes (T-291):**
   - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
+  - N19: English Settings' note says *Restore purchase*, as its button does.
 
 ## 6. MVP and publishing
 

@@ -251,6 +251,7 @@ permission, L3 privacy contact.
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
 - [x] **T-291** **The 27 Oct review's small fixes.** Done 2026-10-27, one commit each:
       - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
+      - N19: English Settings' note says *Restore purchase*, as its button does.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

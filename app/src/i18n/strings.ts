@@ -1189,7 +1189,7 @@ export const STRINGS = {
   'passport.nudge.button': s('See', 'Ver', 'Ansehen'),
   'settings.passport.unlock': s('Unlock the passport', 'Desbloquear o passaporte', 'Reisepass freischalten'),
   'settings.passport.footnote.locked': s(
-    'One payment shows every stamp, with no subscription. A purchase made on another phone comes back with Recover purchase.',
+    'One payment shows every stamp, with no subscription. A purchase made on another phone comes back with Restore purchase.',
     'Um único pagamento mostra todos os carimbos, sem subscrição. Uma compra feita noutro telemóvel volta com Recuperar compra.',
     'Eine einmalige Zahlung zeigt alle Stempel, ohne Abo. Ein Kauf auf einem anderen Telefon kommt mit Kauf wiederherstellen zurück.'
   ),

@@ -200,10 +200,17 @@ export function nextOnboardingStep(state: OnboardingState): OnboardingStep {
   // ⚠ It is a screen, not a gate (D-008): both actions move on, and it is shown
   // once. It is deliberately after notifications rather than before, because two
   // system dialogs back to back get both refused and this one opens a third.
-  if (state.android && !state.keepRunningSeen && !state.batteryExempt) {
+  // ⚠ N28 (2026-10-27): and only with location. Keeping an app awake that
+  // records nothing is a pointless ask, and a refusal already said no once.
+  if (state.android && !state.keepRunningSeen && !state.batteryExempt && locationGranted(state.location)) {
     return 'keep-running';
   }
   return 'complete';
+}
+
+/** Location is on, in either form: what recording, and so the keep-running ask, need. */
+export function locationGranted(level: PermissionLevel): boolean {
+  return level === 'while_using' || level === 'always';
 }
 
 /** The asks first run makes, each its own card with the same layout (T-250). */

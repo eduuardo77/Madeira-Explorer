@@ -230,6 +230,7 @@ The lead lifted the no-app-changes rule for these fixes only. One commit each.
   - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
   - N19: English Settings' note says *Restore purchase*, as its button does.
   - N27: *Ver tudo* 56 × 49 dp, *Ver a tua viagem* 133 × 49, the Settings switch 52 × 48, measured on the P30 (`ui/touchArea.ts`, padding with an equal negative margin, tested; nothing moved). ⚠ **The gold badge only 31 × 26** (was 19 × 22): Android reports it clipped to the passport stamp it sits on, and 48 dp would give a quarter of the stamp's face to the unlock sheet. **The lead's call.**
+  - N28: refusing location skips step 5 and the recent-apps line (`locationGranted`, tested); emulator, clean install, all refused.
 
 ## 6. MVP and publishing
 

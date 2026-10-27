@@ -233,6 +233,19 @@ test('Android gets the keep-running screen, last, and only once', () => {
   );
 });
 
+test('without location there is no keep-running screen (N28)', () => {
+  for (const location of ['denied', 'undetermined'] as const) {
+    const step = nextOnboardingStep(
+      onboarding({ location, notifications: 'granted', android: true, alwaysOffered: true })
+    );
+    assert.notEqual(step, 'keep-running', location);
+  }
+  assert.equal(
+    nextOnboardingStep(onboarding({ location: 'always', notifications: 'granted', android: true, alwaysOffered: true })),
+    'keep-running'
+  );
+});
+
 test('iOS never sees the keep-running screen', () => {
   // It is advice about Android OEM battery managers. iOS has no equivalent
   // screen to send anybody to, and `isBatteryExemptionAvailable` is false there.
@@ -261,18 +274,18 @@ test('the keep-running screen never jumps the queue', () => {
 
 test('⚠ nothing about the new step can gate the user (D-008)', () => {
   // The rule the whole module exists to keep. Somebody who refuses everything,
-  // on Android, still reaches a working app — through the advice screen, not
-  // stuck on it.
+  // on Android, still reaches a working app. Since N28 (2026-10-27) without
+  // the advice screen at all, which keeps an app awake that records nothing.
   const refusedEverything = onboarding({
     location: 'denied',
     notifications: 'denied',
     android: true,
   });
-  assert.equal(nextOnboardingStep(refusedEverything), 'keep-running');
-  assert.equal(
-    nextOnboardingStep({ ...refusedEverything, keepRunningSeen: true }),
-    'complete'
-  );
+  assert.equal(nextOnboardingStep(refusedEverything), 'complete');
+  // With location granted, the advice screen still never holds anybody.
+  const granted = { ...refusedEverything, location: 'while_using' as const, alwaysOffered: true };
+  assert.equal(nextOnboardingStep(granted), 'keep-running');
+  assert.equal(nextOnboardingStep({ ...granted, keepRunningSeen: true }), 'complete');
 });
 
 /** D-094: physical activity, right after location, once. */

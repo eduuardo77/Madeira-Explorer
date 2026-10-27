@@ -29,7 +29,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { deviceLanguage, t } from '../i18n';
-import { batterySentence } from './permissionPolicy';
+import { batterySentence, locationGranted } from './permissionPolicy';
 import { deviceHasLaunchManager } from '../recording/deviceLaunchManager';
 import type { SystemAsk } from './systemAsk';
 import { getContentPack } from '../content/poiCatalogue';
@@ -170,7 +170,8 @@ function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
         art: 'ready',
         title: t('onboarding.ready.title'),
         body: [line],
-        note: props.location === 'denied' || Platform.OS !== 'android' ? undefined : t('onboarding.ready.tip'),
+        // N28: the recent-apps line only matters when something is recording.
+        note: props.location === undefined || !locationGranted(props.location) || Platform.OS !== 'android' ? undefined : t('onboarding.ready.tip'),
         continueLabel: t('onboarding.ready.open'),
       };
     }

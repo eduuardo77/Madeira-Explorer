@@ -253,6 +253,7 @@ permission, L3 privacy contact.
       - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
       - N19: English Settings' note says *Restore purchase*, as its button does.
       - N27: *Ver tudo* 56 × 49 dp, *Ver a tua viagem* 133 × 49, the Settings switch 52 × 48, measured on the P30 (`ui/touchArea.ts`, padding with an equal negative margin, tested; nothing moved). ⚠ **The gold badge only 31 × 26** (was 19 × 22): Android reports it clipped to the passport stamp it sits on, and 48 dp would give a quarter of the stamp's face to the unlock sheet. **The lead's call.**
+      - N28: refusing location skips step 5 and the recent-apps line (`locationGranted`, tested); emulator, clean install, all refused.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

@@ -81,6 +81,7 @@ import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
 import ChevronMark from './ChevronMark';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
+import { growTouch } from './touchArea';
 
 /**
  * The strip a row scrolls in, for `stripStampSize` (T-219): its visible width,
@@ -683,7 +684,7 @@ export function CategoryRow({
               // The word is small, so the tap target is grown around it
               // rather than left at the size of the text (D-015).
               hitSlop={SEE_ALL_HIT_SLOP}
-              style={({ pressed }) => [pressed && styles.seeAllPressed]}
+              style={({ pressed }) => [styles.seeAllTouch, pressed && styles.seeAllPressed]}
             >
               <Text style={styles.seeAll}>
                 {expanded ? t('passport.showLess') : t('passport.seeAll')}
@@ -805,7 +806,7 @@ function PassportView({
               // Two words, so the target is grown around them rather than left
               // at the size of the text (D-015).
               hitSlop={SEE_ALL_HIT_SLOP}
-              style={({ pressed }) => [pressed && styles.seeAllPressed]}
+              style={({ pressed }) => [styles.watchTouch, pressed && styles.seeAllPressed]}
             >
               <Text style={styles.heroAction}>{t('replay.watch')}</Text>
             </Pressable>
@@ -1102,6 +1103,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   seeAllPressed: { opacity: 0.5 },
+  // N27: the views themselves 48 dp for Play's report, nothing moved.
+  seeAllTouch: growTouch(19),
+  watchTouch: growTouch(31),
   // A card, like a category row, because it belongs to this screen rather than
   // floating over it — and bordered rather than filled, so it reads as a
   // question rather than as an award already won.

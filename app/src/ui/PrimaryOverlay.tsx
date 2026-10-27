@@ -85,6 +85,7 @@ import {
   spacing,
   warningBanner,
 } from './theme';
+import { growTouch } from './touchArea';
 
 /** The gold count's drawn size (D-097, R2): a circle, wider only for two digits. */
 const BADGE_SIZE = 30;
@@ -702,6 +703,8 @@ const styles = StyleSheet.create({
   badgeHit: {
     alignItems: 'center',
     justifyContent: 'center',
+    // N27: the view itself 48 dp for Play's report; the badge draws as before.
+    ...growTouch(22, 19),
   },
   badgeText: {
     color: reward.goldButtonText,

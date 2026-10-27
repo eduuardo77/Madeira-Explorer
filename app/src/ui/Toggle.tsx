@@ -14,8 +14,9 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { colors, MIN_TAP_TARGET } from './theme';
+import { growTouch } from './touchArea';
 
 const TRACK_WIDTH = 52;
 const TRACK_HEIGHT = 32;
@@ -51,8 +52,10 @@ export default function Toggle({
       disabled={disabled}
       onPress={() => onChange(!value)}
       hitSlop={{ top: HIT_SLOP, bottom: HIT_SLOP, left: 8, right: 8 }}
-      style={[styles.track, value ? styles.trackOn : styles.trackOff, disabled === true && styles.disabled]}
+      // N27: the pressable's own box 48 dp for Play's report; the track inside draws as before.
+      style={[styles.touch, disabled === true && styles.disabled]}
     >
+      <View style={[styles.track, value ? styles.trackOn : styles.trackOff]}>
       <Animated.View
         style={[
           styles.thumb,
@@ -70,11 +73,13 @@ export default function Toggle({
           },
         ]}
       />
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  touch: growTouch(TRACK_HEIGHT),
   track: {
     width: TRACK_WIDTH,
     height: TRACK_HEIGHT,

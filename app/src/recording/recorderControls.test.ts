@@ -8,7 +8,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   effectiveProfile,
+  endNeedsConfirm,
   OUTING_AWAKE_MS,
+  OUTING_CONFIRM_AFTER_MS,
   outingAwakeOver,
   outingKeepsAwake,
   offerAutomatic,
@@ -242,3 +244,24 @@ test('no stamps and no distance are both said, not left blank', () => {
   assert.deepEqual(described.lines, ['10 min · distance not measured', 'No new stamps on this outing.']);
 });
 
+
+// N21 (the lead, 2026-10-27): confirm ending an outing past a few minutes.
+test('a second tap moments after starting still ends the outing at once', () => {
+  const clock = (ranMs: number) => ({ inProgress: true, startedTs: NOW - ranMs, nowMs: NOW });
+  // The two short outings of 26 Oct: 2 s and 9 s.
+  assert.equal(endNeedsConfirm(clock(2_000)), null);
+  assert.equal(endNeedsConfirm(clock(9_000)), null);
+  assert.equal(endNeedsConfirm(clock(OUTING_CONFIRM_AFTER_MS - 1)), null);
+});
+
+test('an outing that has run a few minutes asks before it ends, with how long', () => {
+  assert.equal(OUTING_CONFIRM_AFTER_MS, 3 * 60_000);
+  const ran = 12 * 60_000;
+  assert.equal(endNeedsConfirm({ inProgress: true, startedTs: NOW - ran, nowMs: NOW }), ran);
+  assert.equal(formatDuration(ran), '12 min');
+});
+
+test('nothing asks when no outing runs, or its start cannot be read', () => {
+  assert.equal(endNeedsConfirm({ inProgress: false, startedTs: null, nowMs: NOW }), null);
+  assert.equal(endNeedsConfirm({ inProgress: true, startedTs: null, nowMs: NOW }), null);
+});

@@ -284,6 +284,25 @@ export function formatDuration(ms: number): string {
   return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`;
 }
 
+/**
+ * N21 (the lead, 2026-10-27): an outing that has run this long asks before it
+ * ends. A second tap moments after *Começar passeio* still ends it at once,
+ * because that is how a mistaken start is undone; later, one tap could lose
+ * a whole outing's recording to a brush of the thumb.
+ */
+export const OUTING_CONFIRM_AFTER_MS = 3 * 60_000;
+
+/**
+ * How long the outing has run when ending it should ask first, or null when it
+ * ends at once. An unreadable start time ends at once, as before N21: the
+ * question has to say how long, and a made-up duration would be false.
+ */
+export function endNeedsConfirm(clock: OutingClock): number | null {
+  if (!clock.inProgress || clock.startedTs === null) return null;
+  const ranMs = clock.nowMs - clock.startedTs;
+  return ranMs >= OUTING_CONFIRM_AFTER_MS ? ranMs : null;
+}
+
 /** The summary as the user reads it: a title and its lines (D-087 §7). */
 export function describeWalkSummary(
   summary: WalkSummary,

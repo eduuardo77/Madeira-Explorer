@@ -557,6 +557,13 @@ export const STRINGS = {
     'Keine neuen Stempel auf diesem Ausflug.'
   ),
   'walk.summary.ok': s('OK', 'OK', 'OK'),
+  // N21: asked only once an outing has run a few minutes. The duration goes in
+  // bold between `lead` and `rest` (ChoiceDialog).
+  'walk.confirmEnd.title': s('End your outing?', 'Terminar o passeio?', 'Ausflug beenden?'),
+  'walk.confirmEnd.lead': s('Your outing has been recording for', 'O teu passeio já vai em', 'Ihr Ausflug zeichnet seit'),
+  'walk.confirmEnd.rest': s('so far. Ending it opens its summary.', 'de registo. Ao terminar, abre o resumo.', 'auf. Beim Beenden öffnet sich die Zusammenfassung.'),
+  'walk.confirmEnd.yes': s('End outing', 'Terminar passeio', 'Ausflug beenden'),
+  'walk.confirmEnd.no': s('Keep going', 'Continuar', 'Weiter aufzeichnen'),
   'map.a11y.openPassport': s('Open your passport', 'Abrir o teu passaporte', 'Reisepass öffnen'),
 
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────

@@ -249,6 +249,13 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [x] **T-292** **N21: ending an outing asks first once it has run 3 minutes** (the lead, 2026-10-27:
+      *"we can add a confirmation to end an outing when it exceeds a few minutes"*). **Done the same
+      day, emulator.** `endNeedsConfirm` (tested) returns how long the outing ran from
+      `OUTING_CONFIRM_AFTER_MS` (3 min) on, else null; an unreadable start time ends at once, since
+      the question must say a real duration. Bruma's `ChoiceDialog`, *End outing* or *Keep going*.
+      Seen: a 3 s outing ended at once; at 3 min the question; *Keep going* kept recording; a 9 min
+      outing ended to its summary.
 - [x] **T-291** **The 27 Oct review's small fixes.** Done 2026-10-27, one commit each:
       - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
       - N19: English Settings' note says *Restore purchase*, as its button does.

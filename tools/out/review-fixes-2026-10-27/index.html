@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review fixes, 27 Oct</title>
+<style>
+  :root { --bg: #f6f5f2; --card: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --ok: #1f7a3a; --warn: #b25b00; --line: #e3e1dc; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin: 0 0 18px; }
+  h2 { font-size: 19px; margin: 0 0 6px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 2px; }
+  .p30 { background: #e7f3ea; color: var(--ok); }
+  .emu { background: #e8eef8; color: #2a5aa8; }
+  .unit { background: #f1efe9; color: var(--muted); }
+  .lead { background: #fbeedd; color: var(--warn); }
+  p { margin: 6px 0; }
+  .shots { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+  figure { margin: 0; max-width: 300px; }
+  figure.wide { max-width: 100%; }
+  figure img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  pre { background: #f3f2ee; border-radius: 8px; padding: 10px 12px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; }
+  .note { color: var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <h1>The 27 Oct review's fixes, seen</h1>
+  <p class="lede">Every change from today, with where it was checked. Green: your P30. Blue: the emulator (360 dp wide, like the P30). Grey: unit tests only. Orange: your call.</p>
+
+  <section>
+    <h2>N21: ending an outing asks first, after 3 minutes <span class="tag emu">emulator</span></h2>
+    <p>New today. A tap moments after starting still ends the outing at once, so a mistaken start is undone as before. From 3 minutes on, ending asks, and says how long the outing has run. <b>Keep going</b> leaves it recording.</p>
+    <div class="shots">
+      <figure><img src="n21-quick-end.png" alt=""><figcaption>Started and tapped again after 3 seconds: ended at once, no question.</figcaption></figure>
+      <figure><img src="n21-ask.png" alt=""><figcaption>After 3 minutes: the question. Keep going kept the outing running.</figcaption></figure>
+      <figure><img src="n21-ended.png" alt=""><figcaption>A 9 minute outing, End outing chosen: the summary, 9 min, 290 m.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>N22: where "Incluído no teu passaporte" is <span class="tag lead">your call</span></h2>
+    <p>On the passport, in the Porto Santo card just under the unlock banner, in link blue (orange box, your P30 now). Someone who has not paid reads it right after "21 carimbos teus à espera", which may say "free". Not changed.</p>
+    <div class="shots">
+      <figure><img src="n27-p30-passport.png" alt=""><figcaption>Your P30, 13:28. Orange: the Porto Santo card. Red: touch areas (N27).</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>N23: refusing location no longer crashes <span class="tag emu">emulator</span></h2>
+    <p>Clean install, every permission refused: the map opens with Allow location, and a second launch does not crash. Then location allowed in Android's settings and back to Bruma: the blue dot.</p>
+    <div class="shots">
+      <figure><img src="n23-refused.png" alt=""><figcaption>All refused: the map and its Allow location button.</figcaption></figure>
+      <figure><img src="n23-granted.png" alt=""><figcaption>Allowed in Android's settings, back in the same process: the blue dot.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>N15: no fine GPS held at home <span class="tag p30">P30</span></h2>
+    <p>Not visual. What your P30's diary and Android said:</p>
+<pre>12:11:15  profile driving -> stationary: restart with no recent fix (last fix 1037 min ago)
+12:11:16  still check: started on driving        (a cache race put driving back, now fixed)
+12:17:16  profile driving -> stationary: still by the motion sensors for 6 min, no position (indoors)
+after the race fix, at home: Bruma's only request every 5 min, balanced power, 100 m</pre>
+    <p>Tonight's night at home is checked automatically tomorrow at 08:30, read only.</p>
+  </section>
+
+  <section>
+    <h2>New-stamp pop-up counts its own island <span class="tag emu">emulator</span></h2>
+    <p>A walk replayed to Forte de São Tiago: <b>1 / 81</b>, where it said 1 / 90. "Bronze passport!" on a first stamp is the tier rule itself (the first stamp reaches bronze), not the island count.</p>
+    <div class="shots"><figure><img src="popup-island-count.png" alt=""><figcaption>The pop-up after the replayed walk.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N16: large text wraps whole words <span class="tag emu">emulator</span></h2>
+    <p>Before, German at 160%: "kostenl / ose Ste / mpel" and a cut status line. After: three languages at 130% and 160%.</p>
+    <div class="shots">
+      <figure><img src="n16-before-de160.png" alt=""><figcaption>Before: German, 160%.</figcaption></figure>
+      <figure class="wide"><img src="n16-large-text.png" alt=""><figcaption>After, left to right: English 130% (passport frame missed) and 160%, Portuguese 130% and 160%, German 130% and 160%.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>N26: the line through the payment note <span class="tag emu">emulator</span></h2>
+    <p>Not reproduced in English or German at 160%, from a cold launch or with the size changed while open. Nothing changed for it.</p>
+    <div class="shots"><figure><img src="n26-de160.png" alt=""><figcaption>German, 160%: the note clean under its card.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N25: the film's closing frame clears the edges <span class="tag p30">P30</span> <span class="tag lead">your call: the empty top</span></h2>
+    <p>Your real trip, before and after. Porto Moniz and the roads now clear both sides. The top half is still sea: a wide island on a tall screen leaves that space somewhere.</p>
+    <div class="shots"><figure class="wide"><img src="n25-film.png" alt=""><figcaption>Left: before. Right: after.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N27: touch areas at least 48 dp, nothing moved <span class="tag p30">P30</span> <span class="tag lead">your call: the badge</span></h2>
+    <p>The red boxes are what Android reports, measured on your P30; the screens look exactly as before. Ver tudo 56 x 49, Ver a tua viagem 133 x 49, the switch 52 x 48. The gold badge only 31 x 26: 48 dp would give a quarter of the passport stamp's face to the unlock sheet. (Boxes at the screen's foot read small because the screen cuts them.)</p>
+    <div class="shots">
+      <figure><img src="n27-p30-map.png" alt=""><figcaption>Map: the gold badge, 31 x 26 dp.</figcaption></figure>
+      <figure><img src="n27-p30-passport2.png" alt=""><figcaption>Passport: Ver tudo, 56 x 49 dp.</figcaption></figure>
+      <figure><img src="n27-p30-settings.png" alt=""><figcaption>Settings: the switch, 52 x 48 dp.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>N28: no "Keep Bruma awake" without location <span class="tag emu">emulator</span></h2>
+    <p>Clean install, all refused: steps 1, 3 and 4 of 5, then straight to the end, with no "don't close Bruma from recent apps" line.</p>
+    <div class="shots"><figure><img src="n28-ready.png" alt=""><figcaption>The last card after refusing everything.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N18: all four options on the background step <span class="tag emu">emulator</span></h2>
+    <p>360 x 780: Don't allow used to sit 10 dp tall at the foot. The rows not to pick are drawn closer when the card would overflow.</p>
+    <div class="shots"><figure><img src="n18-after.png" alt=""><figcaption>Step 2 of 5, all four options above the buttons.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N20: paywall samples print their names whole <span class="tag emu">emulator</span> <span class="tag lead">your call: 12 cut names</span></h2>
+    <p>Three openings, every sample name whole. Separately, 12 of the 90 names are cut on their own stamps everywhere (Monte Palace, Teatro Baltazar Dias, Jardim Botânico and nine more).</p>
+    <div class="shots"><figure class="wide"><img src="n20-paywall.png" alt=""><figcaption>The paywall opened three times.</figcaption></figure></div>
+  </section>
+
+  <section>
+    <h2>N19: Restore purchase, button and note agree <span class="tag emu">emulator</span></h2>
+    <div class="shots"><figure><img src="n19-settings.png" alt=""><figcaption>English Settings: the note now says Restore purchase.</figcaption></figure></div>
+  </section>
+</main>
+</body>
+</html>

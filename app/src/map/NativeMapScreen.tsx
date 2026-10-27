@@ -78,7 +78,9 @@ import {
   startOuting,
 } from '../recording/walkSession';
 import { setAutomaticRecording } from '../recording/automaticRecording';
+import { readOutingClock } from '../recording/trackingSettings';
 import {
+  endNeedsConfirm,
   formatDuration,
   offerAutomatic,
   primaryControl,
@@ -339,6 +341,8 @@ export default function NativeMapScreen({
    * the first read; the button shows *start* until then, the safe default.
    */
   const [controlInput, setControlInput] = useState<ControlInput | null>(null);
+  /** N21: the duration in the "end your outing?" question, while it is open. */
+  const [confirmEnd, setConfirmEnd] = useState<string | null>(null);
   const [silentForMs, setSilentForMs] = useState<number | null>(null);
   /** Notices closed this session. `recorder-stopped` never lands here (T-174). */
   const [dismissedNotices, setDismissedNotices] = useState<
@@ -895,13 +899,41 @@ export default function NativeMapScreen({
         } else if (control === 'start-walk') {
           await startOuting(now);
         } else {
-          // D-087 §7: a short summary when the outing ends.
-          const summary = await endOuting(now);
-          Alert.alert(summary.title, summary.lines.join('\n'), [{ text: t('walk.summary.ok') }]);
+          // N21: an outing of a few minutes asks first; a mistaken start
+          // still ends with the second tap.
+          const ranMs = endNeedsConfirm(await readOutingClock(now));
+          if (ranMs !== null) {
+            setConfirmEnd(formatDuration(ranMs));
+            return;
+          }
+          await finishOuting(now);
         }
         await rereadControl();
       } catch (error) {
         await recordingEventDao.logError('walk toggle', error);
+      } finally {
+        setBusy(false);
+      }
+    })();
+  };
+
+  /** End the outing and show its short summary (D-087 §7). */
+  const finishOuting = async (now: number) => {
+    const summary = await endOuting(now);
+    Alert.alert(summary.title, summary.lines.join('\n'), [{ text: t('walk.summary.ok') }]);
+  };
+
+  /** N21's answer: end now, or carry on recording. */
+  const answerConfirmEnd = (end: boolean) => {
+    setConfirmEnd(null);
+    if (!end || busy) return;
+    setBusy(true);
+    void (async () => {
+      try {
+        await finishOuting(Date.now());
+        await rereadControl();
+      } catch (error) {
+        await recordingEventDao.logError('walk end', error);
       } finally {
         setBusy(false);
       }
@@ -1232,6 +1264,18 @@ export default function NativeMapScreen({
           onClose={() => setUnlocking(null)}
           // Read the map again: the count goes, and the button's stamp is shown.
           onUnlocked={() => setResumeCount((count) => count + 1)}
+        />
+      )}
+
+      {confirmEnd === null ? null : (
+        <ChoiceDialog
+          icon="recording"
+          title={t('walk.confirmEnd.title')}
+          lead={t('walk.confirmEnd.lead')}
+          strong={confirmEnd}
+          rest={t('walk.confirmEnd.rest')}
+          primary={{ label: t('walk.confirmEnd.yes'), onPress: () => answerConfirmEnd(true) }}
+          secondary={{ label: t('walk.confirmEnd.no'), onPress: () => answerConfirmEnd(false) }}
         />
       )}
 

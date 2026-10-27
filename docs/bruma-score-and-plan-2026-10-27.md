@@ -170,7 +170,7 @@ the frame probe; a label and touch-size audit of the map, Settings and passport 
 | N27 | **Four touch targets under 48 dp** on the P30: the gold count badge 19 × 22 dp (over the passport button, which does something else), *Ver tudo* 19 dp tall, *Ver a tua viagem* 31 dp, the Settings switch 32 dp. Play's pre-launch report flags these. For: **every touchable control has a spoken label** on the three screens | `uiautomator`, 480 dpi | P3 |
 | N28 | Refusing location still leads to step 5 (*Keep Bruma awake*) and the *don't close Bruma from recent apps* line, both pointless without location | emulator | P3 |
 | N29 | The outing summary is Android's plain grey alert, not Bruma's design | emulator screenshot | P3 |
-| N21 | **Explained:** the button ignores taps only while a start is in progress (`busy`), and ending asks for no confirmation, so a second tap a second or two after starting ends the outing. Not a crash; a design gap | `NativeMapScreen.tsx:876` | P3 |
+| N21 | **Explained:** the button ignores taps only while a start is in progress (`busy`), and ending asks for no confirmation, so a second tap a second or two after starting ends the outing. Not a crash; a design gap | `NativeMapScreen.tsx:876` | P3, fixed 27 Oct (T-292): asks after 3 min |
 
 **Good:** the film on 46,477 real fixes runs at **46.3 fps**, worst gap 66 ms, none over 100,
 the same as T-279's 46; the trip viewer opens on the last day with its numbers; refusing location

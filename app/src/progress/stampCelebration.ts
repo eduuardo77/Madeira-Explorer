@@ -65,3 +65,29 @@ export function celebrationFor(
     rankUp: rankAfter !== rankBefore ? rankAfter : null,
   };
 }
+
+/**
+ * The celebration counted on the stamp's own island (D-109): the passport
+ * counts Madeira and Porto Santo apart, and the pop-up said *1 / 90* and
+ * *Bronze passport!* for a Madeira stamp when it counted both (26 Oct 2026).
+ * `islandByPlace` names an island passport per place; a main-island place is
+ * absent from it, as everywhere else.
+ */
+export function celebrationOnIsland(
+  placeId: string,
+  earned: readonly EarnedForCelebration[],
+  places: readonly { id: string; category: Category }[],
+  islandByPlace: ReadonlyMap<string, string>
+): Celebration | null {
+  const island = islandByPlace.get(placeId) ?? null;
+  const sameIsland = (id: string) => (islandByPlace.get(id) ?? null) === island;
+  const own = places.filter((place) => sameIsland(place.id));
+  const categoryTotals: Record<Category, number> = { viewpoint: 0, levada: 0, village: 0, beach: 0, landmark: 0 };
+  for (const place of own) categoryTotals[place.category] += 1;
+  return celebrationFor(
+    placeId,
+    earned.filter((stamp) => sameIsland(stamp.placeId)),
+    own.length,
+    categoryTotals
+  );
+}

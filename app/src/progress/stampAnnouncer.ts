@@ -24,7 +24,7 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import { runAwardPass } from './stampAwards';
-import { celebrationFor, type Celebration } from './stampCelebration';
+import { celebrationOnIsland, type Celebration } from './stampCelebration';
 import { getMedals } from '../content/medalCatalogue';
 import { medalTitleFor, setMedalWordsFor } from '../passport/medalView';
 import type { SetMedalWords } from '../passport/medalArt';
@@ -156,8 +156,6 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
       await appStateDao.setJson(appStateDao.AppStateKey.StampsShown, news.record);
     }
     const places = getContentPack().places;
-    const categoryTotals = { viewpoint: 0, levada: 0, village: 0, beach: 0, landmark: 0 };
-    for (const place of places) categoryTotals[place.category] += 1;
     // T-235: every set as it stands, to find the ones a stamp completed.
     const awards = stamps.earned.map((each) => ({ place_id: each.placeId, awarded_ts: each.awardedTs }));
     const definitions = getMedals();
@@ -185,7 +183,8 @@ export async function pendingStampPopups(): Promise<StampPopup[]> {
               category: stamp.category,
               locked,
               awardedTs: stamp.awardedTs,
-              celebration: celebrationFor(placeId, stamps.earned, places.length, categoryTotals),
+              // D-109: counted on the stamp's own island, as the passport counts.
+              celebration: celebrationOnIsland(placeId, stamps.earned, places, getIslandByPlace()),
               othersWaiting: stamps.locked.size - (locked ? 1 : 0),
               medals: completedBy(placeId),
               freeLeft: locked ? null : offerWithStamp(placeId, stamps.earned, unlocked, getIslandByPlace()),

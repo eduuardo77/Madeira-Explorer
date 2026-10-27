@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { Category } from '../content/contentPack.ts';
-import { celebrationFor } from './stampCelebration.ts';
+import { celebrationFor, celebrationOnIsland } from './stampCelebration.ts';
 
 const HOUR = 3_600_000;
 
@@ -58,3 +58,23 @@ test('the first stamp of all makes the passport bronze', () => {
 test('a stamp that is not in the list has nothing to celebrate', () => {
   assert.equal(celebrationFor('zzz', earned([['a', 'beach']]), PLACES, TOTALS), null);
 });
+
+test('the pop-up counts the stamp on its own island, as the passport does (D-109)', () => {
+  const places: Array<{ id: string; category: Category }> = [
+    ...Array.from({ length: 81 }, (_, i) => ({ id: `m${i}`, category: 'viewpoint' as Category })),
+    ...Array.from({ length: 9 }, (_, i) => ({ id: `p${i}`, category: 'beach' as Category })),
+  ];
+  const islands = new Map(Array.from({ length: 9 }, (_, i) => [`p${i}`, 'porto-santo'] as [string, string]));
+  const list = earned([['p0', 'beach'], ['m0', 'viewpoint']]);
+
+  const madeira = celebrationOnIsland('m0', list, places, islands);
+  assert.equal(madeira?.collectedAfter, 1, 'the Porto Santo stamp is not counted');
+  assert.equal(madeira?.total, 81);
+  assert.equal(madeira?.categoryTotal, 81);
+
+  const portoSanto = celebrationOnIsland('p0', list, places, islands);
+  assert.equal(portoSanto?.collectedAfter, 1);
+  assert.equal(portoSanto?.total, 9);
+  assert.equal(portoSanto?.categoryTotal, 9);
+});
+

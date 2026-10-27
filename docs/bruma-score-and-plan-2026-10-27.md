@@ -226,6 +226,9 @@ The lead lifted the no-app-changes rule for these fixes only. One commit each.
 - **N25 fixed (T-290), on the P30.** The closing frame widens its side margins from 24 to 40 dp,
   so the roads and *Porto Moniz* clear the edges. The top half is still sea: the lead's call.
 
+- **Small fixes (T-291):**
+  - the new-stamp pop-up counts the stamp's own island (`celebrationOnIsland`, tested): *1 / 81* for a Madeira stamp, *1 / 9* on Porto Santo, as the passport counts (D-109). Unit tested; not seen on a phone.
+
 ## 6. MVP and publishing
 
 **MVP: yes. Shippable beta: yes, it is in one, with N23 as an urgent fix.** **Publishable: no.** In order of risk: **N23**; **N15**;

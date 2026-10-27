@@ -27,6 +27,13 @@ import { founderWindowOpen } from '../entitlement/founder';
 import { SHOWCASE_COUNT, showcase, stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
 import type { PassportStamp } from './PassportView';
+import { labelFitsBand } from '../passport/stampArt';
+
+/** N20: samples whose names print whole on the band, unless too few do. */
+function wholeNames<T extends { name: string; category: PassportStamp['category'] }>(places: readonly T[]): readonly T[] {
+  const whole = places.filter((place) => labelFitsBand(place.name, place.category));
+  return whole.length >= SHOWCASE_COUNT ? whole : places;
+}
 import { colors, spacing } from './theme';
 import UnlockSheetView from './UnlockSheetView';
 
@@ -57,7 +64,7 @@ export default function UnlockSheet({
   const [shown] = useState<PassportStamp[]>(() =>
     waiting.length > 0
       ? []
-      : showcase(visiblePlacesNow(), SHOWCASE_COUNT, Math.random).map((place) => ({
+      : showcase(wholeNames(visiblePlacesNow()), SHOWCASE_COUNT, Math.random).map((place) => ({
           placeId: place.id,
           name: place.name,
           category: place.category,

@@ -754,6 +754,16 @@ export function bandLabel(name: string, category: Category): string {
   return trimmed.length >= 4 ? trimmed : name;
 }
 
+/**
+ * Whether a place's name prints whole on its band, with no ellipsis. N20
+ * (2026-10-27): the paywall picks its sample stamps at random, and showed
+ * *JARDIM BOTÂNICO DA…* to sell the passport; it now picks among names
+ * that fit. The user's own stamps are drawn as they are, cut or not.
+ */
+export function labelFitsBand(name: string, category: Category): boolean {
+  return !wrapLabel(bandLabel(name, category)).some((line) => line.endsWith('…'));
+}
+
 export function wrapLabel(name: string, maxChars = MAX_LINE_CHARS): string[] {
   const upper = name.trim().toUpperCase().replace(/\s+/g, ' ');
   if (upper.length <= maxChars) {

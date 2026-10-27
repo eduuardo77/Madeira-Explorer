@@ -59,6 +59,7 @@ import {
   type Point,
   type StampElement,
 } from './stampArt.ts';
+import { labelFitsBand } from './stampArt.ts';
 
 /** Plausible ids, in the shape `content/README.md` asks curation to use. */
 function ids(count: number): string[] {
@@ -708,4 +709,10 @@ test('option E: the postmark sits on the paper and reads against it, on every pl
     assert.ok(panelWidthAt(design.panel, y) > 0, `${place.id}: postmark off the panel`);
     assert.ok(cx > 30 && cx < 90, `${place.id}: postmark centre at ${cx}`);
   }
+});
+
+test('a name that prints whole on its band is told apart from one that is cut (N20)', () => {
+  assert.equal(labelFitsBand('Jardim Botânico da Madeira', 'landmark'), false);
+  assert.equal(labelFitsBand('Fanal', 'viewpoint'), true);
+  assert.equal(labelFitsBand('Pico do Arieiro', 'viewpoint'), true);
 });

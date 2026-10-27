@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-27 | **A drive with an outing, automatic off:** Funchal, Fortaleza do Pico and the Jardim Botânico, 1 h 11, 38 km, iPhone alongside | P30 | one mode (D-108), outing | ✅ **92.3% of the route within 10 m**, 98.4% within 30 m; first fix 2 s after the car moved; still checks on *driving* ran and rightly stayed; no stop over 90 s, so T-285 (1) and T-286's sleep are still open |
 | 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, 1 h 40 on foot in a shopping centre, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; on foot 51.9%, all indoors (no reference there); ⚠ never stationary, so T-285's check is still open; ❌ a 29 min sit-down stayed on *driving* (T-286); battery 100 to 97% (coarse); no stamps |
 | 2026-10-18 | **Airplane-mode day** (Wi-Fi off too): east end, Santana, Funchal, 6 h 50, app opened 3 times, iPhone alongside | P30 | Equilibrado | ✅ 91.4% of the route within 10 m, 96.2% within 30 m; ⚠ first 3 km lost (no GPS fix in airplane mode); **battery about 1.6 points an hour**; ❌ **the trip ended at lunch** (ferry terminal, fixed); 5 stamps |
 | 2026-10-17 | **Second carried day:** west and north coast, 8 h, 125 km, app opened twice, iPhone alongside | P30 | Equilibrado | ⚠ 83.1% of the route lit within 10 m, 94.6% within 30 m (mode switching, fixed); 8 stamps; **battery about 2.1 points an hour**; ⚠ Huawei warning at 10:41 (a rolling 24 h, so 16 Oct counts) |
@@ -43,6 +44,23 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-27: a drive with an outing, no long stop
+
+- **Setup:** the field build of 13:28 (T-287 to T-291, not T-292), *Registar com a aplicação
+  fechada* switched off at 14:44, *Começar passeio* at 14:44:40, ended 15:55:24. iPhone
+  SensorLogger 14:44 to 15:55. Database in `Madeira-fieldwork/backups/p30-2026-10-27-after-ride`.
+- **Route:** 92.3% of the iPhone track within 10 m of a lit line, 98.4% within 30 m (by car 92.6%
+  and 98.5%); lit line near the track 93.9% within 10 m. 161 fixes. Three short misses in Funchal,
+  the longest 290 m.
+- **Start:** the outing logged *profile=walking* at 14:44:40, yet the switch at 14:49:24 reads
+  *stationary -> walking*, so something between set stationary (not traced). It cost nothing: the
+  first fix came at 14:47:38, two seconds after the car first moved (14:47:36 on the iPhone).
+- **Still checks on the driving profile ran** (15:11:40, 15:23:09), the path that never ran on
+  26 Oct (T-286), and both said stay: correct, the longest stop on the iPhone was 88 s.
+  A real stop over 10 minutes did not happen, so neither T-285 (1) nor the sleep half of T-286 is
+  answered.
+- Battery not read.
 
 ### 2026-10-26: an outing with automatic off, and a stop it never slept through
 

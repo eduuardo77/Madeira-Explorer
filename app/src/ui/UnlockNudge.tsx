@@ -9,12 +9,13 @@
  * it shows (not bought, not a beta build).
  */
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { n, t } from '../i18n';
 import { designFor } from '../passport/stampArt';
 import type { PassportStamp } from './PassportView';
 import StampArt from './StampArt';
+import { stacksNudgeButton } from './textScale';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
 
 /** Three is a stack; more would only be smaller. */
@@ -45,6 +46,13 @@ export default function UnlockNudge({
     ? n('passport.nudge.body', waiting.length)
     : t(freeLeft > 0 ? 'passport.nudge.freeBody' : 'passport.nudge.noneLeftBody');
   const shown = own ? waiting : showcase;
+  // N16: at large text the button goes under the words, or German breaks mid-word.
+  const stacked = stacksNudgeButton(useWindowDimensions().fontScale);
+  const button = (
+    <View style={[styles.button, stacked && styles.buttonStacked]}>
+      <Text style={styles.buttonText}>{t('passport.nudge.button')}</Text>
+    </View>
+  );
   return (
     <Pressable
       accessibilityRole="button"
@@ -85,10 +93,9 @@ export default function UnlockNudge({
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.body}>{body}</Text>
+        {stacked ? button : null}
       </View>
-      <View style={styles.button}>
-        <Text style={styles.buttonText}>{t('passport.nudge.button')}</Text>
-      </View>
+      {stacked ? null : button}
     </Pressable>
   );
 }
@@ -134,6 +141,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
+  },
+  buttonStacked: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.xs,
   },
   buttonText: {
     color: reward.goldButtonText,

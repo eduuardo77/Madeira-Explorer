@@ -235,6 +235,12 @@ permission, L3 privacy contact.
       (5 min, balanced, 100 m). ⚠ **Open:** the restart from driving with the race fixed is not yet
       seen on the P30 (needs a drive, then an install or restart at home), and a night at home off
       the cable (the lead's go-ahead first).
+- [x] **T-289** **N16 and N26: large text.** **Done 2026-10-27, emulator (360 dp), EN, PT, DE at 130% and
+      160%.** The unlock card puts *Ver* under its words from 115% text (`ui/textScale.ts`, tested);
+      the map's status line shrinks to fit (`adjustsFontSizeToFit`); the passport's row headers wrap
+      the count and *Ver tudo* to a second line. **N26's line through the payment note not
+      reproduced:** English and German at 160%, cold launch and a live size change, both clean;
+      not changed blind. ⚠ Huawei's font may still move a word on the P30.
 - [ ] **T-286** **A stop that begins on *driving* never sleeps.** Found 2026-10-26 (field log):
       a 29 minute sit-down in a shopping centre stayed on *driving*, GPS on high accuracy, because
       the 50 m distance filter lets no fix through while still and `movementPolicy` runs only when

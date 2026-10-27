@@ -521,7 +521,14 @@ export default function PrimaryOverlay({
             ]}
           >
             <View style={[styles.statusDot, { backgroundColor: colors.good }]} />
-            <Text style={[styles.statusText, { color: chrome.content }]} numberOfLines={1}>
+            {/* N16: shrunk to fit at large text rather than cut ("Automatische
+                Aufzeichnung lä…"); the strip's height frames the map. */}
+            <Text
+              style={[styles.statusText, { color: chrome.content }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
+            >
               {t('map.status.automatic')}
             </Text>
             {travelledToday === null ? null : (

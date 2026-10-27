@@ -1069,10 +1069,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'baseline',
     gap: spacing.md,
+    // N16: at large text the count and *See all* wrap under the title
+    // rather than run off the edge ("Alle ansehen" at 130%, German).
+    flexWrap: 'wrap',
+    rowGap: spacing.xs,
     // The heading belongs to the card below it, not to the gap above it.
     paddingHorizontal: spacing.xs,
   },
   rowTitle: {
+    flexShrink: 1,
     color: album.textMuted,
     fontSize: fontSize.small,
     fontWeight: '600',
@@ -1080,6 +1085,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   rowHeaderRight: {
+    marginLeft: 'auto',
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: spacing.md,

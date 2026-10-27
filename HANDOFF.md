@@ -15,8 +15,14 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   position while still counts as still, and a profile cache race fixed. At home now: no fine GPS.
   **N16 fixed** (T-289), large text in three languages on the emulator; N26's struck-out line
   not reproduced. **N25 fixed** (T-290), the film's closing frame clears the edges, on the P30.
-  **Small fixes** (T-291): the pop-up's island count (carried), N19, N27, three of four, N28, N20, N18
+  **Small fixes** (T-291): the pop-up's island count (carried), N19, N27, three of four, N28, N20, N18.
+  The P30 has all of it (field build, `install -r`, 13:02). 1,207 tests.
   ⚠ Version 11 on the testers' phones still crashes on refusal until a new build is uploaded.
+  **Open, the lead's:** a night at home off the cable (ask first); a restart straight after a real
+  drive (the cache-race half of N15 is unseen on the P30); N21 (a second tap ends an outing, no
+  confirmation) and N22 (*Incluído no teu passaporte* to a user who has not paid), left alone as
+  asked; the gold badge at 31 × 26 dp; the film's empty top half; 12 of 90 stamp names cut on
+  their bands.
 - **27 Oct, extended testing and rechecks, revised to 13.3 / 20 (13.28):** ⚠ **N23, P0: refuse location in the first
   run and the app crashes on every launch** (`isMyLocationEnabled: true` unconditionally,
   `NativeMapScreen.tsx:1023`, since 28 Aug; Google's map throws `SecurityException`). Very likely

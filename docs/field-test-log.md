@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-30 | **Car to a walk west of Funchal, automatic recording**, 3 h 10, 42 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **93.5% of the route within 10 m**, 98.0% within 30 m, 95.8% by car; ⚠ on foot 71.1% (the walk began on *driving*); ❌ **home left on fine GPS**: a stale batch from the drive read as a drive now; ⚠ a still check fired 91 min late |
 | 2026-10-27 | **A drive with an outing, automatic off:** Funchal, Fortaleza do Pico and the Jardim Botânico, 1 h 11, 38 km, iPhone alongside | P30 | one mode (D-108), outing | ✅ **92.3% of the route within 10 m**, 98.4% within 30 m; first fix 2 s after the car moved; still checks on *driving* ran and rightly stayed; no stop over 90 s, so T-285 (1) and T-286's sleep are still open |
 | 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, 1 h 40 on foot in a shopping centre, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; on foot 51.9%, all indoors (no reference there); ⚠ never stationary, so T-285's check is still open; ❌ a 29 min sit-down stayed on *driving* (T-286); battery 100 to 97% (coarse); no stamps |
 | 2026-10-18 | **Airplane-mode day** (Wi-Fi off too): east end, Santana, Funchal, 6 h 50, app opened 3 times, iPhone alongside | P30 | Equilibrado | ✅ 91.4% of the route within 10 m, 96.2% within 30 m; ⚠ first 3 km lost (no GPS fix in airplane mode); **battery about 1.6 points an hour**; ❌ **the trip ended at lunch** (ferry terminal, fixed); 5 stamps |
@@ -44,6 +45,35 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-30: by car to a walk west of Funchal, automatic recording, home on GPS
+
+- **Setup:** the field build of 27 Oct (T-292, T-293), automatic recording on, no outing.
+  iPhone SensorLogger 15:47 to 18:56 (`Madeira-fieldwork/iphone-2026-10-30`). Database pulled
+  at 19:27 without stopping the app, `Madeira-fieldwork/backups/p30-2026-10-30-after-outing`.
+  From the iPhone: car 15:48 to 16:09, about 20 min parked, on foot east 16:30 to 16:50, a
+  19 min stop in the open, back 17:10 to 17:31, about 50 min near the car with a poor sky
+  (17:33 to 18:21), car home 18:24 to 18:50.
+- **Route: 93.5% within 10 m, 98.0% within 30 m** of 41.9 km; by car 95.8%; **on foot 71.1%** of
+  3.8 km. Lit line 96.6% within 10 m of the route. The longest miss, 500 m on foot near the car.
+- **On foot started on *driving*.** At 16:15:54 the app relaunched, N15's rule dropped it to
+  stationary, and the same second a batch of fixes held back from the drive raised it again,
+  *moved 7352 m at up to 86 km/h*, while parked. It stayed on driving, 50 m filter, until
+  16:44, a quarter of an hour into the walk. The still check begun at 16:10:36 never reported.
+- ⚠ **Home on GPS again, by the same route.** At 19:25:49 a relaunch dropped it to stationary,
+  then the drive's last 7 fixes (18:49 to 18:56), held back for 37 min, raised it: *moved 1192 m
+  at up to 42 km/h*. At 19:28 `dumpsys location` shows fine GPS every 5 s for Bruma, at home.
+  Cause: `decideProfile` judges movement from the newest fix, not from now, so a stale batch
+  reads as a drive happening now. N15's fix covers the stored profile, not this.
+- ⚠ **A still check that slept 91 minutes.** The check started at 16:10:36 waits 5 minutes on a
+  JavaScript timer; the timer only fired at 17:42:04, when the app was next opened, and it
+  ended *still for 91 min, no position (indoors)*: stationary while walking (sensors said walking
+  at 17:37 and 17:41). The motion wake lifted it at 17:45:52, so about 4 min lost.
+- **The 19 min stop slept late:** sensors still at 16:51:46, the walking batch that showed it came
+  at 17:10:51, so stationary only then. Walking resumed on the motion wake at 17:15:04.
+- **17:56 to 18:24, 30 min on walking with no fix:** the sensors said walking at 17:56:24 and
+  nothing until driving at 18:22:58, so no still check ran. Under a poor sky (the iPhone too).
+- Battery not read.
 
 ### 2026-10-27: a drive with an outing, no long stop
 

@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **30 Oct evening, an in-depth evaluation: 11.9 / 20** on a new 16-KPI rubric (not comparable
+  with 13.3): `docs/bruma-score-and-plan-2026-10-30.md`. New: no place pins on the map for a new
+  user (E1), zoom worst gap 182 ms (E2), the recorder's profile-switching glue has no tests (E3),
+  the only real phone is Android 10 (E4). Nothing changed on the P30 or the emulator.
 - **30 Oct, car to a shopping centre (parking on floor -3) with the iPhone:** 93.5% of the route
   within 10 m (field log). ⚠ Found the P30 on fine GPS at home: a relaunch dropped it to
   stationary (N15's rule) and the drive's last batch, delivered 37 min late, raised it again.

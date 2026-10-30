@@ -53,9 +53,11 @@ never where the lead lives.
   at 19:27 without stopping the app, `Madeira-fieldwork/backups/p30-2026-10-30-after-outing`.
   From the iPhone: car 15:48 to 16:09, about 20 min parked, on foot east 16:30 to 16:50, a
   19 min stop in the open, back 17:10 to 17:31, about 50 min near the car with a poor sky
-  (17:33 to 18:21), car home 18:24 to 18:50.
+  (17:33 to 18:21), car home 18:24 to 18:50. **The lead: a shopping centre, the car parked on
+  floor -3**, so the parked minutes and 17:33 to 18:21 were indoors or underground.
 - **Route: 93.5% within 10 m, 98.0% within 30 m** of 41.9 km; by car 95.8%; **on foot 71.1%** of
-  3.8 km. Lit line 96.6% within 10 m of the route. The longest miss, 500 m on foot near the car.
+  3.8 km. Lit line 96.6% within 10 m of the route. The longest miss, 500 m on foot near the car,
+  is inside the shopping centre, where the iPhone is no reference (as on 26 Oct).
 - **On foot started on *driving*.** At 16:15:54 the app relaunched, N15's rule dropped it to
   stationary, and the same second a batch of fixes held back from the drive raised it again,
   *moved 7352 m at up to 86 km/h*, while parked. It stayed on driving, 50 m filter, until
@@ -72,7 +74,7 @@ never where the lead lives.
 - **The 19 min stop slept late:** sensors still at 16:51:46, the walking batch that showed it came
   at 17:10:51, so stationary only then. Walking resumed on the motion wake at 17:15:04.
 - **17:56 to 18:24, 30 min on walking with no fix:** the sensors said walking at 17:56:24 and
-  nothing until driving at 18:22:58, so no still check ran. Under a poor sky (the iPhone too).
+  nothing until driving at 18:22:58, so no still check ran. Inside the shopping centre: walking there awake is what T-244 accepts.
 - Battery not read.
 
 ### 2026-10-27: a drive with an outing, no long stop

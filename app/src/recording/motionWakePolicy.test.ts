@@ -12,6 +12,7 @@ import {
   LAUNCH_FRESH_FIX_MS,
   launchProfile,
   nextWakeCheck,
+  STILL_CHECK_LATE_MS,
   STILL_CHECK_WAIT_MS,
   WAKE_CHECK_WAITS_MS,
 } from './motionWakePolicy.ts';
@@ -121,4 +122,15 @@ test('a stationary or a fresh install is left as it is', () => {
   assert.equal(launchProfile('stationary', null, NOW).profile, null);
   // Nothing stored: somebody who has just landed (samplingGate's default).
   assert.equal(launchProfile(null, null, NOW).profile, null);
+});
+
+test('still check: a check whose timer froze with the process stays (T-294)', () => {
+  // 30 Oct 2026: begun at 16:10 on driving, decided at 17:42 when the app opened.
+  const late = check('driving', null, null, null, 91);
+  assert.equal(late.sleep, false);
+  assert.match(late.reason, /91 min after the wake/);
+  assert.equal(check('driving', at(0), at(91), null, 91).sleep, false);
+  // Up to the limit it still decides as before.
+  assert.equal(STILL_CHECK_LATE_MS, 10 * 60_000);
+  assert.equal(check('driving', null, null, null, 9).sleep, true);
 });

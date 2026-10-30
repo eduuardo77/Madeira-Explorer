@@ -93,7 +93,7 @@ async function writeCurrentProfile(profile: SamplingProfile): Promise<void> {
  * than wall-clock, which matters when the OS hands us a batch it has been
  * sitting on for several minutes.
  */
-export async function applySamplingGate(now: number): Promise<void> {
+export async function applySamplingGate(now: number, wallNowMs: number = Date.now()): Promise<void> {
   try {
     // Three independent questions, so three round-trips in parallel rather than
     // in series. One of them crosses the native bridge, which is the expensive
@@ -130,7 +130,7 @@ export async function applySamplingGate(now: number): Promise<void> {
     // When the current profile was entered: out of stationary, stillness only
     // counts from then (`decideProfile`, D-106).
     const since = await appStateDao.getUpdatedTs(appStateDao.AppStateKey.SamplingProfile);
-    const decision = decideProfile(current, samples, now, since ?? undefined);
+    const decision = decideProfile(current, samples, now, since ?? undefined, wallNowMs);
 
     if (!decision.changed) {
       // T-285: an outing started standing still keeps the gate on

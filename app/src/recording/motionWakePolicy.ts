@@ -51,6 +51,13 @@ export const STILL_CHECK_WAIT_MS = STILL_CONFIRM_MS;
 export type StillCheck = { sleep: boolean; reason: string };
 
 /**
+ * Longer than this between the wake and the verdict and the check overslept:
+ * its timer was frozen with the process, and what it saw is history (T-294).
+ * The wait plus both position timeouts, with room to spare.
+ */
+export const STILL_CHECK_LATE_MS = 2 * STILL_CHECK_WAIT_MS;
+
+/**
  * Whether a moving profile may drop to stationary after the sensors said
  * still at `wakeMs`. `first` is taken at the wake, `second` after
  * `STILL_CHECK_WAIT_MS`; `lastMovingSignalMs` is the newest moving label from
@@ -74,6 +81,12 @@ export function decideStillCheck(
 ): StillCheck {
   const stay = (reason: string): StillCheck => ({ sleep: false, reason });
   if (current === 'stationary') return stay('already stationary');
+  // ⚠ T-294 (30 Oct 2026, the P30): a check begun at 16:10 on a five-minute
+  // timer ended at 17:42, when the app was next opened, "still for 91 min, no
+  // position", and slept a walk. A frozen timer is not five still minutes.
+  if (nowMs - wakeMs > STILL_CHECK_LATE_MS) {
+    return stay(`the check ran ${Math.round((nowMs - wakeMs) / 60000)} min after the wake`);
+  }
   if (lastMovingSignalMs !== null && lastMovingSignalMs > wakeMs) {
     return stay('the motion sensors said moving since');
   }

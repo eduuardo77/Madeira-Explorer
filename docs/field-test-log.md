@@ -75,6 +75,9 @@ never where the lead lives.
   at 17:10:51, so stationary only then. Walking resumed on the motion wake at 17:15:04.
 - **17:56 to 18:24, 30 min on walking with no fix:** the sensors said walking at 17:56:24 and
   nothing until driving at 18:22:58, so no still check ran. Inside the shopping centre: walking there awake is what T-244 accepts.
+- **T-294 on the P30 at 19:34** (field build, `install -r`, backup
+  `p30-2026-10-30-before-t294`): on opening, stationary at once, and no GPS request from Bruma in
+  `dumpsys location`. The leftover case itself is not yet seen: it needs a drive home.
 - Battery not read.
 
 ### 2026-10-27: a drive with an outing, no long stop

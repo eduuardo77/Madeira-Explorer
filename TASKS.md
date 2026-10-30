@@ -250,6 +250,15 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-294** **A leftover batch and a frozen still check** (field log, 30 Oct). Built 2026-10-30
+      at the desk, 1,217 tests. (1) Out of stationary, `decideProfile` keeps the profile when the
+      newest fix is over 5 min old by the wall clock (`LEFTOVER_FIX_MS`): the moving profile's last
+      batch, delivered after a relaunch dropped it, had raised the P30 to *driving* at home twice
+      (16:15 parked on floor -3, 19:25 at home), and fine GPS stayed on. On Android the stationary
+      profile delivers every fix at once, so a fresh move is never that old. (2) `decideStillCheck`
+      stays when the verdict comes over 10 min after the wake (`STILL_CHECK_LATE_MS`): a 5 min timer
+      frozen with the process ended 91 min later and slept a walk. ⚠ Open until seen on the P30:
+      after a drive home, a relaunch stays stationary (diary: *a leftover batch*).
 - [x] **T-293** **Porto Santo's card at the foot of the passport, and N22's line** (D-109 amended,
       the lead, 2026-10-27). **Done, seen on the P30** (field build, `install -r`, database backed up):
       the card under *Medalhas*, above *Mais recente*; the top goes from the unlock banner straight to

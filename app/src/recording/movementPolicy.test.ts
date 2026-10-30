@@ -349,3 +349,36 @@ test('still labels never stop a phone that has moved past the threshold', () => 
   const moved = [0, 1, 2, 3, 4, 5].map((m) => ({ ...fix(m, m * 60), activity: 'still' }));
   assert.notEqual(decideProfile('walking', moved, NOW).profile, 'stationary');
 });
+
+// ---------------------------------------------------------------------------
+// T-294: a leftover batch is not movement now (the P30, 30 Oct 2026)
+// ---------------------------------------------------------------------------
+
+/** A drive at about 40 km/h ending `endMinAgo` before NOW, one fix a minute. */
+function driveEnding(endMinAgo: number): MovementSample[] {
+  return [0, 1, 2, 3, 4, 5, 6].map((i) => ({ ...fix(endMinAgo + i, 0), ...offsetByMetres(ORIGIN, -i * 650, 0) }));
+}
+
+test('out of stationary, a batch held back 37 min does not raise the profile', () => {
+  const drive = driveEnding(37);
+  // The gate passes the batch's own time as `now`, so only the wall clock can tell.
+  const decision = decideProfile('stationary', drive, drive[0].ts, undefined, NOW);
+  assert.equal(decision.changed, false);
+  assert.match(decision.reason, /37 min old/);
+  // Without the wall clock it reads as a drive, as it did at 19:25 on the P30.
+  assert.equal(decideProfile('stationary', drive, drive[0].ts).profile, 'driving');
+});
+
+test('out of stationary, the same move arriving fresh still raises at once', () => {
+  const drive = driveEnding(0);
+  assert.equal(decideProfile('stationary', drive, NOW, undefined, NOW).profile, 'driving');
+  // A fresh first fix far from an old one at home still counts (F1).
+  const leaving = [fix(0, 3000), fix(180, 0)];
+  assert.equal(decideProfile('stationary', leaving, NOW, undefined, NOW).changed, true);
+});
+
+test('on a moving profile, an old batch is still judged as before', () => {
+  const drive = driveEnding(37);
+  const decision = decideProfile('driving', drive, drive[0].ts, undefined, NOW);
+  assert.equal(decision.profile, 'driving');
+});

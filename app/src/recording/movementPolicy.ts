@@ -91,6 +91,16 @@ export const STATIONARY_EDGE_MS = 2 * 60 * 1000;
 export const STILL_CONFIRM_MS = 5 * 60 * 1000;
 
 /**
+ * Out of `stationary`, a newest fix older than this by the wall clock is a
+ * leftover, not movement now (T-294). On Android the stationary profile hands
+ * over every fix at once, so an old one can only be the moving profile's last
+ * batch, delivered after the drop. On 30 Oct 2026 the P30 dropped to
+ * stationary at home on a relaunch, then the drive's last fixes, held back
+ * 37 min, read as "moved 1192 m at up to 42 km/h" and kept fine GPS on.
+ */
+export const LEFTOVER_FIX_MS = STILL_CONFIRM_MS;
+
+/**
  * Fixes less accurate than this are ignored when measuring displacement.
  *
  * A fix with a ±150 m accuracy radius cannot answer a question about a 100 m
@@ -208,7 +218,12 @@ export function decideProfile(
    * for 12 min", on the twelve still minutes before the switch, so the drive
    * that followed started unrecorded.
    */
-  profileSinceTs?: number
+  profileSinceTs?: number,
+  /**
+   * The wall clock, when `now` is the batch's own time (the gate passes the
+   * newest fix's). Only used to tell a leftover batch from movement now.
+   */
+  wallNowMs?: number
 ): MovementDecision {
   const keep = (reason: string): MovementDecision => ({
     profile: current,
@@ -235,6 +250,11 @@ export function decideProfile(
     if (sample.ts > newest.ts) {
       newest = sample;
     }
+  }
+
+  // T-294: out of stationary, a stale newest fix proves nothing about now.
+  if (current === STATIONARY_PROFILE && wallNowMs !== undefined && wallNowMs - newest.ts > LEFTOVER_FIX_MS) {
+    return keep(`newest fix ${Math.round((wallNowMs - newest.ts) / 60000)} min old, a leftover batch`);
   }
 
   const windowStart = newest.ts - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS;

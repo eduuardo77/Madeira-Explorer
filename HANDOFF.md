@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **30 Oct, car to a shopping centre (parking on floor -3) with the iPhone:** 93.5% of the route
+  within 10 m (field log). ⚠ Found the P30 on fine GPS at home: a relaunch dropped it to
+  stationary (N15's rule) and the drive's last batch, delivered 37 min late, raised it again.
+  **T-294 fixes that and a still check that fired 91 min late**; 1,217 tests. On the P30 since 19:34
+  (field build, `install -r`, backup `p30-2026-10-30-before-t294`), stationary at home after. Open: seeing a drive home end stationary.
 - **27 Oct, afternoon: the review's fixes, app changes allowed for these only.** Done so far:
   **N23 fixed** (T-287): the blue dot only with location granted; emulator refusal path clean.
   **N15 fixed** (T-288), on the P30 since 12:18 (field build, `install -r`, backups in

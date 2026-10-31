@@ -5,6 +5,7 @@
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-consistency-options.mjs
  *     → tools/out/consistency-options.html
+ *     … --round=2 → tools/out/consistency-options-2.html (closer to today)
  *
  * Nothing in the app changes. The map is the P30's own screenshot; the
  * passport and the paywall are phone-sized sketches in HTML with the real
@@ -100,7 +101,7 @@ function paywall(o) {
  * The directions. `t` is every colour a frame uses; `checks` are the pairs
  * measured for the caption ([what, ink, ground, floor]).
  */
-const OPTIONS = [
+const ROUND1 = [
   {
     key: 'today',
     name: 'Hoje',
@@ -170,6 +171,57 @@ const OPTIONS = [
   },
 ];
 
+const TODAY = ROUND1[0];
+
+/**
+ * Round 2 (31 Oct): the lead still prefers today's look, so each direction
+ * keeps today's colours and changes one thing that ties the screens together.
+ */
+const STATUS_PILL = `<div class="ov pill"><span class="dot"></span>A registar automaticamente<span class="pill-km">31 km hoje</span></div>
+  <div class="ov count">26/81</div>`;
+
+const ROUND2 = [
+  TODAY,
+  {
+    key: 'goldbuy',
+    name: 'E · Dourado é comprar',
+    blurb: 'Tudo fica como hoje, menos as cores de destaque: o que se compra ou se ganha passa a dourado (o botão de compra, os vistos, o "Ver" do cartão). O violeta fica. Azul fica só para navegar.',
+    change: 'O botão de compra, os vistos e o "Ver" do cartão do passaporte.',
+    cost: 'Pequeno: uma ou duas horas.',
+    t: { ...TODAY.t, nudgeGo: reward.goldInk, tick: reward.goldInk, buy: reward.goldButton, buyText: reward.goldButtonText },
+  },
+  {
+    key: 'violet',
+    name: 'F · O violeta entra no passaporte',
+    blurb: 'O preto do passaporte ganha um toque do violeta do pop-up, por isso os dois parecem da mesma família e o pop-up deixa de ser uma cor estranha. Quase não se nota sozinho; nota-se ao abrir o pop-up.',
+    change: 'Uma cor: o fundo do passaporte, de #1C1C1E para #1E1A26.',
+    cost: 'Pequeno: uma hora, mais a medição dos carimbos (já feita aqui).',
+    t: { ...TODAY.t, page: '#1E1A26', card: '#1E1A26', hairline: '#4A4458' },
+  },
+  {
+    key: 'glow',
+    name: 'G · Violeta como luz, não como fundo',
+    blurb: 'O pop-up passa a ter o mesmo preto do passaporte, e o violeta fica só como um brilho atrás dos carimbos bloqueados, como uma luz numa montra. O pop-up continua especial sem parecer outra app.',
+    change: 'O fundo do pop-up e um brilho atrás dos carimbos.',
+    cost: 'Pequeno: umas horas.',
+    t: { ...TODAY.t, sheet: `linear-gradient(180deg, #232326, ${reward.panelBottom})` },
+    extraCss: "#glow .stack { isolation: isolate; } #glow .stack::before { content: ''; position: absolute; inset: -34px -30px; z-index: -1; background: radial-gradient(closest-side, #7A5CE0B0, #7A5CE000); }",
+  },
+  {
+    key: 'bridge',
+    name: 'H · Uma ponte no mapa',
+    blurb: 'O mapa fica claro, mas os dois elementos que levam ao passaporte (a contagem 26/81 e a faixa de registo) passam ao preto do passaporte. O preto já está no mapa antes de se abrir o passaporte, por isso a passagem parece intencional.',
+    change: 'Duas peças do mapa. O passaporte e o pop-up ficam como hoje.',
+    cost: 'Pequeno: umas horas; os botões brancos do mapa ficam brancos.',
+    mapOverlay: STATUS_PILL,
+    mapNote: 'Mapa: a faixa e a contagem a preto',
+    t: { ...TODAY.t },
+  },
+];
+
+const ROUND = process.argv.includes('--round=2') ? 2 : 1;
+const OPTIONS = ROUND === 2 ? ROUND2 : ROUND1;
+
 /** Measured pairs for a direction's caption. */
 function measurements(o) {
   const t = o.t;
@@ -205,7 +257,7 @@ ${s} .big small, ${s} .cnt { color: ${t.muted}; }
 ${s} .lbl { color: ${t.muted}; }
 ${s} .strip { background: ${t.card}; border: 1px solid ${t.hairline}; }
 ${s} .nudge { background: ${t.nudgeBg}; border: 1px solid ${t.nudgeEdge}; color: ${t.text}; }
-${s} .nudge-go { color: ${o.key === 'today' ? t.link : t.eyebrow}; }
+${s} .nudge-go { color: ${t.nudgeGo ?? (o.key === 'today' || ROUND === 2 ? t.link : t.eyebrow)}; }
 ${s} .mount { background: ${t.mount ?? 'transparent'}; }
 ${s} .sheet { background: ${t.sheet}; color: ${t.sheetText}; ${o.mounts ? 'box-shadow: 0 8px 30px #0004;' : 'border: 1px solid #FFFFFF1A;'} }
 ${s} .sheet .lead, ${s} .sheet li, ${s} .quiet { color: ${t.sheetMuted}; }
@@ -213,7 +265,8 @@ ${s} .eyebrow { color: ${t.eyebrow}; ${t.serif ? 'font-family: Georgia, serif;' 
 ${s} .title { ${t.serif ? 'font-family: Georgia, serif;' : ''} }
 ${s} .tick { color: ${t.tick}; }
 ${s} .buy { background: ${t.buy}; color: ${t.buyText}; }
-${s} .stack.mounted { background: ${t.mount}; }`;
+${s} .stack.mounted { background: ${t.mount}; }
+${o.extraCss ?? ''}`;
 }
 
 function section(o) {
@@ -224,7 +277,7 @@ function section(o) {
     <h2>${o.name}</h2>
     <p class="blurb">${o.blurb}</p>
     <div class="phones">
-      <figure><div class="phone"><img src="${mapShot}" alt=""></div><figcaption>Mapa${o.key === 'today' ? ' (o P30, 31 out)' : ': igual'}</figcaption></figure>
+      <figure><div class="phone"><img src="${mapShot}" alt="">${o.mapOverlay ?? ''}</div><figcaption>${o.mapNote ?? `Mapa${o.key === 'today' ? ' (o P30, 31 out)' : ': igual'}`}</figcaption></figure>
       <figure><div class="phone">${passport(o)}</div><figcaption>Passaporte</figcaption></figure>
       <figure><div class="phone">${paywall(o)}</div><figcaption>Pop-up de compra</figcaption></figure>
       <div class="notes">
@@ -286,6 +339,11 @@ li { display: flex; gap: 6px; margin: 3px 0; }
 .buy { border-radius: 12px; padding: 11px 6px; font-weight: 700; font-size: 13px; }
 .quiet { font-size: 12px; margin-top: 10px; }
 .quiet.small { font-size: 11px; margin-top: 14px; }
+.ov { position: absolute; background: ${colors.stampPage}; color: ${album.text}; }
+.pill { left: 8px; top: 477px; width: 242px; height: 29px; border-radius: 15px; display: flex; align-items: center; gap: 6px; padding: 0 10px; font-size: 9.5px; }
+.pill .dot { width: 6px; height: 6px; border-radius: 3px; background: #4CC26E; }
+.pill-km { margin-left: auto; color: ${album.textMuted}; }
+.count { left: 47px; top: 455px; width: 37px; height: 15px; border-radius: 8px; font-size: 9px; font-weight: 700; text-align: center; line-height: 15px; }
 .notes { flex: 1; min-width: 240px; max-width: 360px; font-size: 13px; }
 .notes p { margin: 0 0 8px; }
 table { border-collapse: collapse; font-size: 12px; width: 100%; }
@@ -294,13 +352,13 @@ td { padding: 3px 6px 3px 0; border-top: 1px solid #eee; }
 tr.fail td { color: #C0271E; font-weight: 600; }
 ${OPTIONS.map(css).join('\n')}
 </style></head><body>
-<h1>Mapa claro, passaporte escuro, pop-up violeta</h1>
-<p class="intro">Hoje primeiro, depois quatro direções. O mapa é o mesmo em todas: é o produto, e as estradas acesas leem-se nele. Os carimbos são os desenhos reais e o texto é o da app. Os ecrãs do passaporte e do pop-up são esboços, não capturas. Cada contraste foi medido aqui; o mínimo é 4,5:1 para texto e 3:1 para o contorno de um carimbo.</p>
+<h1>Mapa claro, passaporte escuro, pop-up violeta${ROUND === 2 ? ': segunda ronda, perto de hoje' : ''}</h1>
+<p class="intro">${ROUND === 2 ? 'Preferes o aspeto de hoje, por isso cada direção desta ronda mantém as cores de hoje e muda uma só coisa que liga os ecrãs. ' : ''}Hoje primeiro, depois quatro direções. O mapa é o mesmo em todas: é o produto, e as estradas acesas leem-se nele. Os carimbos são os desenhos reais e o texto é o da app. Os ecrãs do passaporte e do pop-up são esboços, não capturas. Cada contraste foi medido aqui; o mínimo é 4,5:1 para texto e 3:1 para o contorno de um carimbo.</p>
 ${OPTIONS.map(section).join('\n')}
 </body></html>`;
 
 mkdirSync(path.join(here, 'out'), { recursive: true });
-const out = path.join(here, 'out', 'consistency-options.html');
+const out = path.join(here, 'out', ROUND === 2 ? 'consistency-options-2.html' : 'consistency-options.html');
 writeFileSync(out, html);
 for (const o of OPTIONS) {
   const failed = measurements(o).filter((m) => !m.ok).map((m) => `${m.what} ${m.ratio.toFixed(2)}`);

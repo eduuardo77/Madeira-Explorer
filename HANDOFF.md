@@ -45,8 +45,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   trip is the new recorder code's first real run. ⚠ The P30's map exposes no pin to `uiautomator`.
   **The lead kept A9's frost and A6's zoom 13** (31 Oct). PR28: no official grade on visitmadeira,
   Calheta says *Experienced*; the lead chose to leave it blank (T-306).
-  **T-307:** four directions for the review's *light map, dark passport, purple paywall* drawn in
-  `tools/out/consistency-options.html`; waiting on the lead's pick, no app change yet.
+  **T-307:** directions for the review's *light map, dark passport, purple paywall* drawn in
+  `tools/out/consistency-options.html` and, closer to today, `consistency-options-2.html`; waiting on the lead's pick, no app change yet.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

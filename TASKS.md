@@ -259,8 +259,12 @@ permission, L3 privacy contact.
       to the green start button), **D** all light with each stamp on a dark mount. Measured there:
       every option clears 4.5:1 for text and 3:1 for stamp paper and the unvisited outline; on any
       light page 0 of 30 papers clear 3:1, hence D's mounts. Mid-dark burgundy, laurel and
-      Atlantic blue drop the unvisited outline under 3:1, so the deep shades are used. **Waiting on
-      the lead's pick**; then the other dark screens (celebrations, medals, share image) drawn the
+      Atlantic blue drop the unvisited outline under 3:1, so the deep shades are used. **Round 2**
+      (`--round=2`, same day): the lead still preferred today, so four smaller steps that keep
+      today's colours: **E** gold for whatever you buy (button, ticks), **F** a violet cast in the
+      passport's black (`#1E1A26`, unvisited outline 3.08:1), **G** the paywall in the passport's
+      black with violet only as a glow behind the stamps, **H** the map's status pill and 26/81
+      count in the passport's black. All pass. **Waiting on the lead's pick**; then the other dark screens (celebrations, medals, share image) drawn the
       same way before any app change.
 - [ ] **T-306** **A10 of the fix plan: levada length and difficulty were already on the card.** Found
       2026-10-31, nothing built: 11 of 18 levadas carry `walk` (route, km, return km, minutes,

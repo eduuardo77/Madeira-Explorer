@@ -28,6 +28,15 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   Seven fixes reverted one at a time, each caught. On the emulator all three paths run through the
   new wiring; the still check's alarm is inexact on Android 12+ (8 min 46 s there). 1,257 tests.
   ⚠ Read backups from copies: SQLite rewrites `-shm` even read only.
+- **31 Oct, evening: Phase 1's desk work done** (`docs/fix-plan-2026-10-30.md`). A7 (T-301) the gold
+  badge is drawn, a tap opens the passport; A8 (T-302) *Desbloquear o passaporte · 5,99 €*, offline
+  *É preciso internet para comprar* (unproven on a phone: which Play code an offline phone gets);
+  A6 (T-303) faint pins from zoom 13, a tap opens the card; A11 (T-304) the map opens on the whole
+  island, centred; A9 (T-305, Provisional) locked stamps frosted with a padlock, as the pop-up;
+  A10 (T-306) was already there. All seen on the emulator, none on the P30. 1,270 tests.
+  **Waiting on the lead:** the P30 install of all of it (back up first), then the pan probe with
+  the pins on, the opening view, a locked stamp, and A3's recorder on the real phone; B4 (upload 12);
+  vetoes on A9's frost hiding names and A6's zoom 13; PR28's difficulty.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

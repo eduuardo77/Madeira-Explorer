@@ -218,3 +218,22 @@ export function projectPoint(
       (2 * Math.PI);
   return { x, y };
 }
+
+/**
+ * What the map opens on: the island, and the trip's roads wherever they go
+ * (A11 of the 30 Oct fix plan). It framed the trip's roads alone, aligned to
+ * the bottom, so on the P30 the island opened in the bottom quarter with its
+ * west end cut (Ponta do Pargo and Paul do Mar lay outside the roads) and
+ * most of the screen sea. Framed with the island and centred in the area the
+ * controls leave, the island is whole; the roads, inside it, still show.
+ * Returning to new roads keeps its own bottom framing (`returnFraming.ts`).
+ */
+export function openingBounds(trace: Bounds | null, home: Bounds): Bounds {
+  if (trace === null) return home;
+  return [
+    Math.min(trace[0], home[0]),
+    Math.min(trace[1], home[1]),
+    Math.max(trace[2], home[2]),
+    Math.max(trace[3], home[3]),
+  ];
+}

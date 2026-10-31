@@ -13,7 +13,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { centreOn, fitBounds, MAX_ZOOM, MIN_ZOOM, projectPoint } from './cameraFit.ts';
+import { centreOn, fitBounds, MAX_ZOOM, MIN_ZOOM, openingBounds, projectPoint, type Bounds } from './cameraFit.ts';
 
 /** A phone-ish viewport, in points. */
 const SCREEN = { width: 360, height: 780 };
@@ -165,4 +165,35 @@ test('show on map: with no padding the place is the screen centre, and zoom is c
   const place = { latitude: 32.65, longitude: -16.9 };
   assert.deepEqual(projectPoint(place, centreOn(place, 13, SCREEN), SCREEN), { x: 180, y: 390 });
   assert.equal(centreOn(place, 99, SCREEN).zoom, MAX_ZOOM);
+});
+
+// A11 (31 Oct 2026): the map opens on the island and the roads together.
+const HOME: Bounds = [-17.28, 32.61, -16.65, 32.9];
+
+test('A11: with no roads the map opens on the island', () => {
+  assert.deepEqual(openingBounds(null, HOME), HOME);
+});
+
+test('A11: roads inside the island open on the whole island, west end included', () => {
+  // The P30's roads reached Porto Moniz and Machico, not Ponta do Pargo.
+  const roads: Bounds = [-17.2, 32.64, -16.75, 32.87];
+  assert.deepEqual(openingBounds(roads, HOME), HOME);
+});
+
+test('A11: roads beyond the island widen the frame to take them in', () => {
+  const portoSanto: Bounds = [-17.25, 32.62, -16.3, 33.1];
+  assert.deepEqual(openingBounds(portoSanto, HOME), [-17.28, 32.61, -16.3, 33.1]);
+});
+
+test('A11: centred, the island sits in the middle of the area the controls leave', () => {
+  const padding = { top: 116, right: 16, bottom: 260, left: 16 };
+  const fit = fitBounds(openingBounds(null, HOME), { width: 360, height: 780, padding, align: 'centre' });
+  assert.ok(fit !== null);
+  const centre = projectPoint({ latitude: (32.61 + 32.9) / 2, longitude: (-17.28 - 16.65) / 2 }, fit, { width: 360, height: 780 });
+  const usableMiddle = padding.top + (780 - padding.top - padding.bottom) / 2;
+  assert.ok(Math.abs(centre.y - usableMiddle) < 25, `island centre at ${centre.y}, middle ${usableMiddle}`);
+  for (const [lon, lat] of [[-17.28, 32.8], [-16.65, 32.75]]) {
+    const point = projectPoint({ latitude: lat, longitude: lon }, fit, { width: 360, height: 780 });
+    assert.ok(point.x >= padding.left - 1 && point.x <= 360 - padding.right + 1, `x ${point.x}`);
+  }
 });

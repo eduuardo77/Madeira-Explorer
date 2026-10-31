@@ -105,7 +105,7 @@ import PrimaryOverlay, {
   type MapNotice,
 } from '../ui/PrimaryOverlay';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, spacing } from '../ui/theme';
-import { centreOn, fitBounds, type Bounds, type CameraFit } from './cameraFit';
+import { centreOn, fitBounds, openingBounds, type Bounds, type CameraFit } from './cameraFit';
 import { offerRecentre, recentreTarget, zoomFloor } from './mapFence';
 import { ARCHIPELAGO_BOUNDS } from '../content/archipelagoBounds';
 import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
@@ -636,16 +636,19 @@ export default function NativeMapScreen({
                 noteCameraCentre(fit.coordinates);
               }
             }
-            // T-272: what the next cold start shows at once. The whole trip
-            // framed, as the map opens with nothing new; anything new since
-            // is framed above, on that showing too.
+            // T-272: what the next cold start shows at once. The island and
+            // the whole trip, centred above the controls (A11), as the map
+            // opens with nothing new; anything new since is framed above, on
+            // that showing too.
             const whole = frame(
-              traceBoundsOf(
-                roads.lines.flatMap((line) =>
-                  line.points.map(([lat, lon]) => [lon, lat] as [number, number])
-                )
-              ),
-              'bottom'
+              openingBounds(
+                traceBoundsOf(
+                  roads.lines.flatMap((line) =>
+                    line.points.map(([lat, lon]) => [lon, lat] as [number, number])
+                  )
+                ),
+                HOME_BOUNDS
+              )
             );
             if (roads.fresh && whole !== null && roads.lines.length > 0) {
               await appStateDao.set(
@@ -690,7 +693,8 @@ export default function NativeMapScreen({
       )
     );
 
-    setCamera(drawn.length > 0 ? frame(traceBoundsOf(drawn), 'bottom') : frame(HOME_BOUNDS));
+    // A11: the island with the roads in it, centred above the controls.
+    setCamera(frame(openingBounds(drawn.length > 0 ? traceBoundsOf(drawn) : null, HOME_BOUNDS)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, tracePolylines]);
 

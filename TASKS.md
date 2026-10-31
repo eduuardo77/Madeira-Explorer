@@ -250,6 +250,17 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-304** **A11 of the fix plan: the map opens on the whole island, centred above the
+      controls.** The 30 Oct review on the P30: *the island opens in the bottom quarter, west end
+      cut, 60% empty sea*. Cause: on a phone with a trip the opening view is the T-272 snapshot,
+      which framed the trip's roads alone, aligned to the bottom; Ponta do Pargo and Paul do Mar
+      lay outside the roads. Now `openingBounds` (`cameraFit.ts`, 4 tests) frames the island and
+      the roads together, centred in the area the controls leave, for the snapshot and for the
+      first frame. The return to new roads keeps its bottom framing (the lead's pick, 4 Oct).
+      **Not yet seen where it matters:** the emulator matched no roads, so it opened on the
+      island alone, which was centred before this change too. A phone keeps its old snapshot
+      until its roads are next matched afresh, so the first cold start after an install may
+      still open the old way. Open: the P30.
 - [ ] **T-303** **A6 of the fix plan: a faint pin for every place, once zoomed in to a town** (the
       lead's Q1 c, D-070 amended). `map/placePins.ts` decides (shown from zoom 13, hidden below
       12.5 so a pinch at the edge does not flicker; one pin per place the passport shows, at the

@@ -250,6 +250,15 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-306** **A10 of the fix plan: levada length and difficulty were already on the card.** Found
+      2026-10-31, nothing built: 11 of 18 levadas carry `walk` (route, km, return km, minutes,
+      difficulty, desk E of 19 Oct) and both the map's card and the passport's draw it, e.g.
+      *PR6 · 4.3 km (8.6 km return) · 3 h · Moderate*, seen on the emulator
+      (`tools/out/a10-levada-card-emulator.png`). The 7 without are not PR routes, so no signed
+      figures exist (left missing, as `levada-routes.mjs` requires). The 30 Oct review's *no
+      length, difficulty* was wrong for levadas; corrected there. **Open, content (the lead's):**
+      Levada da Rocha Vermelha (PR28) has no difficulty in `pois.json`, so its line ends at the
+      time; IFCN's page would give it.
 - [ ] **T-305** **A9 of the fix plan: a locked stamp looks locked, not unvisited** (D-075 amended,
       Provisional). `PassportView` draws it in colour under frost (`blur` 3.4) with the drawn
       padlock in its middle at the pop-up's proportion (56 on 196), as the new-stamp pop-up,

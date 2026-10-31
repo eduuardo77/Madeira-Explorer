@@ -250,6 +250,14 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-296** **One *in vehicle* guess no longer raises a walk** (field log, 31 Oct: at 10:33 the
+      lead was on foot on floor -1; the lead: *fix it*). Built 2026-10-31: on *walking*, a
+      *driving* label from the motion task raises to driving only when the label before it was
+      driving too, within `DRIVING_CONFIRM_WINDOW_MS` (9 min; the native side passes one label per
+      4 min), `confirmsDriving`, tested. A lone one logs *motion sensors say driving once, waiting
+      for a second*. Real drives still rise at once by speed (25 km/h) and by Google's transitions
+      on the fixes; a slow drive in town now rises about 4 min later. 1,228 tests.
+      Open until seen on the P30: a drive that starts on walking rises, and a lone label stays.
 - [ ] **T-295** **The motion wake's waits on an Android alarm** (field log, 31 Oct; the lead: *build
       it*). React Native runs timers in the background only during a headless JS task, and Expo's
       tasks are not one, so the still check's 5 min wait and the wake's 90 s looks never ran with

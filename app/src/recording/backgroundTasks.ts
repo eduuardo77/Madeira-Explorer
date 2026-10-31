@@ -32,7 +32,9 @@ import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME, MOTION_TASK_NAME } from './task
 import { getCurrentSamplingProfile, lowerProfile, raiseProfile } from './samplingGate';
 import {
   canStartStillCheck,
+  confirmsDriving,
   decideStillCheck,
+  type MotionLabel,
   type FollowUp,
   followUpStep,
   nextWakeCheck,
@@ -164,17 +166,25 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
     return;
   }
   const profile = await getCurrentSamplingProfile();
-  if (activity !== undefined && activity !== 'still') {
-    lastMovingSignalMs = Date.now();
+  const nowMs = Date.now();
+  const previousLabel = lastLabel;
+  if (activity !== undefined) {
+    lastLabel = { activity, ts: nowMs };
+    if (activity !== 'still') lastMovingSignalMs = nowMs;
   }
   if (activity === 'still') {
     if (profile !== 'stationary') await startStillCheck(profile);
     return;
   }
   if (profile !== 'stationary') {
-    // Already recording: only a car can make it denser (`raiseProfile`).
+    // Already recording: only a car can make it denser (`raiseProfile`), and
+    // only when the sensors say so twice running (T-296, floor -1 on 31 Oct).
     if (profile === 'walking' && activity === 'driving') {
-      await raiseProfile('driving', 'the motion sensors say driving'); // i18n-exempt: diary reason, D-106
+      if (confirmsDriving(previousLabel, activity, nowMs)) {
+        await raiseProfile('driving', 'the motion sensors say driving twice'); // i18n-exempt: diary reason, D-106
+      } else {
+        await recordingEventDao.log('activity', 'motion sensors say driving once, waiting for a second'); // i18n-exempt: diary line, T-296
+      }
     }
     return;
   }
@@ -184,6 +194,11 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
 
 /** The newest moving label from the motion wake, for the still check (T-286). */
 let lastMovingSignalMs: number | null = null;
+/**
+ * The newest label of any kind, for confirming a drive (T-296). In memory: a
+ * restart forgets it, which only means waiting for one more label.
+ */
+let lastLabel: MotionLabel | null = null;
 
 /**
  * Wait `delayMs`, then run `followUp`: by an Android alarm where there is one

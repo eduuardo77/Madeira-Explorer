@@ -82,7 +82,7 @@ never where the lead lives.
   motion wake raised walking to driving (`raiseProfile`). The transitions show no driving until
   11:10:56. **The lead: 10:33 to 10:37 on floor -1, on foot, no mobile signal even on the
   iPhone.** So the label was wrong, read underground (the iPhone at 86 to 273 m there), and one
-  noisy label is enough to undo walking. Not fixed.
+  noisy label is enough to undo walking. **T-296:** a label now has to come twice.
 - ❌ **Home on fine GPS again, by a third route.** Driving since 11:15:39, and at 11:46
   `dumpsys location` shows fine GPS every 15 s for Bruma at home: the stuck still check means
   nothing lowers it until the app is opened. T-294's own case (a relaunch after a drive home)

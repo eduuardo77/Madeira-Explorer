@@ -207,3 +207,34 @@ export function parsePendingStillCheck(raw: unknown): PendingStillCheck | null {
 export function canStartStillCheck(pending: PendingStillCheck | null, nowMs: number): boolean {
   return pending === null || nowMs - pending.wakeMs > STILL_CHECK_LATE_MS;
 }
+
+// ---------------------------------------------------------------------------
+// One "in a vehicle" guess is not a drive (T-296)
+// ---------------------------------------------------------------------------
+//
+// ⚠ 31 Oct 2026, the P30: at 10:33 the lead was on foot on floor -1, with no
+// signal even on the iPhone, and one *in vehicle* label from Google's activity
+// updates raised walking to driving. The 50 m filter then drew the rest of the
+// walk thinly. Those labels are Google's quick best guess every 30 s, not its
+// debounced transitions, which said walking throughout. A real drive is
+// raised anyway by the speed rule (`VEHICLE_SPEED_MPS`) and by the
+// transitions on its fixes, so a label now needs to be repeated: the previous
+// label the motion task saw must be driving too, recently, with nothing else
+// in between. The native side passes labels at most every 4 minutes
+// (`MIN_GAP_MS`), so a second one comes 4 to 5 minutes on.
+
+/** A label from the motion task, as last seen. */
+export type MotionLabel = { activity: string; ts: number };
+
+/** Two gaps of the native side's 4 minutes, and one minute of slack. */
+export const DRIVING_CONFIRM_WINDOW_MS = 9 * 60_000;
+
+/**
+ * Whether a label raises walking to driving: it says driving, and so did the
+ * label before it, no more than `DRIVING_CONFIRM_WINDOW_MS` earlier.
+ */
+export function confirmsDriving(previous: MotionLabel | null, activity: string, nowMs: number): boolean {
+  if (activity !== 'driving' || previous === null || previous.activity !== 'driving') return false;
+  const ageMs = nowMs - previous.ts;
+  return ageMs >= 0 && ageMs <= DRIVING_CONFIRM_WINDOW_MS;
+}

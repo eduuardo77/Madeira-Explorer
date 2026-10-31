@@ -191,3 +191,38 @@ test('a still check under way blocks another, but not forever (31 Oct)', () => {
   // 09:00 to 11:42 on the P30: the morning's only check would now be replaced.
   assert.equal(canStartStillCheck(pending, wakeMs + 162 * 60_000), true);
 });
+
+// --- T-296: one "in a vehicle" guess is not a drive
+
+import { confirmsDriving, DRIVING_CONFIRM_WINDOW_MS } from './motionWakePolicy.ts';
+
+test('one driving label alone does not raise a walk (31 Oct, floor -1)', () => {
+  const now = 10_000_000;
+  assert.equal(confirmsDriving(null, 'driving', now), false);
+  assert.equal(confirmsDriving({ activity: 'walking', ts: now - 4 * 60_000 }, 'driving', now), false);
+  assert.equal(confirmsDriving({ activity: 'still', ts: now - 4 * 60_000 }, 'driving', now), false);
+});
+
+test('a second driving label within the window raises it', () => {
+  const now = 10_000_000;
+  assert.equal(confirmsDriving({ activity: 'driving', ts: now - 4 * 60_000 }, 'driving', now), true);
+  assert.equal(confirmsDriving({ activity: 'driving', ts: now - DRIVING_CONFIRM_WINDOW_MS }, 'driving', now), true);
+});
+
+test('an old driving label, or one from the future, confirms nothing', () => {
+  const now = 10_000_000;
+  assert.equal(confirmsDriving({ activity: 'driving', ts: now - DRIVING_CONFIRM_WINDOW_MS - 1 }, 'driving', now), false);
+  assert.equal(confirmsDriving({ activity: 'driving', ts: now + 1 }, 'driving', now), false);
+});
+
+test('the window holds the next label the native side can pass', () => {
+  // MIN_GAP_MS in MotionWakeTaskConsumer.kt is 4 min, labels come every 30 s.
+  assert.ok(DRIVING_CONFIRM_WINDOW_MS >= 4 * 60_000 + 30_000);
+});
+
+test('only a driving label is raised', () => {
+  const now = 10_000_000;
+  for (const activity of ['walking', 'running', 'cycling', 'still']) {
+    assert.equal(confirmsDriving({ activity: 'driving', ts: now - 60_000 }, activity, now), false, activity);
+  }
+});

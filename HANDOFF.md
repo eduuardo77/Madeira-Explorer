@@ -16,6 +16,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   **T-295 built the same day:** the waits are Android alarms (React Native runs no timers in the
   background outside a headless task); on the P30 since 12:01, its alarm seen running the task with
   the app in the background. A real stop on driving is still to see. Not data coverage: no SIM.
+  **T-296:** the 10:33 label was wrong (the lead on foot on floor -1); one *in vehicle* guess no
+  longer raises a walk, a second within 9 min does.
 - **30 Oct evening, an in-depth evaluation: 11.9 / 20** on a new 16-KPI rubric (not comparable
   with 13.3): `docs/bruma-score-and-plan-2026-10-30.md`. New: no place pins on the map for a new
   user (E1), zoom worst gap 182 ms (E2), the recorder's profile-switching glue has no tests (E3),

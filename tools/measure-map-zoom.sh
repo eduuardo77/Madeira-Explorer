@@ -13,6 +13,12 @@
 # each other, not with these. Then `make-zoom-gesture.py`'s one-finger zoom runs through monkey
 # while SurfaceFlinger's present times are read, as in `measure-map-frames.sh`.
 # Pass SKIP_PAN=1 for an app whose map is already where it should be.
+#
+# ⚠ N17, A4 of the 30 Oct fix plan: each of the six strokes now runs as its own
+# monkey script, with a marker logged just before it in the same shell call, as
+# `measure-map-frames.sh` does for the pans. Read the *stalls* line, not
+# *gaps > 100 ms*. ONE_SCRIPT=1 runs the old single script (one marker), which
+# gave 116 to 132 ms gaps on 27 Oct and 182 ms on 30 Oct, for comparison.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1
@@ -26,6 +32,11 @@ RAW="$OUT/$LABEL-$(date +%H%M%S).txt"
 
 python -I tools/make-zoom-gesture.py "$OUT/zoom-gesture.txt" 1100
 $ADB push "$OUT/zoom-gesture.txt" /data/local/tmp/zoom-gesture.txt >/dev/null
+mkdir -p "$OUT/zoom-strokes"
+python -I tools/make-zoom-gesture.py --strokes "$OUT/zoom-strokes" 1100
+for i in 1 2 3 4 5 6; do
+  $ADB push "$OUT/zoom-strokes/stroke-$i.txt" "/data/local/tmp/zoom-stroke-$i.txt" >/dev/null
+done
 
 LAYER=$($ADB shell dumpsys SurfaceFlinger --list | tr -d '\r' | grep "^$PKG/" | head -1)
 [ -n "$LAYER" ] || { echo "No window layer for $PKG: is it open in front?" >&2; exit 1; }
@@ -43,9 +54,19 @@ $ADB shell dumpsys SurfaceFlinger --latency-clear "'$LAYER'" >/dev/null
 $ADB shell "while true; do dumpsys SurfaceFlinger --latency '$LAYER'; echo ---; sleep 0.5; done" >"$RAW" &
 READER=$!
 sleep 0.5
-$ADB shell monkey -f /data/local/tmp/zoom-gesture.txt 1 >/dev/null 2>&1
+G="log -t mapframes gesture;"
+if [ "${ONE_SCRIPT:-0}" = 1 ]; then
+  $ADB shell "$G monkey -f /data/local/tmp/zoom-gesture.txt 1 >/dev/null 2>&1"
+else
+  for i in 1 2 3 4 5 6; do
+    $ADB shell "$G monkey -f /data/local/tmp/zoom-stroke-$i.txt 1 >/dev/null 2>&1"
+    sleep 0.8
+  done
+fi
 sleep 1
 kill $READER 2>/dev/null || true
 wait $READER 2>/dev/null || true
-echo "$LABEL ($LAYER)"
+# The markers, on the clock SurfaceFlinger uses (see measure-map-frames.sh).
+$ADB logcat -d -v monotonic -s mapframes:I | tr -d '\r' | awk '/mapframes: gesture/ {print "MARK " $1}' >>"$RAW"
+echo "$LABEL ($LAYER)$([ "${ONE_SCRIPT:-0}" = 1 ] && echo ', one script')"
 node tools/map-frames.mjs "$RAW"

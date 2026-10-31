@@ -44,6 +44,18 @@ for (const line of text.split(/\r?\n/)) {
 
 const periodNs = Number([...periods].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0);
 const times = [...presents].map((value) => Number(BigInt(value) / 1000n) / 1000).sort((a, b) => a - b);
+// logcat keeps markers from earlier runs; only this run's are used (A4, 2026-10-31),
+// so gestures are numbered from 1. A marker comes before its frames, by up to
+// the command's start-up, so a few seconds before the first frame still count.
+if (times.length > 0) {
+  const first = times[0] / 1000 - 5;
+  const last = times[times.length - 1] / 1000;
+  const kept = marks.filter((mark) => mark >= first && mark <= last).sort((a, b) => a - b);
+  marks.length = 0;
+  marks.push(...kept);
+}
+/** Which gesture a moment in ms falls in: the number of markers before it, 0 if none. */
+const gestureAt = (ms) => marks.filter((mark) => mark <= ms / 1000).length;
 const periodMs = periodNs / 1e6;
 const intervals = [];
 const long50 = [];
@@ -60,7 +72,7 @@ for (let i = 1; i < times.length; i += 1) {
       const wait = marks.some((mark) => mark >= from - TOUCH_LAG_S && mark <= to);
       const lone = i + 1 >= times.length || times[i + 1] - times[i] > IDLE_MS;
       const kind = wait ? 'wait' : lone ? 'settle' : 'STALL';
-      long50.push({ gap, at: (times[i - 1] - times[0]) / 1000, kind });
+      long50.push({ gap, at: (times[i - 1] - times[0]) / 1000, kind, gesture: gestureAt(times[i - 1]) });
     }
   }
 }
@@ -91,5 +103,16 @@ console.log(
     `worst ${f(worst)} ms (left out: ${count('wait')} waits, ${count('settle')} settles)`
 );
 for (const entry of long50) {
-  console.log(`  ${f(entry.gap)} ms at +${entry.at.toFixed(2)} s, ${entry.kind}`);
+  const which = marks.length > 0 ? `, gesture ${entry.gesture}` : '';
+  console.log(`  ${f(entry.gap)} ms at +${entry.at.toFixed(2)} s, ${entry.kind}${which}`);
+}
+// From each marker to the first frame after it: the command's start-up plus the
+// map's answer. Printed rather than assumed, since TOUCH_LAG_S was measured for
+// `input`, not for monkey (A4, 2026-10-31).
+if (marks.length > 0) {
+  const answers = marks.map((mark) => {
+    const next = times.find((time) => time / 1000 > mark);
+    return next === undefined ? 'none' : `${Math.round(next - mark * 1000)}`;
+  });
+  console.log(`marker to first frame, ms: ${answers.join(', ')}`);
 }

@@ -250,6 +250,25 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [x] **T-301** **A7 of the fix plan: the gold badge is drawn, and a tap on it opens the passport**
+      (the lead's Q3 b, D-097 amended). `WaitingBadge` takes no touches and is hidden from screen
+      readers; the passport button says the count (`passportButtonLabel`, tested in three
+      languages). **Seen on the emulator** (8 probe stamps added to its test data with `sqlite3`,
+      reason *probe: emulator check of the badge (A7)*; they are still there): the button reads
+      *Open your passport, 9 of 81 places collected, 4 stamps waiting*, the badge is not a
+      clickable node, and a tap on the badge at (210, 1104) opened the passport with its banner.
+      `tools/out/a7-badge-emulator.png`. Not on the P30.
+- [ ] **T-302** **A8 of the fix plan: the buy button says what it buys** (the lead's Q2 b with Q2 c's
+      offline line, D-097 amended): *Desbloquear o passaporte · 5,99 €* (was *Ver os meus
+      carimbos · 5,99 €*), *Desbloquear o passaporte* before Google answers, *É preciso internet
+      para comprar* in the sheet's offline state. Tested in three languages and every state.
+      Seen on the emulator without a price (`tools/out/a8-unlock-sheet-emulator.png`): its lookup
+      fails with `query-product` (no Play account), which counts as failed, not offline, rightly.
+      **Open:** the offline line needs Play to answer with a network code
+      (`billingOutcomes.ts`: `service-error` and others), and which code a phone with no network
+      gets from the price lookup was never measured. Check on a Play install in airplane mode;
+      if it is not one of those codes, the line never shows and needs the phone's own network
+      state (a new native dependency, the lead's call).
 - [x] **T-300** **E3, A3 of the fix plan: the recorder's profile switching is tested, on the P30's
       own batches.** Done 2026-10-31. The logic of `samplingGate.ts` and the location and motion
       tasks in `backgroundTasks.ts` moved, unchanged, to `recording/recorderCore.ts`, which takes

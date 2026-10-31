@@ -23,12 +23,12 @@ function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   };
 }
 
-test('D-097, sheet A: the headline counts what is waiting, and the button offers to see it', () => {
+test('D-097, sheet A: the headline counts what is waiting, and the button says what it buys', () => {
   const model = unlockSheetModel(input());
   assert.equal(model.eyebrow, 'YOUR PASSPORT');
   assert.equal(model.title, 'You have 8 stamps waiting for you');
   assert.equal(model.earned, "You've been there. All that's left is to see them.");
-  assert.equal(model.buy?.label, 'See my stamps · 5,99 €');
+  assert.equal(model.buy?.label, 'Unlock the passport · 5,99 €');
   assert.equal(unlockSheetModel(input({ waiting: 1 })).title, 'You have 1 stamp waiting for you');
 });
 
@@ -37,7 +37,7 @@ test('D-097, sheet A, in Portuguese as the project lead chose it', () => {
   assert.equal(model.eyebrow, 'O TEU PASSAPORTE');
   assert.equal(model.title, 'Tens 8 carimbos à tua espera');
   assert.equal(model.earned, 'Já lá estiveste. Só falta vê-los.');
-  assert.equal(model.buy?.label, 'Ver os meus carimbos · 5,99 €');
+  assert.equal(model.buy?.label, 'Desbloquear o passaporte · 5,99 €');
   assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).title, 'Tens 1 carimbo à tua espera');
   // One stamp is "it" (P30, 2026-10-10: the sheet said "vê-los" for one).
   assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).earned, 'Já lá estiveste. Só falta vê-lo.');
@@ -46,7 +46,7 @@ test('D-097, sheet A, in Portuguese as the project lead chose it', () => {
 test('with nothing waiting (from Settings), the plain offer names the price Google gave', () => {
   const model = unlockSheetModel(input({ waiting: 0 }));
   assert.equal(model.title, 'Unlock your passport');
-  assert.equal(model.buy?.label, 'Unlock for 5,99 €');
+  assert.equal(model.buy?.label, 'Unlock the passport · 5,99 €');
   assert.equal(model.buy?.enabled, true);
   assert.equal(model.restore, 'Restore purchase');
   assert.equal(model.close, 'Not now');
@@ -54,9 +54,9 @@ test('with nothing waiting (from Settings), the plain offer names the price Goog
 });
 
 test('⚠ no price from Google means no price at all, never a remembered one', () => {
-  assert.equal(unlockSheetModel(input({ price: null })).buy?.label, 'See my stamps');
+  assert.equal(unlockSheetModel(input({ price: null })).buy?.label, 'Unlock the passport');
   const model = unlockSheetModel(input({ price: null, waiting: 0 }));
-  assert.equal(model.buy?.label, 'Unlock');
+  assert.equal(model.buy?.label, 'Unlock the passport');
   assert.doesNotMatch(JSON.stringify(model), /\d[.,]\d\d/);
 });
 
@@ -100,6 +100,33 @@ test('offline is never an error, and Buy stays to try again', () => {
   const model = unlockSheetModel(input({ state: { kind: 'offline' } }));
   assert.match(model.notice ?? '', /later, when you have a connection/);
   assert.equal(model.buy?.enabled, true);
+});
+
+test('Q2: offline, the button says a connection is needed, price or none, in three languages', () => {
+  const want = { en: 'You need a connection to buy', pt: 'É preciso internet para comprar', de: 'Kaufen braucht eine Verbindung' };
+  for (const language of ['en', 'pt', 'de'] as const) {
+    for (const price of ['5,99 €', null]) {
+      for (const waiting of [8, 0]) {
+        const model = unlockSheetModel(input({ state: { kind: 'offline' }, price, waiting, language }));
+        assert.equal(model.buy?.label, want[language], `${language} ${price} ${waiting}`);
+        assert.equal(model.buy?.enabled, true);
+      }
+    }
+  }
+});
+
+test('Q2 b: online, the button says what it buys and the price, in three languages', () => {
+  const want = {
+    en: ['Unlock the passport · 5,99 €', 'Unlock the passport'],
+    pt: ['Desbloquear o passaporte · 5,99 €', 'Desbloquear o passaporte'],
+    de: ['Reisepass freischalten · 5,99 €', 'Reisepass freischalten'],
+  };
+  for (const language of ['en', 'pt', 'de'] as const) {
+    for (const waiting of [8, 0]) {
+      assert.equal(unlockSheetModel(input({ language, waiting })).buy?.label, want[language][0]);
+      assert.equal(unlockSheetModel(input({ language, waiting, price: null })).buy?.label, want[language][1]);
+    }
+  }
 });
 
 test('⚠ unavailable does not claim the phone has no Google Play', () => {
@@ -147,9 +174,10 @@ test('what each failure from the store becomes', () => {
 test("⚠ a failure keeps Google's price on the button (seen on the P30)", () => {
   // The first version kept the price in the offer state only, and after a
   // failed purchase the button fell back to a bare "Unlock".
-  for (const kind of ['failed', 'offline', 'nothingToRestore', 'offer'] as const) {
-    assert.equal(unlockSheetModel(input({ state: { kind } })).buy?.label, 'See my stamps · 5,99 €', kind);
-    assert.equal(unlockSheetModel(input({ state: { kind }, waiting: 0 })).buy?.label, 'Unlock for 5,99 €', kind);
+  // Offline is left out: there the button says a connection is needed (Q2).
+  for (const kind of ['failed', 'nothingToRestore', 'offer'] as const) {
+    assert.equal(unlockSheetModel(input({ state: { kind } })).buy?.label, 'Unlock the passport · 5,99 €', kind);
+    assert.equal(unlockSheetModel(input({ state: { kind }, waiting: 0 })).buy?.label, 'Unlock the passport · 5,99 €', kind);
   }
 });
 

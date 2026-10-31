@@ -24,6 +24,9 @@
 
 import type { Category } from '../content/contentPack.ts';
 import { visibleStamps } from '../entitlement/freeTier.ts';
+import type { Language } from '../i18n/languages.ts';
+import { PLURALS, STRINGS } from '../i18n/strings.ts';
+import { plural, translate } from '../i18n/translate.ts';
 
 /** What the button draws. The same fields the passport hands `StampArt`. */
 export type ButtonStamp = {
@@ -88,4 +91,21 @@ export function buttonStamp(
   }
 
   return { placeId: latest.id, name: latest.name, category: latest.category, collected: true };
+}
+
+/**
+ * What a screen reader says for the map's passport button (Q3 b, 31 Oct): the
+ * count of places, then the stamps waiting, when the gold badge shows them.
+ * The badge is drawn, not a button of its own: a tap on it opens the passport,
+ * whose banner sells (D-097 as amended), so it is said here, once.
+ */
+export function passportButtonLabel(
+  collected: number,
+  total: number,
+  waiting: number,
+  language: Language
+): string {
+  if (total === 0) return translate(STRINGS['map.a11y.openPassport'], language);
+  const places = plural(PLURALS['passport.a11y.openWithCount'], total, language, { collected, total });
+  return waiting > 0 ? places + plural(PLURALS['passport.a11y.waitingSuffix'], waiting, language) : places;
 }

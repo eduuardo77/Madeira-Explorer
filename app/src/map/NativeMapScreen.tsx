@@ -1256,7 +1256,7 @@ export default function NativeMapScreen({
         }
         onOpenPassport={onOpenPassport}
         waitingCount={waiting.length}
-        onOpenUnlock={BETA_BUILD ? undefined : () => setUnlocking({ first: null })}
+        waitingShown={!BETA_BUILD}
         onOpenSettings={onOpenSettings}
         isWalking={walkStarted}
         control={controlInput === null ? 'start-walk' : primaryControl(controlInput)}

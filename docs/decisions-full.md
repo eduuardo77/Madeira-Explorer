@@ -5514,6 +5514,18 @@ map (rejected for covering the product itself); a purchase notification after N 
 uninstall risk, and D-011's budget).
 
 
+**Amended 2026-10-31 (the lead's answers of 30 Oct to Q2 and Q3 of `docs/fix-plan-2026-10-30.md`):**
+- **R2, the gold count on the map's passport button, is drawn, not a button** (Q3 b, T-301). It was
+  its own 31 × 26 dp target opening the unlock sheet, on the corner of the passport button, so a
+  tap there was a guess between two things. Now a tap anywhere on the stamp, badge included, opens
+  the passport, whose banner (R1) sells, and the button says the count (*Abrir o teu passaporte,
+  9 de 81 lugares visitados, 4 carimbos à espera*).
+- **Sheet A's button says what it buys and what it costs** (Q2 b, T-302): *Desbloquear o
+  passaporte · 5,99 €*, with or without stamps waiting, was *Ver os meus carimbos · 5,99 €*.
+  Offline it says *É preciso internet para comprar* and a tap tries again (Q2 c's offline line).
+  ⚠ Offline means Play answered with a network code; which code a phone with no network gets
+  from the price lookup has not been measured (the mapping was written before any phone ran it).
+
 ## D-098 — The Portuguese speaks to the user as *tu*
 
 **Status: Accepted 2026-10-06** by the project lead (execution plan, decision L1). Built in T-255.

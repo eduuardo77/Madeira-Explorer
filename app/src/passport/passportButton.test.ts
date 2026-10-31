@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 
 import type { Category } from '../content/contentPack.ts';
 import { FREE_STAMP_ALLOWANCE } from '../entitlement/freeTier.ts';
-import { buttonStamp, PLACEHOLDER_ID } from './passportButton.ts';
+import { buttonStamp, passportButtonLabel, PLACEHOLDER_ID } from './passportButton.ts';
 import { designFor } from './stampArt.ts';
 import { RIM_METAL_UNITS, RIM_PAD_UNITS, rimElements, rimFor } from './stampRim.ts';
 import { mapChrome } from '../ui/theme.ts';
@@ -158,5 +158,36 @@ test('⚠ the hairline, as drawn, stands the pale metals off the light map', asy
       contrastRatio(drawn, LIGHT_LAND) >= 3,
       `${tier}: the hairline measures ${contrastRatio(drawn, LIGHT_LAND).toFixed(2)}:1 on the light map`
     );
+  }
+});
+
+// Q3 b (31 Oct 2026): the gold badge is drawn, and the passport button says its count.
+test('the passport button says the places, then the stamps waiting, in three languages', () => {
+  const cases = {
+    en: [
+      'Open your passport',
+      'Open your passport, 26 of 81 places collected',
+      'Open your passport, 26 of 81 places collected, 1 stamp waiting',
+      'Open your passport, 26 of 81 places collected, 21 stamps waiting',
+    ],
+    pt: [
+      'Abrir o teu passaporte',
+      'Abrir o teu passaporte, 26 de 81 lugares visitados',
+      'Abrir o teu passaporte, 26 de 81 lugares visitados, 1 carimbo à espera',
+      'Abrir o teu passaporte, 26 de 81 lugares visitados, 21 carimbos à espera',
+    ],
+    de: [
+      'Reisepass öffnen',
+      'Reisepass öffnen, 26 von 81 Orten gesammelt',
+      'Reisepass öffnen, 26 von 81 Orten gesammelt, 1 Stempel wartet',
+      'Reisepass öffnen, 26 von 81 Orten gesammelt, 21 Stempel warten',
+    ],
+  } as const;
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const [none, places, one, many] = cases[language];
+    assert.equal(passportButtonLabel(0, 0, 0, language), none);
+    assert.equal(passportButtonLabel(26, 81, 0, language), places);
+    assert.equal(passportButtonLabel(26, 81, 1, language), one);
+    assert.equal(passportButtonLabel(26, 81, 21, language), many);
   }
 });

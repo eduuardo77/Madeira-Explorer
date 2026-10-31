@@ -67,13 +67,13 @@ import RecentreMark from './RecentreMark';
 import WalkMark from './WalkMark';
 import WarningMark from './WarningMark';
 import StampArt from './StampArt';
-import { STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
+import { passportButtonLabel, STAMP_BUTTON_SIZE, type ButtonStamp } from '../passport/passportButton';
 import { designFor, TILT_FIT } from '../passport/stampArt';
 import { rimFor } from '../passport/stampRim';
 import { tierFor } from '../passport/stampTier';
 import { homeProgress } from '../progress/homeProgress';
 import { getRegionName } from '../content/regionCatalogue';
-import { n, t } from '../i18n';
+import { deviceLanguage, t } from '../i18n';
 import type { PrimaryControl, RecordingStatus } from '../recording/recorderControls';
 import {
   colors,
@@ -85,22 +85,9 @@ import {
   spacing,
   warningBanner,
 } from './theme';
-import { growTouch } from './touchArea';
 
 /** The gold count's drawn size (D-097, R2): a circle, wider only for two digits. */
 const BADGE_SIZE = 30;
-
-/**
- * Its target: drawn at 30 dp, grown to MIN_TAP_TARGET on every side (D-015),
- * the way the recentre pill is. A two-digit count is wider, so its sides need
- * less, and over-reaching by a few dp there is harmless.
- */
-const BADGE_HIT_SLOP = {
-  top: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
-  bottom: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
-  left: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
-  right: (MIN_TAP_TARGET - BADGE_SIZE) / 2,
-};
 
 /** The settings mark, a little smaller: it is the quietest control here. */
 const SETTINGS_MARK_SIZE = 20;
@@ -267,7 +254,8 @@ export type PrimaryOverlayProps = {
    * the workbench) or zero draws nothing.
    */
   waitingCount?: number;
-  onOpenUnlock?: () => void;
+  /** False in a beta build, where nothing is locked (D-084). */
+  waitingShown?: boolean;
   onOpenSettings: () => void;
   onToggleRecording: () => void;
 };
@@ -295,7 +283,7 @@ export default function PrimaryOverlay({
   bottomSlot,
   onOpenPassport,
   waitingCount = 0,
-  onOpenUnlock,
+  waitingShown = false,
   onOpenSettings,
   onToggleRecording,
 }: PrimaryOverlayProps) {
@@ -413,15 +401,12 @@ export default function PrimaryOverlay({
         <View style={styles.row} pointerEvents="box-none">
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={
-              progress.total === 0
-                ? t('map.a11y.openPassport')
-                : // The noun follows the total ("1 of 80 places"), so it chooses the form.
-                  n('passport.a11y.openWithCount', progress.total, {
-                    collected: progress.collected,
-                    total: progress.total,
-                  })
-            }
+            accessibilityLabel={passportButtonLabel(
+              progress.collected,
+              progress.total,
+              waitingShown ? waitingCount : 0,
+              deviceLanguage()
+            )}
             onPress={onOpenPassport}
             style={({ pressed }) => [styles.stampButton, pressed && styles.pressed]}
           >
@@ -435,9 +420,7 @@ export default function PrimaryOverlay({
               rim={rimFor(tier, mapStyle)}
               size={STAMP_BUTTON_SIZE * TILT_FIT}
             />
-            {onOpenUnlock === undefined || waitingCount === 0 ? null : (
-              <WaitingBadge count={waitingCount} onPress={onOpenUnlock} />
-            )}
+            {!waitingShown || waitingCount === 0 ? null : <WaitingBadge count={waitingCount} />}
             {/* T-260: where you stand among the places, quietly. The project
                 lead's pick of three drawn options (2026-10-07): no ring, no
                 coloured badge, the count at the button's bottom right (the
@@ -638,9 +621,15 @@ export default function PrimaryOverlay({
 /**
  * The gold count on the passport button (D-097, R2). It pulses twice when the
  * count rises, so a stamp that locks is noticed without a word, and the map's
- * roads stay clear. Its own button: the stamp under it still opens the passport.
+ * roads stay clear.
+ *
+ * ⚠ Drawn, not a button (Q3 b, 31 Oct 2026). It was its own 31 x 26 dp target
+ * opening the unlock sheet, on the corner of the passport button, so a tap
+ * there was a guess between the two. Now touches pass through it to the
+ * passport, whose banner sells, and the button says the count
+ * (`passportButtonLabel`).
  */
-function WaitingBadge({ count, onPress }: { count: number; onPress: () => void }) {
+function WaitingBadge({ count }: { count: number }) {
   const pulse = useRef(new Animated.Value(0)).current;
   const shown = useRef(count);
   useEffect(() => {
@@ -656,20 +645,15 @@ function WaitingBadge({ count, onPress }: { count: number; onPress: () => void }
 
   return (
     <Animated.View
+      pointerEvents="none"
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
       style={[
         styles.badge,
         { transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] }) }] },
       ]}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={n('map.a11y.unlockWaiting', count)}
-        onPress={onPress}
-        hitSlop={BADGE_HIT_SLOP}
-        style={styles.badgeHit}
-      >
-        <Text style={styles.badgeText}>{count}</Text>
-      </Pressable>
+      <Text style={styles.badgeText}>{count}</Text>
     </Animated.View>
   );
 }
@@ -699,12 +683,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     fontSize: fontSize.small,
     fontWeight: '700',
-  },
-  badgeHit: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    // N27: the view itself 48 dp for Play's report; the badge draws as before.
-    ...growTouch(22, 19),
   },
   badgeText: {
     color: reward.goldButtonText,

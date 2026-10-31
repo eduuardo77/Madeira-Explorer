@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { growTouch, MEASURED_TARGET } from './touchArea.ts';
 
 test('the four small controls of the 27 Oct review reach 48 dp (N27)', () => {
-  // Measured on the P30: the gold badge 19 × 22, See all 19 tall, the trip link 31, the switch 32.
+  // Measured on the P30: the gold badge 19 × 22 (a drawing since Q3 b, 31 Oct; the size
+  // stays as a case), See all 19 tall, the trip link 31, the switch 32.
   for (const [height, width] of [[22, 19], [19, undefined], [31, undefined], [32, undefined]] as const) {
     const growth = growTouch(height, width);
     assert.ok(height + 2 * growth.paddingVertical >= MEASURED_TARGET, `height ${height}`);

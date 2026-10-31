@@ -844,8 +844,6 @@ export const STRINGS = {
   'unlock.title': s('Unlock your passport', 'Desbloqueia o teu passaporte', 'Ihren Reisepass freischalten'),
   // D-097, sheet A (picked 2026-10-05): what is already theirs, not a purchase.
   'unlock.eyebrow': s('YOUR PASSPORT', 'O TEU PASSAPORTE', 'IHR REISEPASS'),
-  'unlock.buy.see': s('See my stamps · {price}', 'Ver os meus carimbos · {price}', 'Meine Stempel ansehen · {price}'),
-  'unlock.buy.see.noPrice': s('See my stamps', 'Ver os meus carimbos', 'Meine Stempel ansehen'),
   'unlock.earned.none': s(
     'Every stamp you collect will be shown in full.',
     'Vais ver todos os carimbos que conseguires.',
@@ -916,8 +914,12 @@ export const STRINGS = {
     'Pagamento único. Sem subscrição.',
     'Eine einmalige Zahlung. Kein Abo.'
   ),
-  'unlock.buy': s('Unlock for {price}', 'Desbloquear por {price}', 'Für {price} freischalten'),
-  'unlock.buy.noPrice': s('Unlock', 'Desbloquear', 'Freischalten'),
+  // Q2 b (the lead, 30 Oct; D-097 amended): the button says what it does and
+  // what it costs, with or without stamps waiting. The price is Google's only.
+  'unlock.buy.passport': s('Unlock the passport · {price}', 'Desbloquear o passaporte · {price}', 'Reisepass freischalten · {price}'),
+  'unlock.buy.passport.noPrice': s('Unlock the passport', 'Desbloquear o passaporte', 'Reisepass freischalten'),
+  // Q2, with (c)'s offline line: no connection, so it says so; a tap tries again.
+  'unlock.buy.needsConnection': s('You need a connection to buy', 'É preciso internet para comprar', 'Kaufen braucht eine Verbindung'),
   'unlock.working': s('Waiting for Google Play', 'À espera do Google Play', 'Warten auf Google Play'),
   'unlock.restore': s('Restore purchase', 'Recuperar compra', 'Kauf wiederherstellen'),
   'unlock.notNow': s('Not now', 'Agora não', 'Nicht jetzt'),
@@ -1513,10 +1515,11 @@ export const PLURALS = {
       'Er gehört Ihnen, und {count} weitere warten. Freischalten, um sie in Farbe zu sehen.'
     ),
   },
-  // D-097, R2: the gold count on the map's passport button.
-  'map.a11y.unlockWaiting': {
-    one: s('{count} stamp waiting. Unlock the passport', '{count} carimbo à espera. Desbloquear o passaporte', '{count} Stempel wartet. Reisepass freischalten'),
-    other: s('{count} stamps waiting. Unlock the passport', '{count} carimbos à espera. Desbloquear o passaporte', '{count} Stempel warten. Reisepass freischalten'),
+  // D-097, R2 as amended 31 Oct (Q3 b): the gold count is drawn on the map's
+  // passport button and spoken as part of it, after its count of places.
+  'passport.a11y.waitingSuffix': {
+    one: s(', {count} stamp waiting', ', {count} carimbo à espera', ', {count} Stempel wartet'),
+    other: s(', {count} stamps waiting', ', {count} carimbos à espera', ', {count} Stempel warten'),
   },
   // D-097, R1: the passport's standing reminder while stamps are locked.
   'passport.nudge.title': {

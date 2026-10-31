@@ -14,7 +14,8 @@
  * - **Nothing is offered that does not exist yet.** Medals (T-235) and the
  *   founder stamp (T-233, and only while its window is open) are listed when
  *   the caller says they are real.
- * - **Offline is not an error.** It says *later*, and Buy stays.
+ * - **Offline is not an error.** It says *later*, and Buy stays; the button
+ *   says a connection is needed (Q2, 30 Oct), and a tap tries again.
  * - **Unavailable does not blame the phone**: the same answer comes from an
  *   old Play Store or a country Play does not sell in (T-156b).
  * - **A failure makes no promise about charges**, because the app cannot know.
@@ -90,15 +91,15 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
 
   const { price } = input;
   const waiting = input.waiting > 0;
-  // Sheet A (D-097): with stamps waiting, the offer is to see what is already
-  // theirs; with none (opened from Settings), it is the plain unlock.
-  const buyLabel = waiting
-    ? price === null
-      ? say('unlock.buy.see.noPrice')
-      : say('unlock.buy.see', { price })
-    : price === null
-      ? say('unlock.buy.noPrice')
-      : say('unlock.buy', { price });
+  // Q2 b (30 Oct 2026, D-097 amended): one label, what the tap does and what
+  // it costs. It was "See my stamps · 5,99 €" with stamps waiting, which said
+  // neither that it was a purchase nor of what. Offline it says so instead.
+  const buyLabel =
+    state.kind === 'offline'
+      ? say('unlock.buy.needsConnection')
+      : price === null
+        ? say('unlock.buy.passport.noPrice')
+        : say('unlock.buy.passport', { price });
   const canBuy = { label: buyLabel, enabled: true };
 
   const model: UnlockSheetModel = {

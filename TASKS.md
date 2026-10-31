@@ -250,6 +250,18 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-307** **Visual consistency: "light map, dark passport, purple paywall"** (30 Oct review,
+      Visual 12). Not in the fix plan; the lead asked for options on 31 Oct, open to changing D-080
+      and D-097 if an option looks better. `tools/preview-consistency-options.mjs` draws today and
+      four directions with the real stamps and copy, the map unchanged in all: **A** one night (the
+      paywall in the passport's black, no violet or green; blue navigates, gold is what you earn or
+      buy), **B** passport cover (deep burgundy, gold type), **C** laurel (deep forest green, tied
+      to the green start button), **D** all light with each stamp on a dark mount. Measured there:
+      every option clears 4.5:1 for text and 3:1 for stamp paper and the unvisited outline; on any
+      light page 0 of 30 papers clear 3:1, hence D's mounts. Mid-dark burgundy, laurel and
+      Atlantic blue drop the unvisited outline under 3:1, so the deep shades are used. **Waiting on
+      the lead's pick**; then the other dark screens (celebrations, medals, share image) drawn the
+      same way before any app change.
 - [ ] **T-306** **A10 of the fix plan: levada length and difficulty were already on the card.** Found
       2026-10-31, nothing built: 11 of 18 levadas carry `walk` (route, km, return km, minutes,
       difficulty, desk E of 19 Oct) and both the map's card and the passport's draw it, e.g.

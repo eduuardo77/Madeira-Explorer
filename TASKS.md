@@ -250,6 +250,22 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-295** **The motion wake's waits on an Android alarm** (field log, 31 Oct; the lead: *build
+      it*). React Native runs timers in the background only during a headless JS task, and Expo's
+      tasks are not one, so the still check's 5 min wait and the wake's 90 s looks never ran with
+      the app closed. Built 2026-10-31: `FollowUpAlarm.kt` books an exact alarm (inexact on
+      Android 12+ without the permission, which is not asked for) that runs the motion task again
+      with a step, `look:1`, `look:2` or `still` (`parseFollowUp`, tested). The check under way is
+      kept in `app_state.still_check_pending`, and one older than `STILL_CHECK_LATE_MS` is
+      replaced (`canStartStillCheck`, tested), so a check that never ends no longer blocks the
+      next. Each look books the next one before asking for a position. 1,223 tests.
+      **On the P30 at 12:01** (field build, `install -r`, backup `p30-2026-10-31-before-t295`): a
+      still check started at 12:01:43, `dumpsys alarm` showed the exact `FOLLOW_UP` alarm, and at
+      12:06:43, the launcher in front, the alarm ran the task and cleared the stored check (the
+      launch had already set stationary, so no verdict line, as designed).
+      ⚠ Open until seen on the P30: *still check: stay after 5 min* or a sleep about 5 minutes
+      after *started*, and *motion wake: look 2* lines, all with the app closed. Not fixed: one
+      *in vehicle* label still raises walking to driving (10:33 on 31 Oct).
 - [ ] **T-294** **A leftover batch and a frozen still check** (field log, 30 Oct). Built 2026-10-30
       at the desk, 1,217 tests. (1) Out of stationary, `decideProfile` keeps the profile when the
       newest fix is over 5 min old by the wall clock (`LEFTOVER_FIX_MS`): the moving profile's last

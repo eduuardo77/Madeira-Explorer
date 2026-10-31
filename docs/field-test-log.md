@@ -60,13 +60,23 @@ never where the lead lives.
 - ❌ **The first 4.4 km lost.** Motion wake at 08:40:33 found one fix (still at the door); its
   other two looks, 90 s apart, never logged a fix though the car was moving by 08:43. Google's
   *driving* at 08:45:31 reached the app at 08:48:17, the first fix 08:48:18. Most likely the
-  same frozen JavaScript timer as below; not proven.
+  same stopped JavaScript timer as below; not proven.
 - ❌ **A still check that never ended.** *Still check: started on driving* at 09:00:10, in
   traffic; its 5 min `setTimeout` never fired in the 2 h 40 that followed (no app opening to
-  thaw it, so T-294's late rule never ran either). With `stillCheckRunning` left true, no other
+  restart it, so T-294's late rule never ran either). With `stillCheckRunning` left true, no other
   still could start a check, and only one *started* line came all morning. So the 46 min stop,
   the 9 and 17 min stops and the walk to 10:18 were all on *driving*: no sleep, and the walk
   drawn through the 50 m filter.
+- **Why the timer never fired** (React Native's `JavaTimerManager`, read the same day): while the
+  app is in the background, timers run only during a *headless JS task*, and Expo's background
+  tasks are not one. Not a frozen process: every `setTimeout` in a background task waits for the
+  app to be opened. That also explains 30 Oct's 91 min check. **T-295 moves the waits to an
+  Android alarm.**
+- **Not data coverage** (the lead wondered): the P30 has no SIM and its Wi-Fi was off, so it
+  never had mobile data, and GPS needs none. At four of the five on-foot misses the iPhone was
+  at 3 to 4 m, an open sky; only around the 17 min stop (10:36 to 11:04) it was at 14 m. The
+  P30's own fixes on foot were rougher, median 23 m on *driving* and 34 m after 10:33, against
+  12 m in the quarter hour it spent on *walking*.
 - ⚠ **Walking at 10:18, driving again at 10:33:44 with no car.** Google's transition said walking
   (09:49:45, delivered 10:18:30); then one *most probable* activity label of *in vehicle* on the
   motion wake raised walking to driving (`raiseProfile`). The transitions show no driving until

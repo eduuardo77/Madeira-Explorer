@@ -8,6 +8,7 @@ import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
 import android.os.Bundle
 import android.util.Log
+import java.lang.ref.WeakReference
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.DetectedActivity
@@ -65,6 +66,7 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
 
   override fun didRegister(task: TaskInterface) {
     this.task = task
+    registered = WeakReference(this)
     armSignificantMotion()
     requestActivityUpdates()
   }
@@ -73,6 +75,7 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
     disarmSignificantMotion()
     removeActivityUpdates()
     task = null
+    if (registered?.get() === this) registered = null
   }
 
   /** Activity updates arrive here, through the task's broadcast intent. */
@@ -87,7 +90,7 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
       if (now - lastStillWakeMs < STILL_GAP_MS) return
       lastStillWakeMs = now
       lastWasStill = true
-      run("activity", "still")
+      runTask("activity", "still")
       return
     }
     val activity = movingName(best.type) ?: return
@@ -101,22 +104,25 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
     if (now - lastWakeMs < MIN_GAP_MS && !lastWasStill) return
     lastWakeMs = now
     lastWasStill = false
-    run(source, activity)
+    runTask(source, activity)
   }
 
-  private fun run(source: String, activity: String?) {
+  private fun runTask(source: String, activity: String?, step: String? = null): Boolean {
     val now = System.currentTimeMillis()
-    val current = task ?: return
+    val current = task ?: return false
     val data = Bundle().apply {
       putString("source", source)
       if (activity != null) putString("activity", activity)
+      if (step != null) putString("step", step)
       putDouble("ts", now.toDouble())
     }
     context?.let { TransitionQueue.noteWake(it, source) }
-    try {
+    return try {
       current.execute(data, null)
+      true
     } catch (error: Exception) {
       Log.w(TAG, "motion wake not run", error)
+      false
     }
   }
 
@@ -170,6 +176,13 @@ class MotionWakeTaskConsumer(context: Context, taskManagerUtils: TaskManagerUtil
 
   companion object {
     private const val TAG = "BrumaMotionWake"
+
+    /** The registered consumer, for `FollowUpReceiver` (T-295). */
+    @Volatile private var registered: WeakReference<MotionWakeTaskConsumer>? = null
+
+    /** Run the motion task for an alarm's step; false when no task is registered. */
+    fun followUp(step: String): Boolean =
+      registered?.get()?.runTask("follow_up", null, step) ?: false
 
     /** Play services pauses updates while the phone is still, so this costs nothing then. */
     private const val ACTIVITY_INTERVAL_MS = 30_000L

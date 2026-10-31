@@ -31,11 +31,21 @@ import { applySamplingGate } from './samplingGate';
 import { GEOFENCE_TASK_NAME, LOCATION_TASK_NAME, MOTION_TASK_NAME } from './taskNames';
 import { getCurrentSamplingProfile, lowerProfile, raiseProfile } from './samplingGate';
 import {
+  canStartStillCheck,
   decideStillCheck,
+  type FollowUp,
+  followUpStep,
   nextWakeCheck,
+  parseFollowUp,
+  parsePendingStillCheck,
+  type PendingStillCheck,
   STILL_CHECK_WAIT_MS,
   WAKE_FIX_TIMEOUT_MS,
 } from './motionWakePolicy';
+import type { MovementSample } from './movementPolicy';
+import { scheduleMotionFollowUp } from './activityRecognition';
+import * as appStateDao from '../storage/dao/appStateDao';
+import { AppStateKey } from '../storage/dao/appStateDao';
 import { locationProvider } from './ExpoLocationProvider';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { loadLanguageChoice } from '../i18n/languageChoice';
@@ -127,6 +137,11 @@ async function recordSamples(samples: LocationSample[]): Promise<void> {
  * minutes (`motionWakePolicy.ts`), each through the same pipeline as any batch,
  * so the sampling gate alone decides whether the phone has left. Anything else
  * (already recording, recording off) and it does nothing.
+ *
+ * ⚠ T-295: no wait in here is a JavaScript timer. In the background React
+ * Native's timers do not run (31 Oct 2026, a five minute wait that never
+ * ended), so each wait is an Android alarm that runs this task again with
+ * `source: 'follow_up'` and the step to take.
  */
 TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
   await loadLanguageChoice();
@@ -137,20 +152,23 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
   if (!(await locationProvider.isRecording())) {
     return;
   }
-  let profile = await getCurrentSamplingProfile();
-  const { source, activity } = (data ?? {}) as { source?: string; activity?: string };
+  const { source, activity, step } = (data ?? {}) as {
+    source?: string;
+    activity?: string;
+    step?: string;
+  };
+  if (source === 'follow_up') {
+    const followUp = parseFollowUp(step);
+    if (followUp?.kind === 'look') await wakeLook(followUp.index);
+    if (followUp?.kind === 'still') await finishStillCheck();
+    return;
+  }
+  const profile = await getCurrentSamplingProfile();
   if (activity !== undefined && activity !== 'still') {
     lastMovingSignalMs = Date.now();
   }
   if (activity === 'still') {
-    if (profile !== 'stationary' && !stillCheckRunning) {
-      stillCheckRunning = true;
-      try {
-        await runStillCheck(profile);
-      } finally {
-        stillCheckRunning = false;
-      }
-    }
+    if (profile !== 'stationary') await startStillCheck(profile);
     return;
   }
   if (profile !== 'stationary') {
@@ -161,23 +179,49 @@ TaskManager.defineTask(MOTION_TASK_NAME, async ({ data, error }) => {
     return;
   }
   await recordingEventDao.log('activity', `motion wake: ${source ?? 'unknown'}${activity ? ` (${activity})` : ''}`); // i18n-exempt: diary line, D-106
-  for (let index = 0; ; index += 1) {
-    const wait = nextWakeCheck(index, profile);
-    if (wait === null) break;
-    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-    const fix = await wakePosition();
-    if (fix !== null) {
-      await recordSamples([fix]);
-    }
-    profile = await getCurrentSamplingProfile();
-  }
+  await wakeLook(0);
 });
 
 /** The newest moving label from the motion wake, for the still check (T-286). */
 let lastMovingSignalMs: number | null = null;
-let stillCheckRunning = false;
 
-/** One GPS position for a wake, or null when none comes in time. */
+/**
+ * Wait `delayMs`, then run `followUp`: by an Android alarm where there is one
+ * (T-295), else by a timer, which keeps time only while the app is open.
+ */
+function scheduleFollowUp(delayMs: number, followUp: FollowUp): void {
+  if (scheduleMotionFollowUp(delayMs, followUpStep(followUp))) return;
+  setTimeout(() => {
+    void (followUp.kind === 'look' ? wakeLook(followUp.index) : finishStillCheck());
+  }, delayMs);
+}
+
+/**
+ * Look `index` of a motion wake: one position while the recorder is still
+ * stationary. The next look is booked first, so a position that never comes
+ * cannot end the wake; the next look itself gives up once the gate has left
+ * stationary.
+ */
+async function wakeLook(index: number): Promise<void> {
+  const profile = await getCurrentSamplingProfile();
+  if (nextWakeCheck(index, profile) === null) return;
+  if (index > 0) {
+    await recordingEventDao.log('activity', `motion wake: look ${index + 1}`); // i18n-exempt: diary line, T-295
+  }
+  const wait = nextWakeCheck(index + 1, profile);
+  if (wait !== null) scheduleFollowUp(wait, { kind: 'look', index: index + 1 });
+  const fix = await wakePosition();
+  if (fix !== null) {
+    await recordSamples([fix]);
+  }
+}
+
+/**
+ * One GPS position for a wake, or null when none comes in time.
+ *
+ * ⚠ The timeout is a JavaScript timer, so in the background it may never fire
+ * (T-295); nothing waits on this function any more but the look that asked.
+ */
 async function wakePosition(): Promise<LocationSample | null> {
   const fix = await Promise.race([
     Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null),
@@ -186,31 +230,66 @@ async function wakePosition(): Promise<LocationSample | null> {
   return fix === null ? null : toLocationSample(fix);
 }
 
+async function readStillCheck(): Promise<PendingStillCheck | null> {
+  try {
+    return parsePendingStillCheck(await appStateDao.getJson<unknown>(AppStateKey.StillCheckPending));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * T-286: the sensors say still while on a moving profile. A position now and
  * one five minutes later, each recorded like any batch, and the pure check
  * decides (`decideStillCheck`). Any fix that arrives meanwhile goes through
  * the gate as usual, which may already have decided.
  *
+ * ⚠ T-295: the second half runs from an alarm (`finishStillCheck`), and the
+ * check under way is kept in `app_state`. The in-memory flag this replaced
+ * was left set by a wait that never ended (31 Oct), and blocked every later
+ * check.
+ *
  * ⚠ N15: it waits the five minutes even when the first look finds nothing.
  * It used to give up there, and indoors that is every time.
  */
-async function runStillCheck(profile: SamplingProfile): Promise<void> {
+async function startStillCheck(profile: SamplingProfile): Promise<void> {
   const wakeMs = Date.now();
+  if (!canStartStillCheck(await readStillCheck(), wakeMs)) return;
+  await appStateDao.setJson(AppStateKey.StillCheckPending, { wakeMs, first: null });
   await recordingEventDao.log('activity', `still check: started on ${profile}`); // i18n-exempt: diary line, T-286
+  // Booked before the first look, so a look that never returns cannot cost the check.
+  scheduleFollowUp(STILL_CHECK_WAIT_MS, { kind: 'still' });
   const first = await wakePosition();
-  if (first !== null) await recordSamples([first]);
-  await new Promise((resolve) => setTimeout(resolve, STILL_CHECK_WAIT_MS));
-  const now = await getCurrentSamplingProfile();
-  if (now === 'stationary') return; // the gate got there first
+  if (first === null) return;
+  await recordSamples([first]);
+  const pending = await readStillCheck();
+  if (pending?.wakeMs === wakeMs) {
+    const sample: MovementSample = {
+      ts: first.ts,
+      lat: first.lat,
+      lon: first.lon,
+      accuracyM: first.accuracyM,
+    };
+    await appStateDao.setJson(AppStateKey.StillCheckPending, { wakeMs, first: sample });
+  }
+}
+
+/** The still check's second half, five minutes on, from the alarm (T-295). */
+async function finishStillCheck(): Promise<void> {
+  const pending = await readStillCheck();
+  if (pending === null) return;
+  await appStateDao.set(AppStateKey.StillCheckPending, '');
+  if ((await getCurrentSamplingProfile()) === 'stationary') return; // the gate got there first
   const second = await wakePosition();
   if (second !== null) await recordSamples([second]);
   const after = await getCurrentSamplingProfile();
-  const check = decideStillCheck(after, first, second, lastMovingSignalMs, wakeMs, Date.now());
+  const nowMs = Date.now();
+  const check = decideStillCheck(after, pending.first, second, lastMovingSignalMs, pending.wakeMs, nowMs);
   if (check.sleep) {
     await lowerProfile(check.reason);
   } else {
-    await recordingEventDao.log('activity', `still check: stay, ${check.reason}`); // i18n-exempt: diary line, T-286
+    const waitedMin = Math.round((nowMs - pending.wakeMs) / 60000);
+    await recordingEventDao.log('activity', `still check: stay after ${waitedMin} min, ${check.reason}`); // i18n-exempt: diary line, T-286
   }
 }
 

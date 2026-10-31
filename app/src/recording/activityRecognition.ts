@@ -28,6 +28,7 @@ type NativeActivityTransitions = {
   startMotionWake?(taskName: string): Promise<boolean>;
   hasSignificantMotion?(): boolean;
   stopMotionWake?(taskName: string): Promise<boolean>;
+  scheduleFollowUp?(delayMs: number, step: string): boolean;
 };
 
 const native: NativeActivityTransitions | null =
@@ -162,6 +163,20 @@ export async function stopMotionWake(taskName: string): Promise<void> {
     await native?.stopMotionWake?.(taskName);
   } catch {
     // Nothing to undo: a wake that fires finds the recorder off and does nothing.
+  }
+}
+
+/**
+ * Ask Android to run the motion task again in `delayMs` with `step` (T-295).
+ * False when there is no native side for it (iOS, an older build): the caller
+ * then falls back to a JavaScript timer, which keeps time only while the app
+ * is open.
+ */
+export function scheduleMotionFollowUp(delayMs: number, step: string): boolean {
+  try {
+    return native?.scheduleFollowUp?.(delayMs, step) === true;
+  } catch {
+    return false;
   }
 }
 

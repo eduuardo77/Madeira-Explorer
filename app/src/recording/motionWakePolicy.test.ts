@@ -134,3 +134,60 @@ test('still check: a check whose timer froze with the process stays (T-294)', ()
   assert.equal(STILL_CHECK_LATE_MS, 10 * 60_000);
   assert.equal(check('driving', null, null, null, 9).sleep, true);
 });
+
+// --- T-295: waits kept by an alarm
+
+import {
+  canStartStillCheck,
+  followUpStep,
+  parseFollowUp,
+  parsePendingStillCheck,
+} from './motionWakePolicy.ts';
+
+test('a follow-up step survives the trip through the native side', () => {
+  for (const followUp of [{ kind: 'look', index: 1 }, { kind: 'look', index: 2 }, { kind: 'still' }] as const) {
+    assert.deepEqual(parseFollowUp(followUpStep(followUp)), followUp);
+  }
+});
+
+test('an unexpected step is ignored, not guessed', () => {
+  for (const step of [undefined, null, '', 'look', 'look:0', 'look:3', 'look:x', 'still ', 7]) {
+    assert.equal(parseFollowUp(step), null, String(step));
+  }
+});
+
+test('every wake look after the first has a step', () => {
+  for (let index = 1; index < WAKE_CHECK_WAITS_MS.length; index += 1) {
+    assert.deepEqual(parseFollowUp(`look:${index}`), { kind: 'look', index });
+  }
+});
+
+test('a stored still check reads back, first position included', () => {
+  const first = { ts: 1000, lat: 32.6, lon: -16.9, accuracyM: 12 };
+  assert.deepEqual(parsePendingStillCheck({ wakeMs: 900, first }), { wakeMs: 900, first });
+  assert.deepEqual(parsePendingStillCheck({ wakeMs: 900, first: null }), { wakeMs: 900, first: null });
+  assert.deepEqual(parsePendingStillCheck({ wakeMs: 900 }), { wakeMs: 900, first: null });
+  assert.deepEqual(
+    parsePendingStillCheck({ wakeMs: 900, first: { ts: 1000, lat: 32.6, lon: -16.9 } }),
+    { wakeMs: 900, first: { ts: 1000, lat: 32.6, lon: -16.9, accuracyM: null } }
+  );
+});
+
+test('a broken or cleared row is no check at all', () => {
+  for (const raw of [null, '', 'x', 5, {}, { wakeMs: 'soon' }, { wakeMs: Number.NaN }]) {
+    assert.equal(parsePendingStillCheck(raw), null, JSON.stringify(raw));
+  }
+  // A first position without coordinates is no first position.
+  assert.deepEqual(parsePendingStillCheck({ wakeMs: 1, first: { ts: 2 } }), { wakeMs: 1, first: null });
+});
+
+test('a still check under way blocks another, but not forever (31 Oct)', () => {
+  const wakeMs = 1_000_000;
+  assert.equal(canStartStillCheck(null, wakeMs), true);
+  const pending = { wakeMs, first: null };
+  assert.equal(canStartStillCheck(pending, wakeMs + 60_000), false);
+  assert.equal(canStartStillCheck(pending, wakeMs + STILL_CHECK_LATE_MS), false);
+  assert.equal(canStartStillCheck(pending, wakeMs + STILL_CHECK_LATE_MS + 1), true);
+  // 09:00 to 11:42 on the P30: the morning's only check would now be replaced.
+  assert.equal(canStartStillCheck(pending, wakeMs + 162 * 60_000), true);
+});

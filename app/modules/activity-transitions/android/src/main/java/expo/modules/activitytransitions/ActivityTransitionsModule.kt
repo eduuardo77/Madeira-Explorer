@@ -137,6 +137,15 @@ class ActivityTransitionsModule : Module() {
       }
     }
 
+    /**
+     * An alarm that runs the motion task again in `delayMs` with `step`
+     * (T-295, `FollowUpAlarm`): the waits of the wake looks and the still
+     * check, which a JavaScript timer cannot keep in the background.
+     */
+    Function("scheduleFollowUp") { delayMs: Double, step: String ->
+      FollowUpAlarm.schedule(context, delayMs.toLong(), step)
+    }
+
     AsyncFunction("stopMotionWake") { taskName: String, promise: Promise ->
       try {
         appContext.legacyModule<TaskManagerInterface>()

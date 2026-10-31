@@ -7,5 +7,9 @@
     <receiver
       android:name="expo.modules.activitytransitions.ActivityTransitionReceiver"
       android:exported="false" />
+    <!-- The motion wake's waits (T-295): an alarm in place of a JavaScript timer. -->
+    <receiver
+      android:name="expo.modules.activitytransitions.FollowUpReceiver"
+      android:exported="false" />
   </application>
 </manifest>

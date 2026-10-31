@@ -150,6 +150,12 @@ export const AppStateKey = {
    * put the recorder back to sleep when the window closes.
    */
   OutingAwakeApplied: 'outing_awake_applied',
+  /**
+   * The still check under way, as JSON `{ wakeMs, first }` (T-295), or empty
+   * when none is. Kept here rather than in memory because its second half
+   * runs from an alarm, possibly in another JavaScript run of the task.
+   */
+  StillCheckPending: 'still_check_pending',
   // `paused_until` was here until 2026-09-25, when the pause was removed
   // (D-087 §6 amended). A row left on a phone is read by nothing.
   /**

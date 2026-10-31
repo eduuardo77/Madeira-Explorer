@@ -142,3 +142,68 @@ export function launchProfile(
   const age = lastFixTs === null ? 'no fix stored' : `last fix ${Math.round((nowMs - lastFixTs) / 60000)} min ago`;
   return { profile: 'stationary', reason: `restart with no recent fix (${age})` };
 }
+
+// ---------------------------------------------------------------------------
+// Waits kept by an alarm, not a JavaScript timer (T-295)
+// ---------------------------------------------------------------------------
+//
+// ⚠ 31 Oct 2026, the P30: a still check begun at 09:00 waited on a five
+// minute `setTimeout` that never fired in the 2 h 40 that followed. React
+// Native stops its timers while the app is in the background unless a
+// headless task is running (`JavaTimerManager`), and Expo's background tasks
+// are not one. So every wait in a background task now asks Android for an
+// alarm, which runs the task again with a step: the next wake look, or the
+// still check's second position. What the still check saw first is kept in
+// `app_state`, not in memory, so a check that never finishes cannot block the
+// next one.
+
+/** What an alarm comes back to do. */
+export type FollowUp = { kind: 'look'; index: number } | { kind: 'still' };
+
+/** The step as the native side carries it: `look:1`, `look:2`, `still`. */
+export function followUpStep(followUp: FollowUp): string {
+  return followUp.kind === 'look' ? `look:${followUp.index}` : 'still';
+}
+
+/** The step back from the native side, or null for anything unexpected. */
+export function parseFollowUp(step: unknown): FollowUp | null {
+  if (step === 'still') return { kind: 'still' };
+  if (typeof step !== 'string') return null;
+  const match = /^look:(\d+)$/.exec(step);
+  if (match === null) return null;
+  const index = Number(match[1]);
+  return index >= 1 && index < WAKE_CHECK_WAITS_MS.length ? { kind: 'look', index } : null;
+}
+
+/** A still check under way: when it began, and its first position if one came. */
+export type PendingStillCheck = { wakeMs: number; first: MovementSample | null };
+
+/** The stored check, or null when there is none or the row cannot be read. */
+export function parsePendingStillCheck(raw: unknown): PendingStillCheck | null {
+  if (raw === null || typeof raw !== 'object') return null;
+  const { wakeMs, first } = raw as { wakeMs?: unknown; first?: unknown };
+  if (typeof wakeMs !== 'number' || !Number.isFinite(wakeMs)) return null;
+  if (first === null || first === undefined) return { wakeMs, first: null };
+  const f = first as Record<string, unknown>;
+  const finite = (value: unknown) => typeof value === 'number' && Number.isFinite(value);
+  if (!finite(f.ts) || !finite(f.lat) || !finite(f.lon)) return { wakeMs, first: null };
+  return {
+    wakeMs,
+    first: {
+      ts: f.ts as number,
+      lat: f.lat as number,
+      lon: f.lon as number,
+      accuracyM: finite(f.accuracyM) ? (f.accuracyM as number) : null,
+    },
+  };
+}
+
+/**
+ * Whether a still label may begin a check. Not while one is under way; but a
+ * check older than `STILL_CHECK_LATE_MS` is abandoned (its alarm never came,
+ * the process died), and a new one replaces it rather than waiting forever,
+ * which is what the in-memory flag did on 31 Oct.
+ */
+export function canStartStillCheck(pending: PendingStillCheck | null, nowMs: number): boolean {
+  return pending === null || nowMs - pending.wakeMs > STILL_CHECK_LATE_MS;
+}

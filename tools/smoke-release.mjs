@@ -81,7 +81,7 @@ const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
 const { adb, shell, screen, reach, tap, fingerprint, readable } = device(serial);
 
 const language = phoneLanguage(shell);
-const { label, pattern } = labels(language);
+const { label, pattern, patternWithOptional } = labels(language);
 
 // ---------------------------------------------------------------------------
 // The run
@@ -196,7 +196,7 @@ const STEPS = [
   }],
   ['back to the map', () => tap(label('settings.a11y.backToMap')).then(() => reach(MAP))],
   ['the passport', () =>
-    tap(pattern('passport.a11y.openWithCount', 'map.a11y.openPassport')).then(() =>
+    tap(patternWithOptional(['passport.a11y.openWithCount', 'map.a11y.openPassport'], 'passport.a11y.waitingSuffix')).then(() =>
       reach(label('passport.title'), { scroll: 'up' })
     )],
   ['a stamp, its card, and Close', async () => {

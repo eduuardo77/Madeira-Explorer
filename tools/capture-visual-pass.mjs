@@ -30,7 +30,7 @@ const walknyc = path.join(here, 'out', 'walknyc');
 const serialAt = process.argv.indexOf('--serial');
 const serial = serialAt === -1 ? null : process.argv[serialAt + 1];
 const { shell, screen, reach, tap, size, screenshot, fingerprint, readable } = device(serial);
-const { label, pattern } = labels(phoneLanguage(shell));
+const { label, pattern, patternWithOptional } = labels(phoneLanguage(shell));
 
 const MAP = label('map.a11y.settings');
 const PASSPORT = label('passport.title');
@@ -112,7 +112,7 @@ await tap(label('settings.a11y.backToMap'));
 await reach(MAP);
 
 // The passport and everything in it.
-const OPEN_PASSPORT = pattern('passport.a11y.openWithCount', 'map.a11y.openPassport');
+const OPEN_PASSPORT = patternWithOptional(['passport.a11y.openWithCount', 'map.a11y.openPassport'], 'passport.a11y.waitingSuffix');
 await tap(OPEN_PASSPORT);
 await reach(PASSPORT);
 await pause(1200);

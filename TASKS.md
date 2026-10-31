@@ -266,7 +266,8 @@ permission, L3 privacy contact.
       grid uses the same cell. Before and after on the emulator, the same rows:
       `tools/out/a9-locked-before-after.png`. `preview-stamps.mjs` draws only the artwork module,
       so the emulator is the renderer here. **For the lead:** the frost hides the stamp's name;
-      keep or veto. Open: one P30 screenshot.
+      keep or veto. **On the P30 31 Oct:** `tools/out/a9-locked-p30.png`, three clear states (open,
+      frosted and padlocked, grey).
 - [ ] **T-304** **A11 of the fix plan: the map opens on the whole island, centred above the
       controls.** The 30 Oct review on the P30: *the island opens in the bottom quarter, west end
       cut, 60% empty sea*. Cause: on a phone with a trip the opening view is the T-272 snapshot,
@@ -277,7 +278,10 @@ permission, L3 privacy contact.
       **Not yet seen where it matters:** the emulator matched no roads, so it opened on the
       island alone, which was centred before this change too. A phone keeps its old snapshot
       until its roads are next matched afresh, so the first cold start after an install may
-      still open the old way. Open: the P30.
+      still open the old way. **On the P30 31 Oct:** the snapshot rewritten at 15:38 (centre
+      -16.965, zoom 9.44; was -16.938, 9.89), and the cold start at 15:45 opened on the whole
+      island, Ponta do Pargo to the eastern tip, between the controls:
+      `tools/out/a11-opening-p30-before-after.png` (14:12 before, 15:45 after).
 - [ ] **T-303** **A6 of the fix plan: a faint pin for every place, once zoomed in to a town** (the
       lead's Q1 c, D-070 amended). `map/placePins.ts` decides (shown from zoom 13, hidden below
       12.5 so a pinch at the edge does not flicker; one pin per place the passport shows, at the
@@ -289,9 +293,13 @@ permission, L3 privacy contact.
       **Seen on the emulator** (`tools/out/a6-pins-emulator.png`): no pins on the island view nor
       at about zoom 12.6; pins at about 13.6; a tap on one opened *Jardim Botânico da Madeira*
       with the gold pin and the card; 11 pins named in the accessibility tree; Back closed it.
-      **Open:** the P30 (Google's latest renderer, where D-070 hides its own place icons; the
-      emulator's legacy one shows them beside the pins) and the pan probe still about 59 fps with
-      the pins on. The zoom of 13 is the lead's to judge.
+      **On the P30 31 Oct:** pins at about zoom 13.5 around Funchal (`tools/out/a6-pins-p30.png`);
+      a tap opened *Fortaleza do Pico*; pan probe 59.6 and 59.2 fps with pins on screen, no stall
+      over 50 ms, against 59.0 at the island view without them. ⚠ The P30's map (Google's latest
+      renderer) exposes no pin to `uiautomator`, where the emulator's legacy one names each: whether
+      TalkBack reaches the pins there, the gold one included, is unverified.
+      Google's own place icons show beside the pins on the P30 too (Monte Palace, Museu CR7), as
+      the 30 Oct review saw; not from this change. **Open:** the zoom of 13 is the lead's to judge.
 - [x] **T-301** **A7 of the fix plan: the gold badge is drawn, and a tap on it opens the passport**
       (the lead's Q3 b, D-097 amended). `WaitingBadge` takes no touches and is hidden from screen
       readers; the passport button says the count (`passportButtonLabel`, tested in three
@@ -299,7 +307,9 @@ permission, L3 privacy contact.
       reason *probe: emulator check of the badge (A7)*; they are still there): the button reads
       *Open your passport, 9 of 81 places collected, 4 stamps waiting*, the badge is not a
       clickable node, and a tap on the badge at (210, 1104) opened the passport with its banner.
-      `tools/out/a7-badge-emulator.png`. Not on the P30.
+      `tools/out/a7-badge-emulator.png`. **On the P30 31 Oct:** the button reads *Abrir o teu
+      passaporte, 26 de 81 lugares visitados, 21 carimbos à espera*; a tap on the badge at
+      (310, 1655) opened the passport.
 - [ ] **T-302** **A8 of the fix plan: the buy button says what it buys** (the lead's Q2 b with Q2 c's
       offline line, D-097 amended): *Desbloquear o passaporte · 5,99 €* (was *Ver os meus
       carimbos · 5,99 €*), *Desbloquear o passaporte* before Google answers, *É preciso internet
@@ -310,7 +320,9 @@ permission, L3 privacy contact.
       (`billingOutcomes.ts`: `service-error` and others), and which code a phone with no network
       gets from the price lookup was never measured. Check on a Play install in airplane mode;
       if it is not one of those codes, the line never shows and needs the phone's own network
-      state (a new native dependency, the lead's call).
+      state (a new native dependency, the lead's call). **On the P30 31 Oct** (cable install, online):
+      *Desbloquear o passaporte*, no price, the lookup failing with `query-product` as on 19 Oct
+      (Google sells only to the copy it signed).
 - [x] **T-300** **E3, A3 of the fix plan: the recorder's profile switching is tested, on the P30's
       own batches.** Done 2026-10-31. The logic of `samplingGate.ts` and the location and motion
       tasks in `backgroundTasks.ts` moved, unchanged, to `recording/recorderCore.ts`, which takes
@@ -341,7 +353,13 @@ permission, L3 privacy contact.
       the new wiring. Recording started automatically and stored batches; a still label from the
       emulator's sensors started a still check (14:51:07); the gate raised walking to driving on a
       replayed route; the check's alarm came back through the motion task at 14:59:53 and gave
-      *stay after 9 min, moved 116 m*. No crash. Not on the P30.
+      *stay after 9 min, moved 116 m*. No crash.
+      **On the P30 since 15:38 31 Oct** (field build from `19da54b`, `install -r`, backup
+      `Madeira-fieldwork/backups/p30-2026-10-31-before-phase1`): re-asserted on launch, motion wake
+      armed, profile kept *stationary*, Bruma's request the stationary one (5 min, balanced, 100 m),
+      no GPS in the background, no error, the same after one cold start at 15:45. ⚠ The phone has
+      not moved since, so no batch has gone through the new code on it yet: the next trip is its
+      first real run (diary: *batch*, *profile ... ->*, no *sampling gate* error).
       ⚠ That alarm came 8 min 46 s after the wake, not 5: on Android 12+ without the exact-alarm
       permission it is inexact (`FollowUpAlarm.kt`, as its comment says), here a 3 min 45 s
       window. Under `STILL_CHECK_LATE_MS` (10 min), so the check still decides; but every tester

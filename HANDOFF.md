@@ -37,6 +37,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   **Waiting on the lead:** the P30 install of all of it (back up first), then the pan probe with
   the pins on, the opening view, a locked stamp, and A3's recorder on the real phone; B4 (upload 12);
   vetoes on A9's frost hiding names and A6's zoom 13; PR28's difficulty.
+- **31 Oct, 15:38: all of it on the P30** (field build from `19da54b`, `install -r`, backup
+  `p30-2026-10-31-before-phase1`). Smoke test passes (after teaching it A7's longer passport
+  label); A7, A8 (no price on a cable install), A9, A11 (whole island, centred) and A6 (pins at
+  town zoom, a tap opens the card, pan 59.6 and 59.2 fps with pins, 59.0 without) seen. Recorder
+  re-asserted, stationary, no background GPS, no error. ⚠ The phone has not moved since: the next
+  trip is the new recorder code's first real run. ⚠ The P30's map exposes no pin to `uiautomator`.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

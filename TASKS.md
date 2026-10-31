@@ -250,6 +250,20 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-303** **A6 of the fix plan: a faint pin for every place, once zoomed in to a town** (the
+      lead's Q1 c, D-070 amended). `map/placePins.ts` decides (shown from zoom 13, hidden below
+      12.5 so a pinch at the edge does not flicker; one pin per place the passport shows, at the
+      point its card frames; none under the gold pin); `faintPinSvg` in `placePin.ts`, its PNG
+      from `tools/build-place-pin.mjs` beside the gold one (unchanged) with a fingerprint test.
+      `NativeMapScreen` memoises the markers (T-254) and rebuilds them only when the pins cross
+      their zoom; `showCallout: false` makes the native side consume a tap, which opens the
+      place's card with its collected and locked state, as *Ver no mapa* does. 6 tests.
+      **Seen on the emulator** (`tools/out/a6-pins-emulator.png`): no pins on the island view nor
+      at about zoom 12.6; pins at about 13.6; a tap on one opened *Jardim Botânico da Madeira*
+      with the gold pin and the card; 11 pins named in the accessibility tree; Back closed it.
+      **Open:** the P30 (Google's latest renderer, where D-070 hides its own place icons; the
+      emulator's legacy one shows them beside the pins) and the pan probe still about 59 fps with
+      the pins on. The zoom of 13 is the lead's to judge.
 - [x] **T-301** **A7 of the fix plan: the gold badge is drawn, and a tap on it opens the passport**
       (the lead's Q3 b, D-097 amended). `WaitingBadge` takes no touches and is hidden from screen
       readers; the passport button says the count (`passportButtonLabel`, tested in three

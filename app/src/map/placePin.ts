@@ -36,6 +36,25 @@ export function placePinSvg(): string {
   ].join('');
 }
 
+/**
+ * The faint pin for every place, once the map is zoomed in to a town (A6, the
+ * lead's Q1 c, 31 Oct 2026; D-070 amended). Smaller than the gold one and
+ * see-through, so the island view stays quiet and a town shows what is there
+ * without the pins outshouting the lit roads. Dark at a third, with a white
+ * edge: grey on the light map, outlined on the dark one.
+ */
+export const FAINT_PIN_WIDTH_DP = 24;
+export const FAINT_PIN_HEIGHT_DP = 31;
+
+export function faintPinSvg(): string {
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${FAINT_PIN_WIDTH_DP}" height="${FAINT_PIN_HEIGHT_DP}" viewBox="0 0 34 44">`,
+    `<path d="M17 43 C17 43 3 27 3 17 A14 14 0 0 1 31 17 C31 27 17 43 17 43 Z" fill="${reward.stage}" fill-opacity="0.35" stroke="${reward.badgeEdge}" stroke-opacity="0.9" stroke-width="2"/>`,
+    `<circle cx="17" cy="17" r="5" fill="${reward.badgeEdge}" fill-opacity="0.9"/>`,
+    '</svg>',
+  ].join('');
+}
+
 /** A short fingerprint of the drawing, stored beside the PNG it was rendered from. */
 export function placePinFingerprint(svg: string = placePinSvg()): string {
   // FNV-1a, 32 bits: enough to notice an edit, no crypto module needed.

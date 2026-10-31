@@ -3512,6 +3512,12 @@ P30; with them went the tap that opened a place's card. The map shows the lit ro
 is reached from the passport (*Ver no mapa*), and the stamp button shows the latest one. Whether
 the home should point to a place to go next is decision L4, still open.
 
+⚠ **Amended 2026-10-31 (the lead's answer to Q1 of `docs/fix-plan-2026-10-30.md`, option c;
+T-303):** the island view still draws no place, but **once zoomed in to a town (zoom 13, hidden
+again below 12.5) every place has a faint pin**, the same for collected and not, and a tap opens
+its card as *Ver no mapa* does. The place on show keeps the gold pin (N12). The zoom is a
+reasoned starting point, not a measurement; the lead judges it on the phone.
+
 ### The problem, found by looking rather than by testing
 
 The primary screen said `1 / 60` in its hero and **marked nothing on the map**. Worse, Google's

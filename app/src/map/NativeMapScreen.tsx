@@ -112,8 +112,9 @@ import { COURSE_PAINT, courseBounds, hasCourse } from './levadaHighlight';
 import { effectiveMapStyle, parseMapStyle } from './mapStylePreference';
 import type { MapStyleName } from './mapStyle';
 import { representativeGeofence } from './placeMarkers';
-import { getIslandByPlace } from '../progress/islandGateStore';
-import { PLACE_PIN_PNG_BASE64 } from './placePinPng';
+import { getIslandByPlace, visiblePlacesNow } from '../progress/islandGateStore';
+import { FAINT_PIN_PNG_BASE64, PLACE_PIN_PNG_BASE64 } from './placePinPng';
+import { placeIdFromPin, placePins, pinsVisible } from './placePins';
 import { darkMapPropsFor } from './darkMode';
 import { supportsNativeDarkMap } from './mapsRenderer';
 import { traceBounds } from './traceGeoJson';
@@ -297,6 +298,18 @@ export default function NativeMapScreen({
     { coordinates: { latitude: number; longitude: number }; title: string; iconPng?: string }[]
   >([]);
   const [camera, setCamera] = useState<CameraFit | null>(null);
+  /**
+   * A6 (Q1 c): the faint pins show once the map is zoomed in to a town
+   * (`placePins.ts`); the place a tap opened, and which places are collected
+   * and locked, so its card says the same as the passport's.
+   */
+  const [pinsShown, setPinsShown] = useState(false);
+  const [pinFocus, setPinFocus] = useState<FocusPlace | null>(null);
+  const [focusedPlaceId, setFocusedPlaceId] = useState<string | null>(null);
+  const stampSets = useRef<{ collected: Set<string>; locked: Set<string> }>({
+    collected: new Set(),
+    locked: new Set(),
+  });
   /**
    * ⚠ A latch, not a live check — the same bug as before the renderer changed
    * (D-053). `focusPlace` is cleared the instant it is consumed, so guarding
@@ -523,6 +536,10 @@ export default function NativeMapScreen({
           }
           // The same earned-and-locked reading the passport and Settings use.
           const stamps = await earnedStamps();
+          stampSets.current = {
+            collected: new Set((stamps?.earned ?? []).map((stamp) => stamp.placeId)),
+            locked: stamps?.locked ?? new Set(),
+          };
           if (!cancelled) {
             setWaiting(
               (stamps?.earned ?? [])
@@ -682,7 +699,7 @@ export default function NativeMapScreen({
    * D-055). A tap on a collected mark (T-112) was the other way in, until the
    * marks were removed on 2026-10-04.
    */
-  const requestedPlace = focusPlace;
+  const requestedPlace = focusPlace ?? pinFocus;
 
   useEffect(() => {
     if (requestedPlace === null || !ready) {
@@ -732,6 +749,7 @@ export default function NativeMapScreen({
           iconPng: PLACE_PIN_PNG_BASE64,
         },
       ]);
+      setFocusedPlaceId(requestedPlace.place.id);
 
       setCardArt({
         category: requestedPlace.place.category,
@@ -767,7 +785,9 @@ export default function NativeMapScreen({
         bounds,
       });
 
-      onFocusHandled();
+      // The passport's request is cleared in App; a pin's here.
+      if (requestedPlace === focusPlace) onFocusHandled();
+      else setPinFocus(null);
     })();
 
     return () => {
@@ -806,6 +826,7 @@ export default function NativeMapScreen({
     setPendingFocus(null);
     setCard(null);
     setMarker([]);
+    setFocusedPlaceId(null);
     setCoursePolylines([]);
   };
   // T-211: Back closes an open card rather than leaving the app.
@@ -1054,6 +1075,41 @@ export default function NativeMapScreen({
    * the cost grew with the trip, which is why the jank arrived with D-093.
    * Memoised, a pan sends nothing the map does not already have.
    */
+  /**
+   * The gold pin of the place on show, and at town zoom a faint pin for every
+   * place (A6, Q1 c). Memoised for the same reason as the lines below, and
+   * rebuilt only when the pins cross their zoom, not on every camera move.
+   * `showCallout: false` makes the native side consume the tap: no bubble,
+   * and the camera moves only where the card frames it.
+   */
+  const mapMarkers = useMemo(
+    () =>
+      pinsShown
+        ? [
+            ...marker,
+            ...placePins(visiblePlacesNow(), focusedPlaceId).map((pin) => ({
+              ...pin,
+              iconPng: FAINT_PIN_PNG_BASE64,
+              showCallout: false,
+            })),
+          ]
+        : marker,
+    [marker, pinsShown, focusedPlaceId]
+  );
+
+  /** A tap on a faint pin opens its place, as the passport's *Ver no mapa* does. */
+  const openPinnedPlace = (markerId: string | undefined) => {
+    const placeId = placeIdFromPin(markerId);
+    if (placeId === null) return;
+    const place = visiblePlacesNow().find((candidate) => candidate.id === placeId);
+    if (place === undefined) return;
+    setPinFocus({
+      place,
+      collected: stampSets.current.collected.has(placeId),
+      locked: stampSets.current.locked.has(placeId),
+    });
+  };
+
   const mapPolylines = useMemo(
     () => [...tracePolylines, ...coursePolylines],
     [tracePolylines, coursePolylines]
@@ -1164,11 +1220,14 @@ export default function NativeMapScreen({
         // The trace under the course: the course is only ever on screen in
         // answer to a direct question, so for those few seconds it wins.
         polylines={mapPolylines}
-        markers={marker}
-        // ⚠ No marks for collected places since 2026-10-04: the project lead
-        // asked for the dark dots at their stamps' places to go. The passport
-        // and its *Ver no mapa* are the way to a place now. T-112 drew them.
+        markers={mapMarkers}
+        // ⚠ No marks on the island view since 2026-10-04 (the lead asked for
+        // the dark dots to go); since 31 Oct a faint pin for every place once
+        // zoomed in to a town (A6, Q1 c, D-070 amended).
+        onMarkerClick={(event) => openPinnedPlace(event.id)}
         onCameraMove={(event) => {
+          // A6: the pins cross their zoom; the same value is no re-render.
+          setPinsShown((shown) => pinsVisible(event.zoom, shown));
           // Where we are looking, so *Re-centre* knows whether it has a job.
           // ⚠ expo-maps types both halves as optional, so a partial coordinate is
           // dropped rather than coerced — a centre with one axis missing would

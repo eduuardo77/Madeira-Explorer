@@ -7,6 +7,10 @@ few questions about the test before it grants production access.
 
 ## Where it stands
 
+- **2026-10-31: version 12 replaces 11 on the closed track**,
+  `Madeira-fieldwork/apks/bruma-0.1.0-vc12.aab` (T-298). It fixes the crash on every launch for a
+  tester who refuses location (N23), and has every fix since 21 Oct. Section 3 says what to paste.
+  The lines below about 11 are history.
 - **Build for the closed track: version 11**, `Madeira-fieldwork/apks/bruma-0.1.0-vc11.aab`, built
   2026-10-21 from the current code (upload key, `debuggable` false). It replaces 10: it adds the
   passport's 55 to 60 MB memory cut, the medals row, the drawn chevrons and the blank-map probe fix.
@@ -64,6 +68,12 @@ finish. Recruit two or three spare if at all possible.
 
 ## 3. The release
 
+**Version 12 (31 Oct):** the same steps with `bruma-0.1.0-vc12.aab`, release name `0.1.0 (12)`,
+and these notes:
+   > pt-PT: Corrige o fecho da aplicação ao abrir quando a localização foi recusada, e melhora o registo automático nas paragens.
+   > en-US: Fixes the app closing on launch when location was refused, and improves automatic recording at stops.
+
+*Version 11, as it was:*
 1. Same closed track → *Create new release* → upload `bruma-0.1.0-vc11.aab`.
 2. Release name `0.1.0 (11)`. Release notes, Portuguese and English:
    > pt-PT: Primeira versão de teste. Usa o Bruma num dia normal e diz-nos o que achaste em Definições, Enviar opinião.

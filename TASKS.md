@@ -259,10 +259,22 @@ permission, L3 privacy contact.
       Found on the way: `requestWhileUsingPermission` showed nothing on a phone that no longer asks
       (two refusals, or *don't ask again*), so both the main button and this tap did nothing there;
       it now opens the app's settings page, as `requestAlwaysPermission` has since D-095. 1,244
-      tests. Open until seen: the all-refused first run on the emulator (T-298).
-- [ ] **T-298** **Version 12 for the testers, A1 of the fix plan.** The AAB from `main` with the
-      upload key, versionCode 12, `debuggable` false; `smoke-release.mjs --internal`; the
-      all-refused first run on the emulator. Then the lead uploads it (B4).
+      tests. **Seen 2026-10-31 on the Android 14 emulator, version 12 (T-298):** first run with
+      location, activity and notifications all refused, then the map: no crash on the way in or on
+      a cold relaunch, the banner reads *Nothing is being recorded / Tap to allow location while you
+      use the app*; its tap opened Android's while-using question; refused a second time, the tap
+      opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
+      has location granted.
+- [ ] **T-298** **Version 12 for the testers, A1 of the fix plan.** **Built 2026-10-31** from
+      `b84d14e` (`Madeira-fieldwork/apks/bruma-0.1.0-vc12.aab`, SHA-256 `c33f1f8f…a800`): store build
+      (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), versionCode 12, `debuggable` false on the
+      matching x86_64 APK, whose JavaScript is byte-identical to the AAB's. 1,244 tests.
+      `smoke-release.mjs --internal` **passes on the emulator** (not on the P30: its data and field
+      build stay as they are). The first run of it **failed** at *Privacy, and back*, with no crash:
+      the emulator's 64 dp status bar (hole-punch camera) covered the top half of `BackBar`'s arrow,
+      fixed 32 dp from the top, so a tap at its centre went to Android. Fixed in the same commit the
+      passport's way (`StatusBar.currentHeight`); version 11 has the fault. The all-refused first
+      run seen (T-297). **Open:** the lead uploads it to the closed track (B4); then close this.
 - [ ] **T-296** **One *in vehicle* guess no longer raises a walk** (field log, 31 Oct: at 10:33 the
       lead was on foot on floor -1; the lead: *fix it*). Built 2026-10-31: on *walking*, a
       *driving* label from the motion task raises to driving only when the label before it was

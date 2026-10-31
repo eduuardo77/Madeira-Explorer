@@ -8,6 +8,16 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **31 Oct, afternoon: Phase 0 of `docs/fix-plan-2026-10-30.md` (the lead approved the plan and
+  answered Q1 to Q4).** **T-297 (A2):** with no location at all the map's banner asks for location
+  while in use, not *Permitir sempre*; refused twice, its tap and the main button open the app's
+  settings page (D-095 amended). **T-298 (A1): version 12 built** from `b84d14e`,
+  `Madeira-fieldwork/apks/bruma-0.1.0-vc12.aab` (upload key, versionCode 12, `debuggable` false);
+  smoke test passes on the emulator, and the all-refused first run is clean there, cold relaunch
+  included. The smoke test found the back arrow of Settings, Privacy and Licences half under a
+  64 dp status bar; fixed in 12, present in 11. **Waiting on the lead: upload 12 (B4,
+  `docs/closed-testing.md` §3).** The P30 was not touched. Next: Phase 1 (A4, A3, ...) on the
+  lead's word.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

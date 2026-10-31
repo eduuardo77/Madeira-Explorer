@@ -250,6 +250,44 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [x] **T-300** **E3, A3 of the fix plan: the recorder's profile switching is tested, on the P30's
+      own batches.** Done 2026-10-31. The logic of `samplingGate.ts` and the location and motion
+      tasks in `backgroundTasks.ts` moved, unchanged, to `recording/recorderCore.ts`, which takes
+      its storage, provider, clock, alarms and diary as `deps`; `recorder.ts` passes the real ones
+      and the two files keep every export and task. `recorderReplay.ts` replays batches, the
+      sensors' labels (through a copy of the native consumer's 4 and 10 min gaps), launches and
+      foregrounds with a fake clock and alarms; `timersRunInBackground: false` is T-295's finding.
+      **Fixtures** (`recording/fixtures/`, cut by `tools/extract-recorder-fixture.mjs` from copies
+      of the backups, read only): every position 2° west, longitude only, which keeps haversine
+      distances exact; times kept (the lead's Q4 b). Cut to the minutes each case needs, and
+      checked against the phone's night positions: the closest fix is 11.3 km from home on 26 Oct,
+      2.65 km on 30 Oct. The 30 Oct drive home at 19:25 is left out (its last fixes end at home);
+      16:15 tests the same rule. 27 Oct needs no positions at all.
+      **Cases:** 26 Oct 17:49, a stop that began on driving sleeps at 17:54:15 by the alarm and
+      wakes when the drive resumes; 27 Oct 12:11, the launch starts on stationary and a profile
+      read begun before its write cannot undo it; 30 Oct 16:15, the drive's last fix 7 min late
+      does not raise a stationary phone; and six rules on invented positions (a refused change
+      taken back and retried, not recording, an outing's awake window, the wake's looks, two
+      in-vehicle labels, a still check the gate beat). 13 tests, 1,257 in all.
+      **Each fix reverted, each caught:** T-286's still check (4 tests fail), N15's no position
+      counts as still (6), T-295's alarms (5), N15's launch profile (3), N15's late read (1, only
+      the race test), T-294's leftover rule (2), T-294's wall clock passed by the glue (1, only the
+      30 Oct replay; no pure test could see it). The replay is faithful: on 26 Oct it raises
+      walking to driving at 17:52:12 with the phone's own words, and with T-294 reverted it says
+      *moved 7352 m at up to 86 km/h* at 16:15:55, as the phone did. The 30 Oct trimmed history
+      gives the same result as the full one, with and without T-294.
+      **On the emulator** (Android 14, x86_64 field build, 14:51 to 15:00): all three paths through
+      the new wiring. Recording started automatically and stored batches; a still label from the
+      emulator's sensors started a still check (14:51:07); the gate raised walking to driving on a
+      replayed route; the check's alarm came back through the motion task at 14:59:53 and gave
+      *stay after 9 min, moved 116 m*. No crash. Not on the P30.
+      ⚠ That alarm came 8 min 46 s after the wake, not 5: on Android 12+ without the exact-alarm
+      permission it is inexact (`FollowUpAlarm.kt`, as its comment says), here a 3 min 45 s
+      window. Under `STILL_CHECK_LATE_MS` (10 min), so the check still decides; but every tester
+      on Android 12+ gets it, and none has been measured (E4).
+      ⚠ A fixed offset hides where the fixes are, not their shape; that is why the cuts are short.
+      ⚠ Found while doing it: reading a backup with SQLite rewrites its `-shm` index even read
+      only; `p30-2026-10-27-before-n15`'s was (no data changed). Extract from copies.
 - [x] **T-299** **E2 re-measured, A4 of the fix plan: the zoom does not stall; the 182 ms was the
       probe.** Done 2026-10-31 on the P30 (the lead's OK, field build, nothing installed).
       `measure-map-zoom.sh` now runs its six strokes as six monkey scripts with a marker before each

@@ -22,6 +22,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   probe** counting each stroke's start (double tap, pause, drag) as a stall. Marked per-stroke
   probe and `map-frames.mjs --zoom`; four marked runs on the P30, no stall over 100 ms, worst
   82.8 to 99.2 ms. A5 dropped. Zoom fps 41 to 49, a little under 27 Oct's 46 to 53: watch it.
+- **31 Oct, A3 (T-300): the recorder's profile switching is tested.** Its logic moved unchanged to
+  `recording/recorderCore.ts` (deps passed in), with a replay harness (`recorderReplay.ts`) and
+  fixtures from the P30's batches (2° west, `tools/extract-recorder-fixture.mjs`, from copies).
+  Seven fixes reverted one at a time, each caught. On the emulator all three paths run through the
+  new wiring; the still check's alarm is inexact on Android 12+ (8 min 46 s there). 1,257 tests.
+  ⚠ Read backups from copies: SQLite rewrites `-shm` even read only.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

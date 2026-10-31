@@ -260,7 +260,8 @@ permission, L3 privacy contact.
       Levada da Rocha Vermelha (PR28) has no difficulty in `pois.json`, so its line ends at the
       time. Checked 31 Oct: visitmadeira.com gives no grade for PR28 (10.8 km, 4 h); Calheta's
       municipal page grades it *Experienced* (18.8 km there and back, 5 to 6 h). The schema allows
-      only `easy` and `moderate`, so *Experienced* needs a third level; the lead was asked.
+      only `easy` and `moderate`, so *Experienced* needs a third level. **The lead: leave it blank** (31 Oct);
+      the card ends at the time.
 - [ ] **T-305** **A9 of the fix plan: a locked stamp looks locked, not unvisited** (D-075 amended,
       Provisional). `PassportView` draws it in colour under frost (`blur` 3.4) with the drawn
       padlock in its middle at the pop-up's proportion (56 on 196), as the new-stamp pop-up,

@@ -98,12 +98,12 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-067** | The accuracy cut is a preference, not a veto. A canopy stretch still draws. | Provisional |
 | **D-068** | A levada is credited by time as well as distance. You cannot always finish one. | Provisional |
 | **D-069** | A walk the user sends, never a walk the app collects. | Provisional |
-| **D-070** | ~~The map shows the places you earned~~ ⚠ **Since 2026-10-04 the island view draws no place** (the lead removed the circles); places open from the passport. **Since 2026-10-31, zoomed in to a town (zoom 13), a faint pin for every place; a tap opens its card** (Q1 c, T-303). Chrome follows the map. | Provisional |
+| **D-070** | ~~The map shows the places you earned~~ ⚠ **Since 2026-10-04 the island view draws no place** (the lead removed the circles); places open from the passport. **Since 2026-10-31, zoomed in to a town (zoom 13), a faint pin for every place; a tap opens its card** (Q1 c, T-303; zoom kept by the lead 31 Oct). Chrome follows the map. | Provisional |
 | **D-071** | The map is the product. ⚠ **Partly reversed 2026-08-17: stamps are a priority again** (D-072 made them the revenue). | **Superseded in part** |
 | **D-072** | **Free on Play. Trace always free; ~~10~~ stamps + your first levada free; ~~€4.99~~ unlocks the rest.** ⚠ *Allowance and price superseded by D-089.* | **Superseded in part** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 | **D-074** | ~~The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`.~~ ⚠ **Superseded 2026-09-25 by D-092 (Bruma).** | **Superseded** |
-| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Accepted** (2026-09-25, with D-089) Amended 2026-10-31, Provisional: in the passport, frosted colour with a centred padlock, as the pop-up (A9, T-305). |
+| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Accepted** (2026-09-25, with D-089) Amended 2026-10-31, accepted by the lead the same day: in the passport, frosted colour with a centred padlock, as the pop-up (A9, T-305). |
 | **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
 | **D-077** | Real-device verification comes from **Play's pre-launch report and Firebase Test Lab**, not from owning a phone. | **Provisional** |
 | **D-078** | Stamps are **collectibles with a rank** — bronze/silver/gold/platinum by *how many* you have, shown on the passport button. | **Accepted** |

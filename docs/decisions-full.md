@@ -3516,7 +3516,7 @@ the home should point to a place to go next is decision L4, still open.
 T-303):** the island view still draws no place, but **once zoomed in to a town (zoom 13, hidden
 again below 12.5) every place has a faint pin**, the same for collected and not, and a tap opens
 its card as *Ver no mapa* does. The place on show keeps the gold pin (N12). The zoom is a
-reasoned starting point, not a measurement; the lead judges it on the phone.
+reasoned starting point, not a measurement; **the lead kept it on 31 Oct after using it on the P30** (*"I'm liking the current version of the pins appearances"*).
 
 ### The problem, found by looking rather than by testing
 
@@ -4047,7 +4047,7 @@ promise.
 
 ## D-075 — A stamp you earned but have not paid to see is **locked**, never "not collected"
 
-⚠ **Amended 2026-10-31, Provisional (A9 of `docs/fix-plan-2026-10-30.md`, T-305): a locked stamp in
+⚠ **Amended 2026-10-31, accepted by the lead the same day after seeing it on the P30** (*"we can keep it as it is, I'm liking it"*), name hidden under the frost included. **(A9 of `docs/fix-plan-2026-10-30.md`, T-305): a locked stamp in
 the passport is the artwork in colour under frost, with a padlock in its middle**, as the new-stamp
 pop-up (E3), the medals and the unlock sheet already drew it; it was the muted drawing of a place
 never visited with a 12 dp lock in a corner, and on the P30 the two read the same (the 30 Oct

@@ -258,15 +258,17 @@ permission, L3 privacy contact.
       figures exist (left missing, as `levada-routes.mjs` requires). The 30 Oct review's *no
       length, difficulty* was wrong for levadas; corrected there. **Open, content (the lead's):**
       Levada da Rocha Vermelha (PR28) has no difficulty in `pois.json`, so its line ends at the
-      time; IFCN's page would give it.
+      time. Checked 31 Oct: visitmadeira.com gives no grade for PR28 (10.8 km, 4 h); Calheta's
+      municipal page grades it *Experienced* (18.8 km there and back, 5 to 6 h). The schema allows
+      only `easy` and `moderate`, so *Experienced* needs a third level; the lead was asked.
 - [ ] **T-305** **A9 of the fix plan: a locked stamp looks locked, not unvisited** (D-075 amended,
       Provisional). `PassportView` draws it in colour under frost (`blur` 3.4) with the drawn
       padlock in its middle at the pop-up's proportion (56 on 196), as the new-stamp pop-up,
       the medals and the unlock sheet already did; the 12 dp corner badge is gone. The *See all*
       grid uses the same cell. Before and after on the emulator, the same rows:
       `tools/out/a9-locked-before-after.png`. `preview-stamps.mjs` draws only the artwork module,
-      so the emulator is the renderer here. **For the lead:** the frost hides the stamp's name;
-      keep or veto. **On the P30 31 Oct:** `tools/out/a9-locked-p30.png`, three clear states (open,
+      so the emulator is the renderer here. The frost hides the stamp's name; **the lead kept
+      it, 31 Oct.** **On the P30 31 Oct:** `tools/out/a9-locked-p30.png`, three clear states (open,
       frosted and padlocked, grey).
 - [ ] **T-304** **A11 of the fix plan: the map opens on the whole island, centred above the
       controls.** The 30 Oct review on the P30: *the island opens in the bottom quarter, west end
@@ -297,7 +299,7 @@ permission, L3 privacy contact.
       a tap opened *Fortaleza do Pico*; pan probe 59.6 and 59.2 fps with pins on screen, no stall
       over 50 ms, against 59.0 at the island view without them. ⚠ The P30's map (Google's latest
       renderer) exposes no pin to `uiautomator`, where the emulator's legacy one names each: whether
-      TalkBack reaches the pins there, the gold one included, is unverified.
+      TalkBack reaches the pins there, the gold one included, is unverified. **Zoom 13 kept by the lead, 31 Oct.**
       Google's own place icons show beside the pins on the P30 too (Monte Palace, Museu CR7), as
       the 30 Oct review saw; not from this change. **Open:** the zoom of 13 is the lead's to judge.
 - [x] **T-301** **A7 of the fix plan: the gold badge is drawn, and a tap on it opens the passport**

@@ -265,7 +265,7 @@ permission, L3 privacy contact.
       launch had already set stationary, so no verdict line, as designed).
       ⚠ Open until seen on the P30: *still check: stay after 5 min* or a sleep about 5 minutes
       after *started*, and *motion wake: look 2* lines, all with the app closed. Not fixed: one
-      *in vehicle* label still raises walking to driving (10:33 on 31 Oct).
+      *in vehicle* label still raises walking to driving (10:33 on 31 Oct, on foot on floor -1, the lead).
 - [ ] **T-294** **A leftover batch and a frozen still check** (field log, 30 Oct). Built 2026-10-30
       at the desk, 1,217 tests. (1) Out of stationary, `decideProfile` keeps the profile when the
       newest fix is over 5 min old by the wall clock (`LEFTOVER_FIX_MS`): the moving profile's last

@@ -80,8 +80,9 @@ never where the lead lives.
 - ⚠ **Walking at 10:18, driving again at 10:33:44 with no car.** Google's transition said walking
   (09:49:45, delivered 10:18:30); then one *most probable* activity label of *in vehicle* on the
   motion wake raised walking to driving (`raiseProfile`). The transitions show no driving until
-  11:10:56. Unless the lead was in a vehicle around 10:33 (to ask), one noisy label is enough to
-  undo walking.
+  11:10:56. **The lead: 10:33 to 10:37 on floor -1, on foot, no mobile signal even on the
+  iPhone.** So the label was wrong, read underground (the iPhone at 86 to 273 m there), and one
+  noisy label is enough to undo walking. Not fixed.
 - ❌ **Home on fine GPS again, by a third route.** Driving since 11:15:39, and at 11:46
   `dumpsys location` shows fine GPS every 15 s for Bruma at home: the stuck still check means
   nothing lowers it until the app is opened. T-294's own case (a relaunch after a drive home)

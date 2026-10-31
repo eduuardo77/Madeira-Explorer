@@ -5500,6 +5500,13 @@ stamps cannot silence the health check (D-087 §5's reason for that channel).
 
 ## D-097 — The paywall asks, and keeps asking where it is useful
 
+⚠ **Amended 2026-10-31 (T-307, the lead's pick E from `tools/out/consistency-options-2.html`):
+gold is what you buy or earn, blue is for getting around.** The unlock sheet's buy button becomes
+the gold button (`reward.goldButton`, ink 9.44:1) and its ticks gold (`reward.goldInk`), as the
+new-stamp pop-up, the medals, the badge and the passport's reminder already were; the violet panel
+stays. Links and chevrons stay blue. The lead saw two rounds of recolouring (D-080's dark page and
+this violet included) and kept today's grounds; only the accents change.
+
 **Status: Accepted 2026-10-05** by the project lead; the design is chosen from drawn options
 (`tools/preview-unlock-options.mjs`, `tools/out/unlock-options.html`). **Supersedes T-157's rule**
 (*said once, quietly, never a notification, never a repeating banner*) and the reading of D-089 that

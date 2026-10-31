@@ -264,8 +264,11 @@ permission, L3 privacy contact.
       today's colours: **E** gold for whatever you buy (button, ticks), **F** a violet cast in the
       passport's black (`#1E1A26`, unvisited outline 3.08:1), **G** the paywall in the passport's
       black with violet only as a glow behind the stamps, **H** the map's status pill and 26/81
-      count in the passport's black. All pass. **Waiting on the lead's pick**; then the other dark screens (celebrations, medals, share image) drawn the
-      same way before any app change.
+      count in the passport's black. All pass. **The lead picked E** (31 Oct, D-097 amended). In the
+      app it is two styles in `UnlockSheetView.tsx` (the sketch's blue *Ver* was wrong: the passport's
+      reminder already has a gold button). **Not built yet:** waiting on the lead's
+      go-ahead (they had said not to change the app while exploring); then a contrast test for the
+      gold button on the violet panel, and the sheet seen on the emulator and the P30.
 - [ ] **T-306** **A10 of the fix plan: levada length and difficulty were already on the card.** Found
       2026-10-31, nothing built: 11 of 18 levadas carry `walk` (route, km, return km, minutes,
       difficulty, desk E of 19 Oct) and both the map's card and the passport's draw it, e.g.

@@ -4047,6 +4047,14 @@ promise.
 
 ## D-075 — A stamp you earned but have not paid to see is **locked**, never "not collected"
 
+⚠ **Amended 2026-10-31, Provisional (A9 of `docs/fix-plan-2026-10-30.md`, T-305): a locked stamp in
+the passport is the artwork in colour under frost, with a padlock in its middle**, as the new-stamp
+pop-up (E3), the medals and the unlock sheet already drew it; it was the muted drawing of a place
+never visited with a 12 dp lock in a corner, and on the P30 the two read the same (the 30 Oct
+review). The frost still keeps the artwork from being given away (D-046). **The trade, for the
+lead:** under the frost the stamp's own name cannot be read; a screen reader says it and a tap
+opens the card. Back to the muted drawing is one line in `PassportView.tsx`.
+
 **Status: Accepted 2026-09-25**, with D-089 (its rule 4). *Before that:* **Provisional.** Raised and implemented 2026-08-18 (T-155). It is the one judgement call
 D-072 left open, it changes what the free user's passport *says*, and the project lead should
 either confirm it or overrule it with one boolean.

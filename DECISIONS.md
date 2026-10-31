@@ -103,7 +103,7 @@ grep -A40 "^## D-032" docs/decisions-full.md
 | **D-072** | **Free on Play. Trace always free; ~~10~~ stamps + your first levada free; ~~€4.99~~ unlocks the rest.** ⚠ *Allowance and price superseded by D-089.* | **Superseded in part** |
 | **D-073** | Marketing is ASO on one free listing. Rank honestly; never claim offline. | **Provisional** |
 | **D-074** | ~~The app is **Proa**; the listing is **Proa - Madeira**. Package `com.proa.madeira`.~~ ⚠ **Superseded 2026-09-25 by D-092 (Bruma).** | **Superseded** |
-| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Accepted** (2026-09-25, with D-089) |
+| **D-075** | A stamp you earned but have not paid to see is **locked, never "not collected"**. | **Accepted** (2026-09-25, with D-089) Amended 2026-10-31, Provisional: in the passport, frosted colour with a centred padlock, as the pop-up (A9, T-305). |
 | **D-076** | The souvenir film **is the map, played back** — not a bespoke drawing of the route. | **Accepted** |
 | **D-077** | Real-device verification comes from **Play's pre-launch report and Firebase Test Lab**, not from owning a phone. | **Provisional** |
 | **D-078** | Stamps are **collectibles with a rank** — bronze/silver/gold/platinum by *how many* you have, shown on the passport button. | **Accepted** |

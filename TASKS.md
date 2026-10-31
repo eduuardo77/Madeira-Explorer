@@ -250,6 +250,14 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-305** **A9 of the fix plan: a locked stamp looks locked, not unvisited** (D-075 amended,
+      Provisional). `PassportView` draws it in colour under frost (`blur` 3.4) with the drawn
+      padlock in its middle at the pop-up's proportion (56 on 196), as the new-stamp pop-up,
+      the medals and the unlock sheet already did; the 12 dp corner badge is gone. The *See all*
+      grid uses the same cell. Before and after on the emulator, the same rows:
+      `tools/out/a9-locked-before-after.png`. `preview-stamps.mjs` draws only the artwork module,
+      so the emulator is the renderer here. **For the lead:** the frost hides the stamp's name;
+      keep or veto. Open: one P30 screenshot.
 - [ ] **T-304** **A11 of the fix plan: the map opens on the whole island, centred above the
       controls.** The 30 Oct review on the P30: *the island opens in the bottom quarter, west end
       cut, 60% empty sea*. Cause: on a phone with a trip the opening view is the T-272 snapshot,

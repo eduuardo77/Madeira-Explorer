@@ -250,7 +250,28 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
-- [ ] **T-297** **E5, A2 of `docs/fix-plan-2026-10-30.md`: with no location at all, the map's
+- [x] **T-299** **E2 re-measured, A4 of the fix plan: the zoom does not stall; the 182 ms was the
+      probe.** Done 2026-10-31 on the P30 (the lead's OK, field build, nothing installed).
+      `measure-map-zoom.sh` now runs its six strokes as six monkey scripts with a marker before each
+      (`make-zoom-gesture.py --strokes`, the same events byte for byte), and `map-frames.mjs --zoom`
+      calls a gap a *start* when it comes before the drag is under way (three frames in a row at
+      screen rate): one-finger zoom opens with a double tap and a 90 ms pause in which the map has
+      nothing to move. It prints each stroke's time to steady motion, so a slow start still shows.
+      Pan analysis unchanged on all 222 runs on disk; the 19 Oct freezes before the width fix still
+      read as 10 stalls over 100 ms per run, so the rule hides no real freeze.
+      **Result, 4 marked runs plus 1 single script:** no stall over 100 ms in motion, worst 82.8 to
+      99.2 ms, 41.4 to 48.9 fps. The single script read by the old analyser: 3 gaps over 100 ms,
+      worst 132.5, on the same phone the same minute. Re-read, both 30 Oct runs have no stall over
+      100 ms (worst 66 ms); their 182 ms was the first stroke's start (447 and 248 ms to steady
+      motion; today 0 to 199 ms). **A5, the bisect, is not needed.** To watch: today's zoom fps
+      (41.4 to 48.9) sit a little under 27 Oct's (45.7 to 53.0), from different start views.
+      ⚠ Method: the six strokes zoom out more than in (about 1.5 levels a run), and the map stays
+      mounted, so a relaunch does not reset the camera and force-stop would stop recording. Runs 3
+      to 5 start from the zoom floor (out strokes until the screen stops changing), which repeats
+      within a mean pixel difference of 2.6 to 5.9 (a 170 px shift reads 16.2). Run 1 started from
+      the island view, run 2 from Funchal at the anchor. Monkey takes 333 to 641 ms from marker to
+      first frame, not the 0.45 s measured for `input`.
+ `docs/fix-plan-2026-10-30.md`: with no location at all, the map's
       notice asks for location while using the app, not *Permitir sempre*.** Built 2026-10-31: a
       new notice kind `needs-location` for `denied` and `undetermined` (dismissible, like
       `needs-always`); its lines come from `permissionNoticeLines(permission, language)`, tested per

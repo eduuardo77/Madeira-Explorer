@@ -70,7 +70,7 @@ Weights favour what a paying tourist feels: recording and stability heaviest.
 - **E1, no place pins on the map.** A first-time user cannot see where any of the 81 stamps are;
   places reach the map only through the passport's *Ver no mapa*. No decision found that makes
   this deliberate. For a collecting game, the largest UX gap.
-- **E2, zoom regressed:** worst gap 182 ms in both runs, 132 ms on 27 Oct.
+- **E2, zoom regressed:** worst gap 182 ms in both runs, 132 ms on 27 Oct. **Withdrawn 31 Oct (T-299):** the 182 ms was the first stroke's start (double tap, pause, then the drag), which the unmarked probe counted as a stall; four marked runs and the same two files re-read show no stall over 100 ms in motion.
 - **E3, the recorder's untested glue.** Every field bug since 26 Oct (T-286, N15, T-294) sat in
   the code that applies the profile rules, not in the tested pure rules.
 - **E4, the only real phone runs Android 10.** Not covered by "one phone": the OS behaviour that

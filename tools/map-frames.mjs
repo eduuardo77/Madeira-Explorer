@@ -24,8 +24,22 @@ const PENDING = '9223372036854775807';
 // From the marker to the gesture's first touch: the `input` command starts a
 // Java VM first: 306 to 326 ms on the P30 (11 gestures under atrace, 2026-10-23).
 const TOUCH_LAG_S = 0.45;
+// ⚠ A4, 2026-10-31, the zoom probe only (`--zoom`): Google's one-finger zoom
+// starts with a double tap, a 90 ms pause, then the hold and drag. The map
+// draws a frame or two for the tap and then has nothing to move until the drag
+// is under way, so every stroke opens with a gap of 100 to 180 ms. Whether the
+// marker rule called it a wait depended on monkey's start-up (333 to 641 ms on
+// the P30), which is luck, and a cut-off in ms split the same thing both ways
+// (30 Oct: 182 ms a stall in one run, a start in the other). So, by structure:
+// a stroke's *start* lasts from the map leaving rest until it draws STEADY
+// frames in a row at screen rate; gaps before that are starts, not stutters,
+// and each stroke's time to steady motion is printed, so a slow start still
+// shows. Not for the pan probe, where a pan from rest has no such pause.
+const ZOOM = process.argv.includes('--zoom');
+const STEADY = 3;
+const STEADY_GAP_MS = 20;
 
-const text = readFileSync(process.argv[2], 'utf8');
+const text = readFileSync(process.argv.filter((arg) => arg !== '--zoom')[2], 'utf8');
 // The refresh period opens each reading; one reading on the P30 said 8.4 ms
 // in the middle of a 60 Hz run, so the most common value is the one used.
 const periods = new Map();
@@ -60,6 +74,28 @@ const periodMs = periodNs / 1e6;
 const intervals = [];
 const long50 = [];
 let motionMs = 0;
+/**
+ * For each frame index, the time steady motion began in its burst (the map out
+ * of rest), or Infinity if it never did; and each burst's time to get there.
+ */
+const steadyFrom = new Array(times.length).fill(Infinity);
+const startsMs = [];
+for (let w = 0; w < times.length; ) {
+  let end = w + 1;
+  while (end < times.length && times[end] - times[end - 1] <= IDLE_MS) end += 1;
+  for (let k = w + 1; k + STEADY - 1 < end; k += 1) {
+    let steady = true;
+    for (let j = 0; j < STEADY; j += 1) {
+      if (times[k + j] - times[k + j - 1] > STEADY_GAP_MS) steady = false;
+    }
+    if (steady) {
+      for (let j = w; j < end; j += 1) steadyFrom[j] = times[k - 1];
+      startsMs.push(times[k - 1] - times[w]);
+      break;
+    }
+  }
+  w = end;
+}
 for (let i = 1; i < times.length; i += 1) {
   const gap = times[i] - times[i - 1];
   if (gap <= IDLE_MS) {
@@ -71,7 +107,8 @@ for (let i = 1; i < times.length; i += 1) {
       const to = times[i] / 1000;
       const wait = marks.some((mark) => mark >= from - TOUCH_LAG_S && mark <= to);
       const lone = i + 1 >= times.length || times[i + 1] - times[i] > IDLE_MS;
-      const kind = wait ? 'wait' : lone ? 'settle' : 'STALL';
+      const start = ZOOM && times[i] <= steadyFrom[i];
+      const kind = start ? 'start' : wait ? 'wait' : lone ? 'settle' : 'STALL';
       long50.push({ gap, at: (times[i - 1] - times[0]) / 1000, kind, gesture: gestureAt(times[i - 1]) });
     }
   }
@@ -100,7 +137,8 @@ const worst = stalls.reduce((max, entry) => Math.max(max, entry.gap), 0);
 const count = (kind) => long50.filter((entry) => entry.kind === kind).length;
 console.log(
   `stalls in motion > 50 ms: ${stalls.length}, > 100 ms: ${stalls.filter((entry) => entry.gap > 100).length}, ` +
-    `worst ${f(worst)} ms (left out: ${count('wait')} waits, ${count('settle')} settles)`
+    `worst ${f(worst)} ms (left out: ${count('wait')} waits, ${count('settle')} settles` +
+    `${ZOOM ? `, ${count('start')} starts` : ''})`
 );
 for (const entry of long50) {
   const which = marks.length > 0 ? `, gesture ${entry.gesture}` : '';
@@ -109,6 +147,9 @@ for (const entry of long50) {
 // From each marker to the first frame after it: the command's start-up plus the
 // map's answer. Printed rather than assumed, since TOUCH_LAG_S was measured for
 // `input`, not for monkey (A4, 2026-10-31).
+if (ZOOM) {
+  console.log(`strokes, first frame to steady motion, ms: ${startsMs.map((ms) => Math.round(ms)).join(', ')}`);
+}
 if (marks.length > 0) {
   const answers = marks.map((mark) => {
     const next = times.find((time) => time / 1000 > mark);

@@ -69,4 +69,4 @@ wait $READER 2>/dev/null || true
 # The markers, on the clock SurfaceFlinger uses (see measure-map-frames.sh).
 $ADB logcat -d -v monotonic -s mapframes:I | tr -d '\r' | awk '/mapframes: gesture/ {print "MARK " $1}' >>"$RAW"
 echo "$LABEL ($LAYER)$([ "${ONE_SCRIPT:-0}" = 1 ] && echo ', one script')"
-node tools/map-frames.mjs "$RAW"
+node tools/map-frames.mjs --zoom "$RAW"

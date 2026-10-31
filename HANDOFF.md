@@ -18,6 +18,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   64 dp status bar; fixed in 12, present in 11. **Waiting on the lead: upload 12 (B4,
   `docs/closed-testing.md` §3).** The P30 was not touched. Next: Phase 1 (A4, A3, ...) on the
   lead's word.
+- **31 Oct, Phase 1 begun. A4 (T-299): the zoom does not stall; the 30 Oct 182 ms was the
+  probe** counting each stroke's start (double tap, pause, drag) as a stall. Marked per-stroke
+  probe and `map-frames.mjs --zoom`; four marked runs on the P30, no stall over 100 ms, worst
+  82.8 to 99.2 ms. A5 dropped. Zoom fps 41 to 49, a little under 27 Oct's 46 to 53: watch it.
 - **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
   on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
   app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on

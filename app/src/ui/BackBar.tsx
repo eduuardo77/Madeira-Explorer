@@ -10,7 +10,7 @@
  * header. Android's Back does the same thing (T-211).
  */
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { colors, fontSize, MIN_TAP_TARGET, spacing } from './theme';
 
@@ -48,7 +48,10 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: spacing.xl,
+    // T-298: below the status bar, as the passport's bar is (PASSPORT_BAR_TOP).
+    // A fixed 32 dp put half the arrow under a 64 dp status bar (a hole-punch
+    // camera, the Android 14 emulator), where a tap at its centre went to Android.
+    paddingTop: Math.max(spacing.xl, StatusBar.currentHeight ?? 0),
     paddingHorizontal: spacing.xs,
     paddingBottom: spacing.sm,
   },

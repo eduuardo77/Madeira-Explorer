@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **31 Oct, car to Funchal and a walk with stops (automatic), iPhone alongside: 86.0% within 10 m,
+  on foot 52.8%** (field log). ❌ **The still check's 5 min JavaScript timer never fired** (09:00,
+  app not reopened), and `stillCheckRunning` stayed true, so every stop of the morning stayed on
+  *driving* and the P30 was on fine GPS at home after. Probably the same freeze lost the motion
+  wake's later looks and the first 4.4 km. One *in vehicle* label at 10:33 raised a walk to driving.
+  Not fixed: the wait has to live outside JavaScript (native alarm or work request); the lead decides.
 - **30 Oct evening, an in-depth evaluation: 11.9 / 20** on a new 16-KPI rubric (not comparable
   with 13.3): `docs/bruma-score-and-plan-2026-10-30.md`. New: no place pins on the map for a new
   user (E1), zoom worst gap 182 ms (E2), the recorder's profile-switching glue has no tests (E3),

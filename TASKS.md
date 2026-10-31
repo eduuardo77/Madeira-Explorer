@@ -259,6 +259,7 @@ permission, L3 privacy contact.
       stays when the verdict comes over 10 min after the wake (`STILL_CHECK_LATE_MS`): a 5 min timer
       frozen with the process ended 91 min later and slept a walk. ⚠ Open until seen on the P30:
       after a drive home, a relaunch stays stationary (diary: *a leftover batch*).
+      **31 Oct:** (2) never ran: the frozen timer did not fire at all without a relaunch (T-286).
 - [x] **T-293** **Porto Santo's card at the foot of the passport, and N22's line** (D-109 amended,
       the lead, 2026-10-27). **Done, seen on the P30** (field build, `install -r`, database backed up):
       the card under *Medalhas*, above *Mais recente*; the top goes from the unlock banner straight to
@@ -288,6 +289,9 @@ permission, L3 privacy contact.
       minutes apart (`decideStillCheck`) and drops to stationary through `lowerProfile`. 1,188
       tests. ⚠ Open until seen on the P30: a stop begun on driving, and *still check* lines in the
       diary; none means Google's still never arrives there.
+      **31 Oct, failed on the P30** (field log): Google's still came (09:00:10, *started on driving*),
+      but the 5 min `setTimeout` never fired in 2 h 40 with the app closed, and the stuck
+      `stillCheckRunning` blocked every later check. The wait cannot be a JavaScript timer.
 - [x] **T-285** An outing stays awake only at its start (D-108 amended). **Done 2026-10-25 at the
       desk.** `effectiveProfile` forces the moving profile for the first `OUTING_AWAKE_MS`
       (10 min) of an outing, no longer for all of it; an unreadable start time counts as asleep.

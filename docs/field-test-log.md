@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-10-31 | **Car to Funchal and a walk with stops, automatic recording**, 2 h 57, 40 km, iPhone alongside | P30 | one mode (D-108), automatic | ⚠ **86.0% of the route within 10 m**, 95.5% within 30 m, 88.9% by car; ❌ first 4.4 km lost; ❌ **a still check whose timer never fired**: every stop on *driving*, on foot 52.8%; ⚠ one *in vehicle* label raised a walk to driving; ❌ home on fine GPS after |
 | 2026-10-30 | **Car to a walk west of Funchal, automatic recording**, 3 h 10, 42 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **93.5% of the route within 10 m**, 98.0% within 30 m, 95.8% by car; ⚠ on foot 71.1% (the walk began on *driving*); ❌ **home left on fine GPS**: a stale batch from the drive read as a drive now; ⚠ a still check fired 91 min late |
 | 2026-10-27 | **A drive with an outing, automatic off:** Funchal, Fortaleza do Pico and the Jardim Botânico, 1 h 11, 38 km, iPhone alongside | P30 | one mode (D-108), outing | ✅ **92.3% of the route within 10 m**, 98.4% within 30 m; first fix 2 s after the car moved; still checks on *driving* ran and rightly stayed; no stop over 90 s, so T-285 (1) and T-286's sleep are still open |
 | 2026-10-26 | **An outing with automatic off** (T-285): car out west of Funchal and back, 1 h 40 on foot in a shopping centre, 2 h 43, iPhone alongside | P30 | one mode (D-108), outing | ✅ **95.3% of the route within 10 m**, 98.1% within 30 m, 96.9% by car; on foot 51.9%, all indoors (no reference there); ⚠ never stationary, so T-285's check is still open; ❌ a 29 min sit-down stayed on *driving* (T-286); battery 100 to 97% (coarse); no stamps |
@@ -45,6 +46,37 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-10-31: by car to Funchal, a walk with stops, automatic recording
+
+- **Setup:** the field build of 30 Oct (T-294), automatic recording on, no outing, app opened
+  once at 08:40:23 and not again. iPhone SensorLogger 08:40 to 11:37
+  (`Madeira-fieldwork/iphone-2026-10-31`). Database pulled at 11:42 without stopping the app,
+  `Madeira-fieldwork/backups/p30-2026-10-31-after-walk`. From the iPhone: car 08:42 to 09:03,
+  46 min still near the Mercado dos Lavradores, on foot 09:50 to 11:08 with stops at 10:26
+  (9 min) and 10:45 (17 min), car home 11:09 to 11:30.
+- **Route: 86.0% within 10 m, 95.5% within 30 m** of 40.0 km; by car 88.9%, **on foot 52.8%**
+  (70.7% within 30 m) of 3.3 km. Lit line 90.2% within 10 m of the route. Car home 92.8%.
+- ❌ **The first 4.4 km lost.** Motion wake at 08:40:33 found one fix (still at the door); its
+  other two looks, 90 s apart, never logged a fix though the car was moving by 08:43. Google's
+  *driving* at 08:45:31 reached the app at 08:48:17, the first fix 08:48:18. Most likely the
+  same frozen JavaScript timer as below; not proven.
+- ❌ **A still check that never ended.** *Still check: started on driving* at 09:00:10, in
+  traffic; its 5 min `setTimeout` never fired in the 2 h 40 that followed (no app opening to
+  thaw it, so T-294's late rule never ran either). With `stillCheckRunning` left true, no other
+  still could start a check, and only one *started* line came all morning. So the 46 min stop,
+  the 9 and 17 min stops and the walk to 10:18 were all on *driving*: no sleep, and the walk
+  drawn through the 50 m filter.
+- ⚠ **Walking at 10:18, driving again at 10:33:44 with no car.** Google's transition said walking
+  (09:49:45, delivered 10:18:30); then one *most probable* activity label of *in vehicle* on the
+  motion wake raised walking to driving (`raiseProfile`). The transitions show no driving until
+  11:10:56. Unless the lead was in a vehicle around 10:33 (to ask), one noisy label is enough to
+  undo walking.
+- ❌ **Home on fine GPS again, by a third route.** Driving since 11:15:39, and at 11:46
+  `dumpsys location` shows fine GPS every 15 s for Bruma at home: the stuck still check means
+  nothing lowers it until the app is opened. T-294's own case (a relaunch after a drive home)
+  was not exercised: the app was not opened.
+- No new stamps (Mercado and Teatro already held since 16 Oct). Battery not read.
 
 ### 2026-10-30: by car to a walk west of Funchal, automatic recording, home on GPS
 

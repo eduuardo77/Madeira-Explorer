@@ -476,6 +476,18 @@ export const STRINGS = {
   // D-095: in WalkNYC's shape, the consequence first and then what a tap does.
   // The second line names the phone's own words for the setting (teardown
   // item 4); the tap goes through the disclosure to that choice (T-121).
+  // E5, 30 Oct review: with no location at all, the notice asks for location
+  // while the app is in use, not "all the time" (`permissionNoticeLines`).
+  'notice.needsLocation': s(
+    'Nothing is being recorded',
+    'Nada está a ser registado',
+    'Es wird nichts aufgezeichnet'
+  ),
+  'notice.needsLocation.action': s(
+    'Tap to allow location while you use the app',
+    'Toca para permitir a localização enquanto usas a app',
+    'Tippen, um den Standort bei Nutzung der App zu erlauben'
+  ),
   'notice.needsAlways': s(
     'Automatic recording is off',
     'O registo automático está desligado',

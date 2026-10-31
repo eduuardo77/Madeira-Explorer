@@ -152,7 +152,15 @@ export class ExpoLocationProvider implements LocationProvider {
   }
 
   async requestWhileUsingPermission(): Promise<PermissionLevel> {
-    await Location.requestForegroundPermissionsAsync();
+    // E5: refused in the first run, the phone may no longer ask (Android 11+
+    // after two refusals, or "don't ask again"), and the map's notice promised
+    // the choice. Then only the app's settings page can give it.
+    const before = await Location.getForegroundPermissionsAsync();
+    if (before.status !== 'granted' && !before.canAskAgain) {
+      await Linking.openSettings();
+    } else {
+      await Location.requestForegroundPermissionsAsync();
+    }
     const level = await this.getPermissionLevel();
     await recordingEventDao.log('permission_change', `while_using -> ${level}`);
     return level;

@@ -5440,6 +5440,13 @@ walks): D waits on T-246's measurement of how much of a walk's start automatic r
 **Still open.** The notice's tap is untried on a phone without "all the time" (the P30 has it); the
 lead's outing (T-246) decides whether 6D becomes possible.
 
+**Amended 2026-10-31 (T-297, E5 of the 30 Oct review, fix plan A2):** with **no location at all**
+(refused or never asked), the banner no longer offers *Permitir sempre*. It says *Nada está a ser
+registado* and its tap asks for location while the app is in use, the same ask as the main button
+(`needs-location`, `permissionNoticeLines`). Android cannot grant *all the time* before while in
+use, so the old tap led nowhere useful. The *Permitir sempre* banner is unchanged for
+`while_using`. Both asks open the app's settings page when the phone will no longer ask.
+
 ## D-096 — A new stamp is said when it is earned: a quiet notification, and a pop-up on the map
 
 **Status:** Accepted 2026-10-04, on the project lead's instruction. Amends D-011.

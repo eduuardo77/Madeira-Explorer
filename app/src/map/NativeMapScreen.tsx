@@ -87,6 +87,7 @@ import {
   recorderNotice,
   recordingStatus,
   type ControlInput,
+  permissionNoticeLines,
   type RecorderNotice,
 } from '../recording/recorderControls';
 import * as appStateDao from '../storage/dao/appStateDao';
@@ -978,11 +979,23 @@ export default function NativeMapScreen({
       }
     })();
   };
+  const permissionLines =
+    controlInput === null ? null : permissionNoticeLines(controlInput.permission, deviceLanguage());
   const notice: MapNotice | null =
-    noticeKind === 'needs-always'
+    noticeKind === 'needs-location' && permissionLines !== null
+      ? {
+          text: permissionLines.text,
+          actionLabel: permissionLines.action,
+          // E5: the same ask as the main button in this state, while in use.
+          onAction: act(async () => {
+            await locationProvider.requestWhileUsingPermission();
+          }),
+          onDismiss: dismiss('needs-location'),
+        }
+      : noticeKind === 'needs-always' && permissionLines !== null
         ? {
-            text: t('notice.needsAlways'),
-            actionLabel: t('notice.needsAlways.action'),
+            text: permissionLines.text,
+            actionLabel: permissionLines.action,
             // D-095, option 8C: to the choice itself, through the disclosure,
             // where WalkNYC's opens the app's info page and leaves the user to
             // find Permissions, Location, Allow all the time.

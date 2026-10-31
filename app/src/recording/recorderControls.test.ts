@@ -14,6 +14,7 @@ import {
   outingAwakeOver,
   outingKeepsAwake,
   offerAutomatic,
+  permissionNoticeLines,
   primaryControl,
   recorderNotice,
   recordingStatus,
@@ -118,6 +119,51 @@ test('missing "all the time" is said once, and can be dismissed', () => {
   assert.equal(recorderNotice(partial), 'needs-always');
   assert.equal(recorderNotice(partial, new Set(['needs-always'])), null);
 });
+
+test('E5: with no location at all, the notice asks for location, not "all the time"', () => {
+  for (const permission of ['denied', 'undetermined'] as const) {
+    const none = input({ permission, silence: 'not_recording' });
+    assert.equal(recorderNotice(none), 'needs-location', permission);
+    assert.equal(recorderNotice(none, new Set(['needs-location'] as const)), null, permission);
+    // Dismissing the other notice does not hide this one.
+    assert.equal(recorderNotice(none, new Set(['needs-always'] as const)), 'needs-location');
+  }
+});
+
+// A2 of the 30 Oct fix plan: one case per permission state, in all three languages.
+const NO_LOCATION = {
+  en: ['Nothing is being recorded', 'Tap to allow location while you use the app'],
+  pt: ['Nada está a ser registado', 'Toca para permitir a localização enquanto usas a app'],
+  de: ['Es wird nichts aufgezeichnet', 'Tippen, um den Standort bei Nutzung der App zu erlauben'],
+} as const;
+const WHILE_USING = {
+  en: ['Automatic recording is off', 'Tap to choose “Allow all the time”'],
+  pt: ['O registo automático está desligado', 'Toca para escolher “Permitir sempre”'],
+  de: ['Die automatische Aufzeichnung ist aus', 'Tippen, um „Immer zulassen“ zu wählen'],
+} as const;
+
+for (const language of ['en', 'pt', 'de'] as const) {
+  test(`E5 lines, ${language}: undetermined asks for location while in use`, () => {
+    const [text, action] = NO_LOCATION[language];
+    assert.deepEqual(permissionNoticeLines('undetermined', language), { text, action });
+  });
+  test(`E5 lines, ${language}: denied asks for location while in use`, () => {
+    const [text, action] = NO_LOCATION[language];
+    assert.deepEqual(permissionNoticeLines('denied', language), { text, action });
+  });
+  test(`E5 lines, ${language}: while in use asks for "all the time"`, () => {
+    const [text, action] = WHILE_USING[language];
+    assert.deepEqual(permissionNoticeLines('while_using', language), { text, action });
+  });
+  test(`E5 lines, ${language}: all the time needs no notice`, () => {
+    assert.equal(permissionNoticeLines('always', language), null);
+  });
+  test(`E5 lines, ${language}: no location never mentions "all the time"`, () => {
+    const lines = permissionNoticeLines('denied', language);
+    const always = { en: 'all the time', pt: 'sempre', de: 'Immer' }[language];
+    assert.ok(lines !== null && !`${lines.text} ${lines.action}`.includes(always));
+  });
+}
 
 test('⚠⚠ T-174 — a silent recorder is announced, and cannot be dismissed', () => {
   // Three weeks on the P30 with the switch on and nothing recorded. Hiding

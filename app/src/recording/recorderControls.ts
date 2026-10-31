@@ -50,7 +50,7 @@ export type PrimaryControl = 'grant-location' | 'start-walk' | 'stop-walk';
  * the pause (D-087 §6 amended): the Settings switch already stops recording,
  * and the pause only differed by switching itself back on.
  */
-export type RecorderNotice = 'recorder-stopped' | 'needs-always' | null;
+export type RecorderNotice = 'recorder-stopped' | 'needs-location' | 'needs-always' | null;
 
 export type ControlInput = {
   permission: PermissionLevel;
@@ -95,11 +95,47 @@ export function recorderNotice(
     // Switched off on purpose. Nothing is wrong, so nothing is said.
     return null;
   }
+  // E5 (30 Oct review): with no location at all, "all the time" is the wrong
+  // ask. Android needs while-in-use first, and nothing records until then.
+  if (input.permission === 'denied' || input.permission === 'undetermined') {
+    return dismissed.has('needs-location') ? null : 'needs-location';
+  }
   if (input.permission !== 'always') {
     return dismissed.has('needs-always') ? null : 'needs-always';
   }
   if (input.silence === 'silent') {
     return 'recorder-stopped';
+  }
+  return null;
+}
+
+/** The two lines of a permission notice: the consequence, then what a tap does. */
+export type NoticeLines = { text: string; action: string };
+
+/**
+ * Which lines the map's notice shows for a permission state (E5, A2 of the
+ * 30 Oct fix plan), or null when the permission needs no notice.
+ *
+ * ⚠ The while-in-use line names no Android button: Android 10 says *Permitir
+ * apenas durante a utilização da aplicação*, 11 and later *Enquanto uso a
+ * app*, and a line quoting one is wrong on the other. *Permitir sempre* is
+ * quoted because it reads the same on both.
+ */
+export function permissionNoticeLines(
+  permission: PermissionLevel,
+  language: Language
+): NoticeLines | null {
+  if (permission === 'denied' || permission === 'undetermined') {
+    return {
+      text: translate(STRINGS['notice.needsLocation'], language),
+      action: translate(STRINGS['notice.needsLocation.action'], language),
+    };
+  }
+  if (permission === 'while_using') {
+    return {
+      text: translate(STRINGS['notice.needsAlways'], language),
+      action: translate(STRINGS['notice.needsAlways.action'], language),
+    };
   }
   return null;
 }

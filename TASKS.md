@@ -250,6 +250,19 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-297** **E5, A2 of `docs/fix-plan-2026-10-30.md`: with no location at all, the map's
+      notice asks for location while using the app, not *Permitir sempre*.** Built 2026-10-31: a
+      new notice kind `needs-location` for `denied` and `undetermined` (dismissible, like
+      `needs-always`); its lines come from `permissionNoticeLines(permission, language)`, tested per
+      permission state in all three languages; its tap asks for while in use, as the main button
+      does. The line names no Android button: Android 10 and 11+ word it differently.
+      Found on the way: `requestWhileUsingPermission` showed nothing on a phone that no longer asks
+      (two refusals, or *don't ask again*), so both the main button and this tap did nothing there;
+      it now opens the app's settings page, as `requestAlwaysPermission` has since D-095. 1,244
+      tests. Open until seen: the all-refused first run on the emulator (T-298).
+- [ ] **T-298** **Version 12 for the testers, A1 of the fix plan.** The AAB from `main` with the
+      upload key, versionCode 12, `debuggable` false; `smoke-release.mjs --internal`; the
+      all-refused first run on the emulator. Then the lead uploads it (B4).
 - [ ] **T-296** **One *in vehicle* guess no longer raises a walk** (field log, 31 Oct: at 10:33 the
       lead was on foot on floor -1; the lead: *fix it*). Built 2026-10-31: on *walking*, a
       *driving* label from the motion task raises to driving only when the label before it was

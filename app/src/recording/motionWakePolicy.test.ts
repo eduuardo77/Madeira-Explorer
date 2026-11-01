@@ -61,6 +61,16 @@ test('still check: it waits as long as the still rule in the gate', () => {
   assert.equal(check('driving', at(0), at(4.9), null).sleep, false);
 });
 
+test('still check: the five minutes count from the wake, not the first position (T-308)', () => {
+  // The P30 at home, 1 Nov 2026: woken 19:34:26, first position 19:34:37,
+  // second 19:39:30. First to second is 4 min 53 s; wake to second 5 min 4 s.
+  const result = check('driving', at(11 / 60), at(5 + 4 / 60), null);
+  assert.equal(result.sleep, true);
+  assert.match(result.reason, /for 5 min/);
+  // A second position under five minutes from the wake still stays.
+  assert.equal(check('driving', at(11 / 60), at(4.9), null).sleep, false);
+});
+
 test('still check: doubt about the positions keeps the profile', () => {
   const cases: [string, ReturnType<typeof decideStillCheck>][] = [
     ['moved', check('driving', at(0), at(5, 150), null)],

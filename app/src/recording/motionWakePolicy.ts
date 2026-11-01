@@ -101,7 +101,11 @@ export function decideStillCheck(
   const untrusted = (sample: MovementSample) =>
     sample.accuracyM !== null && sample.accuracyM > MAX_TRUSTED_ACCURACY_M;
   if (untrusted(first) || untrusted(second)) return stay('position too rough');
-  const spanMs = second.ts - first.ts;
+  // ⚠ T-308 (1 Nov 2026, the P30 at home): the span runs from the wake, not
+  // from the first position. The first look lands seconds after the wake (11 s
+  // that day) and the alarm is booked at the wake, so first to second came to
+  // 4 min 53 s, the check stayed, and nothing retried: fine GPS all evening.
+  const spanMs = second.ts - Math.min(first.ts, wakeMs);
   if (spanMs < STILL_CHECK_WAIT_MS) return stay(`only ${Math.round(spanMs / 60000)} min apart`);
   const metres = distanceM(first, second);
   if (metres > MOVING_THRESHOLD_M) return stay(`moved ${Math.round(metres)} m`);

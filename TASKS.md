@@ -251,10 +251,14 @@ permission, L3 privacy contact.
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
 - [ ] **T-308** **A still check at home stays on driving by seconds** (field log, 1 Nov). The
-      alarm is booked before the first look, and `decideStillCheck` wants the two positions a full
+      alarm is booked before the first look, and `decideStillCheck` wanted the two positions a full
       5 min apart; on 1 Nov they were 4 min 53 s, so it stayed, and nothing retries: fine GPS every
-      15 s at home. Fix to weigh: measure the span against the wait less the first look's delay, or
-      a small tolerance. Not built; the lead decides.
+      15 s at home. **Built 1 Nov (`f87a19b`):** the span runs from the wake, not the first
+      position; on the P30 since 19:53 (field build, `install -r`, backup
+      `p30-2026-11-01-before-t308`), stationary at home after the launch. Open: a real stop that
+      ends in a check with two positions. Also seen at 19:49, before the install: a check at home
+      stayed on *moved 111 m*, indoor jitter just over the 100 m threshold; the gate slept it
+      at 19:53 (*within 88 m*). Not changed.
 - [ ] **T-307** **Visual consistency: "light map, dark passport, purple paywall"** (30 Oct review,
       Visual 12). Not in the fix plan; the lead asked for options on 31 Oct, open to changing D-080
       and D-097 if an option looks better. `tools/preview-consistency-options.mjs` draws today and

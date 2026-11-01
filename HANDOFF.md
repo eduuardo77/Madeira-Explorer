@@ -12,7 +12,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   (field log). 90.5% of the route within 10 m, by car 94.1%. ✅ T-295's alarm ran both stops'
   still checks and both slept. ❌ **T-308:** the check at home stayed on *driving* because its two
   positions were 4 min 53 s apart, under the 5 min it wants; the P30 was on fine GPS every 15 s
-  at 19:43. Not fixed. Minor: a late batch 4 min 40 s old raised a stop to walking; a 600 m hop
+  at 19:43. **Fixed the same evening** (`f87a19b`, the span runs from the wake), on the P30 since
+  19:53, backup `p30-2026-11-01-before-t308`; a real stop with it still to see. Minor: a late batch 4 min 40 s old raised a stop to walking; a 600 m hop
   labelled *still* not lit.
 - **31 Oct, afternoon: Phase 0 of `docs/fix-plan-2026-10-30.md` (the lead approved the plan and
   answered Q1 to Q4).** **T-297 (A2):** with no location at all the map's banner asks for location

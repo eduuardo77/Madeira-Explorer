@@ -250,6 +250,11 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
+- [ ] **T-308** **A still check at home stays on driving by seconds** (field log, 1 Nov). The
+      alarm is booked before the first look, and `decideStillCheck` wants the two positions a full
+      5 min apart; on 1 Nov they were 4 min 53 s, so it stayed, and nothing retries: fine GPS every
+      15 s at home. Fix to weigh: measure the span against the wait less the first look's delay, or
+      a small tolerance. Not built; the lead decides.
 - [ ] **T-307** **Visual consistency: "light map, dark passport, purple paywall"** (30 Oct review,
       Visual 12). Not in the fix plan; the lead asked for options on 31 Oct, open to changing D-080
       and D-097 if an option looks better. `tools/preview-consistency-options.mjs` draws today and

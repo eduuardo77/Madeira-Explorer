@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-01 | **Car to Reis Magos, two stops, automatic recording**, 1 h 11, 11.4 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.5% of the route within 10 m**, by car 94.1%; ✅ **T-295's alarm ran both stops' still checks, both slept**; ❌ **home on fine GPS: the check at home stayed, its two positions 4 min 53 s apart** (T-308) |
 | 2026-10-31 | **Car to Funchal and a walk with stops, automatic recording**, 2 h 57, 40 km, iPhone alongside | P30 | one mode (D-108), automatic | ⚠ **86.0% of the route within 10 m**, 95.5% within 30 m, 88.9% by car; ❌ first 4.4 km lost; ❌ **a still check whose timer never fired**: every stop on *driving*, on foot 52.8%; ⚠ one *in vehicle* label raised a walk to driving; ❌ home on fine GPS after |
 | 2026-10-30 | **Car to a walk west of Funchal, automatic recording**, 3 h 10, 42 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **93.5% of the route within 10 m**, 98.0% within 30 m, 95.8% by car; ⚠ on foot 71.1% (the walk began on *driving*); ❌ **home left on fine GPS**: a stale batch from the drive read as a drive now; ⚠ a still check fired 91 min late |
 | 2026-10-27 | **A drive with an outing, automatic off:** Funchal, Fortaleza do Pico and the Jardim Botânico, 1 h 11, 38 km, iPhone alongside | P30 | one mode (D-108), outing | ✅ **92.3% of the route within 10 m**, 98.4% within 30 m; first fix 2 s after the car moved; still checks on *driving* ran and rightly stayed; no stop over 90 s, so T-285 (1) and T-286's sleep are still open |
@@ -46,6 +47,36 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-01: by car to Reis Magos, two stops, automatic recording
+
+- **Setup:** the field build of 31 Oct 15:38 (`19da54b`, T-295, T-296 and Phase 1), automatic
+  on, no outing; app opened 18:25:47. iPhone SensorLogger 18:26 to 19:37
+  (`Madeira-fieldwork/iphone-2026-11-01`). Database pulled 19:43 without stopping the app,
+  `Madeira-fieldwork/backups/p30-2026-11-01-after-outing`. From the iPhone: car 18:32 to 18:40,
+  still near 32.6480,-16.8584 to 19:06 (accuracy 20 to 156 m, likely under cover), a 600 m hop at
+  up to 32 km/h 19:07 to 19:09, still to 19:24, car home 19:24 to 19:34.
+- **Route: 90.5% within 10 m, 95.0% within 30 m** of 11.4 km; by car 94.1%. Lit line 97.2%
+  within 10 m of the route. The "on foot" 740 m is the stops' jitter, no reference.
+- ✅ **First real stop on *driving* that slept, by T-295's alarm.** *Still check: started on
+  driving* 18:42:27, stationary 18:47:57 (5 min 30 s, no position). Seven motion wakes in the
+  stop, none moved it; then 19:04:59 a wake put it back on driving a minute before the hop. Second
+  stop the same: started 19:14:42, stationary 19:20:16.
+- ✅ **T-296's two-label rule ran twice** (*driving once, waiting for a second*, 18:33:40 and
+  19:27:13), both times in a real car, and the drive was raised by distance anyway.
+- ⚠ **At 19:20:16 a late batch undid the sleep in the same second:** 12 fixes, newest 19:15:36,
+  read as *moved 357 m* and raised walking. 4 min 40 s old, just under T-294's 5 min leftover
+  rule. It cost walking at a stop for 11 min, little.
+- ⚠ **The hop 19:07 to 19:09 not lit** (565 m around 32.6454,-16.8577): its eight fixes were
+  recorded at 25 s, labelled *still* (Google's *still* of 18:55 delivered 19:05, no driving
+  transition for two minutes). Why the matcher dropped them is not yet looked at.
+- ❌ **Home on fine GPS, by a fourth route (T-308).** Still check started 19:34:26, first
+  position 19:34:37; the alarm's second position 19:39:30, so the two were 4 min 53 s apart, and
+  `decideStillCheck` stayed: *only 5 min apart*. Nothing starts another check while the phone
+  lies still, so at 19:43 `dumpsys location` shows fine GPS every 15 s for Bruma at home. The
+  alarm is booked before the first look, so whenever the first look takes longer than the alarm
+  is late, a check at home stays.
+- No new stamps. Battery not read (on USB at 100% when pulled).
 
 ### 2026-10-31: by car to Funchal, a walk with stops, automatic recording
 

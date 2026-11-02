@@ -69,7 +69,8 @@ never where the lead lives.
 - ❌ **T-309, the night before at home:** 21:15 to 23:25 on walking with the phone still. The
   fused provider swung between home (19 to 22 m) and a point 110 m south (31 to 40 m), every fix
   *still*, speed 0; `decideProfile` read *moved 110 m* and three still checks stayed on it.
-  147 fixes in 2 h 10. Fix proposed in TASKS, not built.
+  147 fixes in 2 h 10. Every 109 to 119 m wake in the history was the same jitter, four on
+  1 Nov. **Fixed the same day** (`3588f5b`), on the P30 since 12:33.
 - No new stamps (the three places passed already held). Battery not read (on USB at 100%).
 
 ### 2026-11-01: by car to Reis Magos, two stops, automatic recording

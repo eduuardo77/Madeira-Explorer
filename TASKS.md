@@ -256,9 +256,14 @@ permission, L3 privacy contact.
       speed 0, no transition. `decideProfile` read *moved 110 m* (over `MOVING_THRESHOLD_M`, 100)
       and raised walking; three still checks stayed on the same 110 m; only a check whose window
       held no southern fix slept it. 2 h 10 on walking, 147 fixes. The same jitter as T-308's
-      19:49 note, now costly. **Proposed, not built:** out of stationary, a displacement counts
-      only beyond the two fixes' accuracies (110 − 20 − 31 = 59 m), or not when every fix in the
-      window is *still*. Awaiting the lead.
+      19:49 note, now costly. **Built 2 Nov (`3588f5b`), the lead's yes:** a displacement counts
+      only when what is left after both fixes' accuracies is over 100 m (`movedBeyondNoise`:
+      110 − 20 − 31 = 59 m), in the gate's window check, its first-fix rule out of stationary and
+      the still check. In the P30's history every wake of 109 to 119 m since 12 Oct was this
+      jitter (four on 1 Nov, one holding walking 3 h); the two smallest real walks, 161 m and
+      225 m, still clear. On the P30 since 12:33 (field build, `install -r`, backup
+      `p30-2026-11-02-before-t309`), stationary, no background GPS. Open: a night at home with
+      no wake, and a walk from home that starts on time.
 - [x] **T-308** **A still check at home stays on driving by seconds** (field log, 1 Nov). **Seen
       working 2 Nov:** after the ride, checks at 11:41:59 and 11:52:11 both reached stationary
       with positions (*within 15 m*, *within 30 m*), and the P30 stayed stationary at home. The

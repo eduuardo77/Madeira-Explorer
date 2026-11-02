@@ -11,8 +11,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **2 Nov, morning: car through Funchal and back, 34 km, automatic** (field log). **97.5% of the
   route within 10 m**, the best car figure yet. ✅ **T-308 seen working:** the drive home ended
   stationary by a still check with positions. ❌ **T-309:** the night before, Wi-Fi positions
-  110 m apart raised walking at home for 2 h 10 with the phone still. Fix proposed, awaiting the
-  lead. Backup `p30-2026-11-02-after-ride`; the P30 was not changed.
+  110 m apart raised walking at home for 2 h 10 with the phone still. **Fixed the same day**
+  (`3588f5b`, a move must clear both fixes' accuracy), on the P30 since 12:33, backup
+  `p30-2026-11-02-before-t309`; stationary after. To see: a quiet night, a walk from home. 1,274 tests.
 - **1 Nov, evening: car to Reis Magos with two stops, the new recorder's first real run**
   (field log). 90.5% of the route within 10 m, by car 94.1%. ✅ T-295's alarm ran both stops'
   still checks and both slept. ❌ **T-308:** the check at home stayed on *driving* because its two

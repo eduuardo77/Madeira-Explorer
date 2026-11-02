@@ -250,7 +250,18 @@ permission, L3 privacy contact.
       `tools/out/n25-film-closing-before-after.png`. ⚠ **The lead's call:** the top half is still sea,
       since a wide trip at full width leaves that height somewhere; resting it on the card is T-253's
       choice. The island's own west tip is outside the trip and the app holds no outline (D-017).
-- [ ] **T-308** **A still check at home stays on driving by seconds** (field log, 1 Nov). The
+- [ ] **T-309** **Indoor Wi-Fi positions 110 m apart wake the stationary profile at home** (field
+      log, 2 Nov). 1 Nov 21:15 to 23:25, the phone still on the desk: the fused provider swung
+      between home (19 to 22 m) and a point 110 m south (31 to 40 m), every fix labelled *still*,
+      speed 0, no transition. `decideProfile` read *moved 110 m* (over `MOVING_THRESHOLD_M`, 100)
+      and raised walking; three still checks stayed on the same 110 m; only a check whose window
+      held no southern fix slept it. 2 h 10 on walking, 147 fixes. The same jitter as T-308's
+      19:49 note, now costly. **Proposed, not built:** out of stationary, a displacement counts
+      only beyond the two fixes' accuracies (110 − 20 − 31 = 59 m), or not when every fix in the
+      window is *still*. Awaiting the lead.
+- [x] **T-308** **A still check at home stays on driving by seconds** (field log, 1 Nov). **Seen
+      working 2 Nov:** after the ride, checks at 11:41:59 and 11:52:11 both reached stationary
+      with positions (*within 15 m*, *within 30 m*), and the P30 stayed stationary at home. The
       alarm is booked before the first look, and `decideStillCheck` wanted the two positions a full
       5 min apart; on 1 Nov they were 4 min 53 s, so it stayed, and nothing retries: fine GPS every
       15 s at home. **Built 1 Nov (`f87a19b`):** the span runs from the wake, not the first

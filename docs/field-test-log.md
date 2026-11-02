@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-02 | **Car through Funchal and back, automatic recording**, 1 h 12, 34 km, app opened once on the way, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **97.5% of the route within 10 m**, by car 97.9%; ✅ **T-308: home ended stationary**; ❌ the night before, 2 h 10 on walking at home from Wi-Fi jitter (T-309) |
 | 2026-11-01 | **Car to Reis Magos, two stops, automatic recording**, 1 h 11, 11.4 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.5% of the route within 10 m**, by car 94.1%; ✅ **T-295's alarm ran both stops' still checks, both slept**; ❌ **home on fine GPS: the check at home stayed, its two positions 4 min 53 s apart** (T-308) |
 | 2026-10-31 | **Car to Funchal and a walk with stops, automatic recording**, 2 h 57, 40 km, iPhone alongside | P30 | one mode (D-108), automatic | ⚠ **86.0% of the route within 10 m**, 95.5% within 30 m, 88.9% by car; ❌ first 4.4 km lost; ❌ **a still check whose timer never fired**: every stop on *driving*, on foot 52.8%; ⚠ one *in vehicle* label raised a walk to driving; ❌ home on fine GPS after |
 | 2026-10-30 | **Car to a walk west of Funchal, automatic recording**, 3 h 10, 42 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **93.5% of the route within 10 m**, 98.0% within 30 m, 95.8% by car; ⚠ on foot 71.1% (the walk began on *driving*); ❌ **home left on fine GPS**: a stale batch from the drive read as a drive now; ⚠ a still check fired 91 min late |
@@ -47,6 +48,29 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-02: by car through Funchal and back, automatic recording
+
+- **Setup:** the field build of 1 Nov 19:53 (T-308), automatic on, no outing; app opened 10:32
+  and 11:19 (during the drive), then 12:22 at home. iPhone SensorLogger 10:31 to 11:43
+  (`Madeira-fieldwork/iphone-2026-11-02`). Database pulled 12:24 without stopping the app,
+  `Madeira-fieldwork/backups/p30-2026-11-02-after-ride`. From the transitions: on foot 10:33,
+  car 10:37 to 11:00, a stop 11:02 to 11:08, car 11:10 to 11:44 (past the Jardim Botânico,
+  Teatro and Mercado), home.
+- **Route: 97.5% within 10 m, 99.8% within 30 m** of 34.1 km; by car 97.9%; lit line 97.9%
+  within 10 m of the route. Nothing walked and not lit over 40 m: the start was caught (motion
+  wake 10:30:47, walking 10:33:49, driving 10:39:47).
+- ✅ **T-308 seen working.** Still checks at 11:41:59 and 11:52:11 reached stationary with
+  positions (*within 15 m*, *within 30 m for 5 min*); stationary at home since 11:57:15. The 5 s
+  GPS in `dumpsys location` at 12:24 was the map's blue dot, the app on screen.
+- ⚠ **11:07:05, three profiles in one second:** the check of 11:01:54 slept (*no position*),
+  and the same second's batch (fixes 10:57 to 11:07) raised driving, *moved 372 m*. The lead was
+  stopped until 11:08 and drove at 11:10, so little lost; the same late-batch shape as 1 Nov.
+- ❌ **T-309, the night before at home:** 21:15 to 23:25 on walking with the phone still. The
+  fused provider swung between home (19 to 22 m) and a point 110 m south (31 to 40 m), every fix
+  *still*, speed 0; `decideProfile` read *moved 110 m* and three still checks stayed on it.
+  147 fixes in 2 h 10. Fix proposed in TASKS, not built.
+- No new stamps (the three places passed already held). Battery not read (on USB at 100%).
 
 ### 2026-11-01: by car to Reis Magos, two stops, automatic recording
 

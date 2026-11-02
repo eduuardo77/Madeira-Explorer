@@ -7,6 +7,10 @@ few questions about the test before it grants production access.
 
 ## Where it stands
 
+- **2026-11-02: version 13 replaces 12**, `Madeira-fieldwork/apks/bruma-0.1.0-vc13.aab` (T-310),
+  built from today's code: Phase 1 of the fix plan (place pins, the whole island on opening,
+  locked stamps, the price on the button), the still check on an alarm (T-295, T-308) and
+  T-309's quieter GPS at home. Section 3 says what to paste.
 - **2026-10-31: version 12 replaces 11 on the closed track**,
   `Madeira-fieldwork/apks/bruma-0.1.0-vc12.aab` (T-298). It fixes the crash on every launch for a
   tester who refuses location (N23), and has every fix since 21 Oct. Section 3 says what to paste.
@@ -67,6 +71,11 @@ who opts out, or never opts in, resets nothing but leaves the count at 11, and t
 finish. Recruit two or three spare if at all possible.
 
 ## 3. The release
+
+**Version 13 (2 Nov):** the same steps with `bruma-0.1.0-vc13.aab`, release name `0.1.0 (13)`,
+and these notes:
+   > pt-PT: Os locais aparecem no mapa e abrem com um toque. O registo automático dorme melhor nas paragens e em casa, e gasta menos bateria.
+   > en-US: Places now show on the map and open with a tap. Automatic recording rests better at stops and at home, and uses less battery.
 
 **Version 12 (31 Oct):** the same steps with `bruma-0.1.0-vc12.aab`, release name `0.1.0 (12)`,
 and these notes:

@@ -450,6 +450,14 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-310** **Version 13 for the testers.** **Built 2026-11-02** from the commit that sets
+      versionCode 13 (`Madeira-fieldwork/apks/bruma-0.1.0-vc13.aab`, SHA-256 `2b31e89c…87b6`):
+      store build (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), `debuggable` false, four ABIs,
+      T-309 in the bundle. Its JavaScript is byte-identical to the x86_64 APK's and the P30's field
+      build's. `smoke-release.mjs --internal` **passes on the P30** (field build vc13, `install -r`,
+      backup `p30-2026-11-02-before-vc13-smoke`; recorder stationary after). Not on the emulator:
+      another session's probe held it. Replaces 12, which was never uploaded (or is superseded).
+      **Open:** the lead uploads it to the closed track (`docs/closed-testing.md` §3).
 - [ ] **T-298** **Version 12 for the testers, A1 of the fix plan.** **Built 2026-10-31** from
       `b84d14e` (`Madeira-fieldwork/apks/bruma-0.1.0-vc12.aab`, SHA-256 `c33f1f8f…a800`): store build
       (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), versionCode 12, `debuggable` false on the

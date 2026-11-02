@@ -112,6 +112,19 @@ export const LEFTOVER_FIX_MS = STILL_CONFIRM_MS;
  */
 export const MAX_TRUSTED_ACCURACY_M = 100;
 
+/**
+ * Whether two fixes are far enough apart to be a move: the threshold still
+ * left once both fixes' own error is taken off (T-309). On 1 Nov 2026 the P30 lay still at home
+ * from 21:15 to 23:25 while the network position swung between the house (20 m)
+ * and a point 110 m south (31 m); 110 m read as a walk, and the GPS stayed on
+ * the walking rate for 2 h 10. Two fixes whose circles overlap prove nothing.
+ * A fix with no accuracy adds no slack.
+ */
+export function movedBeyondNoise(a: MovementSample, b: MovementSample, metres = distanceM(a, b)): boolean {
+  const slack = (a.accuracyM ?? 0) + (b.accuracyM ?? 0);
+  return metres - slack > MOVING_THRESHOLD_M;
+}
+
 /** The minimum a caller has to know about a fix for this to work. */
 export type MovementSample = Coordinate & {
   ts: number;
@@ -262,11 +275,15 @@ export function decideProfile(
 
 
   let maxDisplacementM = 0;
+  let moved = false;
   let oldestTs = newest.ts;
   for (const sample of inWindow) {
     const metres = distanceM(newest, sample);
     if (metres > maxDisplacementM) {
       maxDisplacementM = metres;
+    }
+    if (movedBeyondNoise(newest, sample, metres)) {
+      moved = true;
     }
     if (sample.ts < oldestTs) {
       oldestTs = sample.ts;
@@ -274,7 +291,7 @@ export function decideProfile(
   }
 
   // Moving wins immediately — see the asymmetry note at the top of the file.
-  if (maxDisplacementM > MOVING_THRESHOLD_M) {
+  if (moved) {
     // ⚠ Vehicle *rate*, not vehicle *classification*. See VEHICLE_SPEED_MPS.
     const fastest = fastestSustainedSpeedMps(inWindow);
     // D-094: the motion sensors *can* classify, which speed cannot on this
@@ -323,8 +340,7 @@ export function decideProfile(
     }
     if (previous !== null) {
       const metres = distanceM(newest, previous);
-      const slack = (newest.accuracyM ?? 0) + (previous.accuracyM ?? 0);
-      if (metres > MOVING_THRESHOLD_M && metres > slack) {
+      if (movedBeyondNoise(newest, previous, metres)) {
         return {
           profile: MOVING_PROFILE,
           reason: `${Math.round(metres)} m from the last fix, ${Math.round((newest.ts - previous.ts) / 60000)} min before`,

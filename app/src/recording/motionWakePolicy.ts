@@ -17,7 +17,7 @@
 import { distanceM } from './distance.ts';
 import type { SamplingProfile } from './LocationProvider';
 import type { MovementSample } from './movementPolicy.ts';
-import { MAX_TRUSTED_ACCURACY_M, MOVING_THRESHOLD_M, STILL_CONFIRM_MS } from './movementPolicy.ts';
+import { MAX_TRUSTED_ACCURACY_M, STILL_CONFIRM_MS, movedBeyondNoise } from './movementPolicy.ts';
 
 /** The wait before each look, in ms: at once, then 90 s, then another 90 s. */
 export const WAKE_CHECK_WAITS_MS: readonly number[] = [0, 90_000, 90_000];
@@ -108,7 +108,8 @@ export function decideStillCheck(
   const spanMs = second.ts - Math.min(first.ts, wakeMs);
   if (spanMs < STILL_CHECK_WAIT_MS) return stay(`only ${Math.round(spanMs / 60000)} min apart`);
   const metres = distanceM(first, second);
-  if (metres > MOVING_THRESHOLD_M) return stay(`moved ${Math.round(metres)} m`);
+  // T-309: within both positions' error is not a move (1 Nov, 110 m of Wi-Fi jitter at home).
+  if (movedBeyondNoise(first, second, metres)) return stay(`moved ${Math.round(metres)} m`);
   return {
     sleep: true,
     reason: `still by the motion sensors, within ${Math.round(metres)} m for ${Math.round(spanMs / 60000)} min`,

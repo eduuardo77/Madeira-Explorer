@@ -382,3 +382,30 @@ test('on a moving profile, an old batch is still judged as before', () => {
   const decision = decideProfile('driving', drive, drive[0].ts, undefined, NOW);
   assert.equal(decision.profile, 'driving');
 });
+
+// T-309: the P30 on the desk at home, 1 Nov 2026 21:13 to 23:25. The network
+// position swung between the house (about 20 m) and a point 110 m south (31 to
+// 40 m), every fix labelled still; 110 m read as a walk for 2 h 10.
+test('Wi-Fi jitter 110 m apart, inside both fixes\' error, does not wake stationary (T-309)', () => {
+  const still = (minutesAgo: number, metres: number, accuracyM: number) => ({
+    ...fix(minutesAgo, metres, accuracyM),
+    activity: 'still',
+  });
+  // 21:13:39 at home at 100 m, 21:15:22 south at 31 m: the fix that woke it.
+  const decision = decideProfile('stationary', [still(1.7, 0, 100), still(0, -110, 31)], NOW);
+  assert.equal(decision.changed, false, decision.reason);
+  // The same swing at the night's usual accuracies, home 20 m and south 34 m.
+  const swing = [still(9, 0, 20), still(6, -110, 34), still(3, 0, 20), still(0, -110, 31)];
+  assert.equal(decideProfile('stationary', swing, NOW).changed, false);
+  // And on walking it no longer holds the phone awake: still for 5 min, it sleeps.
+  const asleep = decideProfile('walking', swing, NOW, NOW - 20 * 60_000);
+  assert.equal(asleep.profile, 'stationary', asleep.reason);
+});
+
+test('a move past both fixes\' error still wakes stationary at once (T-309)', () => {
+  // 130 m on two good GPS fixes is a walk.
+  assert.equal(decideProfile('stationary', [fix(1, 0, 10), fix(0, -130, 10)], NOW).profile, 'walking');
+  // Rough fixes need to be further apart, and then they count.
+  assert.equal(decideProfile('stationary', [fix(1, 0, 60), fix(0, 200, 60)], NOW).changed, false);
+  assert.equal(decideProfile('stationary', [fix(1, 0, 60), fix(0, 230, 60)], NOW).profile, 'walking');
+});

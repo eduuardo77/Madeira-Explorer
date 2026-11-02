@@ -71,6 +71,14 @@ test('still check: the five minutes count from the wake, not the first position 
   assert.equal(check('driving', at(11 / 60), at(4.9), null).sleep, false);
 });
 
+test("still check: Wi-Fi jitter inside both positions' error is still (T-309)", () => {
+  // 1 Nov 2026 at home: three checks stayed on "moved 110 m", home at 20 m, south at 31 m.
+  const result = check('walking', at(0, 0, 20), at(5, -110, 31), null);
+  assert.equal(result.sleep, true, result.reason);
+  // Good positions 130 m apart are still a move.
+  assert.match(check('walking', at(0, 0, 10), at(5, -130, 10), null).reason, /moved 130 m/);
+});
+
 test('still check: doubt about the positions keeps the profile', () => {
   const cases: [string, ReturnType<typeof decideStillCheck>][] = [
     ['moved', check('driving', at(0), at(5, 150), null)],

@@ -471,8 +471,8 @@ permission, L3 privacy contact.
       (the lead: "the day it goes live, which will be today"; purchases before it count, so it
       closes 2027-02-21). `smoke-release.mjs` **passes without `--internal`** on the P30 with a
       field build whose JavaScript is byte-identical to the AAB's (backup
-      `p30-2026-11-21-before-vc14-smoke`). **Video filmed** (`tools/out/t311/`, see the Play doc). **Open:** the lead uploads to
-      production and the closed track, resubmits the declaration.
+      `p30-2026-11-21-before-vc14-smoke`). **Video filmed** (`tools/out/t311/`, see the Play doc). **Uploaded by the lead 2026-11-21.** **Open:** the
+      video link in the location declaration, send for review, the closed track to 14.
 - [ ] **T-310** **Version 13 for the testers.** **Built 2026-11-02** from the commit that sets
       versionCode 13 (`Madeira-fieldwork/apks/bruma-0.1.0-vc13.aab`, SHA-256 `2b31e89c…87b6`):
       store build (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), `debuggable` false, four ABIs,

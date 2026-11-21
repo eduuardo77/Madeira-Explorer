@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **21 Nov: Play rejected version 13 for production** (prominent disclosure, T-311): Android's
+  first location dialog came before any card naming background collection. Fixed in version 14
+  (versionCode bumped), seen on the P30 and the Android 14 emulator; also a map that would not
+  start with location refused and a trip stored. **Blocked on the lead:** `founderWindow.start`
+  is still null, and a public build with it makes nobody a founder. Then the AAB, a new video
+  (`docs/play-background-location.md`), upload, resubmit.
 - **2 Nov, morning: car through Funchal and back, 34 km, automatic** (field log). **97.5% of the
   route within 10 m**, the best car figure yet. ✅ **T-308 seen working:** the drive home ended
   stationary by a still check with positions. ❌ **T-309:** the night before, Wi-Fi positions

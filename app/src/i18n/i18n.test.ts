@@ -268,6 +268,23 @@ test('⚠ T-250 — the first-run Always card keeps Play\'s three facts, in ever
   }
 });
 
+test('⚠ T-311 — the card before Android\'s first location dialog carries the same three facts', () => {
+  // Play rejected version 13: the disclosure must come before every location
+  // request, not only the background one.
+  const facts = {
+    en: [/location data/i, /closed or not in use/i, /only to draw your map/i],
+    pt: [/dados de localização/i, /com a app fechada ou sem estar a ser usada/i, /só para desenhar o teu mapa/i],
+    de: [/Standortdaten/i, /geschlossen ist oder nicht verwendet wird/i, /nur dazu, Ihre Karte/i],
+  } as const;
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const text = [
+      translate(STRINGS['onboarding.location.body1'], language),
+      translate(STRINGS['onboarding.location.body2'], language),
+    ].join(' ');
+    for (const fact of facts[language]) assert.match(text, fact, `${language}: ${fact}`);
+  }
+});
+
 test('⚠ T-250 — the notifications card no longer promises "nothing else, ever" (D-096 says every stamp)', () => {
   for (const language of ['en', 'pt', 'de'] as const) {
     const text = translate(STRINGS['onboarding.messages.body1'], language) + translate(STRINGS['onboarding.messages.note'], language);

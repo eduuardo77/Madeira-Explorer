@@ -69,6 +69,21 @@ To film it again: install on the emulator, set it to English (`adb root`, then
 screenrecord` (in Git Bash, `MSYS_NO_PATHCONV=1`, or the `/sdcard` path is rewritten). Shot 3 is the
 lead's, on the P30, after an outing with the app closed.
 
+## ⚠ Rejected 2026-11-21: refilm before resubmitting (T-311)
+
+Play's verdict on version 13: *"Declaração em destaque inadequada"*, the runtime permission
+requests *"não são imediatamente precedidas"* by an in-app disclosure. The User Data policy reads
+*"runtime permission requests must be immediately preceded by an in-app disclosure"*, with no
+foreground or background split, and the cut above opens on Android's while-using dialog at 12 s,
+before the disclosure at 16 s. Version 14 puts the disclosure on the card before **each** location
+ask. The new video, from a clean install on the Android 14 emulator, in this order:
+
+1. *Every road lights up*, the first disclosure, held for reading; *Continue*.
+2. Android's dialog; *While using the app*.
+3. *Keep your phone in your pocket*, the second disclosure; *Open settings*.
+4. Android's location page; *Allow all the time*.
+5. The feature from the background (shot 3 above, the P30).
+
 ## After submission
 
 Record the date submitted and Google's answer in TASKS (T-123). A rejection usually names the

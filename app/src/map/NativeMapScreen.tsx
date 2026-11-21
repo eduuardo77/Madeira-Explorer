@@ -263,6 +263,7 @@ export default function NativeMapScreen({
   onOpenPassport,
   onOpenSettings,
   onAskAlways,
+  onAskLocation,
   onShown,
 }: {
   /**
@@ -281,6 +282,12 @@ export default function NativeMapScreen({
    * the phone's own choice (T-121): Play forbids going straight to the ask.
    */
   onAskAlways: () => void;
+  /**
+   * T-311: the main button and the notice, when location is not granted. The
+   * app shows the location disclosure before Android's dialog: Play rejected
+   * version 13 for asking without it.
+   */
+  onAskLocation: () => void;
   /**
    * The map is on screen with its tiles drawn, or has failed: the launch
    * splash covers the wait until then (T-257).
@@ -921,7 +928,9 @@ export default function NativeMapScreen({
         const current = (await readControlInput(now)).input;
         const control = primaryControl(current);
         if (control === 'grant-location') {
-          await locationProvider.requestWhileUsingPermission();
+          // T-311: through the disclosure, never straight to Android's dialog.
+          onAskLocation();
+          return;
         } else if (control === 'start-walk') {
           await startOuting(now);
         } else {
@@ -1011,10 +1020,9 @@ export default function NativeMapScreen({
       ? {
           text: permissionLines.text,
           actionLabel: permissionLines.action,
-          // E5: the same ask as the main button in this state, while in use.
-          onAction: act(async () => {
-            await locationProvider.requestWhileUsingPermission();
-          }),
+          // E5: the same ask as the main button in this state, while in use,
+          // through the disclosure (T-311).
+          onAction: onAskLocation,
           onDismiss: dismiss('needs-location'),
         }
       : noticeKind === 'needs-always' && permissionLines !== null

@@ -287,6 +287,8 @@ function AppScreens({ onShown }: { onShown: () => void }) {
             onAskAlways={() =>
               setPrompt(needsAndroidDisclosure() ? 'android-disclosure' : 'always-upgrade')
             }
+            // T-311: the location disclosure, then Android's dialog.
+            onAskLocation={() => setPrompt('location')}
           />
         </View>
       ) : null}

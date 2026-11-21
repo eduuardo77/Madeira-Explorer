@@ -104,10 +104,12 @@ function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
       };
 
     case 'location':
+      // ⚠ COMPLIANCE TEXT (T-311): Play's prominent disclosure, right before
+      // Android's first location dialog. `body1` and `body2` carry its facts.
       return {
         art: 'location',
         title: t('onboarding.location.title'),
-        body: [t('onboarding.location.body1')],
+        body: [t('onboarding.location.body1'), t('onboarding.location.body2')],
         note: batterySentence(deviceLanguage()) ?? t('onboarding.location.note'),
         continueLabel: t('onboarding.action.continue'),
         skipLabel: t('onboarding.action.notNow'),
@@ -185,7 +187,8 @@ function copyFor(screen: OnboardingScreen, props: OnboardingViewProps): Copy {
         title: t('onboarding.background.title'),
         body: [t('onboarding.background.body1'), t('onboarding.background.body2')],
         note: t('onboarding.background.body3'),
-        continueLabel: t('onboarding.background.continue'),
+        // T-311: this card now opens Android's answer itself.
+        continueLabel: props.opensSettings === true ? t('onboarding.always.openSettings') : t('onboarding.background.continue'),
         skipLabel: t('onboarding.background.deny'),
       };
 

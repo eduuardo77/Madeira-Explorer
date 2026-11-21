@@ -93,15 +93,25 @@ export const STRINGS = {
   'onboarding.next.pick': s('Recommended', 'Recomendado', 'Empfohlen'),
 
   // ── O1: location, While-Using ────────────────────────────────────────────
+  // ⚠ COMPLIANCE TEXT (T-311): Play rejected version 13 because this card, the
+  // one right before Android's first location dialog, did not say location is
+  // collected in the background or what for. Play wants the disclosure before
+  // EVERY location request, so `body1` and `body2` carry the same three facts
+  // as the Always card below; `i18n.test.ts` checks them.
   'onboarding.location.title': s(
     'Every road lights up',
     'Cada estrada fica acesa',
     'Jede Straße leuchtet auf'
   ),
   'onboarding.location.body1': s(
-    'To light up your way and give you your stamps, {app} needs your location.',
-    'Para acender o teu caminho e te dar os carimbos, o {app} precisa da tua localização.',
-    'Um Ihren Weg aufleuchten zu lassen und Ihnen Ihre Stempel zu geben, braucht {app} Ihren Standort.'
+    'To light up the roads you travel and give you your stamps, {app} collects location data, even when the app is closed or not in use.',
+    'Para acender as estradas que percorres e te dar os carimbos, o {app} recolhe dados de localização, mesmo com a app fechada ou sem estar a ser usada.',
+    'Um die Straßen, auf denen Sie unterwegs sind, aufleuchten zu lassen und Ihnen Ihre Stempel zu geben, erfasst {app} Standortdaten, auch dann, wenn die App geschlossen ist oder nicht verwendet wird.'
+  ),
+  'onboarding.location.body2': s(
+    'That data is used only to draw your map, here on your phone. It never reaches us, is never sold, and is never used for advertising.',
+    'Esses dados servem só para desenhar o teu mapa, aqui no telemóvel. Nunca nos chegam, nunca são vendidos e nunca servem para publicidade.',
+    'Diese Daten dienen nur dazu, Ihre Karte hier auf Ihrem Telefon zu zeichnen. Sie erreichen uns nie, werden nie verkauft und nie für Werbung genutzt.'
   ),
   'onboarding.location.note': s(
     'You need no account, and your trip is never sent to us.',

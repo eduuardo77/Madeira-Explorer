@@ -46,7 +46,7 @@ function labels(keys: Key[], language: Language): string[] {
  * Android, or an ask with no system screen behind it.
  */
 export function systemAskFor(
-  ask: FirstRunAsk | 'always-upgrade' | 'downgrade',
+  ask: FirstRunAsk | 'always-upgrade' | 'downgrade' | 'android-disclosure',
   input: { android: boolean; apiLevel: number; language: Language }
 ): SystemAsk | null {
   if (!input.android) return null;
@@ -61,6 +61,7 @@ export function systemAskFor(
     case 'always':
     case 'always-upgrade':
     case 'downgrade':
+    case 'android-disclosure':
       // Android 10 asks in a dialog; 11 and later only on the app's location page.
       return apiLevel < API_R
         ? dialog(['os.allowAlways', 'os.q.keepWhileUsing', 'os.q.keepDontAsk'])

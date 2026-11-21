@@ -146,7 +146,8 @@ export interface LocationProvider {
    * GNSS chip. That is the whole reason this is on the interface rather than
    * the geofence manager calling for a fresh fix — rebuilding the monitored set
    * is a housekeeping task and must not cost a GPS acquisition (CONTEXT §6.3).
-   * Returns null when the cache is empty or stale, and the caller is expected
+   * Returns null when the cache is empty or stale, or location is not
+   * allowed (never throws for that, T-311), and the caller is expected
    * to cope rather than escalate.
    */
   getLastKnownPosition(maxAgeMs: number): Promise<CoarsePosition | null>;

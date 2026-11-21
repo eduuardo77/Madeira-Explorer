@@ -46,7 +46,7 @@ test('T-250: "Deny" became "Don\'t allow" at Android 12', () => {
 });
 
 test('T-250: every ask marks an answer that exists, in every language', () => {
-  const asks = ['location', 'always', 'activity', 'notifications', 'keep-running', 'always-upgrade', 'downgrade'] as const;
+  const asks = ['location', 'always', 'activity', 'notifications', 'keep-running', 'always-upgrade', 'downgrade', 'android-disclosure'] as const;
   for (const language of ['en', 'pt', 'de'] as const) {
     for (const apiLevel of [29, 30, 31, 34]) {
       for (const ask of asks) {
@@ -62,4 +62,11 @@ test('T-250: every ask marks an answer that exists, in every language', () => {
 
 test('T-250: iOS draws no replica', () => {
   assert.equal(systemAskFor('location', { android: false, apiLevel: 0, language: 'en' }), null);
+});
+
+test('T-311: the later disclosure shows the same Always answer as first run, since it now asks itself', () => {
+  for (const apiLevel of [29, 34]) {
+    const input = { android: true, apiLevel, language: 'en' as const };
+    assert.deepEqual(systemAskFor('android-disclosure', input), systemAskFor('always', input));
+  }
 });

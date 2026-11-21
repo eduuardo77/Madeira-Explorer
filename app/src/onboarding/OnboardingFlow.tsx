@@ -189,6 +189,11 @@ export default function OnboardingFlow({
             // While-Using first. "All the time" is its own card right after
             // (T-250), never the same dialog: asked cold, it gets denied.
             await locationProvider.requestWhileUsingPermission();
+            if (initialScreen === 'location') {
+              // T-311: the map's ask, shown alone so the disclosure comes first.
+              onFinished();
+              return;
+            }
             break;
           case 'always':
             // Marked first: on Android 11+ the answer is on a settings page,
@@ -228,11 +233,23 @@ export default function OnboardingFlow({
             // answer moves on; a phone without it gets the settings list.
             await requestBatteryExemption();
             break;
-          case 'android-disclosure':
-            setScreen('always-upgrade');
-            return;
-          case 'always-upgrade':
           case 'downgrade':
+            if (needsAndroidDisclosure()) {
+              // T-311: Play wants the disclosure immediately before the ask.
+              setScreen('android-disclosure');
+              return;
+            }
+            await locationProvider.requestAlwaysPermission();
+            await appStateDao.set(
+              appStateDao.AppStateKey.AlwaysOfferedTs,
+              String(Date.now())
+            );
+            onFinished();
+            return;
+          // T-311: the disclosure asks itself. It used to lead to the upgrade
+          // card, which put a card without Play's words between it and the ask.
+          case 'android-disclosure':
+          case 'always-upgrade':
             await locationProvider.requestAlwaysPermission();
             await appStateDao.set(
               appStateDao.AppStateKey.AlwaysOfferedTs,
@@ -290,6 +307,10 @@ export default function OnboardingFlow({
       // Skipping a system ask is the same as declining it, as far as the
       // sequence is concerned: move on, do not re-ask.
       if (screen === 'location') {
+        if (initialScreen === 'location') {
+          onFinished();
+          return;
+        }
         locationSkipped.current = true;
         await advance();
         return;
@@ -327,7 +348,7 @@ export default function OnboardingFlow({
   const ask =
     screen === 'location' || screen === 'always' || screen === 'activity' ||
     screen === 'notifications' || screen === 'keep-running' || screen === 'always-upgrade' ||
-    screen === 'downgrade'
+    screen === 'downgrade' || screen === 'android-disclosure'
       ? systemAskFor(screen, { android, apiLevel: API_LEVEL, language: deviceLanguage() })
       : null;
 

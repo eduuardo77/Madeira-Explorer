@@ -227,6 +227,13 @@ export class ExpoLocationProvider implements LocationProvider {
   async getLastKnownPosition(
     maxAgeMs: number
   ): Promise<CoarsePosition | null> {
+    // T-311: without permission Android throws rather than answering null, and
+    // the map's open framing let that through: "Não foi possível iniciar o
+    // mapa" on the P30 with location refused and a trip on the phone.
+    const permission = await Location.getForegroundPermissionsAsync();
+    if (permission.status !== 'granted') {
+      return null;
+    }
     const position = await Location.getLastKnownPositionAsync({
       maxAge: maxAgeMs,
     });

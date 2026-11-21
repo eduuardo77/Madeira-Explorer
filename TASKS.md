@@ -450,6 +450,23 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-311** **Play rejected version 13 for production: "Declaração em destaque inadequada".**
+      **Fixed 2026-11-21, version 14.** Play's User Data policy wants *every* runtime permission
+      request "immediately preceded" by the disclosure; the first-run card before Android's first
+      location dialog only said "needs your location", and the T-123 video showed that dialog
+      before the disclosure (12 s, then 16 s). Now: the first location card carries the three
+      facts (`onboarding.location.body1`/`body2`, `i18n.test.ts`); the map's *Permitir
+      localização* button and notice open that card standalone, not Android's dialog; on Android
+      the later "all the time" disclosure asks itself, where it used to hand over to the upgrade
+      card, a card without Play's words between disclosure and ask, and the downgrade card goes
+      through it. Found on the way: **location refused with a trip on the phone, the map did not
+      start** (*Não foi possível iniciar o mapa*: `getLastKnownPositionAsync` throws without
+      permission; T-287 was tested on a clean install, no trip, so never hit it); it now answers
+      null. **Seen 2026-11-21:** P30 (vc14 field build, `install -r`, backup
+      `p30-2026-11-21-before-vc14`, location revoked then given back through the new cards: always,
+      recording automatically, 26 stamps and 32 trips intact); Android 14 emulator, clean install:
+      disclosure, while-using dialog, disclosure, settings page. 1,276 tests. **Open:** the
+      founder window (production), the AAB, a new video, upload, resubmit.
 - [ ] **T-310** **Version 13 for the testers.** **Built 2026-11-02** from the commit that sets
       versionCode 13 (`Madeira-fieldwork/apks/bruma-0.1.0-vc13.aab`, SHA-256 `2b31e89c…87b6`):
       store build (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), `debuggable` false, four ABIs,

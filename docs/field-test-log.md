@@ -76,8 +76,9 @@ never where the lead lives.
   times (13:54, 13:59, 14:10, 14:30); each time an *in vehicle* label (13:54:13 *still exit,
   driving enter*; 14:13 a motion wake on *driving*) raised it again at once. Every fix speed 0 to
   2 m/s, 5 m accuracy: fine GPS for most of the stop. From stationary one *in vehicle* label is
-  enough; T-296's two-label rule covers walking only. What the lead was doing there is to ask (a
-  car with the engine running would explain the labels).
+  enough; T-296's two-label rule covers walking only. **The lead: lunch at a restaurant, O
+  Barracão, with no mobile coverage.** Seated, not in a car, so the *in vehicle* labels were
+  wrong. The P30 has no SIM, so coverage does not explain them.
 - ❌ **Home, the same shape a third time:** 17:43:53 stationary *within 19 m for 5 min*, and in
   the same second *moved 1214 m at up to 35 km/h* raised driving. At 17:51 `dumpsys location`
   shows Bruma's fine GPS every 15 s at home on the cable. Whether a later check lowers it is the

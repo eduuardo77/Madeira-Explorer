@@ -456,7 +456,8 @@ permission, L3 privacy contact.
       within 60 m of the stop, raised driving with *moved 1214 to 3845 m*: the distance reaches
       back to the drive in. Fine GPS at home after. Same shape as 1 Nov and 2 Nov 11:07.
       (2) A 53 min stop slept four times and was raised each time by one *in vehicle* label;
-      T-296's two-label rule covers walking only. Ask the lead what the stop was first.
+      T-296's two-label rule covers walking only. The lead: lunch seated in a restaurant, so
+      the labels were false; from stationary one *in vehicle* label should not be enough.
 - [ ] **T-311** **Play rejected version 13 for production: "Declaração em destaque inadequada".**
       **Fixed 2026-11-21, version 14.** Play's User Data policy wants *every* runtime permission
       request "immediately preceded" by the disclosure; the first-run card before Android's first

@@ -65,7 +65,15 @@ never where the lead lives.
 - **Route, 11:00 to 16:40: 87.9% within 10 m, 94.8% within 30 m** of 95.7 km; by car 90.4%; on
   foot 6.1 km, 51.5% (Funchal's old town, as 31 Oct's 52.8%); lit line 90.3% within 10 m of the
   route. Biggest miss 1.8 km at 13:26 above Monte (32.706, -16.895), driving at 39 km/h with
-  fixes arriving (21 to 27 per 10 min); not looked into.
+  fixes arriving (21 to 27 per 10 min). **Looked into that evening:** the P30's fixes from 13:24:30
+  to 13:27:05 sat 40 to 170 m off the ER103 (13:25:29 at 169 m from the iPhone, reporting 20 m;
+  13:26:03 at 71 m, reporting 6 m) while the iPhone stayed within 10 m of the road in
+  `roads.json`. Three such fixes break the chain (`MAX_SKIPPED_FIXES`), and a break of 3 min 16 s
+  is joined only through a tunnel, so Poiso to above Parque Ecológico is not lit. The matcher did
+  as written; the GPS was off.
+- **Trip 31 ended at 06:03 by three days of silence (D-088)** after nothing since 12 Nov, so
+  today is trip 33 and the map and passport show it alone (6 of 81). Nothing is deleted: trip 31
+  holds 41,849 fixes and all 26 stamps. The lead read it as all their data gone.
 - ✅ **The start:** motion wake 10:56:49, walking 11:01:00, driving 11:06:03.
 - ✅ **Stamps with the app closed:** Prainha, Ponta do Rosto, Santana, Teatro Municipal, Sé do
   Funchal, Praia dos Reis Magos. Monte and the levada starts were passed by car, no stamp, right.

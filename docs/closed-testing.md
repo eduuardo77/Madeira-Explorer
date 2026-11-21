@@ -72,6 +72,16 @@ finish. Recruit two or three spare if at all possible.
 
 ## 3. The release
 
+**Version 14 (21 Nov, T-311):** `bruma-0.1.0-vc14.aab`, release name `0.1.0 (14)`, to
+production and to this closed track. Production is the first public release, so its notes
+introduce the app:
+   > pt-PT: Primeira versão do Bruma. Cada estrada por onde passas fica acesa no mapa, e os 81 lugares da Madeira esperam no teu passaporte. Tudo fica no teu telemóvel, sem conta.
+   > en-US: The first release of Bruma. Every road you travel lights up on your map, and 81 places on Madeira wait in your passport. Everything stays on your phone, with no account.
+
+Closed track, for the testers:
+   > pt-PT: Explica melhor, antes de pedir, porque é que o Bruma usa a localização. O mapa volta a abrir quando a localização está desligada.
+   > en-US: Explains more clearly, before asking, why Bruma uses your location. The map opens again when location is turned off.
+
 **Version 13 (2 Nov):** the same steps with `bruma-0.1.0-vc13.aab`, release name `0.1.0 (13)`,
 and these notes:
    > pt-PT: Os locais aparecem no mapa e abrem com um toque. O registo automático dorme melhor nas paragens e em casa, e gasta menos bateria.

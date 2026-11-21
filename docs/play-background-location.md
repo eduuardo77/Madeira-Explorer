@@ -84,6 +84,12 @@ ask. The new video, from a clean install on the Android 14 emulator, in this ord
 4. Android's location page; *Allow all the time*.
 5. The feature from the background (shot 3 above, the P30).
 
+**Filmed 2026-11-21:** `tools/out/t311/bruma-background-location-v14.mp4` (55 s, 720x1560, not
+committed). Steps 1 to 4 on the Android 14 emulator, clean install of the vc14 field build, in
+English; step 5 is the P30 part of the October video (home screen held 2.5 s so the app is seen
+closed, then the map lit while it was). Over Google's 30 s aim, so each card can be read; cut
+holds, never the cards, if it has to shrink.
+
 ## After submission
 
 Record the date submitted and Google's answer in TASKS (T-123). A rejection usually names the

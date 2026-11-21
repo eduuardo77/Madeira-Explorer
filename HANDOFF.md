@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **21 Nov, evening:** trip 31 had ended by three quiet days (D-088) and the lead thought their
+  data lost; **trip 33 folded back into 31 on the P30** (backup `p30-2026-11-21-before-merge`),
+  26/81 again. Open for the lead: T-314 (`docs/trip-ending-question.md`) and T-313, a road left
+  dark by a GPS bad patch (`docs/research-broken-line-2026-11-21.md`, prototype on branch
+  `t313-corridor-prototype`).
 - **21 Nov, afternoon: sightseeing day on version 14, automatic** (field log): **87.9% of the
   route within 10 m**, by car 90.4%, on foot 51.5%; 6 stamps with the app closed; recording
   survived the morning's revoke and regrant. ❌ **T-312:** stops woken back to driving, three

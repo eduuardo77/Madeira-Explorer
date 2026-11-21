@@ -70,10 +70,13 @@ never where the lead lives.
   13:26:03 at 71 m, reporting 6 m) while the iPhone stayed within 10 m of the road in
   `roads.json`. Three such fixes break the chain (`MAX_SKIPPED_FIXES`), and a break of 3 min 16 s
   is joined only through a tunnel, so Poiso to above Parque Ecológico is not lit. The matcher did
-  as written; the GPS was off.
+  as written; the GPS was off. Research and a prototype fix: `docs/research-broken-line-2026-11-21.md` (T-313).
 - **Trip 31 ended at 06:03 by three days of silence (D-088)** after nothing since 12 Nov, so
   today is trip 33 and the map and passport show it alone (6 of 81). Nothing is deleted: trip 31
-  holds 41,849 fixes and all 26 stamps. The lead read it as all their data gone.
+  holds 41,849 fixes and all 26 stamps. The lead read it as all their data gone. **Folded back
+  at 19:02** at their request: trip 33 into 31, 31 reopened, today's six duplicate stamps dropped,
+  all 49,537 fixes kept, integrity ok; the map shows the whole island and 26/81 again. Backup
+  `p30-2026-11-21-before-merge`. The question is open: `docs/trip-ending-question.md` (T-314).
 - ✅ **The start:** motion wake 10:56:49, walking 11:01:00, driving 11:06:03.
 - ✅ **Stamps with the app closed:** Prainha, Ponta do Rosto, Santana, Teatro Municipal, Sé do
   Funchal, Praia dos Reis Magos. Monte and the levada starts were passed by car, no stamp, right.

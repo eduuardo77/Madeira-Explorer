@@ -450,6 +450,15 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-313** **A driven road left dark by a GPS bad patch (21 Nov, Poiso to above Parque
+      Ecológico, 1.8 km).** The lead: treat it seriously. Research in
+      `docs/research-broken-line-2026-11-21.md`: a join along the road when every fix between two
+      chains lies within 150 m of it fixes this case and changes nothing else on 16 iPhone days.
+      Prototype on branch `t313-corridor-prototype`. **Waiting on the lead**: it reverses T-279's
+      "only a tunnel" rule. After it: the parallel-road choice at Ribeiro Frio (13:03).
+- [ ] **T-314** **When should a trip end?** (`docs/trip-ending-question.md`). Trip 31 ended by
+      three quiet days on 21 Nov and the lead read it as data lost; folded back by hand the same
+      evening. The rule is unchanged: three quiet days will end it again. **Waiting on the lead.**
 - [ ] **T-312** **Stops woken back to driving (21 Nov sightseeing day, field log).** Not fixed:
       the lead asked for no app changes. (1) Three times (Prainha 11:35:52, Santana 12:36:17,
       home 17:43:53) a still check settled stationary and the same second's batch, every fix

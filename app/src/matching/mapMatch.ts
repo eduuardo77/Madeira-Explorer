@@ -228,6 +228,14 @@ export const TUNNEL_JOIN_SLACK_M = 300;
 /** How far from a chain's end the route through may start, metres: the other carriageway. */
 export const TUNNEL_JOIN_REACH_M = 60;
 
+/**
+ * Two chains are also joined along an ordinary road when every fix between
+ * them lies within this many metres of the shortest route (T-313, research).
+ */
+export const CORRIDOR_JOIN_M = Number(globalThis.process?.env?.CORRIDOR_JOIN_M ?? 150);
+export const CORRIDOR_JOIN_FACTOR = Number(globalThis.process?.env?.CORRIDOR_JOIN_FACTOR ?? 2);
+export const CORRIDOR_JOIN_SLACK_M = 300;
+
 /** Fixes in a row that may be skipped as impossible before the chain ends. */
 export const MAX_SKIPPED_FIXES = 2;
 
@@ -542,7 +550,7 @@ export function* matchTraceInSteps(
       matched += part.fixCount;
     }
   }
-  const chains = yield* joinThroughTunnels(graph, scratch, found);
+  const chains = yield* joinThroughTunnels(graph, scratch, found, moving);
 
   // A chain start is a safe place to resume only once nothing still to be
   // recorded can change the decisions that led to it: its context is the
@@ -599,14 +607,18 @@ type Moving = { fix: MatchFix; ceiling: number | null };
 function* joinThroughTunnels(
   graph: RoadGraph,
   scratch: RouteScratch,
-  chains: readonly MatchedChain[]
+  chains: readonly MatchedChain[],
+  moving: readonly Moving[] = []
 ): Generator<void, MatchedChain[], void> {
   const ordered = [...chains].sort((a, b) => a.anchors[0].ts - b.anchors[0].ts);
   const joined: MatchedChain[] = [];
   for (const chain of ordered) {
     yield;
     const previous = joined[joined.length - 1];
-    const through = previous === undefined ? null : tunnelBetween(graph, scratch, previous, chain);
+    let through = previous === undefined ? null : tunnelBetween(graph, scratch, previous, chain);
+    if (previous !== undefined && through === null && CORRIDOR_JOIN_M > 0) {
+      through = corridorBetween(graph, scratch, previous, chain, moving);
+    }
     if (previous === undefined || through === null) {
       joined.push(chain);
       continue;
@@ -655,6 +667,58 @@ function tunnelBetween(
     }
   }
   return best?.route ?? null;
+}
+
+/**
+ * The shortest road from the end of `a` to the start of `b` when the fixes
+ * recorded between them all lie within `CORRIDOR_JOIN_M` of it, or null.
+ */
+function corridorBetween(
+  graph: RoadGraph,
+  scratch: RouteScratch,
+  a: MatchedChain,
+  b: MatchedChain,
+  moving: readonly Moving[]
+): EdgePiece[] | null {
+  const t0 = a.anchors[a.anchors.length - 1].ts;
+  const t1 = b.anchors[0].ts;
+  const seconds = (t1 - t0) / 1000;
+  if (seconds <= 0 || seconds > MAX_BRIDGE_S) {
+    return null;
+  }
+  const between = moving.filter((m) => m.fix.ts > t0 && m.fix.ts < t1).map((m) => m.fix);
+  const end = a.pieces[a.pieces.length - 1];
+  const start = b.pieces[0];
+  const [endLat, endLon] = pointAt(graph, end.edge, end.to);
+  const [startLat, startLon] = pointAt(graph, start.edge, start.from);
+  const straight = distanceM({ lat: endLat, lon: endLon }, { lat: startLat, lon: startLon });
+  const limitM = Math.min(MAX_ROUTE_SPEED_MPS * seconds, CORRIDOR_JOIN_FACTOR * straight + CORRIDOR_JOIN_SLACK_M);
+  const route = routeBetween(graph, scratch, { edge: end.edge, offset: end.to }, { edge: start.edge, offset: start.from }, limitM);
+  if (route === null) {
+    return null;
+  }
+  const points: { lat: number; lon: number }[] = [];
+  for (const piece of route) {
+    const length = Math.abs(piece.to - piece.from);
+    const steps = Math.max(1, Math.ceil(length / 20));
+    for (let i = 0; i <= steps; i += 1) {
+      const [lat, lon] = pointAt(graph, piece.edge, piece.from + ((piece.to - piece.from) * i) / steps);
+      points.push({ lat, lon });
+    }
+  }
+  for (const fix of between) {
+    let nearest = Infinity;
+    for (const point of points) {
+      nearest = Math.min(nearest, distanceM(fix, point));
+    }
+    if (nearest > CORRIDOR_JOIN_M) {
+      return null;
+    }
+  }
+  if (globalThis.process?.env?.CORRIDOR_LOG) {
+    console.error(`corridor join ${new Date(t0).toISOString()} ${seconds}s ${between.length} fixes`);
+  }
+  return route;
 }
 
 /** `a`, the route through, then `b`, as one chain timed by both chains' fixes. */

@@ -14,7 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
-| 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
+| 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; battery 100 to 86% in 6 h 48 (about 2.1 an hour); ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
 | 2026-11-02 | **Car through Funchal and back, automatic recording**, 1 h 12, 34 km, app opened once on the way, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **97.5% of the route within 10 m**, by car 97.9%; ✅ **T-308: home ended stationary**; ❌ the night before, 2 h 10 on walking at home from Wi-Fi jitter (T-309) |
 | 2026-11-01 | **Car to Reis Magos, two stops, automatic recording**, 1 h 11, 11.4 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.5% of the route within 10 m**, by car 94.1%; ✅ **T-295's alarm ran both stops' still checks, both slept**; ❌ **home on fine GPS: the check at home stayed, its two positions 4 min 53 s apart** (T-308) |
 | 2026-10-31 | **Car to Funchal and a walk with stops, automatic recording**, 2 h 57, 40 km, iPhone alongside | P30 | one mode (D-108), automatic | ⚠ **86.0% of the route within 10 m**, 95.5% within 30 m, 88.9% by car; ❌ first 4.4 km lost; ❌ **a still check whose timer never fired**: every stop on *driving*, on foot 52.8%; ⚠ one *in vehicle* label raised a walk to driving; ❌ home on fine GPS after |
@@ -57,8 +57,11 @@ never where the lead lives.
   opened 10:59, 11:28 (at Prainha), 15:57, 16:10, 16:41, then 17:44 at home. iPhone SensorLogger
   11:00:17 to 16:40 (`Madeira-fieldwork/iphone-2026-11-21`), so Reis Magos and the drive home have
   no reference. Database pulled 17:46 without stopping the app,
-  `Madeira-fieldwork/backups/p30-2026-11-21-after-trip`. Battery 86% on USB at the pull; the
-  level at leaving not yet given.
+  `Madeira-fieldwork/backups/p30-2026-11-21-after-trip`. The lead stopped SensorLogger at 16:40
+  by mistake; after Reis Magos they drove home.
+- **Battery, from `dumpsys batterystats --history`:** unplugged at 10:56:26 at 100%, plugged at
+  17:44:51 at 86%: **14 points in 6 h 48, about 2.1 an hour**, the third carried day (2 and 2.1
+  before). It includes five looks at the app and the fine GPS at stops below.
 - **Route, 11:00 to 16:40: 87.9% within 10 m, 94.8% within 30 m** of 95.7 km; by car 90.4%; on
   foot 6.1 km, 51.5% (Funchal's old town, as 31 Oct's 52.8%); lit line 90.3% within 10 m of the
   route. Biggest miss 1.8 km at 13:26 above Monte (32.706, -16.895), driving at 39 km/h with

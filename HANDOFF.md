@@ -11,9 +11,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **21 Nov: Play rejected version 13 for production** (prominent disclosure, T-311): Android's
   first location dialog came before any card naming background collection. Fixed in version 14
   (versionCode bumped), seen on the P30 and the Android 14 emulator; also a map that would not
-  start with location refused and a trip stored. **Blocked on the lead:** `founderWindow.start`
-  is still null, and a public build with it makes nobody a founder. Then the AAB, a new video
-  (`docs/play-background-location.md`), upload, resubmit.
+  start with location refused and a trip stored. Founder window set to 2026-11-21 (launch day,
+  the lead's word). AAB `bruma-0.1.0-vc14.aab` built, smoke test passes as a public build. Left:
+  a new video (`docs/play-background-location.md`), upload, resubmit. The P30's trip 31 (all 26
+  stamps) ended by inactivity at 06:03 the same day, silent since 12 Nov; trip 33 is on show.
 - **2 Nov, morning: car through Funchal and back, 34 km, automatic** (field log). **97.5% of the
   route within 10 m**, the best car figure yet. ✅ **T-308 seen working:** the drive home ended
   stationary by a still check with positions. ❌ **T-309:** the night before, Wi-Fi positions

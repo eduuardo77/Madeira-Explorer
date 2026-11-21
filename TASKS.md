@@ -465,8 +465,14 @@ permission, L3 privacy contact.
       null. **Seen 2026-11-21:** P30 (vc14 field build, `install -r`, backup
       `p30-2026-11-21-before-vc14`, location revoked then given back through the new cards: always,
       recording automatically, 26 stamps and 32 trips intact); Android 14 emulator, clean install:
-      disclosure, while-using dialog, disclosure, settings page. 1,276 tests. **Open:** the
-      founder window (production), the AAB, a new video, upload, resubmit.
+      disclosure, while-using dialog, disclosure, settings page. 1,276 tests.
+      **AAB built 2026-11-21:** `Madeira-fieldwork/apks/bruma-0.1.0-vc14.aab` (SHA-256
+      `cdcfad71…7435`), store build, upload key, four ABIs, **founder window from 2026-11-21**
+      (the lead: "the day it goes live, which will be today"; purchases before it count, so it
+      closes 2027-02-21). `smoke-release.mjs` **passes without `--internal`** on the P30 with a
+      field build whose JavaScript is byte-identical to the AAB's (backup
+      `p30-2026-11-21-before-vc14-smoke`). **Open:** the new video, the lead uploads to
+      production and the closed track, resubmits the declaration.
 - [ ] **T-310** **Version 13 for the testers.** **Built 2026-11-02** from the commit that sets
       versionCode 13 (`Madeira-fieldwork/apks/bruma-0.1.0-vc13.aab`, SHA-256 `2b31e89c…87b6`):
       store build (not beta), upload key (SHA-1 `87:5F:7F:…:47:61`), `debuggable` false, four ABIs,

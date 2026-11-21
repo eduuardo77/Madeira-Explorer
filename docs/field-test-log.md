@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
 | 2026-11-02 | **Car through Funchal and back, automatic recording**, 1 h 12, 34 km, app opened once on the way, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **97.5% of the route within 10 m**, by car 97.9%; ✅ **T-308: home ended stationary**; ❌ the night before, 2 h 10 on walking at home from Wi-Fi jitter (T-309) |
 | 2026-11-01 | **Car to Reis Magos, two stops, automatic recording**, 1 h 11, 11.4 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.5% of the route within 10 m**, by car 94.1%; ✅ **T-295's alarm ran both stops' still checks, both slept**; ❌ **home on fine GPS: the check at home stayed, its two positions 4 min 53 s apart** (T-308) |
 | 2026-10-31 | **Car to Funchal and a walk with stops, automatic recording**, 2 h 57, 40 km, iPhone alongside | P30 | one mode (D-108), automatic | ⚠ **86.0% of the route within 10 m**, 95.5% within 30 m, 88.9% by car; ❌ first 4.4 km lost; ❌ **a still check whose timer never fired**: every stop on *driving*, on foot 52.8%; ⚠ one *in vehicle* label raised a walk to driving; ❌ home on fine GPS after |
@@ -48,6 +49,40 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-21: sightseeing day, automatic recording, version 14's first trip
+
+- **Setup:** the vc14 field build of the morning (T-311), location revoked and given back through
+  the new cards at 10:31 to 10:37 (*always*, recording re-asserted). Automatic on, no outing; app
+  opened 10:59, 11:28 (at Prainha), 15:57, 16:10, 16:41, then 17:44 at home. iPhone SensorLogger
+  11:00:17 to 16:40 (`Madeira-fieldwork/iphone-2026-11-21`), so Reis Magos and the drive home have
+  no reference. Database pulled 17:46 without stopping the app,
+  `Madeira-fieldwork/backups/p30-2026-11-21-after-trip`. Battery 86% on USB at the pull; the
+  level at leaving not yet given.
+- **Route, 11:00 to 16:40: 87.9% within 10 m, 94.8% within 30 m** of 95.7 km; by car 90.4%; on
+  foot 6.1 km, 51.5% (Funchal's old town, as 31 Oct's 52.8%); lit line 90.3% within 10 m of the
+  route. Biggest miss 1.8 km at 13:26 above Monte (32.706, -16.895), driving at 39 km/h with
+  fixes arriving (21 to 27 per 10 min); not looked into.
+- ✅ **The start:** motion wake 10:56:49, walking 11:01:00, driving 11:06:03.
+- ✅ **Stamps with the app closed:** Prainha, Ponta do Rosto, Santana, Teatro Municipal, Sé do
+  Funchal, Praia dos Reis Magos. Monte and the levada starts were passed by car, no stamp, right.
+- ❌ **A stop woken by its own fixes, twice.** Prainha, still 11:29 to 11:38: the still check
+  settled stationary at 11:35:52 and in the same second *moved 3424 m at up to 65 km/h* raised
+  driving; every fix of that batch was within 60 m of the stop. Santana, still 12:30 to 12:50: the
+  same at 12:36:17, *moved 3845 m at up to 62 km/h*, then 14 min on driving while parked. The
+  distance must reach back to the drive in, before the stop. The shape of 1 Nov's late batch and
+  2 Nov's 11:07 *moved 372 m*; now seen four times.
+- ❌ **A 53 min stop held on driving** (13:48 to 14:41, 32.703, -16.902). The check slept it four
+  times (13:54, 13:59, 14:10, 14:30); each time an *in vehicle* label (13:54:13 *still exit,
+  driving enter*; 14:13 a motion wake on *driving*) raised it again at once. Every fix speed 0 to
+  2 m/s, 5 m accuracy: fine GPS for most of the stop. From stationary one *in vehicle* label is
+  enough; T-296's two-label rule covers walking only. What the lead was doing there is to ask (a
+  car with the engine running would explain the labels).
+- ❌ **Home, the same shape a third time:** 17:43:53 stationary *within 19 m for 5 min*, and in
+  the same second *moved 1214 m at up to 35 km/h* raised driving. At 17:51 `dumpsys location`
+  shows Bruma's fine GPS every 15 s at home on the cable. Whether a later check lowers it is the
+  night's question.
+- The walk in Funchal slept indoors at 15:21 and 16:46 (*no position*) and woke on the next steps.
 
 ### 2026-11-02: by car through Funchal and back, automatic recording
 

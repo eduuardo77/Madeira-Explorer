@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **21 Nov, afternoon: sightseeing day on version 14, automatic** (field log): **87.9% of the
+  route within 10 m**, by car 90.4%, on foot 51.5%; 6 stamps with the app closed; recording
+  survived the morning's revoke and regrant. ❌ **T-312:** stops woken back to driving, three
+  times by the stop's own fixes (home too: fine GPS every 15 s at 17:51), and a 53 min stop by
+  single *in vehicle* labels. Not fixed (no app changes, the lead's word). Backup
+  `p30-2026-11-21-after-trip`.
 - **21 Nov: Play rejected version 13 for production** (prominent disclosure, T-311): Android's
   first location dialog came before any card naming background collection. Fixed in version 14
   (versionCode bumped), seen on the P30 and the Android 14 emulator; also a map that would not

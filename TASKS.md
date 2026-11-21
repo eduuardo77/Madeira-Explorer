@@ -450,6 +450,13 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-312** **Stops woken back to driving (21 Nov sightseeing day, field log).** Not fixed:
+      the lead asked for no app changes. (1) Three times (Prainha 11:35:52, Santana 12:36:17,
+      home 17:43:53) a still check settled stationary and the same second's batch, every fix
+      within 60 m of the stop, raised driving with *moved 1214 to 3845 m*: the distance reaches
+      back to the drive in. Fine GPS at home after. Same shape as 1 Nov and 2 Nov 11:07.
+      (2) A 53 min stop slept four times and was raised each time by one *in vehicle* label;
+      T-296's two-label rule covers walking only. Ask the lead what the stop was first.
 - [ ] **T-311** **Play rejected version 13 for production: "Declaração em destaque inadequada".**
       **Fixed 2026-11-21, version 14.** Play's User Data policy wants *every* runtime permission
       request "immediately preceded" by the disclosure; the first-run card before Android's first

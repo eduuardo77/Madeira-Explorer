@@ -450,6 +450,22 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
+      screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be
+      clear) and dropped upstream's `color = Color(polyline.color)`: maps-compose's spans overload
+      of `Polyline` has no colour parameter (tried 22 Nov, does not compile), so the line's own
+      colour stays the default black. The emulator (Play services 25.26) asks for the LATEST
+      renderer and logs `loadedRenderer: LEGACY`, which draws the spans black: every capture on
+      the site since 26 Oct. The P30 (26.34) draws orange. Any phone that falls back to LEGACY
+      would show black roads; how many do is unknown. **Fixed 22 Nov (lead's choice, in the app):**
+      the view asks `MapsInitializer` which renderer loaded; on LEGACY each line is drawn in the
+      colour form, split at its gaps (`splitAtGaps`), so more polylines and a slower pan there;
+      LATEST keeps the spans path unchanged (`BrumaPolyline` in the patch). Seen orange on the
+      emulator (LEGACY, `tools/out/screenshot-styles/t316-emulator.png`). On the P30 since 23:01
+      (field build, backup `p30-2026-11-22-before-t316`): log says LATEST, no crash, screen not
+      seen (locked). Pan speed on LEGACY not measured. Also open: new store screenshots, split block style 1
+      with five panels (the privacy panel held back by the lead); sketches in
+      `tools/out/screenshot-styles/`.
 - [ ] **T-315** **A still check slept the phone as the car left (22 Nov, 14:19, about 1.2 km
       dark).** Its look found no position, so it decided on labels alone, and it counts only
       the motion wake's labels (`lastMovingSignalMs` in `recorderCore.ts`): *walking* at 14:16:51

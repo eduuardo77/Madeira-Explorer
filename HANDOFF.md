@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov, 23:01: T-316, lit roads were black on Google's LEGACY map renderer** (the emulator,
+  so every site screenshot since 26 Oct): T-278's spans carry no colour there. Now drawn in plain
+  colour split at the gaps on LEGACY; on the P30 (LATEST, path unchanged), backup
+  `p30-2026-11-22-before-t316`. Store screenshots: split block style 1, five panels (privacy
+  panel held back), sketches in `tools/out/screenshot-styles/`; recapture still to do.
 - **22 Nov, day west** (field log): 89.5% within 10 m, 2.1%/h, T-312 held at every stop. ❌
   **T-315:** a still check slept the phone as the car left Câmara de Lobos (1.2 km dark): it never
   sees labels from the transitions batch. **Fixed the same evening, on the P30 since 19:30**: the

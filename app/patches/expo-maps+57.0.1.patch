@@ -46,7 +46,7 @@ index 82450b6..75de0d4 100644
  import android.graphics.Point
  import android.graphics.drawable.Drawable
  import android.view.MotionEvent
-@@ -15,8 +18,10 @@ import androidx.compose.runtime.State
+@@ -15,19 +18,35 @@ import androidx.compose.runtime.State
  import androidx.compose.runtime.derivedStateOf
  import androidx.compose.runtime.getValue
  import androidx.compose.runtime.key
@@ -57,7 +57,9 @@ index 82450b6..75de0d4 100644
  import androidx.compose.ui.Modifier
  import androidx.compose.ui.graphics.Color
  import com.google.android.gms.maps.CameraUpdateFactory
-@@ -24,8 +29,19 @@ import com.google.android.gms.maps.LocationSource
+ import com.google.android.gms.maps.LocationSource
++import com.google.android.gms.maps.MapsInitializer
++import com.google.android.gms.maps.model.PatternItem
  import com.google.android.gms.maps.model.BitmapDescriptor
  import com.google.android.gms.maps.model.BitmapDescriptorFactory
  import com.google.android.gms.maps.model.CameraPosition
@@ -76,14 +78,30 @@ index 82450b6..75de0d4 100644
 +import kotlinx.coroutines.suspendCancellableCoroutine
  import com.google.maps.android.compose.CameraPositionState
  import com.google.maps.android.compose.GoogleMap
++import com.google.maps.android.compose.GoogleMapComposable
  import com.google.maps.android.compose.Marker
-@@ -84,6 +100,17 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+ import com.google.maps.android.compose.MarkerState
+ import com.google.maps.android.compose.Polygon
+@@ -84,6 +103,30 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
    private lateinit var cameraState: CameraPositionState
    private var manualCameraControl = false
  
 +  // Bruma (T-278): lines set one by one (`setLines`), converted once, by id.
 +  private class SetLine(val record: PolylineRecord, val points: List<LatLng>, val spans: List<StyleSpan>)
 +  private val setLines = mutableStateMapOf<String, SetLine>()
++
++  // Bruma (T-316): true when Google's map fell back to its LEGACY renderer
++  // (the emulator, Play services 25.26). That renderer draws a polyline's
++  // spans in the line's own colour, which the spans form of `Polyline` cannot
++  // set, so the lit roads came out black. On it each line is drawn in plain
++  // colour, split at its gaps: more polylines, but the right colour.
++  private val legacyRenderer = mutableStateOf(false)
++
++  init {
++    MapsInitializer.initialize(context.applicationContext, MapsInitializer.Renderer.LATEST) { renderer ->
++      legacyRenderer.value = renderer == MapsInitializer.Renderer.LEGACY
++    }
++  }
 +
 +  // Bruma (T-279): the camera path playing (`playCameraPath`), or null.
 +  private class CameraPathRun(val points: List<CameraPathPoint>, val fromMs: Double)
@@ -95,7 +113,7 @@ index 82450b6..75de0d4 100644
    private var lastTouchPoint: Point? = null
  
    // Selection state management
-@@ -96,12 +123,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -96,12 +139,26 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      return super.dispatchTouchEvent(event)
    }
  
@@ -122,45 +140,57 @@ index 82450b6..75de0d4 100644
      val polygonState by polygonStateFromProps()
      val circleState by circleStateFromProps()
      val mapOptions = props.mapOptions.value.mapId?.let { GoogleMapOptions().mapId(it) } ?: GoogleMapOptions()
-@@ -154,12 +195,35 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -154,25 +211,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
        mapColorScheme = props.colorScheme.value.toComposeMapColorScheme(),
        locationSource = locationSource
      ) {
 -      polylineState.forEach { (polyline, coordinates) ->
+-        Polyline(
+-          points = coordinates,
+-          color = Color(polyline.color),
+-          geodesic = polyline.geodesic,
+-          width = polyline.width,
+-          clickable = true,
+-          onClick = {
+-            onPolylineClick(
+-              PolylineRecord(
+-                id = polyline.id,
+-                coordinates.map { Coordinates(it.latitude, it.longitude) },
+-                polyline.geodesic,
+-                polyline.color,
+-                polyline.width
+-              )
 +      MapEffect(Unit) { map -> nativeMap = map }
 +      setLines.forEach { (id, line) ->
 +        key(id) {
-+          Polyline(
-+            points = line.points,
-+            spans = line.spans,
-+            geodesic = line.record.geodesic,
-+            width = line.record.width,
-+            jointType = JointType.ROUND,
-+            startCap = RoundCap(),
-+            endCap = RoundCap()
-+          )
++          BrumaPolyline(line.record, line.points, line.spans, line.record.width, pattern = null, clickable = false) {}
 +        }
 +      }
 +      polylineState.forEachIndexed { index, (polyline, coordinates, spans) ->
-         Polyline(
-           points = coordinates,
--          color = Color(polyline.color),
-+          // Bruma (T-278): the colour comes in the spans, so gaps can be clear.
-+          spans = spans,
-           geodesic = polyline.geodesic,
--          width = polyline.width,
-+          width = stepWidths.getOrNull(index) ?: polyline.width,
-+          // Bruma (D-093): round joints and ends. The default mitred joint
-+          // turns a sharp bend into a long spike (T-168), and a butt end makes
-+          // a lit street stop square in the middle of a junction.
-+          jointType = JointType.ROUND,
-+          startCap = RoundCap(),
-+          endCap = RoundCap(),
++        BrumaPolyline(
++          polyline,
++          coordinates,
++          spans,
++          stepWidths.getOrNull(index) ?: polyline.width,
 +          // Bruma: a tunnel, dashed by the map itself, in screen pixels.
 +          pattern = if (polyline.dashed) listOf(Dash(30f), Gap(22f)) else null,
-           clickable = true,
-           onClick = {
-             onPolylineClick(
++          clickable = true
++        ) {
++          onPolylineClick(
++            PolylineRecord(
++              id = polyline.id,
++              coordinates.map { Coordinates(it.latitude, it.longitude) },
++              polyline.geodesic,
++              polyline.color,
++              polyline.width
+             )
+-          }
+-        )
++          )
++        }
+       }
+ 
+       MapPolygons(
 @@ -194,7 +258,7 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
  
        for ((marker, state) in markerState.value) {
@@ -197,7 +227,7 @@ index 82450b6..75de0d4 100644
    }
  
    @Composable
-@@ -319,11 +393,32 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -319,11 +393,96 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      remember {
        derivedStateOf {
          props.polylines.value.map { polyline ->
@@ -207,6 +237,70 @@ index 82450b6..75de0d4 100644
        }
      }
  
++  // Bruma: one lit line. Round joints and ends (D-093): the default mitred
++  // joint turns a sharp bend into a long spike (T-168), and a butt end makes a
++  // lit street stop square in the middle of a junction. The colour comes in
++  // the spans so gaps can be clear (T-278); on the LEGACY renderer, which
++  // ignores the spans' colour, plain coloured pieces split at the gaps (T-316).
++  @Composable
++  @GoogleMapComposable
++  private fun BrumaPolyline(
++    record: PolylineRecord,
++    points: List<LatLng>,
++    spans: List<StyleSpan>,
++    width: Float,
++    pattern: List<PatternItem>?,
++    clickable: Boolean,
++    onClick: () -> Unit
++  ) {
++    if (legacyRenderer.value) {
++      val pieces = remember(points, record.gaps) { splitAtGaps(points, record.gaps) }
++      for (piece in pieces) {
++        Polyline(
++          points = piece,
++          color = Color(record.color),
++          geodesic = record.geodesic,
++          width = width,
++          jointType = JointType.ROUND,
++          startCap = RoundCap(),
++          endCap = RoundCap(),
++          pattern = pattern,
++          clickable = clickable,
++          onClick = { onClick() }
++        )
++      }
++    } else {
++      Polyline(
++        points = points,
++        spans = spans,
++        geodesic = record.geodesic,
++        width = width,
++        jointType = JointType.ROUND,
++        startCap = RoundCap(),
++        endCap = RoundCap(),
++        pattern = pattern,
++        clickable = clickable,
++        onClick = { onClick() }
++      )
++    }
++  }
++
++  // Bruma (T-316): the runs between gap segments; gap i joins point i to i + 1.
++  private fun splitAtGaps(points: List<LatLng>, gaps: List<Int>): List<List<LatLng>> {
++    if (gaps.isEmpty()) return listOf(points)
++    val gapSet = gaps.toHashSet()
++    val pieces = mutableListOf<List<LatLng>>()
++    var start = 0
++    for (i in 0 until points.size - 1) {
++      if (i in gapSet) {
++        if (i > start) pieces.add(points.subList(start, i + 1))
++        start = i + 1
++      }
++    }
++    if (points.size - 1 > start) pieces.add(points.subList(start, points.size))
++    return pieces
++  }
++
 +  // Bruma (T-278): the polyline's colour, with each gap segment transparent;
 +  // one span of its colour when it has no gaps.
 +  private fun gapSpans(polyline: PolylineRecord): List<StyleSpan> {
@@ -231,7 +325,7 @@ index 82450b6..75de0d4 100644
    @Composable
    private fun polygonStateFromProps() =
      remember {
-@@ -361,6 +456,89 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -361,6 +520,89 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
      }
    }
  
@@ -321,7 +415,7 @@ index 82450b6..75de0d4 100644
    suspend fun setCameraPosition(config: SetCameraPositionConfig?) {
      // Stop updating the camera position based on user location.
      manualCameraControl = true
-@@ -415,6 +593,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
+@@ -415,6 +657,18 @@ class GoogleMapsView(context: Context, appContext: AppContext) :
    }
  
    private fun getIconDescriptor(marker: MarkerRecord): BitmapDescriptor? {

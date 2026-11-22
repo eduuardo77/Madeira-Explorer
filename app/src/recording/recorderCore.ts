@@ -35,6 +35,8 @@ import {
   canStartStillCheck,
   confirmsDriving,
   decideStillCheck,
+  decideVehicleRecheck,
+  DRIVING_CONFIRM_WINDOW_MS,
   type FollowUp,
   launchProfile,
   type MotionLabel,
@@ -135,6 +137,12 @@ export function createRecorder(deps: RecorderDeps) {
    * restart forgets it, which only means waiting for one more label.
    */
   let lastLabel: MotionLabel | null = null;
+  /**
+   * When the sensors last said *in a vehicle* twice running (T-296), which is
+   * what lets one such label raise a stationary phone (T-312). In memory, as
+   * `lastLabel`: a restart means the fixes, not the label, wake it.
+   */
+  let drivingConfirmedMs: number | null = null;
 
   async function readCurrentProfile(): Promise<SamplingProfile> {
     if (cachedProfile !== null) {
@@ -245,6 +253,14 @@ export function createRecorder(deps: RecorderDeps) {
       }
 
       await deps.diary.log('start', `profile ${current} -> ${decision.profile}: ${decision.reason}`);
+
+      // T-312: one *in a vehicle* label raised it; look again in five minutes.
+      const confirmed =
+        drivingConfirmedMs !== null && wallNowMs - drivingConfirmedMs <= DRIVING_CONFIRM_WINDOW_MS;
+      if (decision.byLabel === true && !confirmed) {
+        const newest = samples.reduce((a, b) => (b.ts > a.ts ? b : a));
+        await startVehicleRecheck(newest, wallNowMs);
+      }
     } catch (error) {
       await deps.diary.logError('sampling gate', error);
     }
@@ -367,6 +383,7 @@ export function createRecorder(deps: RecorderDeps) {
     const nowMs = deps.now();
     const previousLabel = lastLabel;
     if (activity !== undefined) {
+      if (confirmsDriving(previousLabel, activity, nowMs)) drivingConfirmedMs = nowMs;
       lastLabel = { activity, ts: nowMs };
       if (activity !== 'still') lastMovingSignalMs = nowMs;
     }
@@ -461,11 +478,46 @@ export function createRecorder(deps: RecorderDeps) {
     }
   }
 
+  /**
+   * T-312: a raise to driving on one *in a vehicle* label is looked at again
+   * five minutes on, on the still check's alarm and row (`decideVehicleRecheck`).
+   * It replaces a still check under way: the raise is newer than its still.
+   */
+  async function startVehicleRecheck(first: MovementSample, wakeMs: number): Promise<void> {
+    await deps.state.setStillCheck({
+      wakeMs,
+      vehicle: true,
+      first: { ts: first.ts, lat: first.lat, lon: first.lon, accuracyM: first.accuracyM },
+    });
+    await deps.diary.log('activity', 'vehicle recheck: in a vehicle once, looking again in 5 min'); // i18n-exempt: diary line, T-312
+    scheduleFollowUp(STILL_CHECK_WAIT_MS, { kind: 'still' });
+  }
+
+  /** The recheck's second half, from the still check's alarm. */
+  async function finishVehicleRecheck(pending: PendingStillCheck): Promise<void> {
+    if ((await getCurrentSamplingProfile()) !== 'driving') return;
+    const second = await deps.provider.currentPosition();
+    if (second !== null) await recordSamples([second]);
+    const after = await getCurrentSamplingProfile();
+    const check = decideVehicleRecheck(after, pending.first, second, drivingConfirmedMs, pending.wakeMs, deps.now());
+    if (check.sleep) {
+      await lowerProfile(check.reason);
+    } else {
+      await deps.diary.log('activity', `vehicle recheck: stay, ${check.reason}`); // i18n-exempt: diary line, T-312
+    }
+  }
+
   /** The still check's second half, five minutes on, from the alarm (T-295). */
   async function finishStillCheck(): Promise<void> {
     const pending = await readStillCheck();
     if (pending === null) return;
+    // The alarm of a still check the recheck replaced: the recheck's own comes later.
+    if (pending.vehicle === true && deps.now() - pending.wakeMs < STILL_CHECK_WAIT_MS) return;
     await deps.state.clearStillCheck();
+    if (pending.vehicle === true) {
+      await finishVehicleRecheck(pending);
+      return;
+    }
     if ((await getCurrentSamplingProfile()) === 'stationary') return; // the gate got there first
     const second = await deps.provider.currentPosition();
     if (second !== null) await recordSamples([second]);

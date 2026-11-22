@@ -116,6 +116,51 @@ export function decideStillCheck(
   };
 }
 
+/**
+ * Whether a raise to driving on one *in a vehicle* label goes back to
+ * stationary, five minutes on (T-312). `first` is where the phone was at the
+ * raise, `second` a position now; `drivingConfirmedMs` is when the sensors
+ * last said driving twice running (`confirmsDriving`).
+ *
+ * ⚠ 21 Nov 2026, the P30: seated at lunch for 53 min, single labels raised it
+ * to driving four times, each held until a still label and a five-minute check;
+ * that evening in a shopping centre, 20 min. A wait for a second label before
+ * raising was tried first and rejected: replayed on two real departures it
+ * left 1.8 km and 1 km of road unrecorded, because a drive also begins on one
+ * label. So the raise stays, and is undone only on positive evidence: two
+ * trusted positions five minutes apart, within their error. Anything less
+ * keeps driving, as a doubtful still check does, since a wrong sleep loses road.
+ */
+export function decideVehicleRecheck(
+  current: SamplingProfile,
+  first: MovementSample | null,
+  second: MovementSample | null,
+  drivingConfirmedMs: number | null,
+  wakeMs: number,
+  nowMs: number
+): StillCheck {
+  const stay = (reason: string): StillCheck => ({ sleep: false, reason });
+  if (current !== 'driving') return stay(`already ${current}`);
+  if (nowMs - wakeMs > STILL_CHECK_LATE_MS) {
+    return stay(`the check ran ${Math.round((nowMs - wakeMs) / 60000)} min after the raise`);
+  }
+  if (drivingConfirmedMs !== null && drivingConfirmedMs >= wakeMs) {
+    return stay('the motion sensors said driving twice since');
+  }
+  if (first === null || second === null) return stay('no position to compare');
+  const untrusted = (sample: MovementSample) =>
+    sample.accuracyM !== null && sample.accuracyM > MAX_TRUSTED_ACCURACY_M;
+  if (untrusted(first) || untrusted(second)) return stay('position too rough');
+  const spanMs = second.ts - first.ts;
+  if (spanMs < STILL_CHECK_WAIT_MS) return stay(`only ${Math.round(spanMs / 60000)} min apart`);
+  const metres = distanceM(first, second);
+  if (movedBeyondNoise(first, second, metres)) return stay(`moved ${Math.round(metres)} m`);
+  return {
+    sleep: true,
+    reason: `in a vehicle once, still within ${Math.round(metres)} m after ${Math.round(spanMs / 60000)} min`,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // The profile a restart begins on (N15)
 // ---------------------------------------------------------------------------
@@ -180,20 +225,26 @@ export function parseFollowUp(step: unknown): FollowUp | null {
   return index >= 1 && index < WAKE_CHECK_WAITS_MS.length ? { kind: 'look', index } : null;
 }
 
-/** A still check under way: when it began, and its first position if one came. */
-export type PendingStillCheck = { wakeMs: number; first: MovementSample | null };
+/**
+ * A still check under way: when it began, and its first position if one came.
+ * `vehicle`: not the sensors' still but a raise on one *in a vehicle* label,
+ * rechecked by `decideVehicleRecheck` (T-312).
+ */
+export type PendingStillCheck = { wakeMs: number; first: MovementSample | null; vehicle?: true };
 
 /** The stored check, or null when there is none or the row cannot be read. */
 export function parsePendingStillCheck(raw: unknown): PendingStillCheck | null {
   if (raw === null || typeof raw !== 'object') return null;
-  const { wakeMs, first } = raw as { wakeMs?: unknown; first?: unknown };
+  const { wakeMs, first, vehicle } = raw as { wakeMs?: unknown; first?: unknown; vehicle?: unknown };
   if (typeof wakeMs !== 'number' || !Number.isFinite(wakeMs)) return null;
-  if (first === null || first === undefined) return { wakeMs, first: null };
+  const kind = vehicle === true ? { vehicle: true as const } : {};
+  if (first === null || first === undefined) return { wakeMs, first: null, ...kind };
   const f = first as Record<string, unknown>;
   const finite = (value: unknown) => typeof value === 'number' && Number.isFinite(value);
-  if (!finite(f.ts) || !finite(f.lat) || !finite(f.lon)) return { wakeMs, first: null };
+  if (!finite(f.ts) || !finite(f.lat) || !finite(f.lon)) return { wakeMs, first: null, ...kind };
   return {
     wakeMs,
+    ...kind,
     first: {
       ts: f.ts as number,
       lat: f.lat as number,

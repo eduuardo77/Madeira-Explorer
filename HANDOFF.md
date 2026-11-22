@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov, 10:14: T-312 fixed and on the P30** (field build, versionCode still 14, backup
+  `p30-2026-11-22-before-t312`). A stop is woken only by fixes from after it; a raise to
+  driving on one *in vehicle* label is rechecked five minutes on. Waiting for a second label
+  was rejected: it lost 1 to 1.8 km at real departures. Replayed on 21 Nov's stops; not yet
+  seen on a trip. 1,285 tests. Not in the Play build (version 14 is in review).
 - **22 Nov: cinema at Forum Madeira and the night after** (field log): 90.4% there, 91.6% back
   within 10 m; the 3 h film stayed stationary; **a quiet night** (2 fixes, 01:07 to 09:57).
   T-312 twice more (a false *in vehicle* in the centre, home raised to walking for 30 min); the

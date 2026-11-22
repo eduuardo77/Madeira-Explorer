@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 
 import {
   decideStillCheck,
+  decideVehicleRecheck,
   LAUNCH_FRESH_FIX_MS,
   launchProfile,
   nextWakeCheck,
@@ -48,6 +49,31 @@ function check(
 ) {
   return decideStillCheck(current, first, second, movingMs, T0, T0 + waitedMin * 60_000);
 }
+
+// T-312: a raise on one in-vehicle label, looked at again five minutes on.
+const recheck = (first: MovementSample | null, second: MovementSample | null, confirmedMs: number | null = null) =>
+  decideVehicleRecheck('driving', first, second, confirmedMs, T0, T0 + 5 * 60_000);
+
+test('vehicle recheck: still where it was raised five minutes on, it sleeps (T-312)', () => {
+  const result = recheck(at(0), at(5, 25));
+  assert.equal(result.sleep, true);
+  assert.match(result.reason, /in a vehicle once, still within 25 m after 5 min/);
+});
+
+test('vehicle recheck: anything short of two close positions keeps driving, since a wrong sleep loses road', () => {
+  assert.equal(recheck(at(0), at(5, 400)).sleep, false, 'moved');
+  assert.equal(recheck(at(0), null).sleep, false, 'no position is doubt here, unlike the still check');
+  assert.equal(recheck(null, at(5)).sleep, false);
+  assert.equal(recheck(at(0), at(5, 10, 150)).sleep, false, 'too rough');
+  assert.equal(recheck(at(0), at(3)).sleep, false, 'too soon');
+  assert.equal(recheck(at(0), at(5), T0 + 60_000).sleep, false, 'said driving twice since');
+  assert.equal(decideVehicleRecheck('stationary', at(0), at(5), null, T0, T0 + 5 * 60_000).sleep, false);
+  assert.equal(
+    decideVehicleRecheck('driving', at(0), at(25), null, T0, T0 + 25 * 60_000).sleep,
+    false,
+    'a recheck that ran far too late'
+  );
+});
 
 test('still check: a phone still on driving for five minutes sleeps', () => {
   const result = check('driving', at(0), at(5, 20), null);

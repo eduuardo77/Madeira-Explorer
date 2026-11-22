@@ -268,6 +268,136 @@ test('30 Oct: the still check begun at 16:10 stays, because the sensors said wal
 });
 
 // ---------------------------------------------------------------------------
+// 21 Nov: stops woken back to driving (T-312)
+// ---------------------------------------------------------------------------
+//
+// The sightseeing day on version 14. At Prainha (still 11:29 to 11:38) the still
+// check slept the phone at 11:35:52 and the same second's batch, every fix at the
+// stop, raised driving: "moved 3424 m at up to 65 km/h", measured from the drive
+// in, ten minutes before. Santana did the same at 12:36:17 and held fine GPS for
+// 14 min while parked. At lunch (13:48 to 14:41, seated in a restaurant) and in
+// the shopping centre that evening (20:30), single in-vehicle labels raised a
+// still phone to driving.
+
+/**
+ * The labels as the phone received them: Google hands transitions over in
+ * bunches, so each one arrives at the diary's next "activity ... enter" line,
+ * not at its own time. At Prainha the walking of 11:33:55 reached the app at
+ * 11:35:52, after the still check had decided; fed at 11:33:55 the check
+ * stays awake and the fault never shows.
+ */
+function deliveredEvents(f: Fixture): ReplayEvent[] {
+  const deliveries = f.diary
+    .filter((line) => line.kind === 'activity' && / (enter|exit)/.test(` ${line.detail}`))
+    .map((line) => line.ts);
+  return [
+    ...f.batches.map((batch): ReplayEvent => ({ kind: 'batch', at: batch.at, fixes: batch.fixes })),
+    ...f.labels
+      .filter((label) => label.transition === 'enter')
+      .map((label): ReplayEvent => ({
+        kind: 'label',
+        at: deliveries.find((ts) => ts >= label.ts) ?? label.ts,
+        activity: label.activity,
+      })),
+  ];
+}
+
+/**
+ * For a phone known to be seated: the recorded fix nearest `t`, within two
+ * minutes either side. `positionsFrom` only looks ahead, and at lunch the
+ * driving profile's fixes came minutes apart, so a request the phone would
+ * have answered at the table found nothing.
+ */
+function seatedPositionsFrom(f: Fixture): (t: number) => LocationSample | null {
+  const all = [...f.history, ...f.batches.flatMap((batch) => batch.fixes)];
+  return (t) => {
+    const near = all.filter((fix) => Math.abs(fix.ts - t) <= 2 * MIN);
+    if (near.length === 0) return null;
+    const fix = near.reduce((a, b) => (Math.abs(b.ts - t) < Math.abs(a.ts - t) ? b : a));
+    return { ...fix, ts: t };
+  };
+}
+
+/**
+ * `seatedFrom`: the phone sat still from then on. Its later batches are left
+ * out, since they exist only because the P30 was wrongly on driving, and every
+ * position comes from `seatedPositionsFrom`.
+ */
+async function replayDay(name: string, endIso: string, extra: ReplayEvent[] = [], seatedFrom?: string) {
+  const f = fixture(name);
+  const replay = createReplay({
+    storedProfile: f.profileBefore?.profile,
+    storedProfileTs: f.profileBefore?.ts,
+    history: f.history,
+    positionAt: seatedFrom ? seatedPositionsFrom(f) : positionsFrom(f),
+  });
+  const cut = seatedFrom ? utc(seatedFrom) : Infinity;
+  const kept = deliveredEvents(f).filter((event) => event.kind !== 'batch' || event.at < cut);
+  await replay.run([...kept, ...extra], utc(endIso));
+  return replay;
+}
+
+/** Minutes spent on driving between `from` and `to`, by the provider's changes. */
+function drivingMinutes(changes: { at: number; profile: SamplingProfile }[], from: number, to: number): number {
+  let total = 0;
+  changes.forEach((change, i) => {
+    if (change.profile !== 'driving') return;
+    const end = Math.min(changes[i + 1]?.at ?? to, to);
+    const start = Math.max(change.at, from);
+    if (end > start) total += end - start;
+  });
+  return total / MIN;
+}
+
+/** The first change away from stationary after the first sleep. */
+function wokenAfterSleep(changes: { at: number; profile: SamplingProfile }[]) {
+  const sleep = changes.findIndex((change) => change.profile === 'stationary');
+  return { sleep: changes[sleep], woken: sleep === -1 ? undefined : changes.slice(sleep + 1)[0] };
+}
+
+test('⚠ 21 Nov, Prainha: a stop the still check slept stays asleep until the car leaves (T-312)', async () => {
+  const replay = await replayDay('stop-rewoken-prainha-2026-11-21', '2026-11-21T11:42:00');
+  const { sleep, woken } = wokenAfterSleep(replay.changes);
+  assert.ok(sleep, `never slept:\n${replay.diary.join('\n')}`);
+  assert.ok(woken, `never woke for the drive:\n${replay.diary.join('\n')}`);
+  // Not the same second's batch: the sensors' walking at 11:36:55 (the lead on
+  // foot at the viewpoint) may wake it, nothing before.
+  assert.ok(woken.at >= utc('2026-11-21T11:36:55'), `woken at ${at(woken.at)}:\n${replay.diary.join('\n')}`);
+  // No car until the car left: 11:39:38 by the fixes, 11:39:40 by the sensors.
+  const driving = replay.changes.find((change) => change.at > sleep.at && change.profile === 'driving');
+  assert.ok(driving && driving.at >= utc('2026-11-21T11:39:38'), replay.diary.join('\n'));
+});
+
+test('⚠ 21 Nov, Santana: the same at 12:36, the car parked until 12:50 (T-312)', async () => {
+  const replay = await replayDay('stop-rewoken-santana-2026-11-21', '2026-11-21T12:52:00', [
+    // The diary's "still check: started on driving" at 12:31:17 is the sensors' still.
+    { kind: 'label', at: utc('2026-11-21T12:31:17'), activity: 'still' },
+  ]);
+  const { sleep, woken } = wokenAfterSleep(replay.changes);
+  assert.ok(sleep, `never slept:\n${replay.diary.join('\n')}`);
+  // The lead walked about the village: a walking label may wake it, the same second may not.
+  assert.ok(!woken || woken.at > sleep.at, `woken at ${at(woken!.at)}:\n${replay.diary.join('\n')}`);
+  const driving = replay.changes.find((change) => change.at > sleep.at && change.profile === 'driving');
+  assert.ok(!driving || driving.at >= utc('2026-11-21T12:50:00'), replay.diary.join('\n'));
+});
+
+test('⚠ 21 Nov, lunch: a raise on one in-vehicle label goes back to sleep five minutes on (T-312)', async () => {
+  // Seated from 13:48 by the iPhone; the walk out began at 14:40:39.
+  const replay = await replayDay('lunch-false-vehicle-2026-11-21', '2026-11-21T14:40:00', [], '2026-11-21T13:48:30');
+  // On the P30 driving held 43 of the 52 minutes; now each raise lasts five.
+  const minutes = drivingMinutes(replay.changes, utc('2026-11-21T13:48:00'), utc('2026-11-21T14:40:00'));
+  const raises = replay.changes.filter((change) => change.profile === 'driving').length;
+  assert.ok(raises >= 1 && minutes <= raises * 5.5, `${minutes} min in ${raises} raises:\n${replay.diary.join('\n')}`);
+});
+
+test('⚠ 21 Nov, the shopping centre: the same, 20 min of driving down to 10 (T-312)', async () => {
+  const replay = await replayDay('centre-false-vehicle-2026-11-21', '2026-11-21T20:52:00');
+  // In the centre, still, 20:16 to 20:52; on the P30 driving held 20:31 to 20:50.
+  assert.ok(drivingMinutes(replay.changes, utc('2026-11-21T20:16:00'), utc('2026-11-21T20:52:00')) <= 11, replay.diary.join('\n'));
+  assert.equal(replay.changes[replay.changes.length - 1].profile, 'stationary', replay.diary.join('\n'));
+});
+
+// ---------------------------------------------------------------------------
 // The glue's own rules, on invented positions
 // ---------------------------------------------------------------------------
 

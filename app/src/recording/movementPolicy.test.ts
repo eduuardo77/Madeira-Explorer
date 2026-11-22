@@ -409,3 +409,32 @@ test('a move past both fixes\' error still wakes stationary at once (T-309)', ()
   assert.equal(decideProfile('stationary', [fix(1, 0, 60), fix(0, 200, 60)], NOW).changed, false);
   assert.equal(decideProfile('stationary', [fix(1, 0, 60), fix(0, 230, 60)], NOW).profile, 'walking');
 });
+
+test('a batch of fixes from before the drop does not wake stationary (T-312)', () => {
+  // Prainha, 21 Nov: slept at the stop, then the same second's batch, taken at
+  // the stop, arrived with the drive in still inside the window.
+  const droppedAt = NOW - 30_000;
+  const window = [fix(10, 3400), fix(8, 1800), fix(5, 0), fix(2, 15), fix(1, 5)];
+  const decision = decideProfile('stationary', window, NOW, droppedAt, NOW);
+  assert.equal(decision.changed, false);
+  assert.match(decision.reason, /no fix since the phone stopped/);
+});
+
+test('after the drop, a fix since it is measured against the fixes since, not the drive in (T-312)', () => {
+  const droppedAt = NOW - 3 * 60_000;
+  const window = [fix(10, 3400), fix(5, 0), fix(2, 10), fix(1, 20)];
+  assert.equal(decideProfile('stationary', window, NOW, droppedAt, NOW).changed, false);
+  // A real departure after the drop still wakes it.
+  assert.equal(decideProfile('stationary', [...window, fix(0, 600)], NOW, droppedAt, NOW).changed, true);
+});
+
+test('a raise to driving on the label alone says so, for the recheck (T-312)', () => {
+  const labelled = { ...fix(0, 0), activity: 'driving' };
+  const decision = decideProfile('stationary', [fix(1, 0), labelled], NOW);
+  assert.equal(decision.profile, 'driving');
+  assert.equal(decision.byLabel, true);
+  // Proved by speed, it is a drive whatever the label.
+  const fast = decideProfile('stationary', [fix(2, 0), { ...fix(0, 2000), activity: 'driving' }], NOW);
+  assert.equal(fast.profile, 'driving');
+  assert.equal(fast.byLabel, false);
+});

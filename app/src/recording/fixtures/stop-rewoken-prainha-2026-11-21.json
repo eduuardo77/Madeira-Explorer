@@ -1,0 +1,888 @@
+{
+ "name": "stop-rewoken-prainha-2026-11-21",
+ "source": "copy",
+ "window": {
+  "from": "2026-11-21T11:28:00",
+  "to": "2026-11-21T11:42:00",
+  "historyMin": 15
+ },
+ "offsetLonDeg": -2,
+ "profileBefore": {
+  "profile": "driving",
+  "ts": 1795259163247
+ },
+ "history": [
+  {
+   "ts": 1795259595292,
+   "lat": 32.6490294,
+   "lon": -18.8316537,
+   "accuracyM": 12.420999526977539,
+   "speedMps": 22.70663833618164,
+   "bearingDeg": 85,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259622494,
+   "lat": 32.6505516,
+   "lon": -18.8253762,
+   "accuracyM": 24.849000930786133,
+   "speedMps": 23.6713924407959,
+   "bearingDeg": 74,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259649483,
+   "lat": 32.6542526,
+   "lon": -18.8204817,
+   "accuracyM": 25.594999313354492,
+   "speedMps": 22.05011749267578,
+   "bearingDeg": 75,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259676274,
+   "lat": 32.6556139,
+   "lon": -18.8144933,
+   "accuracyM": 37.85200119018555,
+   "speedMps": 23.82814598083496,
+   "bearingDeg": 33,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259703284,
+   "lat": 32.6595086,
+   "lon": -18.8095063,
+   "accuracyM": 22.82200050354004,
+   "speedMps": 25.57151985168457,
+   "bearingDeg": 28,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259730278,
+   "lat": 32.6639715,
+   "lon": -18.8057437,
+   "accuracyM": 40.97600173950195,
+   "speedMps": 21.336862564086914,
+   "bearingDeg": 57,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259751485,
+   "lat": 32.6678733,
+   "lon": -18.8039303,
+   "accuracyM": 17.243000030517578,
+   "speedMps": 26.07236099243164,
+   "bearingDeg": 23,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259767289,
+   "lat": 32.6713066,
+   "lon": -18.8033919,
+   "accuracyM": 20.81100082397461,
+   "speedMps": 23.698654174804688,
+   "bearingDeg": 11,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259794372,
+   "lat": 32.6764491,
+   "lon": -18.800999,
+   "accuracyM": 26.68899917602539,
+   "speedMps": 21.866750717163086,
+   "bearingDeg": 48,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259821280,
+   "lat": 32.6815243,
+   "lon": -18.7971386,
+   "accuracyM": 26.09000015258789,
+   "speedMps": 27.596803665161133,
+   "bearingDeg": 37,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259849073,
+   "lat": 32.68715,
+   "lon": -18.7946141,
+   "accuracyM": 31.242000579833984,
+   "speedMps": 23.959922790527344,
+   "bearingDeg": 352,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259883682,
+   "lat": 32.6892606,
+   "lon": -18.7878487,
+   "accuracyM": 12.59000015258789,
+   "speedMps": 25.227476119995117,
+   "bearingDeg": 105,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259910294,
+   "lat": 32.6895091,
+   "lon": -18.781511,
+   "accuracyM": 12.258000373840332,
+   "speedMps": 24.455005645751953,
+   "bearingDeg": 72,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259937484,
+   "lat": 32.6919223,
+   "lon": -18.7744328,
+   "accuracyM": 22.031999588012695,
+   "speedMps": 23.892364501953125,
+   "bearingDeg": 36,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259964276,
+   "lat": 32.6976687,
+   "lon": -18.7711702,
+   "accuracyM": 36.86000061035156,
+   "speedMps": 26.88361930847168,
+   "bearingDeg": 18,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795259991479,
+   "lat": 32.7035805,
+   "lon": -18.7701889,
+   "accuracyM": 17.516000747680664,
+   "speedMps": 23.539600372314453,
+   "bearingDeg": 49,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260053484,
+   "lat": 32.714214,
+   "lon": -18.7667054,
+   "accuracyM": 18.097999572753906,
+   "speedMps": 19.776323318481445,
+   "bearingDeg": 309,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260080282,
+   "lat": 32.7181346,
+   "lon": -18.771135,
+   "accuracyM": 24.045000076293945,
+   "speedMps": 24.515913009643555,
+   "bearingDeg": 317,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260107276,
+   "lat": 32.722346,
+   "lon": -18.7761232,
+   "accuracyM": 12.192000389099121,
+   "speedMps": 24.26883888244629,
+   "bearingDeg": 313,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260134279,
+   "lat": 32.7278079,
+   "lon": -18.7794055,
+   "accuracyM": 26.981000900268555,
+   "speedMps": 23.348846435546875,
+   "bearingDeg": 321,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260161274,
+   "lat": 32.7320488,
+   "lon": -18.776369,
+   "accuracyM": 24.15999984741211,
+   "speedMps": 26.13884162902832,
+   "bearingDeg": 70,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260247439,
+   "lat": 32.7374705,
+   "lon": -18.7523161,
+   "accuracyM": 17.37700080871582,
+   "speedMps": 25.701213836669922,
+   "bearingDeg": 54,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260279692,
+   "lat": 32.7425201,
+   "lon": -18.7456023,
+   "accuracyM": 33.547000885009766,
+   "speedMps": 27.62430191040039,
+   "bearingDeg": 25,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260334680,
+   "lat": 32.7427606,
+   "lon": -18.7367922,
+   "accuracyM": 30.437999725341797,
+   "speedMps": 10.582137107849121,
+   "bearingDeg": 165,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260359686,
+   "lat": 32.7418168,
+   "lon": -18.7345699,
+   "accuracyM": 26.95800018310547,
+   "speedMps": 14.448747634887695,
+   "bearingDeg": 125,
+   "altitudeM": 238.8000030517578,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260386681,
+   "lat": 32.7430096,
+   "lon": -18.7318686,
+   "accuracyM": 21.02199935913086,
+   "speedMps": 10.025257110595703,
+   "bearingDeg": 27,
+   "altitudeM": 88.72275687009096,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260413486,
+   "lat": 32.743671,
+   "lon": -18.7293995,
+   "accuracyM": 21.32900047302246,
+   "speedMps": 15.172377586364746,
+   "bearingDeg": 113,
+   "altitudeM": 93.75612514931709,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260440277,
+   "lat": 32.7438379,
+   "lon": -18.725343,
+   "accuracyM": 21.8799991607666,
+   "speedMps": 13.483076095581055,
+   "bearingDeg": 93,
+   "altitudeM": 104.43833158258349,
+   "activityType": "driving",
+   "source": "fused"
+  },
+  {
+   "ts": 1795260467681,
+   "lat": 32.7441902,
+   "lon": -18.7214874,
+   "accuracyM": 20.35700035095215,
+   "speedMps": 13.38412094116211,
+   "bearingDeg": 85,
+   "altitudeM": 119.47451885137707,
+   "activityType": "driving",
+   "source": "fused"
+  }
+ ],
+ "batches": [
+  {
+   "at": 1795260522918,
+   "fixes": [
+    {
+     "ts": 1795260495902,
+     "lat": 32.744211,
+     "lon": -18.7175084,
+     "accuracyM": 29.60099983215332,
+     "speedMps": 12.111570358276367,
+     "bearingDeg": 99,
+     "altitudeM": 108.48792254645377,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795260523778,
+   "fixes": [
+    {
+     "ts": 1795260523687,
+     "lat": 32.7437877,
+     "lon": -18.7167927,
+     "accuracyM": 18.93899917602539,
+     "speedMps": 1.4986854791641235,
+     "bearingDeg": 42,
+     "altitudeM": 110.97863360960037,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795260590424,
+   "fixes": [
+    {
+     "ts": 1795260590206,
+     "lat": 32.7436687,
+     "lon": -18.7162756,
+     "accuracyM": 3.0910000801086426,
+     "speedMps": 1.173863172531128,
+     "bearingDeg": 83.28181457519531,
+     "altitudeM": 110.5885508973607,
+     "activityType": "walking",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795260650867,
+   "fixes": [
+    {
+     "ts": 1795260650770,
+     "lat": 32.7436261,
+     "lon": -18.7161224,
+     "accuracyM": 4.900000095367432,
+     "speedMps": 0.7440512776374817,
+     "bearingDeg": 257.9993896484375,
+     "altitudeM": 95.39834961760789,
+     "activityType": "still",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795260952114,
+   "fixes": [
+    {
+     "ts": 1795260951896,
+     "lat": 32.7430825,
+     "lon": -18.7163161,
+     "accuracyM": 16.7810001373291,
+     "speedMps": 0.16255319118499756,
+     "bearingDeg": 238.9943389892578,
+     "altitudeM": 96.88364230282605,
+     "activityType": "still",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795260952341,
+   "fixes": [
+    {
+     "ts": 1795260612584,
+     "lat": 32.7435935,
+     "lon": -18.7160674,
+     "accuracyM": 13.791000366210938,
+     "speedMps": 0.3744017779827118,
+     "bearingDeg": 90.00788116455078,
+     "altitudeM": 107.93818795587867,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260628758,
+     "lat": 32.7436315,
+     "lon": -18.7160154,
+     "accuracyM": 13.725000381469727,
+     "speedMps": 0.3558347821235657,
+     "bearingDeg": 275,
+     "altitudeM": 90.46752757113427,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260644785,
+     "lat": 32.7436144,
+     "lon": -18.7160423,
+     "accuracyM": 15.54699993133545,
+     "speedMps": 0.5872060656547546,
+     "bearingDeg": 226,
+     "altitudeM": 92.8550337255001,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260719307,
+     "lat": 32.743604,
+     "lon": -18.7161218,
+     "accuracyM": 22.31100082397461,
+     "speedMps": 0.4747624397277832,
+     "bearingDeg": 324.96868896484375,
+     "altitudeM": 107.4738857485354,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260735457,
+     "lat": 32.7436148,
+     "lon": -18.7161009,
+     "accuracyM": 13.345999717712402,
+     "speedMps": 0.08336333930492401,
+     "bearingDeg": 0,
+     "altitudeM": 95.11001970153302,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260866671,
+     "lat": 32.7431839,
+     "lon": -18.7163694,
+     "accuracyM": 15.491000175476074,
+     "speedMps": 0.9789013862609863,
+     "bearingDeg": 206.9538116455078,
+     "altitudeM": 92.11721412092447,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260914571,
+     "lat": 32.7431103,
+     "lon": -18.7164024,
+     "accuracyM": 19.979999542236328,
+     "speedMps": 0.3472447991371155,
+     "bearingDeg": 330.02386474609375,
+     "altitudeM": 96.48130160290748,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260930916,
+     "lat": 32.7431151,
+     "lon": -18.7164529,
+     "accuracyM": 4.900000095367432,
+     "speedMps": 0,
+     "bearingDeg": 0,
+     "altitudeM": 98.0602409504354,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260939694,
+     "lat": 32.7431147,
+     "lon": -18.716452,
+     "accuracyM": 8.503000259399414,
+     "speedMps": 0.000017501128240837716,
+     "bearingDeg": 0,
+     "altitudeM": 98.0602409504354,
+     "activityType": "still",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795261279173,
+   "fixes": [
+    {
+     "ts": 1795260952899,
+     "lat": 32.7430672,
+     "lon": -18.7163228,
+     "accuracyM": 15.993000030517578,
+     "speedMps": 0.36635759472846985,
+     "bearingDeg": 222.00218200683594,
+     "altitudeM": 93.63808632735163,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260968685,
+     "lat": 32.7430688,
+     "lon": -18.7163818,
+     "accuracyM": 9.329999923706055,
+     "speedMps": 0.7056735754013062,
+     "bearingDeg": 245,
+     "altitudeM": 87.02409499697387,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795260984629,
+     "lat": 32.7430355,
+     "lon": -18.7164554,
+     "accuracyM": 10.491999626159668,
+     "speedMps": 0.5708349943161011,
+     "bearingDeg": 12,
+     "altitudeM": 84.109892712906,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261079809,
+     "lat": 32.7435495,
+     "lon": -18.7165462,
+     "accuracyM": 7.870999813079834,
+     "speedMps": 1.0559041500091553,
+     "bearingDeg": 309.0394592285156,
+     "altitudeM": 97.8540747044608,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261145353,
+     "lat": 32.7437532,
+     "lon": -18.7168688,
+     "accuracyM": 22.46500015258789,
+     "speedMps": 0.22300909459590912,
+     "bearingDeg": 164.10659790039062,
+     "altitudeM": 104.88503224495798,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261161525,
+     "lat": 32.7438331,
+     "lon": -18.7165333,
+     "accuracyM": 26.180999755859375,
+     "speedMps": 0.5996272563934326,
+     "bearingDeg": 91,
+     "altitudeM": 104.66590858064592,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261178103,
+     "lat": 32.7435307,
+     "lon": -18.7164959,
+     "accuracyM": 28.895000457763672,
+     "speedMps": 5.275821208953857,
+     "bearingDeg": 70,
+     "altitudeM": 105.53482399694622,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261197506,
+     "lat": 32.7447243,
+     "lon": -18.7157674,
+     "accuracyM": 16.61400032043457,
+     "speedMps": 10.123022079467773,
+     "bearingDeg": 13,
+     "altitudeM": 105.77640777174383,
+     "activityType": "driving",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261224275,
+     "lat": 32.7469097,
+     "lon": -18.7144782,
+     "accuracyM": 27.815000534057617,
+     "speedMps": 14.034322738647461,
+     "bearingDeg": 108,
+     "altitudeM": 114.40991293638945,
+     "activityType": "driving",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261251690,
+     "lat": 32.7485052,
+     "lon": -18.7132343,
+     "accuracyM": 21.111000061035156,
+     "speedMps": 8.732848167419434,
+     "bearingDeg": 38,
+     "altitudeM": 118.6132813859731,
+     "activityType": "driving",
+     "source": "fused"
+    },
+    {
+     "ts": 1795261278900,
+     "lat": 32.7485386,
+     "lon": -18.7111702,
+     "accuracyM": 22.270999908447266,
+     "speedMps": 6.177867889404297,
+     "bearingDeg": 101,
+     "altitudeM": 120.20498202554882,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795261305892,
+   "fixes": [
+    {
+     "ts": 1795261305892,
+     "lat": 32.7493061,
+     "lon": -18.7091976,
+     "accuracyM": 26.722999572753906,
+     "speedMps": 8.368867874145508,
+     "bearingDeg": 83,
+     "altitudeM": 151.12996050529182,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ],
+   "single": true
+  }
+ ],
+ "labels": [
+  {
+   "ts": 1795260538187,
+   "activity": "driving",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795260538187,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795260647185,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795260647185,
+   "activity": "still",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795260835014,
+   "activity": "still",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795260835014,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795260914526,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795260914526,
+   "activity": "still",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795261015395,
+   "activity": "still",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795261015395,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795261180107,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795261180107,
+   "activity": "driving",
+   "transition": "enter"
+  }
+ ],
+ "diary": [
+  {
+   "ts": 1795259703494,
+   "kind": "batch",
+   "detail": "7 fixes"
+  },
+  {
+   "ts": 1795259849199,
+   "kind": "batch",
+   "detail": "geofence enter santa-cruz"
+  },
+  {
+   "ts": 1795259883897,
+   "kind": "batch",
+   "detail": "7 fixes"
+  },
+  {
+   "ts": 1795259910434,
+   "kind": "batch",
+   "detail": "geofence exit santa-cruz"
+  },
+  {
+   "ts": 1795259910460,
+   "kind": "batch",
+   "detail": "geofence enter aeroporto-da-madeira"
+  },
+  {
+   "ts": 1795260053620,
+   "kind": "batch",
+   "detail": "geofence exit aeroporto-da-madeira"
+  },
+  {
+   "ts": 1795260080532,
+   "kind": "batch",
+   "detail": "6 fixes"
+  },
+  {
+   "ts": 1795260279903,
+   "kind": "batch",
+   "detail": "5 fixes"
+  },
+  {
+   "ts": 1795260334819,
+   "kind": "batch",
+   "detail": "geofence enter canical"
+  },
+  {
+   "ts": 1795260386805,
+   "kind": "batch",
+   "detail": "geofence exit canical"
+  },
+  {
+   "ts": 1795260467899,
+   "kind": "batch",
+   "detail": "6 fixes"
+  },
+  {
+   "ts": 1795260496038,
+   "kind": "batch",
+   "detail": "geofence enter prainha-main"
+  },
+  {
+   "ts": 1795260522901,
+   "kind": "billing",
+   "detail": "owned 0, unlocked false, pending false"
+  },
+  {
+   "ts": 1795260522918,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795260523063,
+   "kind": "geofence",
+   "detail": "watching 99, 21 out of range, anchor 30000m (recording started)"
+  },
+  {
+   "ts": 1795260523065,
+   "kind": "start",
+   "detail": "recording re-asserted on launch: the task was registered"
+  },
+  {
+   "ts": 1795260523391,
+   "kind": "map",
+   "detail": "roads: kept 0 chains, matched 1 ({\"fixesIn\":266,\"fixesUsable\":264,\"fixesMoving\":47,\"fixesMatched\":44,\"fixesWild\":3,\"chains\":1,\"chainsDropped\":0}) in 154 ms, 23717 m lit, 23 lines; network {\"requireMs\":86,\"phaseMs\":{\"geometry\":331,\"lengths\":93,\"junctions\":28,\"grid\":612},\"wallMs\":1651,\"slices\":57}"
+  },
+  {
+   "ts": 1795260523778,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795260590408,
+   "kind": "activity",
+   "detail": "driving exit, walking enter"
+  },
+  {
+   "ts": 1795260590424,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795260650692,
+   "kind": "activity",
+   "detail": "still check: started on driving"
+  },
+  {
+   "ts": 1795260650855,
+   "kind": "activity",
+   "detail": "walking exit, still enter"
+  },
+  {
+   "ts": 1795260650867,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795260952098,
+   "kind": "activity",
+   "detail": "still exit, walking enter, walking exit, still enter"
+  },
+  {
+   "ts": 1795260952114,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795260952167,
+   "kind": "stamp",
+   "detail": "Prainha: 456s inside, no speed data (confidence 0.51)"
+  },
+  {
+   "ts": 1795260952254,
+   "kind": "start",
+   "detail": "profile driving -> stationary: still by the motion sensors, within 63 m for 5 min"
+  },
+  {
+   "ts": 1795260952341,
+   "kind": "batch",
+   "detail": "9 fixes"
+  },
+  {
+   "ts": 1795260952388,
+   "kind": "start",
+   "detail": "profile stationary -> driving: moved 3424 m at up to 65 km/h"
+  },
+  {
+   "ts": 1795261224406,
+   "kind": "batch",
+   "detail": "geofence exit prainha-main"
+  },
+  {
+   "ts": 1795261279146,
+   "kind": "activity",
+   "detail": "still exit, walking enter, walking exit, driving enter"
+  },
+  {
+   "ts": 1795261279173,
+   "kind": "batch",
+   "detail": "11 fixes"
+  }
+ ]
+}

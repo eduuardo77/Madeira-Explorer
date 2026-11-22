@@ -210,6 +210,13 @@ export type MovementDecision = {
   reason: string;
   /** True when the profile differs from what was passed in. */
   changed: boolean;
+  /**
+   * Out of stationary to driving on the motion sensors' *in a vehicle* alone,
+   * no speed behind it (T-312). The recorder rechecks such a raise five
+   * minutes on (`decideVehicleRecheck`): seated at lunch on 21 Nov 2026, one
+   * label at a time held the P30 on fine GPS for most of 53 min.
+   */
+  byLabel?: boolean;
 };
 
 /**
@@ -270,8 +277,22 @@ export function decideProfile(
     return keep(`newest fix ${Math.round((wallNowMs - newest.ts) / 60000)} min old, a leftover batch`);
   }
 
+  // ⚠ T-312: out of stationary, only a fix from after the drop can say the phone
+  // moves now. On 21 Nov 2026 the still check slept the P30 at Prainha at
+  // 11:35:52 and the same second's batch, every fix taken at the stop in the
+  // minutes before, woke it: the window reached back to the drive in, "moved
+  // 3424 m at up to 65 km/h". Four times in two days, home twice. The fixes
+  // before the drop still serve below as where the phone was (rule 2).
+  if (current === STATIONARY_PROFILE && profileSinceTs !== undefined && newest.ts < profileSinceTs) {
+    return keep('no fix since the phone stopped');
+  }
+
   const windowStart = newest.ts - STATIONARY_WINDOW_MS - STATIONARY_EDGE_MS;
-  const inWindow = trusted.filter((sample) => sample.ts >= windowStart);
+  const inWindow = trusted.filter(
+    (sample) =>
+      sample.ts >= windowStart &&
+      (current !== STATIONARY_PROFILE || profileSinceTs === undefined || sample.ts >= profileSinceTs)
+  );
 
 
   let maxDisplacementM = 0;
@@ -312,6 +333,7 @@ export function decideProfile(
             : `moved ${Math.round(maxDisplacementM)} m at up to ${Math.round(fastest * 3.6)} km/h`
           : `moved ${Math.round(maxDisplacementM)} m`,
       changed: current !== profile,
+      byLabel: current === STATIONARY_PROFILE && profile === 'driving' && fastest < VEHICLE_SPEED_MPS,
     };
   }
 
@@ -327,7 +349,12 @@ export function decideProfile(
     //    a denser rate, as everywhere else the label is used.
     if (newest.activity !== undefined && MOVING_ACTIVITIES.has(newest.activity)) {
       const profile: SamplingProfile = newest.activity === 'driving' ? 'driving' : MOVING_PROFILE;
-      return { profile, reason: `the motion sensors say ${newest.activity}`, changed: true };
+      return {
+        profile,
+        reason: `the motion sensors say ${newest.activity}`,
+        changed: true,
+        byLabel: profile === 'driving',
+      };
     }
     // 2. The phone is far from where it last was, however long ago that was:
     //    the fix before the window, which the check above cannot see. Both

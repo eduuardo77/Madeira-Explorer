@@ -471,6 +471,22 @@ permission, L3 privacy contact.
       0 m* then *moved 446 m* raised walking, 30 min of GPS at home; (2) 20:30:50 a motion wake
       on *driving* inside the shopping centre, 20 min on driving. The home case of 17:43 lowered
       itself at 17:53 (a later check), so (1) costs 10 to 30 min, not a night.
+      **Fixed 2026-11-22** (the lead: "Yes, fix T-312"). (1) `decideProfile`: out of
+      stationary, only fixes from after the drop can wake it; with none, *no fix since the
+      phone stopped*. (2) A raise from stationary to driving on the label alone (`byLabel`)
+      books a **vehicle recheck** on the still check's alarm and row: five minutes on, two
+      trusted positions within their error put it back to stationary
+      (`decideVehicleRecheck`); no position, a move or a second *in vehicle* keeps driving.
+      ⚠ **Rejected first: waiting for a second label before raising.** Replayed on real
+      departures it raised 1.5 to 7 min late, 1.8 km of road unrecorded leaving home for the
+      cinema and 1 km leaving the centre, since a drive also starts on one label. Replays
+      (`recorderCore.test.ts`, fixtures cut from the P30, 2° west): Prainha and Santana stay
+      asleep until the lead walks or drives; lunch 46 min of driving down to 10; the centre 19
+      down to 10; the five departures of 21 Nov raise when the phone did. The home case is
+      not a fixture (it is where the lead lives); it is the same rule as Prainha. Each case
+      fails on the old code. 1,285 tests. **On the P30 since 22 Nov 10:14** (field build,
+      `install -r`, backup `p30-2026-11-22-before-t312`): relaunched, stationary, no Bruma GPS
+      request. To see on a trip: a stop that stays asleep, and a recheck line in the diary.
 - [ ] **T-311** **Play rejected version 13 for production: "Declaração em destaque inadequada".**
       **Fixed 2026-11-21, version 14.** Play's User Data policy wants *every* runtime permission
       request "immediately preceded" by the disclosure; the first-run card before Android's first

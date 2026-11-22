@@ -8,6 +8,9 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov, day west** (field log): 89.5% within 10 m, 2.1%/h, T-312 held at every stop. ❌
+  **T-315:** a still check slept the phone as the car left Câmara de Lobos (1.2 km dark): it never
+  sees labels from the transitions batch. Not fixed. Backup `p30-2026-11-22-after-trip`.
 - **22 Nov, 10:49: silence no longer ends a trip** (T-314 choice B, D-088 amended), on the P30
   (backup `p30-2026-11-22-before-t314`). Still open: C, everything adding up across trips.
 - **22 Nov, 10:25: T-313 built and on the P30** (field build, backup

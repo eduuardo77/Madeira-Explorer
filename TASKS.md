@@ -450,6 +450,12 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-315** **A still check slept the phone as the car left (22 Nov, 14:19, about 1.2 km
+      dark).** Its look found no position, so it decided on labels alone, and it counts only
+      the motion wake's labels (`lastMovingSignalMs` in `recorderCore.ts`): *walking* at 14:16:51
+      and *driving* at 14:19:34 came through the transitions batch and were never seen; the 4
+      fixes stored at 14:17:58 were not looked at either. Fix to propose: before deciding, read
+      the stored labels and fixes since the wake. Not fixed; awaits the lead. Field log 22 Nov.
 - [ ] **T-313** **A driven road left dark by a GPS bad patch (21 Nov, Poiso to above Parque
       Ecológico, 1.8 km).** The lead: treat it seriously. Research in
       `docs/research-broken-line-2026-11-21.md`: a join along the road when every fix between two

@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-22 | **Day west, automatic recording, first trip of T-312, T-313 and T-314**: Câmara de Lobos, Ponta do Sol, Caminho Velho dos Reis Magos on foot, 8 h, 106 km measured, iPhone 11:08 to 19:14 | P30 | one mode (D-108), automatic | ✅ **89.5% of the route within 10 m**, 96.0% within 30 m, by car 91.5%, on foot 69.3% (51.5% the day before); ✅ T-312: no stop woken by its own fixes, both single-label raises real departures; battery 94 to 77% in 8 h 12 (about 2.1 an hour); ❌ **T-315: a still check slept the phone as the car left** (14:19, about 1.2 km dark); ❌ 1.2 km of expressway lit beside the old road at Ponta do Sol (T-313's second half); the road join did not fire |
 | 2026-11-21 to 22 | **Cinema at Forum Madeira and the night after, automatic recording**, car each way (19 km), 4 h in the shopping centre, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.4% there and 91.6% back within 10 m**, 97.5 and 99.1% within 30 m; ✅ **the film slept** (20:50 to 00:09, motion wakes never raised it); ✅ **a quiet night**: 2 fixes from 01:07 to 09:57; battery 97 to 85% in 14 h 31, trip included; ❌ T-312 twice more: a false *in vehicle* in the centre (20 min), home raised to walking (30 min) |
 | 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; battery 100 to 86% in 6 h 48 (about 2.1 an hour); ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
 | 2026-11-02 | **Car through Funchal and back, automatic recording**, 1 h 12, 34 km, app opened once on the way, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **97.5% of the route within 10 m**, by car 97.9%; ✅ **T-308: home ended stationary**; ❌ the night before, 2 h 10 on walking at home from Wi-Fi jitter (T-309) |
@@ -50,6 +51,33 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-22: day west, automatic recording, first trip of T-312, T-313 and T-314
+
+- **Setup:** field build of 10:49 (T-312, T-313, T-314), automatic on, unplugged 11:04 at 94%.
+  iPhone SensorLogger 11:08 to 19:14 (`Madeira-fieldwork/iphone-2026-11-22`, compare page beside
+  it). Database pulled 19:17, `Madeira-fieldwork/backups/p30-2026-11-22-after-trip`.
+- **Route: 89.5% within 10 m, 96.0% within 30 m** of 106 km; by car 91.5% (97.1% within 30 m);
+  on foot 9.4 km, 69.3% (51.5% on 21 Nov). Lit line 91.8% within 10 m of the route.
+- **Battery, from `dumpsys batterystats --history`:** 94% at 11:04, 77% plugged at 19:16:
+  **17 points in 8 h 12, about 2.1 an hour**, the fourth carried day at 2 to 2.1.
+- ✅ **T-312:** no stop raised by its own fixes all day. The two raises on one *in vehicle* label
+  (12:40:59, 14:23:24) were real departures, and the recheck kept them on driving (*driving twice
+  since*). 48 min asleep from 16:06.
+- ✅ **T-313:** the join did not fire; the day reads the same with it off. No harm, no help.
+- ❌ **T-315, a still check slept the phone as the car left.** Check started 14:14:23 on walking;
+  its own look found no position. *Still exit, walking enter* at 14:16:51 reached the recorder
+  through the transitions batch at 14:17:58, with 4 fixes; *driving enter* at 14:19:34 and a fix at
+  13.5 m/s came at 14:19:54. The alarm ran first in that second: *still by the motion sensors
+  for 6 min, no position (indoors)*, stationary. The motion wake raised driving at 14:23:24.
+  About 1.2 km dark leaving Câmara de Lobos. The check counts only labels from the motion wake
+  (`lastMovingSignalMs`), not those of the transitions batch, and only its own two looks, not the
+  fixes stored while it waited.
+- ❌ **Ponta do Sol, 15:22 to 15:26:** fixes 50 to 70 s apart under the cliffs, and the chain took
+  the expressway: 1.2 km lit there, the old road driven dark. The parallel-road choice of
+  T-313's research, seen again.
+- Smaller: a few hundred metres walked at three stops while the phone slept (12:35, 14:56, 17:37),
+  the first minutes of a walk before the motion wake.
 
 ### 2026-11-21 to 22: cinema at Forum Madeira, and the night after
 

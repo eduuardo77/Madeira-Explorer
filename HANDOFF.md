@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov: cinema at Forum Madeira and the night after** (field log): 90.4% there, 91.6% back
+  within 10 m; the 3 h film stayed stationary; **a quiet night** (2 fixes, 01:07 to 09:57).
+  T-312 twice more (a false *in vehicle* in the centre, home raised to walking for 30 min); the
+  home case lowers itself within 10 to 30 min, not a night. Backup `p30-2026-11-22-after-cinema`.
 - **21 Nov, evening:** trip 31 had ended by three quiet days (D-088) and the lead thought their
   data lost; **trip 33 folded back into 31 on the P30** (backup `p30-2026-11-21-before-merge`),
   26/81 again. Open for the lead: T-314 (`docs/trip-ending-question.md`) and T-313, a road left

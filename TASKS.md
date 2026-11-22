@@ -467,6 +467,10 @@ permission, L3 privacy contact.
       (2) A 53 min stop slept four times and was raised each time by one *in vehicle* label;
       T-296's two-label rule covers walking only. The lead: lunch seated in a restaurant, so
       the labels were false; from stationary one *in vehicle* label should not be enough.
+      **21 Nov evening, cinema at Forum Madeira, both again:** (1) home at 00:37:24, *within
+      0 m* then *moved 446 m* raised walking, 30 min of GPS at home; (2) 20:30:50 a motion wake
+      on *driving* inside the shopping centre, 20 min on driving. The home case of 17:43 lowered
+      itself at 17:53 (a later check), so (1) costs 10 to 30 min, not a night.
 - [ ] **T-311** **Play rejected version 13 for production: "Declaração em destaque inadequada".**
       **Fixed 2026-11-21, version 14.** Play's User Data policy wants *every* runtime permission
       request "immediately preceded" by the disclosure; the first-run card before Android's first

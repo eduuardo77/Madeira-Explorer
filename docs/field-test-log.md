@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-21 to 22 | **Cinema at Forum Madeira and the night after, automatic recording**, car each way (19 km), 4 h in the shopping centre, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.4% there and 91.6% back within 10 m**, 97.5 and 99.1% within 30 m; ✅ **the film slept** (20:50 to 00:09, motion wakes never raised it); ✅ **a quiet night**: 2 fixes from 01:07 to 09:57; battery 97 to 85% in 14 h 31, trip included; ❌ T-312 twice more: a false *in vehicle* in the centre (20 min), home raised to walking (30 min) |
 | 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; battery 100 to 86% in 6 h 48 (about 2.1 an hour); ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
 | 2026-11-02 | **Car through Funchal and back, automatic recording**, 1 h 12, 34 km, app opened once on the way, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **97.5% of the route within 10 m**, by car 97.9%; ✅ **T-308: home ended stationary**; ❌ the night before, 2 h 10 on walking at home from Wi-Fi jitter (T-309) |
 | 2026-11-01 | **Car to Reis Magos, two stops, automatic recording**, 1 h 11, 11.4 km, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.5% of the route within 10 m**, by car 94.1%; ✅ **T-295's alarm ran both stops' still checks, both slept**; ❌ **home on fine GPS: the check at home stayed, its two positions 4 min 53 s apart** (T-308) |
@@ -49,6 +50,30 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-21 to 22: cinema at Forum Madeira, and the night after
+
+- **Setup:** vc14, automatic, app last opened 19:25 at home (and 18:44, 19:02 while trip 33 was
+  folded back into 31). iPhone SensorLogger in two parts, 19:40 to 21:09 and 21:09 to 00:31
+  (`Madeira-fieldwork/iphone-2026-11-21-cinema`). The P30 stayed off the cable overnight;
+  database pulled 22 Nov 09:57, `Madeira-fieldwork/backups/p30-2026-11-22-after-cinema`.
+- **Home from the day before:** the 17:43:53 wake to driving lowered itself at 17:53:49 (*still
+  by the motion sensors for 10 min, within 11 m*). The fixes from 18:40 to 19:25 are the app on
+  screen.
+- **There, 19:40 to 20:03: 90.4% within 10 m**, 97.5% within 30 m, of 19.2 km. Driving from
+  19:35:23. Unlit: 225 m into the centre's car park.
+- **In the centre, 20:02 to 00:09** (the iPhone within 60 m throughout). Stationary 20:16:21
+  (*within 119 m for 12 min*). ❌ 20:30:50 a motion wake on *driving* raised driving, on fine GPS
+  (5 m) until 20:50:50: T-312 (2) again, with the lead on foot or seated. ✅ **The film,
+  20:50 to 00:09, stayed stationary**: nine motion wakes with their looks, none raised it.
+- **Back, 00:04 to 00:31: 91.6% within 10 m**, 99.1% within 30 m, of 19.6 km. Driving at
+  00:09:59, the car leaving at 00:09:56 by the iPhone: nothing lost.
+- ❌ **Home, T-312 (1) a fourth time:** 00:37:24 stationary *within 0 m for 5 min*, and the same
+  second *moved 446 m* raised walking; lowered at 01:06:52. 30 min of GPS at home.
+- ✅ **A quiet night:** 2 fixes from 01:07 to 09:57; no Bruma GPS request in `dumpsys location`
+  at 09:57. The night T-309 was waiting for.
+- **Battery,** `batterystats --history`: unplugged 19:25 at 97%, plugged 09:56 at 85%, 12 points
+  in 14 h 31 with the trip and the night together.
 
 ### 2026-11-21: sightseeing day, automatic recording, version 14's first trip
 

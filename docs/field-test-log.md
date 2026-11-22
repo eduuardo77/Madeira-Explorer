@@ -72,7 +72,7 @@ never where the lead lives.
   for 6 min, no position (indoors)*, stationary. The motion wake raised driving at 14:23:24.
   About 1.2 km dark leaving Câmara de Lobos. The check counts only labels from the motion wake
   (`lastMovingSignalMs`), not those of the transitions batch, and only its own two looks, not the
-  fixes stored while it waited.
+  fixes stored while it waited. **Fixed the same evening** (T-315), on the P30 since 19:30.
 - ❌ **Ponta do Sol, 15:22 to 15:26:** fixes 50 to 70 s apart under the cliffs, and the chain took
   the expressway: 1.2 km lit there, the old road driven dark. The parallel-road choice of
   T-313's research, seen again.

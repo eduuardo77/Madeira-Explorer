@@ -36,6 +36,8 @@ import {
   confirmsDriving,
   decideStillCheck,
   decideVehicleRecheck,
+  latestOf,
+  movedWhileWaiting,
   DRIVING_CONFIRM_WINDOW_MS,
   type FollowUp,
   launchProfile,
@@ -86,6 +88,12 @@ export type RecorderDeps = {
     /** Newest first, `ts >= sinceTs`, at most `limit` (`rawFixDao.getMovementWindow`). */
     getMovementWindow(tripId: number, sinceTs: number, limit: number): Promise<MovementSample[]>;
     getLastFixTs(tripId: number): Promise<number | null>;
+    /**
+     * The newest *enter* stored in `activity_event` after `sinceTs`, by the
+     * label's own time, when it is a moving one; else null (T-315). The
+     * transitions batch stores them there and never reaches `onMotionWake`.
+     */
+    getLastMovingLabelTs(sinceTs: number): Promise<number | null>;
   };
   provider: {
     /** `hasStartedLocationUpdatesAsync`: the task is registered, not proof it runs (T-174). */
@@ -117,6 +125,9 @@ export type RecorderDeps = {
 };
 
 export type Recorder = ReturnType<typeof createRecorder>;
+
+/** The most stored fixes a still check reads from its wait (T-315): five minutes at the walking rate fit. */
+const STILL_EVIDENCE_LIMIT = 50;
 
 export function createRecorder(deps: RecorderDeps) {
   /**
@@ -523,7 +534,22 @@ export function createRecorder(deps: RecorderDeps) {
     if (second !== null) await recordSamples([second]);
     const after = await getCurrentSamplingProfile();
     const nowMs = deps.now();
-    const check = decideStillCheck(after, pending.first, second, lastMovingSignalMs, pending.wakeMs, nowMs);
+    // T-315: what was stored while it waited counts too. The labels of the
+    // transitions batch never reach `onMotionWake`, and a look that found
+    // nothing is not proof of indoors when the batches brought fixes.
+    const tripId = await deps.trace.getActiveTripId();
+    const stored =
+      tripId === null ? [] : await deps.trace.getMovementWindow(tripId, pending.wakeMs, STILL_EVIDENCE_LIMIT);
+    const moving = latestOf(lastMovingSignalMs, await deps.trace.getLastMovingLabelTs(pending.wakeMs));
+    const check = decideStillCheck(
+      after,
+      pending.first,
+      second,
+      moving,
+      pending.wakeMs,
+      nowMs,
+      movedWhileWaiting(pending.first, stored)
+    );
     if (check.sleep) {
       await lowerProfile(check.reason);
     } else {

@@ -25,6 +25,25 @@ export async function insertEvents(events: readonly ActivityEvent[]): Promise<vo
 }
 
 /**
+ * The time of the newest *enter* after `sinceTs` when it is a moving one, or
+ * null: what a still check asks before it sleeps the phone (T-315,
+ * `recorderCore.ts`). Only the newest: the sensors flicker to walking and back
+ * at a stop, and on 21 and 22 Nov counting any moving enter would have kept
+ * 11 of 22 real stops awake; the newest kept 6, each a real departure.
+ */
+export async function getLastMovingEnterSince(sinceTs: number): Promise<number | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ ts: number; activity: string }>(
+    `SELECT ts, activity FROM activity_event
+      WHERE ts > ? AND transition = 'enter' ORDER BY ts DESC LIMIT 1;`,
+    sinceTs
+  );
+  return row !== null && MOVING_ACTIVITIES.includes(row.activity) ? row.ts : null;
+}
+
+const MOVING_ACTIVITIES = ['walking', 'running', 'cycling', 'driving'];
+
+/**
  * The events that decide the activity between `fromTs` and `toTs`: every one
  * in that range, and the last `context` before it, which carry the state in.
  */

@@ -1,0 +1,474 @@
+{
+ "name": "still-departure-2026-11-22",
+ "source": "copy",
+ "window": {
+  "from": "2026-11-22T14:05:00",
+  "to": "2026-11-22T14:25:00",
+  "historyMin": 15
+ },
+ "offsetLonDeg": -2,
+ "profileBefore": {
+  "profile": "stationary",
+  "ts": 1795353280749
+ },
+ "history": [
+  {
+   "ts": 1795355836618,
+   "lat": 32.6485452,
+   "lon": -18.9751195,
+   "accuracyM": 100,
+   "speedMps": 0,
+   "bearingDeg": 0,
+   "altitudeM": 61.461963599547744,
+   "activityType": "still",
+   "source": "fused"
+  }
+ ],
+ "batches": [
+  {
+   "at": 1795356391974,
+   "fixes": [
+    {
+     "ts": 1795356391742,
+     "lat": 32.6485001,
+     "lon": -18.9748542,
+     "accuracyM": 12.138999938964844,
+     "speedMps": 0.5693147778511047,
+     "bearingDeg": 354,
+     "altitudeM": 61.461963599547744,
+     "activityType": "still",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795356457502,
+   "fixes": [
+    {
+     "ts": 1795356457353,
+     "lat": 32.6483066,
+     "lon": -18.9754933,
+     "accuracyM": 24.207000732421875,
+     "speedMps": 0.20377202332019806,
+     "bearingDeg": 337,
+     "altitudeM": 61.461963599547744,
+     "activityType": "walking",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795356813203,
+   "fixes": [
+    {
+     "ts": 1795356489684,
+     "lat": 32.6484815,
+     "lon": -18.9755711,
+     "accuracyM": 20.437000274658203,
+     "speedMps": 1.6403034925460815,
+     "bearingDeg": 198,
+     "altitudeM": 68.13514754455537,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356534280,
+     "lat": 32.6485781,
+     "lon": -18.9757626,
+     "accuracyM": 16.66200065612793,
+     "speedMps": 1.2425917387008667,
+     "bearingDeg": 179,
+     "altitudeM": 69.86825187783688,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356570488,
+     "lat": 32.6488804,
+     "lon": -18.9764694,
+     "accuracyM": 18.256000518798828,
+     "speedMps": 5.8881096839904785,
+     "bearingDeg": 153,
+     "altitudeM": 72.93146337103099,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356641520,
+     "lat": 32.6486925,
+     "lon": -18.976907,
+     "accuracyM": 22.72100067138672,
+     "speedMps": 5.886297702789307,
+     "bearingDeg": 273,
+     "altitudeM": 73.18776796106249,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356704426,
+     "lat": 32.6483639,
+     "lon": -18.9769234,
+     "accuracyM": 27.285999298095703,
+     "speedMps": 1.538071870803833,
+     "bearingDeg": 231,
+     "altitudeM": 68.70063795149326,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356735389,
+     "lat": 32.6486662,
+     "lon": -18.977799,
+     "accuracyM": 22.089000701904297,
+     "speedMps": 0.2945787012577057,
+     "bearingDeg": 20,
+     "altitudeM": 72.0619937190786,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356766578,
+     "lat": 32.6488156,
+     "lon": -18.9777756,
+     "accuracyM": 4.699999809265137,
+     "speedMps": 7.283408164978027,
+     "bearingDeg": 344,
+     "altitudeM": 68.18989267852157,
+     "activityType": "walking",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795357078888,
+   "fixes": [
+    {
+     "ts": 1795356939923,
+     "lat": 32.6494832,
+     "lon": -18.9763557,
+     "accuracyM": 4.900000095367432,
+     "speedMps": 0.9424764513969421,
+     "bearingDeg": 201,
+     "altitudeM": 64.60518376342952,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795356985792,
+     "lat": 32.6488652,
+     "lon": -18.9776129,
+     "accuracyM": 32.939998626708984,
+     "speedMps": 0.23754547536373138,
+     "bearingDeg": 284,
+     "altitudeM": 68.17119655571878,
+     "activityType": "still",
+     "source": "fused"
+    },
+    {
+     "ts": 1795357047488,
+     "lat": 32.6490257,
+     "lon": -18.9782494,
+     "accuracyM": 10.381999969482422,
+     "speedMps": 2.407978057861328,
+     "bearingDeg": 300,
+     "altitudeM": 68.97763209044933,
+     "activityType": "walking",
+     "source": "fused"
+    },
+    {
+     "ts": 1795357078675,
+     "lat": 32.6491979,
+     "lon": -18.9787035,
+     "accuracyM": 20.520999908447266,
+     "speedMps": 1.928983449935913,
+     "bearingDeg": 51,
+     "altitudeM": 69.86800880264491,
+     "activityType": "walking",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795357194181,
+   "fixes": [
+    {
+     "ts": 1795357119921,
+     "lat": 32.6490895,
+     "lon": -18.9789269,
+     "accuracyM": 16.677000045776367,
+     "speedMps": 13.533350944519043,
+     "bearingDeg": 72,
+     "altitudeM": 69.82661505509168,
+     "activityType": "walking",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795357403997,
+   "fixes": [
+    {
+     "ts": 1795357403775,
+     "lat": 32.6544273,
+     "lon": -18.9683886,
+     "accuracyM": 6.178999900817871,
+     "speedMps": 17.210187911987305,
+     "bearingDeg": 41,
+     "altitudeM": 69.99090514983982,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ]
+  },
+  {
+   "at": 1795357431693,
+   "fixes": [
+    {
+     "ts": 1795357431693,
+     "lat": 32.6553097,
+     "lon": -18.9664427,
+     "accuracyM": 24.589000701904297,
+     "speedMps": 11.31580638885498,
+     "bearingDeg": 16,
+     "altitudeM": 164.005334966816,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ],
+   "single": true
+  },
+  {
+   "at": 1795357459295,
+   "fixes": [
+    {
+     "ts": 1795357459295,
+     "lat": 32.6561383,
+     "lon": -18.9680831,
+     "accuracyM": 33.268001556396484,
+     "speedMps": 13.746692657470703,
+     "bearingDeg": 315,
+     "altitudeM": 162.0565869193524,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ],
+   "single": true
+  },
+  {
+   "at": 1795357484654,
+   "fixes": [
+    {
+     "ts": 1795357484654,
+     "lat": 32.6584043,
+     "lon": -18.9721122,
+     "accuracyM": 33.108001708984375,
+     "speedMps": 24.6306095123291,
+     "bearingDeg": 256,
+     "altitudeM": 164.7278282912448,
+     "activityType": "driving",
+     "source": "fused"
+    }
+   ],
+   "single": true
+  }
+ ],
+ "labels": [
+  {
+   "ts": 1795356111099,
+   "activity": "still",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795356111099,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795356135640,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795356135640,
+   "activity": "still",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795356427947,
+   "activity": "still",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795356427947,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795356860270,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795356860270,
+   "activity": "still",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795357011090,
+   "activity": "still",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795357011090,
+   "activity": "walking",
+   "transition": "enter"
+  },
+  {
+   "ts": 1795357174256,
+   "activity": "walking",
+   "transition": "exit"
+  },
+  {
+   "ts": 1795357174256,
+   "activity": "driving",
+   "transition": "enter"
+  }
+ ],
+ "diary": [
+  {
+   "ts": 1795356107596,
+   "kind": "activity",
+   "detail": "motion wake: significant_motion"
+  },
+  {
+   "ts": 1795356107737,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795356197625,
+   "kind": "activity",
+   "detail": "motion wake: look 2"
+  },
+  {
+   "ts": 1795356207502,
+   "kind": "activity",
+   "detail": "motion wake: significant_motion"
+  },
+  {
+   "ts": 1795356297584,
+   "kind": "activity",
+   "detail": "motion wake: look 2"
+  },
+  {
+   "ts": 1795356387607,
+   "kind": "activity",
+   "detail": "motion wake: look 3"
+  },
+  {
+   "ts": 1795356391962,
+   "kind": "activity",
+   "detail": "still exit, walking enter, walking exit, still enter"
+  },
+  {
+   "ts": 1795356391974,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795356391992,
+   "kind": "batch",
+   "detail": "0 fixes (1 already stored)"
+  },
+  {
+   "ts": 1795356455593,
+   "kind": "activity",
+   "detail": "motion wake: significant_motion"
+  },
+  {
+   "ts": 1795356457488,
+   "kind": "activity",
+   "detail": "still exit, walking enter"
+  },
+  {
+   "ts": 1795356457502,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795356457522,
+   "kind": "batch",
+   "detail": "0 fixes (1 already stored)"
+  },
+  {
+   "ts": 1795356457538,
+   "kind": "start",
+   "detail": "profile stationary -> walking: the motion sensors say walking"
+  },
+  {
+   "ts": 1795356813203,
+   "kind": "batch",
+   "detail": "7 fixes"
+  },
+  {
+   "ts": 1795356863888,
+   "kind": "activity",
+   "detail": "still check: started on walking"
+  },
+  {
+   "ts": 1795357078868,
+   "kind": "activity",
+   "detail": "walking exit, still enter, still exit, walking enter"
+  },
+  {
+   "ts": 1795357078888,
+   "kind": "batch",
+   "detail": "4 fixes"
+  },
+  {
+   "ts": 1795357194089,
+   "kind": "start",
+   "detail": "profile walking -> stationary: still by the motion sensors for 6 min, no position (indoors)"
+  },
+  {
+   "ts": 1795357194168,
+   "kind": "activity",
+   "detail": "walking exit, driving enter"
+  },
+  {
+   "ts": 1795357194181,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795357392632,
+   "kind": "activity",
+   "detail": "motion wake: activity (driving)"
+  },
+  {
+   "ts": 1795357403997,
+   "kind": "batch",
+   "detail": "1 fixes"
+  },
+  {
+   "ts": 1795357404019,
+   "kind": "batch",
+   "detail": "geofence exit camara-de-lobos-main"
+  },
+  {
+   "ts": 1795357404037,
+   "kind": "start",
+   "detail": "profile stationary -> driving: the motion sensors say driving"
+  },
+  {
+   "ts": 1795357404042,
+   "kind": "batch",
+   "detail": "0 fixes (1 already stored)"
+  },
+  {
+   "ts": 1795357404044,
+   "kind": "activity",
+   "detail": "vehicle recheck: in a vehicle once, looking again in 5 min"
+  }
+ ]
+}

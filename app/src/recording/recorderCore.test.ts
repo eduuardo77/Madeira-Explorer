@@ -15,7 +15,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import type { LocationSample, SamplingProfile } from './LocationProvider';
 import { offsetByMetres } from './distance.ts';
-import { STILL_CHECK_WAIT_MS, WAKE_FIX_TIMEOUT_MS } from './motionWakePolicy.ts';
+import { movedWhileWaiting, STILL_CHECK_WAIT_MS, WAKE_FIX_TIMEOUT_MS } from './motionWakePolicy.ts';
 import { createRecorder, type RecorderDeps } from './recorderCore.ts';
 import { createReplay, type ReplayEvent } from './recorderReplay.ts';
 
@@ -178,6 +178,7 @@ test('⚠⚠ 27 Oct: a profile read begun before the launch wrote cannot undo th
     trace: {
       getActiveTripId: async () => 1,
       getMovementWindow: async () => [],
+      getLastMovingLabelTs: async () => null,
       getLastFixTs: async () => LAUNCH_AT - 1037 * 60_000,
     },
     provider: {
@@ -496,4 +497,107 @@ test('a still check whose stop the gate already caught ends quietly (T-286)', as
   );
   assert.deepEqual(replay.changes.map((change) => change.profile), ['stationary']);
   assert.ok(!replay.diary.some((line) => line.includes('still check: stay')), replay.diary.join('\n'));
+});
+
+// ---------------------------------------------------------------------------
+// 22 Nov, 14:14 to 14:24: a still check that slept the phone as the car left (T-315)
+// ---------------------------------------------------------------------------
+//
+// Câmara de Lobos. The still check began at 14:14:23 on walking and its look
+// found nothing. The lead walked at 14:16:51 and drove at 14:19:34, but those
+// labels came through the transitions batch (14:17:58, 14:19:54), which only
+// stores them; the recorder never saw them. At 14:19:54 the check slept the
+// phone, "no position (indoors)", and the motion wake raised driving at 14:23:24.
+
+/** The day as the phone received it: motion wakes, transitions stored only, batches. */
+function departureEvents(f: Fixture, transitions: boolean): ReplayEvent[] {
+  const deliveries = f.diary
+    .filter((line) => line.kind === 'activity' && / (enter|exit)/.test(` ${line.detail}`))
+    .map((line) => line.ts);
+  const byDelivery = new Map<number, Fixture['labels']>();
+  for (const label of f.labels) {
+    const at = deliveries.find((ts) => ts >= label.ts) ?? label.ts;
+    byDelivery.set(at, [...(byDelivery.get(at) ?? []), label]);
+  }
+  return [
+    ...f.batches.map((batch): ReplayEvent => ({ kind: 'batch', at: batch.at, fixes: batch.fixes })),
+    { kind: 'significant_motion', at: utc('2026-11-22T14:07:35') },
+    // "still check: started on walking": the motion wake's still.
+    { kind: 'label', at: utc('2026-11-22T14:14:23'), activity: 'still' },
+    { kind: 'label', at: utc('2026-11-22T14:23:12'), activity: 'driving' },
+    ...(transitions
+      ? [...byDelivery].map(([at, labels]): ReplayEvent => ({ kind: 'transitions', at, labels }))
+      : []),
+  ];
+}
+
+async function replayDeparture(transitions: boolean) {
+  const f = fixture('still-departure-2026-11-22');
+  const replay = createReplay({
+    storedProfile: f.profileBefore?.profile,
+    storedProfileTs: f.profileBefore?.ts,
+    history: f.history,
+    positionAt: positionsFrom(f),
+  });
+  await replay.run(departureEvents(f, transitions), utc('2026-11-22T14:25:00'));
+  return replay;
+}
+
+test('⚠ 22 Nov, Câmara de Lobos: a still check does not sleep a phone that walked to the car (T-315)', async () => {
+  const replay = await replayDeparture(true);
+  const asleep = replay.changes.find(
+    (change) => change.profile === 'stationary' && change.at > utc('2026-11-22T14:14:23')
+  );
+  const diary = replay.diary.join('\n');
+  assert.equal(asleep, undefined, `slept at ${asleep && at(asleep.at)}:\n${diary}`);
+  assert.ok(
+    replay.diary.some((line) => line.includes('still check: stay') && line.includes('the motion sensors said moving since')),
+    diary
+  );
+  // Recording on walking as the car left, raised to driving by the first fix of the drive in.
+  const driving = replay.changes.find((change) => change.profile === 'driving');
+  assert.ok(driving && driving.at <= utc('2026-11-22T14:23:24'), diary);
+});
+
+test('22 Nov, without the stored labels: the fixes stored while it waited keep it awake too (T-315)', async () => {
+  // Four fixes came at 14:17:58, the lead walking to the car: either evidence is enough.
+  const replay = await replayDeparture(false);
+  const asleep = replay.changes.find(
+    (change) => change.profile === 'stationary' && change.at > utc('2026-11-22T14:14:23')
+  );
+  assert.equal(asleep, undefined, replay.diary.join('\n'));
+  assert.ok(replay.diary.some((line) => /still check: stay .*moved \d+ m while it waited/.test(line)), replay.diary.join('\n'));
+});
+
+test('movedWhileWaiting: jitter within the fixes\' error is not a move, a walk is (T-315)', () => {
+  const at0 = { ts: 0, lat: 32.65, lon: -16.97, accuracyM: 20 };
+  const jitter = [{ ts: 60_000, lat: 32.6502, lon: -16.97, accuracyM: 30 }];
+  assert.equal(movedWhileWaiting(at0, jitter), null, '22 m within 20 and 30 m of error');
+  const walk = [...jitter, { ts: 150_000, lat: 32.652, lon: -16.97, accuracyM: 10 }];
+  assert.ok((movedWhileWaiting(at0, walk) ?? 0) > 200);
+  assert.equal(movedWhileWaiting(null, []), null);
+  // Too rough to count: 400 m off at 300 m of error.
+  assert.equal(movedWhileWaiting(at0, [{ ts: 60_000, lat: 32.6536, lon: -16.97, accuracyM: 300 }]), null);
+});
+
+test('a flicker to walking and back to still while it waits does not keep a stop awake (T-315)', async () => {
+  // Only the newest stored label counts: on 21 and 22 Nov counting any moving
+  // one would have kept 11 of 22 real stops awake.
+  const t0 = utc('2026-11-22T16:01:16');
+  const replay = createReplay({ storedProfile: 'walking', storedProfileTs: t0 - 10 * MIN });
+  await replay.run(
+    [
+      { kind: 'label', at: t0, activity: 'still' },
+      {
+        kind: 'transitions',
+        at: t0 + 2 * MIN,
+        labels: [
+          { ts: t0 + 60_000, activity: 'walking', transition: 'enter' },
+          { ts: t0 + 90_000, activity: 'still', transition: 'enter' },
+        ],
+      },
+    ],
+    t0 + 7 * MIN
+  );
+  assert.equal(replay.providerProfile(), 'stationary', replay.diary.join('\n'));
 });

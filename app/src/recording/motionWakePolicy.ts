@@ -77,7 +77,9 @@ export function decideStillCheck(
   second: MovementSample | null,
   lastMovingSignalMs: number | null,
   wakeMs: number,
-  nowMs: number
+  nowMs: number,
+  /** `movedWhileWaiting` over the fixes stored since the wake (T-315). */
+  movedWhileWaitingM: number | null = null
 ): StillCheck {
   const stay = (reason: string): StillCheck => ({ sleep: false, reason });
   if (current === 'stationary') return stay('already stationary');
@@ -89,6 +91,9 @@ export function decideStillCheck(
   }
   if (lastMovingSignalMs !== null && lastMovingSignalMs > wakeMs) {
     return stay('the motion sensors said moving since');
+  }
+  if (movedWhileWaitingM !== null) {
+    return stay(`moved ${Math.round(movedWhileWaitingM)} m while it waited`);
   }
   if (first === null || second === null) {
     const waitedMs = nowMs - wakeMs;
@@ -114,6 +119,42 @@ export function decideStillCheck(
     sleep: true,
     reason: `still by the motion sensors, within ${Math.round(metres)} m for ${Math.round(spanMs / 60000)} min`,
   };
+}
+
+/**
+ * The farthest the fixes stored while a still check waited moved beyond their
+ * error, metres, or null when none did (T-315). Measured from the check's
+ * first look, or from the oldest of them when the look found nothing. Only
+ * evidence of moving: they say nothing about how long the phone was still,
+ * which the check's own looks and the wait measure.
+ *
+ * ⚠ 22 Nov 2026, the P30 leaving Câmara de Lobos: the check began at 14:14:23,
+ * its look found nothing, and at 14:19:54 it slept the phone on "no position
+ * (indoors)" while four fixes stored at 14:17:58 showed the lead walking to the
+ * car, and the car was moving. About 1.2 km went dark.
+ */
+export function movedWhileWaiting(
+  first: MovementSample | null,
+  sinceWake: readonly MovementSample[]
+): number | null {
+  const trusted = sinceWake.filter(
+    (sample) => sample.accuracyM === null || sample.accuracyM <= MAX_TRUSTED_ACCURACY_M
+  );
+  if (trusted.length === 0) return null;
+  const from = first ?? trusted.reduce((a, b) => (b.ts < a.ts ? b : a));
+  let farthest: number | null = null;
+  for (const sample of trusted) {
+    const metres = distanceM(from, sample);
+    if (movedBeyondNoise(from, sample, metres) && (farthest === null || metres > farthest)) farthest = metres;
+  }
+  return farthest;
+}
+
+/** The later of two moments, either of which may be unknown. */
+export function latestOf(a: number | null, b: number | null): number | null {
+  if (a === null) return b;
+  if (b === null) return a;
+  return Math.max(a, b);
 }
 
 /**

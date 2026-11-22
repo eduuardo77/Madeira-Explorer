@@ -11,6 +11,7 @@
 import * as Location from 'expo-location';
 import { AppState } from 'react-native';
 import type { ActivityType, FixSource } from '../storage/types';
+import * as activityEventDao from '../storage/dao/activityEventDao';
 import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
 import * as rawFixDao from '../storage/dao/rawFixDao';
@@ -81,6 +82,7 @@ export const recorder = createRecorder({
     getActiveTripId: async () => (await tripDao.getActiveTrip())?.id ?? null,
     getMovementWindow: (tripId, sinceTs, limit) => rawFixDao.getMovementWindow(tripId, sinceTs, limit),
     getLastFixTs: async (tripId) => (await rawFixDao.getLastFix(tripId))?.ts ?? null,
+    getLastMovingLabelTs: (sinceTs) => activityEventDao.getLastMovingEnterSince(sinceTs),
   },
   provider: {
     isRecording: () => locationProvider.isRecording(),

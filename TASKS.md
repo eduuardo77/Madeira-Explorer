@@ -454,8 +454,21 @@ permission, L3 privacy contact.
       dark).** Its look found no position, so it decided on labels alone, and it counts only
       the motion wake's labels (`lastMovingSignalMs` in `recorderCore.ts`): *walking* at 14:16:51
       and *driving* at 14:19:34 came through the transitions batch and were never seen; the 4
-      fixes stored at 14:17:58 were not looked at either. Fix to propose: before deciding, read
-      the stored labels and fixes since the wake. Not fixed; awaits the lead. Field log 22 Nov.
+      fixes stored at 14:17:58 were not looked at either. **Fixed 2026-11-22** (the lead: "Yes,
+      fix T-315"): before deciding, the check reads what was stored since the wake. (1) The
+      newest stored *enter* (`activityEventDao.getLastMovingEnterSince`), if a moving one, counts
+      as the sensors saying moving. ⚠ **Only the newest**: the sensors flicker to walking and
+      back at a stop; counting any moving enter would have kept 11 of the 22 real sleeps of
+      21 and 22 Nov awake, the newest keeps 6, each a real start (Santana on foot, out of lunch
+      at 14:40, Funchal at 15:21 then 1.9 km on foot, leaving for the cinema at 19:40, and this
+      one). (2) Fixes stored while it waited that moved beyond their error
+      (`movedWhileWaiting`) keep it awake. ⚠ **Rejected first: letting stored fixes stand in for
+      the check's looks**: an old fix shortened the measured wait ("only 3 min apart") and five
+      real-stop replays stopped sleeping. The harness gained a `transitions` event (stored,
+      never passed to the recorder), as the phone does; `deliveredEvents` still feeds old cases
+      through the motion wake. Fixture `still-departure-2026-11-22` (2° west). The two replays
+      fail on the old recorder. 1,291 tests. On the P30 since 19:30 (field build, backup
+      `p30-2026-11-22-before-t315`). To see on a trip: a departure from a stop that does not sleep.
 - [ ] **T-313** **A driven road left dark by a GPS bad patch (21 Nov, Poiso to above Parque
       Ecológico, 1.8 km).** The lead: treat it seriously. Research in
       `docs/research-broken-line-2026-11-21.md`: a join along the road when every fix between two

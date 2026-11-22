@@ -43,6 +43,12 @@ export type ReplayEvent =
   | { kind: 'batch'; at: number; fixes: LocationSample[] }
   /** Google's activity updates say `activity` (walking, driving, still...). */
   | { kind: 'label'; at: number; activity: string }
+  /**
+   * The transitions batch (`recordingSink.labelActivities`): stored in
+   * `activity_event` at `at` with their own times, never passed to the
+   * recorder (T-315). `label` is the motion wake's route instead.
+   */
+  | { kind: 'transitions'; at: number; labels: { ts: number; activity: string; transition: string }[] }
   /** The phone's significant-motion sensor fires. */
   | { kind: 'significant_motion'; at: number }
   /** A new app process starts and re-asserts the recorder. */
@@ -99,6 +105,7 @@ export function createReplay(options: ReplayOptions = {}): Replay {
     state.set('profile', { value: options.storedProfile, updatedTs: options.storedProfileTs ?? 0 });
   }
   const fixes: LocationSample[] = [...(options.history ?? [])];
+  const stored: { ts: number; activity: string; transition: string }[] = [];
   const changes: ProfileChange[] = [];
   const diary: string[] = [];
   let providerProfile: SamplingProfile | null = options.storedProfile ?? null;
@@ -151,6 +158,12 @@ export function createReplay(options: ReplayOptions = {}): Replay {
             activity: fix.activityType,
           })),
       getLastFixTs: async () => (fixes.length === 0 ? null : Math.max(...fixes.map((fix) => fix.ts))),
+      getLastMovingLabelTs: async (sinceTs) => {
+        const enters = stored.filter((label) => label.ts > sinceTs && label.transition === 'enter');
+        if (enters.length === 0) return null;
+        const newest = enters.reduce((a, b) => (b.ts > a.ts ? b : a));
+        return ['walking', 'running', 'cycling', 'driving'].includes(newest.activity) ? newest.ts : null;
+      },
     },
     provider: {
       isRecording: async () => options.recording ?? true,
@@ -239,6 +252,8 @@ export function createReplay(options: ReplayOptions = {}): Replay {
     now = event.at;
     if (event.kind === 'batch') {
       await current.recordSamples(event.fixes);
+    } else if (event.kind === 'transitions') {
+      stored.push(...event.labels);
     } else if (event.kind === 'significant_motion') {
       if (now - lastWakeMs < MIN_GAP_MS && !lastWasStill) return;
       lastWakeMs = now;

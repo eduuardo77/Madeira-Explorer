@@ -8,6 +8,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov, 10:49: silence no longer ends a trip** (T-314 choice B, D-088 amended), on the P30
+  (backup `p30-2026-11-22-before-t314`). Still open: C, everything adding up across trips.
 - **22 Nov, 10:25: T-313 built and on the P30** (field build, backup
   `p30-2026-11-22-before-t313`). Two chains minutes apart are joined along the road when every
   fix between them stays within 150 m of it; `MATCHER_VERSION` 6. The P30 rematched its trip

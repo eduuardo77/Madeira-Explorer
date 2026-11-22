@@ -1,5 +1,8 @@
 # When should a trip end? (open, the lead is not sure)
 
+**2026-11-22: choice B is in** (the lead: "Yes, do that too"): silence no longer ends a trip,
+on the P30 since 10:49 (D-088 amended). The rest of this page (C, the questions) is still open.
+
 **Opened 2026-11-21**, after the lead's own trip ended without them noticing and they read it as
 all their data gone. Not a decision yet: this is the question, what happened, and the choices.
 

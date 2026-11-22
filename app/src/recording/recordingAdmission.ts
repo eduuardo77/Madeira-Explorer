@@ -159,8 +159,11 @@ export function unstoredFixes<T extends { ts: number; lat: number; lon: number }
 export function tripHasLapsed(
   trip: { startedTs: number; lastFixTs: number | null },
   incomingTs: number,
-  silenceMs: number = INACTIVITY_END_MS
+  silenceMs: number | null = INACTIVITY_END_MS
 ): boolean {
+  if (silenceMs === null) {
+    return false; // silence never ends a trip (D-088 amended 2026-11-22)
+  }
   return incomingTs - (trip.lastFixTs ?? trip.startedTs) >= silenceMs;
 }
 

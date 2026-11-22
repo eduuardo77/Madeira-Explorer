@@ -68,9 +68,18 @@ export const MIN_TRIP_AGE_FOR_DEPARTURE_MS = 20 * 60 * 60 * 1000;
 export const MIN_DEPARTURE_DWELL_SECONDS = 45 * 60;
 
 /**
- * Silence long enough to conclude the trip is over.
+ * Silence long enough to conclude the trip is over, or null: **silence never
+ * ends a trip** (D-088 amended 2026-11-22, the lead: "Yes, do that too").
  *
- * ⚠ **D-012 says "24h+"; this is deliberately three days.** Silence is
+ * ⚠ **Why null now.** On 21 Nov 2026 the P30 had been quiet since 12 Nov; the
+ * first fix ended trip 31 (26 stamps, seven weeks) and the map and passport
+ * showed one day. The lead, who lives on the island, read it as all their data
+ * lost. A resident has three quiet days all the time. A trip now ends only at
+ * the airport, on leaving the archipelago or by *Terminar viagem*; whether
+ * trips should end at all is open (`docs/trip-ending-question.md`, T-314).
+ *
+ * What three days was for, kept because the number may come back:
+ * ⚠ **D-012 says "24h+"; this was deliberately three days.** Silence is
  * ambiguous in a way the other two signals are not — it means "the user left"
  * *or* "an OEM killed the recorder" (ARCHITECTURE §6.2), and those want
  * opposite responses. Ending a live holiday because the recorder died would
@@ -78,7 +87,7 @@ export const MIN_DEPARTURE_DWELL_SECONDS = 45 * 60;
  * it. Three days makes the mistake much rarer, and costs a late reveal in the
  * cases where it is wrong — which is the cheaper error.
  */
-export const INACTIVITY_END_MS = 3 * 24 * 60 * 60 * 1000;
+export const INACTIVITY_END_MS: number | null = null;
 
 /**
  * How far outside the archipelago's bounds a fix must be, in degrees, before
@@ -196,10 +205,10 @@ export function detectTripEnd(input: TripEndInput): TripEndDecision {
     };
   }
 
-  // 3. Silence. The ambiguous one — see INACTIVITY_END_MS.
+  // 3. Silence. The ambiguous one — see INACTIVITY_END_MS, null since D-088 was amended.
   const lastActivity = input.lastFixTs ?? input.tripStartedTs;
   const silence = input.now - lastActivity;
-  if (silence >= INACTIVITY_END_MS) {
+  if (INACTIVITY_END_MS !== null && silence >= INACTIVITY_END_MS) {
     return {
       ended: true,
       method: 'inactivity',

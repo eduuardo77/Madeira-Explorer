@@ -33,6 +33,8 @@ import { reconstructVisits } from '../progress/stampRules.ts';
 import type { GeofenceCrossing } from '../progress/stampRules.ts';
 import { INACTIVITY_END_MS, detectTripEnd } from '../progress/tripEnd.ts';
 
+const THREE_DAYS = 3 * 24 * 3_600_000;
+
 /** Madeira and Porto Santo together (D-021), near enough for a test. */
 const BOUNDS: Bounds = {
   west: -17.3,
@@ -281,11 +283,13 @@ const TRIP_30 = {
   firstFixAfterGap: Date.parse('2026-09-22T09:19:50Z'),
 };
 
-test('⚠⚠ T-195 — trip 30: a 24.9-day silence has lapsed when the next fix arrives', () => {
+test('⚠⚠ T-195 — trip 30: with a silence given, 24.9 days has lapsed when the next fix arrives', () => {
+  // The rule kept for when a silence comes back (T-314); by default none ends a trip.
   assert.equal(
     tripHasLapsed(
       { startedTs: TRIP_30.startedTs, lastFixTs: TRIP_30.lastFixBeforeGap },
-      TRIP_30.firstFixAfterGap
+      TRIP_30.firstFixAfterGap,
+      THREE_DAYS
     ),
     true
   );
@@ -303,12 +307,13 @@ test('T-195 — an ordinary gap in a live holiday has not lapsed', () => {
   }
 });
 
-test('T-195 — the boundary is the same one detectTripEnd uses, so they cannot disagree', () => {
+test('T-195 — tripHasLapsed and detectTripEnd agree, so they cannot disagree', () => {
+  // Silence never ends a trip since D-088 was amended (2026-11-22): both say no.
   const lastFixTs = TRIP_30.lastFixBeforeGap;
   for (const incomingTs of [
-    lastFixTs + INACTIVITY_END_MS - 1,
-    lastFixTs + INACTIVITY_END_MS,
-    lastFixTs + INACTIVITY_END_MS + 1,
+    lastFixTs + THREE_DAYS - 1,
+    lastFixTs + THREE_DAYS,
+    lastFixTs + 30 * 24 * 3_600_000,
   ]) {
     const decision = detectTripEnd({
       tripStartedTs: TRIP_30.startedTs,
@@ -325,9 +330,9 @@ test('T-195 — the boundary is the same one detectTripEnd uses, so they cannot 
   }
 });
 
-test('T-195 — the lapsed trip ends at its last fix, not when the new evidence arrived', () => {
-  // What the sink relies on when it calls checkTripEnd(incomingTs): the souvenir
-  // must not claim 25 empty days (ARCHITECTURE §10).
+test('T-195 — 25 days of silence keep the trip open (D-088 amended 2026-11-22)', () => {
+  // The P30's real gap of 28 Aug to 22 Sep: the trip continues.
+  assert.equal(INACTIVITY_END_MS, null);
   const decision = detectTripEnd({
     tripStartedTs: TRIP_30.startedTs,
     now: TRIP_30.firstFixAfterGap,
@@ -336,14 +341,22 @@ test('T-195 — the lapsed trip ends at its last fix, not when the new evidence 
     leftBoundsTs: null,
     lastFixTs: TRIP_30.lastFixBeforeGap,
   });
-  assert.equal(decision.method, 'inactivity');
-  assert.equal(decision.endedTs, TRIP_30.lastFixBeforeGap);
+  assert.equal(decision.ended, false);
+  assert.equal(
+    tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs: TRIP_30.lastFixBeforeGap }, TRIP_30.firstFixAfterGap),
+    false
+  );
 });
 
-test('T-195 — a trip with no fixes at all is measured from its start', () => {
+test('T-195 — with a silence given, a trip with no fixes is measured from its start', () => {
+  // The rule kept for when a silence comes back (T-314).
   assert.equal(
-    tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs: null }, TRIP_30.startedTs + INACTIVITY_END_MS),
+    tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs: null }, TRIP_30.startedTs + THREE_DAYS, THREE_DAYS),
     true
+  );
+  assert.equal(
+    tripHasLapsed({ startedTs: TRIP_30.startedTs, lastFixTs: null }, TRIP_30.startedTs + THREE_DAYS - 1, THREE_DAYS),
+    false
   );
 });
 

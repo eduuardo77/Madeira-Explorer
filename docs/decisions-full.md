@@ -4842,6 +4842,14 @@ just sent the user in to look. The screens now show the open trip or else the la
 waits three days for a souvenir. Ending the trip and leaving the recorder running: it replaces the
 trip the user just finished.
 
+**Amended 2026-11-22: silence no longer ends a trip** (the lead: "Yes, do that too", choice B
+of `docs/trip-ending-question.md`). On 21 Nov the P30's first fix after nine quiet days ended
+the lead's seven-week trip; the map and passport showed one day and they read it as all their
+data lost. `INACTIVITY_END_MS` is null; `detectTripEnd` and `tripHasLapsed` skip the silence
+rule, which stays in the code for when a silence comes back. A trip now ends at the airport, on
+leaving the archipelago, or by *Terminar viagem*. Cost, accepted: a visitor whose phone misses the
+departure geofence and the bounds keeps one trip until they end it. Whether trips should end at
+all (choice C) is open, T-314.
 
 ## D-089 — The free tier: the map unlimited, five stamps plus the first levada, €5.99 once
 

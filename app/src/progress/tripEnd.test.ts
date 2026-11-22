@@ -214,29 +214,28 @@ test('a day of silence does NOT end the trip', () => {
   assert.equal(decision.ended, false);
 });
 
-test('three days of silence does end the trip', () => {
+test('silence never ends a trip (D-088 amended 2026-11-22)', () => {
+  // 21 Nov 2026: nine quiet days ended the lead's seven-week trip and the map
+  // showed one day. Three days, nine, a month: the trip continues.
+  assert.equal(INACTIVITY_END_MS, null);
   const lastFix = START + 4 * DAY;
-  const decision = detectTripEnd(
-    midTrip({ now: lastFix + INACTIVITY_END_MS, lastFixTs: lastFix })
-  );
-
-  assert.equal(decision.ended, true);
-  assert.equal(decision.method, 'inactivity');
-  assert.equal(decision.endedTs, lastFix, 'dated to the last real evidence');
+  for (const days of [3, 9, 30]) {
+    const decision = detectTripEnd(midTrip({ now: lastFix + days * DAY, lastFixTs: lastFix }));
+    assert.equal(decision.ended, false, `${days} days`);
+  }
 });
 
-test('a trip that never recorded anything can still time out', () => {
+test('a trip that never recorded anything does not time out either', () => {
   const decision = detectTripEnd({
     tripStartedTs: START,
-    now: START + INACTIVITY_END_MS + HOUR,
+    now: START + 30 * DAY,
     departureVisits: [],
     hasTravelledElsewhere: false,
     leftBoundsTs: null,
     lastFixTs: null,
   });
 
-  assert.equal(decision.ended, true);
-  assert.equal(decision.method, 'inactivity');
+  assert.equal(decision.ended, false);
 });
 
 test('a live holiday keeps going', () => {

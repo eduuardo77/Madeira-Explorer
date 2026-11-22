@@ -465,7 +465,10 @@ permission, L3 privacy contact.
       choice at Ribeiro Frio (13:03).
 - [ ] **T-314** **When should a trip end?** (`docs/trip-ending-question.md`). Trip 31 ended by
       three quiet days on 21 Nov and the lead read it as data lost; folded back by hand the same
-      evening. The rule is unchanged: three quiet days will end it again. **Waiting on the lead.**
+      evening. **B done 2026-11-22** (the lead: "Yes, do that too"): `INACTIVITY_END_MS` null,
+      silence never ends a trip; tests rewritten to keep the rule's shape for when a silence
+      comes back. On the P30 since 10:49 (backup `p30-2026-11-22-before-t314`). Still open: C,
+      everything adding up across trips.
 - [ ] **T-312** **Stops woken back to driving (21 Nov sightseeing day, field log).** Not fixed:
       the lead asked for no app changes. (1) Three times (Prainha 11:35:52, Santana 12:36:17,
       home 17:43:53) a still check settled stationary and the same second's batch, every fix

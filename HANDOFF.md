@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **22 Nov, 10:25: T-313 built and on the P30** (field build, backup
+  `p30-2026-11-22-before-t313`). Two chains minutes apart are joined along the road when every
+  fix between them stays within 150 m of it; `MATCHER_VERSION` 6. The P30 rematched its trip
+  and 21 Nov above Monte is one line, 12:43 to 13:43. 17 iPhone drives unchanged but that one.
+  1,287 tests. Not in version 14. Open for the lead: T-314, when a trip ends.
 - **22 Nov, 10:14: T-312 fixed and on the P30** (field build, versionCode still 14, backup
   `p30-2026-11-22-before-t312`). A stop is woken only by fixes from after it; a raise to
   driving on one *in vehicle* label is rechecked five minutes on. Waiting for a second label

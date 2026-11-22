@@ -43,10 +43,12 @@
  *   - no route between consecutive fixes is plausible in the time between
  *     them, or the silence between them is longer than `MAX_BRIDGE_S`.
  *
- * One exception, at a tunnel (T-279): two chains minutes apart are joined
- * when the short way between them runs through one (`joinThroughTunnels`),
- * because GPS inside a tunnel reports the roads over the hill and breaks the
- * chain at the portal.
+ * Two exceptions, where the break is the receiver's fault and not the road's
+ * (`joinAcrossBreaks`): two chains minutes apart are joined when the short way
+ * between them runs through a tunnel (T-279), because GPS inside one reports
+ * the roads over the hill; or when every fix between them stays within
+ * `CORRIDOR_JOIN_M` of that short way (T-313), because a bad patch of GPS
+ * puts a car 40 to 170 m off the road it is on.
  *
  * A chain too short to be evidence of a journey (`MIN_CHAIN_FIXES`) is
  * dropped. What is left is drawn as roads, and nothing is drawn where no road
@@ -73,7 +75,7 @@ import type { Activity } from '../recording/activityTimeline.ts';
  * fixes differently. Chains kept by `chainStore.ts` under another version are
  * dropped and the trip rematched.
  */
-export const MATCHER_VERSION = 5;
+export const MATCHER_VERSION = 6;
 
 /** What the matcher needs of a fix: a subset of the `raw_fix` row. */
 export type MatchFix = GateFix & {
@@ -229,12 +231,23 @@ export const TUNNEL_JOIN_SLACK_M = 300;
 export const TUNNEL_JOIN_REACH_M = 60;
 
 /**
- * Two chains are also joined along an ordinary road when every fix between
- * them lies within this many metres of the shortest route (T-313, research).
+ * Two chains minutes apart are also joined along an ordinary road when every
+ * fix between them lies within this many metres of the shortest road from one
+ * to the other (T-313).
+ *
+ * ⚠ Measured, 2026-11-21. Above Monte the P30 put three minutes of fixes 40 to
+ * 170 m off the ER103 while reporting 6 to 27 m, the iPhone beside it within
+ * 10 m of the road: three fixes with no road in reach broke the chain and
+ * 1.8 km went dark. On 17 drives with an iPhone alongside, 100 m left that gap;
+ * 150 m and 250 m both closed it and changed nothing else, precision included.
+ * 150 m keeps a beach or a boat 200 m off the road dark.
  */
-export const CORRIDOR_JOIN_M = Number(globalThis.process?.env?.CORRIDOR_JOIN_M ?? 150);
-export const CORRIDOR_JOIN_FACTOR = Number(globalThis.process?.env?.CORRIDOR_JOIN_FACTOR ?? 2);
+export const CORRIDOR_JOIN_M = 150;
+/** The road between may be at most this many times the straight line, plus the slack. */
+export const CORRIDOR_JOIN_FACTOR = 2;
 export const CORRIDOR_JOIN_SLACK_M = 300;
+/** How often the road is sampled when measuring a fix's distance to it, metres. */
+const CORRIDOR_STEP_M = 20;
 
 /** Fixes in a row that may be skipped as impossible before the chain ends. */
 export const MAX_SKIPPED_FIXES = 2;
@@ -550,12 +563,12 @@ export function* matchTraceInSteps(
       matched += part.fixCount;
     }
   }
-  const chains = yield* joinThroughTunnels(graph, scratch, found, moving);
+  const chains = yield* joinAcrossBreaks(graph, scratch, found, usable);
 
   // A chain start is a safe place to resume only once nothing still to be
   // recorded can change the decisions that led to it: its context is the
   // minute either side. And only a start that is still a chain's start: one
-  // joined through a tunnel to the chain before it would, resumed from, be
+  // joined across a break to the chain before it would, resumed from, be
   // matched without that chain to join to.
   const newest = usable.length === 0 ? Number.NEGATIVE_INFINITY : usable[usable.length - 1].ts;
   const inside = (ts: number) =>
@@ -601,14 +614,19 @@ type Moving = { fix: MatchFix; ceiling: number | null };
  *
  * So two chains less than `MAX_BRIDGE_S` apart are joined when the shortest
  * route from near the end of the first to near the start of the second goes
- * through a tunnel and is nearly straight (`TUNNEL_JOIN_FACTOR`). Only a
- * tunnel: anywhere else a break is the honest answer.
+ * through a tunnel and is nearly straight (`TUNNEL_JOIN_FACTOR`).
+ *
+ * Or, anywhere, when every fix recorded between them lies within
+ * `CORRIDOR_JOIN_M` of the shortest road (`corridorBetween`, T-313). Up to
+ * T-313 only a tunnel was joined, and a GPS bad patch on an open road left
+ * 1.8 km dark. The fixes between are the evidence: a beach, a boat or another
+ * road off the network leaves the corridor, and the break stays.
  */
-function* joinThroughTunnels(
+function* joinAcrossBreaks(
   graph: RoadGraph,
   scratch: RouteScratch,
   chains: readonly MatchedChain[],
-  moving: readonly Moving[] = []
+  fixes: readonly MatchFix[]
 ): Generator<void, MatchedChain[], void> {
   const ordered = [...chains].sort((a, b) => a.anchors[0].ts - b.anchors[0].ts);
   const joined: MatchedChain[] = [];
@@ -616,8 +634,8 @@ function* joinThroughTunnels(
     yield;
     const previous = joined[joined.length - 1];
     let through = previous === undefined ? null : tunnelBetween(graph, scratch, previous, chain);
-    if (previous !== undefined && through === null && CORRIDOR_JOIN_M > 0) {
-      through = corridorBetween(graph, scratch, previous, chain, moving);
+    if (previous !== undefined && through === null) {
+      through = corridorBetween(graph, scratch, previous, chain, fixes);
     }
     if (previous === undefined || through === null) {
       joined.push(chain);
@@ -670,15 +688,17 @@ function tunnelBetween(
 }
 
 /**
- * The shortest road from the end of `a` to the start of `b` when the fixes
- * recorded between them all lie within `CORRIDOR_JOIN_M` of it, or null.
+ * The shortest road from the end of `a` to the start of `b` when every fix
+ * recorded between them lies within `CORRIDOR_JOIN_M` of it, or null. Every
+ * usable fix, moving or not: a stop off the road leaves the corridor too. With
+ * no fix between there is no evidence, and the break stays.
  */
 function corridorBetween(
   graph: RoadGraph,
   scratch: RouteScratch,
   a: MatchedChain,
   b: MatchedChain,
-  moving: readonly Moving[]
+  fixes: readonly MatchFix[]
 ): EdgePiece[] | null {
   const t0 = a.anchors[a.anchors.length - 1].ts;
   const t1 = b.anchors[0].ts;
@@ -686,7 +706,10 @@ function corridorBetween(
   if (seconds <= 0 || seconds > MAX_BRIDGE_S) {
     return null;
   }
-  const between = moving.filter((m) => m.fix.ts > t0 && m.fix.ts < t1).map((m) => m.fix);
+  const between = fixes.filter((fix) => fix.ts > t0 && fix.ts < t1);
+  if (between.length === 0) {
+    return null;
+  }
   const end = a.pieces[a.pieces.length - 1];
   const start = b.pieces[0];
   const [endLat, endLon] = pointAt(graph, end.edge, end.to);
@@ -700,7 +723,7 @@ function corridorBetween(
   const points: { lat: number; lon: number }[] = [];
   for (const piece of route) {
     const length = Math.abs(piece.to - piece.from);
-    const steps = Math.max(1, Math.ceil(length / 20));
+    const steps = Math.max(1, Math.ceil(length / CORRIDOR_STEP_M));
     for (let i = 0; i <= steps; i += 1) {
       const [lat, lon] = pointAt(graph, piece.edge, piece.from + ((piece.to - piece.from) * i) / steps);
       points.push({ lat, lon });
@@ -714,9 +737,6 @@ function corridorBetween(
     if (nearest > CORRIDOR_JOIN_M) {
       return null;
     }
-  }
-  if (globalThis.process?.env?.CORRIDOR_LOG) {
-    console.error(`corridor join ${new Date(t0).toISOString()} ${seconds}s ${between.length} fixes`);
   }
   return route;
 }

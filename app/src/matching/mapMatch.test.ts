@@ -153,9 +153,9 @@ test('a tunnel is lit when GPS inside it puts the car on the road over the hill 
   assert.equal(chains.length, 1, 'one drive, one chain');
 });
 
-test('two chains a few minutes apart with no tunnel between them stay two', () => {
-  // The same layout with the tunnel an open road: a break there is a break.
-  const net = network(
+/** The tunnel's layout with the tunnel an open road. */
+function openRoad() {
+  return network(
     { w: [-1500, 0], p1: [300, 0], p2: [1500, 0], e: [3300, 0], s1: [400, 100], s2: [1400, 100], h: [900, 3000] },
     [
       { from: 'w', to: 'p1', kind: 'm' },
@@ -166,9 +166,47 @@ test('two chains a few minutes apart with no tunnel between them stay two', () =
       { from: 's2', to: 'h' },
     ]
   );
-  const fixes = drive();
+}
+
+test('a GPS bad patch on an open road is joined along it (T-313)', () => {
+  // 21 Nov 2026 above Monte: three fixes 100 m off the road the car was on,
+  // reporting 35 m, broke the chain and left the road between dark. Every fix
+  // of the patch is within CORRIDOR_JOIN_M of the road, so it is lit.
+  const net = openRoad();
+  const { chains } = matchTrace(net.graph, drive());
+  const visited = visitedEdges(net.graph, chains);
+  assert.equal(chains.length, 1, 'one drive, one chain');
+  assert.ok(litOn(visited, [net.edge('p1', 'p2')]) > 1150, 'the road through the patch');
+  assert.equal(litOn(visited, [net.edge('s1', 's2')]), 0, 'not the road the fixes sat on');
+});
+
+/**
+ * Along one straight road at 10 m/s, a fix every 10 s, with two minutes of
+ * them `off` metres north of it: longer than `OFF_NETWORK_BREAK_S`, so the
+ * chain breaks there.
+ */
+function offRoadPatch(off: number) {
+  const net = network({ w: [-2000, 0], e: [2000, 0] }, [{ from: 'w', to: 'e', kind: 'm' }]);
+  const fixes = [];
+  for (let t = 0; t <= 300; t += 10) {
+    fixes.push(fixAt(t, -1500 + t * 10, t > 60 && t < 200 ? off : 2, 10, 20));
+  }
   const { chains } = matchTrace(net.graph, fixes);
-  assert.equal(chains.length, 2, 'a break with no tunnel in it is not joined');
+  return { chains, lit: litOn(visitedEdges(net.graph, chains), [net.edge('w', 'e')]) };
+}
+
+test('two minutes of fixes 120 m off the road, no road nearer: joined along it (T-313)', () => {
+  const { chains, lit } = offRoadPatch(120);
+  assert.equal(chains.length, 1);
+  assert.ok(lit > 2900, `${lit} m: the whole drive`);
+});
+
+test('fixes that leave the corridor keep two chains apart (T-313)', () => {
+  // 250 m off: not a receiver error the road can explain (a beach, a boat),
+  // so the break stays and the road between stays dark.
+  const { chains, lit } = offRoadPatch(250);
+  assert.equal(chains.length, 2, 'a break the fixes do not support is not joined');
+  assert.ok(lit < 2000, `${lit} m: not the road between`);
 });
 
 test('a long silence is not bridged, even along a road', () => {

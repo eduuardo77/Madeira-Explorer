@@ -68,6 +68,9 @@ near Ribeira Brava is the recording, not the matcher: the P30 had no fixes until
 
 ## Proposal
 
+**Point 1 built on 2026-11-22** (T-313 in `TASKS.md`), rechecked on 17 drives including the
+cinema trip of 21 Nov: the same numbers as the prototype.
+
 1. **Ship the corridor join** (T-313): the prototype plus tests (a join through a GPS bad patch;
    no join when the fixes in between leave the corridor; the beach case), and rewrite the old
    test. Needs the lead's yes: it reverses T-279's "only a tunnel" rule.

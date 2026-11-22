@@ -454,8 +454,15 @@ permission, L3 privacy contact.
       Ecológico, 1.8 km).** The lead: treat it seriously. Research in
       `docs/research-broken-line-2026-11-21.md`: a join along the road when every fix between two
       chains lies within 150 m of it fixes this case and changes nothing else on 16 iPhone days.
-      Prototype on branch `t313-corridor-prototype`. **Waiting on the lead**: it reverses T-279's
-      "only a tunnel" rule. After it: the parallel-road choice at Ribeiro Frio (13:03).
+      **Built 2026-11-22** (the lead: "Yes, build it"): `corridorBetween` in `mapMatch.ts`, joined
+      after the tunnel test in `joinAcrossBreaks`; every usable fix in the gap counts, stopped
+      ones too, and a gap with no fix is not joined. `MATCHER_VERSION` 6, so every trip is
+      rematched once and 21 Nov lights on the phone. Tests: the bad patch joined, two minutes
+      120 m off joined, 250 m off kept apart; the first two fail with the join off, the last
+      with a 300 m corridor. ⚠ A two-minute patch is needed in a test: fixes with no road in
+      reach break a chain only after `OFF_NETWORK_BREAK_S` (90 s). 17 iPhone drives unchanged
+      but 21 Nov (recall 94.8 to 96.6% within 30 m). 1,287 tests. Next: the parallel-road
+      choice at Ribeiro Frio (13:03).
 - [ ] **T-314** **When should a trip end?** (`docs/trip-ending-question.md`). Trip 31 ended by
       three quiet days on 21 Nov and the lead read it as data lost; folded back by hand the same
       evening. The rule is unchanged: three quiet days will end it again. **Waiting on the lead.**

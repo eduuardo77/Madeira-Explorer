@@ -450,6 +450,15 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-320** **A first-run tutorial with a selling point (idea, 23 Nov).** The lead's idea:
+      three or four picture steps before the permission cards, the last one the founder stamp and
+      the launch price. Written up with its constraints (Play's disclosure order, no gate, D-110)
+      and four open questions in `docs/first-run-tutorial-idea.md`. Nothing built; awaits the lead.
+- [ ] **T-319** **A more visual unlock sheet (23 Nov, sketches).** The lead: today's sheet has
+      too much text and too little picture. Six directions drawn with the real art in
+      `tools/out/paywall-options.html` (`tools/preview-paywall-options.mjs`): A the reveal, B
+      before and after, C the collection grid, D your island, E founder, F the sets. Awaits the
+      lead's choice; the chosen one is built in `UnlockSheetView` and seen on the P30.
 - [ ] **T-318** **Launch price €2.99 (D-110, 23 Nov).** The lead sets `passport_madeira` to €2.99
       in Play Console (Monetise, Products, In-app products; base price, then let Play convert the
       other currencies) before launch. **On 2027-03-01** (launch price runs to 28 Feb, a week past the founder

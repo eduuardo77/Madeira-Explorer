@@ -93,6 +93,14 @@ because it is one of the curated 60. D-074 has the full screen.
 
 ## 4. The listing, drafted
 
+⚠ **Superseded 2026-11-23: the text to paste is `store/listing/{en,pt,de}.txt`** (short, full,
+What's new). The drafts below are history. What changed and why: *YOUR TRIP STAYS ON YOUR PHONE*
+became *YOUR TRIPS ARE NEVER SENT TO US*, with the phone's own backup stated (the database is in
+Android auto-backup on purpose, `plugins/withAndroidBackupRules.js`); *Removing the app deletes it
+all too* went for the same reason; 80 places became 81 plus Porto Santo's 9 and its free stamp
+(D-109); *you choose how often it records* went (no such setting); the save-a-copy file in
+Settings is mentioned. German still unreviewed by a speaker.
+
 ### Title (30 max)
 
 > **Bruma: Madeira Walk Tracker** (27 characters) ✅ **decided 2026-09-25 (D-092)**

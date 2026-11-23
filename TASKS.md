@@ -450,6 +450,20 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-324** **Version 15 for the Play Store, the first update after going live.** (Commit
+      8f1987a, which set versionCode 15, says T-322 by mistake: the number was already the
+      stamps review's.) **Built 2026-11-23** from 8d10129:
+      `Madeira-fieldwork/apks/bruma-0.1.0-vc15.aab` (SHA-256 `7da323ac…07ab7`), store build, upload
+      key, four ABIs, versionCode 15. Since 14: T-312 to T-316 (stops, still checks, trips no
+      longer ended by silence, the GPS bad patch, LEGACY roads), T-318 and T-319 (launch price,
+      the swiped unlock sheet), T-321 (stale still at a departure), T-323 (German buttons),
+      T-325 (the passport's new top and island). 1,319 tests. ⚠ A first AAB, built while other
+      sessions edited the working tree, carried uncommitted work: renamed
+      `bruma-0.1.0-vc15-DIRTY-do-not-upload.aab`, never upload it. This one was checked: no app
+      or content file changed during the build. `smoke-release.mjs` **passes without
+      `--internal`** on the P30, field build with JavaScript byte-identical to the AAB's
+      (backup `p30-2026-11-23-before-vc15`), recorder running after. **Open:** the lead uploads
+      it to production. Release notes not written.
 - [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
       lead found the top of the passport too plain and too tall for what it says. Three rounds of
       sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as

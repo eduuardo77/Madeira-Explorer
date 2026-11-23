@@ -463,7 +463,13 @@ permission, L3 privacy contact.
       pulled from its cache (`Bruma-<date>.png`, 3240 x 5760), headline *Share the island you've
       collected*. (3) The trip list, and with it the day viewer, appears only with two trips. (4)
       Forte de São João Baptista is in Porto Moniz; Portela's road is not connected in the graph.
-      Left: the lead's verdict, PT and DE captures and headlines, the site's images.
+      **23 Nov: PT and DE done** (`tools/out/store-shots/{en,pt,de}-1..5.png`, 1080x1920, and
+      `sheet-<lang>.png`), the app's language set through its `language` row. The generator now
+      dates the last drive today and stores the Levada Nova da Calheta question as answered.
+      Shifting the demo a day on the device was refused by `raw_fix`'s append-only trigger, as it
+      should be (the shell then ran the other updates; the database was regenerated). Seen in DE:
+      the stamp page's *Auf der Karte zeigen* wraps to two lines and touches the button's edges.
+      Left: the lead's verdict (PT headlines especially), the site's images, Play upload.
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
       screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be
       clear) and dropped upstream's `color = Color(polyline.color)`: maps-compose's spans overload

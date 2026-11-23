@@ -41,7 +41,8 @@ const DAYS = [
   { date: '2026-11-14', via: ['monte', 'pico-do-areeiro'] },
   { date: '2026-11-17', via: ['quinta-da-boa-vista', 'se-do-funchal', 'praia-formosa', 'camara-de-lobos'] },
   { date: '2026-11-19', via: ['praia-formosa', 'pico-dos-barcelos', 'jardim-botanico-da-madeira', 'ponta-do-garajau', 'santa-cruz'] },
-  { date: '2026-11-22', via: ['calheta', 'farol-da-ponta-do-pargo', 'teleferico-das-achadas-da-cruz', 'porto-moniz'] },
+  // The last drive is today, so the map reads "km today" whenever this is run.
+  { date: new Date().toISOString().slice(0, 10), via: ['calheta', 'farol-da-ponta-do-pargo', 'teleferico-das-achadas-da-cruz', 'porto-moniz'] },
 ];
 const DRIVE = 'mpr'; // motorway, primary, residential, and their tunnels
 
@@ -173,6 +174,9 @@ const seen = JSON.stringify([...awards.keys()]);
 for (const key of ['stamps_shown', 'stamps_notified']) {
   db.prepare('INSERT OR REPLACE INTO app_state (key, value, updated_ts) VALUES (?, ?, ?)').run(key, seen, Date.now());
 }
+// The levada it half covers already answered, so its question does not sit
+// over the passport (T-149).
+db.prepare("INSERT OR REPLACE INTO app_state (key, value, updated_ts) VALUES ('confirmations_declined', ?, ?)").run(JSON.stringify(['levada-nova-da-calheta']), Date.now());
 // Shown as a buyer sees it: the stamps in colour, no offer in the way.
 db.prepare("INSERT OR REPLACE INTO app_state (key, value, updated_ts) VALUES ('stamps_unlocked', 'true', ?)").run(Date.now());
 db.exec('COMMIT');

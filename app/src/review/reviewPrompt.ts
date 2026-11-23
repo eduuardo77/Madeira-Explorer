@@ -16,7 +16,7 @@ import {
   parseHistory,
   REVIEW_RULES,
   shouldAskForReview,
-  storePageUrls,
+  storePageUrl,
   withAsk,
   withStoreOpened,
   type ReviewHistory,
@@ -89,16 +89,11 @@ export async function openStorePage(): Promise<void> {
   if (!SUPPORTED || name === null) {
     return;
   }
-  const urls = storePageUrls(name);
   try {
-    await Linking.openURL(urls.app);
-  } catch {
-    try {
-      await Linking.openURL(urls.web);
-    } catch (error) {
-      await recordingEventDao.logError('store page', error).catch(() => undefined);
-      return;
-    }
+    await Linking.openURL(storePageUrl(name));
+  } catch (error) {
+    await recordingEventDao.logError('store page', error).catch(() => undefined);
+    return;
   }
   try {
     const nowMs = Date.now();

@@ -123,11 +123,12 @@ export function parseHistory(raw: string | null, nowMs: number): ReviewHistory {
   }
 }
 
-/** The Play Store page, in the store app first and the browser if it is missing. */
-export function storePageUrls(packageName: string): { app: string; web: string } {
-  const id = encodeURIComponent(packageName);
-  return {
-    app: `market://details?id=${id}`,
-    web: `https://play.google.com/store/apps/details?id=${id}`,
-  };
+/**
+ * The Play Store page. The web address, not `market://`: on the P30 (EMUI 12)
+ * `market://` is claimed by Huawei's AppGallery too, and Android asks which
+ * store to open, where Bruma is not. `play.google.com` is the Play Store's own
+ * verified link, so it opens Play directly, and a browser where there is none.
+ */
+export function storePageUrl(packageName: string): string {
+  return `https://play.google.com/store/apps/details?id=${encodeURIComponent(packageName)}`;
 }

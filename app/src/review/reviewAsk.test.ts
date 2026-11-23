@@ -5,7 +5,7 @@ import {
   parseHistory,
   REVIEW_RULES,
   shouldAskForReview,
-  storePageUrls,
+  storePageUrl,
   withAsk,
   withStoreOpened,
   type ReviewMoment,
@@ -69,9 +69,6 @@ test('the stored history reads back, and a corrupt one never becomes a reason to
   assert.deepEqual(parseHistory('{"askedTs":["x",3,1]}', NOW).askedTs, [1, 3]);
 });
 
-test('the store page opens in the Play Store app, the browser as a fallback', () => {
-  assert.deepEqual(storePageUrls('com.example.app'), {
-    app: 'market://details?id=com.example.app',
-    web: 'https://play.google.com/store/apps/details?id=com.example.app',
-  });
+test('the store page is the Play web address, never market:// (AppGallery claims it on Huawei)', () => {
+  assert.equal(storePageUrl('com.example.app'), 'https://play.google.com/store/apps/details?id=com.example.app');
 });

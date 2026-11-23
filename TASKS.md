@@ -478,8 +478,11 @@ permission, L3 privacy contact.
       opens the store page; after it the app never asks again. Rules in `review/reviewAsk.ts`
       (tested), Play call in `reviewPrompt.ts`. **Not seen working:** the sheet appears only for a
       copy installed from Play (internal testing or production), so it is unseen until a store
-      update; a sideloaded build resolves silently. Left: see the row on the P30, see the sheet
-      once from an internal-test install.
+      update; a sideloaded build resolves silently. **On the P30 23 Nov** (field build, backup
+      `p30-2026-11-23-before-t326`): the row opens Play on Bruma's page and the history row is
+      stored. ⚠ `market://` opened Huawei's chooser (AppGallery or Play), so the row uses the
+      `https://play.google.com` link, which resolves to Play directly. Left: see the sheet once
+      from an internal-test install.
 - [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
       lead found the top of the passport too plain and too tall for what it says. Three rounds of
       sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as

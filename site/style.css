@@ -99,7 +99,9 @@ a.store:hover, a.store:focus-visible { border-color: #b9c1cc; }
 
 .shot {
   flex: none;
-  width: 240px;
+  /* Three and a bit across the column, so the fourth peeks in and says the strip scrolls.
+     On a phone the floor of 200px leaves the second one peeking instead. */
+  width: clamp(200px, 28.5%, 240px);
   /* The store set's frames (T-317): 9:16, each with its own headline. */
   aspect-ratio: 9 / 16;
   border-radius: 16px;

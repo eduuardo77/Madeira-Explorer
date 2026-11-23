@@ -471,6 +471,20 @@ permission, L3 privacy contact.
       13: the app's floor (`accessibility.test.ts`); the bubble is 280 wide for it. ⚠ Not built
       from the sketch: the roads drawing themselves in, the pulse, a gliding zoom, two-finger
       pinch. Reduce motion: no fade, no lighting sequence. 1,319 tests.
+- [ ] **T-322** **Review stamps that sit on top of each other (the lead, 23 Nov).** The lead:
+      Praia da Baía D'Abra and Cais do Sardinha are basically the same place, which makes little
+      sense when Madeira has only 8 beach stamps. Measured from the geofence centres in
+      `content/pois.json`: Abra to Cais 1,177 m, both on the PR8, and Cais is 377 m from the
+      Ponta de São Lourenço viewpoint, so one walk to the tip awards **three** stamps, two of them
+      beaches. Cais do Sardinha is a quay, not a beach. Likely outcome: drop one of the two (or
+      move Cais out of *beach*) and spend the beach slot on a beach elsewhere (D-078 allows the
+      canvas to grow, but only with places worth going to). Other close pairs to look at while
+      there, each a stamp beside its own village or neighbour: Porto Moniz and Forte de São João
+      Baptista 128 m, Praia da Calheta and Calheta 165 m, Monte Palace and Monte 252 m, the
+      Funchal centre landmarks (Sé, Teatro, CR7, Mercado, all within ~900 m), Fanal and Levada dos
+      Cedros 357 m. Levada do Risco and Levada do Alecrim share a start geofence at Rabaçal (0 m),
+      probably on purpose, since they are two different walks. Method is D-064: a defended draft,
+      the lead vetoes. Nothing changed yet.
 - [ ] **T-321** **A slow departure on a stale *still* drops driving to walking (23 Nov trip).**
       After a 36 min stop on driving, the first batch of the drive home (16:21:31) carried the
       stop's own *driving exit, still enter* label from 15:44, 37 min late. The policy's moving
@@ -570,7 +584,7 @@ permission, L3 privacy contact.
       (600x1067), tiles 9:16; the template is kept as `tools/store-shots.html`. The intro said
       *your trip never leaves your phone*, the phrase i18n.test.ts bans (the phone's own backup
       can copy it); now *your trips are never sent to us*, the policy's wording.
-      Left: the lead's verdict on the PT headlines, Play upload (the lead's).
+      Left: Play upload (the lead's). PT headlines approved by the lead, 23 Nov evening.
       **23 Nov evening: upload-ready** in `store/screenshots/{en,pt,de}/1..5.png` (1080x1920,
       RGB, no alpha); the October set (four raw captures, *1 / 80*) removed. The live listing
       still showed that October set. Its description and *What's new* still say the trip stays

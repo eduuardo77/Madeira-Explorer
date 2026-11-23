@@ -463,7 +463,7 @@ permission, L3 privacy contact.
       or content file changed during the build. `smoke-release.mjs` **passes without
       `--internal`** on the P30, field build with JavaScript byte-identical to the AAB's
       (backup `p30-2026-11-23-before-vc15`), recorder running after. **Open:** the lead uploads
-      it to production. Release notes not written.
+      it to production. Release notes in `store/release-notes/vc15.txt`, three languages, each under 500 characters, in Play's pasting format.
 - [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
       lead found the top of the passport too plain and too tall for what it says. Three rounds of
       sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as

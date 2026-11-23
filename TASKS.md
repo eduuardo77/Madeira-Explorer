@@ -1716,6 +1716,9 @@ section's definition of done.
       ✅ **Live 2026-10-07 (T-267):** the lead set up Vercel and Namecheap's DNS; `https://bruma.lol/privacy`
       redirects to `www.bruma.lol/privacy` and serves policy 2026-10-07 with the contact, as the app
       shows. Left for T-267: `privacy@bruma.lol` forwarding (Namecheap Email Forwarding), later.
+      ✅ **Live on Play 2026-11-23:** the *coming soon* button is now a link to the listing
+      (`id=com.proa.madeira`), as are the iPhone answer and the footer; Open Graph tags added so a
+      shared link shows the name and icon. Battery answer unchanged: still no number (D-041).
       ✅ **Screenshots 2026-10-26:** the five slots hold emulator captures (`site/screenshots/*.jpg`,
       540 x 1170) of the fort stop, then the demo drive from it (nobody's movements, D-016): the live
       map, the day viewer, the passport (1 / 81, the Porto Santo card), the fort's stamp page and the

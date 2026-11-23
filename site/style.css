@@ -78,7 +78,7 @@ h1 {
   text-decoration: none;
 }
 
-.store[aria-disabled="true"] { cursor: default; }
+a.store:hover, a.store:focus-visible { border-color: var(--text); }
 .store small { font-weight: 400; color: var(--muted); }
 .store svg { width: 18px; height: 18px; flex: none; }
 

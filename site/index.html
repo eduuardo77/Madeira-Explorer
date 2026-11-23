@@ -7,6 +7,12 @@
 <meta name="description" content="Bruma highlights every road and trail you travel in Madeira, so you can see where you have been. No account, and your trips are never sent to us.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="icon.png">
+<link rel="canonical" href="https://bruma.lol/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bruma.lol/">
+<meta property="og:title" content="Bruma: Madeira Walk Tracker">
+<meta property="og:description" content="Track every road you walk and drive in Madeira. No account, and your trips are never sent to us. On Google Play.">
+<meta property="og:image" content="https://bruma.lol/icon.png">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -17,6 +23,7 @@
   bite: no battery number until one is measured (D-041, D-060); never claim the
   map works offline (D-073); no dash characters in anything a user reads.
   `node tools/build-site.mjs` rebuilds privacy.html and checks this file.
+  Live on Google Play since 2026-11-23: the store links go to the listing.
 -->
 <main>
   <header>
@@ -24,10 +31,10 @@
     <p class="tagline">Track every road you walk and drive in Madeira</p>
     <p class="intro">Made in Madeira. Bruma highlights every road and trail you travel, so you can see how much of the island you have really been to. No account, and your trips are never sent to us.</p>
     <div class="stores">
-      <span class="store" aria-disabled="true">
+      <a class="store" href="https://play.google.com/store/apps/details?id=com.proa.madeira">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .5.5.8 1 .6l15.6-9.2c.4-.3.4-.9 0-1.2L5 2.2c-.5-.2-1 .1-1 .6z"/></svg>
-        Google Play <small>coming soon</small>
-      </span>
+        Get it on Google Play
+      </a>
     </div>
   </header>
 
@@ -111,7 +118,7 @@
     </details>
     <details>
       <summary>Is there an iPhone version?</summary>
-      <p>Not yet. Bruma is coming to Android first.</p>
+      <p>Not yet. For now Bruma is on Android only, from <a href="https://play.google.com/store/apps/details?id=com.proa.madeira">Google Play</a>.</p>
     </details>
   </section>
 
@@ -123,6 +130,7 @@
 
 <footer>
   <span>&copy; 2026 Bruma</span>
+  <a href="https://play.google.com/store/apps/details?id=com.proa.madeira">Google Play</a>
   <a href="privacy.html">Privacy</a>
 </footer>
 </body>

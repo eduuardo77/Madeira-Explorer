@@ -2,7 +2,8 @@
  * The unlock sheet (the paywall): directions for the project lead (23 Nov 2026).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-paywall-options.mjs
- *     → tools/out/paywall-options.html
+ *     → tools/out/paywall-options.html   (round 1: six directions)
+ *     → tools/out/paywall-carousel.html  (round 2: the lead liked A, B, D, E, F; one swipeable sheet)
  *
  * The lead: today's sheet "has too much information and is less visual". Each
  * frame is a phone at 360 x 780 dp, in Portuguese, with the app's real art:
@@ -309,3 +310,91 @@ const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>
 mkdirSync(path.join(here, 'out'), { recursive: true });
 writeFileSync(path.join(here, 'out', 'paywall-options.html'), html);
 console.log('tools/out/paywall-options.html');
+
+// ── Round 2: one sheet, swiped (the lead, 23 Nov) ───────────────────────────
+// The bottom never moves: price line, button, "Agora não". The pages above it
+// are the round-1 favourites, one picture and one line each. Page 1 is B when
+// the sheet opened from a tapped stamp, A otherwise; Founder only while its
+// window is open.
+const pagesShown = (index, count) =>
+  `<div class="dots">${Array.from({ length: count }, (_, i) => `<i class="${i === index ? 'on' : ''}"></i>`).join('')}</div>`;
+const fixedBottom = (index, count, label = `Desbloquear o passaporte · ${PRICE}`) =>
+  `<div class="fixed">${pagesShown(index, count)}${launchPill}${buy(label, true)}${notNow}</div>`;
+const page = (index, count, hero) =>
+  `<div class="full stage">${X}<div class="eyebrow top">O TEU PASSAPORTE</div><div class="pagebody">${hero}</div>${fixedBottom(index, count)}</div>`;
+const COUNT = 4;
+
+const carousel = [
+  {
+    name: '1. Os teus carimbos (aberto no passaporte)',
+    note: 'A primeira página quando o ecrã abre do cartão do passaporte: o carimbo do centro a cores, os teus à volta foscos. Uma frase.',
+    body: page(0, COUNT, `
+      <div class="reveal compact">
+        <div class="orbit">${['fanal', 'cabo-girao', 'pico-do-areeiro', 'porto-moniz', 'levada-das-25-fontes', 'camara-de-lobos']
+          .map((id, i) => `<span class="o o${i}">${locked(id, 66, false)}</span>`)
+          .join('')}</div>
+        <div class="hero glow">${stamp('praia-formosa', 150)}</div>
+      </div>
+      <div class="title big">25 carimbos teus,<br>à espera de cor</div>`),
+  },
+  {
+    name: '1. Os teus carimbos (aberto num carimbo)',
+    note: 'A mesma página quando o ecrã abre de um carimbo fosco que tocaste: esse carimbo, meio fosco e meio a cores. As outras páginas são iguais.',
+    body: page(0, COUNT, `
+      <div class="split compact">
+        <div class="half left">${stamp('cabo-girao', 250)}</div>
+        <div class="half right">${stamp('cabo-girao', 250)}</div>
+        <div class="seam"></div><div class="seam-knob">${PADLOCK(28)}</div>
+      </div>
+      <div class="title big">Cabo Girão, a cores.<br>E mais 24.</div>`),
+  },
+  {
+    name: '2. A tua ilha',
+    note: 'O mapa dos concelhos, os teus lugares a dourado. Lembra que a app é sobre onde estiveste e que o passaporte é o álbum disso.',
+    body: page(1, COUNT, `
+      <div class="island">${islandSvg(330, visited, litRegions)}</div>
+      <div class="stat"><b>${VISITED}</b> de ${madeiraPlaces.length} lugares</div>
+      <div class="title big">Cada lugar onde estiveste<br>tem o seu carimbo</div>
+      <div class="sub">Porto Santo incluído, quando lá fores.</div>`),
+  },
+  {
+    name: '3. Os conjuntos',
+    note: 'As cinco medalhas com o teu progresso. Mostra que há um jogo para acabar.',
+    body: page(2, COUNT, `
+      <div class="medals compact">
+        ${[['viewpoint', 5, 20], ['levada', 0, 18], ['village', 9, 19], ['beach', 6, 8], ['landmark', 10, 16]]
+          .map(
+            ([c, n, t]) => `<div class="medal"><span class="m">${setMedal(c, n, t, 'silver').replace('<svg ', '<svg width="74" height="74" ')}</span>
+            <span class="mname">${STRINGS[`passport.category.${c}`].pt}</span><span class="bar"><i style="width:${Math.round((n / t) * 100)}%"></i></span><span class="mcount">${n} de ${t}</span></div>`
+          )
+          .join('')}
+      </div>
+      <div class="title big">Uma medalha por<br>cada conjunto</div>`),
+  },
+  {
+    name: '4. Fundador (só até 21 de fevereiro)',
+    note: 'Só aparece enquanto a janela de fundador está aberta; depois o carrossel fica com três páginas e os pontos passam a três sozinhos.',
+    body: page(3, COUNT, `
+      <div class="hero founder glow">${founder.replace('<svg ', '<svg width="200" height="200" ')}</div>
+      <div class="title big">Carimbo de fundador,<br>só até 21 de fevereiro</div>
+      <div class="sub">Para quem desbloqueia nos primeiros três meses. Depois, nunca mais.</div>`),
+  },
+];
+
+const CAROUSEL_CSS = `
+.pagebody { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-bottom: 12px; }
+.fixed { width: 100%; }
+.dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 4px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; } .dots i.on { width: 20px; border-radius: 4px; background: ${reward.goldInk}; }
+.reveal.compact { height: 290px; } .reveal.compact .hero svg { width: 180px; height: 180px; } .split.compact { width: 250px; height: 250px; margin-top: 0; }
+.medals.compact { gap: 10px; margin-top: 0; } .medals.compact .medal .m svg { width: 58px; height: 58px; }
+.swipe { position: absolute; top: 46%; color: #ffffff55; font-size: 26px; } .swipe.l { left: 6px; } .swipe.r { right: 6px; }
+`;
+const carouselHtml = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Paywall: carrossel</title><style>${CSS}${CAROUSEL_CSS}</style></head><body>
+<h1>O ecrã de desbloquear, deslizável</h1>
+<p class="lead">Ronda 2. As favoritas da ronda 1 (A, B, D, E, F) como páginas de um só ecrã. O fundo não se mexe: os pontos, o preço de lançamento, o botão e "Agora não". Cada página tem uma imagem e uma frase. A primeira muda conforme de onde se abriu o ecrã.</p>
+<div class="frames">${carousel
+  .map((f) => `<figure><div class="phone">${f.body}</div><figcaption><b>${f.name}</b>${f.note}</figcaption></figure>`)
+  .join('')}</div></body></html>`;
+writeFileSync(path.join(here, 'out', 'paywall-carousel.html'), carouselHtml);
+console.log('tools/out/paywall-carousel.html');

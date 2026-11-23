@@ -459,6 +459,11 @@ permission, L3 privacy contact.
       `tools/out/paywall-options.html` (`tools/preview-paywall-options.mjs`): A the reveal, B
       before and after, C the collection grid, D your island, E founder, F the sets. Awaits the
       lead's choice; the chosen one is built in `UnlockSheetView` and seen on the P30.
+      — **Round 2, same day:** the lead liked A, B, D, E and F (not today's, not C), so one
+      swipeable sheet: a fixed bottom (dots, launch price, button, *Agora não*) under four pages,
+      one picture and one line each: your stamps (B when opened from a tapped stamp, A otherwise),
+      your island, the sets, founder (only while its window is open).
+      `tools/out/paywall-carousel.html`. Awaits the lead's go-ahead to build.
 - [ ] **T-318** **Launch price €2.99 (D-110, 23 Nov).** The lead sets `passport_madeira` to €2.99
       in Play Console (Monetise, Products, In-app products; base price, then let Play convert the
       other currencies) before launch. **On 2027-03-01** (launch price runs to 28 Feb, a week past the founder

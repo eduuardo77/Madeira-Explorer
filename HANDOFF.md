@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **23 Nov: Bruma is live in production on Google Play** (approved, the lead's word). A recorder
+  change is now a store update. **Same afternoon, a short trip** (field log): 95.8% within 10 m
+  where the iPhone recorded; ❌ **T-321**, a stale *still* label dropped driving to walking at a
+  departure, about 3 km dark. Not fixed; awaits the lead.
 - **23 Nov: launch price (D-110, T-318).** €2.99 in Play Console until 28 Feb 2027, raise to €5.99
   on 1 March by hand. The unlock sheet says *Launch price until 28 February. Then it doubles.*
   (content `launchPriceUntil`), never "50% off" (nobody has paid €5.99). Restore left the sheet

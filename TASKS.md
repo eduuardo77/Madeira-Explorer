@@ -450,6 +450,16 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-321** **A slow departure on a stale *still* drops driving to walking (23 Nov trip).**
+      After a 36 min stop on driving, the first batch of the drive home (16:21:31) carried the
+      stop's own *driving exit, still enter* label from 15:44, 37 min late. The policy's moving
+      branch saw 325 m at under 25 km/h and no *driving* label, so driving fell to walking; fixes
+      54 s apart, the chain dropped, about 3 km dark from the stop to 16:28. The still check put
+      it back at 16:26:34. A *still* label is not evidence of walking, and the label rule says it
+      may only make the rate denser. Candidate fix: out of driving, a move goes to walking only on
+      a *walking* label (or a fresh *still* after the move started); otherwise it stays driving.
+      Needs a replay fixture from `p30-2026-11-23-after-trip`. Awaits the lead: the app is live,
+      so a recorder change is now a Play update.
 - [ ] **T-320** **A first-run tutorial with a selling point (idea, 23 Nov).** The lead's idea:
       three or four picture steps before the permission cards, the last one the founder stamp and
       the launch price. Written up with its constraints (Play's disclosure order, no gate, D-110)

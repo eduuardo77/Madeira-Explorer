@@ -52,6 +52,24 @@ never where the lead lives.
 
 ## Entries
 
+### 2026-11-23: the botanical garden and a stop west, the day Play went live
+
+- **Setup:** field build of the morning (T-318, T-319), versionCode 14, automatic, unplugged
+  about 15:16 at 100%, plugged 16:46. iPhone SensorLogger 15:18 to 15:53 only (then one fix at
+  16:46): `Madeira-fieldwork/iphone-2026-11-23`, compare page beside it. Database pulled 16:49,
+  `backups/p30-2026-11-23-after-trip`.
+- **Route, 15:18 to 15:53 (17 km measured): 95.8% within 10 m, 99.7% within 30 m**; by car
+  97.3%. Lit line 96.2% within 10 m. The drive home has no iPhone track.
+- **Battery: not measured.** The P30 showed 100% for the whole 1 h 30 from a full charge.
+- ❌ **T-321, about 3 km dark leaving the stop (16:19 to 16:28).** The stop's *still* label from
+  15:44 arrived with the departure batch at 16:21:31 and the policy dropped driving to walking
+  (*moved 325 m*); 54 s fixes, chain dropped. The still check raised driving at 16:26:34.
+- ⚠ **The stop, 15:43 to 16:19, stayed on driving** (still check at 15:41: *only 5 min apart*);
+  no fixes but no sleep, the T-285 case again. After arriving home, still on driving with
+  rough positions (*position too rough*, 16:46).
+- Before the trip, 13:20 to 15:15, fixes every 6.5 s at home: the app was on screen on the desk
+  for the T-318 and T-319 work, not the recorder in the background.
+
 ### 2026-11-22: day west, automatic recording, first trip of T-312, T-313 and T-314
 
 - **Setup:** field build of 10:49 (T-312, T-313, T-314), automatic on, unplugged 11:04 at 94%.

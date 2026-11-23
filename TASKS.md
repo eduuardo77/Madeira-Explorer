@@ -473,6 +473,13 @@ permission, L3 privacy contact.
       and *Put your phone away. Your map fills in by itself.* (the app's own onboarding promise;
       PT and DE follow its wording, `onboarding` done screen). The headlines live only in
       `tools/out/store-shots/index.html`, which is not committed.
+      **Screens redone (lead, 23 Nov: panels 1 and 2 were the same map, panel 5 looked broken).**
+      Panel 2 is now Funchal's streets close up with the app's own *Recording your trip*
+      notification over it; panel 5 is the day viewer, headline *Relive any day, then share it.*
+      The day viewer needs the passport's trip list, which needs two trips **with matched road**,
+      and the app matches only the running trip: the generator now also writes
+      `<out>-step1.db` (the first two days, running) and `<out>-step2.sql` (end it, add the rest),
+      so the app matches trip 1 before trip 2 exists, as a phone would have.
       Left: the lead's verdict (PT headlines especially), the site's images, Play upload.
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
       screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be

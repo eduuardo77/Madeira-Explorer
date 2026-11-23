@@ -14,7 +14,7 @@
  * tuned against it (CONTEXT §6.6).
  */
 
-import { copyFileSync, readFileSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -159,16 +159,24 @@ db.exec("DELETE FROM sqlite_sequence");
 for (const key of ['map_snapshot', 'passport_summary', 'stamps_shown', 'stamps_notified', 'map_seen_until_ts', 'dev_poi_fixture', 'geofence_working_set', 'notifications_sent', 'paused_until', 'walk_started_ts']) {
   db.prepare('DELETE FROM app_state WHERE key = ?').run(key);
 }
-db.prepare('INSERT INTO trip (id, started_ts, ended_ts, end_detection_method) VALUES (1, ?, NULL, NULL)').run(fixes[0].ts - 60_000);
+// Two trips, because the passport lists trips (and so opens the day viewer)
+// only when there are two: the first two days, ended, and the rest of
+// the month to today, still running. The map and passport show the running
+// one, so every stamp belongs to it.
+const secondDay = Date.parse(`${DAYS[2].date}T00:00:00Z`); // two days: one is under the list's minimum
+const tripOf = (ts) => (ts < secondDay ? 1 : 2);
+const firstDayEnd = fixes.filter((f) => f.ts < secondDay).at(-1).ts;
+db.prepare("INSERT INTO trip (id, started_ts, ended_ts, end_detection_method) VALUES (1, ?, ?, 'manual')").run(fixes[0].ts - 60_000, firstDayEnd + 60_000);
+db.prepare('INSERT INTO trip (id, started_ts, ended_ts, end_detection_method) VALUES (2, ?, NULL, NULL)').run(secondDay + 8 * 3_600_000);
 const insertFix = db.prepare(
-  "INSERT INTO raw_fix (trip_id, ts, lat, lon, accuracy_m, speed_mps, bearing_deg, altitude_m, activity_type, source) VALUES (1, ?, ?, ?, ?, ?, NULL, NULL, ?, 'fused')"
+  "INSERT INTO raw_fix (trip_id, ts, lat, lon, accuracy_m, speed_mps, bearing_deg, altitude_m, activity_type, source) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?, 'fused')"
 );
 db.exec('BEGIN');
-for (const f of fixes) insertFix.run(f.ts, f.lat, f.lon, f.accuracy_m, f.speed_mps, f.activity);
+for (const f of fixes) insertFix.run(tripOf(f.ts), f.ts, f.lat, f.lon, f.accuracy_m, f.speed_mps, f.activity);
 const insertAward = db.prepare(
-  "INSERT INTO stamp_award (trip_id, place_id, awarded_ts, dwell_seconds, mean_speed_mps, confidence, reason) VALUES (1, ?, ?, 900, NULL, 0.6, 'modelled demo, not a visit')"
+  "INSERT INTO stamp_award (trip_id, place_id, awarded_ts, dwell_seconds, mean_speed_mps, confidence, reason) VALUES (?, ?, ?, 900, NULL, 0.6, 'modelled demo, not a visit')"
 );
-for (const [id, ts] of [...awards].sort((a, b) => a[1] - b[1])) insertAward.run(id, ts);
+for (const [id, ts] of [...awards].sort((a, b) => a[1] - b[1])) insertAward.run(2, id, ts);
 // Every stamp already shown and announced, so no pop-up waits on the first open.
 const seen = JSON.stringify([...awards.keys()]);
 for (const key of ['stamps_shown', 'stamps_notified']) {
@@ -182,3 +190,38 @@ db.prepare("INSERT OR REPLACE INTO app_state (key, value, updated_ts) VALUES ('s
 db.exec('COMMIT');
 db.close();
 console.log(`${output}: ${fixes.length} fixes, ${awards.size} stamps: ${[...awards.keys()].join(' ')}`);
+
+// The app matches only the trip that is running, and the passport lists only
+// trips with matched road, so an ended first trip never matched is not
+// listed. A phone matched it while it ran; to do the same, `<out>-step1.db`
+// holds the first trip alone and still running, and `<out>-step2.sql` ends it
+// and adds the second: push the first, open the app until trip 1 has matched
+// roads, then run the second with sqlite3 on the device.
+const step1 = output.replace(/\.db$/, '') + '-step1.db';
+copyFileSync(output, step1);
+const one = new DatabaseSync(step1);
+one.exec('PRAGMA foreign_keys = OFF');
+const trip2 = one.prepare('SELECT started_ts FROM trip WHERE id = 2').get();
+const ended = one.prepare('SELECT ended_ts FROM trip WHERE id = 1').get();
+const later = one.prepare('SELECT trip_id, ts, lat, lon, accuracy_m, speed_mps, activity_type FROM raw_fix WHERE trip_id = 2 ORDER BY ts').all();
+const awarded = one.prepare('SELECT place_id, awarded_ts FROM stamp_award').all();
+one.exec('DELETE FROM raw_fix WHERE trip_id = 2; DELETE FROM stamp_award; DELETE FROM trip WHERE id = 2; UPDATE trip SET ended_ts = NULL, end_detection_method = NULL WHERE id = 1');
+one.close();
+const sql = [
+  'BEGIN;',
+  `UPDATE trip SET ended_ts = ${ended.ended_ts}, end_detection_method = 'manual' WHERE id = 1;`,
+  `INSERT INTO trip (id, started_ts, ended_ts, end_detection_method) VALUES (2, ${trip2.started_ts}, NULL, NULL);`,
+  ...later.map(
+    (f) =>
+      `INSERT INTO raw_fix (trip_id, ts, lat, lon, accuracy_m, speed_mps, bearing_deg, altitude_m, activity_type, source) VALUES (2, ${f.ts}, ${f.lat}, ${f.lon}, ${f.accuracy_m}, ${f.speed_mps}, NULL, NULL, '${f.activity_type}', 'fused');`
+  ),
+  ...awarded.map(
+    (a) =>
+      `INSERT INTO stamp_award (trip_id, place_id, awarded_ts, dwell_seconds, mean_speed_mps, confidence, reason) VALUES (2, '${a.place_id}', ${a.awarded_ts}, 900, NULL, 0.6, 'modelled demo, not a visit');`
+  ),
+  "DELETE FROM app_state WHERE key IN ('map_snapshot', 'passport_summary', 'map_seen_until_ts');",
+  'COMMIT;',
+  '',
+].join('\n');
+writeFileSync(output.replace(/\.db$/, '') + '-step2.sql', sql);
+console.log(`also ${step1} and the -step2.sql that completes it`);

@@ -65,22 +65,25 @@ h1 {
 
 .stores { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
+/* The Play button, measured from thesidewalk.app's: white in both themes, like Google's own badge. */
 .store {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  gap: 10px;
+  padding: 13px 20px;
+  background: #ffffff;
+  border: 1px solid #d7dce3;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   font-weight: 600;
-  font-size: 15px;
-  color: var(--text);
+  font-size: 15.5px;
+  color: #0e1217;
   text-decoration: none;
+  transition: border-color 0.2s;
 }
 
-a.store:hover, a.store:focus-visible { border-color: var(--text); }
-.store small { font-weight: 400; color: var(--muted); }
-.store svg { width: 18px; height: 18px; flex: none; }
+a.store:hover, a.store:focus-visible { border-color: #b9c1cc; }
+.store svg { width: 20px; height: 20px; flex: none; }
 
 /* The strip of screens: scrolls sideways on its own, never the page. */
 .shots {

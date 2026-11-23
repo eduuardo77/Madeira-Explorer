@@ -297,6 +297,7 @@ export function decideProfile(
 
   let maxDisplacementM = 0;
   let moved = false;
+  let movedUnderStill = false;
   let oldestTs = newest.ts;
   for (const sample of inWindow) {
     const metres = distanceM(newest, sample);
@@ -305,6 +306,9 @@ export function decideProfile(
     }
     if (movedBeyondNoise(newest, sample, metres)) {
       moved = true;
+      if (sample.activity === 'still' && newest.activity === 'still') {
+        movedUnderStill = true;
+      }
     }
     if (sample.ts < oldestTs) {
       oldestTs = sample.ts;
@@ -321,14 +325,26 @@ export function decideProfile(
     // is the matcher's weakest case and misses tunnel portals. The label is
     // only ever a reason for the denser rate, never for a sparser one.
     const inVehicle = newest.activity === 'driving';
+    // ⚠ T-321: out of driving, a *still* label on a moving phone is a stale
+    // label, not evidence of feet. On 23 Nov 2026 the stop's still of 15:44
+    // reached the app with the first batch of the drive home at 16:21, the car
+    // pulling away at walking pace, and driving fell to walking: fixes 54 s
+    // apart and about 3 km dark. The tell is that the phone moved *between*
+    // fixes both labelled still. At an arrival the moving fixes carry driving
+    // and only the parked ones still; those still drop to walking, which slept
+    // within 1 to 20 min in 10 of the P30's 12 such cases, where a stop held on
+    // driving stayed awake 36 min that same day.
+    const staleStill = current === 'driving' && movedUnderStill;
     const profile: SamplingProfile =
-      fastest >= VEHICLE_SPEED_MPS || inVehicle ? 'driving' : MOVING_PROFILE;
+      fastest >= VEHICLE_SPEED_MPS || inVehicle || staleStill ? 'driving' : MOVING_PROFILE;
 
     return {
       profile,
       reason:
         profile === 'driving'
-          ? inVehicle && fastest < VEHICLE_SPEED_MPS
+          ? staleStill && fastest < VEHICLE_SPEED_MPS
+            ? `moved ${Math.round(maxDisplacementM)} m, still by an old label, so no walking`
+            : inVehicle && fastest < VEHICLE_SPEED_MPS
             ? `moved ${Math.round(maxDisplacementM)} m, in a vehicle by the motion sensors`
             : `moved ${Math.round(maxDisplacementM)} m at up to ${Math.round(fastest * 3.6)} km/h`
           : `moved ${Math.round(maxDisplacementM)} m`,

@@ -270,6 +270,31 @@ test('in a vehicle by the motion sensors: the driving rate, even at walking pace
   assert.equal(decideProfile('walking', walk, now).profile, 'walking', 'the same crawl on foot stays on the walking rate');
 });
 
+/** T-321, 23 Nov 2026: the stop's still label arrived with the departure's fixes. */
+test('out of driving, a slow move under an old still label stays on driving; a walking label still walks', () => {
+  const now = 1_800_000_000_000;
+  const crawl = Array.from({ length: 10 }, (_, i) => ({
+    lat: 32.65,
+    lon: -16.91 + (i * 20) / 93_800,
+    ts: now - (9 - i) * 60_000,
+    accuracyM: 8,
+  }));
+  const still = crawl.map((sample) => ({ ...sample, activity: 'still' }));
+  const decision = decideProfile('driving', still, now);
+  assert.equal(decision.profile, 'driving');
+  assert.equal(decision.changed, false);
+  assert.match(decision.reason, /old label/);
+
+  const parkedAndWalked = crawl.map((sample) => ({ ...sample, activity: 'walking' }));
+  assert.equal(decideProfile('driving', parkedAndWalked, now).profile, 'walking', 'a walking label after the car still walks');
+  assert.equal(decideProfile('driving', crawl, now).profile, 'walking', 'no label, as before T-321');
+  assert.equal(decideProfile('walking', still, now).profile, 'walking', 'only out of driving: never a reason to raise');
+
+  // An arrival: the road under driving, then parked under a fresh still. Walking, as before.
+  const arrival = crawl.map((sample, i) => ({ ...sample, ...(i < 7 ? { activity: 'driving' } : { activity: 'still', lon: crawl[6].lon }) }));
+  assert.equal(decideProfile('driving', arrival, now).profile, 'walking', 'parked under a fresh still lowers as before');
+});
+
 // ---------------------------------------------------------------------------
 // leaving stationary on the first fix (F1, the P30, 2026-10-12)
 // ---------------------------------------------------------------------------

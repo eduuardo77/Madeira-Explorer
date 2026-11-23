@@ -399,6 +399,38 @@ test('⚠ 21 Nov, the shopping centre: the same, 20 min of driving down to 10 (T
 });
 
 // ---------------------------------------------------------------------------
+// 23 Nov, 15:36 to 16:30: a stale still at a slow departure (T-321)
+// ---------------------------------------------------------------------------
+//
+// A 36 min stop on driving, no fix through the 50 m filter. The sensors' still
+// of 15:44:47 reached the app only at 16:21:31, with the first batch of the
+// drive home, and the gate read 325 m at walking pace and no driving label as
+// walking: fixes 54 s apart, the chain dropped, about 3 km dark until 16:28.
+
+test('⚠ 23 Nov: a slow departure carrying the stop\'s still label stays on driving (T-321)', async () => {
+  const f = fixture('departure-stale-still-2026-11-23');
+  const all = [...f.history, ...f.batches.flatMap((batch) => batch.fixes)].sort((a, b) => a.ts - b.ts);
+  const replay = createReplay({
+    storedProfile: f.profileBefore?.profile,
+    storedProfileTs: f.profileBefore?.ts,
+    history: f.history,
+    // The check's look at 15:41:46 had the fix of 15:41:45 ("only 5 min apart").
+    positionAt: (t) => all.find((fix) => fix.ts >= t - 2_000 && fix.ts <= t + WAKE_FIX_TIMEOUT_MS) ?? null,
+  });
+  await replay.run(
+    [
+      ...deliveredEvents(f),
+      // "still check: started on driving" at 15:36:46 is the motion wake's still.
+      { kind: 'label', at: utc('2026-11-23T15:36:46'), activity: 'still' },
+    ],
+    utc('2026-11-23T16:30:30')
+  );
+  const diary = replay.diary.join('\n');
+  const dropped = replay.changes.find((change) => change.profile !== 'driving');
+  assert.equal(dropped, undefined, `left driving at ${dropped && at(dropped.at)}:\n${diary}`);
+});
+
+// ---------------------------------------------------------------------------
 // The glue's own rules, on invented positions
 // ---------------------------------------------------------------------------
 

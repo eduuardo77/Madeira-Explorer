@@ -64,6 +64,7 @@ never where the lead lives.
 - ❌ **T-321, about 3 km dark leaving the stop (16:19 to 16:28).** The stop's *still* label from
   15:44 arrived with the departure batch at 16:21:31 and the policy dropped driving to walking
   (*moved 325 m*); 54 s fixes, chain dropped. The still check raised driving at 16:26:34.
+  **Fixed the same evening** (TASKS T-321), on the P30 as a field build.
 - ⚠ **The stop, 15:43 to 16:19, stayed on driving** (still check at 15:41: *only 5 min apart*);
   no fixes but no sleep, the T-285 case again. After arriving home, still on driving with
   rough positions (*position too rough*, 16:46).

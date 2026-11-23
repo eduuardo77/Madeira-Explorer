@@ -460,6 +460,17 @@ permission, L3 privacy contact.
       a *walking* label (or a fresh *still* after the move started); otherwise it stays driving.
       Needs a replay fixture from `p30-2026-11-23-after-trip`. Awaits the lead: the app is live,
       so a recorder change is now a Play update.
+      — **Built the same evening (the lead's yes).** Out of driving, a move whose moving fixes
+      *and* newest fix are all labelled still stays on driving (*still by an old label, so no
+      walking*). Each fix carries the label in force at its own time, so at an arrival the road
+      fixes say driving and only the parked ones still: those lower as before. The broader rule
+      (any still label) was rejected: over the P30's 38 real driving-to-walking drops it kept 10
+      arrivals on driving, which had slept within 1 to 20 min on walking, the same day a stop on
+      driving stayed awake 36 min. The narrow one changes 5 of 38: today's and four October walks
+      after parking under a lagging still (Doppler spikes of 6.6 to 7.8 m/s there too, so speed
+      does not separate them). Cost: those walks stay on the denser rate until a walking label;
+      no road lost. Replay fixture `departure-stale-still-2026-11-23` (fails before, passes
+      after). 1,318 tests. Not in the Play build.
 - [ ] **T-320** **A first-run tutorial with a selling point (idea, 23 Nov).** The lead's idea:
       three or four picture steps before the permission cards, the last one the founder stamp and
       the launch price. Written up with its constraints (Play's disclosure order, no gate, D-110)

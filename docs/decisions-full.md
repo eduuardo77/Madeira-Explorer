@@ -5859,7 +5859,34 @@ slot from the places' monitored set (`geofenceSelection`), and fires only while 
 armed; the recorder is already running on any trip there (D-021). The flag is permanent: the
 same `porto_santo_unlocked` row in `app_state`, holding the visited island ids.
 
-## D-109 — Porto Santo has its own passport, sold to people on Madeira
+## D-110 — A launch price of €2.99 until the founder window closes
+
+**Status: Accepted** 2026-11-23, the project lead: an initial 50% discount on the Madeira passport.
+Amends D-089's price for the launch period only.
+
+**Decision.** `passport_madeira` sells at **€2.99** from launch until **2027-02-21**, the day the
+founder window (`content/pois.json`, `founderWindow`, 2026-11-21 + 3 months) closes, then goes to
+**€5.99**. Early buyers get half price and the founder stamp together.
+
+**How.** A Play Console price change, nothing else. The app never holds a price
+(`storeBilling.fetchPrice` returns Google's `displayPrice`), so the sheet shows 2,99 € without a
+build or a review, and 5,99 € again when the console says so.
+
+**Wording.** A *launch price* (*preço de lançamento*, *Einführungspreis*), never "50% off" or a
+crossed-out €5.99. Nobody has paid €5.99 yet, and the EU price indication rules (Directive
+98/6/EC art. 6a, from the Omnibus directive) measure an announced reduction against the lowest
+price applied in the previous 30 days. Not legal advice; the safe wording costs nothing.
+
+**Rejected.** *A Play one-time-product discount offer* (Billing Library 8; `expo-iap` 5.8.2 has
+`discountOffers` and `offerToken`): it shows a crossed-out price, but needs the offer read in
+`billingSync`, the token passed at purchase (without it Google charges the full price), the sheet
+redrawn in three languages, and a new build while version 14 waits for review. Worth revisiting for
+a later sale, once €5.99 has been the real price for 30 days.
+
+**Open.** Raising the price on 21 Feb is a manual console change (T-318). Play may round or
+localise other currencies; check them when setting it.
+
+, sold to people on Madeira
 
 **Status: Provisional** — 2026-10-26, the project lead, the same day T-067a was built on D-107's
 answers: *"I want to use Porto Santo as a selling point for people in Madeira even though it is

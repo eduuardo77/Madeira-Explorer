@@ -409,7 +409,7 @@ installed 21:51), data kept.
 ## ⚠⚠ 2026-10-05: where the last session ended — read this first
 
 **Monetisation (`docs/monetization-execution-plan.md`).** Phase 0 done (app in Play Console, upload
-key, payments, testers, `passport_madeira` active at €5.99, Maps key carries the Play and upload
+key, payments, testers, `passport_madeira` active at €5.99 (⚠ €2.99 launch price until 2027-02-21, D-110, T-318), Maps key carries the Play and upload
 SHA-1s). Phase 1 done. **Phase 2 done (T-156a to e)**: `expo-iap` 5.8.2 behind `storeBilling.ts`,
 `billingSync.ts` (saved, then acknowledged), the unlock sheet, the Settings rows. **The first real
 test purchase worked 2026-10-05** (bought, unlocked, acknowledged: order still *Processado* ten

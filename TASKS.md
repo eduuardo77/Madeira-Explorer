@@ -521,7 +521,21 @@ permission, L3 privacy contact.
       Funchal centre landmarks (Sé, Teatro, CR7, Mercado, all within ~900 m), Fanal and Levada dos
       Cedros 357 m. Levada do Risco and Levada do Alecrim share a start geofence at Rabaçal (0 m),
       probably on purpose, since they are two different walks. Method is D-064: a defended draft,
-      the lead vetoes. Nothing changed yet.
+      the lead vetoes.
+      — **The beach half, done 2026-11-23 (the lead chose it).** The test that decided it: would
+      anyone go there for its own sake? Closeness is fine when each place is (the Funchal
+      landmarks); Abra and Cais are stops on one walk that already has its stamp. **Both cut.
+      Five added**, coordinates from OSM's beach ways: Praia de Machico, Praia do Garajau,
+      Praia da Alagoa (Porto da Cruz), Complexo Balnear do Lido, Praia da Madalena do Mar.
+      Madeira 81 → 84 places, beaches 8 → 11. Machico and Madalena were moved ~75 m inland: OSM
+      centres a beach polygon on the waterline and `build-regions` put both in the sea. Garajau is
+      271 m from the Ponta do Garajau viewpoint, so its radius is 120 m and the top does not earn
+      the beach. ⚠ **Still open:** Calhau da Lapa (approved, not added: OSM has only a locality
+      label for it, which this file has learnt not to trust, and Overpass was overloaded);
+      `build-levadas` and `check-names` not re-run, Overpass again (no levada changed). ⚠ A user
+      who earned Abra or Cais since launch keeps the row in `stamp_award`: the passport ignores it
+      (it walks the pack), but the trip list's `stamp_count` is raw SQL and will count it. Ships
+      with the next store build; not on the P30. The close pairs above are not reviewed.
 - [ ] **T-321** **A slow departure on a stale *still* drops driving to walking (23 Nov trip).**
       After a 36 min stop on driving, the first batch of the drive home (16:21:31) carried the
       stop's own *driving exit, still enter* label from 15:44, 37 min late. The policy's moving

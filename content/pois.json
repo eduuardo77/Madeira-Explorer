@@ -659,46 +659,6 @@
       ]
     },
     {
-      "id": "cais-do-sardinha",
-      "name": "Cais do Sardinha",
-      "category": "beach",
-      "regionId": "machico",
-      "why": {
-        "en": "A quay at the end of the PR8 trail, on Ponta de São Lourenço.",
-        "pt": "Cais no fim do PR8, na Ponta de São Lourenço.",
-        "de": "Ein Anleger am Ende des Wanderwegs PR8, auf der Ponta de São Lourenço."
-      },
-      "whyPlain": true,
-      "geofences": [
-        {
-          "id": "cais-do-sardinha",
-          "lat": 32.74212,
-          "lon": -16.68565,
-          "radiusM": 250
-        }
-      ]
-    },
-    {
-      "id": "praia-da-baia-d-abra",
-      "name": "Praia da Baía D'Abra",
-      "category": "beach",
-      "regionId": "machico",
-      "why": {
-        "en": "A bay on the São Lourenço peninsula, beside the PR8 trail.",
-        "pt": "Baía na península de São Lourenço, junto ao PR8.",
-        "de": "Eine Bucht auf der Halbinsel São Lourenço, am Wanderweg PR8."
-      },
-      "whyPlain": true,
-      "geofences": [
-        {
-          "id": "praia-da-baia-d-abra",
-          "lat": 32.74723,
-          "lon": -16.69667,
-          "radiusM": 250
-        }
-      ]
-    },
-    {
       "id": "faja-dos-padres",
       "name": "Fajã dos Padres",
       "category": "beach",
@@ -714,6 +674,101 @@
           "lat": 32.656,
           "lon": -17.025,
           "radiusM": 100
+        }
+      ]
+    },
+    {
+      "id": "praia-de-machico",
+      "name": "Praia de Machico",
+      "category": "beach",
+      "regionId": "machico",
+      "why": {
+        "en": "A golden sand beach in the bay where the first settlers landed.",
+        "pt": "Praia de areia dourada na baía onde desembarcaram os primeiros povoadores.",
+        "de": "Ein goldener Sandstrand in der Bucht, in der die ersten Siedler landeten."
+      },
+      "geofences": [
+        {
+          "id": "praia-de-machico-main",
+          "lat": 32.71730,
+          "lon": -16.764,
+          "radiusM": 250
+        }
+      ]
+    },
+    {
+      "id": "praia-do-garajau",
+      "name": "Praia do Garajau",
+      "category": "beach",
+      "regionId": "santa-cruz",
+      "why": {
+        "en": "A pebble beach below the Cristo Rei cliff, reached by cable car.",
+        "pt": "Praia de calhau sob a falésia do Cristo Rei, com acesso por teleférico.",
+        "de": "Ein Kiesstrand unter der Klippe des Cristo Rei, erreichbar mit der Seilbahn."
+      },
+      "geofences": [
+        {
+          "id": "praia-do-garajau-main",
+          "lat": 32.63817,
+          "lon": -16.8527,
+          "radiusM": 120
+        }
+      ]
+    },
+    {
+      "id": "praia-da-alagoa",
+      "name": "Praia da Alagoa",
+      "category": "beach",
+      "regionId": "machico",
+      "why": {
+        "en": "A beach of dark stones and sand on the north coast, at Porto da Cruz.",
+        "pt": "Praia de calhau e areia escura na costa norte, no Porto da Cruz.",
+        "de": "Ein Strand aus dunklen Steinen und Sand an der Nordküste, in Porto da Cruz."
+      },
+      "geofences": [
+        {
+          "id": "praia-da-alagoa-main",
+          "lat": 32.77495,
+          "lon": -16.82896,
+          "radiusM": 200
+        }
+      ]
+    },
+    {
+      "id": "complexo-balnear-do-lido",
+      "name": "Complexo Balnear do Lido",
+      "category": "beach",
+      "regionId": "funchal",
+      "why": {
+        "en": "The seafront bathing complex in Funchal, with pools and ladders into the sea.",
+        "pt": "Complexo balnear à beira-mar no Funchal, com piscinas e escadas para o mar.",
+        "de": "Die Badeanlage am Meer in Funchal, mit Becken und Leitern ins Meer."
+      },
+      "geofences": [
+        {
+          "id": "complexo-balnear-do-lido-main",
+          "lat": 32.63558,
+          "lon": -16.9326,
+          "radiusM": 150
+        }
+      ]
+    },
+    {
+      "id": "praia-da-madalena-do-mar",
+      "name": "Praia da Madalena do Mar",
+      "category": "beach",
+      "regionId": "ponta-do-sol",
+      "why": {
+        "en": "A long pebble beach on the south coast, among banana plantations.",
+        "pt": "Longa praia de calhau na costa sul, entre bananais.",
+        "de": "Ein langer Kiesstrand an der Südküste, zwischen Bananenplantagen."
+      },
+      "geofences": [
+        {
+          "id": "praia-da-madalena-do-mar-main",
+          "lat": 32.69847,
+          "lon": -17.13117,
+          "radiusM": 250
         }
       ]
     },

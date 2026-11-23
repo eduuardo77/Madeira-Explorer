@@ -480,7 +480,11 @@ permission, L3 privacy contact.
       and the app matches only the running trip: the generator now also writes
       `<out>-step1.db` (the first two days, running) and `<out>-step2.sql` (end it, add the rest),
       so the app matches trip 1 before trip 2 exists, as a phone would have.
-      Left: the lead's verdict (PT headlines especially), the site's images, Play upload.
+      **23 Nov: on bruma.lol** (the lead's go): the English set as `site/screenshots/1..5.jpg`
+      (600x1067), tiles 9:16; the template is kept as `tools/store-shots.html`. The intro said
+      *your trip never leaves your phone*, the phrase i18n.test.ts bans (the phone's own backup
+      can copy it); now *your trips are never sent to us*, the policy's wording.
+      Left: the lead's verdict on the PT headlines, Play upload (the lead's).
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
       screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be
       clear) and dropped upstream's `color = Color(polyline.color)`: maps-compose's spans overload

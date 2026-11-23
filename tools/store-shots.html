@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  The store screenshots (T-317): split block, style 1, five panels, en / pt / de.
+  The screens come from the modelled month (tools/make-demo-db.mjs) captured on the
+  madeira AVD into tools/out/demo-db/shots/<lang>/. Render with headless Chrome:
+    ?lang=pt               the five side by side, 1931 x 723
+    ?panel=3&lang=de       one panel at Play size, window 1080 x 1920
+  Headlines: no dashes (CLAUDE.md), the app's own words in each language.
+-->
+<html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #e9e9ec; font-family: Inter, system-ui, sans-serif; }
+  .strip { display: flex; gap: 0; padding: 0; }
+  body.sheet { padding: 28px; width: 1931px; }
+  body.sheet .strip { width: 1875px; border-radius: 8px; overflow: hidden; }
+  body.one .panel:not(.on) { display: none; }
+  body.one .panel { transform: scale(2.88); transform-origin: 0 0; }
+  .panel { position: relative; width: 375px; height: 667px; overflow: hidden; padding: 52px 30px 0; background: #fff; flex: none; }
+  .band { position: absolute; left: 0; right: 0; top: 0; height: 372px; background: var(--c); }
+  .head { position: relative; z-index: 2; font: 800 30px/1.12 Inter, sans-serif; letter-spacing: -.8px; color: #fff; }
+  .head em { font-style: normal; opacity: .72; }
+  .phone { position: absolute; z-index: 2; left: 52px; top: 188px; width: 271px; height: 588px; border-radius: 38px;
+           border: 7px solid #111; background: #111; overflow: hidden; box-shadow: 0 30px 60px -18px rgba(0,0,0,.35); }
+  .phone img { display: block; width: 100%; }
+  .pop { position: absolute; z-index: 3; left: 22px; width: 331px; top: 478px; transform: rotate(-2.5deg);
+         filter: drop-shadow(0 18px 28px rgba(0,0,0,.45)); }
+  .p1 { --c: #1f6f4a; } .p2 { --c: #12807a; } .p3 { --c: #1b5f8c; } .p4 { --c: #b5651d; } .p5 { --c: #5b3f9e; }
+</style></head><body>
+<div class="strip" id="strip"></div>
+<script>
+  // Captures: tools/out/demo-db/shots, the modelled month (tools/make-demo-db.mjs), nobody's movements (D-016).
+  const q = new URLSearchParams(location.search), one = q.get('panel'), lang = q.get('lang') || 'en';
+  const S = `out/demo-db/shots/${lang}/`;
+  // Panel 2 is the app's own onboarding promise (onboarding done screen). Headlines in the app's own words: carimbo, lugares, registar (PT, tu); Stempel, Orte (DE, Sie).
+  const H = {
+    en: [`Every road you travel, <em>lit up.</em>`, `Put your phone away.<br><em>Your map fills in by&nbsp;itself.</em>`,
+         `81 places worth a stamp. <em>Collect the island.</em>`, `Earn a stamp at every place <em>worth going to.</em>`,
+         `Relive any day, <em>then share it.</em>`],
+    pt: [`Cada estrada por onde passas, <em>acesa.</em>`, `Guarda o telemóvel.<br><em>O mapa enche-se sozinho.</em>`,
+         `81 lugares que valem um carimbo. <em>Coleciona a ilha.</em>`, `Um carimbo em cada lugar <em>que vale a visita.</em>`,
+         `Revive qualquer dia <em>e partilha-o.</em>`],
+    de: [`Jede Straße, die Sie fahren, <em>leuchtet auf.</em>`, `Telefon wegstecken.<br><em>Ihre Karte füllt sich von selbst.</em>`,
+         `81 Orte, die einen Stempel wert sind. <em>Sammeln Sie die Insel.</em>`, `Ein Stempel für jeden Ort, <em>der einen Besuch wert ist.</em>`,
+         `Jeden Tag noch einmal erleben, <em>dann teilen.</em>`],
+  }[lang];
+  const P = [
+    ['1-map-zoom.png', 0],
+    // Funchal's streets, closer than panel 1, with the app's own notification over them.
+    ['2-map-close.png', 0, '', '2-card.png'],
+    ['3-passport.png', 0],
+    ['4-stamp.png', 0],
+    // The day viewer: the trip list opens it (tools/make-demo-db.mjs writes two trips for that).
+    ['5-viewer.png', 0],
+  ];
+  document.body.className = one ? 'one' : 'sheet';
+  document.getElementById('strip').innerHTML = P.map(([img, shift, bg, pop], i) => `
+    <div class="panel p${i + 1} ${String(i + 1) === one ? 'on' : ''}"><div class="band"></div>
+      <div class="head">${H[i]}</div>
+      <div class="phone" style="${bg ? `background:${bg}` : ''}"><img src="${S}${img}" style="${shift || ''}"></div>
+      ${pop ? `<img class="pop" src="${S}${pop}">` : ''}
+    </div>`).join('');
+</script>
+</body></html>

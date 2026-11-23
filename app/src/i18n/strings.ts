@@ -924,6 +924,13 @@ export const STRINGS = {
     'Pagamento único. Sem subscrição.',
     'Eine einmalige Zahlung. Kein Abo.'
   ),
+  // D-110 (the lead, 23 Nov): the launch price says it is one, without
+  // claiming a discount on a price nobody has paid yet. {date} is the last day.
+  'unlock.launchPrice': s(
+    'Launch price until {date}. Then it doubles.',
+    'Preço de lançamento até {date}. Depois, o dobro.',
+    'Einführungspreis bis {date}. Danach das Doppelte.'
+  ),
   // Q2 b (the lead, 30 Oct; D-097 amended): the button says what it does and
   // what it costs, with or without stamps waiting. The price is Google's only.
   'unlock.buy.passport': s('Unlock the passport · {price}', 'Desbloquear o passaporte · {price}', 'Reisepass freischalten · {price}'),

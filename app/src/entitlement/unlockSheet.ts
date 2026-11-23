@@ -20,12 +20,14 @@
  *   old Play Store or a country Play does not sell in (T-156b).
  * - **A failure makes no promise about charges**, because the app cannot know.
  * - **A locked stamp was earned**, never missed (the tone rule in `strings.ts`).
+ * - **The launch price says when it ends** (D-110), and only where the button
+ *   is. It never names a price of its own or a discount: "then it doubles".
  *
  * Pure: takes the language, as `placeCard.ts` does, and never imports
  * `i18n/index.ts`.
  */
 
-import type { Language } from '../i18n/languages.ts';
+import { DATE_LOCALES, type Language } from '../i18n/languages.ts';
 import { PLURALS, STRINGS } from '../i18n/strings.ts';
 import { plural, translate } from '../i18n/translate.ts';
 import type { StoreFailure } from './billingOutcomes.ts';
@@ -62,6 +64,12 @@ export interface UnlockSheetInput {
      */
     islands?: readonly string[];
   };
+  /**
+   * The first millisecond after the launch price (D-110: the founder window's
+   * end, `founderWindowEndMs`), or null when there is none. Shown only before it.
+   */
+  launchPriceEndMs?: number | null;
+  nowMs?: number;
   language: Language;
 }
 
@@ -74,6 +82,8 @@ export interface UnlockSheetModel {
   /** The line under the list, for every state but a plain offer. */
   notice: string | null;
   buy: { label: string; enabled: boolean } | null;
+  /** Over the button while the launch price lasts (D-110), else null. */
+  launchPrice: string | null;
   restore: string | null;
   close: string;
 }
@@ -102,6 +112,21 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
         : say('unlock.buy.passport', { price });
   const canBuy = { label: buyLabel, enabled: true };
 
+  // The last day, not the first after it: "until 20 February" while the
+  // window closes at midnight UTC on the 21st. Noon of that day, not a
+  // `timeZone` option, which Hermes was never seen to honour: noon UTC is the
+  // same date in every zone from UTC-11 to UTC+11.
+  const end = input.launchPriceEndMs ?? null;
+  const launchPrice =
+    end !== null && input.nowMs !== undefined && input.nowMs < end
+      ? say('unlock.launchPrice', {
+          date: new Date(end - 12 * 3_600_000).toLocaleDateString(DATE_LOCALES[language], {
+            day: 'numeric',
+            month: 'long',
+          }),
+        })
+      : null;
+
   const model: UnlockSheetModel = {
     eyebrow: say('unlock.eyebrow'),
     title: waiting
@@ -111,6 +136,7 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     adds,
     notice: null,
     buy: canBuy,
+    launchPrice,
     restore: say('unlock.restore'),
     close: say('unlock.notNow'),
   };
@@ -122,17 +148,17 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
       return { ...model, buy: { label: say('unlock.working'), enabled: false } };
     case 'pending':
       // Already bought, so nothing to buy twice; Restore asks Google again.
-      return { ...model, notice: say('unlock.pending'), buy: null };
+      return { ...model, notice: say('unlock.pending'), buy: null, launchPrice: null };
     case 'offline':
       return { ...model, notice: say('unlock.offline') };
     case 'unavailable':
-      return { ...model, notice: say('unlock.unavailable'), buy: null, restore: null };
+      return { ...model, notice: say('unlock.unavailable'), buy: null, launchPrice: null, restore: null };
     case 'failed':
       return { ...model, notice: say('unlock.failed') };
     case 'nothingToRestore':
       return { ...model, notice: say('unlock.nothingToRestore') };
     case 'unlocked':
-      return { ...model, notice: say('unlock.unlocked'), buy: null, restore: null, close: say('unlock.done') };
+      return { ...model, notice: say('unlock.unlocked'), buy: null, launchPrice: null, restore: null, close: say('unlock.done') };
   }
 }
 

@@ -23,7 +23,7 @@ import { getMedals } from '../content/medalCatalogue';
 import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
 import { getOpenIslandPassports, visiblePlacesNow } from '../progress/islandGateStore';
-import { founderWindowOpen } from '../entitlement/founder';
+import { founderWindowEndMs, founderWindowOpen } from '../entitlement/founder';
 import { SHOWCASE_COUNT, showcase, stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
 import type { PassportStamp } from './PassportView';
@@ -144,6 +144,10 @@ export default function UnlockSheet({
       founder: founderWindowOpen(Date.now(), getContentPack().founderWindow),
       islands,
     },
+    // D-110: the launch price ends with the founder window, set by the same
+    // content field, so the line and the founder stamp go together.
+    launchPriceEndMs: founderWindowEndMs(getContentPack().founderWindow),
+    nowMs: Date.now(),
     language: deviceLanguage(),
   });
 

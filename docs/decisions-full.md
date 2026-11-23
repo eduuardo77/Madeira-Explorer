@@ -5883,6 +5883,15 @@ price applied in the previous 30 days. Not legal advice; the safe wording costs 
 redrawn in three languages, and a new build while version 14 waits for review. Worth revisiting for
 a later sale, once €5.99 has been the real price for 30 days.
 
+**Amended 2026-11-23, the same day, the project lead:** a lower price alone does not say it is
+temporary. The unlock sheet now carries one line over the button while the founder window is open:
+*Launch price until 20 February. Then it doubles.* (PT *Preço de lançamento até 20 de fevereiro.
+Depois, o dobro.*, DE *Einführungspreis bis 20. Februar. Danach das Doppelte.*). It names no price
+and no percentage, so Google's stays the only price, and "doubles" holds in every currency. The
+date is the founder window's last day (`founderWindowEndMs` minus one day), so the line, the
+founder stamp and the price all end together. Shown only where the button is. ⚠ The app cannot
+see the console: if the price is not lowered, the line is false. Ships in the next build.
+
 **Open.** Raising the price on 21 Feb is a manual console change (T-318). Play may round or
 localise other currencies; check them when setting it.
 

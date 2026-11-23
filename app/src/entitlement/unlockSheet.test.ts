@@ -204,13 +204,13 @@ test('no text a user reads has a dash, in any language or state', () => {
   }
 });
 
-test('pure: no runtime import except the strings and the translator', () => {
+test('pure: no runtime import except the strings, the translator and the date locales', () => {
   const source = readFileSync(
     path.join(path.dirname(fileURLToPath(import.meta.url)), 'unlockSheet.ts'),
     'utf8'
   );
   for (const line of source.match(/^import .*$/gm) ?? []) {
-    assert.match(line, /^import type |from '\.\.\/i18n\/(strings|translate)\.ts'/, line);
+    assert.match(line, /^import type |from '\.\.\/i18n\/(strings|translate|languages)\.ts'/, line);
   }
 });
 
@@ -222,4 +222,42 @@ test('with nothing waiting, the sheet shows three different places, chosen by th
   assert.equal(new Set(picked).size, 3);
   assert.deepEqual(showcase(['a', 'b'], 3, Math.random).sort(), ['a', 'b']);
   assert.deepEqual(places, ['a', 'b', 'c', 'd', 'e'], 'the catalogue is not reordered');
+});
+
+// D-110: the founder window that opened 2026-11-21 for 3 months closes at
+// midnight UTC on 21 Feb 2027, so the last launch-price day is the 20th.
+const LAUNCH_END = Date.UTC(2027, 1, 21);
+
+test('D-110: before the end, the launch price says its last day, in three languages', () => {
+  const want = {
+    en: 'Launch price until 20 February. Then it doubles.',
+    pt: 'Preço de lançamento até 20 de fevereiro. Depois, o dobro.',
+    de: 'Einführungspreis bis 20. Februar. Danach das Doppelte.',
+  } as const;
+  for (const language of ['en', 'pt', 'de'] as const) {
+    const model = unlockSheetModel(input({ language, launchPriceEndMs: LAUNCH_END, nowMs: Date.UTC(2026, 10, 23) }));
+    assert.equal(model.launchPrice, want[language], language);
+  }
+});
+
+test('D-110: from the end on, or with no window, there is no launch price', () => {
+  assert.equal(unlockSheetModel(input({ launchPriceEndMs: LAUNCH_END, nowMs: LAUNCH_END })).launchPrice, null);
+  assert.equal(unlockSheetModel(input({ launchPriceEndMs: LAUNCH_END, nowMs: LAUNCH_END - 1 })).launchPrice !== null, true);
+  assert.equal(unlockSheetModel(input({ launchPriceEndMs: null, nowMs: 0 })).launchPrice, null);
+  assert.equal(unlockSheetModel(input()).launchPrice, null);
+});
+
+test('D-110: the launch price stands only where there is something to buy', () => {
+  const at = { launchPriceEndMs: LAUNCH_END, nowMs: Date.UTC(2026, 10, 23) };
+  for (const kind of ['offer', 'working', 'offline', 'failed', 'nothingToRestore'] as const) {
+    assert.notEqual(unlockSheetModel(input({ ...at, state: { kind } })).launchPrice, null, kind);
+  }
+  for (const kind of ['pending', 'unavailable', 'unlocked'] as const) {
+    assert.equal(unlockSheetModel(input({ ...at, state: { kind } })).launchPrice, null, kind);
+  }
+});
+
+test('D-110: the line names no price and no discount, so Google stays the only price', () => {
+  const line = unlockSheetModel(input({ launchPriceEndMs: LAUNCH_END, nowMs: 0 })).launchPrice ?? '';
+  assert.doesNotMatch(line, /\d+[.,]\d\d|€|%|off/i);
 });

@@ -453,8 +453,11 @@ permission, L3 privacy contact.
 - [ ] **T-318** **Launch price €2.99 (D-110, 23 Nov).** The lead sets `passport_madeira` to €2.99
       in Play Console (Monetise, Products, In-app products; base price, then let Play convert the
       other currencies) before launch. **On 2027-02-21**, the founder window's end, set it back to
-      €5.99. No app change: the sheet shows Google's price. Listing and site text say *launch
-      price*, never "50% off".
+      €5.99. Listing and site text say *launch price*, never "50% off".
+      — ✅ **In-app line built 23 Nov** (D-110 amended): `unlockSheet.ts` `launchPrice`, over the
+      buy button while the founder window is open, three languages, 4 tests. Needs the next build;
+      not yet seen on a phone (Hermes date formatting included). The line goes live with that
+      build whether or not the console price was lowered: lower it first.
 - [ ] **T-317** **Store screenshots from a modelled month (22 Nov, started).** `tools/make-demo-db.mjs`
       writes 11 day drives routed on `content/roads.json` through named places (nobody's movements,
       D-016) into a copy of the app's database: 243 km, 43 of 81 stamps (awarded where a drive

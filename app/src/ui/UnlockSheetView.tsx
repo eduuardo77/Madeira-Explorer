@@ -138,6 +138,8 @@ export default function UnlockSheetView({
         </Text>
       )}
 
+      {model.launchPrice === null ? null : <Text style={styles.launchPrice}>{model.launchPrice}</Text>}
+
       {model.buy === null ? null : (
         <Animated.View
           style={[
@@ -274,6 +276,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.label,
     textAlign: 'center',
     marginTop: spacing.md,
+  },
+  launchPrice: {
+    color: reward.text,
+    fontSize: fontSize.label,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: spacing.lg,
   },
   buyWrap: {
     alignSelf: 'stretch',

@@ -590,6 +590,24 @@ export const STRINGS = {
 
   // ── The passport (D-003, D-027, D-058) ──────────────────────────────────
   'passport.title': s('Passport', 'Passaporte', 'Reisepass'),
+  // T-325: the header's second column and the round play button.
+  'passport.stats.lit': s('roads lit', 'estradas acesas', 'Straßen beleuchtet'),
+  'passport.watch.short': s('Trip', 'Viagem', 'Reise'),
+  // T-325: the island beside the title, opened inside the page.
+  'passport.islandMap.a11y.open': s('Open the island map', 'Abrir o mapa da ilha', 'Inselkarte öffnen'),
+  'passport.islandMap.a11y.close': s('Close the island map', 'Fechar o mapa da ilha', 'Inselkarte schließen'),
+  'passport.island.bubble.open': s('Stamped on {date}', 'Carimbado a {date}', 'Gestempelt am {date}'),
+  'passport.island.bubble.waiting': s('You were here on {date}', 'Estiveste aqui a {date}', 'Sie waren am {date} hier'),
+  'passport.island.bubble.new': s('Not visited yet', 'Por visitar', 'Noch nicht besucht'),
+  'passport.island.a11y.see': s('See the stamp', 'Ver o carimbo', 'Stempel ansehen'),
+  'passport.island.a11y.unlock': s('Unlock', 'Desbloquear', 'Freischalten'),
+  'passport.island.a11y.place': s('See the place', 'Ver o lugar', 'Ort ansehen'),
+  'passport.island.tag.waiting': s('waiting', 'à espera', 'wartet'),
+  'passport.island.tag.new': s('not visited', 'por visitar', 'offen'),
+  'passport.island.zoomIn': s('Zoom in', 'Aproximar', 'Vergrößern'),
+  'passport.island.wholeIsland': s('Whole island', 'Ilha inteira', 'Ganze Insel'),
+  'passport.island.filter': s('{category}: {collected} of {total}', '{category}: {collected} de {total}', '{category}: {collected} von {total}'),
+  'passport.island.showAll': s('show all', 'mostrar todos', 'alle zeigen'),
   'passport.back': s('Map', 'Mapa', 'Karte'),
   // D-109: an island with a passport of its own, reached from a card in the
   // main passport. Its name comes from content (D-017).
@@ -1640,6 +1658,27 @@ export const PLURALS = {
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),
     other: s('places collected', 'lugares visitados', 'Orte gesammelt'),
+  },
+  // T-325: the island's legend, its lists and what is new since it was last opened.
+  'passport.island.legend.open': {
+    one: s('{count} in colour', '{count} a cores', '{count} in Farbe'),
+    other: s('{count} in colour', '{count} a cores', '{count} in Farbe'),
+  },
+  'passport.island.legend.waiting': {
+    one: s('{count} waiting for you', '{count} à tua espera', '{count} wartet auf Sie'),
+    other: s('{count} waiting for you', '{count} à tua espera', '{count} warten auf Sie'),
+  },
+  'passport.island.legend.new': {
+    one: s('{count} to visit', '{count} por visitar', '{count} noch offen'),
+    other: s('{count} to visit', '{count} por visitar', '{count} noch offen'),
+  },
+  'passport.island.group': {
+    one: s('{count} place here', '{count} lugar aqui', '{count} Ort hier'),
+    other: s('{count} places here', '{count} lugares aqui', '{count} Orte hier'),
+  },
+  'passport.island.fresh': {
+    one: s('{count} new place since last time', '{count} lugar novo desde a última vez', '{count} neuer Ort seit dem letzten Mal'),
+    other: s('{count} new places since last time', '{count} lugares novos desde a última vez', '{count} neue Orte seit dem letzten Mal'),
   },
   // D-087 §7: which stamps the outing collected. `{names}` is joined by the caller.
   'walk.summary.stamps': {

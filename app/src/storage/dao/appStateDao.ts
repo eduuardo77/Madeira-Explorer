@@ -203,6 +203,12 @@ export const AppStateKey = {
    * shifting when they arrive (2026-10-18). Absent until first worked out.
    */
   PassportSummary: 'passport_summary',
+  /**
+   * When the passport's island was last opened, ms (T-325): the places earned
+   * after it light last, with a burst. Absent until it is first opened, and
+   * nothing bursts that time.
+   */
+  PassportIslandSeenTs: 'passport_island_seen_ts',
 } as const;
 
 export type AppStateKeyName =

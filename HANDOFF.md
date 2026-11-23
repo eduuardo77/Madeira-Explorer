@@ -14,6 +14,14 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   departure, about 3 km dark. **Fixed the same evening** (narrow rule: only a move made wholly
   under *still* keeps driving; arrivals lower as before), replay fixture, 1,318 tests, on the
   P30 as a field build. Not in the Play build; to see on a trip.
+- **23 Nov, evening: the passport's new top and its island (T-325),** the lead's choice after
+  sketch rounds in `tools/preview-passport-cover-*.mjs` and `tools/preview-island-*.mjs`. The
+  number and the trip side by side, a round play button, a five-piece progress bar; the island
+  beside the title opens inside the page over every trip's lit roads, with a bubble per place
+  (it does what the stamp in its row does), lists for close places, zoom, category chips, and
+  what is new since last opened. On the P30 (field build, versionCode 15, backup
+  `p30-2026-11-23-before-t323`), checked there: header, island, bubble, Funchal list, zoom,
+  filter, the bubble opening a card. 1,319 tests. Not in the Play build.
 - **23 Nov: launch price (D-110, T-318).** €2.99 in Play Console until 28 Feb 2027, raise to €5.99
   on 1 March by hand. The unlock sheet says *Launch price until 28 February. Then it doubles.*
   (content `launchPriceUntil`), never "50% off" (nobody has paid €5.99). Restore left the sheet

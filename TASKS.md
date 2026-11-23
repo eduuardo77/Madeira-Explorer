@@ -450,6 +450,27 @@ permission, L3 privacy contact.
       use the app*; its tap opened Android's while-using question; refused a second time, the tap
       opened the app's settings page. `tools/out/vc12-refused-map.png`. Not seen on the P30, which
       has location granted.
+- [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
+      lead found the top of the passport too plain and too tall for what it says. Three rounds of
+      sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as
+      worse), then one finished design the lead chose (`tools/preview-passport-cover-final.mjs`):
+      one left edge, the count and the trip side by side, a round play button, a five-piece
+      progress bar, the island's outline beside the title. The lead then asked for the island to
+      be usable: sketched over five rounds (`preview-island-interaction.mjs`, `-inline.mjs`,
+      `-bubble.mjs`), the lead chose **inside the page, not over it** and **a bubble, not a card**.
+      Built: `passport/islandView.ts` (pure: dot states, tap test with the *squarely on one dot*
+      rule, bubble placement, zoom fit, what is new since last opened), `passport/islandRoads.ts`
+      (every trip's lit roads in the island's box), `ui/PassportIsland.tsx`, the header in
+      `PassportView`, the data in `PassportScreen` (app state `passport_island_seen_ts`). Gold
+      dot, gold ring (locked), grey (not visited); the bubble does what tapping the stamp in its
+      row does (trophy, card with unlock, place card), so no new route. Close places list (at
+      most four) with *Zoom in*; double tap zooms; *Whole island* returns; the five chips filter;
+      the places earned since the last opening light last with a burst and a label. Every trip's
+      road is drawn unmasked: it is the owner's own page, like the trip viewer. All trips' total
+      moved from under the number to the trips list. ⚠ Captions are 14, not the sketch's 10 to
+      13: the app's floor (`accessibility.test.ts`); the bubble is 280 wide for it. ⚠ Not built
+      from the sketch: the roads drawing themselves in, the pulse, a gliding zoom, two-finger
+      pinch. Reduce motion: no fade, no lighting sequence. 1,319 tests.
 - [ ] **T-321** **A slow departure on a stale *still* drops driving to walking (23 Nov trip).**
       After a 36 min stop on driving, the first batch of the drive home (16:21:31) carried the
       stop's own *driving exit, still enter* label from 15:44, 37 min late. The policy's moving

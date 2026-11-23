@@ -61,6 +61,8 @@ import {
   visiblePlacesNow,
 } from '../progress/islandGateStore';
 import { inPassport, islandMedalIds, placesIn } from '../progress/islandPassports';
+import { freshSince } from '../passport/islandView';
+import type { PassportIslandData } from './PassportIsland';
 import { getRegions } from '../content/regionCatalogue';
 import { islandCardLine, type IslandCardLine } from '../passport/islandCardLine';
 import type { IslandCard } from './PassportView';
@@ -221,7 +223,7 @@ export default function PassportScreen({
   const [canWatch, setCanWatch] = useState(false);
   const [trips, setTrips] = useState<PassportTripRow[]>([]);
   /** T-262: absent until the stored roads are read, and while none is lit. */
-  const [stats, setStats] = useState<{ trip: string; total: string | null } | undefined>();
+  const [stats, setStats] = useState<{ trip: string; total: string | null; distance: string; days: string | null } | undefined>();
   /** The founder stamp, when this phone's purchase earned one (T-233). */
   const [founder, setFounder] = useState<FounderCard | null>(null);
   /** Free stamps still to come, for the passport card; null once bought (D-105). */
@@ -233,6 +235,9 @@ export default function PassportScreen({
    * free stamps, read with the main page. Empty when the pack has none.
    */
   const [islandPages, setIslandPages] = useState<IslandPage[]>([]);
+  // T-325: every trip's lit roads for the island, and when it was last opened.
+  const [islandRoadLines, setIslandRoadLines] = useState<Array<Array<[number, number]>>>([]);
+  const [islandSeenTs, setIslandSeenTs] = useState<number | null>(null);
   /** The island whose passport is open over the main one, or null. */
   const [openIsland, setOpenIsland] = useState<string | null>(null);
   /** Bumped to read everything again, after a trip is ended here. */
@@ -331,6 +336,7 @@ export default function PassportScreen({
       const nextFreeLeft = unlocked ? null : freeLeftIn(earnedNow, islands, null);
 
       const nextFounder = founderCard(await purchaseTimeMs(), deviceLanguage());
+      const seen = await appStateDao.get(appStateDao.AppStateKey.PassportIslandSeenTs);
       // T-235: every award of the trip, locked stamps included (D-075): a
       // set completes from what was earned, paid or not.
       // D-109: the main shelf from the main island's places only, so a
@@ -373,6 +379,7 @@ export default function PassportScreen({
         setConfirmationEvidence(prompt?.evidence ?? '');
       }
       setFounder(unlessSame(nextFounder));
+      setIslandSeenTs(seen === null ? null : Number(seen));
       setFreeLeft(nextFreeLeft);
       setMedals(unlessSame(nextMedals));
       setIslandPages(unlessSame(nextIslandPages));
@@ -447,6 +454,12 @@ export default function PassportScreen({
         // and "Dia 2 de 2" when opened.
         // Every trip, not only the listed ones: the total counts all road lit.
         const roads = await storedRoadsFor(summaries.map((trip) => trip.id));
+        // T-325: every trip's lit roads for the island, unmasked: it is the
+        // owner's own page, on their phone, like the trip viewer (`timedRunsFor`).
+        if (!cancelled) {
+          const lines = [...roads.runs.values()].flat().map((run) => run.points.map((point) => [point.lon, point.lat] as [number, number]));
+          setIslandRoadLines((current) => (current.length === lines.length ? current : lines));
+        }
         const known = new Set(getContentPack().places.map((place) => place.id));
         const daysOf = async (tripId: number) => {
           const stampTs = (await stampAwardDao.getAwards(tripId))
@@ -696,6 +709,35 @@ export default function PassportScreen({
     [stamps, passportId]
   );
   const pageWaiting = useMemo(() => pageStamps.filter((stamp) => stamp.locked === true), [pageStamps]);
+  // T-325: the island beside the title, for the page on show: the main
+  // island's municipalities, or the open island's (D-109).
+  const islandData = useMemo<PassportIslandData | undefined>(() => {
+    const byRegion = getIslandByRegion();
+    const regions = getRegions()
+      .filter((region) => region.outline !== null && (byRegion.get(region.id) ?? null) === passportId)
+      .map((region) => ({ id: region.id, outline: region.outline ?? [] }));
+    if (regions.length === 0) return undefined;
+    const places = placesIn(getContentPack().places, byRegion, passportId).map((place) => ({
+      id: place.id,
+      regionId: place.regionId,
+      lat: place.geofences[0].lat,
+      lon: place.geofences[0].lon,
+      category: place.category,
+      regionName: getRegionName(place.regionId),
+    }));
+    const shown = new Set(places.map((place) => place.id));
+    return {
+      regions,
+      places,
+      roads: islandRoadLines,
+      fresh: freshSince(awards, islandSeenTs, shown),
+      onSeen: () => {
+        void appStateDao
+          .set(appStateDao.AppStateKey.PassportIslandSeenTs, String(Date.now()))
+          .catch((error) => recordingEventDao.logError('island seen', error));
+      },
+    };
+  }, [passportId, islandRoadLines, awards, islandSeenTs]);
   const islandCards = useMemo<IslandCard[]>(
     () =>
       islandPages
@@ -746,6 +788,7 @@ export default function PassportScreen({
             onUnlock={BETA_BUILD ? undefined : unlockFromPage}
             medals={islandPage.medals}
             onOpenMedal={setOpenMedal}
+            island={islandData}
           />
         ) : (
         <PassportView
@@ -769,6 +812,7 @@ export default function PassportScreen({
           founder={founder ?? undefined}
           medals={medals}
           onOpenMedal={setOpenMedal}
+          island={islandData}
         />
         )
       )}
@@ -934,13 +978,16 @@ export default function PassportScreen({
 function wordStats(
   summary: PassportSummary,
   language: Language
-): { trip: string; total: string | null } | undefined {
+): { trip: string; total: string | null; distance: string; days: string | null } | undefined {
   if (summary.tripLitM <= 0) return undefined;
   const tripDistance = formatDistance(summary.tripLitM, language);
   const totalDistance = formatDistance(summary.totalLitM, language);
   return {
     trip: n('passport.stats.trip', summary.days, { distance: tripDistance }),
     total: totalDistance === tripDistance ? null : t('passport.stats.total', { distance: totalDistance }),
+    // T-325: the same figures, split for the header's second column.
+    distance: tripDistance,
+    days: summary.days > 0 ? n('passport.trips.days', summary.days) : null,
   };
 }
 

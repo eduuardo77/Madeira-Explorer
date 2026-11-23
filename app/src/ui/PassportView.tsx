@@ -80,6 +80,7 @@ import { postmarkFor } from './postmark';
 import { n, t } from '../i18n';
 import type { StringKey } from '../i18n/strings';
 import ChevronMark from './ChevronMark';
+import PassportIsland, { IslandMark, type PassportIslandData } from './PassportIsland';
 import { album, colors, fontSize, MIN_TAP_TARGET, radius, spacing } from './theme';
 import { growTouch } from './touchArea';
 
@@ -181,6 +182,9 @@ const MIN_STAMPS_FOR_SEE_ALL = 4;
  * screen along.
  */
 const SEE_ALL_HIT_SLOP = { top: 24, bottom: 17, left: 12, right: 12 };
+/** T-325: the island mark is 96 x 54 drawn, the close button 36 round: both grown to 60 (D-015). */
+const ISLAND_MARK_SLOP = { top: 3, bottom: 3, left: 0, right: 0 };
+const ISLAND_CLOSE_SLOP = { top: 12, bottom: 12, left: 12, right: 12 };
 
 
 /**
@@ -267,7 +271,19 @@ export type PassportViewProps = {
    * this trip's road lit and days, and all trips' road when it differs.
    * Absent until there is road lit, and in the workbench.
    */
-  stats?: { trip: string; total: string | null };
+  stats?: {
+    trip: string;
+    total: string | null;
+    /** The trip's road lit, "412 km": the header's second column (T-325). */
+    distance: string;
+    /** "6 dias de passeio", or null before a day is counted. */
+    days: string | null;
+  };
+  /**
+   * The island beside the title, and the map it opens into (T-325). Absent in
+   * the workbench and wherever the content has no outlines.
+   */
+  island?: PassportIslandData;
   /**
    * End the open trip by hand (T-204, D-088). Absent when no trip is open, and
    * in the workbench. The screen owns the confirmation.
@@ -726,13 +742,17 @@ function PassportView({
   medals,
   title,
   islands,
+  island,
 }: PassportViewProps) {
   const awardedAt = new Map(awards.map((award) => [award.place_id, award.awarded_ts]));
   const hasContent = progress.total > 0;
   // Every row's strip is the same width, so whichever reports last is right.
   // Setting the same number again does not re-render.
   const [stripWidth, setStripWidth] = useState<number | null>(null);
-  const stampSize = stripStampSize(stripGeometry(stripWidth, useWindowDimensions().width));
+  const windowWidth = useWindowDimensions().width;
+  const stampSize = stripStampSize(stripGeometry(stripWidth, windowWidth));
+  // T-325: the island opens inside the page and always starts closed.
+  const [islandOpen, setIslandOpen] = useState(false);
   // D-105: the card's places while nothing is waiting, picked anew only when
   // the passport's stamps are reloaded.
   const nudgeShowcase = useMemo(
@@ -747,49 +767,107 @@ function PassportView({
       // The header is the hero; let it scroll away rather than pin it. There
       // is only one number and the user has already read it.
     >
-      <Text style={styles.heading}>{title ?? t('passport.title')}</Text>
+      {/* T-325, the lead's choice of 23 Nov (`tools/preview-passport-cover-final.mjs`):
+          one left edge, the number and the trip side by side, the island as
+          the page's one mark. It was centred and six lines tall, and the
+          stamps started 54 px lower. */}
+      <View style={styles.titleRow}>
+        <Text style={styles.heading}>{title ?? t('passport.title')}</Text>
+        {island === undefined || !hasContent ? null : islandOpen ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('passport.islandMap.a11y.close')}
+            onPress={() => setIslandOpen(false)}
+            hitSlop={ISLAND_CLOSE_SLOP}
+            style={({ pressed }) => [styles.islandClose, pressed && styles.seeAllPressed]}
+          >
+            <Svg width={14} height={9} viewBox="0 0 14 9">
+              <Path d="M1 8l6-6 6 6" fill="none" stroke={album.textMuted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </Pressable>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('passport.islandMap.a11y.open')}
+            onPress={() => setIslandOpen(true)}
+            hitSlop={ISLAND_MARK_SLOP}
+            style={({ pressed }) => [styles.islandMark, pressed && styles.seeAllPressed]}
+          >
+            <IslandMark data={island} stamps={stamps ?? []} />
+            {/* Without the arrow an icon beside a title reads as decoration. */}
+            <View style={styles.expandBadge}>
+              <Svg width={8} height={5} viewBox="0 0 8 5">
+                <Path d="M1 1l3 3 3-3" fill="none" stroke={album.text} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </View>
+          </Pressable>
+        )}
+      </View>
 
       {hasContent ? (
-        <View style={styles.hero}>
-          <Text style={styles.heroNumber}>
-            {progress.collected}
-            <Text style={styles.heroTotal}> / {progress.total}</Text>
-          </Text>
-          <Text style={styles.heroLabel}>
-            {/* ⚠ T-191: the caption names what the big number counts, at zero
-                too. It used to switch to "places to collect" at zero, and on
-                a Portuguese phone "0 / 80 lugares por visitar" read backwards:
-                the number counted visits and the words counted what was left
-                (review P2-3). The noun follows the total, "1 / 80 places",
-                so the total chooses the form (2026-10-08). */}
-            {n('passport.collected', progress.total)}
-          </Text>
-          {stats === undefined ? null : (
-            <>
-              <Text style={styles.statsLine}>{stats.trip}</Text>
-              {stats.total === null ? null : (
-                <Text style={styles.statsTotal}>{stats.total}</Text>
-              )}
-            </>
+        <>
+          <View style={styles.statsRow}>
+            <View style={styles.primary}>
+              <Text style={styles.heroNumber}>
+                {progress.collected}
+                <Text style={styles.heroTotal}> / {progress.total}</Text>
+              </Text>
+              <Text style={styles.heroLabel}>
+                {/* ⚠ T-191: the caption names what the big number counts, at zero
+                    too. "0 / 80 lugares por visitar" read backwards on a
+                    Portuguese phone (review P2-3). The total chooses the form. */}
+                {n('passport.collected', progress.total)}
+              </Text>
+            </View>
+            {/* ⚠ No invitation line (2026-09-25): the lead saw no purpose in it. */}
+            {stats === undefined ? null : (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.secondary} accessible accessibilityLabel={stats.trip}>
+                  <Text style={styles.secondaryValue}>{stats.distance}</Text>
+                  <Text style={styles.secondaryLabel}>{t('passport.stats.lit')}</Text>
+                  {stats.days === null ? null : <Text style={styles.secondaryLabel}>{stats.days}</Text>}
+                </View>
+              </>
+            )}
+            {onWatch === undefined ? null : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('replay.watch')}
+                onPress={onWatch}
+                style={({ pressed }) => [styles.play, stats === undefined && styles.playAlone, pressed && styles.seeAllPressed]}
+              >
+                <View style={styles.playCircle}>
+                  <Svg width={13} height={15} viewBox="0 0 10 12">
+                    <Path d="M1 1v10l8-5z" fill={album.actionText} />
+                  </Svg>
+                </View>
+                <Text style={styles.playLabel}>{t('passport.watch.short')}</Text>
+              </Pressable>
+            )}
+          </View>
+          {island !== undefined && islandOpen ? (
+            <PassportIsland
+              data={island}
+              stamps={stamps ?? []}
+              awards={awards}
+              width={windowWidth - 2 * spacing.md}
+              onSelectStamp={onSelectStamp}
+            />
+          ) : (
+            // Five pieces, one per category and sized to it, white for what is
+            // collected: closed, the island's progress in one line.
+            <View style={styles.track} accessible={false} importantForAccessibility="no-hide-descendants">
+              {progress.byCategory
+                .filter((row) => row.total > 0)
+                .map((row) => (
+                  <View key={row.category} style={[styles.trackPiece, { flex: row.total }]}>
+                    <View style={[styles.trackFill, { width: `${(row.collected / row.total) * 100}%` }]} />
+                  </View>
+                ))}
+            </View>
           )}
-          {/* ⚠ No invitation line any more (2026-09-25). "Estes são os
-              lugares. Vá a um deles..." sat here at zero stamps; the project
-              lead could not find it and, found, saw no purpose in it, and
-              asked for it gone. The rows below say what there is to collect. */}
-          {onWatch === undefined ? null : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('replay.watch')}
-              onPress={onWatch}
-              // Two words, so the target is grown around them rather than left
-              // at the size of the text (D-015).
-              hitSlop={SEE_ALL_HIT_SLOP}
-              style={({ pressed }) => [styles.watchTouch, pressed && styles.seeAllPressed]}
-            >
-              <Text style={styles.heroAction}>{t('replay.watch')}</Text>
-            </Pressable>
-          )}
-        </View>
+        </>
       ) : (
         <Text style={styles.rowEmpty}>{t('passport.nothingCurated')}</Text>
       )}
@@ -876,6 +954,8 @@ function PassportView({
             <Text style={styles.rowTitle} accessibilityRole="header">
               {t('passport.trips')}
             </Text>
+            {/* T-325: every trip's road, moved here from under the number. */}
+            {stats?.total == null ? null : <Text style={styles.rowCount}>{stats.total}</Text>}
           </View>
           <View style={styles.tripList}>
             {trips.map((trip, index) => (
@@ -977,14 +1057,43 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.4,
   },
-  hero: {
+  // T-325: the header. Three levels: the number (48), the trip (17), the
+  // captions (12 and 13); one left edge with the rows below.
+  titleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    justifyContent: 'space-between',
+    minHeight: MIN_TAP_TARGET,
   },
+  islandMark: { padding: 6, marginRight: -6, borderRadius: radius.control },
+  expandBadge: {
+    position: 'absolute',
+    right: 2,
+    bottom: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: album.hairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: album.background,
+  },
+  islandClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: album.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm + 6 },
+  primary: { paddingRight: spacing.md + 4 },
   heroNumber: {
     color: album.text,
     fontSize: fontSize.hero,
-    fontWeight: '800',
+    fontWeight: '700',
+    lineHeight: fontSize.hero + 4,
   },
   heroTotal: {
     color: album.textMuted,
@@ -993,30 +1102,28 @@ const styles = StyleSheet.create({
   },
   heroLabel: {
     color: album.textMuted,
-    fontSize: fontSize.body,
-    marginTop: spacing.xs,
-  },
-  statsLine: {
-    color: album.text,
-    fontSize: fontSize.body,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  statsTotal: {
-    color: album.textMuted,
     fontSize: fontSize.small,
-    marginTop: spacing.xs,
-    textAlign: 'center',
+    marginTop: 2,
   },
-  // Under the hero, in the tinted-word register iOS uses for a section action,
-  // not a filled button, which would make the passport's quietest area its
-  // loudest.
-  heroAction: {
-    color: album.tint,
-    fontSize: fontSize.body,
-    fontWeight: '600',
-    marginTop: spacing.sm,
+  divider: { width: StyleSheet.hairlineWidth * 2, alignSelf: 'stretch', backgroundColor: album.hairline },
+  secondary: { flex: 1, paddingLeft: spacing.md },
+  secondaryValue: { color: album.text, fontSize: fontSize.body, fontWeight: '600' },
+  secondaryLabel: { color: album.textMuted, fontSize: fontSize.small },
+  play: { alignItems: 'center', gap: 4, minWidth: MIN_TAP_TARGET },
+  playAlone: { marginLeft: 'auto' },
+  playCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: album.action,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 3,
   },
+  playLabel: { color: album.tint, fontSize: fontSize.small, fontWeight: '600' },
+  track: { flexDirection: 'row', gap: 3, height: 4, marginTop: spacing.md - 2 },
+  trackPiece: { backgroundColor: album.surface, borderRadius: 2, overflow: 'hidden' },
+  trackFill: { height: '100%', backgroundColor: album.text, borderRadius: 2 },
   section: {
     gap: spacing.sm,
   },
@@ -1087,7 +1194,6 @@ const styles = StyleSheet.create({
   seeAllPressed: { opacity: 0.5 },
   // N27: the views themselves 48 dp for Play's report, nothing moved.
   seeAllTouch: growTouch(19),
-  watchTouch: growTouch(31),
   // A card, like a category row, because it belongs to this screen rather than
   // floating over it — and bordered rather than filled, so it reads as a
   // question rather than as an award already won.

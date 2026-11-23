@@ -33,7 +33,6 @@ export default function UnlockSheetView({
   unlocked,
   working,
   onBuy,
-  onRestore,
   onClose,
 }: {
   model: UnlockSheetModel;
@@ -46,10 +45,9 @@ export default function UnlockSheetView({
   showcase?: PassportStamp[];
   /** Paid: the fan is drawn sharp. */
   unlocked: boolean;
-  /** Google is busy: Restore waits too. */
+  /** Google is busy. */
   working: boolean;
   onBuy: () => void;
-  onRestore: () => void;
   onClose: () => void;
 }) {
   const wobble = useLoop(2600);
@@ -174,19 +172,8 @@ export default function UnlockSheetView({
       >
         <Text style={styles.dismiss}>{model.close}</Text>
       </Pressable>
-      {/* Last and quiet (the project lead, 2026-10-06): restoring is for the
-          few who bought on another phone, so it sits under "Not now" in small
-          grey type, as store apps keep it. The tap target stays full size. */}
-      {model.restore === null ? null : (
-        <Pressable
-          accessibilityRole="button"
-          disabled={working}
-          onPress={onRestore}
-          style={({ pressed }) => [styles.plain, pressed && styles.pressed]}
-        >
-          <Text style={styles.restore}>{model.restore}</Text>
-        </Pressable>
-      )}
+      {/* No Restore here since 23 Nov (the project lead): it is in Settings,
+          which opens this sheet with `startWithRestore`. */}
     </View>
   );
 }
@@ -307,10 +294,6 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  restore: {
-    color: reward.textMuted,
-    fontSize: fontSize.small,
   },
   dismiss: {
     color: reward.textMuted,

@@ -48,7 +48,6 @@ test('with nothing waiting (from Settings), the plain offer names the price Goog
   assert.equal(model.title, 'Unlock your passport');
   assert.equal(model.buy?.label, 'Unlock the passport · 5,99 €');
   assert.equal(model.buy?.enabled, true);
-  assert.equal(model.restore, 'Restore purchase');
   assert.equal(model.close, 'Not now');
   assert.equal(model.notice, null);
 });
@@ -93,7 +92,6 @@ test('pending: told why it is closed, and nothing to buy twice', () => {
   const model = unlockSheetModel(input({ state: { kind: 'pending' } }));
   assert.match(model.notice ?? '', /Payment pending/);
   assert.equal(model.buy, null);
-  assert.equal(model.restore, 'Restore purchase');
 });
 
 test('offline is never an error, and Buy stays to try again', () => {
@@ -134,7 +132,6 @@ test('⚠ unavailable does not claim the phone has no Google Play', () => {
   const model = unlockSheetModel(input({ state: { kind: 'unavailable' } }));
   assert.doesNotMatch(model.notice ?? '', /does not have|no Google Play/i);
   assert.equal(model.buy, null);
-  assert.equal(model.restore, null);
 });
 
 test('failed: an honest line and a retry, and no promise about charges', () => {
@@ -149,7 +146,6 @@ test('unlocked: one way out, to the stamps', () => {
   const model = unlockSheetModel(input({ state: { kind: 'unlocked' } }));
   assert.match(model.notice ?? '', /unlocked/);
   assert.equal(model.buy, null);
-  assert.equal(model.restore, null);
   assert.equal(model.close, 'See my stamps');
 });
 
@@ -224,15 +220,15 @@ test('with nothing waiting, the sheet shows three different places, chosen by th
   assert.deepEqual(places, ['a', 'b', 'c', 'd', 'e'], 'the catalogue is not reordered');
 });
 
-// D-110: the founder window that opened 2026-11-21 for 3 months closes at
-// midnight UTC on 21 Feb 2027, so the last launch-price day is the 20th.
-const LAUNCH_END = Date.UTC(2027, 1, 21);
+// D-110: the launch price's last day is 28 Feb 2027, so it ends at midnight
+// UTC on 1 March.
+const LAUNCH_END = Date.UTC(2027, 2, 1);
 
 test('D-110: before the end, the launch price says its last day, in three languages', () => {
   const want = {
-    en: 'Launch price until 20 February. Then it doubles.',
-    pt: 'Preço de lançamento até 20 de fevereiro. Depois, o dobro.',
-    de: 'Einführungspreis bis 20. Februar. Danach das Doppelte.',
+    en: 'Launch price until 28 February. Then it doubles.',
+    pt: 'Preço de lançamento até 28 de fevereiro. Depois, o dobro.',
+    de: 'Einführungspreis bis 28. Februar. Danach das Doppelte.',
   } as const;
   for (const language of ['en', 'pt', 'de'] as const) {
     const model = unlockSheetModel(input({ language, launchPriceEndMs: LAUNCH_END, nowMs: Date.UTC(2026, 10, 23) }));
@@ -260,4 +256,10 @@ test('D-110: the launch price stands only where there is something to buy', () =
 test('D-110: the line names no price and no discount, so Google stays the only price', () => {
   const line = unlockSheetModel(input({ launchPriceEndMs: LAUNCH_END, nowMs: 0 })).launchPrice ?? '';
   assert.doesNotMatch(line, /\d+[.,]\d\d|€|%|off/i);
+});
+
+test('no Restore on the sheet (the lead, 23 Nov): it lives in Settings', () => {
+  for (const kind of ['offer', 'pending', 'failed', 'nothingToRestore'] as const) {
+    assert.equal('restore' in unlockSheetModel(input({ state: { kind } })), false, kind);
+  }
 });

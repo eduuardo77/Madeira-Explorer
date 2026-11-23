@@ -548,7 +548,6 @@ export default function DesignWorkbench() {
                 unlocked={screen === 'unlock:unlocked'}
                 working={screen === 'unlock:working'}
                 onBuy={() => setScreen('unlock:working')}
-                onRestore={() => setScreen('unlock:nothingToRestore')}
                 onClose={() => setScreen('passport')}
               />
             </View>

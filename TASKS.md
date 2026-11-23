@@ -452,12 +452,19 @@ permission, L3 privacy contact.
       has location granted.
 - [ ] **T-318** **Launch price €2.99 (D-110, 23 Nov).** The lead sets `passport_madeira` to €2.99
       in Play Console (Monetise, Products, In-app products; base price, then let Play convert the
-      other currencies) before launch. **On 2027-02-21**, the founder window's end, set it back to
-      €5.99. Listing and site text say *launch price*, never "50% off".
+      other currencies) before launch. **On 2027-03-01** (launch price runs to 28 Feb, a week past the founder
+      window), set it back to €5.99. ✅ Console price lowered by the lead, 23 Nov. Listing and site text say *launch price*, never "50% off".
       — ✅ **In-app line built 23 Nov** (D-110 amended): `unlockSheet.ts` `launchPrice`, over the
       buy button while the founder window is open, three languages, 4 tests. Needs the next build;
       not yet seen on a phone (Hermes date formatting included). The line goes live with that
       build whether or not the console price was lowered: lower it first.
+      — ✅ **On the P30 23 Nov, 12:13** (field build, `install -r`, backup
+      `p30-2026-11-23-before-t318`): *Preço de lançamento até 28 de fevereiro. Depois, o dobro.*
+      over *Desbloquear o passaporte · 2,99 €* (the console price, live). Two changes from the same
+      look: the card had outgrown the P30 in Portuguese and was clipped at both ends, so the sheet
+      now scrolls; and **Restore is off the sheet** (the lead: it is in Settings, which opens the
+      sheet with `startWithRestore`). Pending now shows only *Agora não*; Google's confirmation
+      still unlocks it.
 - [ ] **T-317** **Store screenshots from a modelled month (22 Nov, started).** `tools/make-demo-db.mjs`
       writes 11 day drives routed on `content/roads.json` through named places (nobody's movements,
       D-016) into a copy of the app's database: 243 km, 43 of 81 stamps (awarded where a drive

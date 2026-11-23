@@ -495,3 +495,11 @@ test('⚠ review H: a malformed walk is reported and dropped; the place stays', 
     assert.equal(problems.length, 1, JSON.stringify(walk));
   }
 });
+
+test('D-110: launchPriceUntil is a real date or nothing, and a typo is reported', () => {
+  assert.equal(parseContentPack({ formatVersion: 1, launchPriceUntil: '2027-02-28', places: [] }).pack.launchPriceUntil, '2027-02-28');
+  assert.equal(parseContentPack({ formatVersion: 1, places: [] }).pack.launchPriceUntil, null);
+  const typo = parseContentPack({ formatVersion: 1, launchPriceUntil: '2027-02-30', places: [] });
+  assert.equal(typo.pack.launchPriceUntil, null);
+  assert.ok(typo.problems.some((p) => p.where === 'launchPriceUntil'));
+});

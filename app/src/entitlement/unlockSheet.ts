@@ -65,8 +65,8 @@ export interface UnlockSheetInput {
     islands?: readonly string[];
   };
   /**
-   * The first millisecond after the launch price (D-110: the founder window's
-   * end, `founderWindowEndMs`), or null when there is none. Shown only before it.
+   * The first millisecond after the launch price (D-110: the day after
+   * content's `launchPriceUntil`), or null when there is none. Shown only before it.
    */
   launchPriceEndMs?: number | null;
   nowMs?: number;
@@ -84,7 +84,6 @@ export interface UnlockSheetModel {
   buy: { label: string; enabled: boolean } | null;
   /** Over the button while the launch price lasts (D-110), else null. */
   launchPrice: string | null;
-  restore: string | null;
   close: string;
 }
 
@@ -112,8 +111,8 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
         : say('unlock.buy.passport', { price });
   const canBuy = { label: buyLabel, enabled: true };
 
-  // The last day, not the first after it: "until 20 February" while the
-  // window closes at midnight UTC on the 21st. Noon of that day, not a
+  // The last day, not the first after it: "until 28 February" while the
+  // price ends at midnight UTC on 1 March. Noon of that day, not a
   // `timeZone` option, which Hermes was never seen to honour: noon UTC is the
   // same date in every zone from UTC-11 to UTC+11.
   const end = input.launchPriceEndMs ?? null;
@@ -137,7 +136,6 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     notice: null,
     buy: canBuy,
     launchPrice,
-    restore: say('unlock.restore'),
     close: say('unlock.notNow'),
   };
 
@@ -147,18 +145,18 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     case 'working':
       return { ...model, buy: { label: say('unlock.working'), enabled: false } };
     case 'pending':
-      // Already bought, so nothing to buy twice; Restore asks Google again.
+      // Already bought, so nothing to buy twice; Google's confirmation unlocks it.
       return { ...model, notice: say('unlock.pending'), buy: null, launchPrice: null };
     case 'offline':
       return { ...model, notice: say('unlock.offline') };
     case 'unavailable':
-      return { ...model, notice: say('unlock.unavailable'), buy: null, launchPrice: null, restore: null };
+      return { ...model, notice: say('unlock.unavailable'), buy: null, launchPrice: null };
     case 'failed':
       return { ...model, notice: say('unlock.failed') };
     case 'nothingToRestore':
       return { ...model, notice: say('unlock.nothingToRestore') };
     case 'unlocked':
-      return { ...model, notice: say('unlock.unlocked'), buy: null, launchPrice: null, restore: null, close: say('unlock.done') };
+      return { ...model, notice: say('unlock.unlocked'), buy: null, launchPrice: null, close: say('unlock.done') };
   }
 }
 

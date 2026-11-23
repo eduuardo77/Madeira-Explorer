@@ -3,6 +3,7 @@
   "destination": "Madeira",
   "productId": "passport_madeira",
   "founderWindow": { "start": "2026-11-21", "months": 3 },
+  "launchPriceUntil": "2027-02-28",
   "islandPassports": ["porto-santo"],
   "places": [
     {

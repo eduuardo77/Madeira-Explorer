@@ -183,6 +183,11 @@ export type ContentPack = {
    */
   founderWindow: FounderWindow | null;
   /**
+   * The last day of the launch price (D-110), `YYYY-MM-DD`, or null when there
+   * is none. The app holds no price: this only dates the line that says so.
+   */
+  launchPriceUntil: string | null;
+  /**
    * Islands hidden until the user has been there (D-024, T-067a), by the
    * `islandId` of `content/regions.json`. Empty when the pack hides nothing.
    * Since D-107 their stamps are also paid only, never one of the free five.
@@ -294,6 +299,7 @@ export function parseContentPack(raw: unknown): ParsedContentPack {
       destination: parseDestination(root.destination, problems),
       productId: parseProductId(root.productId, problems),
       founderWindow: parseFounderWindow(root.founderWindow, problems),
+      launchPriceUntil: parseLaunchPriceUntil(root.launchPriceUntil, problems),
       hiddenIslands: parseIslandList(root.hiddenIslands, 'hiddenIslands', problems),
       islandPassports: parseIslandList(root.islandPassports, 'islandPassports', problems),
       places,
@@ -366,6 +372,19 @@ function parseProductId(raw: unknown, problems: ContentProblem[]): string | null
       where: 'productId',
       problem: 'must be lowercase letters, digits, "_" or ".", starting with a letter or digit',
     });
+    return null;
+  }
+  return raw;
+}
+
+/**
+ * The launch price's last day (D-110): a `YYYY-MM-DD` date or absent. A typo
+ * is reported and dropped, so it can never put the line up for good.
+ */
+function parseLaunchPriceUntil(raw: unknown, problems: ContentProblem[]): string | null {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== 'string' || parseWindowStart(raw) === null) {
+    problems.push({ where: 'launchPriceUntil', problem: 'must be a real date written YYYY-MM-DD' });
     return null;
   }
   return raw;

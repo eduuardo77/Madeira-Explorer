@@ -5892,7 +5892,18 @@ date is the founder window's last day (`founderWindowEndMs` minus one day), so t
 founder stamp and the price all end together. Shown only where the button is. ⚠ The app cannot
 see the console: if the price is not lowered, the line is false. Ships in the next build.
 
-**Open.** Raising the price on 21 Feb is a manual console change (T-318). Play may round or
+**Amended again 2026-11-23, the project lead:** the launch price runs **until the last day of
+February (2027-02-28)**, a week past the founder window, which stays 21 Nov + 3 months because
+the founder line promises "the first three months". So the two are no longer one date: content
+carries `"launchPriceUntil": "2027-02-28"` (`parseLaunchPriceUntil`, a typo dropped and reported),
+and the line reads *until 28 February*. The founder stamp still ends on 21 Feb.
+
+**Asked the same day: should it say "50% off"?** No, for now. Nobody has paid €5.99, so a
+reduction from it is a reference price never applied (Directive 98/6/EC art. 6a). "Then it
+doubles" says the same thing truthfully. A real "50% off" sale is possible later, once €5.99 has
+been charged for at least 30 days.
+
+**Open.** Raising the price on 1 March 2027 is a manual console change (T-318). Play may round or
 localise other currencies; check them when setting it.
 
 , sold to people on Madeira

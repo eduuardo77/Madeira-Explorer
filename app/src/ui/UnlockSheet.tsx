@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 import {
   buyPassport,
   passportPrice,
@@ -23,7 +23,7 @@ import { getMedals } from '../content/medalCatalogue';
 import { getContentPack } from '../content/poiCatalogue';
 import { isUnlocked } from '../entitlement/entitlementStore';
 import { getOpenIslandPassports, visiblePlacesNow } from '../progress/islandGateStore';
-import { founderWindowEndMs, founderWindowOpen } from '../entitlement/founder';
+import { founderWindowOpen, parseWindowStart } from '../entitlement/founder';
 import { SHOWCASE_COUNT, showcase, stateAfterFailure, unlockSheetModel, type UnlockState } from '../entitlement/unlockSheet';
 import { deviceLanguage } from '../i18n';
 import type { PassportStamp } from './PassportView';
@@ -144,16 +144,19 @@ export default function UnlockSheet({
       founder: founderWindowOpen(Date.now(), getContentPack().founderWindow),
       islands,
     },
-    // D-110: the launch price ends with the founder window, set by the same
-    // content field, so the line and the founder stamp go together.
-    launchPriceEndMs: founderWindowEndMs(getContentPack().founderWindow),
+    // D-110: content dates the launch price; the line goes at midnight UTC
+    // after its last day.
+    launchPriceEndMs: launchPriceEndMs(getContentPack().launchPriceUntil),
     nowMs: Date.now(),
     language: deviceLanguage(),
   });
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.scrim}>
+      {/* Scrolls when the card is taller than the screen: with the founder,
+          Porto Santo and launch price lines it no longer fit the P30 in
+          Portuguese (23 Nov), centred and clipped at both ends. */}
+      <ScrollView style={styles.scrim} contentContainerStyle={styles.scrimContent} bounces={false}>
         <UnlockSheetView
           model={model}
           waiting={waiting}
@@ -161,10 +164,9 @@ export default function UnlockSheet({
           unlocked={state.kind === 'unlocked'}
           working={state.kind === 'working'}
           onBuy={buy}
-          onRestore={() => void restore()}
           onClose={onClose}
         />
-      </View>
+      </ScrollView>
     </Modal>
   );
 }
@@ -173,8 +175,19 @@ const styles = StyleSheet.create({
   scrim: {
     flex: 1,
     backgroundColor: colors.scrim,
+  },
+  scrimContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
+    // The modal draws under the status bar (statusBarTranslucent).
+    paddingTop: spacing.xl + spacing.lg,
   },
 });
+
+/** The first millisecond after the launch price's last day, or null. */
+function launchPriceEndMs(until: string | null): number | null {
+  const lastDay = until === null ? null : parseWindowStart(until);
+  return lastDay === null ? null : lastDay + 24 * 3_600_000;
+}

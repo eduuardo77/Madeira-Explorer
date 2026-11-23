@@ -144,6 +144,9 @@ const BANNED_PRIVACY_CLAIMS = [
     // T-193: the absolute forms of "uploaded" and "shared" in all three.
     /nunca é enviad[oa]/i, /nie hochgeladen/i,
     /never shared/i, /nunca é partilhad[oa]/i, /nie weitergegeben/i,
+    // 23 Nov: the save-a-copy footnote said "lives only on this phone" from 4 Oct
+    // to 23 Nov, false while the phone's own backup holds the database.
+    /only on (this|your) phone/i, /só (neste|no teu) telemóvel/i, /nur auf (diesem|Ihrem) Telefon/i,
 ];
 
 test('⚠ no string claims the trip never leaves the phone, or that there is no backup', () => {

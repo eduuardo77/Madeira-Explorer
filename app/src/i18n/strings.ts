@@ -1276,9 +1276,9 @@ export const STRINGS = {
   'settings.backup.save': s('Save a copy of my trip', 'Guardar uma cópia da viagem', 'Eine Kopie meiner Reise speichern'),
   'settings.backup.restore': s('Restore from a copy', 'Restaurar a partir de uma cópia', 'Aus einer Kopie wiederherstellen'),
   'settings.backup.footnote': s(
-    'Your trip lives only on this phone, and uninstalling the app removes it. Keep a copy in Drive or on another device. It shows everywhere you have been, so keep it private.',
-    'A tua viagem vive só neste telemóvel, e desinstalar a aplicação apaga-a. Guarda uma cópia no Drive ou noutro aparelho. Mostra todos os sítios onde estiveste, por isso mantém-na privada.',
-    'Ihre Reise ist nur auf diesem Telefon, und wer die App deinstalliert, löscht sie. Bewahren Sie eine Kopie in Drive oder auf einem anderen Gerät auf. Sie zeigt jeden Ort, an dem Sie waren, also halten Sie sie privat.'
+    'Uninstalling the app removes your trip from this phone. Keep a copy in Drive or on another device to be sure of it. It shows everywhere you have been, so keep it private.',
+    'Desinstalar a aplicação apaga a viagem deste telemóvel. Guarda uma cópia no Drive ou noutro aparelho para não a perderes. Mostra todos os sítios onde estiveste, por isso mantém-na privada.',
+    'Wer die App deinstalliert, löscht die Reise von diesem Telefon. Bewahren Sie eine Kopie in Drive oder auf einem anderen Gerät auf, um sicherzugehen. Sie zeigt jeden Ort, an dem Sie waren, also halten Sie sie privat.'
   ),
   'settings.backup.dialogTitle': s('Save a copy of your trip', 'Guardar uma cópia da tua viagem', 'Eine Kopie Ihrer Reise speichern'),
   'settings.backup.saveFailed': s(

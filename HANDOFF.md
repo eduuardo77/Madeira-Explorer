@@ -11,7 +11,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 - **23 Nov: launch price (D-110, T-318).** €2.99 in Play Console until 28 Feb 2027, raise to €5.99
   on 1 March by hand. The unlock sheet says *Launch price until 28 February. Then it doubles.*
   (content `launchPriceUntil`), never "50% off" (nobody has paid €5.99). Restore left the sheet
-  for Settings; the sheet scrolls. On the P30 (backup `p30-2026-11-23-before-t318`). 1,297 tests.
+  for Settings; the sheet scrolls and has a close X, top right. On the P30 (backup `p30-2026-11-23-before-t318`). 1,298 tests.
 - **22 Nov, 23:01: T-316, lit roads were black on Google's LEGACY map renderer** (the emulator,
   so every site screenshot since 26 Oct): T-278's spans carry no colour there. Now drawn in plain
   colour split at the gaps on LEGACY; on the P30 (LATEST, path unchanged), backup

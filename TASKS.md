@@ -465,6 +465,9 @@ permission, L3 privacy contact.
       now scrolls; and **Restore is off the sheet** (the lead: it is in Settings, which opens the
       sheet with `startWithRestore`). Pending now shows only *Agora não*; Google's confirmation
       still unlocks it.
+      — ✅ **A close X, top right (the lead, 23 Nov, 12:20 on the P30):** the same action as
+      *Agora não*, 40 dp drawn, 60 dp to the finger, said *Fechar*. Tapped on the P30: back to
+      the passport.
 - [ ] **T-317** **Store screenshots from a modelled month (22 Nov, started).** `tools/make-demo-db.mjs`
       writes 11 day drives routed on `content/roads.json` through named places (nobody's movements,
       D-016) into a copy of the app's database: 243 km, 43 of 81 stamps (awarded where a drive

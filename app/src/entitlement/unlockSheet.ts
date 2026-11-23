@@ -84,6 +84,8 @@ export interface UnlockSheetModel {
   buy: { label: string; enabled: boolean } | null;
   /** Over the button while the launch price lasts (D-110), else null. */
   launchPrice: string | null;
+  /** The X in the corner, said to screen readers (the lead, 23 Nov). */
+  closeIcon: string;
   close: string;
 }
 
@@ -136,6 +138,7 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     notice: null,
     buy: canBuy,
     launchPrice,
+    closeIcon: say('common.close'),
     close: say('unlock.notNow'),
   };
 

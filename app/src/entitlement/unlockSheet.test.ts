@@ -263,3 +263,12 @@ test('no Restore on the sheet (the lead, 23 Nov): it lives in Settings', () => {
     assert.equal('restore' in unlockSheetModel(input({ state: { kind } })), false, kind);
   }
 });
+
+test('the X in the corner is said as Close, in three languages, in every state', () => {
+  const want = { en: 'Close', pt: 'Fechar', de: 'Schließen' } as const;
+  for (const language of ['en', 'pt', 'de'] as const) {
+    for (const kind of ['offer', 'pending', 'unavailable', 'unlocked'] as const) {
+      assert.equal(unlockSheetModel(input({ language, state: { kind } })).closeIcon, want[language], `${language} ${kind}`);
+    }
+  }
+});

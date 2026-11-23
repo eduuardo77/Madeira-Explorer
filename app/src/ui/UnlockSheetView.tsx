@@ -14,7 +14,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { UnlockSheetModel } from '../entitlement/unlockSheet';
 import { designFor } from '../passport/stampArt';
 import type { PassportStamp } from './PassportView';
@@ -66,6 +66,20 @@ export default function UnlockSheetView({
         </Defs>
         <Rect width="100" height="100" fill="url(#unlock-panel)" />
       </Svg>
+
+      {/* A second way out besides "Not now" (the lead, 23 Nov): the X store
+          paywalls carry, top right. Same action as the button. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={model.closeIcon}
+        onPress={onClose}
+        hitSlop={(MIN_TAP_TARGET - CLOSE_BOX) / 2}
+        style={({ pressed }) => [styles.closeIcon, pressed && styles.pressed]}
+      >
+        <Svg width={16} height={16} viewBox="0 0 16 16">
+          <Path d="M2 2 L14 14 M14 2 L2 14" stroke={reward.textMuted} strokeWidth={2.2} strokeLinecap="round" />
+        </Svg>
+      </Pressable>
 
       <Text style={styles.eyebrow}>{model.eyebrow}</Text>
       <Text style={styles.title} accessibilityRole="header">
@@ -196,7 +210,19 @@ function useLoop(durationMs: number): Animated.Value {
   return value;
 }
 
+const CLOSE_BOX = 40;
+
 const styles = StyleSheet.create({
+  closeIcon: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    width: CLOSE_BOX,
+    height: CLOSE_BOX,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
   card: {
     width: '100%',
     maxWidth: 380,

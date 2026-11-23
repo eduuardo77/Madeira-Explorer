@@ -8,6 +8,11 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **23 Nov, late: T-326, a rare ask for a Play rating** (D-111, Provisional). Google's own in-app
+  review sheet as a free stamp's celebration closes, from the third stamp, 3 days after install,
+  120 days apart, 3 times ever; a *Rate Bruma* row in Settings. New native dependency
+  (`expo-store-review`), so it needs a store build: **not in version 15**. Licences regenerated.
+  Unseen: the sheet shows only on a copy installed from Play.
 - **23 Nov, 19:07: version 15 REBUILT from d096712** with the Settings footnote fix (ebdc340, the
   only app change since 8d10129): `bruma-0.1.0-vc15.aab`, SHA-256 `797a6e76…e812f9`, upload key,
   smoke passes on the P30. The 8d10129 bundle is now `…-vc15-OLD-footnote-do-not-upload.aab`.

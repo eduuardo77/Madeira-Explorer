@@ -209,6 +209,12 @@ export const AppStateKey = {
    * nothing bursts that time.
    */
   PassportIslandSeenTs: 'passport_island_seen_ts',
+  /**
+   * JSON `ReviewHistory` (`review/reviewAsk.ts`, T-326): when the app asked
+   * Play for its rating sheet, and whether the user opened the store page from
+   * Settings. What keeps the ask rare. Absent until the first ask.
+   */
+  ReviewAsks: 'review_asks',
 } as const;
 
 export type AppStateKeyName =

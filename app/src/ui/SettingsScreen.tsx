@@ -48,6 +48,7 @@ import { deleteAllUserData } from '../storage/database';
 import { restoreBackupFile, saveBackupFile } from '../storage/backupFile';
 import { APP_NAME } from '../brand';
 import { feedbackMailto } from './feedbackMail';
+import { canOpenStorePage, openStorePage } from '../review/reviewPrompt';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import PrivacyPolicyView from './PrivacyPolicyView';
 import LicencesView from './LicencesView';
@@ -447,6 +448,7 @@ export default function SettingsScreen({
               : Constants.expoConfig.version
         }
         onContact={contactEmail === null ? undefined : () => sendFeedback(contactEmail)}
+        onRate={BETA_BUILD || !canOpenStorePage() ? undefined : () => void openStorePage()}
         languageChoice={languageChoice}
         onChangeLanguage={(language) => {
           setLanguageChoiceState(language);

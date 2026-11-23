@@ -23,6 +23,7 @@ export type SettingsIconName =
   | 'privacy'
   | 'licences'
   | 'contact'
+  | 'rate'
   | 'send'
   | 'technical'
   | 'backup'
@@ -105,6 +106,7 @@ const GLYPHS: Record<SettingsIconName, (color: string, stroke: Stroke) => ReactE
       <Path d="M3.5 7l8.5 6.5L20.5 7" {...s} />
     </>
   ),
+  rate: (_, s) => <Path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" {...s} />,
   send: (_, s) => <Path d="M21 3L3 10.5l7.2 2.9L13 21zM10.2 13.4L21 3" {...s} />,
   technical: (_, s) => (
     <>

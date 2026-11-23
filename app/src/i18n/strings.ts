@@ -1240,6 +1240,14 @@ export const STRINGS = {
     'Automatisch folgt Ihrem Telefon.'
   ),
   'settings.about.contact': s('Send feedback', 'Enviar opinião', 'Feedback senden'),
+  // T-326: opens the store page, since the user asked; the in-app sheet is
+  // Google's and may silently not appear.
+  'settings.about.rate': s('Rate {app}', 'Avaliar o {app}', '{app} bewerten'),
+  'settings.about.rateDetail': s(
+    'On Google Play. It helps others find it.',
+    'No Google Play. Ajuda outros a encontrá-lo.',
+    'Bei Google Play. So finden andere die App.'
+  ),
   'settings.feedback.noMail': s(
     'No email app opened. You can write to {email}.',
     'Não abriu nenhuma aplicação de email. Podes escrever para {email}.',

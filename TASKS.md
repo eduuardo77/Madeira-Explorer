@@ -470,6 +470,16 @@ permission, L3 privacy contact.
       before and after; `smoke-release.mjs` passes on the P30 (field build of the same JavaScript,
       backup `p30-2026-11-23-before-footnote`). The 8d10129 bundle renamed
       `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
+- [ ] **T-326** **Ask for a Play Store rating, rarely (the lead, 23 Nov: "reviews are important,
+      can't be an annoying pop-up").** Built under D-111 (Provisional): Google's own in-app review
+      sheet (`expo-store-review`), asked for only as a free stamp's celebration closes, from the
+      third stamp, three days after install, 120 days apart, three times in the app's life, never
+      in a beta, beside the unlock offer, or with another sheet due. A *Rate Bruma* row in Settings
+      opens the store page; after it the app never asks again. Rules in `review/reviewAsk.ts`
+      (tested), Play call in `reviewPrompt.ts`. **Not seen working:** the sheet appears only for a
+      copy installed from Play (internal testing or production), so it is unseen until a store
+      update; a sideloaded build resolves silently. Left: see the row on the P30, see the sheet
+      once from an internal-test install.
 - [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
       lead found the top of the passport too plain and too tall for what it says. Three rounds of
       sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as

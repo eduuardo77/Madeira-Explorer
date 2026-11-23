@@ -125,6 +125,7 @@ import { onReturnToFront } from '../navigation/onReturnToFront';
 import { nextSeenTs, returnFraming } from './returnFraming';
 import { TRACE_PAINT } from './traceStyle';
 import { packTrace } from './mergedTrace';
+import { maybeAskForReview } from '../review/reviewPrompt';
 import { nativeWidthSteps, traceWidthDp } from './traceWidth';
 
 import lightTemplate from '../../assets/map/light.json';
@@ -1381,8 +1382,20 @@ export default function NativeMapScreen({
         <StampNewsCard
           stamp={stampNews[0]}
           onClose={() => {
-            void markStampShown(stampNews[0].placeId);
+            const closed = stampNews[0];
+            void markStampShown(closed.placeId);
             setStampNews((showing) => showing.slice(1));
+            // T-326: the one moment the app may ask for a rating, and only
+            // when nothing else is about to rise (another stamp, the offer).
+            void maybeAskForReview({
+              collected: closed.celebration?.collectedAfter ?? 0,
+              locked: closed.locked,
+              offeredUnlock: closed.freeLeft !== null,
+              moreWaiting:
+                stampNews.length > 1 ||
+                (controlInput !== null && offerAutomatic(controlInput, offerAnswered)),
+              beta: BETA_BUILD,
+            });
           }}
           onOpenPassport={() => {
             // Every pending one is in the passport the user is about to open.

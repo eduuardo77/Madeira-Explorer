@@ -124,6 +124,8 @@ export type SettingsViewProps = {
    * domain (T-187, D-044): no address, no row, rather than a dead one.
    */
   onContact?: () => void;
+  /** The Play Store page (T-326); absent where there is no Play Store or in a beta. */
+  onRate?: () => void;
   /**
    * Send one walk back so the thresholds can stop being guesses (OD-11, D-069).
    * ⚠ Optional, and absent is a legitimate state — the workbench mounts this
@@ -367,6 +369,7 @@ export default function SettingsView({
   donating,
   version,
   onContact,
+  onRate,
   languageChoice,
   onChangeLanguage,
   onClose,
@@ -556,6 +559,15 @@ export default function SettingsView({
           )}
           {onContact === undefined ? null : (
             <ListRow icon="contact" label={t('settings.about.contact')} tone="action" onPress={onContact} />
+          )}
+          {onRate === undefined ? null : (
+            <ListRow
+              icon="rate"
+              label={t('settings.about.rate', { app: APP_NAME })}
+              detail={t('settings.about.rateDetail')}
+              tone="action"
+              onPress={onRate}
+            />
           )}
           {onOpenDebug === undefined ? null : (
             <ListRow icon="technical" label={t('settings.about.technical')} onPress={onOpenDebug} />

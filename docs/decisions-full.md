@@ -6024,3 +6024,26 @@ service), and the 17 Oct mode-switch fixes on a day with stops.
 **What would overturn it.** A levada walk under trees, with the iPhone alongside, drawn visibly
 worse than the iPhone's track. The first answer would be denser sampling when walking, for
 everyone, not a mode.
+
+## D-111 — Asking for a rating: Google's sheet, at one moment, rarely
+
+**Status: Provisional** 2026-11-23 (T-326). The project lead: reviews matter, and the ask
+*"can't be an annoying pop-up"*.
+
+**Decision.** The only ask is the Play In-App Review sheet, requested as a stamp's celebration
+closes, when every rule in `app/src/review/reviewAsk.ts` holds: three days since install, at least
+three stamps, the stamp free and its pop-up not offering the unlock, nothing else about to rise,
+not a beta, 120 days since the last ask, fewer than three asks so far, and the store page never
+opened from Settings. Settings has *Rate Bruma*, which opens the store page itself (the user asked,
+and Google's sheet may silently not appear).
+
+**Rejected.** A dialog of our own first ("Enjoying Bruma?", unhappy answers to email): Google's
+policy forbids asking for the user's opinion before the review prompt, and it is one more pop-up.
+Asking at launch or after N opens: not tied to anything good having happened. A prompt after a trip
+ends: the user is seldom looking at the app when it does.
+
+**What it costs.** The app cannot know whether anyone rated; every ask is counted as spent. D-100
+holds: Google collects the review, the app sends nothing.
+
+**What would overturn it.** Ratings that stay thin months after launch with many stamps earned
+would argue for a second moment (the film's end), not for asking more often.

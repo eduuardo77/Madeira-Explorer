@@ -457,9 +457,11 @@ permission, L3 privacy contact.
       Captured on the `madeira` AVD at 1080x2340 / 480 dpi with Android's demo status bar
       (`tools/out/demo-db/shots/`), framed in split block style 1 (`tools/out/store-shots/`,
       `?panel=N` renders one at 1080x1920). Found: (1) the emulator that was running was
-      `nightlog-api36`, not ours; restored. (2) The passport's Share does nothing on the emulator
-      (no sheet, no error), so the share picture is not captured; panel 5 shows the medals for
-      now. (3) The trip list, and with it the day viewer, appears only with two trips. (4)
+      `nightlog-api36`, not ours; restored. (2) The passport's Share is slow on the emulator, not
+      broken: nothing after 12 s, the share sheet open by 60 s (export log: 11,003 fixes, nothing
+      to mask); time not measured closer, nor on the P30. Panel 5 is the app's own share picture,
+      pulled from its cache (`Bruma-<date>.png`, 3240 x 5760), headline *Share the island you've
+      collected*. (3) The trip list, and with it the day viewer, appears only with two trips. (4)
       Forte de São João Baptista is in Porto Moniz; Portela's road is not connected in the graph.
       Left: the lead's verdict, PT and DE captures and headlines, the site's images.
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store

@@ -14,20 +14,16 @@
  * The day's lit roads at full strength, and the rest of the trip pale behind
  * them so the day is seen in its place. Clean by default: no mark where a stamp
  * was earned and no time; the *Horas* pill shows a dark tag with each stamp's
- * time (the lead, 19 Oct 2026; the share follows the pill). **No S and E**: WalkNYC marks where a
+ * time (the lead, 19 Oct 2026). **No S and E**: WalkNYC marks where a
  * walk began and ended, and a Bruma day begins and ends at the hotel, which the
- * app keeps out of everything shared (D-040).
+ * app keeps out of everything it exports (D-040).
  *
- * SHARE
- * -----
- * WalkNYC's way: one picture of this screen, the whole trip with its figures
- * and a line about the app. The screen switches to the trip, drawn from the
- * **masked** roads (`tripShare.ts`: where the user slept is cut out), hides
- * its buttons, has Google photograph the map (`takeSnapshot`, added to
- * expo-maps by this project's patch), lays that photograph under the tags and
- * the card, captures the lot and opens the share sheet. Then it switches back.
- * The live map cannot be captured directly: it is a GL surface, and
- * view-shot sees it as black.
+ * NO SHARE
+ * --------
+ * WalkNYC's Share was copied here and removed on 23 Nov 2026 (the lead, D-099
+ * amended): its picture came out as roads on black when the map had not
+ * loaded, and Android's share sheet offers no way to keep it in the gallery.
+ * The phone's own screenshot does the job better.
  *
  * ⚠ **The map's gestures are off.** The tags are React views pinned with
  * `projectPoint` against the camera this screen set; a map the thumb could pan
@@ -39,8 +35,6 @@ import { GoogleMapsColorScheme, GoogleMapsMapType } from 'expo-maps/build/google
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  Image,
   PixelRatio,
   Pressable,
   StyleSheet,
@@ -48,7 +42,6 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { getContentPack } from '../content/poiCatalogue';
 import { deviceLanguage, n, t } from '../i18n';
 import { fitBounds, projectPoint, type CameraFit, type Viewport } from '../map/cameraFit';
 import { darkMapPropsFor } from '../map/darkMode';
@@ -63,11 +56,7 @@ import * as appStateDao from '../storage/dao/appStateDao';
 import { AppStateKey } from '../storage/dao/appStateDao';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import { colors, fontSize, mapChrome, MIN_TAP_TARGET, radius, spacing } from '../ui/theme';
-import { formatDateRange } from './shareCard';
-import { SNAP_MS } from './replayMap';
-import { REFUSAL_KEYS, shareCardImage } from './shareTrip';
 import {
-  boundsOf,
   dayTitle,
   formatClock,
   openingDay,
@@ -77,7 +66,6 @@ import {
 } from './tripDays';
 import ChevronMark from '../ui/ChevronMark';
 import Svg, { Path } from 'react-native-svg';
-import { buildShareScene } from './tripShare';
 import { loadTripView, type TripView } from './tripViewerData';
 
 /**
@@ -89,23 +77,10 @@ const TOP_CLEARANCE = 112 + 34;
 /**
  * The card's foot sits above Google's logo, which must stay visible: map
  * attribution is one of the things Bruma keeps that others trade away. At
- * `spacing.md` the card covered half of it, in the viewer and the shared image.
+ * `spacing.md` the card covered half of it.
  */
 const CARD_BOTTOM = spacing.xl + spacing.sm;
 const CARD_CLEARANCE = 236 + CARD_BOTTOM - spacing.md;
-
-/**
- * How long the map gets to fetch its tiles after the camera moves for a share,
- * before it is photographed. ⚠ A wait, not a signal: expo-maps reports when a
- * map first loads, not when a later camera move has finished drawing. Too
- * short shows as grey squares in the image; it is only ever spent on a share.
- */
-const MAP_SETTLE_MS = 1500;
-
-const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/** The share's picture: the masked trip, framed, and Google's photograph of it once taken. */
-type ShareScene = { runs: DayRun[]; camera: CameraFit; snapshot: string | null };
 
 /** The local midnight after the one at `startTs`: a day's end, daylight saving included. */
 function nextMidnight(startTs: number): number {
@@ -138,16 +113,6 @@ export default function TripViewerScreen({
   const { width, height } = useWindowDimensions();
   const language = deviceLanguage();
   const mapRef = useRef<GoogleMaps.MapView>(null);
-  /**
-   * What a share captures: the photograph, the tags and the card, and not the
-   * live map. With the map in the captured tree the first build's image had
-   * the map and nothing over it (P30, 2026-10-06).
-   */
-  const shareFrameRef = useRef<View>(null);
-  const [shareScene, setShareScene] = useState<ShareScene | null>(null);
-  const [sharing, setSharing] = useState(false);
-  /** Resolved when the snapshot under the card has loaded, so the capture includes it. */
-  const snapshotLoaded = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -188,7 +153,6 @@ export default function TripViewerScreen({
       padding: {
         top: TOP_CLEARANCE,
         bottom: CARD_CLEARANCE,
-        // Tighter than the share's: a day that spans the island fills more of the width.
         // ⚠ Not spacing.md: at 16 dp the 18 Oct day met the screen's left edge
         // at Praia Formosa (review of 19 Oct, N9), the thick line and the
         // stamp's mark reaching past the box their points make.
@@ -199,27 +163,8 @@ export default function TripViewerScreen({
     [width, height],
   );
 
-  /** The share frames the whole trip; nothing sits at the top but its tags. */
-  const shareViewport: Viewport = useMemo(
-    () => ({
-      width,
-      height,
-      padding: {
-        top: spacing.xl * 2 + TAG_LIFT,
-        bottom: CARD_CLEARANCE + spacing.lg,
-        left: spacing.xl,
-        right: spacing.xl,
-      },
-      // The trip rests on the card, as the replay's finale does: a wide, shallow
-      // trip centred left empty sea between them (seen in the first shared image).
-      align: 'bottom',
-    }),
-    [width, height],
-  );
-
   const days = view !== null && view !== 'loading' ? view.days : [];
   const day = days[dayIndex] ?? null;
-  const allStamps = useMemo(() => days.flatMap((d) => d.stamps), [days]);
 
   const camera: CameraFit | null = useMemo(
     () => (day?.bounds == null ? null : fitBounds(day.bounds, viewport)),
@@ -257,21 +202,13 @@ export default function TripViewerScreen({
   const paint = TRACE_PAINT[styleName];
   const darkMap = darkMapPropsFor(styleName, supportsNativeDarkMap);
 
-  /** What is on the map now: the day in its trip, or the masked trip for a share. */
+  /** What is on the map now: the day shown. */
   const shown: {
     runs: DayRun[];
     stamps: ViewerStamp[];
     camera: CameraFit | null;
     viewport: Viewport;
-  } =
-    shareScene !== null
-      ? {
-          runs: shareScene.runs,
-          stamps: allStamps,
-          camera: shareScene.camera,
-          viewport: shareViewport,
-        }
-      : { runs: day?.runs ?? [], stamps: day?.stamps ?? [], camera, viewport };
+  } = { runs: day?.runs ?? [], stamps: day?.stamps ?? [], camera, viewport };
 
   const polylines = useMemo(() => {
     if (view === null || view === 'loading' || day === null) {
@@ -279,7 +216,6 @@ export default function TripViewerScreen({
     }
     const px = PixelRatio.get();
     // The whole trip first, pale, then the day on top of it at full strength.
-    // A share has no pale trip: only the masked roads may be in that picture.
     // Only the day shown (the lead, 17 Oct 2026): the other days' roads, drawn
     // pale behind it, cluttered the view.
     // As few polylines as the runs' round ends allow (T-278, `mergedTrace.ts`).
@@ -292,59 +228,9 @@ export default function TripViewerScreen({
       color: paint.coreColor,
       width: paint.coreWidth * px,
     }));
-  }, [view, day, paint, shareScene, shown.runs]);
+  }, [view, day, paint, shown.runs]);
 
   const showDay = (index: number) => setDayIndex(Math.max(0, Math.min(days.length - 1, index)));
-
-  const share = async () => {
-    if (sharing || view === null || view === 'loading') {
-      return;
-    }
-    setSharing(true);
-    try {
-      const scene = await buildShareScene(view.tripId);
-      if (!scene.ok) {
-        Alert.alert(t('passport.share.nothingTitle'), t(REFUSAL_KEYS[scene.refusal]));
-        return;
-      }
-      const bounds = boundsOf(scene.runs, allStamps);
-      const shareCamera = bounds === null ? null : fitBounds(bounds, shareViewport);
-      if (shareCamera === null) {
-        Alert.alert(t('passport.share.failedTitle'), t(REFUSAL_KEYS.failed));
-        return;
-      }
-      setShareScene({ runs: scene.runs, camera: shareCamera, snapshot: null });
-      // ⚠ Not 0 (`SNAP_MS` says why), and the share's first build
-      // photographed the day it had not left (P30).
-      mapRef.current?.setCameraPosition({ ...shareCamera, duration: SNAP_MS });
-      await pause(MAP_SETTLE_MS);
-      const snapshot = (await mapRef.current?.takeSnapshot()) ?? null;
-      if (snapshot === null) {
-        await recordingEventDao.logError('trip share', new Error('the map gave no snapshot'));
-        Alert.alert(t('passport.share.failedTitle'), t(REFUSAL_KEYS.failed));
-        return;
-      }
-      // Wait for the photograph to be drawn under the card, but not forever.
-      await Promise.race([
-        new Promise<void>((resolve) => {
-          snapshotLoaded.current = resolve;
-          setShareScene((current) => (current === null ? null : { ...current, snapshot }));
-        }),
-        pause(3000),
-      ]);
-      const sent = await shareCardImage(shareFrameRef);
-      if (!sent.ok) {
-        Alert.alert(t('passport.share.failedTitle'), t(REFUSAL_KEYS[sent.refusal]));
-      }
-    } finally {
-      snapshotLoaded.current = null;
-      setShareScene(null);
-      if (camera !== null) {
-        mapRef.current?.setCameraPosition({ ...camera, duration: SNAP_MS });
-      }
-      setSharing(false);
-    }
-  };
 
   if (view === 'loading') {
     return (
@@ -377,13 +263,8 @@ export default function TripViewerScreen({
   }
 
   const chrome = mapChrome.light;
-  const range = formatDateRange(view.startedTs, view.endTs, language);
-
-  const destination = getContentPack().destination ?? t('share.fallbackTitle');
-
   /**
-   * The stamps' times, only when the *Horas* pill asks for them, in the viewer
-   * and the share alike. Clean by default, and no mark where a stamp was: the
+   * The stamps' times, only when the *Horas* pill asks for them. Clean by default, and no mark where a stamp was: the
    * lead, 19 Oct 2026, the times and then their dots made the picture less
    * pleasing. Tags that would overlap share one (`tagGroups.ts`, 17 Oct 2026).
    */
@@ -455,96 +336,73 @@ export default function TripViewerScreen({
         }}
       />
 
-      {shareScene !== null ? null : tags}
+      {tags}
 
-      {shareScene !== null ? null : (
-        <View style={styles.topRow} pointerEvents="box-none">
-          {/* Centred on the screen, not between its neighbours, as WalkNYC's is. */}
-          <View style={styles.pillCentre} pointerEvents="none">
-            <View style={[styles.pill, { backgroundColor: chrome.surface }]}>
-              <Text style={[styles.pillText, { color: chrome.content }]}>
-                {t('trip.day', { day: dayIndex + 1, days: days.length })}
-              </Text>
-            </View>
+      <View style={styles.topRow} pointerEvents="box-none">
+        {/* Centred on the screen, not between its neighbours, as WalkNYC's is. */}
+        <View style={styles.pillCentre} pointerEvents="none">
+          <View style={[styles.pill, { backgroundColor: chrome.surface }]}>
+            <Text style={[styles.pillText, { color: chrome.content }]}>
+              {t('trip.day', { day: dayIndex + 1, days: days.length })}
+            </Text>
           </View>
-          {/* Back and play on the left: on the right, play met the pill at 360 dp. */}
-          <View style={styles.buttonGroup}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('trip.a11y.back')}
-              onPress={onClose}
-              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
-              style={({ pressed }) => [
-                styles.round,
-                { backgroundColor: chrome.surface },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Svg width={22} height={22} viewBox="0 0 24 24" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                <Path d="M20 12H5M11 5l-7 7 7 7" stroke={chrome.content} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </Svg>
-            </Pressable>
-            {/* T-275: the timelapse and the share are of the trip shown, any of
-                them, through the same masked export. */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('trip.a11y.replay')}
-              accessibilityState={{ expanded: choosing }}
-              onPress={() => setChoosing((open) => !open)}
-              hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
-              style={({ pressed }) => [
-                styles.round,
-                { backgroundColor: chrome.surface },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Svg width={18} height={18} viewBox="0 0 24 24" style={styles.playGlyph} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                <Path d="M7 4.5 L19.5 12 L7 19.5 Z" fill={chrome.link} stroke={chrome.link} strokeWidth={2} strokeLinejoin="round" />
-              </Svg>
-            </Pressable>
-          </View>
+        </View>
+        {/* Back and play on the left: on the right, play met the pill at 360 dp. */}
+        <View style={styles.buttonGroup}>
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ busy: sharing }}
-            disabled={sharing}
-            onPress={() => void share()}
-            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+            accessibilityLabel={t('trip.a11y.back')}
+            onPress={onClose}
+            hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
             style={({ pressed }) => [
-              styles.pill,
+              styles.round,
               { backgroundColor: chrome.surface },
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.pillText, { color: chrome.link }]}>
-              {sharing ? t('passport.sharing') : t('trip.share')}
-            </Text>
+            <Svg width={22} height={22} viewBox="0 0 24 24" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Path d="M20 12H5M11 5l-7 7 7 7" stroke={chrome.content} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </Svg>
           </Pressable>
-        </View>
-      )}
-
-      {shareScene !== null ? null : (
-        <View style={styles.timesRow} pointerEvents="box-none">
+          {/* T-275: the timelapse is of the trip shown, any of them. */}
           <Pressable
-            accessibilityRole="switch"
-            accessibilityLabel={t('trip.times')}
-            accessibilityHint={t('trip.a11y.times')}
-            accessibilityState={{ checked: showTimes }}
-            onPress={() => setShowTimes((on) => !on)}
-            hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+            accessibilityRole="button"
+            accessibilityLabel={t('trip.a11y.replay')}
+            accessibilityState={{ expanded: choosing }}
+            onPress={() => setChoosing((open) => !open)}
+            hitSlop={(MIN_TAP_TARGET - ROUND) / 2}
             style={({ pressed }) => [
-              styles.pill,
-              { backgroundColor: showTimes ? chrome.link : chrome.surface },
+              styles.round,
+              { backgroundColor: chrome.surface },
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.pillText, { color: showTimes ? chrome.surface : chrome.link }]}>
-              {t('trip.times')}
-            </Text>
+            <Svg width={18} height={18} viewBox="0 0 24 24" style={styles.playGlyph} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Path d="M7 4.5 L19.5 12 L7 19.5 Z" fill={chrome.link} stroke={chrome.link} strokeWidth={2} strokeLinejoin="round" />
+            </Svg>
           </Pressable>
         </View>
-      )}
+        {/* Horas sits where Share was (D-099 amended, 23 Nov 2026). */}
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityLabel={t('trip.times')}
+          accessibilityHint={t('trip.a11y.times')}
+          accessibilityState={{ checked: showTimes }}
+          onPress={() => setShowTimes((on) => !on)}
+          hitSlop={(MIN_TAP_TARGET - PILL) / 2}
+          style={({ pressed }) => [
+            styles.pill,
+            { backgroundColor: showTimes ? chrome.link : chrome.surface },
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text style={[styles.pillText, { color: showTimes ? chrome.surface : chrome.link }]}>
+            {t('trip.times')}
+          </Text>
+        </Pressable>
+      </View>
 
-      {shareScene !== null || !choosing ? null : (
+      {!choosing ? null : (
         <View style={styles.choiceRow} pointerEvents="box-none">
           {day !== null ? (
             <Pressable
@@ -573,81 +431,39 @@ export default function TripViewerScreen({
         </View>
       )}
 
-      {shareScene !== null ? (
-        <View
-          ref={shareFrameRef}
-          collapsable={false}
-          // Opaque, so no corner of the image is ever transparent: the first
-          // shared image showed Android's checkerboard wherever nothing was drawn.
-          style={[StyleSheet.absoluteFill, styles.root]}
-          pointerEvents="none"
-        >
-          {shareScene.snapshot === null ? null : (
-            <Image
-              source={{ uri: shareScene.snapshot }}
-              style={StyleSheet.absoluteFill}
-              // ⚠ No fade: Android fades a loaded image in over 300 ms, and the
-              // first shared image was captured mid-fade, the map a faint ghost.
-              fadeDuration={0}
-              onLoad={() => snapshotLoaded.current?.()}
-            />
-          )}
-          {tags}
-          <View style={styles.card}>
-            <View style={styles.navText}>
-              <Text style={styles.title}>{range}</Text>
-              <Text style={styles.subtitle}>{destination}</Text>
-            </View>
-            <View style={styles.stats}>
-              <Stat
-                value={String(view.stampCount)}
-                label={n('trip.stat.stamps', view.stampCount)}
-                first
-              />
-              <Stat
-                value={formatDistance(view.litM, language)}
-                label={t('trip.stat.lit')}
-              />
-              <Stat value={String(days.length)} label={n('trip.stat.days', days.length)} />
-            </View>
-            <Text style={styles.plug}>{t('trip.share.plug')}</Text>
+      <View style={styles.card}>
+        <View style={styles.nav}>
+          <Arrow
+            direction="left"
+            label={t('trip.a11y.previous')}
+            enabled={dayIndex > 0}
+            onPress={() => showDay(dayIndex - 1)}
+          />
+          <View style={styles.navText}>
+            <Text style={styles.title}>{dayTitle(day.startTs, language)}</Text>
           </View>
+          <Arrow
+            direction="right"
+            label={t('trip.a11y.next')}
+            enabled={dayIndex < days.length - 1}
+            onPress={() => showDay(dayIndex + 1)}
+          />
         </View>
-      ) : (
-        <View style={styles.card}>
-          <View style={styles.nav}>
-            <Arrow
-              direction="left"
-              label={t('trip.a11y.previous')}
-              enabled={dayIndex > 0}
-              onPress={() => showDay(dayIndex - 1)}
-            />
-            <View style={styles.navText}>
-              <Text style={styles.title}>{dayTitle(day.startTs, language)}</Text>
-            </View>
-            <Arrow
-              direction="right"
-              label={t('trip.a11y.next')}
-              enabled={dayIndex < days.length - 1}
-              onPress={() => showDay(dayIndex + 1)}
-            />
-          </View>
-          <View style={styles.stats}>
-            <Stat
-              value={String(day.stamps.length)}
-              label={n('trip.stat.stamps', day.stamps.length)}
-              first
-            />
-            <Stat value={formatDistance(day.litM, language)} label={t('trip.stat.lit')} />
-            <Stat value={formatDistance(view.litM, language)} label={t('trip.stat.trip')} />
-          </View>
-          <View style={styles.dots} importantForAccessibility="no-hide-descendants">
-            {days.map((d, index) => (
-              <View key={d.startTs} style={[styles.dot, index === dayIndex && styles.dotOn]} />
-            ))}
-          </View>
+        <View style={styles.stats}>
+          <Stat
+            value={String(day.stamps.length)}
+            label={n('trip.stat.stamps', day.stamps.length)}
+            first
+          />
+          <Stat value={formatDistance(day.litM, language)} label={t('trip.stat.lit')} />
+          <Stat value={formatDistance(view.litM, language)} label={t('trip.stat.trip')} />
         </View>
-      )}
+        <View style={styles.dots} importantForAccessibility="no-hide-descendants">
+          {days.map((d, index) => (
+            <View key={d.startTs} style={[styles.dot, index === dayIndex && styles.dotOn]} />
+          ))}
+        </View>
+      </View>
     </View>
   );
 }
@@ -719,12 +535,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
   },
-  /** Under the share pill, on the right, level with the film's choice on the left. */
-  timesRow: {
-    position: 'absolute',
-    top: spacing.xl + spacing.sm + PILL + spacing.md,
-    right: spacing.md,
-  },
   topRow: {
     position: 'absolute',
     top: spacing.xl + spacing.sm,
@@ -786,7 +596,6 @@ const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navText: { flex: 1, alignItems: 'center', paddingHorizontal: spacing.sm },
   title: { color: colors.text, fontSize: fontSize.label, fontWeight: '700', textAlign: 'center' },
-  subtitle: { color: colors.textMuted, fontSize: fontSize.small, textAlign: 'center' },
   arrow: {
     width: ARROW,
     height: ARROW,
@@ -818,10 +627,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   dotOn: { backgroundColor: mapChrome.light.link },
-  plug: {
-    color: colors.textMuted,
-    fontSize: fontSize.small,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
 });

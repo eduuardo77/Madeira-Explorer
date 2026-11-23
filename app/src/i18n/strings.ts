@@ -699,12 +699,10 @@ export const STRINGS = {
   // mismatch `docs/marketing-plan.md` §2 says produces an uninstall.
   // ── The trip viewer (T-253, D-099): WalkNYC's walk viewer, a page per day ──
   'trip.day': s('Day {day} of {days}', 'Dia {day} de {days}', 'Tag {day} von {days}'),
-  'trip.share': s('Share', 'Partilhar', 'Teilen'),
   'trip.ofTrip': s('Trip of {range}', 'Viagem de {range}', 'Reise: {range}'),
   // L6: the one distance the app shows, each road once (the passport's measure).
   'trip.stat.lit': s('Road lit', 'Estradas acesas', 'Straße beleuchtet'),
   'trip.stat.trip': s('This trip', 'Na viagem', 'Diese Reise'),
-  'trip.share.plug': s('Light up your roads with {app}', 'Acende as tuas estradas com o {app}', 'Lassen Sie Ihre Straßen mit {app} aufleuchten'),
   'trip.a11y.replay': s('Watch the trip as a timelapse', 'Ver a viagem em timelapse', 'Die Reise im Zeitraffer ansehen'),
   // The lead, 17 Oct 2026: the film of the day shown, or of the whole trip.
   'trip.replay.day': s('This day', 'Este dia', 'Dieser Tag'),

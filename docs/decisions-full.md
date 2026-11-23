@@ -5644,6 +5644,15 @@ also has the timelapse, which is why the animated film was kept rather than remo
 projection); a share waits 1.5 s for map tiles rather than a signal, which expo-maps does not give;
 `takeSnapshot` is a native addition in the project's expo-maps patch.
 
+**⚠ Amended 2026-11-23 (T-327): the viewer's Partilhar is removed**, on the project lead's word
+(*"Yes, remove it"*). On the P30 the picture came out as the roads on black, the map not loaded
+when the 1.5 s guess ran out, and Huawei's share sheet offers no way to keep it in the gallery.
+The phone's own screenshot does the job better: the real map, straight into the gallery. Lost: the
+line about the app, and the hotel mask (a screenshot is the user's own choice of what to show).
+*Horas* takes Partilhar's place, top right. The passport's and the trophy's shares stay; they do
+not use the map snapshot. `takeSnapshot` stays in the expo-maps patch, unused, rather than
+reopen the patch for it.
+
 ## D-101 — One distance: road lit, each road once
 
 **Status:** Accepted — the project lead, 2026-10-09 (L6 in `docs/bruma-score-and-plan-2026-10-09.md`):

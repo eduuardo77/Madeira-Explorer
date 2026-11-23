@@ -3,8 +3,7 @@
  *
  * The impure half of `tripDays.ts`: it reads the trip on show, its lit roads
  * and its stamps, and hands them to the pure module with the phone's own
- * midnight. Nothing here leaves the phone, so nothing here is masked; the
- * shared image is built from `exportRoadSegments` instead (`tripShare.ts`).
+ * midnight. Nothing here leaves the phone, so nothing here is masked.
  */
 
 import { getContentPack } from '../content/poiCatalogue';

@@ -469,6 +469,10 @@ permission, L3 privacy contact.
       Shifting the demo a day on the device was refused by `raw_fix`'s append-only trigger, as it
       should be (the shell then ran the other updates; the database was regenerated). Seen in DE:
       the stamp page's *Auf der Karte zeigen* wraps to two lines and touches the button's edges.
+      Headlines 1 and 2 reworded by the lead's choice (23 Nov): *Every road you travel, lit up.*
+      and *Put your phone away. Your map fills in by itself.* (the app's own onboarding promise;
+      PT and DE follow its wording, `onboarding` done screen). The headlines live only in
+      `tools/out/store-shots/index.html`, which is not committed.
       Left: the lead's verdict (PT headlines especially), the site's images, Play upload.
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
       screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be

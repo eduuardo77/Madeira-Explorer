@@ -1,3 +1,6 @@
+=== APP NAME (30) ===
+Bruma: Ihre Wege auf Madeira
+
 === SHORT DESCRIPTION (80) ===
 Jede Straße auf Madeira, zu Fuß oder im Auto, markiert. Sehen Sie, wo Sie waren.
 

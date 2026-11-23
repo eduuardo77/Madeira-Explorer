@@ -1,3 +1,6 @@
+=== APP NAME (30) ===
+Bruma: Madeira por onde passei
+
 === SHORT DESCRIPTION (80) ===
 Cada estrada que fazes a pé ou de carro na Madeira, destacada. Vê onde andaste.
 

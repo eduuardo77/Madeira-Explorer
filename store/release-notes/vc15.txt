@@ -3,19 +3,19 @@
 • Uma viagem já não termina sozinha ao fim de uns dias sem movimento.
 • O passaporte tem um topo novo e um mapa da ilha que abres sobre as tuas estradas.
 • Um novo ecrã de desbloqueio, com o preço de lançamento até 28 de fevereiro.
-• Correções: estradas destacadas a preto em alguns telemóveis.
+• Correções: estradas destacadas a preto em alguns telemóveis, e uma nota errada nas Definições.
 </pt-PT>
 <en-US>
 • More reliable recording: it no longer stops as you drive away from a stop, no longer wakes the GPS for no reason while you're parked, and leaves fewer gaps in your lit roads.
 • A trip no longer ends on its own after a few quiet days.
 • The passport has a new top, and an island map you can open over your lit roads.
 • A new unlock screen, with the launch price until 28 February.
-• Fixes: lit roads drawn black on some phones.
+• Fixes: lit roads drawn black on some phones, and a note in Settings about where your trip is kept.
 </en-US>
 <de-DE>
 • Zuverlässigere Aufzeichnung: kein Stopp mehr beim Losfahren nach einem Halt, kein grundloses GPS beim Parken, weniger Lücken in Ihren Wegen.
 • Eine Reise endet nicht mehr von selbst nach ein paar ruhigen Tagen.
 • Der Reisepass hat einen neuen Kopf und eine Inselkarte, die Sie über Ihren Wegen öffnen.
 • Ein neuer Freischaltbildschirm, mit dem Einführungspreis bis 28. Februar.
-• Korrekturen: Schaltflächen, die auf Deutsch umbrachen, und schwarz gezeichnete Wege auf manchen Handys.
+• Korrekturen: umbrechende Knöpfe, schwarze Wege auf manchen Handys und ein falscher Hinweis in den Einstellungen.
 </de-DE>

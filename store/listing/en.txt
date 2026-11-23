@@ -1,3 +1,6 @@
+=== APP NAME (30) ===
+Bruma: Madeira Walk Tracker
+
 === SHORT DESCRIPTION (80) ===
 Every road you walk or drive in Madeira, highlighted. See where you've been.
 

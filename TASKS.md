@@ -510,6 +510,11 @@ permission, L3 privacy contact.
       — ✅ **A close X, top right (the lead, 23 Nov, 12:20 on the P30):** the same action as
       *Agora não*, 40 dp drawn, 60 dp to the finger, said *Fechar*. Tapped on the P30: back to
       the passport.
+- [x] **T-323** **The stamp page's buttons wrapped in German (found 22 Nov, store screenshots).**
+      *Auf der Karte zeigen* broke onto two lines that touched the button's edges: the two buttons
+      had no side padding and no centred text. Both now have padding, centred text and one line
+      that shrinks to 75% at most when a label is long (`TrophyCard.tsx`). Seen on the emulator
+      23 Nov: German on one line, slightly smaller; English unchanged at full size.
 - [ ] **T-317** **Store screenshots from a modelled month (22 Nov, started).** `tools/make-demo-db.mjs`
       writes 11 day drives routed on `content/roads.json` through named places (nobody's movements,
       D-016) into a copy of the app's database: 243 km, 43 of 81 stamps (awarded where a drive

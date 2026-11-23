@@ -240,14 +240,19 @@ export default function TrophyCard({
             onPress={onShowOnMap}
             style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
           >
-            <Text style={styles.primaryText}>{t('placeCard.showOnMap')}</Text>
+            {/* One line, a little smaller when a language's label is long (T-323). */}
+            <Text style={styles.primaryText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+              {t('placeCard.showOnMap')}
+            </Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
             onPress={share}
             style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}
           >
-            <Text style={styles.ghostText}>{t('passport.share')}</Text>
+            <Text style={styles.ghostText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+              {t('passport.share')}
+            </Text>
           </Pressable>
         </Animated.View>
         <Pressable
@@ -482,11 +487,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm,
+    // T-323: the label had no room of its own, so the German "Auf der Karte
+    // zeigen" wrapped onto two lines that touched the button's edges.
+    paddingHorizontal: spacing.sm,
   },
   primaryText: {
     color: reward.goldButtonText,
     fontSize: fontSize.body,
     fontWeight: '800',
+    textAlign: 'center',
   },
   ghost: {
     flex: 1,
@@ -497,11 +506,13 @@ const styles = StyleSheet.create({
     backgroundColor: reward.cardFill,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
   },
   ghostText: {
     color: reward.text,
     fontSize: fontSize.body,
     fontWeight: '800',
+    textAlign: 'center',
   },
   close: {
     alignSelf: 'stretch',

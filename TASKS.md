@@ -545,6 +545,10 @@ permission, L3 privacy contact.
       *your trip never leaves your phone*, the phrase i18n.test.ts bans (the phone's own backup
       can copy it); now *your trips are never sent to us*, the policy's wording.
       Left: the lead's verdict on the PT headlines, Play upload (the lead's).
+      **23 Nov evening: upload-ready** in `store/screenshots/{en,pt,de}/1..5.png` (1080x1920,
+      RGB, no alpha); the October set (four raw captures, *1 / 80*) removed. The live listing
+      still showed that October set. Its description and *What's new* still say the trip stays
+      on the phone, the phrase the site dropped (the phone's own backup can copy it).
 - [x] **T-316** **Lit roads drawn black where Google's map ignores spans (found 22 Nov, store
       screenshots).** T-278's expo-maps patch moved the line colour into `spans` (so gaps can be
       clear) and dropped upstream's `color = Color(polyline.color)`: maps-compose's spans overload

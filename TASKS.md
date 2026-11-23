@@ -464,6 +464,12 @@ permission, L3 privacy contact.
       `--internal`** on the P30, field build with JavaScript byte-identical to the AAB's
       (backup `p30-2026-11-23-before-vc15`), recorder running after. **Open:** the lead uploads
       it to production. Release notes in `store/release-notes/vc15.txt`, three languages, each under 500 characters, in Play's pasting format.
+      **Rebuilt 19:07 from d096712** (the lead: include the footnote fix, ebdc340, the only app
+      change since 8d10129): `bruma-0.1.0-vc15.aab` is now SHA-256 `797a6e76…e812f9`, upload key
+      `75:E4:B7…`, four ABIs, versionCode 15, the old footnote absent from its bundle; tree clean
+      before and after; `smoke-release.mjs` passes on the P30 (field build of the same JavaScript,
+      backup `p30-2026-11-23-before-footnote`). The 8d10129 bundle renamed
+      `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
 - [ ] **T-325** **The passport's front page, and an island you can use (the lead, 23 Nov).** The
       lead found the top of the passport too plain and too tall for what it says. Three rounds of
       sketches (`tools/preview-passport-cover-options.mjs`, rounds 1 to 3; round 2 rejected as

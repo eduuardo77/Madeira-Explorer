@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **23 Nov, 19:07: version 15 REBUILT from d096712** with the Settings footnote fix (ebdc340, the
+  only app change since 8d10129): `bruma-0.1.0-vc15.aab`, SHA-256 `797a6e76…e812f9`, upload key,
+  smoke passes on the P30. The 8d10129 bundle is now `…-vc15-OLD-footnote-do-not-upload.aab`.
+  Listing text to paste: `store/listing/{en,pt,de}.txt`; notes `store/release-notes/vc15.txt`.
 - **23 Nov, evening: version 15 built** (T-324), `bruma-0.1.0-vc15.aab` from 8d10129, smoke
   test passes as a public build; on the P30 as a field build with the same JavaScript (backup
   `p30-2026-11-23-before-vc15`). Left: the lead uploads it. ⚠ Never upload

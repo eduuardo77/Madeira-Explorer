@@ -8,6 +8,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **23 Nov, evening: version 15 built** (T-324), `bruma-0.1.0-vc15.aab` from 8d10129, smoke
+  test passes as a public build; on the P30 as a field build with the same JavaScript (backup
+  `p30-2026-11-23-before-vc15`). Left: the lead uploads it. ⚠ Never upload
+  `bruma-0.1.0-vc15-DIRTY-do-not-upload.aab`. ⚠ **Other sessions edit this working tree:
+  build from a tree with nothing uncommitted under `app/` and `content/`, and check that
+  nothing changed during the build.**
 - **23 Nov: Bruma is live in production on Google Play** (approved, the lead's word). A recorder
   change is now a store update. **Same afternoon, a short trip** (field log): 95.8% within 10 m
   where the iPhone recorded; ❌ **T-321**, a stale *still* label dropped driving to walking at a

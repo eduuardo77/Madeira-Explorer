@@ -6027,7 +6027,7 @@ everyone, not a mode.
 
 ## D-111 — Asking for a rating: Google's sheet, at one moment, rarely
 
-**Status: Provisional** 2026-11-23 (T-326). The project lead: reviews matter, and the ask
+**Status: Accepted** 2026-11-23 (T-326), the project lead after a sketch: "I like google's frame". Reviews matter, and the ask
 *"can't be an annoying pop-up"*.
 
 **Decision.** The only ask is the Play In-App Review sheet, requested as a stamp's celebration

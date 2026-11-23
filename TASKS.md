@@ -471,7 +471,7 @@ permission, L3 privacy contact.
       backup `p30-2026-11-23-before-footnote`). The 8d10129 bundle renamed
       `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
 - [ ] **T-326** **Ask for a Play Store rating, rarely (the lead, 23 Nov: "reviews are important,
-      can't be an annoying pop-up").** Built under D-111 (Provisional): Google's own in-app review
+      can't be an annoying pop-up").** Built under D-111 (Accepted 23 Nov): Google's own in-app review
       sheet (`expo-store-review`), asked for only as a free stamp's celebration closes, from the
       third stamp, three days after install, 120 days apart, three times in the app's life, never
       in a beta, beside the unlock offer, or with another sheet due. A *Rate Bruma* row in Settings

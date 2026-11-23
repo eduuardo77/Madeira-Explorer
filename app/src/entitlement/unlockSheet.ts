@@ -70,16 +70,35 @@ export interface UnlockSheetInput {
    */
   launchPriceEndMs?: number | null;
   nowMs?: number;
+  /**
+   * T-319: the stamp the user tapped to get here, by name, or null when the
+   * sheet opened from anywhere else. Page 1 then shows that one stamp.
+   */
+  focusName?: string | null;
+  /** The user's places on the main island, for the island page; null leaves it out. */
+  places?: { visited: number; total: number } | null;
+  /** The first millisecond after the founder window (`founderWindowEndMs`), for its page's date. */
+  founderEndMs?: number | null;
   language: Language;
 }
+
+/**
+ * One page of the swiped sheet (T-319, the lead, 23 Nov): one picture and
+ * one line, with a quieter line under it. The view draws the picture for
+ * `kind`; the words are all here.
+ */
+export type UnlockPage =
+  | { kind: 'stamps'; art: 'focus' | 'reveal' | 'showcase'; line: string; sub: string; once: string }
+  | { kind: 'island'; line: string; count: string; sub: string }
+  | { kind: 'sets'; line: string }
+  | { kind: 'founder'; line: string; sub: string };
 
 export interface UnlockSheetModel {
   /** The small line over the headline. */
   eyebrow: string;
-  title: string;
-  earned: string;
-  adds: string[];
-  /** The line under the list, for every state but a plain offer. */
+  /** What paying gives, as pages: never one for what the app does not have yet. */
+  pages: UnlockPage[];
+  /** Over the button, for every state but a plain offer. */
   notice: string | null;
   buy: { label: string; enabled: boolean } | null;
   /** Over the button while the launch price lasts (D-110), else null. */
@@ -94,14 +113,8 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
   const say = (key: keyof typeof STRINGS, values?: Record<string, string>) =>
     translate(STRINGS[key], language, values);
 
-  const adds = [say('unlock.adds.stamps')];
-  for (const island of input.offers.islands ?? []) adds.push(say('unlock.adds.island', { island }));
-  if (input.offers.medals) adds.push(say('unlock.adds.medals'));
-  if (input.offers.founder) adds.push(say('unlock.adds.founder'));
-  adds.push(say('unlock.adds.once'));
-
   const { price } = input;
-  const waiting = input.waiting > 0;
+  const pages = unlockPages(input, say);
   // Q2 b (30 Oct 2026, D-097 amended): one label, what the tap does and what
   // it costs. It was "See my stamps · 5,99 €" with stamps waiting, which said
   // neither that it was a purchase nor of what. Offline it says so instead.
@@ -120,21 +133,12 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
   const end = input.launchPriceEndMs ?? null;
   const launchPrice =
     end !== null && input.nowMs !== undefined && input.nowMs < end
-      ? say('unlock.launchPrice', {
-          date: new Date(end - 12 * 3_600_000).toLocaleDateString(DATE_LOCALES[language], {
-            day: 'numeric',
-            month: 'long',
-          }),
-        })
+      ? say('unlock.launchPrice', { date: lastDay(end, language) })
       : null;
 
   const model: UnlockSheetModel = {
     eyebrow: say('unlock.eyebrow'),
-    title: waiting
-      ? plural(PLURALS['unlock.title.waiting'], input.waiting, language)
-      : say('unlock.title'),
-    earned: waiting ? plural(PLURALS['unlock.lead'], input.waiting, language) : say('unlock.earned.none'),
-    adds,
+    pages,
     notice: null,
     buy: canBuy,
     launchPrice,
@@ -161,6 +165,73 @@ export function unlockSheetModel(input: UnlockSheetInput): UnlockSheetModel {
     case 'unlocked':
       return { ...model, notice: say('unlock.unlocked'), buy: null, launchPrice: null, close: say('unlock.done') };
   }
+}
+
+/**
+ * The day before `endMs`, "28 February", as the user's language writes it.
+ * Noon of that day, not a `timeZone` option, which Hermes was never seen to
+ * honour: noon UTC is the same date in every zone from UTC-11 to UTC+11.
+ */
+function lastDay(endMs: number, language: Language): string {
+  return new Date(endMs - 12 * 3_600_000).toLocaleDateString(DATE_LOCALES[language], { day: 'numeric', month: 'long' });
+}
+
+/**
+ * The pages, in order (T-319): the user's stamps first, then the island, the
+ * sets and the founder stamp, each only when it exists. Reuses the lead's
+ * wording from the list it replaces wherever a line survived.
+ */
+function unlockPages(
+  input: UnlockSheetInput,
+  say: (key: keyof typeof STRINGS, values?: Record<string, string>) => string
+): UnlockPage[] {
+  const { language } = input;
+  const once = say('unlock.adds.once');
+  const others = input.waiting - 1;
+  const first: UnlockPage =
+    input.waiting === 0
+      ? { kind: 'stamps', art: 'showcase', line: say('unlock.title'), sub: say('unlock.earned.none'), once }
+      : input.focusName
+        ? {
+            kind: 'stamps',
+            art: 'focus',
+            line: say('unlock.page.focus', { name: input.focusName }),
+            sub:
+              others > 0
+                ? plural(PLURALS['unlock.page.focusMore'], others, language)
+                : plural(PLURALS['unlock.lead'], 1, language),
+            once,
+          }
+        : {
+            kind: 'stamps',
+            art: 'reveal',
+            line: plural(PLURALS['unlock.title.waiting'], input.waiting, language),
+            sub: plural(PLURALS['unlock.lead'], input.waiting, language),
+            once,
+          };
+  const pages: UnlockPage[] = [first];
+  if (input.places) {
+    const islands = input.offers.islands ?? [];
+    pages.push({
+      kind: 'island',
+      line: say('unlock.page.island'),
+      count: say('unlock.page.places', {
+        visited: String(input.places.visited),
+        total: String(input.places.total),
+      }),
+      sub: islands.length > 0 ? say('unlock.page.islandAlso', { island: islands.join(', ') }) : say('unlock.adds.stamps'),
+    });
+  }
+  if (input.offers.medals) pages.push({ kind: 'sets', line: say('unlock.adds.medals') });
+  const founderEnd = input.founderEndMs ?? null;
+  if (input.offers.founder && founderEnd !== null) {
+    pages.push({
+      kind: 'founder',
+      line: say('unlock.page.founder', { date: lastDay(founderEnd, language) }),
+      sub: say('unlock.page.founderSub'),
+    });
+  }
+  return pages;
 }
 
 /**

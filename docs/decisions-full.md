@@ -5555,6 +5555,27 @@ uninstall risk, and D-011's budget).
   ⚠ Offline means Play answered with a network code; which code a phone with no network gets
   from the price lookup has not been measured (the mapping was written before any phone ran it).
 
+
+**Amended 2026-11-23 (T-319), the project lead:** the card with a list "has too much information
+and is less visual". Six directions were sketched with the real art (`tools/out/paywall-options.html`);
+the lead liked five and dropped today's and the grid, and asked for them together. So the sheet is
+**one full screen, swiped**: the bottom never moves (dots, launch price, gold button, *Agora não*,
+the X top right), and above it pages of one picture and one line each:
+
+1. **Your stamps.** Opened from a tapped stamp (the passport's card, the new-stamp pop-up): that
+   stamp half frosted, half in colour, padlock on the seam. Otherwise one of the user's stamps in
+   colour with the others frosted round it; with nothing waiting, a few places in colour.
+2. **Your island.** The main island's municipalities, lit where the user has been
+   (`passport/islandMapArt.ts`, framed on each municipality's largest polygon).
+3. **Your medals.** The five content medals furthest along. ⚠ The first sketch drew five
+   *category* sets; content has ten municipality medals and one for levadas, so the page shows
+   those. The sketch was wrong, not the content.
+4. **Founder**, only while its window is open.
+
+A page exists only for what the app has (no medals in content, no medals page). Copy reuses the
+lead's lines where one survived. The button turned gold (was blue) to match the stamps.
+*Rejected:* the grid sheet (C), the lead's least favourite; one page only, which cannot show
+every feature without a list.
 ## D-098 — The Portuguese speaks to the user as *tu*
 
 **Status: Accepted 2026-10-06** by the project lead (execution plan, decision L1). Built in T-255.

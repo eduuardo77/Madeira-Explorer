@@ -1345,6 +1345,8 @@ export default function NativeMapScreen({
             ...waiting.filter((stamp) => stamp.placeId === unlocking.first),
             ...waiting.filter((stamp) => stamp.placeId !== unlocking.first),
           ]}
+          // T-319: from the new-stamp pop-up, page 1 shows that stamp.
+          focusId={unlocking.first}
           onClose={() => setUnlocking(null)}
           // Read the map again: the count goes, and the button's stamp is shown.
           onUnlocked={() => setResumeCount((count) => count + 1)}

@@ -871,6 +871,23 @@ export const STRINGS = {
     'Todos os carimbos de {island}',
     'Alle Stempel auf {island}'
   ),
+  // T-319 (23 Nov): the swiped sheet's pages, one line each. Page 1 opened
+  // from a tapped stamp names it; the island page counts the user's places;
+  // the founder page dates its last day.
+  'unlock.page.focus': s('{name}, in colour', '{name}, a cores', '{name}, in Farbe'),
+  'unlock.page.island': s(
+    "Every place you've been gets its stamp",
+    'Cada lugar onde estiveste vale um carimbo',
+    'Jeder Ort, an dem Sie waren, bekommt seinen Stempel'
+  ),
+  'unlock.page.islandAlso': s('And {island} too', 'E {island} também', 'Und auch {island}'),
+  'unlock.page.places': s('{visited} of {total} places', '{visited} de {total} lugares', '{visited} von {total} Orten'),
+  'unlock.page.founder': s('Founder stamp, only until {date}', 'Carimbo de fundador, só até {date}', 'Gründerstempel, nur bis {date}'),
+  'unlock.page.founderSub': s(
+    'For whoever unlocks in the first three months. Never again after that.',
+    'Para quem desbloqueia nos primeiros três meses. Depois, nunca mais.',
+    'Für alle, die in den ersten drei Monaten freischalten. Danach nie wieder.'
+  ),
   'unlock.adds.medals': s(
     'A medal for each set you complete',
     'Uma medalha por cada conjunto que completares',
@@ -1559,6 +1576,10 @@ export const PLURALS = {
   'passport.nudge.body': {
     one: s('Unlock it and see it in colour', 'Desbloqueia e vê-o a cores', 'Freischalten und in Farbe sehen'),
     other: s('Unlock them and see them in colour', 'Desbloqueia e vê-os a cores', 'Freischalten und in Farbe sehen'),
+  },
+  'unlock.page.focusMore': {
+    one: s('And {count} more waiting for you', 'E mais {count} à tua espera', 'Und {count} weiterer wartet auf Sie'),
+    other: s('And {count} more waiting for you', 'E mais {count} à tua espera', 'Und {count} weitere warten auf Sie'),
   },
   'unlock.lead': {
     one: s(

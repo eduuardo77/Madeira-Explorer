@@ -242,6 +242,8 @@ export default function PassportScreen({
    * locked stamp's card, T-156d; the reminder card, D-097 R1). Null when closed.
    */
   const [unlockWaiting, setUnlockWaiting] = useState<PassportStamp[] | null>(null);
+  /** T-319: the locked stamp tapped to open the sheet, or null from elsewhere. */
+  const [unlockFocus, setUnlockFocus] = useState<string | null>(null);
   /**
    * A collected, unlocked stamp's trophy (T-251), with what it says; null when
    * closed. Locked and uncollected stamps open the place card instead.
@@ -252,10 +254,12 @@ export default function PassportScreen({
   /** Open the sheet with every locked stamp, `first` leading the fan. */
   const waiting = useMemo(() => stamps.filter((stamp) => stamp.locked === true), [stamps]);
   const openUnlock = useCallback(
-    (first: PassportStamp | null) =>
+    (first: PassportStamp | null) => {
+      setUnlockFocus(first?.placeId ?? null);
       setUnlockWaiting(
         first === null ? waiting : [first, ...waiting.filter((stamp) => stamp.placeId !== first.placeId)]
-      ),
+      );
+    },
     [waiting]
   );
   const unlockFromPage = useCallback(() => openUnlock(null), [openUnlock]);
@@ -852,6 +856,7 @@ export default function PassportScreen({
       {unlockWaiting === null ? null : (
         <UnlockSheet
           waiting={unlockWaiting}
+          focusId={unlockFocus}
           onClose={() => setUnlockWaiting(null)}
           // Read everything again: the stamps that were waiting are now shown.
           onUnlocked={() => setReloadKey((key) => key + 1)}

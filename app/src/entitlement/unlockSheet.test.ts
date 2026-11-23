@@ -23,29 +23,50 @@ function input(overrides: Partial<UnlockSheetInput> = {}): UnlockSheetInput {
   };
 }
 
-test('D-097, sheet A: the headline counts what is waiting, and the button says what it buys', () => {
+const first = (model: ReturnType<typeof unlockSheetModel>) => {
+  const page = model.pages[0];
+  assert.equal(page.kind, 'stamps');
+  return page as Extract<typeof page, { kind: 'stamps' }>;
+};
+const kinds = (model: ReturnType<typeof unlockSheetModel>) => model.pages.map((page) => page.kind);
+const FOUNDER_END = Date.UTC(2027, 1, 21);
+
+test('D-097, sheet A, now page 1: the headline counts what is waiting, and the button says what it buys', () => {
   const model = unlockSheetModel(input());
   assert.equal(model.eyebrow, 'YOUR PASSPORT');
-  assert.equal(model.title, 'You have 8 stamps waiting for you');
-  assert.equal(model.earned, "You've been there. All that's left is to see them.");
+  assert.equal(first(model).art, 'reveal');
+  assert.equal(first(model).line, 'You have 8 stamps waiting for you');
+  assert.equal(first(model).sub, "You've been there. All that's left is to see them.");
   assert.equal(model.buy?.label, 'Unlock the passport · 5,99 €');
-  assert.equal(unlockSheetModel(input({ waiting: 1 })).title, 'You have 1 stamp waiting for you');
+  assert.equal(first(unlockSheetModel(input({ waiting: 1 }))).line, 'You have 1 stamp waiting for you');
 });
 
 test('D-097, sheet A, in Portuguese as the project lead chose it', () => {
   const model = unlockSheetModel(input({ language: 'pt' }));
   assert.equal(model.eyebrow, 'O TEU PASSAPORTE');
-  assert.equal(model.title, 'Tens 8 carimbos à tua espera');
-  assert.equal(model.earned, 'Já lá estiveste. Só falta vê-los.');
+  assert.equal(first(model).line, 'Tens 8 carimbos à tua espera');
+  assert.equal(first(model).sub, 'Já lá estiveste. Só falta vê-los.');
   assert.equal(model.buy?.label, 'Desbloquear o passaporte · 5,99 €');
-  assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).title, 'Tens 1 carimbo à tua espera');
+  assert.equal(first(unlockSheetModel(input({ language: 'pt', waiting: 1 }))).line, 'Tens 1 carimbo à tua espera');
   // One stamp is "it" (P30, 2026-10-10: the sheet said "vê-los" for one).
-  assert.equal(unlockSheetModel(input({ language: 'pt', waiting: 1 })).earned, 'Já lá estiveste. Só falta vê-lo.');
+  assert.equal(first(unlockSheetModel(input({ language: 'pt', waiting: 1 }))).sub, 'Já lá estiveste. Só falta vê-lo.');
 });
 
-test('with nothing waiting (from Settings), the plain offer names the price Google gave', () => {
-  const model = unlockSheetModel(input({ waiting: 0 }));
-  assert.equal(model.title, 'Unlock your passport');
+test('T-319: opened from a tapped stamp, page 1 names it and counts the others', () => {
+  const model = unlockSheetModel(input({ language: 'pt', focusName: 'Cabo Girão', waiting: 25 }));
+  assert.equal(first(model).art, 'focus');
+  assert.equal(first(model).line, 'Cabo Girão, a cores');
+  assert.equal(first(model).sub, 'E mais 24 à tua espera');
+  const only = unlockSheetModel(input({ language: 'pt', focusName: 'Cabo Girão', waiting: 1 }));
+  assert.equal(first(only).sub, 'Já lá estiveste. Só falta vê-lo.');
+  assert.equal(first(unlockSheetModel(input({ language: 'de', focusName: 'Fanal', waiting: 2 }))).sub, 'Und 1 weiterer wartet auf Sie');
+});
+
+test('with nothing waiting (from Settings), page 1 shows places and the plain offer names the price Google gave', () => {
+  const model = unlockSheetModel(input({ waiting: 0, focusName: 'Fanal' }));
+  assert.equal(first(model).art, 'showcase');
+  assert.equal(first(model).line, 'Unlock your passport');
+  assert.match(first(model).sub, /Every stamp you collect/);
   assert.equal(model.buy?.label, 'Unlock the passport · 5,99 €');
   assert.equal(model.buy?.enabled, true);
   assert.equal(model.close, 'Not now');
@@ -59,27 +80,47 @@ test('⚠ no price from Google means no price at all, never a remembered one', (
   assert.doesNotMatch(JSON.stringify(model), /\d[.,]\d\d/);
 });
 
-test('with nothing waiting, it says what paying will show', () => {
-  assert.match(unlockSheetModel(input({ waiting: 0 })).earned, /Every stamp you collect/);
+test('⚠ it never offers what the app does not have yet: a page only for what exists', () => {
+  assert.deepEqual(kinds(unlockSheetModel(input())), ['stamps']);
+  // Founder needs both the open window and its date.
+  assert.deepEqual(kinds(unlockSheetModel(input({ offers: { medals: false, founder: true } }))), ['stamps']);
+  const full = unlockSheetModel(
+    input({
+      offers: { medals: true, founder: true },
+      places: { visited: 30, total: 81 },
+      founderEndMs: FOUNDER_END,
+    })
+  );
+  assert.deepEqual(kinds(full), ['stamps', 'island', 'sets', 'founder']);
 });
 
-test('⚠ it never offers what the app does not have yet', () => {
-  // Medals (T-235) and the founder stamp (T-233) are listed only when they exist.
-  const plain = unlockSheetModel(input()).adds.join(' ');
-  assert.doesNotMatch(plain, /medal|founder/i);
-  const full = unlockSheetModel(input({ offers: { medals: true, founder: true } })).adds.join(' ');
-  assert.match(full, /medal/i);
-  assert.match(full, /founder/i);
+test('T-319: the island page counts the places, and names an island passport when given', () => {
+  const page = unlockSheetModel(input({ language: 'pt', places: { visited: 30, total: 81 } })).pages[1];
+  assert.deepEqual(page, {
+    kind: 'island',
+    line: 'Cada lugar onde estiveste vale um carimbo',
+    count: '30 de 81 lugares',
+    sub: 'Todos os carimbos, nesta e nas próximas visitas',
+  });
+  const islands = unlockSheetModel(
+    input({ places: { visited: 1, total: 81 }, offers: { medals: false, founder: false, islands: ['Porto Santo'] } })
+  ).pages[1];
+  assert.equal(islands.kind === 'island' && islands.sub, 'And Porto Santo too');
 });
 
-test('D-109: an island with its own passport is named when the caller gives it', () => {
-  assert.doesNotMatch(unlockSheetModel(input()).adds.join(' '), /Every stamp on/);
-  const after = unlockSheetModel(input({ offers: { medals: false, founder: false, islands: ['Porto Santo'] } }));
-  assert.equal(after.adds[1], 'Every stamp on Porto Santo');
+test('T-319: the founder page dates its last day, the day before the window closes', () => {
+  const model = unlockSheetModel(input({ language: 'pt', offers: { medals: false, founder: true }, founderEndMs: FOUNDER_END }));
+  assert.deepEqual(model.pages[1], {
+    kind: 'founder',
+    line: 'Carimbo de fundador, só até 20 de fevereiro',
+    sub: 'Para quem desbloqueia nos primeiros três meses. Depois, nunca mais.',
+  });
 });
 
-test('every list says it is one payment and no subscription', () => {
-  assert.ok(unlockSheetModel(input()).adds.some((line) => /One payment\. No subscription\./.test(line)));
+test('page 1 always says it is one payment and no subscription', () => {
+  for (const extra of [{}, { waiting: 0 }, { focusName: 'Fanal' }]) {
+    assert.equal(first(unlockSheetModel(input(extra))).once, 'One payment. No subscription.');
+  }
 });
 
 test('while Google is working, Buy waits and says so', () => {
@@ -192,7 +233,7 @@ test('no text a user reads has a dash, in any language or state', () => {
     for (const state of states) {
       for (const [waiting, price] of [[0, null], [1, '5,99 €'], [8, null]] as const) {
         const text = JSON.stringify(
-          unlockSheetModel(input({ state, language, waiting, price, offers: { medals: true, founder: true } }))
+          unlockSheetModel(input({ state, language, waiting, price, offers: { medals: true, founder: true, islands: ['Porto Santo'] }, places: { visited: 3, total: 81 }, founderEndMs: FOUNDER_END, focusName: waiting === 1 ? 'Fanal' : null }))
         );
         assert.doesNotMatch(text, /[–—]/, `${language} ${state.kind}`);
       }

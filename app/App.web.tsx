@@ -208,6 +208,7 @@ type Screen =
   | `unlock:${UnlockState['kind']}`
   | `onboarding:${OnboardingScreen}`
   | 'unlock-none'
+  | 'unlock-focus'
   | 'news-third'
   | 'news-fifth';
 
@@ -281,6 +282,7 @@ const SCREENS: { id: Screen; label: string }[] = [
     label: `Unlock: ${kind} (T-156d)`,
   })),
   { id: 'unlock-none', label: 'Unlock: nothing waiting, three places shown' },
+  { id: 'unlock-focus', label: 'Unlock: opened from a tapped stamp (T-319)' },
   { id: 'news-third', label: 'New stamp: the 3rd, with the offer (D-105)' },
   { id: 'news-fifth', label: 'New stamp: the 5th, the last free (D-105)' },
   { id: 'privacy', label: 'Privacy policy (T-124)' },
@@ -537,16 +539,16 @@ export default function DesignWorkbench() {
             <View style={styles.unlockStage}>
               <UnlockSheetView
                 model={unlockSheetModel({
-                  state: screen === 'unlock-none' ? UNLOCK_STATES.offer : UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
+                  state: screen === 'unlock-none' || screen === 'unlock-focus' ? UNLOCK_STATES.offer : UNLOCK_STATES[screen.slice('unlock:'.length) as UnlockState['kind']],
                   price: '0,00 € (workbench)',
                   waiting: screen === 'unlock-none' ? 0 : stamps.filter((stamp) => stamp.locked === true).length,
                   offers: { medals: false, founder: false },
+                  focusName: screen === 'unlock-focus' ? stamps.find((stamp) => stamp.locked === true)?.name ?? null : null,
                   language: deviceLanguage(),
                 })}
                 waiting={screen === 'unlock-none' ? [] : stamps.filter((stamp) => stamp.locked === true)}
                 showcase={showcase(stamps, 3, Math.random).map((stamp) => ({ ...stamp, collected: true, locked: false }))}
                 unlocked={screen === 'unlock:unlocked'}
-                working={screen === 'unlock:working'}
                 onBuy={() => setScreen('unlock:working')}
                 onClose={() => setScreen('passport')}
               />
@@ -663,10 +665,10 @@ export default function DesignWorkbench() {
 
 const styles = StyleSheet.create({
   // The sheet over the scrim colour it sits on in the app.
+  // A phone's screen (T-319: the sheet is full screen and swiped, so it needs a height).
   unlockStage: {
     backgroundColor: colors.scrim,
-    alignItems: 'center',
-    padding: spacing.lg,
+    height: 780,
   },
   root: { flex: 1, backgroundColor: '#0a0e12' },
   fill: { flex: 1 },

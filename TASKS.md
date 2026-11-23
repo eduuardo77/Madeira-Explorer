@@ -463,7 +463,14 @@ permission, L3 privacy contact.
       swipeable sheet: a fixed bottom (dots, launch price, button, *Agora não*) under four pages,
       one picture and one line each: your stamps (B when opened from a tapped stamp, A otherwise),
       your island, the sets, founder (only while its window is open).
-      `tools/out/paywall-carousel.html`. Awaits the lead's go-ahead to build.
+      `tools/out/paywall-carousel.html`.
+      — ✅ **Built 23 Nov, on the P30 13:25** (D-097 amended): `UnlockSheetView` rewritten, pages
+      from `unlockSheetModel().pages`, the island from `passport/islandMapArt.ts` (5 tests), the
+      tapped stamp passed as `focusId` from the passport card and the new-stamp pop-up. Seen on the
+      P30: reveal, island (30 of 81, *E Porto Santo também*), medals, founder; the tapped-stamp
+      page seen in the workbench only (the place card on the map has no unlock to reach it).
+      Found on the phone: the orbit stamps needed blur 7, not 3.4, at their size; the sketch's
+      category medals do not exist in content. 1,304 tests.
 - [ ] **T-318** **Launch price €2.99 (D-110, 23 Nov).** The lead sets `passport_madeira` to €2.99
       in Play Console (Monetise, Products, In-app products; base price, then let Play convert the
       other currencies) before launch. **On 2027-03-01** (launch price runs to 28 Feb, a week past the founder

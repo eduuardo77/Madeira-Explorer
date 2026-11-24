@@ -544,6 +544,15 @@ permission, L3 privacy contact.
       over the drawing 7.1 and 1.6 levels; pan at most 113 and 7 km/s; the app's own camera is
       1.5 levels/s and 2.2 levels. The pen leaves the clear area (below the header, above the
       watermark) in 2.6% of frames, by 13 px at most.
+      **24 Nov, later (the lead: "overall I'm happy with the film thing"; D-112 Provisional):**
+      *Câmara mais perto* had been switched off under the new pacing; it now follows the comet 1.3
+      levels in, smoothed 350 ms, pan held to 26 km/s (the pen leaves the clear area in 6% of
+      frames, on long hops). The free watermark is larger (42 px) and over the map in the lower
+      third. **The save flow, drawn for the lead** (`tools/lib/video-save-flow.html`): *Guardar
+      vídeo* and *Partilhar* under the film; a sheet with the remembered choices (info, camera)
+      and *Tirar a marca* for free users; a real progress percentage; saved to Movies/Bruma, then
+      *Partilhar* or *Ver na Galeria*. Next, for it to exist: MapLibre back as the export's
+      renderer, frames to MP4 on Android, and the render time measured on the P30.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

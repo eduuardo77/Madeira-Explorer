@@ -6057,3 +6057,37 @@ holds: Google collects the review, the app sends nothing.
 
 **What would overturn it.** Ratings that stay thin months after launch with many stamps earned
 would argue for a second moment (the film's end), not for asking more often.
+
+## D-112 — The film you keep is drawn on Bruma's own map
+
+**Status: Provisional 2026-11-24.** The project lead, after four rounds of sketches on the real
+trip 31 (`tools/preview-video-options.mjs`): *"overall I'm happy with the film thing"*. The
+pacing by day and the closer camera are still being judged; the save flow
+(`tools/lib/video-save-flow.html`) is drawn, not decided. T-329.
+
+**Why not Google's map.** The Maps SDK's `GoogleMap.snapshot()` reference says images of the map
+"must not be transmitted to your servers, or otherwise used outside of the application"; the Maps
+Platform Terms (3.2.3 a, *No Scraping*) forbid exporting or resharing Google Maps Content outside
+the Services. A video saved to the gallery or posted is outside the app. Asked by the lead
+("can't we use google maps?"), and the answer did not change with a paid Google API. D-076 (the
+film is the map played back) holds for the film watched inside the app; the old share PNGs
+(T-253, T-105d) were outside these terms too, and are gone since T-327.
+
+**The decision.** The exported video renders the project's own map from August (D-035, D-036:
+`app/assets/map/`, OSM vector tiles and SRTM terrain, the light style) in a palette near the
+app's Google map (pale cyan sea, near-white land, soft greens, gentle relief). Plan and finale are
+the app's (`composeSouvenir`, the masked export trace, D-040). *© OpenStreetMap · relevo NASA
+SRTM* in every frame. Free: a large white signature (the island's silhouette from content, a
+hairline, BRUMA) over the map in the lower third, and a two second end card; paid: the same
+signature small in a corner (D-089 rule 8). Info *Discreta* by default (one line under the
+date), *Completa* (a card) or *Nenhuma*. Stamp dots off by default. The video is saved to the
+gallery (Movies/Bruma) before any share sheet opens: Huawei's share sheet cannot save.
+
+**Rejected.** A flat drawing of the island (options A and C of the first round: not "natural, in
+terms of the map"). The app icon as the watermark (*"unprofessional"*). Google's map in the
+export (its terms).
+
+**Costs taken.** MapLibre Native left the app with D-057 and has to come back as a renderer for
+the export, a native dependency and a store build; the time to render on the P30 is unmeasured,
+so no screen promises a duration. Android 7 to 9 ask for storage permission to save.
+

@@ -72,11 +72,13 @@
         letter-spacing: .08em; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.42)) drop-shadow(0 0 7px rgba(20,32,43,.28)); }
   .wm svg { display: block; fill: currentColor; }
   .wm .rule { width: 1px; align-self: stretch; background: currentColor; opacity: .55; }
-  .wm.free { left: 50%; bottom: 58px; transform: translateX(-50%); font-size: 30px; font-weight: 700; gap: 14px; opacity: 1;
-             letter-spacing: .1em;
-             filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 10px rgba(20,32,43,.35)); }
-  .wm.free svg { width: 54px; }
-  .wm.free .rule { margin: 4px 0; width: 1.5px; opacity: .7; }
+  /* Free: big, and over the map rather than beside it, in the lower third, where it
+     is seen the whole time; a reason to buy, still drawn cleanly. */
+  .wm.free { left: 50%; top: 66%; transform: translate(-50%, -50%); font-size: 42px; font-weight: 700; gap: 18px; opacity: .93;
+             letter-spacing: .12em;
+             filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 14px rgba(20,32,43,.4)); }
+  .wm.free svg { width: 78px; }
+  .wm.free .rule { margin: 6px 0; width: 2px; opacity: .7; }
   .wm.paid { right: 12px; bottom: 6px; font-size: 10px; gap: 5px; opacity: .85; }
   .wm.paid svg { width: 17px; }
   .wm.paid .rule { display: none; }
@@ -140,6 +142,9 @@ const PILL_MS = 1100;              // how long a stamp's name stays
 const COUNT_UP_MS = 1100;          // the hero number rising at the close
 const ZOOM_IN_MAX = 0.7;           // levels a day may be framed closer than the whole trip
 const SMOOTH_MS = 700;             // how widely the camera smooths across days
+const NEAR_SMOOTH_MS = 350;        // it follows the comet, so it smooths less
+const NEAR_PAN_MAX = 26;           // km a second, at most, for the close camera
+const NEAR_ZOOM = 1.3;             // "Câmara mais perto": levels in from the whole trip
 const ZOOM_RATE_MAX = 0.45;        // levels a second, at most
 
 // The map files sit beside this page in tools/out/map/ (copied from app/assets/map/).
@@ -304,6 +309,7 @@ function run(map) {
   // While the info card is shown the camera leaves room for it; otherwise it uses the frame.
   // A switch eases the camera between the two over 0.6 s rather than jumping.
   let lean = S.info !== 'full' ? 1 : 0, leanTarget = lean;
+  let near = S.near ? 1 : 0;
   // Without the card, the close centres the whole trip in the frame instead of
   // parking it low for a card that is not there.
   let w = Infinity, so = Infinity, e = -Infinity, n = -Infinity;
@@ -326,16 +332,17 @@ function run(map) {
   // and never overshoots), then the zoom held to ZOOM_RATE_MAX levels a second.
   // Short days blur into their neighbours instead of being chased.
   const STEP = 1000 / 30;
-  const smoothPath = (set) => {
+  const smoothPath = (set, target, smoothMs = SMOOTH_MS, panMax = 0) => {
     const n = Math.ceil(D.durationMs / STEP) + 1;
     const raw = [];
     for (let i = 0; i < n; i += 1) {
       const t = i * STEP, ds = D.paced.days;
       let k = -1;
       for (let j = 0; j < ds.length; j += 1) if (ds[j].start <= t) k = j;
-      raw.push(k < 0 ? { lon: set.whole.center.lng, lat: set.whole.center.lat, zoom: set.whole.zoom } : set.days[k]);
+      const whole = { lon: set.whole.center.lng, lat: set.whole.center.lat, zoom: set.whole.zoom };
+      raw.push(target ? target(t, k, whole) : k < 0 ? whole : set.days[k]);
     }
-    const sigma = SMOOTH_MS / STEP, reach = Math.ceil(sigma * 3);
+    const sigma = smoothMs / STEP, reach = Math.ceil(sigma * 3);
     const weights = [];
     for (let j = -reach; j <= reach; j += 1) weights.push(Math.exp(-(j * j) / (2 * sigma * sigma)));
     const out = raw.map((_, i) => {
@@ -355,15 +362,52 @@ function run(map) {
         prev = out[i].zoom;
       }
     }
+    // Pan held too, when asked: a close camera chasing a hop would whip.
+    if (panMax) {
+      const step = (panMax * STEP) / 1000 / 111; // degrees a frame
+      for (let pass = 0; pass < 2; pass += 1) {
+        const order = pass === 0 ? [...out.keys()] : [...out.keys()].reverse();
+        let prev = null;
+        for (const i of order) {
+          if (prev !== null) {
+            const dx = (out[i].lon - prev.lon) * 0.84, dy = out[i].lat - prev.lat, d = Math.hypot(dx, dy);
+            if (d > step) { out[i].lon = prev.lon + (dx / d) * step / 0.84; out[i].lat = prev.lat + (dy / d) * step; }
+          }
+          prev = out[i];
+        }
+      }
+    }
     return out;
   };
-  const smooth = { full: smoothPath(dayCams.full), lean: smoothPath(dayCams.lean) };
+  // Closer: the camera follows the comet itself, NEAR_ZOOM levels in from the whole
+  // trip, smoothed and rate-held the same way, so it travels rather than cuts.
+  const drawn = D.paced.strokes.filter((st) => !st.quiet);
+  const penAt = (t) => {
+    let best = null;
+    for (const st of drawn) if (st.t[0] <= t) best = st;
+    if (best === null) return null;
+    for (let i = 1; i < best.t.length; i += 1) if (best.t[i] >= t) {
+      const u = (t - best.t[i - 1]) / Math.max(1, best.t[i] - best.t[i - 1]);
+      return [(best.c[i - 1][0] + (best.c[i][0] - best.c[i - 1][0]) * u) / 1e5, (best.c[i - 1][1] + (best.c[i][1] - best.c[i - 1][1]) * u) / 1e5];
+    }
+    return P(best.c[best.c.length - 1]);
+  };
+  const nearTarget = (set) => (t, k, whole) => {
+    const pen = t < D.finaleAt ? penAt(t) : null;
+    if (k < 0 || pen === null) return whole;
+    // Nudge the centre down a little, so the comet sits in the middle of the clear area.
+    return { lon: pen[0], lat: pen[1] - 0.004, zoom: whole.zoom + NEAR_ZOOM };
+  };
+  const smooth = {
+    full: smoothPath(dayCams.full), lean: smoothPath(dayCams.lean),
+    nearFull: smoothPath(dayCams.full, nearTarget(dayCams.full), NEAR_SMOOTH_MS, NEAR_PAN_MAX), nearLean: smoothPath(dayCams.lean, nearTarget(dayCams.lean), NEAR_SMOOTH_MS, NEAR_PAN_MAX),
+  };
   const dayCamAt = (which, t) => {
     const path = smooth[which], f = Math.min(path.length - 1, Math.max(0, t / STEP)), i = Math.floor(f), u = f - i;
     const a = path[i], b = path[Math.min(path.length - 1, i + 1)];
     return { lon: a.lon + (b.lon - a.lon) * u, lat: a.lat + (b.lat - a.lat) * u, zoom: a.zoom + (b.zoom - a.zoom) * u };
   };
-  window.camProbe = (t) => dayCamAt('lean', t); // for measuring the camera
+  window.camProbe = (t, which = 'lean') => dayCamAt(which, t); // for measuring the camera
   // Where each stroke begins far from where the last one ended, the head fades in.
   let lastDrawn = null;
   const jumpIn = D.paced.strokes.map((st) => {
@@ -390,8 +434,10 @@ function run(map) {
     // Camera: the app's path; the lean and full paths mixed by `lean`.
     lean += (leanTarget - lean) * clamp01(dt / 180);
     const paced = S.pace === 'new';
-    const a = paced ? dayCamAt('full', film) : camAt(D.cameraPath, film);
-    const b = paced ? dayCamAt('lean', film) : camAt(D.cameraPathLean, film);
+    near += ((S.near ? 1 : 0) - near) * clamp01(dt / 250);
+    const blend = (x, y) => ({ lon: x.lon + (y.lon - x.lon) * near, lat: x.lat + (y.lat - x.lat) * near, zoom: x.zoom + (y.zoom - x.zoom) * near });
+    const a = paced ? blend(dayCamAt('full', film), dayCamAt('nearFull', film)) : camAt(D.cameraPath, film);
+    const b = paced ? blend(dayCamAt('lean', film), dayCamAt('nearLean', film)) : camAt(D.cameraPathLean, film);
     if (paced) { a.zoom += 1; b.zoom += 1; } // the app's path is in Google zoom; these are MapLibre's
     const mix = (x, y) => x + (y - x) * lean;
     const closer = S.near && !paced ? easeInOut(Math.min((t - drawStart) / 1200, (D.finaleAt - 700 - t) / 1200)) : 0;

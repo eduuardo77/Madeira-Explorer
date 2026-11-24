@@ -138,6 +138,9 @@ const END_CARD_MS = 2200;
 const TITLE_HOLD_MS = 2200;        // "Nenhuma": the title leaves after this
 const PILL_MS = 1100;              // how long a stamp's name stays
 const COUNT_UP_MS = 1100;          // the hero number rising at the close
+const ZOOM_IN_MAX = 0.7;           // levels a day may be framed closer than the whole trip
+const SMOOTH_MS = 700;             // how widely the camera smooths across days
+const ZOOM_RATE_MAX = 0.45;        // levels a second, at most
 
 // The map files sit beside this page in tools/out/map/ (copied from app/assets/map/).
 // Read whole into memory, so any static server will do: no HTTP Range needed.
@@ -312,21 +315,55 @@ function run(map) {
     return { whole, days: D.paced.days.map((d) => {
       const c = map.cameraForBounds([[d.bounds[0] / 1e5, d.bounds[1] / 1e5], [d.bounds[2] / 1e5, d.bounds[3] / 1e5]],
         { padding: { top: 140, bottom: bottom + 20, left: 40, right: 40 } });
-      return { lon: c.center.lng, lat: c.center.lat, zoom: Math.max(whole.zoom, Math.min(10.6, c.zoom)) };
+      // At most ZOOM_IN_MAX levels closer than the whole trip: a day is framed, never dived into.
+      return { lon: c.center.lng, lat: c.center.lat, zoom: Math.max(whole.zoom, Math.min(whole.zoom + ZOOM_IN_MAX, c.zoom)) };
     }) };
   };
   dayCams.full = fitDays(230); dayCams.lean = fitDays(130);
-  const dayCamAt = (set, t) => {
-    const ds = D.paced.days, cams = set.days;
-    const whole = { lon: set.whole.center.lng, lat: set.whole.center.lat, zoom: set.whole.zoom };
-    let i = -1;
-    for (let k = 0; k < ds.length; k += 1) if (ds[k].start <= t) i = k;
-    if (i < 0) return whole;
-    const from = i === 0 ? whole : cams[i - 1], to = cams[i];
-    const u = easeInOut((t - ds[i].start) / Math.min(900, Math.max(300, (ds[i].end - ds[i].start) * 0.7)));
-    // Zoom eases in log space already (zoom is a log scale); centre straight.
-    return { lon: from.lon + (to.lon - from.lon) * u, lat: from.lat + (to.lat - from.lat) * u, zoom: from.zoom + (to.zoom - from.zoom) * u };
+
+  // The camera a viewer sees: each day's framing as a target, then smoothed over
+  // time (a Gaussian, SMOOTH_MS wide, both ways, so it starts moving before a day
+  // and never overshoots), then the zoom held to ZOOM_RATE_MAX levels a second.
+  // Short days blur into their neighbours instead of being chased.
+  const STEP = 1000 / 30;
+  const smoothPath = (set) => {
+    const n = Math.ceil(D.durationMs / STEP) + 1;
+    const raw = [];
+    for (let i = 0; i < n; i += 1) {
+      const t = i * STEP, ds = D.paced.days;
+      let k = -1;
+      for (let j = 0; j < ds.length; j += 1) if (ds[j].start <= t) k = j;
+      raw.push(k < 0 ? { lon: set.whole.center.lng, lat: set.whole.center.lat, zoom: set.whole.zoom } : set.days[k]);
+    }
+    const sigma = SMOOTH_MS / STEP, reach = Math.ceil(sigma * 3);
+    const weights = [];
+    for (let j = -reach; j <= reach; j += 1) weights.push(Math.exp(-(j * j) / (2 * sigma * sigma)));
+    const out = raw.map((_, i) => {
+      let lon = 0, lat = 0, zoom = 0, w = 0;
+      for (let j = -reach; j <= reach; j += 1) {
+        const r = raw[Math.min(n - 1, Math.max(0, i + j))], k = weights[j + reach];
+        lon += r.lon * k; lat += r.lat * k; zoom += r.zoom * k; w += k;
+      }
+      return { lon: lon / w, lat: lat / w, zoom: zoom / w };
+    });
+    const maxStep = (ZOOM_RATE_MAX * STEP) / 1000;
+    for (let pass = 0; pass < 2; pass += 1) {
+      const order = pass === 0 ? out.keys() : [...out.keys()].reverse();
+      let prev = null;
+      for (const i of order) {
+        if (prev !== null) out[i].zoom = Math.min(prev + maxStep, Math.max(prev - maxStep, out[i].zoom));
+        prev = out[i].zoom;
+      }
+    }
+    return out;
   };
+  const smooth = { full: smoothPath(dayCams.full), lean: smoothPath(dayCams.lean) };
+  const dayCamAt = (which, t) => {
+    const path = smooth[which], f = Math.min(path.length - 1, Math.max(0, t / STEP)), i = Math.floor(f), u = f - i;
+    const a = path[i], b = path[Math.min(path.length - 1, i + 1)];
+    return { lon: a.lon + (b.lon - a.lon) * u, lat: a.lat + (b.lat - a.lat) * u, zoom: a.zoom + (b.zoom - a.zoom) * u };
+  };
+  window.camProbe = (t) => dayCamAt('lean', t); // for measuring the camera
   // Where each stroke begins far from where the last one ended, the head fades in.
   let lastDrawn = null;
   const jumpIn = D.paced.strokes.map((st) => {
@@ -353,8 +390,8 @@ function run(map) {
     // Camera: the app's path; the lean and full paths mixed by `lean`.
     lean += (leanTarget - lean) * clamp01(dt / 180);
     const paced = S.pace === 'new';
-    const a = paced ? dayCamAt(dayCams.full, film) : camAt(D.cameraPath, film);
-    const b = paced ? dayCamAt(dayCams.lean, film) : camAt(D.cameraPathLean, film);
+    const a = paced ? dayCamAt('full', film) : camAt(D.cameraPath, film);
+    const b = paced ? dayCamAt('lean', film) : camAt(D.cameraPathLean, film);
     if (paced) { a.zoom += 1; b.zoom += 1; } // the app's path is in Google zoom; these are MapLibre's
     const mix = (x, y) => x + (y - x) * lean;
     const closer = S.near && !paced ? easeInOut(Math.min((t - drawStart) / 1200, (D.finaleAt - 700 - t) / 1200)) : 0;

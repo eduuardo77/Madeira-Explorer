@@ -537,6 +537,13 @@ permission, L3 privacy contact.
       leaps over 1.5 km inside a stroke 26 to 0; pen speed median 28 to 12 km/s, 99th percentile
       119 to 34 km/s; the head moves to a new place 249 to 133 times. The km count is scaled to end
       on the same total. Only in the sketch; `penPath.ts` and the app's film are unchanged.
+      **The camera calmed (the lead: "the zoom-ins and zoom-outs are quite aggressive"):** each
+      day's framing is now a target, not a cut: at most 0.7 levels closer than the whole trip,
+      smoothed over time (a Gaussian 700 ms wide, both ways) and held to 0.45 zoom levels a
+      second. Measured, before and after: zoom speed at most 8.2 and 0.4 levels/s; zoom travel
+      over the drawing 7.1 and 1.6 levels; pan at most 113 and 7 km/s; the app's own camera is
+      1.5 levels/s and 2.2 levels. The pen leaves the clear area (below the header, above the
+      watermark) in 2.6% of frames, by 13 px at most.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

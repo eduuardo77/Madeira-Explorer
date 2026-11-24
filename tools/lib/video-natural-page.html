@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   body { background: #1C1C1E; color: #F1F7FF; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 24px; }
   h1 { font-size: 20px; margin: 0 0 4px; }
@@ -13,33 +14,52 @@
   button { font: inherit; padding: 6px 14px; border-radius: 999px; border: 1px solid #555; background: #2C2C2E; color: #fff; cursor: pointer; }
   button.on { background: #F2B820; color: #1C1C1E; border-color: #F2B820; }
   input[type=range] { width: 360px; }
-  .frame { position: relative; width: 360px; height: 640px; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px #0008; }
+  .frame { position: relative; width: 360px; height: 640px; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px #0008;
+           font-family: Roboto, system-ui, sans-serif; }
   #map { position: absolute; inset: 0; }
   .ov { position: absolute; pointer-events: none; color: #14202B; }
-  .title { left: 20px; top: 18px; }
-  .title b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 0 6px #fff, 0 0 12px #fff; }
-  .title span { font-size: 13px; font-weight: 600; color: #3C4852; text-shadow: 0 0 5px #fff, 0 0 10px #fff; }
-  .shade-top { left: 0; right: 0; top: 0; height: 110px; background: linear-gradient(#ffffffcc, #ffffff00); }
-  .shade-bottom { left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(#ffffff00, #ffffffe6 55%); }
-  .counters { left: 20px; right: 20px; bottom: 44px; display: flex; gap: 34px; }
-  .counter b { display: block; font-size: 38px; font-weight: 800; color: #B33A0A; line-height: 1; font-variant-numeric: tabular-nums; }
-  .counter span { font-size: 12px; font-weight: 700; color: #3C4852; letter-spacing: 0.4px; text-transform: uppercase; }
-  .pill { left: 20px; top: 92px; background: #fffffff0; border-radius: 999px; padding: 6px 14px 6px 10px; font-weight: 700; font-size: 14px;
-          box-shadow: 0 2px 8px #0002; display: flex; gap: 8px; align-items: center; transition: opacity .25s; }
-  .pill i { width: 12px; height: 12px; border-radius: 50%; background: #F2B820; display: inline-block; }
-  .finale { left: 0; right: 0; bottom: 70px; text-align: center; opacity: 0; transition: opacity .6s; }
-  .finale b { font-size: 76px; font-weight: 800; line-height: 1; }
-  .finale small { font-size: 32px; font-weight: 600; color: #4E5B66; }
-  .finale div { font-size: 15px; font-weight: 600; }
-  .finale p { margin: 4px 0 0; font-size: 14px; color: #4E5B66; }
-  .credit { left: 8px; bottom: 6px; font-size: 9px; color: #4E5B66; }
-  .mark { left: 50%; transform: translateX(-50%); top: 448px; background: #fffffff2; border-radius: 999px; padding: 4px 22px; font-weight: 800;
-          font-size: 18px; box-shadow: 0 1px 6px #0002; }
-  .mark.small { left: auto; right: 10px; top: auto; bottom: 6px; transform: none; background: none; box-shadow: none; padding: 0; font-size: 12px; opacity: .8; }
-  .mark.end { top: 600px; }
-  .endcard { inset: 0; background: #F5F2E9; display: none; flex-direction: column; align-items: center; justify-content: center; }
-  .endcard b { font-size: 52px; font-weight: 800; }
-  .endcard span { color: #4E5B66; font-size: 16px; }
+  /* Header: a soft veil so the words read on any ground, not a band. */
+  .shade-top { left: 0; right: 0; top: 0; height: 120px;
+               background: linear-gradient(rgba(255,255,255,.92), rgba(255,255,255,.55) 55%, rgba(255,255,255,0)); }
+  .title { left: 20px; top: 20px; }
+  .title b { display: block; font-size: 28px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.1; }
+  .title span { font-size: 12.5px; font-weight: 500; color: #4A5560; }
+  /* The card at the foot, as in the trip viewer. */
+  .card { left: 14px; right: 14px; bottom: 26px; padding: 14px 18px 12px; border-radius: 20px;
+          background: rgba(255,255,255,.86); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12);
+          transition: opacity .5s; }
+  .counters { display: flex; }
+  .counter { flex: 1; }
+  .counter + .counter { border-left: 1px solid #E3E0D8; padding-left: 18px; }
+  .counter b { display: block; font-size: 30px; font-weight: 700; color: #B33A0A; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .counter span { font-size: 12px; font-weight: 500; color: #5A646D; white-space: nowrap; }
+  .progress { margin-top: 10px; height: 3px; border-radius: 2px; background: #ECE8DF; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: #B33A0A; border-radius: 2px; }
+  .pill { left: 20px; top: 84px; background: rgba(255,255,255,.95); border-radius: 999px; padding: 5px 13px 5px 6px; font-weight: 600; font-size: 13px;
+          box-shadow: 0 2px 10px rgba(0,0,0,.14); display: flex; gap: 8px; align-items: center; transition: opacity .25s; }
+  .pill i { width: 20px; height: 20px; border-radius: 50%; background: #B33A0A; display: inline-grid; place-items: center; color: #fff;
+            font-style: normal; font-size: 12px; font-weight: 700; }
+  .finale { left: 14px; right: 14px; bottom: 26px; padding: 14px 18px 16px; border-radius: 20px; text-align: center; opacity: 0;
+            background: rgba(255,255,255,.88); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12); transition: opacity .6s; }
+  .finale b { font-size: 60px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+  .finale small { font-size: 26px; font-weight: 500; color: #5A646D; }
+  .finale div { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .finale p { margin: 4px 0 0; font-size: 13px; color: #5A646D; }
+  .credit { left: 16px; bottom: 8px; font-size: 8.5px; color: #3E4A54; opacity: .85; z-index: 5; }
+  /* D-089's marks: medium in the lower third (free), small in a corner (paid). */
+  .mark { left: 50%; transform: translateX(-50%); bottom: 132px; border-radius: 999px; padding: 6px 16px 6px 8px;
+          background: rgba(20,32,43,.62); color: #fff; font-weight: 700; font-size: 17px; letter-spacing: .2px;
+          display: flex; gap: 8px; align-items: center; }
+  .mark img { width: 22px; height: 22px; border-radius: 6px; display: block; }
+  .mark.small { left: auto; right: 14px; bottom: auto; top: 22px; transform: none; padding: 3px 9px 3px 4px; font-size: 11px; gap: 5px;
+                background: rgba(20,32,43,.45); }
+  .mark.small img { width: 14px; height: 14px; border-radius: 4px; }
+  .mark.end { bottom: auto; top: 86px; }
+  .endcard { inset: 0; background: rgba(250,248,243,.84); backdrop-filter: blur(6px); display: none; flex-direction: column;
+             align-items: center; justify-content: center; gap: 6px; }
+  .endcard img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 4px 14px rgba(0,0,0,.18); margin-bottom: 8px; }
+  .endcard b { font-size: 44px; font-weight: 700; letter-spacing: -0.5px; }
+  .endcard span { color: #5A646D; font-size: 14px; }
   .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
   .side { max-width: 46ch; color: #C8C8D0; }
   .side b { color: #fff; }
@@ -55,26 +75,30 @@
   <button id="paid">Pago</button>
   <button id="near">Câmara mais perto</button>
   <button id="palette" class="on">Cores naturais</button>
+  <button id="dots">Pontos dos carimbos</button>
 </div>
 <div class="row">
   <div class="frame">
     <div id="map"></div>
     <div class="ov shade-top"></div>
-    <div class="ov shade-bottom"></div>
     <div class="ov title"><b>Madeira</b><span id="dates"></span></div>
-    <div class="ov pill" id="pill" style="opacity:0"><i></i><span id="pillText"></span></div>
-    <div class="ov counters" id="counters">
-      <div class="counter"><b id="km">0</b><span>km de estradas acesas</span></div>
-      <div class="counter"><b id="st">0</b><span>carimbos</span></div>
+    <div class="ov pill" id="pill" style="opacity:0"><i>✓</i><span id="pillText"></span></div>
+    <div class="ov card" id="counters">
+      <div class="counters">
+        <div class="counter"><b id="km">0</b><span>km de estradas acesas</span></div>
+        <div class="counter"><b id="st">0</b><span>carimbos</span></div>
+      </div>
+      <div class="progress"><i id="progress"></i></div>
     </div>
     <div class="ov finale" id="finale"><b id="hero"></b><small id="heroTotal"></small><div>lugares visitados</div><p id="heroKm"></p></div>
-    <div class="ov mark" id="mark">Bruma</div>
+    <div class="ov mark" id="mark"><img src="map/icon.png" alt="">Bruma</div>
     <div class="ov credit">© OpenStreetMap · relevo NASA SRTM</div>
-    <div class="ov endcard" id="endcard"><b>Bruma</b><span>Feito com Bruma, no Google Play</span></div>
+    <div class="ov endcard" id="endcard"><img src="map/icon.png" alt=""><b>Bruma</b><span>Feito com Bruma, no Google Play</span></div>
   </div>
   <div class="side">
     <p><b>O que já é igual ao filme da app:</b> o plano (o que se desenha e quando), a câmara, a linha (branca por fora, laranja escuro por dentro), o cartão final.</p>
     <p><b>O que muda:</b> o mapa por baixo. Não é o do Google, que não pode sair da app; é o da Bruma, que tem relevo, verde, praias e nomes.</p>
+    <p><b>Pontos dos carimbos</b> mostra ou esconde os pontos amarelos onde ganhaste cada carimbo. O nome aparece em cima de qualquer forma.</p>
     <p><b>Câmara mais perto</b> aproxima um nível durante o desenho, para se ver mais do mapa e das estradas.</p>
   </div>
 </div>
@@ -154,13 +178,15 @@ async function start() {
   map.addSource('pen', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addSource('stamps', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   const lineLayout = { 'line-join': 'round', 'line-cap': 'round' };
-  map.addLayer({ id: 'lit-casing', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#ffffff', 'line-opacity': 0.9, 'line-width': 8 } }, 'earth_label_islands');
-  map.addLayer({ id: 'lit-core', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#B33A0A', 'line-width': 4 } }, 'earth_label_islands');
+  map.addLayer({ id: 'lit-casing', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#ffffff', 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4.5, 10, 6.5, 12, 8] } }, 'earth_label_islands');
+  map.addLayer({ id: 'lit-core', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#B33A0A', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 10, 3.2, 12, 4] } }, 'earth_label_islands');
   map.addLayer({ id: 'stamp-ring', type: 'circle', source: 'stamps', paint: {
     'circle-radius': ['get', 'ring'], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#F2B820',
     'circle-stroke-width': 3, 'circle-stroke-opacity': ['get', 'ringOpacity'] } }, 'earth_label_islands');
   map.addLayer({ id: 'stamp-dot', type: 'circle', source: 'stamps', paint: {
     'circle-radius': 6.5, 'circle-color': '#F2B820', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 } }, 'earth_label_islands');
+  map.addLayer({ id: 'pen-halo', type: 'circle', source: 'pen', paint: {
+    'circle-radius': 14, 'circle-color': '#B33A0A', 'circle-opacity': 0.18, 'circle-blur': 0.4 } }, 'earth_label_islands');
   map.addLayer({ id: 'pen', type: 'circle', source: 'pen', paint: {
     'circle-radius': 6, 'circle-color': '#B33A0A', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 } }, 'earth_label_islands');
   window.august = Object.fromEntries(Object.keys(NATURAL).map((key) => {
@@ -235,13 +261,21 @@ function run(map) {
     $('finale').style.opacity = finale ? 1 : 0;
     $('heroKm').textContent = `${Math.round(kmAt(t))} km de estradas acesas`;
     $('mark').className = `ov mark${free ? (finale ? ' end' : '') : ' small'}`;
-    $('endcard').style.display = free && t > D.durationMs ? 'flex' : 'none';
+    $('mark').style.display = free && t > D.durationMs ? 'none' : 'flex';
+    $('progress').style.width = `${Math.min(100, (Math.min(t, D.finaleAt) / D.finaleAt) * 100)}%`;
+    const beat = (t % 1200) / 1200;
+    map.setPaintProperty('pen-halo', 'circle-radius', 10 + 12 * beat);
+    map.setPaintProperty('pen-halo', 'circle-opacity', 0.3 * (1 - beat));
+    const ending = free && t > D.durationMs;
+    $('endcard').style.display = ending ? 'flex' : 'none';
+    for (const q of ['.title', '.shade-top', '#finale']) document.querySelector(q).style.visibility = ending ? 'hidden' : 'visible';
 
     $('scrub').value = Math.round((t / total()) * 1000);
     $('clock').textContent = `${(t / 1000).toFixed(1)} s`;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+  const params = new URLSearchParams(location.search);
   const toggle = (on, off) => { $(on).classList.add('on'); $(off).classList.remove('on'); };
   $('play').onclick = (e) => { playing = !playing; e.target.textContent = playing ? 'Pausa' : 'Tocar'; };
   $('restart').onclick = () => { at = 0; };
@@ -249,9 +283,16 @@ function run(map) {
   $('free').onclick = () => { free = true; toggle('free', 'paid'); };
   $('paid').onclick = () => { free = false; toggle('paid', 'free'); };
   $('near').onclick = () => { near = !near; $('near').classList.toggle('on', near); };
+  let dots = false;
+  const showDots = () => {
+    for (const id of ['stamp-ring', 'stamp-dot']) map.setLayoutProperty(id, 'visibility', dots ? 'visible' : 'none');
+    $('dots').classList.toggle('on', dots);
+  };
+  $('dots').onclick = () => { dots = !dots; showDots(); };
+  if (params.has('dots')) dots = true;
+  showDots();
   let natural = true;
   $('palette').onclick = () => { natural = !natural; $('palette').classList.toggle('on', natural); setPalette(map, natural ? NATURAL : window.august); };
-  const params = new URLSearchParams(location.search);
   if (params.has('near')) { near = true; $('near').classList.add('on'); }
   if (params.has('august')) { natural = false; $('palette').classList.remove('on'); setPalette(map, window.august); }
   if (params.has('t')) { at = Number(params.get('t')); playing = false; }

@@ -496,6 +496,11 @@ permission, L3 privacy contact.
       while drawing; it crops the far end of a long day. ⚠ **For the phone:** MapLibre Native left
       the app with D-057, so drawing this map on the device means bringing a renderer back (or
       MapLibre's offscreen snapshotter), a native dependency and a store build. Unmeasured.
+      **Polished the same day (the lead: "remove the yellow dots or add a toggle"):** stamp dots
+      off by default behind *Pontos dos carimbos* (the stamp's name still shows); the counters on a
+      frosted card like the trip viewer's, with the film's progress; the line thinner as the camera
+      pulls back; a pulsing pen; the real app icon in the marks; the end card over a veiled map;
+      Roboto, the phone's own face.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

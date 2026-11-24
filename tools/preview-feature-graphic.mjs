@@ -3,14 +3,16 @@
  * (T-269, round three).
  *
  *     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tools/preview-feature-graphic.mjs
- *     → tools/out/feature-graphic/{b,d,e,f}.png and index.html
+ *     → tools/out/feature-graphic/{g,g2,h,b,d,e,f}.png and index.html
  *
  * Round one drew A (the lit island on slate with the name), B (the flag) and C
  * (the road network); the lead chose B. Round two set B beside three quieter
  * versions and the lead kept B. Round three (2026-11-24): B is live, and the
  * lead finds it "a bit too similar to the icon". So three directions that do
  * not reuse the icon's picture, with B alongside for comparison. Rounds one and
- * two are in git history.
+ * two are in git history. Round four (same day): the lead asked for something
+ * "not as dark and with more professional finish and polish": G and G2 (the
+ * island as a light map) and H (E at first light), drawn above round three.
  *
  * Nothing here is a person's trace (D-016): the lit roads are driven routes over
  * the shipped OpenStreetMap network (`lib/syntheticTrips.mjs`), the levadas are
@@ -46,8 +48,8 @@ const NIGHT = '#0F1A20';
 
 const fmt = (points) => `M${points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join('L')}`;
 
-/** The island, its whole road network and a set of lit roads, in the 108 canvas. */
-function nightIsland(island, { litSeed = 7, litWalks = 9, walkM = 30000, levadaGlow = true } = {}) {
+/** The island's whole road network, a set of lit roads and the levadas, as paths in the 108 canvas. */
+function islandLayers(island, { litSeed = 7, litWalks = 9, walkM = 30000, kinds = ['m', 'p', 'r'], alwaysKinds = [] } = {}) {
   const project = (e, i) => island.project(graph.lon[i], graph.lat[i]);
   let network = '';
   for (let e = 0; e < graph.edgeCount; e += 1) {
@@ -79,18 +81,31 @@ function nightIsland(island, { litSeed = 7, litWalks = 9, walkM = 30000, levadaG
   let lit = '';
   for (let w = 0; w < litWalks; w += 1) {
     const place = starts[Math.floor(random() * starts.length)];
-    const steps = drivenRoute(graph, routing, nearest(place.geofences[0].lat, place.geofences[0].lon), walkM * (0.5 + random()), random, ['m', 'p', 'r']);
+    const steps = drivenRoute(graph, routing, nearest(place.geofences[0].lat, place.geofences[0].lon), walkM * (0.5 + random()), random, kinds);
     for (const { edge } of steps) {
       const pts = [];
       for (let i = graph.pointStart[edge]; i < graph.pointStart[edge + 1]; i += 1) pts.push(project(edge, i));
       lit += fmt(pts);
     }
   }
+  // Every road of these kinds, lit whole: the expressways, which nearly every visitor drives.
+  for (let e = 0; e < graph.edgeCount; e += 1) {
+    if (!alwaysKinds.includes(graph.edgeKindCodes[e].toLowerCase()) || graph.lat[graph.pointStart[e]] < 32.6) continue;
+    const pts = [];
+    for (let i = graph.pointStart[e]; i < graph.pointStart[e + 1]; i += 1) pts.push(project(e, i));
+    lit += fmt(pts);
+  }
   let lev = '';
   for (const f of levadas.features) {
     const lines = f.geometry.type === 'LineString' ? [f.geometry.coordinates] : f.geometry.coordinates;
     for (const line of lines) lev += fmt(line.map(([lon, lat]) => island.project(lon, lat)));
   }
+  return { network, lit, lev };
+}
+
+/** The island at night: the network faint, the lit roads in the dark map's blue. */
+function nightIsland(island, { levadaGlow = true, ...litOptions } = {}) {
+  const { network, lit, lev } = islandLayers(island, litOptions);
   return `
     <path d="${island.d}" fill="#1D3329" stroke="#1D3329" stroke-width="2.4" stroke-linejoin="round"/>
     <path d="${island.d}" fill="none" stroke="#3E6B58" stroke-opacity="0.6" stroke-width="0.35" stroke-linejoin="round"/>
@@ -128,12 +143,21 @@ function ridge(seed, base, amp, { peaks = 3 } = {}) {
 }
 
 /** E: Bruma is mist. Ridges in layers of cloud at dusk, one road lit through them. */
-function optionE() {
+const DUSK = {
+  ridges: ['#5C7486', '#3F5767', '#2A3F4C', '#18262E'],
+  sky: ['#1B2A33', '#5E7A8C', '#E9C9A8'],
+  sun: '#FBE3C4',
+  mist: '#E8EEF2',
+  road: PALETTE.road,
+  ink: '#FFFFFF',
+  sub: null,
+};
+function optionE(c = DUSK) {
   const layers = [
-    { seed: 3, base: 250, amp: 60, fill: '#5C7486', peaks: 2 },
-    { seed: 11, base: 315, amp: 50, fill: '#3F5767' },
-    { seed: 21, base: 385, amp: 42, fill: '#2A3F4C' },
-    { seed: 5, base: 455, amp: 28, fill: '#18262E' },
+    { seed: 3, base: 250, amp: 60, fill: c.ridges[0], peaks: 2 },
+    { seed: 11, base: 315, amp: 50, fill: c.ridges[1] },
+    { seed: 21, base: 385, amp: 42, fill: c.ridges[2] },
+    { seed: 5, base: 455, amp: 28, fill: c.ridges[3] },
   ];
   const mist = (y, h, o) => `<rect x="-40" y="${y}" width="${W + 80}" height="${h}" fill="url(#mist)" opacity="${o}" filter="url(#soft)"/>`;
   const ridges = layers.map((l) => ({ ...l, ...ridge(l.seed, l.base, l.amp, { peaks: l.peaks ?? 3 }) }));
@@ -142,7 +166,7 @@ function optionE() {
   const yAt = (x) => crest.reduce((best, p) => (Math.abs(p[0] - x) < Math.abs(best[0] - x) ? p : best))[1];
   // From the foreground, bottom left, up onto the third ridge and along its face below the crest.
   const road = [[40, 520], [110, 470]];
-  for (let x = 200; x <= 900; x += 70) road.push([x, yAt(x) + 26 + 6 * Math.sin(x / 90)]);
+  for (let x = 200; x <= W + 60; x += 70) road.push([x, yAt(x) + 26 + 6 * Math.sin(x / 90)]);
   // A smooth curve through the midpoints, the points as controls: it never doubles back.
   let roadD = `M${road[0][0]},${road[0][1]}`;
   for (let i = 1; i < road.length - 1; i += 1) {
@@ -153,25 +177,98 @@ function optionE() {
   roadD += ` L${road[road.length - 1][0]},${road[road.length - 1][1]}`;
   return `<defs>
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#1B2A33"/><stop offset="0.55" stop-color="#5E7A8C"/><stop offset="1" stop-color="#E9C9A8"/></linearGradient>
+        <stop offset="0" stop-color="${c.sky[0]}"/><stop offset="0.55" stop-color="${c.sky[1]}"/><stop offset="1" stop-color="${c.sky[2]}"/></linearGradient>
+      <radialGradient id="sunGlow"><stop offset="0" stop-color="${c.sun}" stop-opacity="0.9"/><stop offset="0.35" stop-color="${c.sun}" stop-opacity="0.35"/><stop offset="1" stop-color="${c.sun}" stop-opacity="0"/></radialGradient>
       <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#E8EEF2" stop-opacity="0"/><stop offset="0.5" stop-color="#E8EEF2" stop-opacity="0.75"/><stop offset="1" stop-color="#E8EEF2" stop-opacity="0"/></linearGradient>
+        <stop offset="0" stop-color="${c.mist}" stop-opacity="0"/><stop offset="0.5" stop-color="${c.mist}" stop-opacity="0.75"/><stop offset="1" stop-color="${c.mist}" stop-opacity="0"/></linearGradient>
       <filter id="soft" x="-5%" y="-60%" width="110%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>
       <filter id="blur" x="-10%" y="-50%" width="120%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
     </defs>
     <rect width="${W}" height="${H}" fill="url(#sky)"/>
-    <circle cx="760" cy="215" r="34" fill="#FBE3C4" opacity="0.55"/>
+    ${c.sub === null ? `<circle cx="760" cy="215" r="34" fill="${c.sun}" opacity="0.55"/>` : `<circle cx="760" cy="200" r="150" fill="url(#sunGlow)"/><circle cx="760" cy="200" r="30" fill="${c.sun}"/>`}
     <path d="${ridges[0].d}" fill="${ridges[0].fill}"/>
     ${mist(190, 140, 0.7)}
     <path d="${ridges[1].d}" fill="${ridges[1].fill}"/>
     ${mist(260, 130, 0.55)}
     <path d="${ridges[2].d}" fill="${ridges[2].fill}"/>
-    <path d="${roadD}" fill="none" stroke="${PALETTE.roadGlow}" stroke-opacity="0.45" stroke-width="12" stroke-linecap="round" filter="url(#blur)"/>
-    <path d="${roadD}" fill="none" stroke="${PALETTE.road}" stroke-width="4" stroke-linecap="round"/>
-    <path d="${roadD}" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="${roadD}" fill="none" stroke="${c.sub === null ? c.road : '#FFFFFF'}" stroke-opacity="${c.sub === null ? 0.45 : 0.9}" stroke-width="${c.sub === null ? 12 : 16}" stroke-linecap="round" filter="url(#blur)"/>
+    <path d="${roadD}" fill="none" stroke="${c.road}" stroke-width="${c.sub === null ? 4 : 5.5}" stroke-linecap="round"/>
+    <path d="${roadD}" fill="none" stroke="#FFFFFF" stroke-opacity="${c.sub === null ? 0.8 : 0.45}" stroke-width="${c.sub === null ? 1.4 : 1.2}" stroke-linecap="round"/>
     ${mist(370, 110, 0.4)}
     <path d="${ridges[3].d}" fill="${ridges[3].fill}"/>
-    <text x="512" y="132" text-anchor="middle" ${font} font-size="80" font-weight="600" letter-spacing="10" fill="#FFFFFF">Bruma</text>`;
+    ${c.sub === null
+      ? `<text x="512" y="132" text-anchor="middle" ${font} font-size="80" font-weight="600" letter-spacing="10" fill="${c.ink}">Bruma</text>`
+      : wordmark(512, 120, 84, c.ink, c.sub)}`;
+}
+
+/** The name and, under it, MADEIRA in spaced capitals: a word every language reads the same. */
+function wordmark(x, y, size, ink, sub, anchor = 'middle') {
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Segoe UI Semibold, Segoe UI, Roboto, Arial, sans-serif" font-size="${size}" font-weight="600" letter-spacing="${size * 0.06}" fill="${ink}">Bruma</text>
+    <text x="${anchor === 'middle' ? x : x + 4}" y="${y + size * 0.48}" text-anchor="${anchor}" ${font} font-size="${size * 0.22}" font-weight="600" letter-spacing="${size * 0.11}" fill="${sub}">MADEIRA</text>`;
+}
+
+/** H: E at first light. Pale sky, white mist, the road in a deep blue with a white halo. */
+function optionH() {
+  return optionE({
+    ridges: ['#B7CAD6', '#91AABA', '#6D889B', '#3E5869'],
+    sky: ['#B9D3E3', '#DCE8EE', '#F7E8D8'],
+    sun: '#FFF3E0',
+    mist: '#FFFFFF',
+    road: '#1F6FE0',
+    ink: '#1B2A33',
+    sub: '#4C6677',
+  });
+}
+
+/** The island by day, map style: soft shadow, shelf rings in the sea, lit roads in deep blue with a white casing. */
+function dayIsland(island, { pins = true } = {}) {
+  const { network, lit, lev } = islandLayers(island, { litSeed: 4, litWalks: 4, walkM: 40000, kinds: ['m', 'p'], alwaysKinds: ['m'] });
+  const pinAt = (id) => {
+    const g = places.find((p) => p.id === id).geofences[0];
+    const [x, y] = island.project(g.lon, g.lat);
+    return `<circle cx="${x}" cy="${y}" r="1.25" fill="#FFFFFF" filter="url(#pinShadow)"/><circle cx="${x}" cy="${y}" r="0.7" fill="#E4572E"/>`;
+  };
+  const line = 'fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  return `
+    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="9" stroke-linejoin="round"/>
+    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="${island.d}" fill="#000000" fill-opacity="0.18" stroke="#000000" stroke-opacity="0.18" stroke-width="2.4" stroke-linejoin="round" transform="translate(0.6 1.4)" filter="url(#islandShadow)"/>
+    <path d="${island.d}" fill="url(#land)" stroke="url(#land)" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="0.35" stroke-linejoin="round"/>
+    <path d="${network}" fill="none" stroke="#7D8F86" stroke-opacity="0.28" stroke-width="0.09"/>
+    <path d="${lev}" ${line} stroke="#1E9E78" stroke-opacity="0.75" stroke-width="0.22" stroke-dasharray="0.6 0.45"/>
+    <path d="${lit}" ${line} stroke="#FFFFFF" stroke-width="1.05"/>
+    <path d="${lit}" ${line} stroke="#1F6FE0" stroke-width="0.55"/>
+    ${pins ? ['pico-do-areeiro', 'cabo-girao', 'porto-moniz', 'levada-das-25-fontes', 'santana', 'ponta-de-sao-lourenco'].map(pinAt).join('') : ''}`;
+}
+
+const DAY_DEFS = `
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF4F8"/><stop offset="1" stop-color="#CFE4EE"/></linearGradient>
+    <radialGradient id="seaLight" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.7"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9F0DC"/><stop offset="0.6" stop-color="#D6E5C6"/><stop offset="1" stop-color="#C7DBB6"/></linearGradient>
+    <filter id="islandShadow" x="-10%" y="-10%" width="120%" height="130%"><feGaussianBlur stdDeviation="1.6"/></filter>
+    <filter id="pinShadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="0.25" stdDeviation="0.3" flood-color="#000000" flood-opacity="0.35"/></filter>`;
+
+/** G: the island by day, centred, the name above it. */
+function optionG() {
+  const island = islandPaths(rings, 100, 54);
+  const s = 7.2;
+  return `<defs>${DAY_DEFS}</defs>
+    <rect width="${W}" height="${H}" fill="url(#sea)"/>
+    <rect width="${W}" height="${H}" fill="url(#seaLight)"/>
+    <g transform="translate(${512 - 54 * s} ${306 - 54 * s}) scale(${s})">${dayIsland(island)}</g>
+    ${wordmark(512, 92, 62, '#1B2A33', '#4C6677')}`;
+}
+
+/** G2: the same island by day, to the right, the name on the left. */
+function optionG2() {
+  const island = islandPaths(rings, 100, 54);
+  const s = 6.0;
+  return `<defs>${DAY_DEFS}</defs>
+    <rect width="${W}" height="${H}" fill="url(#sea)"/>
+    <rect width="${W}" height="${H}" fill="url(#seaLight)"/>
+    <g transform="translate(${672 - 54 * s} ${262 - 54 * s}) scale(${s})">${dayIsland(island)}</g>
+    ${wordmark(64, 252, 72, '#1B2A33', '#4C6677', 'start')}`;
 }
 
 /** One of the app's own stamps, placed and turned. resvg ignores CSS transforms, so the tilt moves to a group. */
@@ -201,6 +298,9 @@ function optionF() {
 }
 
 const options = [
+  ['g', 'G, the island by day', 'A light map: the island with a soft shadow and pale shelf rings in the sea, a few trips in deep blue with a white casing, levadas as green dashes, six places pinned. MADEIRA under the name reads the same in every language.', optionG()],
+  ['g2', 'G2, the same, name on the left', 'G as a layout with the name beside the island instead of above it: more room for both.', optionG2()],
+  ['h', 'H, bruma at first light', 'E redrawn in daylight: pale sky, white mist, a soft sun, the road in deep blue with a white halo.', optionH()],
   ['b', 'B, the banner now', 'What Play shows today: the icon at banner size. For comparison.', flagBanner(rings, ROUTE)],
   ['d', 'D, the island at night', 'The whole road network faint, a month of driving lit in the app’s blue, the levadas glowing green. What the app looks like after you have used it, which the icon does not show.', optionD()],
   ['e', 'E, bruma', 'The name in a picture: ridges in layers of mist at dusk, one road lit through them. No map at all, nothing like the icon.', optionE()],
@@ -223,7 +323,7 @@ writeFileSync(
 <style>body{margin:0;padding:24px;background:#111;color:#eee;font-family:system-ui,sans-serif}
 figure{margin:0 0 28px}img{width:100%;max-width:1024px;display:block;border-radius:8px}
 figcaption{margin-top:8px;max-width:1024px;line-height:1.4}b{display:block;color:#fff}</style>
-<h2>T-269: the Play feature graphic, round three: away from the icon (1024 × 500)</h2>
+<h2>T-269: the Play feature graphic, round four: lighter, G, G2 and H; round three below (1024 × 500)</h2>
 ${options.map(([id, name, note]) => `<figure><img src="${pngs.get(id)}" alt=""><figcaption><b>${name}</b>${note}</figcaption></figure>`).join('')}`
 );
 console.log('tools/out/feature-graphic/index.html');

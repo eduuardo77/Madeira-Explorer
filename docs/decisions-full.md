@@ -5651,7 +5651,7 @@ The phone's own screenshot does the job better: the real map, straight into the 
 line about the app, and the hotel mask (a screenshot is the user's own choice of what to show).
 *Horas* takes Partilhar's place, top right. **24 Nov: the passport's Partilhar removed too** (the
 lead: *"remove the passport share too"*), so no picture of the map leaves the phone any more;
-only the trophy card's share stays (a stamp, no map). `takeSnapshot` stays in the expo-maps patch, unused, rather than
+the trophy card's share (a stamp, no map) is hidden, its code kept behind `SHOW_SHARE`. `takeSnapshot` stays in the expo-maps patch, unused, rather than
 reopen the patch for it.
 
 ## D-101 — One distance: road lit, each road once

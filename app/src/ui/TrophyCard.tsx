@@ -8,7 +8,7 @@
  * what the stamp means (`places/trophy.ts`): the medal of its municipality,
  * with that set's stamps lighting in turn, and the nearest stamp not yet
  * collected. *Partilhar* sends a picture of the trophy through the phone's
- * own share sheet, as the passport's share does.
+ * own share sheet; ⚠ hidden since 24 Nov 2026 (`SHOW_SHARE`, T-327).
  *
  * With the phone's "remove animations" on, it all appears at once, still.
  */
@@ -26,6 +26,14 @@ import ChevronMark from './ChevronMark';
 import { postmarkFor } from './postmark';
 import { fontSize, MIN_TAP_TARGET, radius, reward, spacing } from './theme';
 import { useReduceMotion } from './useReduceMotion';
+
+/**
+ * T-327: the trophy's Partilhar is hidden, not removed (the lead, 24 Nov 2026:
+ * "let's hide it for now, I don't really see the purpose of sharing that").
+ * It worked, unlike the trip viewer's and the passport's, so the code stays;
+ * `true` brings the button back as it was.
+ */
+const SHOW_SHARE = false;
 
 const STAMP_SIZE = 176;
 const MINI = 46;
@@ -238,13 +246,18 @@ export default function TrophyCard({
           <Pressable
             accessibilityRole="button"
             onPress={onShowOnMap}
-            style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.primary,
+              !SHOW_SHARE && styles.primaryAlone,
+              pressed && styles.pressed,
+            ]}
           >
             {/* One line, a little smaller when a language's label is long (T-323). */}
             <Text style={styles.primaryText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
               {t('placeCard.showOnMap')}
             </Text>
           </Pressable>
+          {SHOW_SHARE ? (
           <Pressable
             accessibilityRole="button"
             onPress={share}
@@ -254,6 +267,7 @@ export default function TrophyCard({
               {t('passport.share')}
             </Text>
           </Pressable>
+          ) : null}
         </Animated.View>
         <Pressable
           accessibilityRole="button"
@@ -497,6 +511,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'center',
   },
+  primaryAlone: { marginRight: 0 },
   ghost: {
     flex: 1,
     minHeight: MIN_TAP_TARGET,

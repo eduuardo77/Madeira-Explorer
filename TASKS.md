@@ -472,7 +472,7 @@ permission, L3 privacy contact.
       `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
-      and the passport's Partilhar are gone, and the trophy card's share is a stamp with no map.
+      and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.
       *When you share your trip* / *Quando partilhas a tua viagem* still says the app can make a
       picture of your map with where you slept removed. Its last paragraph (the walk report sent
       from Settings) is still true. To change, all together: `app/src/legal/privacyPolicy.ts` and
@@ -485,7 +485,8 @@ permission, L3 privacy contact.
       better. *Horas* moved into its place. D-099 amended. Typecheck and 1,327 tests pass; seen on
       the P30 24 Nov (field build); reaches Play only with the next store build. **24 Nov: the
       passport's Partilhar removed too** (the lead), with `ShareCardView.tsx` and `buildCardForTrip`.
-      Only the trophy share remains. ⚠ The privacy policy's *When you share your trip* still
+      **The trophy's share hidden the same day** (`SHOW_SHARE = false` in `TrophyCard.tsx`, code
+      kept; the lead: "I don't really see the purpose"), so the app shows no share at all. ⚠ The privacy policy's *When you share your trip* still
       describes a map picture; changing it (and its date) awaits the lead.
 - [ ] **T-326** **Ask for a Play Store rating, rarely (the lead, 23 Nov: "reviews are important,
       can't be an annoying pop-up").** Built under D-111 (Accepted 23 Nov): Google's own in-app review

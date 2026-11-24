@@ -10,24 +10,35 @@
   body { background: #1C1C1E; color: #F1F7FF; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 24px; }
   h1 { font-size: 20px; margin: 0 0 4px; }
   p.note { color: #A0A0A8; max-width: 80ch; margin: 4px 0; }
-  .bar { display: flex; gap: 12px; align-items: center; margin: 16px 0; flex-wrap: wrap; }
-  button { font: inherit; padding: 6px 14px; border-radius: 999px; border: 1px solid #555; background: #2C2C2E; color: #fff; cursor: pointer; }
+  .bar { display: flex; gap: 10px; align-items: center; margin: 14px 0 6px; flex-wrap: wrap; }
+  .bar.second { margin-top: 0; }
+  .bar label { color: #A0A0A8; margin-right: 2px; }
+  button { font: inherit; padding: 5px 13px; border-radius: 999px; border: 1px solid #555; background: #2C2C2E; color: #fff; cursor: pointer; }
   button.on { background: #F2B820; color: #1C1C1E; border-color: #F2B820; }
-  input[type=range] { width: 360px; }
+  .group { display: inline-flex; gap: 0; }
+  .group button { border-radius: 0; margin-left: -1px; }
+  .group button:first-child { border-radius: 999px 0 0 999px; }
+  .group button:last-child { border-radius: 0 999px 999px 0; }
+  input[type=range] { width: 300px; }
+  .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; margin-top: 12px; }
+  .side { max-width: 48ch; color: #C8C8D0; }
+  .side b { color: #fff; }
+
+  /* ---- the video frame: 360 x 640 dp, 1080 x 1920 px ---- */
   .frame { position: relative; width: 360px; height: 640px; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px #0008;
-           font-family: Roboto, system-ui, sans-serif; }
+           font-family: Roboto, system-ui, sans-serif; background: #91D8EE; }
   #map { position: absolute; inset: 0; }
-  .ov { position: absolute; pointer-events: none; color: #14202B; }
-  /* Header: a soft veil so the words read on any ground, not a band. */
+  .ov { position: absolute; pointer-events: none; color: #14202B; will-change: opacity, transform; }
   .shade-top { left: 0; right: 0; top: 0; height: 120px;
-               background: linear-gradient(rgba(255,255,255,.92), rgba(255,255,255,.55) 55%, rgba(255,255,255,0)); }
-  .title { left: 20px; top: 20px; }
+               background: linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.5) 55%, rgba(255,255,255,0)); }
+  .title { left: 20px; top: 20px; right: 20px; }
   .title b { display: block; font-size: 28px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.1; }
   .title span { font-size: 12.5px; font-weight: 500; color: #4A5560; }
-  /* The card at the foot, as in the trip viewer. */
-  .card { left: 14px; right: 14px; bottom: 26px; padding: 14px 18px 12px; border-radius: 20px;
-          background: rgba(255,255,255,.86); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12);
-          transition: opacity .5s; }
+  .title em { display: block; font-style: normal; font-size: 13px; font-weight: 600; color: #B33A0A; margin-top: 3px;
+              font-variant-numeric: tabular-nums; }
+
+  .card { left: 14px; right: 14px; bottom: 26px; padding: 13px 18px 12px; border-radius: 20px;
+          background: rgba(255,255,255,.86); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12); }
   .counters { display: flex; }
   .counter { flex: 1; }
   .counter + .counter { border-left: 1px solid #E3E0D8; padding-left: 18px; }
@@ -35,76 +46,86 @@
   .counter span { font-size: 12px; font-weight: 500; color: #5A646D; white-space: nowrap; }
   .progress { margin-top: 10px; height: 3px; border-radius: 2px; background: #ECE8DF; overflow: hidden; }
   .progress i { display: block; height: 100%; width: 0; background: #B33A0A; border-radius: 2px; }
-  .pill { left: 20px; top: 84px; background: rgba(255,255,255,.95); border-radius: 999px; padding: 5px 13px 5px 6px; font-weight: 600; font-size: 13px;
-          box-shadow: 0 2px 10px rgba(0,0,0,.14); display: flex; gap: 8px; align-items: center; transition: opacity .25s; }
+
+  .pill { left: 20px; top: 98px; background: rgba(255,255,255,.96); border-radius: 999px; padding: 5px 13px 5px 6px; font-weight: 600; font-size: 13px;
+          box-shadow: 0 2px 10px rgba(0,0,0,.14); display: flex; gap: 8px; align-items: center; white-space: nowrap; opacity: 0; }
   .pill i { width: 20px; height: 20px; border-radius: 50%; background: #B33A0A; display: inline-grid; place-items: center; color: #fff;
             font-style: normal; font-size: 12px; font-weight: 700; }
+  .pill small { color: #5A646D; font-weight: 500; font-size: 12px; }
+
   .finale { left: 14px; right: 14px; bottom: 26px; padding: 14px 18px 16px; border-radius: 20px; text-align: center; opacity: 0;
-            background: rgba(255,255,255,.88); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12); transition: opacity .6s; }
-  .finale b { font-size: 60px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+            background: rgba(255,255,255,.88); backdrop-filter: blur(10px); box-shadow: 0 4px 18px rgba(0,0,0,.12); }
+  .finale b { font-size: 60px; font-weight: 700; line-height: 1; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
   .finale small { font-size: 26px; font-weight: 500; color: #5A646D; }
   .finale div { font-size: 14px; font-weight: 600; margin-top: 2px; }
   .finale p { margin: 4px 0 0; font-size: 13px; color: #5A646D; }
-  .credit { left: 16px; bottom: 8px; font-size: 8.5px; color: #3E4A54; opacity: .85; z-index: 5; }
-  /* D-089's marks: medium in the lower third (free), small in a corner (paid). */
-  .mark { left: 50%; transform: translateX(-50%); bottom: 132px; border-radius: 999px; padding: 6px 16px 6px 8px;
-          background: rgba(20,32,43,.62); color: #fff; font-weight: 700; font-size: 17px; letter-spacing: .2px;
-          display: flex; gap: 8px; align-items: center; }
-  .mark img { width: 22px; height: 22px; border-radius: 6px; display: block; }
-  .mark.small { left: auto; right: 14px; bottom: auto; top: 22px; transform: none; padding: 3px 9px 3px 4px; font-size: 11px; gap: 5px;
-                background: rgba(20,32,43,.45); }
-  .mark.small img { width: 14px; height: 14px; border-radius: 4px; }
-  .mark.end { bottom: auto; top: 86px; }
-  .endcard { inset: 0; background: rgba(250,248,243,.84); backdrop-filter: blur(6px); display: none; flex-direction: column;
-             align-items: center; justify-content: center; gap: 6px; }
+
+  .credit { left: 12px; bottom: 7px; font-size: 8.5px; color: #3E4A54; opacity: .8; z-index: 5; }
+
+  /* The watermark: the app's icon and name, no box, see-through (D-089: medium when free, small when paid). */
+  .wm { display: flex; align-items: center; gap: 9px; color: #fff; font-weight: 700; letter-spacing: .2px;
+        text-shadow: 0 1px 3px rgba(0,0,0,.45), 0 0 1px rgba(0,0,0,.5); filter: drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
+  .wm img { border-radius: 22%; display: block; }
+  .wm.free { left: 50%; top: 85%; transform: translate(-50%, -50%); font-size: 30px; opacity: .62; }
+  .wm.free img { width: 40px; height: 40px; }
+  .wm.paid { right: 12px; bottom: 6px; font-size: 12px; gap: 5px; opacity: .75; }
+  .wm.paid img { width: 15px; height: 15px; }
+
+  .endcard { inset: 0; background: rgba(250,248,243,.86); backdrop-filter: blur(6px); display: flex; flex-direction: column;
+             align-items: center; justify-content: center; gap: 6px; opacity: 0; z-index: 4; }
   .endcard img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 4px 14px rgba(0,0,0,.18); margin-bottom: 8px; }
   .endcard b { font-size: 44px; font-weight: 700; letter-spacing: -0.5px; }
   .endcard span { color: #5A646D; font-size: 14px; }
-  .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
-  .side { max-width: 46ch; color: #C8C8D0; }
-  .side b { color: #fff; }
 </style>
 <h1>B, no mapa natural da Bruma</h1>
-<p class="note">A tua viagem real (cópia do P30 desta manhã), alojamento escondido. O mapa é o da própria Bruma: OpenStreetMap, relevo da NASA (SRTM) e o estilo claro de agosto, antes do Google. A câmara é a do filme da app. O contador de km é aproximado neste esboço.</p>
+<p class="note">A tua viagem real (cópia do P30 desta manhã), alojamento escondido. Mapa da própria Bruma (OpenStreetMap, relevo NASA SRTM), com cores próximas do mapa que vês na app. Câmara e tempos do filme da app. O contador de km é aproximado neste esboço.</p>
 <div class="bar">
   <button id="play">Pausa</button>
   <button id="restart">Do início</button>
   <input id="scrub" type="range" min="0" max="1000" value="0">
   <span id="clock">0.0 s</span>
-  <button id="free" class="on">Grátis</button>
-  <button id="paid">Pago</button>
+</div>
+<div class="bar second">
+  <label>Informação</label>
+  <span class="group"><button data-info="full">Completa</button><button data-info="discreet" class="on">Discreta</button><button data-info="none">Nenhuma</button></span>
+  <label>Versão</label>
+  <span class="group"><button data-tier="free" class="on">Grátis</button><button data-tier="paid">Pago</button></span>
+  <button id="dots">Pontos dos carimbos</button>
   <button id="near">Câmara mais perto</button>
   <button id="palette" class="on">Cores naturais</button>
-  <button id="dots">Pontos dos carimbos</button>
 </div>
 <div class="row">
-  <div class="frame">
+  <div class="frame" id="frame">
     <div id="map"></div>
-    <div class="ov shade-top"></div>
-    <div class="ov title"><b>Madeira</b><span id="dates"></span></div>
-    <div class="ov pill" id="pill" style="opacity:0"><i>✓</i><span id="pillText"></span></div>
-    <div class="ov card" id="counters">
+    <div class="ov shade-top" id="shade"></div>
+    <div class="ov title" id="title"><b>Madeira</b><span id="dates"></span><em id="line"></em></div>
+    <div class="ov pill" id="pill"><i>&#x2713;</i><span id="pillText"></span><small id="pillMore"></small></div>
+    <div class="ov card" id="card">
       <div class="counters">
         <div class="counter"><b id="km">0</b><span>km de estradas acesas</span></div>
         <div class="counter"><b id="st">0</b><span>carimbos</span></div>
       </div>
       <div class="progress"><i id="progress"></i></div>
     </div>
-    <div class="ov finale" id="finale"><b id="hero"></b><small id="heroTotal"></small><div>lugares visitados</div><p id="heroKm"></p></div>
-    <div class="ov mark" id="mark"><img src="map/icon.png" alt="">Bruma</div>
-    <div class="ov credit">© OpenStreetMap · relevo NASA SRTM</div>
+    <div class="ov finale" id="finale"><b id="hero">0</b><small id="heroTotal"></small><div>lugares visitados</div><p id="heroKm"></p></div>
+    <div class="ov wm free" id="wm"><img src="map/icon.png" alt="">Bruma</div>
+    <div class="ov credit">&copy; OpenStreetMap &middot; relevo NASA SRTM</div>
     <div class="ov endcard" id="endcard"><img src="map/icon.png" alt=""><b>Bruma</b><span>Feito com Bruma, no Google Play</span></div>
   </div>
   <div class="side">
-    <p><b>O que já é igual ao filme da app:</b> o plano (o que se desenha e quando), a câmara, a linha (branca por fora, laranja escuro por dentro), o cartão final.</p>
-    <p><b>O que muda:</b> o mapa por baixo. Não é o do Google, que não pode sair da app; é o da Bruma, que tem relevo, verde, praias e nomes.</p>
-    <p><b>Pontos dos carimbos</b> mostra ou esconde os pontos amarelos onde ganhaste cada carimbo. O nome aparece em cima de qualquer forma.</p>
-    <p><b>Câmara mais perto</b> aproxima um nível durante o desenho, para se ver mais do mapa e das estradas.</p>
+    <p><b>Informação.</b> <i>Discreta</i> (a escolha por omissão): uma linha pequena debaixo da data, e o mapa fica com o ecrã todo. <i>Completa</i>: o cartão com os números em baixo. <i>Nenhuma</i>: só o mapa; o título sai ao fim de dois segundos.</p>
+    <p><b>Marca de água.</b> O ícone e o nome da app, sem caixa, transparentes. Grátis: ao centro, em baixo. Pago: pequena, num canto.</p>
+    <p><b>Os tempos.</b> O título entra; a linha desenha-se com a câmara da app; cada carimbo diz o nome durante um segundo, e os que chegam juntos dizem "e mais 2"; no fim a câmara recua, o número sobe até ao total e o cartão sobe; na versão grátis, o cartão da Bruma.</p>
+    <p><b>Mapa do Google?</b> Não num vídeo que sai do telemóvel: a documentação do Google proíbe usar imagens do mapa fora da app. As cores aqui imitam o que vês na app.</p>
   </div>
 </div>
 <script>
 const D = /*DATA*/null;
-const END_CARD_MS = 2000;
+const END_CARD_MS = 2200;
+const TITLE_HOLD_MS = 2200;        // "Nenhuma": the title leaves after this
+const PILL_MS = 1100;              // how long a stamp's name stays
+const COUNT_UP_MS = 1100;          // the hero number rising at the close
+
 // The map files sit beside this page in tools/out/map/ (copied from app/assets/map/).
 // Read whole into memory, so any static server will do: no HTTP Range needed.
 const BASE = new URL('map', location.href).href;
@@ -113,44 +134,41 @@ class MemorySource {
   getKey() { return this.url; }
   async getBytes(offset, length) { const b = await this.bytes; return { data: b.slice(offset, offset + length) }; }
 }
-
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', protocol.tile);
-for (const name of ['madeira.pmtiles', 'madeira-terrain.pmtiles']) {
-  protocol.add(new pmtiles.PMTiles(new MemorySource(`${BASE}/${name}`)));
-}
+for (const name of ['madeira.pmtiles', 'madeira-terrain.pmtiles']) protocol.add(new pmtiles.PMTiles(new MemorySource(`${BASE}/${name}`)));
 
-const fmtDay = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long' });
-const fmtYear = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
-document.getElementById('dates').textContent = `${fmtDay.format(D.firstTs)} a ${fmtYear.format(D.lastTs)}`;
-document.getElementById('hero').textContent = D.collected;
-document.getElementById('heroTotal').textContent = ` / ${D.total}`;
+// ---- easing ----
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const easeOut = (u) => 1 - Math.pow(1 - clamp01(u), 3);
+const easeInOut = (u) => { u = clamp01(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+const fadeIn = (t, start, ms) => easeOut((t - start) / ms);
 
-function camAt(at) {
-  const c = D.cameraPath;
-  let lo = 0, hi = c.length - 1;
-  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (c[mid][0] <= at) lo = mid; else hi = mid - 1; }
-  const a = c[lo], b = c[Math.min(lo + 1, c.length - 1)];
-  const u = b[0] === a[0] ? 0 : Math.min(1, Math.max(0, (at - a[0]) / (b[0] - a[0])));
+// ---- data lookups ----
+function camAt(path, at) {
+  let lo = 0, hi = path.length - 1;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (path[mid][0] <= at) lo = mid; else hi = mid - 1; }
+  const a = path[lo], b = path[Math.min(lo + 1, path.length - 1)];
+  const u = b[0] === a[0] ? 0 : clamp01((at - a[0]) / (b[0] - a[0]));
   return { lon: (a[1] + (b[1] - a[1]) * u) / 1e5, lat: (a[2] + (b[2] - a[2]) * u) / 1e5, zoom: a[3] + (b[3] - a[3]) * u };
 }
-
 function kmAt(at) {
   const s = D.kmSteps;
   let lo = 0, hi = s.length - 1, best = 0;
   while (lo <= hi) { const mid = (lo + hi) >> 1; if (s[mid][0] <= at) { best = s[mid][1]; lo = mid + 1; } else hi = mid - 1; }
   return best;
 }
-
-function strokesAt(at) {
+const P = (c) => [c[0] / 1e5, c[1] / 1e5];
+/** Strokes drawn between `from` (exclusive of finished ones before it) and `to`. */
+function strokes(from, to) {
   const out = [];
   for (const seg of D.segments) {
-    if (seg.t[0] > at) continue;
+    const end = seg.t[seg.t.length - 1];
+    if (seg.t[0] > to || end <= from) continue;
     const pts = [];
     for (let i = 0; i < seg.c.length; i += 1) {
-      if (seg.t[i] <= at) { pts.push([seg.c[i][0] / 1e5, seg.c[i][1] / 1e5]); continue; }
-      const a = seg.c[i - 1], b = seg.c[i];
-      const u = (at - seg.t[i - 1]) / Math.max(1, seg.t[i] - seg.t[i - 1]);
+      if (seg.t[i] <= to) { pts.push(P(seg.c[i])); continue; }
+      const a = seg.c[i - 1], b = seg.c[i], u = (to - seg.t[i - 1]) / Math.max(1, seg.t[i] - seg.t[i - 1]);
       pts.push([(a[0] + (b[0] - a[0]) * u) / 1e5, (a[1] + (b[1] - a[1]) * u) / 1e5]);
       break;
     }
@@ -159,61 +177,43 @@ function strokesAt(at) {
   return out;
 }
 
-async function start() {
-  const style = JSON.parse(
-    (await (await fetch(`${BASE}/light.json`)).text())
-      .replace('{{TILES_PMTILES}}', `pmtiles://${BASE}/madeira.pmtiles`)
-      .replace('{{TERRAIN_PMTILES}}', `pmtiles://${BASE}/madeira-terrain.pmtiles`)
-      .replace('{{GLYPHS}}', `${BASE}/fonts`)
-  );
-  const first = camAt(0);
-  const map = new maplibregl.Map({
-    container: 'map', style, center: [first.lon, first.lat], zoom: first.zoom - 1,
-    interactive: false, attributionControl: false, pixelRatio: 3, fadeDuration: 0,
-  });
-  window.map = map;
-  // Start on the style, not on `load`, which waits for every tile of the first view.
-  if (!map.isStyleLoaded()) await new Promise((r) => map.once('style.load', r));
-  map.addSource('lit', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-  map.addSource('pen', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-  map.addSource('stamps', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-  const lineLayout = { 'line-join': 'round', 'line-cap': 'round' };
-  map.addLayer({ id: 'lit-casing', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#ffffff', 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4.5, 10, 6.5, 12, 8] } }, 'earth_label_islands');
-  map.addLayer({ id: 'lit-core', type: 'line', source: 'lit', layout: lineLayout, paint: { 'line-color': '#B33A0A', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 10, 3.2, 12, 4] } }, 'earth_label_islands');
-  map.addLayer({ id: 'stamp-ring', type: 'circle', source: 'stamps', paint: {
-    'circle-radius': ['get', 'ring'], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#F2B820',
-    'circle-stroke-width': 3, 'circle-stroke-opacity': ['get', 'ringOpacity'] } }, 'earth_label_islands');
-  map.addLayer({ id: 'stamp-dot', type: 'circle', source: 'stamps', paint: {
-    'circle-radius': 6.5, 'circle-color': '#F2B820', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 } }, 'earth_label_islands');
-  map.addLayer({ id: 'pen-halo', type: 'circle', source: 'pen', paint: {
-    'circle-radius': 14, 'circle-color': '#B33A0A', 'circle-opacity': 0.18, 'circle-blur': 0.4 } }, 'earth_label_islands');
-  map.addLayer({ id: 'pen', type: 'circle', source: 'pen', paint: {
-    'circle-radius': 6, 'circle-color': '#B33A0A', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 } }, 'earth_label_islands');
-  window.august = Object.fromEntries(Object.keys(NATURAL).map((key) => {
-    const [layer, prop] = key.split('|');
-    return [key, map.getPaintProperty(layer, prop)];
-  }));
-  setPalette(map, NATURAL);
-  run(map);
-}
+// ---- stamp names, queued so each is read: one at a time, at least PILL_MS each ----
+const pills = (() => {
+  const out = [];
+  let i = 0;
+  const stamps = [...D.stamps].sort((a, b) => a.at - b.at);
+  while (i < stamps.length) {
+    const start = Math.max(stamps[i].at, out.length ? out[out.length - 1].end : 0);
+    let j = i + 1;
+    while (j < stamps.length && stamps[j].at < start + PILL_MS) j += 1;
+    if (start + PILL_MS > D.finaleAt - 200) break;
+    out.push({ start, end: start + PILL_MS, name: stamps[i].name, more: j - i - 1 });
+    i = j;
+  }
+  return out;
+})();
 
-// A palette nearer a everyday map's: blue sea, green forest, warm beaches,
-// stronger relief. August's style was muted on purpose, to keep the trace
-// first on a map you use (D-026); a video is looked at, not used.
+const fmtDay = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long' });
+const fmtYear = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+document.getElementById('dates').textContent = `${fmtDay.format(D.firstTs)} a ${fmtYear.format(D.lastTs)}`;
+document.getElementById('heroTotal').textContent = ` / ${D.total}`;
+
+// A palette near the Google map the app shows: its pale cyan sea, near-white land,
+// soft greens, gentle relief. August's style was muted on purpose (D-026).
 const NATURAL = {
-  'background|background-color': '#A9DAEC',
-  'water|fill-color': '#A9DAEC',
-  'earth|fill-color': '#F3F0E7',
+  'background|background-color': '#91D8EE',
+  'water|fill-color': '#91D8EE',
+  'earth|fill-color': '#F3F1EB',
   'landcover|fill-color': ['match', ['get', 'kind'],
-    'grassland', '#DCEBCB', 'barren', '#EAE3D2', 'urban_area', '#ECE8E0', 'farmland', '#E4EDD3',
-    'glacier', '#F5F5F2', 'scrub', '#D2E5C1', '#C4DFB4'],
-  'landuse_park|fill-color': ['case', ['==', ['get', 'kind'], 'wood'], '#BFDCAE', '#CBE3BC'],
-  'landuse_urban_green|fill-color': '#CBE3BC',
-  'landuse_beach|fill-color': '#F6EBC6',
-  'terrain_hillshade|hillshade-exaggeration': 0.5,
-  'terrain_hillshade|hillshade-shadow-color': '#5E6E5A',
-  'terrain_hillshade|hillshade-accent-color': '#5E6E5A',
-  'places_locality|text-color': '#3A3A38',
+    'grassland', '#DDEFD3', 'barren', '#EDE8DC', 'urban_area', '#EEECE6', 'farmland', '#E5F0D8',
+    'glacier', '#F7F7F5', 'scrub', '#D5EBCB', '#C8E6C0'],
+  'landuse_park|fill-color': ['case', ['==', ['get', 'kind'], 'wood'], '#C3E3BA', '#CDE8C4'],
+  'landuse_urban_green|fill-color': '#CDE8C4',
+  'landuse_beach|fill-color': '#FAF0CF',
+  'terrain_hillshade|hillshade-exaggeration': 0.42,
+  'terrain_hillshade|hillshade-shadow-color': '#6B7B67',
+  'terrain_hillshade|hillshade-accent-color': '#6B7B67',
+  'places_locality|text-color': '#404040',
   'places_locality|text-halo-color': '#FFFFFF',
 };
 function setPalette(map, palette) {
@@ -223,79 +223,203 @@ function setPalette(map, palette) {
   }
 }
 
+async function start() {
+  const style = JSON.parse(
+    (await (await fetch(`${BASE}/light.json`)).text())
+      .replace('{{TILES_PMTILES}}', `pmtiles://${BASE}/madeira.pmtiles`)
+      .replace('{{TERRAIN_PMTILES}}', `pmtiles://${BASE}/madeira-terrain.pmtiles`)
+      .replace('{{GLYPHS}}', `${BASE}/fonts`)
+  );
+  const first = camAt(D.cameraPathLean, 0);
+  const map = new maplibregl.Map({
+    container: 'map', style, center: [first.lon, first.lat], zoom: first.zoom - 1,
+    interactive: false, attributionControl: false, pixelRatio: 2, fadeDuration: 250,
+  });
+  window.map = map;
+  if (!map.isStyleLoaded()) await new Promise((r) => map.once('style.load', r));
+  const empty = { type: 'FeatureCollection', features: [] };
+  for (const id of ['done', 'live', 'pen', 'stamps']) map.addSource(id, { type: 'geojson', data: empty, tolerance: 0.2 });
+  const lineLayout = { 'line-join': 'round', 'line-cap': 'round' };
+  const casing = { 'line-color': '#ffffff', 'line-opacity': 0.92, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4.5, 10, 6.5, 12, 8] };
+  const core = { 'line-color': '#B33A0A', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 10, 3.2, 12, 4] };
+  const below = 'earth_label_islands';
+  // Drawn road in two sources: `done` changes four times a second, `live` (the last
+  // quarter second of pen) every frame, so each frame re-tiles only a short line.
+  map.addLayer({ id: 'done-casing', type: 'line', source: 'done', layout: lineLayout, paint: casing }, below);
+  map.addLayer({ id: 'live-casing', type: 'line', source: 'live', layout: lineLayout, paint: casing }, below);
+  map.addLayer({ id: 'done-core', type: 'line', source: 'done', layout: lineLayout, paint: core }, below);
+  map.addLayer({ id: 'live-core', type: 'line', source: 'live', layout: lineLayout, paint: core }, below);
+  map.addLayer({ id: 'stamp-ring', type: 'circle', source: 'stamps', paint: {
+    'circle-radius': ['get', 'ring'], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#F2B820',
+    'circle-stroke-width': 2.5, 'circle-stroke-opacity': ['get', 'ringOpacity'] } }, below);
+  map.addLayer({ id: 'stamp-dot', type: 'circle', source: 'stamps', paint: {
+    'circle-radius': ['get', 'r'], 'circle-color': '#F2B820', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 } }, below);
+  map.addLayer({ id: 'pen-halo', type: 'circle', source: 'pen', paint: { 'circle-radius': 14, 'circle-color': '#B33A0A', 'circle-opacity': 0.2, 'circle-blur': 0.5 } }, below);
+  map.addLayer({ id: 'pen', type: 'circle', source: 'pen', paint: {
+    'circle-radius': ['get', 'r'], 'circle-color': '#B33A0A', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 } }, below);
+  window.august = Object.fromEntries(Object.keys(NATURAL).map((key) => { const [l, p] = key.split('|'); return [key, map.getPaintProperty(l, p)]; }));
+  setPalette(map, NATURAL);
+  run(map);
+}
+
 function run(map) {
-  let free = true, near = false, playing = true, at = 0, last = performance.now(), lastData = -1;
-  const total = () => D.durationMs + (free ? END_CARD_MS : 0);
   const $ = (id) => document.getElementById(id);
-  const draw = D.segments.length ? [D.segments[0].t[0], D.finaleAt] : [0, D.finaleAt];
+  const params = new URLSearchParams(location.search);
+  const S = { info: params.get('info') ?? 'discreet', tier: params.get('tier') ?? 'free', dots: params.has('dots'),
+              near: params.has('near'), natural: !params.has('august') };
+  let playing = !params.has('t'), at = Number(params.get('t') ?? 0), last = performance.now();
+  let flushedAt = -1, kmShown = 0, lastT = -1;
+  const total = () => D.durationMs + (S.tier === 'free' ? END_CARD_MS : 0);
+  const drawStart = D.segments.length ? D.segments[0].t[0] : 0;
+  // While the info card is shown the camera leaves room for it; otherwise it uses the frame.
+  // A switch eases the camera between the two over 0.6 s rather than jumping.
+  let lean = S.info !== 'full' ? 1 : 0, leanTarget = lean;
+  // Without the card, the close centres the whole trip in the frame instead of
+  // parking it low for a card that is not there.
+  let w = Infinity, so = Infinity, e = -Infinity, n = -Infinity;
+  for (const seg of D.segments) for (const [x, y] of seg.c) { w = Math.min(w, x); e = Math.max(e, x); so = Math.min(so, y); n = Math.max(n, y); }
+  const centred = map.cameraForBounds([[w / 1e5, so / 1e5], [e / 1e5, n / 1e5]], { padding: { top: 120, bottom: 150, left: 24, right: 24 } });
 
   function frame(now) {
-    if (playing) { at += now - last; if (at > total() + 800) at = 0; }
+    const dt = Math.min(100, now - last);
+    if (playing) { at += dt; if (at > total() + 900) { at = 0; } }
     last = now;
     const t = Math.min(at, total());
-    const c = camAt(Math.min(t, D.durationMs));
-    // Closer: one level in while drawing, eased in and out over a second.
-    const inDraw = Math.min(1, Math.max(0, (t - draw[0]) / 1000), Math.max(0, (draw[1] - 600 - t) / 1000));
-    map.jumpTo({ center: [c.lon, c.lat], zoom: c.zoom - 1 + (near ? inDraw : 0) });
-
+    if (t < lastT) { flushedAt = -1; kmShown = 0; }
+    lastT = t;
+    const film = Math.min(t, D.durationMs);
     const finale = t >= D.finaleAt;
-    if (Math.abs(t - lastData) > 30 || t < lastData) {
-      lastData = t;
-      const strokes = strokesAt(Math.min(t, D.finaleAt));
-      map.getSource('lit').setData({ type: 'Feature', geometry: { type: 'MultiLineString', coordinates: strokes } });
-      const tail = strokes.length ? strokes[strokes.length - 1] : null;
-      map.getSource('pen').setData({ type: 'FeatureCollection', features: tail && !finale ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: tail[tail.length - 1] } }] : [] });
-      map.getSource('stamps').setData({ type: 'FeatureCollection', features: D.stamps.filter((s) => s.at <= t).map((s) => {
-        const u = Math.min(1, (t - s.at) / 700);
-        return { type: 'Feature', properties: { ring: 7 + 24 * u, ringOpacity: 1 - u }, geometry: { type: 'Point', coordinates: [s.lon / 1e5, s.lat / 1e5] } };
+    const ending = S.tier === 'free' && t > D.durationMs;
+
+    // Camera: the app's path; the lean and full paths mixed by `lean`.
+    lean += (leanTarget - lean) * clamp01(dt / 180);
+    const a = camAt(D.cameraPath, film), b = camAt(D.cameraPathLean, film);
+    const mix = (x, y) => x + (y - x) * lean;
+    const closer = S.near ? easeInOut(Math.min((t - drawStart) / 1200, (D.finaleAt - 700 - t) / 1200)) : 0;
+    let cam = { lon: mix(a.lon, b.lon), lat: mix(a.lat, b.lat), zoom: mix(a.zoom, b.zoom) - 1 + closer };
+    const settle = easeInOut((t - (D.finaleAt - 600)) / 1500) * lean;
+    if (settle > 0 && centred) {
+      cam = { lon: cam.lon + (centred.center.lng - cam.lon) * settle, lat: cam.lat + (centred.center.lat - cam.lat) * settle,
+              zoom: cam.zoom + (centred.zoom - cam.zoom) * settle };
+    }
+    map.jumpTo({ center: [cam.lon, cam.lat], zoom: cam.zoom });
+
+    // The line: flush finished road four times a second, draw the rest live.
+    const drawTo = Math.min(t, D.finaleAt);
+    const flushTo = Math.floor(drawTo / 250) * 250;
+    if (flushTo !== flushedAt) {
+      flushedAt = flushTo;
+      map.getSource('done').setData({ type: 'Feature', geometry: { type: 'MultiLineString', coordinates: strokes(-Infinity, flushTo) } });
+    }
+    const live = strokes(flushTo, drawTo);
+    map.getSource('live').setData({ type: 'Feature', geometry: { type: 'MultiLineString', coordinates: live } });
+    const allLive = live.length ? live : strokes(-Infinity, drawTo).slice(-1);
+    const tail = allLive.length ? allLive[allLive.length - 1] : null;
+    const penShown = tail && t > drawStart && !finale;
+    // The pen grows in as drawing starts and shrinks away as the camera pulls back.
+    const penScale = easeOut((t - drawStart) / 400) * (1 - easeOut((t - (D.finaleAt - 500)) / 500));
+    map.getSource('pen').setData(penShown
+      ? { type: 'Feature', properties: { r: 5.5 * penScale }, geometry: { type: 'Point', coordinates: tail[tail.length - 1] } }
+      : { type: 'FeatureCollection', features: [] });
+    const beat = (t % 1300) / 1300;
+    map.setPaintProperty('pen-halo', 'circle-radius', (9 + 13 * easeOut(beat)) * penScale);
+    map.setPaintProperty('pen-halo', 'circle-opacity', 0.28 * (1 - beat));
+
+    if (S.dots) {
+      map.getSource('stamps').setData({ type: 'FeatureCollection', features: D.stamps.filter((s) => s.at <= drawTo).map((s) => {
+        const u = (t - s.at) / 700;
+        // A small overshoot as each dot lands.
+        const pop = u < 1 ? 6 * (1 + 0.35 * Math.sin(Math.PI * clamp01(u))) * easeOut(u * 2.5) : 6;
+        return { type: 'Feature', properties: { r: pop, ring: 6 + 22 * easeOut(u), ringOpacity: 1 - clamp01(u) },
+                 geometry: { type: 'Point', coordinates: P([s.lon, s.lat]) } };
       }) });
     }
 
-    const earned = D.stamps.filter((s) => s.at <= t);
-    const latest = earned[earned.length - 1];
-    $('pill').style.opacity = latest && t - latest.at < 1400 && !finale ? 1 : 0;
-    if (latest) $('pillText').textContent = latest.name;
-    $('km').textContent = Math.round(kmAt(t));
-    $('st').textContent = earned.length;
-    $('counters').style.opacity = finale ? 0 : 1;
-    $('finale').style.opacity = finale ? 1 : 0;
-    $('heroKm').textContent = `${Math.round(kmAt(t))} km de estradas acesas`;
-    $('mark').className = `ov mark${free ? (finale ? ' end' : '') : ' small'}`;
-    $('mark').style.display = free && t > D.durationMs ? 'none' : 'flex';
-    $('progress').style.width = `${Math.min(100, (Math.min(t, D.finaleAt) / D.finaleAt) * 100)}%`;
-    const beat = (t % 1200) / 1200;
-    map.setPaintProperty('pen-halo', 'circle-radius', 10 + 12 * beat);
-    map.setPaintProperty('pen-halo', 'circle-opacity', 0.3 * (1 - beat));
-    const ending = free && t > D.durationMs;
-    $('endcard').style.display = ending ? 'flex' : 'none';
-    for (const q of ['.title', '.shade-top', '#finale']) document.querySelector(q).style.visibility = ending ? 'hidden' : 'visible';
+    // Numbers ease toward their value rather than ticking.
+    kmShown += (kmAt(drawTo) - kmShown) * clamp01(dt / 140);
+    const stampsNow = D.stamps.filter((s) => s.at <= drawTo).length;
+
+    // Title: rises in at the start; "Nenhuma" lets it go after a beat.
+    const titleIn = fadeIn(t, 150, 600);
+    const titleOut = S.info === 'none' ? 1 - fadeIn(t, TITLE_HOLD_MS, 500) : 1;
+    const titleOp = ending ? 0 : titleIn * titleOut;
+    $('title').style.opacity = titleOp;
+    $('title').style.transform = `translateY(${(1 - titleIn) * 10}px)`;
+    $('shade').style.opacity = titleOp;
+
+    // Discreet line under the date.
+    const lineOp = S.info === 'discreet' ? fadeIn(t, drawStart, 500) : 0;
+    $('line').style.opacity = lineOp;
+    $('line').style.display = S.info === 'discreet' ? 'block' : 'none';
+    $('line').textContent = finale
+      ? `${Math.round(D.collected * easeOut((t - D.finaleAt - 300) / COUNT_UP_MS))} de ${D.total} lugares · ${Math.round(kmShown)} km de estradas acesas`
+      : `${Math.round(kmShown)} km · ${stampsNow} carimbos`;
+
+    // Full: the card at the foot, out as the close begins.
+    const cardOp = S.info === 'full' ? fadeIn(t, drawStart - 200, 500) * (1 - fadeIn(t, D.finaleAt - 250, 350)) : 0;
+    $('card').style.opacity = cardOp;
+    $('card').style.transform = `translateY(${(1 - fadeIn(t, drawStart - 200, 500)) * 14}px)`;
+    $('km').textContent = Math.round(kmShown);
+    $('st').textContent = stampsNow;
+    $('progress').style.width = `${clamp01((drawTo - drawStart) / (D.finaleAt - drawStart)) * 100}%`;
+
+    // The close (full only): the card rises and the number counts up.
+    const heroIn = S.info === 'full' && !ending ? fadeIn(t, D.finaleAt + 150, 650) : 0;
+    $('finale').style.opacity = heroIn;
+    $('finale').style.transform = `translateY(${(1 - heroIn) * 22}px)`;
+    $('hero').textContent = Math.round(D.collected * easeOut((t - D.finaleAt - 300) / COUNT_UP_MS));
+    $('heroKm').textContent = `${Math.round(kmShown)} km de estradas acesas`;
+
+    // Stamp names, from the queue (not shown with "Nenhuma").
+    const pill = S.info === 'none' ? null : pills.find((p) => t >= p.start && t < p.end);
+    if (pill) {
+      const u = (t - pill.start) / PILL_MS;
+      const op = Math.min(easeOut(u / 0.2), 1 - easeOut((u - 0.8) / 0.2));
+      $('pill').style.opacity = op;
+      $('pill').style.transform = `translateX(${(1 - easeOut(u / 0.25)) * -14}px)`;
+      $('pillText').textContent = pill.name;
+      $('pillMore').textContent = pill.more ? `e mais ${pill.more}` : '';
+      $('pill').style.top = S.info === 'discreet' ? '104px' : '92px';
+    } else {
+      $('pill').style.opacity = 0;
+    }
+
+    // Watermark, and the free version's closing card.
+    const wm = $('wm');
+    wm.className = `ov wm ${S.tier}`;
+    wm.style.opacity = ending ? 0 : '';
+    const endIn = ending ? fadeIn(t, D.durationMs, 450) : 0;
+    $('endcard').style.opacity = endIn;
+    $('endcard').style.transform = `scale(${0.96 + 0.04 * endIn})`;
 
     $('scrub').value = Math.round((t / total()) * 1000);
     $('clock').textContent = `${(t / 1000).toFixed(1)} s`;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  const params = new URLSearchParams(location.search);
-  const toggle = (on, off) => { $(on).classList.add('on'); $(off).classList.remove('on'); };
-  $('play').onclick = (e) => { playing = !playing; e.target.textContent = playing ? 'Pausa' : 'Tocar'; };
+
+  // ---- controls ----
+  const sync = () => {
+    for (const b of document.querySelectorAll('[data-info]')) b.classList.toggle('on', b.dataset.info === S.info);
+    for (const b of document.querySelectorAll('[data-tier]')) b.classList.toggle('on', b.dataset.tier === S.tier);
+    $('dots').classList.toggle('on', S.dots);
+    $('near').classList.toggle('on', S.near);
+    $('palette').classList.toggle('on', S.natural);
+    for (const id of ['stamp-ring', 'stamp-dot']) map.setLayoutProperty(id, 'visibility', S.dots ? 'visible' : 'none');
+    leanTarget = S.info === 'full' ? 0 : 1;
+  };
+  for (const b of document.querySelectorAll('[data-info]')) b.onclick = () => { S.info = b.dataset.info; sync(); };
+  for (const b of document.querySelectorAll('[data-tier]')) b.onclick = () => { S.tier = b.dataset.tier; sync(); };
+  $('dots').onclick = () => { S.dots = !S.dots; sync(); };
+  $('near').onclick = () => { S.near = !S.near; sync(); };
+  $('palette').onclick = () => { S.natural = !S.natural; setPalette(map, S.natural ? NATURAL : window.august); sync(); };
+  $('play').onclick = (e) => { playing = !playing; last = performance.now(); e.target.textContent = playing ? 'Pausa' : 'Tocar'; };
   $('restart').onclick = () => { at = 0; };
   $('scrub').oninput = () => { at = ($('scrub').value / 1000) * total(); };
-  $('free').onclick = () => { free = true; toggle('free', 'paid'); };
-  $('paid').onclick = () => { free = false; toggle('paid', 'free'); };
-  $('near').onclick = () => { near = !near; $('near').classList.toggle('on', near); };
-  let dots = false;
-  const showDots = () => {
-    for (const id of ['stamp-ring', 'stamp-dot']) map.setLayoutProperty(id, 'visibility', dots ? 'visible' : 'none');
-    $('dots').classList.toggle('on', dots);
-  };
-  $('dots').onclick = () => { dots = !dots; showDots(); };
-  if (params.has('dots')) dots = true;
-  showDots();
-  let natural = true;
-  $('palette').onclick = () => { natural = !natural; $('palette').classList.toggle('on', natural); setPalette(map, natural ? NATURAL : window.august); };
-  if (params.has('near')) { near = true; $('near').classList.add('on'); }
-  if (params.has('august')) { natural = false; $('palette').classList.remove('on'); setPalette(map, window.august); }
-  if (params.has('t')) { at = Number(params.get('t')); playing = false; }
+  if (!S.natural) setPalette(map, window.august);
+  sync();
+  lean = leanTarget;
+  if (!playing) $('play').textContent = 'Tocar';
 }
 start();
 </script>

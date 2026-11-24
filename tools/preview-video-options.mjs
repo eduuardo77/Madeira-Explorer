@@ -181,12 +181,15 @@ for (let e = 0; e < graph.edgeCount; e += 1) {
 // The app's own camera path (what `playCameraPath` plays on the phone), for a
 // 360 x 640 dp frame with the title above and the counters below. Google zoom.
 const path60 = cameraPath(film, { width: 360, height: 640, padding: { top: 100, bottom: 230, left: 20, right: 20 } });
-const cameraPathData = path60
-  .filter((_, i) => i % 2 === 0)
-  .map((p) => [Math.round(p.atMs), q(p.camera.coordinates.longitude), q(p.camera.coordinates.latitude), Math.round(p.camera.zoom * 1000) / 1000]);
+const toData = (points) =>
+  points.map((p) => [Math.round(p.atMs), q(p.camera.coordinates.longitude), q(p.camera.coordinates.latitude), Math.round(p.camera.zoom * 1000) / 1000]);
+const cameraPathData = toData(path60);
+// The same camera with the foot of the frame free, for the video without the info card.
+const cameraPathLean = toData(cameraPath(film, { width: 360, height: 640, padding: { top: 100, bottom: 130, left: 20, right: 20 } }));
 
 const data = {
   cameraPath: cameraPathData,
+  cameraPathLean,
   durationMs: film.durationMs,
   draw: film.scenes.find((s) => s.kind === 'draw'),
   finaleAt: film.scenes.find((s) => s.kind === 'finale').startMs,
@@ -210,7 +213,7 @@ const html = readFileSync(path.join(root, 'tools/lib/video-options-page.html'), 
 );
 mkdirSync(path.join(root, 'tools/out'), { recursive: true });
 // The natural map version (B on the project's own MapLibre map), lighter: no island geometry.
-const natural = { ...data, outlines: undefined, roadLines: undefined, camera: undefined };
+const natural = { ...data, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
 writeFileSync(
   path.join(root, 'tools/out/video-natural.html'),
   readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))

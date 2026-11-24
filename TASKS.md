@@ -501,6 +501,19 @@ permission, L3 privacy contact.
       frosted card like the trip viewer's, with the film's progress; the line thinner as the camera
       pulls back; a pulsing pen; the real app icon in the marks; the end card over a veiled map;
       Roboto, the phone's own face.
+      **Round three (the lead: smoother, a real watermark, less info, "can't we use Google Maps?"):**
+      Google stays out of the exported video (its `snapshot()` rule); the natural palette now follows
+      the app's Google map (its pale cyan sea, near-white land). The badge is a watermark: icon and
+      name, no box, see-through, in the sea under the island (free) or a corner (paid). *Informação:*
+      **Discreta** by default (one line under the date, the map gets the frame), *Completa* (the
+      card), *Nenhuma* (the title leaves at 2.2 s). Without the card the camera uses the frame and
+      the close centres the trip. Timing: the title rises in, the pen grows and shrinks away, stamp
+      names queue at 1.1 s each ("e mais 2" when several land together), numbers ease rather than
+      tick, the total counts up at the close, the end card fades and settles. The drawn road is
+      split into a part flushed four times a second and a live tail, so a frame re-tiles only a
+      short line: under 6.2 ms of work per frame on the PC (552 frames rendered). Not watched
+      playing (the pane was hidden), and an exported video is rendered frame by frame, so on the
+      phone only the time to make it varies, not its smoothness.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

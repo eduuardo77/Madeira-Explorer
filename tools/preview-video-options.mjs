@@ -213,7 +213,22 @@ const html = readFileSync(path.join(root, 'tools/lib/video-options-page.html'), 
 );
 mkdirSync(path.join(root, 'tools/out'), { recursive: true });
 // The natural map version (B on the project's own MapLibre map), lighter: no island geometry.
-const natural = { ...data, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
+// The watermark's glyph: the main island's silhouette, every municipality filled
+// the same colour so the borders vanish, in a 100-wide box. From content (D-017).
+const islandGlyph = (() => {
+  const pts = outlines.flat();
+  const xs = pts.map(([x]) => x * Math.cos((32.75 * Math.PI) / 180));
+  const ys = pts.map(([, y]) => -y);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const k = 100 / (x1 - x0);
+  const d = outlines
+    .filter((ring) => ring.length > 40)
+    .map((ring) => 'M' + ring.filter((_, i) => i % 3 === 0)
+      .map(([x, y]) => `${((x * Math.cos((32.75 * Math.PI) / 180) - x0) * k).toFixed(1)},${((-y - y0) * k).toFixed(1)}`).join('L') + 'Z')
+    .join('');
+  return { d, height: Math.round((y1 - y0) * k * 10) / 10 };
+})();
+const natural = { ...data, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
 writeFileSync(
   path.join(root, 'tools/out/video-natural.html'),
   readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))

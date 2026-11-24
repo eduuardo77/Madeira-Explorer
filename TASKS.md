@@ -514,6 +514,10 @@ permission, L3 privacy contact.
       short line: under 6.2 ms of work per frame on the PC (552 frames rendered). Not watched
       playing (the pane was hidden), and an exported video is rendered frame by frame, so on the
       phone only the time to make it varies, not its smoothness.
+      **Watermark redone the same day (the lead: "looks a bit unprofessional"):** no app icon, no
+      colour. A white signature: the main island's silhouette (built from `content/regions.json`),
+      a hairline, BRUMA in spaced capitals, a soft dark halo so it holds on pale land as well as
+      sea. Free: centred near the foot; paid: small, bottom right.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

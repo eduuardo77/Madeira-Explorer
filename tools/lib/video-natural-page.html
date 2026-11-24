@@ -47,6 +47,9 @@
   .progress { margin-top: 10px; height: 3px; border-radius: 2px; background: #ECE8DF; overflow: hidden; }
   .progress i { display: block; height: 100%; width: 0; background: #B33A0A; border-radius: 2px; }
 
+  .daychip { right: 16px; top: 22px; text-align: right; opacity: 0; font-variant-numeric: tabular-nums; }
+  .daychip b { display: block; font-size: 15px; font-weight: 700; color: #14202B; }
+  .daychip span { display: block; font-size: 12px; font-weight: 500; color: #4A5560; }
   .pill { left: 20px; top: 98px; background: rgba(255,255,255,.96); border-radius: 999px; padding: 5px 13px 5px 6px; font-weight: 600; font-size: 13px;
           box-shadow: 0 2px 10px rgba(0,0,0,.14); display: flex; gap: 8px; align-items: center; white-space: nowrap; opacity: 0; }
   .pill i { width: 20px; height: 20px; border-radius: 50%; background: #B33A0A; display: inline-grid; place-items: center; color: #fff;
@@ -96,6 +99,8 @@
   <span class="group"><button data-info="full">Completa</button><button data-info="discreet" class="on">Discreta</button><button data-info="none">Nenhuma</button></span>
   <label>Versão</label>
   <span class="group"><button data-tier="free" class="on">Grátis</button><button data-tier="paid">Pago</button></span>
+  <label>Ritmo</label>
+  <span class="group"><button data-pace="new" class="on">Novo, por dia</button><button data-pace="old">Atual</button></span>
   <button id="dots">Pontos dos carimbos</button>
   <button id="near">Câmara mais perto</button>
   <button id="palette" class="on">Cores naturais</button>
@@ -105,6 +110,7 @@
     <div id="map"></div>
     <div class="ov shade-top" id="shade"></div>
     <div class="ov title" id="title"><b>Madeira</b><span id="dates"></span><em id="line"></em></div>
+    <div class="ov daychip" id="daychip"><b id="dayNo"></b><span id="dayDate"></span></div>
     <div class="ov pill" id="pill"><i>&#x2713;</i><span id="pillText"></span><small id="pillMore"></small></div>
     <div class="ov card" id="card">
       <div class="counters">
@@ -121,6 +127,7 @@
   <div class="side">
     <p><b>Informação.</b> <i>Discreta</i> (a escolha por omissão): uma linha pequena debaixo da data, e o mapa fica com o ecrã todo. <i>Completa</i>: o cartão com os números em baixo. <i>Nenhuma</i>: só o mapa; o título sai ao fim de dois segundos.</p>
     <p><b>Marca de água.</b> Uma assinatura a branco: a silhueta da ilha, um traço fino e BRUMA. Sem caixa e sem cores. Grátis: ao centro, em baixo. Pago: pequena, no canto.</p>
+    <p><b>Ritmo novo, por dia</b> (para comparar com <i>Atual</i>): a caneta só passa por estrada nova, nunca volta a desenhar o caminho de casa; cada dia com estrada nova tem a sua parte dos mesmos 14 segundos, mais para os dias grandes, e dentro do dia uma velocidade só; a câmara enquadra o dia; em cima à direita, o dia e a data; a ponta é um cometa em vez de um ponto.</p>
     <p><b>Os tempos.</b> O título entra; a linha desenha-se com a câmara da app; cada carimbo diz o nome durante um segundo, e os que chegam juntos dizem "e mais 2"; no fim a câmara recua, o número sobe até ao total e o cartão sobe; na versão grátis, o cartão da Bruma.</p>
     <p><b>Mapa do Google?</b> Não num vídeo que sai do telemóvel: a documentação do Google proíbe usar imagens do mapa fora da app. As cores aqui imitam o que vês na app.</p>
   </div>
@@ -158,8 +165,9 @@ function camAt(path, at) {
   const u = b[0] === a[0] ? 0 : clamp01((at - a[0]) / (b[0] - a[0]));
   return { lon: (a[1] + (b[1] - a[1]) * u) / 1e5, lat: (a[2] + (b[2] - a[2]) * u) / 1e5, zoom: a[3] + (b[3] - a[3]) * u };
 }
+let SEG = D.segments, KM = D.kmSteps, STAMPS = D.stamps;
 function kmAt(at) {
-  const s = D.kmSteps;
+  const s = KM;
   let lo = 0, hi = s.length - 1, best = 0;
   while (lo <= hi) { const mid = (lo + hi) >> 1; if (s[mid][0] <= at) { best = s[mid][1]; lo = mid + 1; } else hi = mid - 1; }
   return best;
@@ -168,7 +176,7 @@ const P = (c) => [c[0] / 1e5, c[1] / 1e5];
 /** Strokes drawn between `from` (exclusive of finished ones before it) and `to`. */
 function strokes(from, to) {
   const out = [];
-  for (const seg of D.segments) {
+  for (const seg of SEG) {
     const end = seg.t[seg.t.length - 1];
     if (seg.t[0] > to || end <= from) continue;
     const pts = [];
@@ -184,10 +192,10 @@ function strokes(from, to) {
 }
 
 // ---- stamp names, queued so each is read: one at a time, at least PILL_MS each ----
-const pills = (() => {
+const makePills = () => {
   const out = [];
   let i = 0;
-  const stamps = [...D.stamps].sort((a, b) => a.at - b.at);
+  const stamps = [...STAMPS].sort((a, b) => a.at - b.at);
   while (i < stamps.length) {
     const start = Math.max(stamps[i].at, out.length ? out[out.length - 1].end : 0);
     let j = i + 1;
@@ -197,7 +205,8 @@ const pills = (() => {
     i = j;
   }
   return out;
-})();
+};
+let pills = makePills();
 
 const fmtDay = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long' });
 const fmtYear = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -262,6 +271,16 @@ async function start() {
     'circle-stroke-width': 2.5, 'circle-stroke-opacity': ['get', 'ringOpacity'] } }, below);
   map.addLayer({ id: 'stamp-dot', type: 'circle', source: 'stamps', paint: {
     'circle-radius': ['get', 'r'], 'circle-color': '#F2B820', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 } }, below);
+  // The comet (new pacing): a short glowing tail fading backwards, and a soft head.
+  map.addSource('tail', { type: 'geojson', data: empty, lineMetrics: true });
+  map.addLayer({ id: 'tail-glow', type: 'line', source: 'tail', layout: lineLayout, paint: {
+    'line-width': 11, 'line-blur': 5, 'line-opacity': ['get', 'o'],
+    'line-gradient': ['interpolate', ['linear'], ['line-progress'], 0, 'rgba(255,140,80,0)', 1, 'rgba(255,140,80,0.85)'] } }, below);
+  map.addLayer({ id: 'head-glow', type: 'circle', source: 'pen', paint: {
+    'circle-radius': 12, 'circle-color': '#FF9A5C', 'circle-opacity': ['*', 0.55, ['get', 'o']], 'circle-blur': 0.9 } }, below);
+  map.addLayer({ id: 'head-core', type: 'circle', source: 'pen', paint: {
+    'circle-radius': ['*', 3.6, ['get', 'k']], 'circle-color': '#FFFFFF', 'circle-opacity': ['get', 'o'],
+    'circle-stroke-color': '#FF7A3D', 'circle-stroke-width': 1.5, 'circle-stroke-opacity': ['get', 'o'] } }, below);
   map.addLayer({ id: 'pen-halo', type: 'circle', source: 'pen', paint: { 'circle-radius': 14, 'circle-color': '#B33A0A', 'circle-opacity': 0.2, 'circle-blur': 0.5 } }, below);
   map.addLayer({ id: 'pen', type: 'circle', source: 'pen', paint: {
     'circle-radius': ['get', 'r'], 'circle-color': '#B33A0A', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 } }, below);
@@ -273,7 +292,7 @@ async function start() {
 function run(map) {
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const S = { info: params.get('info') ?? 'discreet', tier: params.get('tier') ?? 'free', dots: params.has('dots'),
+  const S = { info: params.get('info') ?? 'discreet', tier: params.get('tier') ?? 'free', pace: params.get('pace') ?? 'new', dots: params.has('dots'),
               near: params.has('near'), natural: !params.has('august') };
   let playing = !params.has('t'), at = Number(params.get('t') ?? 0), last = performance.now();
   let flushedAt = -1, kmShown = 0, lastT = -1;
@@ -286,6 +305,38 @@ function run(map) {
   // parking it low for a card that is not there.
   let w = Infinity, so = Infinity, e = -Infinity, n = -Infinity;
   for (const seg of D.segments) for (const [x, y] of seg.c) { w = Math.min(w, x); e = Math.max(e, x); so = Math.min(so, y); n = Math.max(n, y); }
+  // New pacing: the camera frames each day's new road, easing from one day to the next.
+  const dayCams = {};
+  const fitDays = (bottom) => {
+    const whole = map.cameraForBounds([[w / 1e5, so / 1e5], [e / 1e5, n / 1e5]], { padding: { top: 120, bottom, left: 24, right: 24 } });
+    return { whole, days: D.paced.days.map((d) => {
+      const c = map.cameraForBounds([[d.bounds[0] / 1e5, d.bounds[1] / 1e5], [d.bounds[2] / 1e5, d.bounds[3] / 1e5]],
+        { padding: { top: 140, bottom: bottom + 20, left: 40, right: 40 } });
+      return { lon: c.center.lng, lat: c.center.lat, zoom: Math.max(whole.zoom, Math.min(10.6, c.zoom)) };
+    }) };
+  };
+  dayCams.full = fitDays(230); dayCams.lean = fitDays(130);
+  const dayCamAt = (set, t) => {
+    const ds = D.paced.days, cams = set.days;
+    const whole = { lon: set.whole.center.lng, lat: set.whole.center.lat, zoom: set.whole.zoom };
+    let i = -1;
+    for (let k = 0; k < ds.length; k += 1) if (ds[k].start <= t) i = k;
+    if (i < 0) return whole;
+    const from = i === 0 ? whole : cams[i - 1], to = cams[i];
+    const u = easeInOut((t - ds[i].start) / Math.min(900, Math.max(300, (ds[i].end - ds[i].start) * 0.7)));
+    // Zoom eases in log space already (zoom is a log scale); centre straight.
+    return { lon: from.lon + (to.lon - from.lon) * u, lat: from.lat + (to.lat - from.lat) * u, zoom: from.zoom + (to.zoom - from.zoom) * u };
+  };
+  // Where each stroke begins far from where the last one ended, the head fades in.
+  let lastDrawn = null;
+  const jumpIn = D.paced.strokes.map((st) => {
+    if (st.quiet) return false;
+    const prev = lastDrawn; lastDrawn = st;
+    if (prev === null) return true;
+    const a = prev.c[prev.c.length - 1], b = st.c[0];
+    // Only a long move fades: a short one reads as the pen moving on, a fade there would shimmer.
+    return Math.hypot((a[0] - b[0]) * 0.84, a[1] - b[1]) * 1.11 > 1500; // 1e-5 degrees to metres
+  });
   const centred = map.cameraForBounds([[w / 1e5, so / 1e5], [e / 1e5, n / 1e5]], { padding: { top: 120, bottom: 150, left: 24, right: 24 } });
 
   function frame(now) {
@@ -301,9 +352,12 @@ function run(map) {
 
     // Camera: the app's path; the lean and full paths mixed by `lean`.
     lean += (leanTarget - lean) * clamp01(dt / 180);
-    const a = camAt(D.cameraPath, film), b = camAt(D.cameraPathLean, film);
+    const paced = S.pace === 'new';
+    const a = paced ? dayCamAt(dayCams.full, film) : camAt(D.cameraPath, film);
+    const b = paced ? dayCamAt(dayCams.lean, film) : camAt(D.cameraPathLean, film);
+    if (paced) { a.zoom += 1; b.zoom += 1; } // the app's path is in Google zoom; these are MapLibre's
     const mix = (x, y) => x + (y - x) * lean;
-    const closer = S.near ? easeInOut(Math.min((t - drawStart) / 1200, (D.finaleAt - 700 - t) / 1200)) : 0;
+    const closer = S.near && !paced ? easeInOut(Math.min((t - drawStart) / 1200, (D.finaleAt - 700 - t) / 1200)) : 0;
     let cam = { lon: mix(a.lon, b.lon), lat: mix(a.lat, b.lat), zoom: mix(a.zoom, b.zoom) - 1 + closer };
     const settle = easeInOut((t - (D.finaleAt - 600)) / 1500) * lean;
     if (settle > 0 && centred) {
@@ -326,15 +380,43 @@ function run(map) {
     const penShown = tail && t > drawStart && !finale;
     // The pen grows in as drawing starts and shrinks away as the camera pulls back.
     const penScale = easeOut((t - drawStart) / 400) * (1 - easeOut((t - (D.finaleAt - 500)) / 500));
+    let headO = penScale;
+    if (paced && penShown) {
+      // Fade the head in where the pen starts somewhere new, rather than leaping.
+      let k = -1;
+      for (let i = 0; i < SEG.length; i += 1) if (!SEG[i].quiet && SEG[i].t[0] <= drawTo) k = i;
+      if (k >= 0 && jumpIn[k]) headO *= easeOut((drawTo - SEG[k].t[0]) / 160);
+      // The head sits on this stroke, at `drawTo`, never on a day's quiet remainder.
+      const hs = SEG[k];
+      let hp = P(hs.c[hs.c.length - 1]);
+      for (let i = 1; i < hs.t.length; i += 1) if (hs.t[i] >= drawTo) {
+        const u = (drawTo - hs.t[i - 1]) / Math.max(1, hs.t[i] - hs.t[i - 1]);
+        hp = [(hs.c[i - 1][0] + (hs.c[i][0] - hs.c[i - 1][0]) * u) / 1e5, (hs.c[i - 1][1] + (hs.c[i][1] - hs.c[i - 1][1]) * u) / 1e5];
+        break;
+      }
+      tail[tail.length - 1] = hp;
+      // The tail: the last 300 ms of this stroke.
+      const seg = SEG[k];
+      const pts = [];
+      for (let i = 0; i < seg.c.length; i += 1) if (seg.t[i] >= drawTo - 300 && seg.t[i] <= drawTo) pts.push(P(seg.c[i]));
+      pts.push(tail[tail.length - 1]);
+      map.getSource('tail').setData(pts.length >= 2
+        ? { type: 'Feature', properties: { o: headO }, geometry: { type: 'LineString', coordinates: pts } }
+        : { type: 'FeatureCollection', features: [] });
+    } else {
+      map.getSource('tail').setData({ type: 'FeatureCollection', features: [] });
+    }
     map.getSource('pen').setData(penShown
-      ? { type: 'Feature', properties: { r: 5.5 * penScale }, geometry: { type: 'Point', coordinates: tail[tail.length - 1] } }
+      ? { type: 'Feature', properties: { r: 5.5 * penScale, o: headO, k: 0.6 + 0.4 * penScale }, geometry: { type: 'Point', coordinates: tail[tail.length - 1] } }
       : { type: 'FeatureCollection', features: [] });
+    for (const id of ['pen', 'pen-halo']) map.setLayoutProperty(id, 'visibility', paced ? 'none' : 'visible');
+    for (const id of ['head-glow', 'head-core', 'tail-glow']) map.setLayoutProperty(id, 'visibility', paced ? 'visible' : 'none');
     const beat = (t % 1300) / 1300;
     map.setPaintProperty('pen-halo', 'circle-radius', (9 + 13 * easeOut(beat)) * penScale);
     map.setPaintProperty('pen-halo', 'circle-opacity', 0.28 * (1 - beat));
 
     if (S.dots) {
-      map.getSource('stamps').setData({ type: 'FeatureCollection', features: D.stamps.filter((s) => s.at <= drawTo).map((s) => {
+      map.getSource('stamps').setData({ type: 'FeatureCollection', features: STAMPS.filter((s) => s.at <= drawTo).map((s) => {
         const u = (t - s.at) / 700;
         // A small overshoot as each dot lands.
         const pop = u < 1 ? 6 * (1 + 0.35 * Math.sin(Math.PI * clamp01(u))) * easeOut(u * 2.5) : 6;
@@ -345,7 +427,7 @@ function run(map) {
 
     // Numbers ease toward their value rather than ticking.
     kmShown += (kmAt(drawTo) - kmShown) * clamp01(dt / 140);
-    const stampsNow = D.stamps.filter((s) => s.at <= drawTo).length;
+    const stampsNow = STAMPS.filter((s) => s.at <= drawTo).length;
 
     // Title: rises in at the start; "Nenhuma" lets it go after a beat.
     const titleIn = fadeIn(t, 150, 600);
@@ -354,6 +436,15 @@ function run(map) {
     $('title').style.opacity = titleOp;
     $('title').style.transform = `translateY(${(1 - titleIn) * 10}px)`;
     $('shade').style.opacity = titleOp;
+
+    // The day and its date, while drawing (new pacing).
+    const day = paced ? [...D.paced.days].reverse().find((d) => d.start <= drawTo) : null;
+    const chipOp = paced && day && S.info !== 'none' ? fadeIn(t, drawStart, 400) * (1 - fadeIn(t, D.finaleAt - 200, 300)) : 0;
+    $('daychip').style.opacity = chipOp;
+    if (day) {
+      $('dayNo').textContent = `Dia ${day.dayNo} de ${D.paced.tripDays}`;
+      $('dayDate').textContent = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(day.date);
+    }
 
     // Discreet line under the date.
     const lineOp = S.info === 'discreet' ? fadeIn(t, drawStart, 500) : 0;
@@ -410,6 +501,7 @@ function run(map) {
   const sync = () => {
     for (const b of document.querySelectorAll('[data-info]')) b.classList.toggle('on', b.dataset.info === S.info);
     for (const b of document.querySelectorAll('[data-tier]')) b.classList.toggle('on', b.dataset.tier === S.tier);
+    for (const b of document.querySelectorAll('[data-pace]')) b.classList.toggle('on', b.dataset.pace === S.pace);
     $('dots').classList.toggle('on', S.dots);
     $('near').classList.toggle('on', S.near);
     $('palette').classList.toggle('on', S.natural);
@@ -418,6 +510,15 @@ function run(map) {
   };
   for (const b of document.querySelectorAll('[data-info]')) b.onclick = () => { S.info = b.dataset.info; sync(); };
   for (const b of document.querySelectorAll('[data-tier]')) b.onclick = () => { S.tier = b.dataset.tier; sync(); };
+  const usePace = () => {
+    const paced = S.pace === 'new';
+    SEG = paced ? D.paced.strokes : D.segments;
+    KM = paced ? D.paced.kmSteps : D.kmSteps;
+    STAMPS = paced ? D.paced.stamps : D.stamps;
+    pills = makePills();
+    flushedAt = -1; kmShown = 0;
+  };
+  for (const b of document.querySelectorAll('[data-pace]')) b.onclick = () => { S.pace = b.dataset.pace; usePace(); sync(); };
   $('dots').onclick = () => { S.dots = !S.dots; sync(); };
   $('near').onclick = () => { S.near = !S.near; sync(); };
   $('palette').onclick = () => { S.natural = !S.natural; setPalette(map, S.natural ? NATURAL : window.august); sync(); };
@@ -425,6 +526,7 @@ function run(map) {
   $('restart').onclick = () => { at = 0; };
   $('scrub').oninput = () => { at = ($('scrub').value / 1000) * total(); };
   if (!S.natural) setPalette(map, window.august);
+  usePace();
   sync();
   lean = leanTarget;
   if (!playing) $('play').textContent = 'Tocar';

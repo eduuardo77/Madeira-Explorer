@@ -228,7 +228,161 @@ const islandGlyph = (() => {
     .join('');
   return { d, height: Math.round((y1 - y0) * k * 10) / 10 };
 })();
-const natural = { ...data, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
+// --- A second pacing, to compare (the lead, 24 Nov: "try the 3 combined") ----
+//
+// 1. Road already drawn is not drawn again: the pen goes only over new road.
+// 2. Paced by day: each day with new road gets a share of the same drawing time,
+//    by the square root of its new kilometres (busy days longer, quiet days
+//    still readable), at least MIN_DAY_MS; inside a day, one steady speed.
+// 3. The head is a comet, drawn by the page.
+// Same masked roads, same drawing time and finale as the app's film.
+const MIN_DAY_MS = 350;
+const BRIDGE_REPEAT_M = 500;
+const draw0 = film.scenes.find((s) => s.kind === 'draw');
+const DRAW_FROM = draw0.startMs;
+const DRAW_MS = film.scenes.find((s) => s.kind === 'finale').startMs - DRAW_FROM;
+const dayOf = (ts) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Atlantic/Madeira' }).format(ts);
+const runs = [...roads].sort((a, b) => a.fixes[0].ts - b.fixes[0].ts);
+const drawnCells = new Map(); // cell -> metres along the whole pen when first drawn
+let penAlong = 0;
+const pieces = []; // { day, ts0, pts: [[lon, lat, ts]], m }
+const allByDay = new Map(); // every road of a day, animated or not, so the day ends complete
+for (const run of runs) {
+  let cur = null;
+  let whole = null;
+  let held = [], heldM = 0;
+  for (let i = 1; i < run.fixes.length; i += 1) {
+    const a = run.fixes[i - 1], b = run.fixes[i];
+    const d = dayOf(a.ts);
+    if (whole === null || whole.day !== d) {
+      whole = { day: d, c: [[q(a.lon), q(a.lat)]] };
+      if (!allByDay.has(d)) allByDay.set(d, []);
+      allByDay.get(d).push(whole);
+    }
+    whole.c.push([q(b.lon), q(b.lat)]);
+    const m = distanceM(a, b);
+    // Sample the step against a 40 m grid, as penPath does: new if any of it is new.
+    const n = Math.max(1, Math.ceil(m / 20));
+    let fresh = false;
+    const cells = [];
+    // A cell counts as drawn when it or a neighbour is: two passes of one road,
+    // simplified differently, wander a cell apart on bends.
+    const near = (lat, lon) => {
+      const i = Math.round(lat / 0.00036), j = Math.round(lon / 0.00043);
+      // Drawn by the pen at least 300 m ago (REPEAT_AFTER_M), so a road never repeats itself.
+      for (let di = -1; di <= 1; di += 1) for (let dj = -1; dj <= 1; dj += 1) {
+        const at = drawnCells.get(`${i + di},${j + dj}`);
+        if (at !== undefined && at < penAlong - 300) return true;
+      }
+      return false;
+    };
+    let newCells = 0;
+    for (let k = 0; k <= n; k += 1) {
+      const lat = a.lat + ((b.lat - a.lat) * k) / n, lon = a.lon + ((b.lon - a.lon) * k) / n;
+      cells.push(cellOf(lat, lon));
+      if (!near(lat, lon)) newCells += 1;
+    }
+    fresh = newCells * 2 > n + 1;
+    penAlong += m;
+    for (const c of cells) if (!drawnCells.has(c)) drawnCells.set(c, penAlong);
+    // A short stretch of known road between two new pieces is run through rather
+    // than hopped over (BRIDGE_REPEAT_M): fewer jumps of the head, little time spent.
+    if (fresh) {
+      if (cur !== null && held.length && heldM <= BRIDGE_REPEAT_M && dayOf(a.ts) === cur.day) {
+        for (const h of held) cur.pts.push(h);
+        cur.m += heldM;
+      } else if (cur === null || held.length) {
+        cur = { day: dayOf(a.ts), pts: [[a.lon, a.lat, a.ts]], m: 0 };
+        pieces.push(cur);
+      }
+      held = []; heldM = 0;
+      cur.pts.push([b.lon, b.lat, b.ts]);
+      cur.m += m;
+    } else if (cur !== null) {
+      held.push([b.lon, b.lat, b.ts]);
+      heldM += m;
+      if (heldM > BRIDGE_REPEAT_M) { cur = null; held = []; heldM = 0; }
+    }
+  }
+}
+// New road shorter than this is a sliver beside a road already drawn, not a road:
+// drawing it would only send the head hopping.
+const MIN_PIECE_M = 250;
+const kept = pieces.filter((p) => p.m >= MIN_PIECE_M);
+console.log(`new road: ${pieces.length} pieces, ${kept.length} of at least ${MIN_PIECE_M} m (${(kept.reduce((s, p) => s + p.m, 0) / 1000).toFixed(0)} of ${(pieces.reduce((s, p) => s + p.m, 0) / 1000).toFixed(0)} km)`);
+pieces.length = 0;
+pieces.push(...kept);
+const dayKeys = [...new Set(pieces.map((p) => p.day))];
+const tripDay0 = new Date(`${dayOf(trip.started_ts)}T00:00:00Z`).getTime();
+const days = dayKeys.map((key) => {
+  const ps = pieces.filter((p) => p.day === key);
+  const km = ps.reduce((sum, p) => sum + p.m, 0) / 1000;
+  const lons = ps.flatMap((p) => p.pts.map((x) => x[0])), lats = ps.flatMap((p) => p.pts.map((x) => x[1]));
+  return { key, km, ps, bounds: [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)],
+           dayNo: Math.round((new Date(`${key}T00:00:00Z`).getTime() - tripDay0) / 86400000) + 1 };
+});
+const weights = days.map((d) => Math.sqrt(d.km));
+const sumW = weights.reduce((a, b) => a + b, 0);
+let ms = days.map((d, i) => Math.max(MIN_DAY_MS, (DRAW_MS * weights[i]) / sumW));
+const scale = DRAW_MS / ms.reduce((a, b) => a + b, 0);
+ms = ms.map((x) => x * scale);
+let clock = DRAW_FROM;
+const v2Strokes = [];
+const v2Days = [];
+const v2Km = [];
+let litSoFar = 0;
+const freshPoints = []; // [ts, filmMs], for placing stamps
+days.forEach((d, i) => {
+  const start = clock, total = d.km * 1000;
+  let along = 0;
+  for (const p of d.ps) {
+    const c = [], tt = [];
+    p.pts.forEach((pt, k) => {
+      if (k > 0) along += distanceM({ lat: p.pts[k - 1][1], lon: p.pts[k - 1][0] }, { lat: pt[1], lon: pt[0] });
+      const at = start + (total > 0 ? (along / total) * ms[i] : 0);
+      c.push([q(pt[0]), q(pt[1])]);
+      tt.push(Math.round(at));
+      freshPoints.push([pt[2], at]);
+      if (k > 0) v2Km.push([Math.round(at), Math.round((litSoFar + along) / 100) / 10]);
+    });
+    v2Strokes.push({ c, t: tt });
+  }
+  litSoFar += total;
+  clock += ms[i];
+  // The rest of the day (slivers too short to animate, roads beside roads already
+  // drawn) appears as the day closes, so the finished map is the whole trip.
+  for (const w of allByDay.get(d.key) ?? []) {
+    if (w.c.length >= 2) v2Strokes.push({ c: w.c, t: w.c.map(() => Math.round(clock - 1)), quiet: 1 });
+  }
+  v2Days.push({ start: Math.round(start), end: Math.round(clock), dayNo: d.dayNo, date: new Date(`${d.key}T12:00:00Z`).getTime(),
+                km: Math.round(d.km * 10) / 10, bounds: d.bounds.map(q) });
+});
+// Days with no new road worth animating still add their slivers, as the day before closes.
+for (const [key, ws] of allByDay) {
+  if (dayKeys.includes(key)) continue;
+  const before = v2Days.filter((d) => new Date(d.date).toISOString().slice(0, 10) < key).pop();
+  const at = before ? before.end - 1 : DRAW_FROM;
+  for (const w of ws) if (w.c.length >= 2) v2Strokes.push({ c: w.c, t: w.c.map(() => Math.round(at)), quiet: 1 });
+}
+freshPoints.sort((a, b) => a[0] - b[0]);
+const filmTimeOf = (ts) => {
+  let lo = 0, hi = freshPoints.length - 1, best = DRAW_FROM;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (freshPoints[mid][0] <= ts) { best = freshPoints[mid][1]; lo = mid + 1; } else hi = mid - 1; }
+  return Math.round(best);
+};
+const v2Stamps = awards
+  .filter((a) => places.has(a.place_id))
+  .map((a) => { const p = places.get(a.place_id); return { at: filmTimeOf(a.awarded_ts), lon: q(p.lon), lat: q(p.lat), name: p.name }; });
+// The count must end where the trip's does: roads shown at a day's close are lit
+// too, so the running figure is scaled to finish on the same total.
+const kmTotal = kmSteps.length ? kmSteps[kmSteps.length - 1][1] : 0;
+const kmScale = litSoFar > 0 ? kmTotal / (litSoFar / 1000) : 1;
+for (const step of v2Km) step[1] = Math.round(step[1] * kmScale * 10) / 10;
+const paced = { strokes: v2Strokes, days: v2Days, kmSteps: v2Km, stamps: v2Stamps, tripDays: Math.round((data.lastTs - data.firstTs) / 86400000) + 1 };
+console.log(`paced by day: ${days.length} days with new road, ${(litSoFar / 1000).toFixed(0)} km new, ` +
+  `day share ${Math.round(Math.min(...ms))} to ${Math.round(Math.max(...ms))} ms`);
+
+const natural = { ...data, paced, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
 writeFileSync(
   path.join(root, 'tools/out/video-natural.html'),
   readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))

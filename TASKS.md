@@ -526,6 +526,17 @@ permission, L3 privacy contact.
       to the lead: skip or fade the pen over road already drawn, pace by day with the date shown,
       a longer cap for long trips, constant speed on screen rather than on the ground, a pause as
       each stamp lands, and a comet tail instead of a dot.
+      **The three combined, built in the sketch to compare (the lead: "not definitive, I need to see
+      it first"):** *Ritmo: Novo, por dia* beside *Atual*. Road already drawn is not drawn again
+      (40 m grid, a neighbour cell counts, only once the pen is 300 m past it); known road under
+      500 m between two new pieces is run through; new pieces under 250 m and the rest of each day
+      appear as that day closes, so the finished map is the whole trip. Each day with new road
+      (18 of 62) gets a share of the same 14 s by the square root of its new km, at least 350 ms;
+      the camera frames the day; *Dia 17 de 62, 10 de outubro* top right; the head is a comet that
+      fades in only after a move over 1.5 km. Measured on trip 31 at 30 fps, current against new:
+      leaps over 1.5 km inside a stroke 26 to 0; pen speed median 28 to 12 km/s, 99th percentile
+      119 to 34 km/s; the head moves to a new place 249 to 133 times. The km count is scaled to end
+      on the same total. Only in the sketch; `penPath.ts` and the app's film are unchanged.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

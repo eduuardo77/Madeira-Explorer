@@ -470,6 +470,16 @@ permission, L3 privacy contact.
       before and after; `smoke-release.mjs` passes on the P30 (field build of the same JavaScript,
       backup `p30-2026-11-23-before-footnote`). The 8d10129 bundle renamed
       `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
+- [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
+      "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
+      and the passport's Partilhar are gone, and the trophy card's share is a stamp with no map.
+      *When you share your trip* / *Quando partilhas a tua viagem* still says the app can make a
+      picture of your map with where you slept removed. Its last paragraph (the walk report sent
+      from Settings) is still true. To change, all together: `app/src/legal/privacyPolicy.ts` and
+      `privacyPolicy.pt.ts` (and German if it has one), `POLICY_VERSION`, `docs/privacy-policy.md`
+      (generated), `site/privacy.html`; `privacyPolicy.test.ts` requires the words *share* and
+      *where you slept*, so it needs updating with the text. Check first whether a new
+      `POLICY_VERSION` shows users an update notice.
 - [x] **T-327** **The trip viewer's Partilhar removed (the lead, 23 Nov).** Its image was roads on
       black when the map had not loaded, and could not be saved to the gallery; a screenshot does it
       better. *Horas* moved into its place. D-099 amended. Typecheck and 1,327 tests pass; seen on

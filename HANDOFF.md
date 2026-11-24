@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
+  leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
+  Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`
+  (`tools/preview-video-options.mjs`); awaits the lead's pick. Nothing in `app/` changed.
 - **23 Nov, late: T-326, a rare ask for a Play rating** (D-111, Provisional). Google's own in-app
   review sheet as a free stamp's celebration closes, from the third stamp, 3 days after install,
   120 days apart, 3 times ever; a *Rate Bruma* row in Settings. New native dependency

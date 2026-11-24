@@ -470,6 +470,22 @@ permission, L3 privacy contact.
       before and after; `smoke-release.mjs` passes on the P30 (field build of the same JavaScript,
       backup `p30-2026-11-23-before-footnote`). The 8d10129 bundle renamed
       `…-vc15-OLD-footnote-do-not-upload.aab`. The notes' fixes line names the footnote.
+- [ ] **T-329** **The film as a video to keep: sketched on Bruma's own map, awaits the lead (24 Nov).**
+      ⚠ **The exported video cannot be Google's map.** The Maps SDK's `GoogleMap.snapshot()` docs:
+      images of the map "must not be transmitted to your servers, or otherwise used outside of the
+      application"; Maps Platform Terms 3.2.3(a) *No Scraping*: no exporting or resharing Google Maps
+      Content outside the Services. Read 24 Nov on developers.google.com and cloud.google.com. So
+      D-076 holds for the in-app film only, and the old share PNGs (T-253, T-105d) were outside
+      these terms too. A video that leaves the phone draws only what Bruma ships: OSM municipalities
+      and roads (ODbL, *© OpenStreetMap* in every frame). Three looks drawn on the real trip 31,
+      masked as an export (`node tools/preview-video-options.mjs --db <copy of madeira.db>` →
+      `tools/out/video-options.html`, plays, free and paid marks): **A** the passport's night gold,
+      **B** the app's day colours, both on the film's own camera; **C** the whole island still, big
+      counters, stamps landing. Not decided: the look, and whether the in-app film moves onto the
+      same drawing so what you watch is what you keep. Not built: encoding (Android `MediaCodec`
+      from a Canvas surface, save to `Movies/` through MediaStore, share), unmeasured on the P30.
+      The sketch's km counter is approximate (345 against the app's 369). Supersedes the Google
+      basemap assumption in T-105b-v2 and T-106 (*Google's attribution clear of both*).
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.
@@ -4256,6 +4272,7 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       soak tests for the phone's time.
       — Notes: `docs/task-notes.md` (T-105d)
 - [ ] **T-105b-v2** Encode the storyboard to an MP4 on the device ⇠ T-105a, T-105c *(v2)*
+      — ⚠ **24 Nov: not on Google's map** (its terms forbid it outside the app); see T-329.
       — Needs native video encoding, which is the part that cannot be verified without a
       device. It consumes `Composition` and needs no judgement of its own.
       — Also where the *look* is decided: whether the finale shows a denominator (D-042 carries

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt">
+<meta charset="utf-8">
+<title>Vídeo da viagem, opções</title>
+<style>
+  body { background: #1C1C1E; color: #F1F7FF; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.note { color: #A0A0A8; max-width: 80ch; margin: 4px 0; }
+  .bar { display: flex; gap: 12px; align-items: center; margin: 16px 0; flex-wrap: wrap; }
+  button { font: inherit; padding: 6px 14px; border-radius: 999px; border: 1px solid #555; background: #2C2C2E; color: #fff; cursor: pointer; }
+  button.on { background: #F2B820; color: #1C1C1E; border-color: #F2B820; }
+  input[type=range] { width: 360px; }
+  .row { display: flex; gap: 28px; flex-wrap: wrap; }
+  figure { margin: 0; }
+  canvas { width: 360px; height: 640px; border-radius: 14px; display: block; box-shadow: 0 6px 24px #0008; }
+  figcaption { margin-top: 8px; width: 360px; color: #C8C8D0; }
+  figcaption b { color: #fff; }
+</style>
+<h1>O filme como vídeo para guardar: três esboços</h1>
+<p class="note">A tua viagem real (cópia do P30 desta manhã), com o alojamento escondido como em qualquer exportação. O mapa é o da Bruma, do OpenStreetMap: o mapa do Google não pode sair da app. O contador de km é aproximado neste esboço.</p>
+<div class="bar">
+  <button id="play">Pausa</button>
+  <button id="restart">Do início</button>
+  <input id="scrub" type="range" min="0" max="1000" value="0">
+  <span id="clock">0.0 s</span>
+  <button id="free" class="on">Grátis (marca média e cartão final)</button>
+  <button id="paid">Pago (marca pequena)</button>
+</div>
+<div class="row">
+  <figure><canvas id="a" width="1080" height="1920"></canvas><figcaption><b>A. Noite dourada.</b> A ilha do passaporte, a câmara segue o caminho como no filme de hoje.</figcaption></figure>
+  <figure><canvas id="b" width="1080" height="1920"></canvas><figcaption><b>B. Dia.</b> As cores do mapa da app, a mesma câmara.</figcaption></figure>
+  <figure><canvas id="c" width="1080" height="1920"></canvas><figcaption><b>C. A ilha inteira.</b> Câmara parada, números grandes, cada carimbo aparece quando o ganhas.</figcaption></figure>
+</div>
+<script>
+const D = /*DATA*/null;
+const W = 1080, H = 1920;
+const END_CARD_MS = 2000;
+
+const THEMES = {
+  a: { sea: '#14121A', land: '#26232F', border: '#3A3546', coast: '#4A4458', major: '#4A4558', minor: '#332F3E',
+       glow: 'rgba(255,196,60,0.28)', lit: '#FFD45C', ink: '#FFFFFF', sub: '#B9B3C8', accent: '#FFD45C',
+       pill: 'rgba(20,18,26,0.82)', camera: 'follow' },
+  b: { sea: '#9ED9EE', land: '#F5F2E9', border: '#DCD5C4', coast: '#C9C1AD', major: '#FFFFFF', minor: '#EAE5D8',
+       glow: 'rgba(255,255,255,0.95)', lit: '#B33A0A', ink: '#14202B', sub: '#4E5B66', accent: '#B33A0A',
+       pill: 'rgba(255,255,255,0.92)', camera: 'follow' },
+  c: { sea: '#F3EFE6', land: '#E4DDCC', border: '#F3EFE6', coast: '#CFC6B1', major: '#D2C9B5', minor: '#DAD3C2',
+       glow: 'rgba(255,255,255,0.9)', lit: '#B33A0A', ink: '#14202B', sub: '#5F6770', accent: '#B33A0A',
+       pill: 'rgba(255,255,255,0.95)', camera: 'island' },
+};
+
+const K = Math.cos(32.75 * Math.PI / 180);
+const px = (lon) => lon / 1e5 * K;
+const py = (lat) => -lat / 1e5;
+
+function buildPath(lines, closed) {
+  const p = new Path2D();
+  for (const line of lines) {
+    line.forEach(([lon, lat], i) => (i ? p.lineTo(px(lon), py(lat)) : p.moveTo(px(lon), py(lat))));
+    if (closed) p.closePath();
+  }
+  return p;
+}
+const landPath = buildPath(D.outlines, true);
+const majorPath = buildPath(D.roadLines.major, false);
+const minorPath = buildPath(D.roadLines.minor, false);
+
+let islandBox = [Infinity, Infinity, -Infinity, -Infinity];
+for (const line of D.outlines) for (const [lon, lat] of line) {
+  islandBox = [Math.min(islandBox[0], lon), Math.min(islandBox[1], lat), Math.max(islandBox[2], lon), Math.max(islandBox[3], lat)];
+}
+
+function cameraAt(at) {
+  const cams = D.camera;
+  let lo = 0, hi = cams.length - 1;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (cams[mid][0] <= at) lo = mid; else hi = mid - 1; }
+  const a = cams[lo], b = cams[Math.min(lo + 1, cams.length - 1)];
+  const u = b[0] === a[0] ? 0 : Math.min(1, Math.max(0, (at - a[0]) / (b[0] - a[0])));
+  return [1, 2, 3, 4].map((i) => a[i] + (b[i] - a[i]) * u);
+}
+
+/** Fit a [w, s, e, n] box into a pixel area; fit, never fill. */
+function fit(box, area) {
+  const x0 = px(box[0]), x1 = px(box[2]), y0 = py(box[3]), y1 = py(box[1]);
+  const scale = Math.min(area.w / (x1 - x0), area.h / (y1 - y0));
+  const ox = area.x + (area.w - (x1 - x0) * scale) / 2 - x0 * scale;
+  const oy = area.y + (area.h - (y1 - y0) * scale) / 2 - y0 * scale;
+  return { scale, ox, oy };
+}
+
+function kmAt(at) {
+  const s = D.kmSteps;
+  let lo = 0, hi = s.length - 1, best = 0;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (s[mid][0] <= at) { best = s[mid][1]; lo = mid + 1; } else hi = mid - 1; }
+  return best;
+}
+
+function strokesAt(at) {
+  const out = [];
+  for (const seg of D.segments) {
+    if (seg.t[0] > at) continue;
+    const pts = [];
+    for (let i = 0; i < seg.c.length; i += 1) {
+      if (seg.t[i] <= at) { pts.push(seg.c[i]); continue; }
+      const a = seg.c[i - 1], b = seg.c[i];
+      const u = (at - seg.t[i - 1]) / Math.max(1, seg.t[i] - seg.t[i - 1]);
+      pts.push([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]);
+      break;
+    }
+    if (pts.length >= 2) out.push(pts);
+  }
+  return out;
+}
+
+const fmtDay = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long' });
+const fmtYear = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+const dateRange = `${fmtDay.format(D.firstTs)} a ${fmtYear.format(D.lastTs)}`;
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function mark(ctx, th, size, finale) {
+  // The app's name as a mark: medium (free, lower third) or small (paid, corner).
+  ctx.save();
+  if (size === 'medium') {
+    const w = 330, h = 96, x = (W - w) / 2, y = finale ? H - 230 : th.camera === 'island' ? 1225 : H * 0.70;
+    ctx.globalAlpha = 0.9; ctx.fillStyle = th.pill; roundRect(ctx, x, y, w, h, 48); ctx.fill();
+    ctx.strokeStyle = th.accent; ctx.lineWidth = 3; ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = th.ink; ctx.font = '700 52px system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Bruma', W / 2, y + 66);
+  } else {
+    ctx.globalAlpha = 0.75; ctx.fillStyle = th.ink; ctx.font = '700 34px system-ui, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText('Bruma', W - 48, H - 52);
+  }
+  ctx.restore();
+}
+
+function render(id, at, free) {
+  const th = THEMES[id];
+  const ctx = document.getElementById(id).getContext('2d');
+  const total = D.durationMs + (free ? END_CARD_MS : 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = th.sea; ctx.fillRect(0, 0, W, H);
+
+  if (free && at > D.durationMs) { endCard(ctx, th, (at - D.durationMs) / END_CARD_MS); return total; }
+
+  const finale = at >= D.finaleAt;
+  const fu = finale ? Math.min(1, (at - D.finaleAt) / 700) : 0;
+  let view;
+  if (th.camera === 'island') view = fit(islandBox, { x: 40, y: 430, w: W - 80, h: 760 });
+  else view = fit(cameraAt(at), { x: 40, y: 230, w: W - 80, h: H - 230 - (finale ? 640 : 380) });
+
+  ctx.setTransform(view.scale, 0, 0, view.scale, view.ox, view.oy);
+  const lw = (p) => p / view.scale;
+  ctx.fillStyle = th.land; ctx.fill(landPath, 'evenodd');
+  ctx.strokeStyle = th.border; ctx.lineWidth = lw(2); ctx.stroke(landPath);
+  ctx.strokeStyle = th.minor; ctx.lineWidth = lw(th.camera === 'island' ? 1 : 1.6); ctx.stroke(minorPath);
+  ctx.strokeStyle = th.major; ctx.lineWidth = lw(th.camera === 'island' ? 2 : 3.4); ctx.stroke(majorPath);
+
+  const strokes = strokesAt(Math.min(at, D.finaleAt));
+  const lit = new Path2D();
+  for (const s of strokes) s.forEach(([lon, lat], i) => (i ? lit.lineTo(px(lon), py(lat)) : lit.moveTo(px(lon), py(lat))));
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const core = th.camera === 'island' ? 6 : 9;
+  ctx.strokeStyle = th.glow; ctx.lineWidth = lw(core * (id === 'a' ? 3.2 : 1.9)); ctx.stroke(lit);
+  ctx.strokeStyle = th.lit; ctx.lineWidth = lw(core); ctx.stroke(lit);
+
+  // The pen.
+  if (!finale && strokes.length) {
+    const last = strokes[strokes.length - 1], tip = last[last.length - 1];
+    ctx.fillStyle = th.ink; ctx.beginPath(); ctx.arc(px(tip[0]), py(tip[1]), lw(13), 0, 7); ctx.fill();
+    ctx.fillStyle = th.lit; ctx.beginPath(); ctx.arc(px(tip[0]), py(tip[1]), lw(8), 0, 7); ctx.fill();
+  }
+
+  // Stamps: a dot that stays, a ring that pops as it lands.
+  let latest = null;
+  for (const st of D.stamps) {
+    if (st.at > at) continue;
+    latest = st;
+    const age = at - st.at, x = px(st.lon), y = py(st.lat);
+    ctx.fillStyle = '#F2B820'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = lw(4);
+    ctx.beginPath(); ctx.arc(x, y, lw(th.camera === 'island' ? 13 : 16), 0, 7); ctx.fill(); ctx.stroke();
+    if (age < 700) {
+      const u = age / 700;
+      ctx.strokeStyle = `rgba(242,184,32,${1 - u})`; ctx.lineWidth = lw(6);
+      ctx.beginPath(); ctx.arc(x, y, lw(16 + 70 * u), 0, 7); ctx.stroke();
+    }
+  }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // Top: where and when.
+  ctx.textAlign = 'left'; ctx.fillStyle = th.ink;
+  ctx.font = `800 ${th.camera === 'island' ? 104 : 84}px system-ui, sans-serif`; ctx.fillText('Madeira', 64, 150);
+  ctx.fillStyle = th.sub; ctx.font = '500 40px system-ui, sans-serif'; ctx.fillText(dateRange, 66, 214);
+
+  // The stamp just earned, named.
+  if (latest && at - latest.at < 1400 && !finale) {
+    const a = Math.min(1, (1400 - (at - latest.at)) / 300);
+    ctx.globalAlpha = a; ctx.font = '700 40px system-ui, sans-serif';
+    const text = latest.name, w = ctx.measureText(text).width + 120, y = th.camera === 'island' ? 300 : 270;
+    ctx.fillStyle = th.pill; roundRect(ctx, 64, y, w, 76, 38); ctx.fill();
+    ctx.fillStyle = '#F2B820'; ctx.beginPath(); ctx.arc(64 + 42, y + 38, 14, 0, 7); ctx.fill();
+    ctx.fillStyle = th.ink; ctx.textAlign = 'left'; ctx.fillText(text, 64 + 72, y + 52); ctx.globalAlpha = 1;
+  }
+
+  const stampsNow = D.stamps.filter((s) => s.at <= at).length;
+  const km = Math.round(kmAt(at));
+  if (!finale) {
+    // Bottom: the counters running.
+    const y = th.camera === 'island' ? 1560 : H - 260;
+    counter(ctx, th, 64, y, `${km}`, 'km de estradas acesas', th.camera === 'island' ? 150 : 104);
+    counter(ctx, th, th.camera === 'island' ? 640 : 680, y, `${stampsNow}`, 'carimbos', th.camera === 'island' ? 150 : 104);
+  } else {
+    // The closing card, as in the app's film: the count and the dates.
+    ctx.globalAlpha = fu; ctx.textAlign = 'center'; ctx.fillStyle = th.ink;
+    const y = th.camera === 'island' ? 1420 : H - 470;
+    ctx.font = '800 220px system-ui, sans-serif';
+    const big = `${D.collected}`, small = ` / ${D.total}`;
+    const wb = ctx.measureText(big).width; ctx.font = '600 96px system-ui, sans-serif'; const ws = ctx.measureText(small).width;
+    ctx.textAlign = 'left'; ctx.font = '800 220px system-ui, sans-serif'; ctx.fillText(big, (W - wb - ws) / 2, y);
+    ctx.fillStyle = th.sub; ctx.font = '600 96px system-ui, sans-serif'; ctx.fillText(small, (W - wb - ws) / 2 + wb, y);
+    ctx.textAlign = 'center'; ctx.fillStyle = th.ink; ctx.font = '600 46px system-ui, sans-serif';
+    ctx.fillText('lugares visitados', W / 2, y + 76);
+    ctx.fillStyle = th.sub; ctx.font = '500 42px system-ui, sans-serif';
+    ctx.fillText(`${km} km de estradas acesas`, W / 2, y + 146);
+    ctx.globalAlpha = 1;
+  }
+
+  // Attribution, always, and the mark.
+  ctx.textAlign = 'left'; ctx.fillStyle = th.sub; ctx.globalAlpha = 0.85; ctx.font = '400 26px system-ui, sans-serif';
+  ctx.fillText('© OpenStreetMap', 40, H - 40); ctx.globalAlpha = 1;
+  mark(ctx, th, free ? 'medium' : 'small', finale);
+  return total;
+}
+
+function counter(ctx, th, x, y, value, label, size) {
+  ctx.textAlign = 'left'; ctx.fillStyle = th.accent; ctx.font = `800 ${size}px system-ui, sans-serif`; ctx.fillText(value, x, y);
+  ctx.fillStyle = th.sub; ctx.font = '600 38px system-ui, sans-serif'; ctx.fillText(label, x + 4, y + 56);
+}
+
+function endCard(ctx, th, u) {
+  ctx.globalAlpha = Math.min(1, u * 4);
+  ctx.textAlign = 'center'; ctx.fillStyle = th.ink;
+  ctx.font = '800 150px system-ui, sans-serif'; ctx.fillText('Bruma', W / 2, H / 2 - 20);
+  ctx.fillStyle = th.sub; ctx.font = '500 48px system-ui, sans-serif';
+  ctx.fillText('Feito com Bruma, no Google Play', W / 2, H / 2 + 70);
+  ctx.globalAlpha = 1;
+}
+
+// --- the player ---
+let free = true, playing = true, at = 0, last = performance.now();
+const scrub = document.getElementById('scrub'), clock = document.getElementById('clock');
+function total() { return D.durationMs + (free ? END_CARD_MS : 0); }
+function frame(now) {
+  if (playing) { at += now - last; if (at > total() + 800) at = 0; }
+  last = now;
+  const t = Math.min(at, total());
+  for (const id of ['a', 'b', 'c']) render(id, t, free);
+  scrub.value = Math.round((t / total()) * 1000); clock.textContent = `${(t / 1000).toFixed(1)} s`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+document.getElementById('play').onclick = (e) => { playing = !playing; e.target.textContent = playing ? 'Pausa' : 'Tocar'; };
+document.getElementById('restart').onclick = () => { at = 0; };
+scrub.oninput = () => { at = (scrub.value / 1000) * total(); };
+document.getElementById('free').onclick = () => { free = true; document.getElementById('free').classList.add('on'); document.getElementById('paid').classList.remove('on'); };
+document.getElementById('paid').onclick = () => { free = false; document.getElementById('paid').classList.add('on'); document.getElementById('free').classList.remove('on'); };
+// For screenshots: ?t=<ms> holds one moment.
+const held = new URLSearchParams(location.search).get('t');
+if (held !== null) { at = Number(held); playing = false; }
+</script>
+</html>

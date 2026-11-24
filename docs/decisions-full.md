@@ -6082,6 +6082,9 @@ hairline, BRUMA) over the map in the lower third, and a two second end card; pai
 signature small in a corner (D-089 rule 8). Info *Discreta* by default (one line under the
 date), *Completa* (a card) or *Nenhuma*. Stamp dots off by default. The video is saved to the
 gallery (Movies/Bruma) before any share sheet opens: Huawei's share sheet cannot save.
+The video is **seen before it is saved**: a preview plays it as it will be, the choices change
+it live, and the file is made once; **one video per trip** in the gallery, a new save of the
+same trip replacing the one before (the lead, 24 Nov: trying settings must not fill the gallery).
 
 **Rejected.** A flat drawing of the island (options A and C of the first round: not "natural, in
 terms of the map"). The app icon as the watermark (*"unprofessional"*). Google's map in the

@@ -62,11 +62,37 @@
   .done-check { width: 84px; height: 84px; border-radius: 50%; background: #2E9E5B; display: grid; place-items: center; margin-bottom: 18px; }
   .done-check svg { width: 40px; height: 40px; fill: none; stroke: #fff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
   .stack { position: absolute; left: 18px; right: 18px; bottom: 26px; display: flex; flex-direction: column; gap: 10px; }
+  /* The preview: the video itself, playing, with the choices under it. */
+  .editor { position: absolute; inset: 0; background: #F2F2F7; }
+  .editor .top { position: absolute; left: 16px; right: 16px; top: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .editor .top b { font-size: 16px; }
+  .pv { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); width: 162px; height: 288px; border-radius: 12px; overflow: hidden;
+        background: #91D8EE; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+  .pv svg.isl { position: absolute; left: 0; top: 92px; width: 162px; }
+  .pv .t { position: absolute; left: 10px; top: 10px; }
+  .pv .t b { display: block; font-size: 15px; font-weight: 700; }
+  .pv .t span { font-size: 7px; color: #4A5560; display: block; }
+  .pv .t em { font-style: normal; font-size: 7.5px; color: #B33A0A; font-weight: 600; }
+  .pv .w { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); color: #fff; font-weight: 700; font-size: 16px;
+           letter-spacing: .12em; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 8px rgba(20,32,43,.4)); }
+  .pv .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%;
+              background: rgba(20,32,43,.5); display: grid; place-items: center; }
+  .pv .play svg { width: 18px; height: 18px; fill: #fff; }
+  .scrub { position: absolute; left: 69px; right: 69px; top: 344px; height: 4px; border-radius: 2px; background: #DDDDE3; }
+  .scrub i { position: absolute; left: 0; top: 0; bottom: 0; width: 38%; background: #0A5AAE; border-radius: 2px; }
+  .scrub b { position: absolute; left: 38%; top: -5px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #0A5AAE; }
+  .chips { position: absolute; left: 14px; right: 14px; top: 356px; }
+  .chips .label { margin: 6px 0 4px; }
+  .chips .seg span { padding: 5px 0; font-size: 12.5px; }
+  .editor .foot { position: absolute; left: 14px; right: 14px; bottom: 16px; }
+  .editor .foot .note { font-size: 11.5px; color: #4A3B00; background: #FFF6DC; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px;
+                        display: flex; justify-content: space-between; gap: 8px; }
+  .editor .foot .note a { color: #0A5AAE; font-weight: 600; text-decoration: none; white-space: nowrap; }
   .side { max-width: 70ch; color: #C8C8D0; margin-top: 26px; }
   .side h3 { color: #fff; font-size: 15px; margin: 18px 0 4px; }
   .side li { margin: 3px 0; }
 </style>
-<h1>Guardar o vídeo: do botão à galeria em três toques</h1>
+<h1>Guardar o vídeo: ver primeiro, guardar uma vez</h1>
 <p class="note">Desenho para decidir, nada disto está na app. O vídeo é feito no telemóvel, guardado logo na Galeria (em Filmes, pasta Bruma) e só depois oferecido para partilhar, porque no P30 a folha de partilha da Huawei não tem "guardar na galeria".</p>
 
 <svg width="0" height="0" style="position:absolute">
@@ -81,6 +107,7 @@
     <symbol id="down" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
     <symbol id="share" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v6h14v-6"/></symbol>
     <symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></symbol>
   </defs>
 </svg>
 
@@ -92,33 +119,36 @@
       <div class="title"><b>Madeira</b><span>24 de setembro a 24 de novembro de 2026</span></div>
       <div class="wm">BRUMA</div>
       <div class="bar">
-        <div class="btn primary"><svg><use href="#down"/></svg>Guardar vídeo</div>
-        <div class="btn secondary"><svg><use href="#share"/></svg>Partilhar</div>
+        <div class="btn primary"><svg><use href="#down"/></svg>Fazer o vídeo</div>
       </div>
     </div>
-    <figcaption><b>1. No filme.</b> Por baixo do filme que já existe, dois botões. <i>Partilhar</i> faz o mesmo que guardar e abre logo a partilha.</figcaption>
+    <figcaption><b>1. No filme.</b> Por baixo do filme que já existe, um botão. Nada é guardado aqui.</figcaption>
   </figure>
 
   <figure>
     <div class="phone">
-      <div class="map"><svg viewBox="0 0 300 150"><use href="#island"/></svg></div>
-      <div class="scrim"></div>
-      <div class="sheet">
-        <div class="grab"></div>
-        <h2>Guardar o vídeo</h2>
-        <div class="thumbrow">
-          <div class="thumb"><svg viewBox="0 0 300 150"><use href="#island"/></svg></div>
-          <div><b>Toda a viagem</b><span>18 segundos, vertical, para histórias e reels</span></div>
+      <div class="editor">
+        <div class="top"><span class="link">Cancelar</span><b>O teu vídeo</b><span style="width:56px"></span></div>
+        <div class="pv">
+          <svg class="isl" viewBox="0 0 300 150"><use href="#island"/></svg>
+          <div class="t"><b>Madeira</b><span>24 de setembro a 24 de novembro de 2026</span><em>151 km · 11 carimbos</em></div>
+          <div class="w">BRUMA</div>
+          <div class="play"><svg viewBox="0 0 24 24"><use href="#pause"/></svg></div>
         </div>
-        <div class="label">Informação no vídeo</div>
-        <div class="seg"><span>Completa</span><span class="on">Discreta</span><span>Nenhuma</span></div>
-        <div class="label">Câmara</div>
-        <div class="seg"><span class="on">Normal</span><span>Mais perto</span></div>
-        <div class="free"><span>Na versão grátis o vídeo leva a marca BRUMA.</span><a href="#">Tirar a marca</a></div>
-        <div class="btn primary">Criar vídeo</div>
+        <div class="scrub"><i></i><b></b></div>
+        <div class="chips">
+          <div class="label">Informação</div>
+          <div class="seg"><span>Completa</span><span class="on">Discreta</span><span>Nenhuma</span></div>
+          <div class="label">Câmara</div>
+          <div class="seg"><span class="on">Normal</span><span>Mais perto</span></div>
+        </div>
+        <div class="foot">
+          <div class="note"><span>Grátis: com a marca BRUMA.</span><a href="#">Tirar a marca</a></div>
+          <div class="btn primary" style="width:100%"><svg><use href="#down"/></svg>Guardar na Galeria</div>
+        </div>
       </div>
     </div>
-    <figcaption><b>2. Duas escolhas, já feitas.</b> Abre com as últimas escolhas da pessoa: quem não quer pensar carrega logo em <i>Criar vídeo</i>. <i>Tirar a marca</i> abre o ecrã do passaporte.</figcaption>
+    <figcaption><b>2. Vê antes de guardar.</b> O vídeo toca aqui, já como vai ficar: marca, informação e câmara. Mudar uma escolha muda o vídeo logo, a tocar, sem gravar nada. Só <i>Guardar na Galeria</i> cria o ficheiro, uma vez. Abre com as últimas escolhas da pessoa.</figcaption>
   </figure>
 
   <figure>
@@ -143,6 +173,7 @@
         <div class="done-check"><svg viewBox="0 0 24 24"><use href="#check"/></svg></div>
         <h2>Guardado na Galeria</h2>
         <p>Filmes, pasta Bruma</p>
+        <p style="margin-top:10px;font-size:12.5px">Substituiu o vídeo desta viagem que tinhas guardado antes.</p>
       </div>
       <div class="stack">
         <div class="btn primary"><svg><use href="#share"/></svg>Partilhar</div>
@@ -150,7 +181,7 @@
         <div class="link" style="text-align:center;margin-top:4px">Concluído</div>
       </div>
     </div>
-    <figcaption><b>4. Pronto.</b> Já está na Galeria antes de qualquer partilha. <i>Partilhar</i> abre a folha do Android com o vídeo (Instagram, WhatsApp, TikTok). <i>Ver na Galeria</i> abre-o no leitor do telemóvel.</figcaption>
+    <figcaption><b>4. Pronto.</b> Um vídeo por viagem: guardar de novo a mesma viagem substitui o anterior, e diz-o (a linha só aparece quando substituiu). Já está na Galeria antes de qualquer partilha. <i>Partilhar</i> abre a folha do Android com o vídeo (Instagram, WhatsApp, TikTok). <i>Ver na Galeria</i> abre-o no leitor do telemóvel.</figcaption>
   </figure>
 </div>
 
@@ -158,12 +189,15 @@
   <h3>Porque assim</h3>
   <ul>
     <li><b>Guarda sempre primeiro.</b> A queixa que tirou a partilha em novembro: a imagem não ficava na galeria. Aqui nada depende da folha de partilha.</li>
-    <li><b>Três toques</b> do filme à galeria: Guardar vídeo, Criar vídeo, e espera. Sem contas, sem pedir nada à pessoa no Android 10 ou mais recente.</li>
+    <li><b>Vê-se antes de guardar.</b> Experimentar as escolhas não deixa ficheiros pela Galeria: a pré-visualização toca no ecrã com o mesmo desenho do vídeo, e o ficheiro só é feito uma vez, no fim.</li>
+    <li><b>Um vídeo por viagem na Galeria.</b> Guardar outra vez a mesma viagem substitui o ficheiro anterior (a app pode mudar ficheiros que ela própria criou, sem pedir licença no Android 10 ou mais recente). Se a pessoa o tiver apagado ou mudado de sítio, guarda um novo.</li>
+    <li><b>Três toques</b> do filme à galeria: Fazer o vídeo, Guardar na Galeria, e espera. Sem contas, sem pedir nada à pessoa no Android 10 ou mais recente.</li>
     <li><b>As escolhas lembradas</b>: a mesma pessoa faz o mesmo tipo de vídeo da próxima vez sem voltar a escolher.</li>
     <li><b>Nome do ficheiro legível</b>: "Bruma Madeira 24 set a 24 nov 2026.mp4", 1080 por 1920, 30 quadros por segundo.</li>
   </ul>
   <h3>O que falta para isto existir</h3>
   <ul>
+    <li>A pré-visualização é o mesmo motor a desenhar no ecrã, ao vivo: o que se vê é o que fica.</li>
     <li>Um motor de mapa na app para desenhar o mapa da Bruma (MapLibre, que saiu com a D-057), e o código Android que grava os quadros num MP4. Só chega às pessoas numa atualização da loja.</li>
     <li>Medir no P30 quanto tempo demora um vídeo de 18 segundos. Até lá, o ecrã 3 não promete tempo nenhum.</li>
     <li>Android 7 a 9 (a app aceita desde o 7) pede licença para guardar ficheiros: um pedido do sistema na primeira vez.</li>

@@ -553,6 +553,13 @@ permission, L3 privacy contact.
       and *Tirar a marca* for free users; a real progress percentage; saved to Movies/Bruma, then
       *Partilhar* or *Ver na Galeria*. Next, for it to exist: MapLibre back as the export's
       renderer, frames to MP4 on Android, and the render time measured on the P30.
+      **Redrawn the same day (the lead: "you should be able to see the video before saving it",
+      or trying settings leaves several videos in the gallery):** the film has one button, *Fazer
+      o vídeo*, which opens a preview: the video playing as it will be saved, the choices under it
+      changing it live, nothing written; *Guardar na Galeria* makes the file once. One video per
+      trip in the gallery: saving the same trip again replaces the file the app made before (an
+      app may change its own MediaStore files without permission on Android 10 and later), and
+      says so; if the person deleted or moved it, a new one is saved.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

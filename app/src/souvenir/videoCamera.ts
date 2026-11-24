@@ -1,0 +1,162 @@
+/**
+ * The exported video's camera (T-329, D-112).
+ *
+ * The first by-day camera cut to each day's framing in under a second; on the
+ * lead's trip it zoomed at up to 8.2 levels a second and reversed five times
+ * ("the zoom-ins and zoom-outs are quite aggressive"). Here a day's framing is
+ * only a target:
+ *
+ *   - at most `zoomInMax` levels closer than the whole trip (framed, never dived into);
+ *   - smoothed over time with a Gaussian `smoothMs` wide, both ways, so the
+ *     camera starts moving before a day and never overshoots, and short days
+ *     blur into their neighbours instead of being chased;
+ *   - the zoom held to `zoomRateMax` levels a second, and, when asked, the pan
+ *     to `panMaxKmPerS`.
+ *
+ * Measured on trip 31 in the sketch: zoom at most 0.4 levels/s, 1.6 levels of
+ * zoom travel over the drawing (the app's own film camera: 1.5 and 2.2).
+ *
+ * The close camera (*Câmara mais perto*) is the same machine with the pen as
+ * its target (`follow`), `followZoom` levels in, smoothed less, its pan held.
+ *
+ * Zoom is Google's (256 px tiles), as `cameraFit.fitBounds` gives it. A
+ * renderer with 512 px tiles (MapLibre) subtracts one.
+ *
+ * Pure: numbers in, a path out.
+ */
+
+import { fitBounds, type Viewport } from '../map/cameraFit.ts';
+
+export type VideoCamera = { lon: number; lat: number; zoom: number };
+export type CameraSample = VideoCamera & { atMs: number };
+
+export type CameraDay = { startMs: number; bounds: [number, number, number, number] };
+
+export type VideoCameraOptions = {
+  zoomInMax: number;
+  smoothMs: number;
+  zoomRateMax: number;
+  /** km/s; 0 leaves the pan free. */
+  panMaxKmPerS: number;
+};
+
+/** The calm by-day camera, as the lead approved it in the sketch on 24 Nov 2026. */
+export const DAY_CAMERA: VideoCameraOptions = { zoomInMax: 0.7, smoothMs: 700, zoomRateMax: 0.45, panMaxKmPerS: 0 };
+/** *Câmara mais perto*: it follows the pen, so it smooths less and holds its pan. */
+export const CLOSE_CAMERA: VideoCameraOptions = { zoomInMax: 1.3, smoothMs: 350, zoomRateMax: 0.45, panMaxKmPerS: 26 };
+
+const KM_PER_DEG = 111.32;
+
+/**
+ * The camera for every `stepMs` of a film `durationMs` long.
+ *
+ * `follow(t)` (close camera) returns where the pen is, or null when there is
+ * none; then the target is the whole trip. Without it, the target is the
+ * framing of the day under way.
+ */
+export function videoCameraPath(input: {
+  whole: [number, number, number, number];
+  days: readonly CameraDay[];
+  viewport: Viewport;
+  durationMs: number;
+  stepMs: number;
+  options: VideoCameraOptions;
+  follow?: (atMs: number) => { lon: number; lat: number } | null;
+}): CameraSample[] {
+  const { viewport, stepMs, options } = input;
+  const wholeFit = fitBounds(input.whole, viewport);
+  if (wholeFit === null) return [];
+  const whole: VideoCamera = { lon: wholeFit.coordinates.longitude, lat: wholeFit.coordinates.latitude, zoom: wholeFit.zoom };
+  const dayCams = input.days.map((day) => {
+    const fit = fitBounds(day.bounds, {
+      ...viewport,
+      padding: {
+        top: (viewport.padding?.top ?? 0) + 20,
+        bottom: (viewport.padding?.bottom ?? 0) + 20,
+        left: (viewport.padding?.left ?? 0) + 16,
+        right: (viewport.padding?.right ?? 0) + 16,
+      },
+    });
+    if (fit === null) return whole;
+    return { lon: fit.coordinates.longitude, lat: fit.coordinates.latitude, zoom: clamp(fit.zoom, whole.zoom, whole.zoom + options.zoomInMax) };
+  });
+
+  // The targets, frame by frame.
+  const count = Math.max(1, Math.ceil(input.durationMs / stepMs) + 1);
+  const raw: VideoCamera[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const t = i * stepMs;
+    let day = -1;
+    for (let d = 0; d < input.days.length; d += 1) if (input.days[d].startMs <= t) day = d;
+    if (input.follow) {
+      const pen = day < 0 ? null : input.follow(t);
+      raw.push(pen === null ? whole : { lon: pen.lon, lat: pen.lat, zoom: whole.zoom + options.zoomInMax });
+    } else {
+      raw.push(day < 0 ? whole : dayCams[day]);
+    }
+  }
+
+  // Smoothed both ways.
+  const sigma = Math.max(1e-6, options.smoothMs / stepMs);
+  const reach = Math.ceil(sigma * 3);
+  const weights: number[] = [];
+  for (let j = -reach; j <= reach; j += 1) weights.push(Math.exp(-(j * j) / (2 * sigma * sigma)));
+  const out: VideoCamera[] = raw.map((_, i) => {
+    let lon = 0;
+    let lat = 0;
+    let zoom = 0;
+    let w = 0;
+    for (let j = -reach; j <= reach; j += 1) {
+      const r = raw[clamp(i + j, 0, count - 1)];
+      const k = weights[j + reach];
+      lon += r.lon * k;
+      lat += r.lat * k;
+      zoom += r.zoom * k;
+      w += k;
+    }
+    return { lon: lon / w, lat: lat / w, zoom: zoom / w };
+  });
+
+  // Zoom speed held, forwards then backwards so neither end is favoured.
+  const zoomStep = (options.zoomRateMax * stepMs) / 1000;
+  holdBothWays(out, (prev, cur) => {
+    cur.zoom = clamp(cur.zoom, prev.zoom - zoomStep, prev.zoom + zoomStep);
+  });
+  // Pan speed held, when asked.
+  if (options.panMaxKmPerS > 0) {
+    const panStepDeg = (options.panMaxKmPerS * stepMs) / 1000 / KM_PER_DEG;
+    holdBothWays(out, (prev, cur) => {
+      const k = Math.cos((cur.lat * Math.PI) / 180);
+      const dx = (cur.lon - prev.lon) * k;
+      const dy = cur.lat - prev.lat;
+      const d = Math.hypot(dx, dy);
+      if (d > panStepDeg) {
+        cur.lon = prev.lon + ((dx / d) * panStepDeg) / k;
+        cur.lat = prev.lat + (dy / d) * panStepDeg;
+      }
+    });
+  }
+
+  return out.map((camera, i) => ({ ...camera, atMs: i * stepMs }));
+}
+
+/** The camera at `atMs`, between samples. */
+export function videoCameraAt(path: readonly CameraSample[], atMs: number): VideoCamera | null {
+  if (path.length === 0) return null;
+  const step = path.length > 1 ? path[1].atMs - path[0].atMs : 1;
+  const f = clamp(atMs / step, 0, path.length - 1);
+  const i = Math.floor(f);
+  const u = f - i;
+  const a = path[i];
+  const b = path[Math.min(path.length - 1, i + 1)];
+  return { lon: a.lon + (b.lon - a.lon) * u, lat: a.lat + (b.lat - a.lat) * u, zoom: a.zoom + (b.zoom - a.zoom) * u };
+}
+
+function holdBothWays(path: VideoCamera[], hold: (prev: VideoCamera, cur: VideoCamera) => void): void {
+  for (let i = 1; i < path.length; i += 1) hold(path[i - 1], path[i]);
+  for (let i = path.length - 2; i >= 0; i -= 1) hold(path[i + 1], path[i]);
+}
+
+function clamp(value: number, low: number, high: number): number {
+  return Math.min(high, Math.max(low, value));
+}

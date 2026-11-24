@@ -518,6 +518,14 @@ permission, L3 privacy contact.
       colour. A white signature: the main island's silhouette (built from `content/regions.json`),
       a hairline, BRUMA in spaced capitals, a soft dark halo so it holds on pale land as well as
       sea. Free: centred near the foot; paid: small, bottom right.
+      Made more prominent in the free version the same day (30 px bold, stronger halo).
+      **The pen's speed, measured (not changed; the lead asked for ideas first):** trip 31 is 61
+      days drawn in 14 s, the cap (`MAX_DRAW_MS`). Frame by frame at 30 fps, the pen jumps more than
+      1.5 km in one frame in 159 of 419 frames; 59% of those jumps are on road already drawn
+      (`REPEAT_PACE` makes it 4 times faster there). New road runs at a median 30 km/s. Ideas put
+      to the lead: skip or fade the pen over road already drawn, pace by day with the date shown,
+      a longer cap for long trips, constant speed on screen rather than on the ground, a pause as
+      each stamp lands, and a comet tail instead of a dot.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

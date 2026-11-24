@@ -17,7 +17,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   *Horas* in its place, top right, seen on the P30 (field build from cac4f3d, `install -r`, backup
   `p30-2026-11-24-before-t327`). **10:00: the passport's Partilhar removed too** (2d6401e, on the
   P30, backup `p30-2026-11-24-before-t327b`); the trophy share hidden too
-  (`SHOW_SHARE`), so the app shows no share. ⚠ The privacy policy
+  (`SHOW_SHARE`, 539c969,
+  on the P30 10:14, backup `p30-2026-11-24-before-t327c`), so the app shows no share. ⚠ The privacy policy
   still describes a map picture; held by the lead, **T-328**. Not in the Play build.
 - **23 Nov, 19:07: version 15 REBUILT from d096712** with the Settings footnote fix (ebdc340, the
   only app change since 8d10129): `bruma-0.1.0-vc15.aab`, SHA-256 `797a6e76…e812f9`, upload key,

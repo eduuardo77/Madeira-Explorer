@@ -55,7 +55,7 @@ Google's encryption, as the privacy policy says. The app never sends it anywhere
 | The part of the map on screen; device details, IP, a pseudonymous Maps identifier, crash data, map pan and zoom events | Google (Maps SDK) | Whenever the map is shown | Google's [Maps SDK data disclosure](https://developers.google.com/maps/documentation/android-sdk/play-data-disclosure) (rows in the Play section below) |
 | The purchase request; the purchase token when it is acknowledged | Google Play | Only when the user buys or restores | `entitlement/storeBilling.ts`, `entitlement/billingSync.ts` (expo-iap); nothing goes to a server of ours |
 | Nothing (Firebase is never initialised: no `google-services.json`) | | | `FirebaseApp: Default FirebaseApp failed to initialize`, every launch on the P30 |
-| The masked share image, the backup file, the walk report | **Wherever the user sends them**, through Android's share sheet | Only on the user's tap | `shareTrip.ts` (the passport and trophy images, masked, D-040), `backupFile.ts`, `donateWalk.ts` (D-069) |
+| The masked share image, the backup file, the walk report | **Wherever the user sends them**, through Android's share sheet | Only on the user's tap | `shareTrip.ts` (the trophy image only, no map, since T-327), `backupFile.ts`, `donateWalk.ts` (D-069) |
 | The trip | **Nobody.** No account, no server of ours, no analytics, no ads | | The privacy policy's central claim |
 
 **How each lands on the Play form:** see the Data safety section below (T-268, 2026-10-07):

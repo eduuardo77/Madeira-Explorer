@@ -5649,8 +5649,9 @@ projection); a share waits 1.5 s for map tiles rather than a signal, which expo-
 when the 1.5 s guess ran out, and Huawei's share sheet offers no way to keep it in the gallery.
 The phone's own screenshot does the job better: the real map, straight into the gallery. Lost: the
 line about the app, and the hotel mask (a screenshot is the user's own choice of what to show).
-*Horas* takes Partilhar's place, top right. The passport's and the trophy's shares stay; they do
-not use the map snapshot. `takeSnapshot` stays in the expo-maps patch, unused, rather than
+*Horas* takes Partilhar's place, top right. **24 Nov: the passport's Partilhar removed too** (the
+lead: *"remove the passport share too"*), so no picture of the map leaves the phone any more;
+only the trophy card's share stays (a stamp, no map). `takeSnapshot` stays in the expo-maps patch, unused, rather than
 reopen the patch for it.
 
 ## D-101 — One distance: road lit, each road once

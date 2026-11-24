@@ -1,9 +1,8 @@
 /**
  * Turning a trip into a picture somebody can send (T-105d, T-107, T-108).
  *
- * The impure half of the share card: it reads the trip, hands the facts to
- * `shareCard.ts`, and — once a view has drawn it — captures a PNG and opens the
- * share sheet. The judgement is all in the pure module; this is plumbing.
+ * Once a view has drawn a picture, captures it as a PNG and opens the share
+ * sheet (the trophy card's share, T-327: the passport's went 24 Nov 2026).
  *
  * ⚠ **THE TRACE COMES THROUGH `exportTrace.ts` AND NOWHERE ELSE.** That module
  * is the single door D-016 and D-040 require every export to pass through, and
@@ -23,22 +22,10 @@ import * as Sharing from 'expo-sharing';
 import type { View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
-import { getContentPack } from '../content/poiCatalogue';
-import { exportRoadSegments } from '../matching/roadNetwork';
-import { getCurrentProgress } from '../progress/currentProgress';
 import * as recordingEventDao from '../storage/dao/recordingEventDao';
-import * as stampAwardDao from '../storage/dao/stampAwardDao';
-import * as tripDao from '../storage/dao/tripDao';
-import { deviceLanguage, t } from '../i18n';
-import { MASK_RADIUS_M } from './accommodation';
-import { getExportableTrace, type ExportRefusal } from './exportTrace';
-import {
-  buildShareCard,
-  formatDateRange,
-  shareImageFilename,
-  type CardPoint,
-  type ShareCard,
-} from './shareCard';
+import { t } from '../i18n';
+import type { ExportRefusal } from './exportTrace';
+import { shareImageFilename } from './shareCard';
 
 /**
  * Why a share did not happen, for the screen to translate (T-190).
@@ -55,77 +42,9 @@ export const REFUSAL_KEYS = {
   failed: 'share.refusal.failed',
 } as const satisfies Record<ShareRefusal, string>;
 
-export type ShareCardResult =
-  | { ok: true; card: ShareCard }
-  /**
-   * Refused. `refusal` is what the screen shows, translated; `reason` is the
-   * diary's English and is **never** shown (`i18nCoverage.test.ts`).
-   */
-  | { ok: false; refusal: ShareRefusal; reason: string };
-
 export type ShareSendResult =
   | { ok: true }
   | { ok: false; refusal: ShareRefusal; reason: string };
-
-/**
- * Everything the card needs, from the database.
- *
- * Returns a refusal rather than a half-card: a souvenir missing the trace is
- * not a souvenir, and an empty rectangle with somebody's holiday dates on it
- * would be worse than the honest sentence.
- */
-export async function buildCardForTrip(
-  nowMs: number = Date.now()
-): Promise<ShareCardResult> {
-  try {
-    const trace = await getExportableTrace();
-    if (!trace.safeToShare) {
-      // ⚠ The refusal is the feature. ARCHITECTURE §10 forbids showing an
-      // export the app cannot vouch for.
-      return { ok: false, refusal: trace.refusal ?? 'failed', reason: trace.reason };
-    }
-
-    const trip = (await tripDao.getActiveTrip()) ?? (await tripDao.getMostRecentTrip());
-    if (trip === null) {
-      return { ok: false, refusal: 'nothing', reason: 'no trip to share yet' };
-    }
-
-    const progress = await getCurrentProgress();
-    const pack = getContentPack();
-
-    const awards = await stampAwardDao.getAwards(trip.id);
-    // Newest first: the last places you collected are the ones you remember.
-    const names = [...awards]
-      .sort((a, b) => b.awarded_ts - a.awarded_ts)
-      .flatMap((award) => {
-        const place = pack.places.find((candidate) => candidate.id === award.place_id);
-        return place === undefined ? [] : [place.name];
-      });
-
-    // The roads travelled, as on the map (D-093), but from the masked trace
-    // only and cut at the mask circle: this image leaves the phone.
-    const roads = await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M);
-    const strokes: CardPoint[][] = roads.map((segment) =>
-      segment.fixes.map((fix): CardPoint => [fix.lon, fix.lat])
-    );
-
-    return {
-      ok: true,
-      card: buildShareCard({
-        destination: pack.destination ?? t('share.fallbackTitle'),
-        dateRange: formatDateRange(trip.started_ts, trip.ended_ts ?? nowMs, deviceLanguage()),
-        collected: progress.collected,
-        total: progress.total,
-        strokes,
-        stampNames: names,
-        language: deviceLanguage(),
-      }),
-    };
-  } catch (error) {
-    await recordingEventDao.logError('share card', error);
-    return { ok: false, refusal: 'failed', reason: 'the trip could not be read' };
-  }
-}
 
 /**
  * Give the capture a name a person would choose (T-192).

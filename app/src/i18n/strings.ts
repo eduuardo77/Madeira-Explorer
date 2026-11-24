@@ -621,12 +621,6 @@ export const STRINGS = {
   'passport.mostRecent': s('Most recent: {date}', 'Mais recente: {date}', 'Zuletzt: {date}'),
   'passport.showLess': s('Show less', 'Ver menos', 'Weniger anzeigen'),
   'passport.share': s('Share', 'Partilhar', 'Teilen'),
-  'passport.sharing': s('Preparing…', 'A preparar…', 'Wird vorbereitet…'),
-  'passport.share.nothingTitle': s(
-    'Nothing to share yet',
-    'Ainda não há nada para partilhar',
-    'Noch nichts zum Teilen'
-  ),
   'passport.share.failedTitle': s('Could not share', 'Não foi possível partilhar', 'Teilen nicht möglich'),
   // T-190: the title of the phone's own share sheet. It was English on every phone.
   'passport.share.dialogTitle': s('Share your trip', 'Partilhar a tua viagem', 'Ihre Reise teilen'),
@@ -760,17 +754,6 @@ export const STRINGS = {
     'Es sind noch keine Orte ausgewählt, also gibt es nichts zu sammeln.'
   ),
 
-  'passport.a11y.share': s(
-    'Share your trip as an image',
-    'Partilhar a tua viagem como imagem',
-    'Ihre Reise als Bild teilen'
-  ),
-  // T-192: said when Share is disabled, so a screen reader knows why.
-  'passport.a11y.shareLater': s(
-    'Sharing opens after your first stamp',
-    'A partilha fica disponível depois do primeiro carimbo',
-    'Teilen ist nach Ihrem ersten Stempel möglich'
-  ),
   'passport.a11y.backToMap': s('Back to the map', 'Voltar ao mapa', 'Zurück zur Karte'),
   'passport.a11y.stampCollected': s(
     '{name}, collected. Open to show it on the map.',

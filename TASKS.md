@@ -473,7 +473,10 @@ permission, L3 privacy contact.
 - [x] **T-327** **The trip viewer's Partilhar removed (the lead, 23 Nov).** Its image was roads on
       black when the map had not loaded, and could not be saved to the gallery; a screenshot does it
       better. *Horas* moved into its place. D-099 amended. Typecheck and 1,327 tests pass; seen on
-      the P30 24 Nov (field build); reaches Play only with the next store build.
+      the P30 24 Nov (field build); reaches Play only with the next store build. **24 Nov: the
+      passport's Partilhar removed too** (the lead), with `ShareCardView.tsx` and `buildCardForTrip`.
+      Only the trophy share remains. ⚠ The privacy policy's *When you share your trip* still
+      describes a map picture; changing it (and its date) awaits the lead.
 - [ ] **T-326** **Ask for a Play Store rating, rarely (the lead, 23 Nov: "reviews are important,
       can't be an annoying pop-up").** Built under D-111 (Accepted 23 Nov): Google's own in-app review
       sheet (`expo-store-review`), asked for only as a free stamp's celebration closes, from the

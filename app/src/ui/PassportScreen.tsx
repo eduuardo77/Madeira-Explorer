@@ -38,13 +38,11 @@ import * as recordingEventDao from '../storage/dao/recordingEventDao';
 import * as stampAwardDao from '../storage/dao/stampAwardDao';
 import * as tripDao from '../storage/dao/tripDao';
 import type { StampAward } from '../storage/types';
-import ShareCardView from '../souvenir/ShareCardView';
 import { getSouvenirComposition } from '../souvenir/souvenirPlan';
-import { formatDateRange, type ShareCard } from '../souvenir/shareCard';
+import { formatDateRange } from '../souvenir/shareCard';
 import { listedTrips, withSomethingToShow } from '../souvenir/tripList';
 import { localStartOfDay, tripDayCount } from '../souvenir/tripDays';
 import { storedRoadsFor } from '../matching/roadNetwork';
-import { REFUSAL_KEYS, buildCardForTrip, shareCardImage } from '../souvenir/shareTrip';
 import PassportView, {
   PASSPORT_BAR_TOP,
   type FounderCard,
@@ -200,15 +198,6 @@ export default function PassportScreen({
   /** The one walk the app wants settled (T-149), or null — which is usually. */
   const [confirmation, setConfirmation] = useState<ConfirmationPrompt | null>(null);
   const [confirmationEvidence, setConfirmationEvidence] = useState('');
-  /**
-   * The share card, built only when asked for (T-105d).
-   *
-   * ⚠ It has to be *mounted* to be photographed — `captureRef` photographs a
-   * view, not a description — so it is rendered off to the side of the screen
-   * while the share sheet is being prepared, and unmounted afterwards.
-   */
-  const [shareCard, setShareCard] = useState<ShareCard | null>(null);
-  const [sharing, setSharing] = useState(false);
   /** T-204: whether a trip is open, which is when "End trip" is offered. */
   const [tripOpen, setTripOpen] = useState(false);
   /**
@@ -268,7 +257,6 @@ export default function PassportScreen({
     [waiting]
   );
   const unlockFromPage = useCallback(() => openUnlock(null), [openUnlock]);
-  const shareCardRef = useRef<View>(null);
 
   /** Covered by another screen: whatever was open over the passport closes. */
   useEffect(() => {
@@ -586,45 +574,6 @@ export default function PassportScreen({
     })();
   }, [awards]);
 
-  /**
-   * Build the card, let React draw it, photograph it, hand it to the OS.
-   *
-   * The wait is not a guess at a render time — `requestAnimationFrame` fires
-   * after the frame the card was drawn in, which is exactly the moment it
-   * becomes photographable.
-   */
-  const canShare = progress !== null && progress.collected > 0;
-
-  const shareTrip = () => {
-    if (sharing || !canShare) {
-      return;
-    }
-    setSharing(true);
-
-    void (async () => {
-      const built = await buildCardForTrip();
-      if (!built.ok) {
-        setSharing(false);
-        // The honest answer from the export door, shown rather than swallowed
-        // (ARCHITECTURE §10) — most often "the trace could not be masked".
-        // ⚠ T-190: the translated refusal, never `reason`, which is the diary's
-        // English and was shown here until 2026-09-23.
-        Alert.alert(t('passport.share.nothingTitle'), t(REFUSAL_KEYS[built.refusal]));
-        return;
-      }
-
-      setShareCard(built.card);
-      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-
-      const shared = await shareCardImage(shareCardRef);
-      setShareCard(null);
-      setSharing(false);
-      if (!shared.ok) {
-        Alert.alert(t('passport.share.failedTitle'), t(REFUSAL_KEYS[shared.refusal]));
-      }
-    })();
-  };
-
   const closeCard = () => {
     setCard(null);
     setCardPlace(null);
@@ -816,14 +765,14 @@ export default function PassportScreen({
         />
         )
       )}
-      {/* The bar behind `‹ Map` and Share, in the album's colour, under every
+      {/* The bar behind `‹ Map`, in the album's colour, under every
           sheet: without it the stamps scrolled through the controls and under
           the status bar (T-263, seen in the visual pass). */}
       <View style={styles.bar} pointerEvents="none" />
 
       {/* T-201: dim the stamps behind the card, which competed with it (review
           P1-4). Tapping the dimmed page closes the card, as a sheet's backdrop
-          does. Drawn before the back and share controls, so they stay above it
+          does. Drawn before the back control, so it stays above it
           and reachable: the card is still not modal (PlaceCardView). Hidden
           from screen readers, which close the card with its own button. */}
       {card === null ? null : (
@@ -907,34 +856,9 @@ export default function PassportScreen({
         />
       )}
 
-      {/* The card being photographed. Off-screen rather than hidden: a view
-          with zero opacity or `display: none` is not guaranteed to have pixels
-          to capture, and one placed beyond the edge always does. */}
-      {shareCard === null ? null : (
-        <View style={styles.offscreen} pointerEvents="none">
-          <ShareCardView ref={shareCardRef} card={shareCard} />
-        </View>
-      )}
-
-      {/* ⚠ T-192: nothing to share before the first stamp. It used to share
-          at 0 / 80, and the image was almost entirely black (review P1-5). */}
-      {islandPage !== null ? null : (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('passport.a11y.share')}
-        accessibilityHint={canShare ? undefined : t('passport.a11y.shareLater')}
-        accessibilityState={{ disabled: !canShare }}
-        disabled={!canShare}
-        onPress={shareTrip}
-        style={({ pressed }) => [
-          styles.share,
-          !canShare && styles.shareDisabled,
-          pressed && styles.pressed,
-        ]}
-      >
-        <Text style={styles.shareText}>{sharing ? t('passport.sharing') : t('passport.share')}</Text>
-      </Pressable>
-      )}
+      {/* T-327 (24 Nov 2026): the passport's Partilhar removed, the lead's call
+          after the trip viewer's: a phone screenshot shares the page better,
+          and the share sheet could not keep the image in the gallery. */}
 
       {/* ⚠ **Top-left, in a navigation bar, not floating bottom-right.**
           A floating pill sat on top of the last category row — the scroll's
@@ -1172,7 +1096,6 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   // Off the side of the screen, where it can be drawn and photographed without
   // ever being seen.
-  offscreen: { position: 'absolute', left: -4000, top: 0 },
   bar: {
     position: 'absolute',
     top: 0,
@@ -1180,23 +1103,6 @@ const styles = StyleSheet.create({
     right: 0,
     height: PASSPORT_BAR_TOP + MIN_TAP_TARGET,
     backgroundColor: album.background,
-  },
-  // Opposite the back control, where iOS puts a share action.
-  share: {
-    position: 'absolute',
-    top: PASSPORT_BAR_TOP,
-    right: spacing.sm,
-    minHeight: MIN_TAP_TARGET,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  // Disabled controls are exempt from the contrast floor (WCAG 1.4.3); the
-  // hint says why it is off.
-  shareDisabled: { opacity: 0.4 },
-  shareText: {
-    color: album.tint,
-    fontSize: fontSize.body,
-    fontWeight: '600',
   },
   back: {
     position: 'absolute',

@@ -63,7 +63,7 @@ function thresholdsInForce(): Record<string, number> {
 
 export type DonationResult =
   | { ok: true; report: WalkReport; description: string }
-  /** As `ShareCardResult`: the screen shows `refusal`, the diary keeps `reason`. */
+  /** As a share refusal: the screen shows `refusal`, the diary keeps `reason`. */
   | { ok: false; refusal: ShareRefusal; reason: string };
 
 /**

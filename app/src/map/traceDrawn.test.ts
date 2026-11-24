@@ -131,12 +131,19 @@ test('NativeMapScreen draws the matched roads, not the fixes', () => {
 });
 
 /**
- * The share card and the film leave the phone. They must use the export path
+ * The film leaves the phone. It must use the export path
  * (masked fixes, then cut at the mask circle: `matching/roadTrace.ts` says why
  * masking fixes is no longer enough), never the map's private lines.
  */
-test('the share card and the film draw roads from the masked export only', () => {
-  for (const file of ['souvenir/shareTrip.ts', 'souvenir/souvenirPlan.ts']) {
+test('the film draws roads from the masked export only, and shareTrip never reads the trace', () => {
+  // T-327: the passport's share card went on 24 Nov 2026; shareTrip.ts only
+  // photographs the trophy now, so it must not read the trace at all.
+  const shareTrip = codeOnly(readFileSync(path.join(srcRoot, 'souvenir/shareTrip.ts'), 'utf8'));
+  assert.ok(
+    !/roadLinesFor\s*\(|rawFixDao|getExportableTrace|exportRoadSegments/.test(shareTrip),
+    'souvenir/shareTrip.ts reads a trace; the trophy share has no map in it.'
+  );
+  for (const file of ['souvenir/souvenirPlan.ts']) {
     const source = codeOnly(readFileSync(path.join(srcRoot, file), 'utf8'));
     assert.ok(
       /exportRoadSegments\(\s*trace\.fixes,\s*trace\.accommodation,\s*MASK_RADIUS_M\s*\)/.test(source),

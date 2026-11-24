@@ -85,14 +85,14 @@ writeFileSync(path.join(here, '..', 'site', 'icon.png'), siteIcon);
 console.log(`site/icon.png  ${siteIcon.length} bytes`);
 
 // Play's listing (T-269): its 512 px icon, the launcher's square, and the
-// feature graphic the lead picked (B, the flag).
+// feature graphic the lead picked (G2, the island as a light map, 2026-11-24).
 const store = path.join(here, '..', 'store');
 mkdirSync(store, { recursive: true });
 const storeFiles = {
   'icon-512.png': png(`${icon.background}${icon.foreground}`, SHOWN, 512),
   // ⚠ No alpha: Play takes a feature graphic only as JPEG or 24-bit PNG.
   'feature-graphic.png': rgbPng(
-    new Resvg(featureGraphicSvg(rings, ROUTE), { fitTo: { mode: 'width', value: 1024 } }).render()
+    new Resvg(featureGraphicSvg(rings), { fitTo: { mode: 'width', value: 1024 }, font: { loadSystemFonts: true } }).render()
   ),
 };
 for (const [name, data] of Object.entries(storeFiles)) {

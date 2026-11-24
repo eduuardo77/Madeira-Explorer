@@ -306,7 +306,13 @@ Auf Englisch, Portugiesisch und Deutsch. Gemacht auf Madeira.
 
 ## 4b. The feature graphic and the store icon (T-269)
 
-✅ **Chosen 2026-10-07: B, the flag as drawn**, the icon at banner size: blue, gold and blue, the cross,
+✅ **Replaced 2026-11-24: G2, the island as a light map, the name on its left.** B (below) read as
+the icon again at banner size. G2: pale sea, the island in soft greens with a shadow, the south coast
+drive lit in deep blue, levadas in green dashes, six places pinned, "Bruma" with MADEIRA under it,
+which reads the same in every language. Drawn against D, E, F (dark) and G, H (light). Same files and
+build as below; the text needs system fonts, so build on Windows.
+
+Before that, **chosen 2026-10-07: B, the flag as drawn**, the icon at banner size: blue, gold and blue, the cross,
 the island and its lit road, no text (nothing to translate). Drawn against A (the island on slate
 with the name), C (the island's road network) and three quieter versions of B
 (`tools/preview-feature-graphic.mjs`). The files Play takes are `store/feature-graphic.png` and

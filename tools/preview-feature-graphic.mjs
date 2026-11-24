@@ -22,86 +22,22 @@
  * the middle and the only text is the name, which needs no translation.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { islandPaths, PALETTE } from './lib/icon-art.mjs';
-import { flagBanner, H, W } from './lib/feature-graphic.mjs';
+import { DAY_DEFS, dayIsland, flagBanner, fmt, font, H, islandLayers, optionG2, places, W, wordmark } from './lib/feature-graphic.mjs';
 import { mainIslandRings, ROUTE } from './lib/icon-geometry.mjs';
-import { drivenRoute, rng } from './lib/syntheticTrips.mjs';
+import { rng } from './lib/syntheticTrips.mjs';
 import { stampSvg } from './lib/svg-render.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, '..');
-const readJson = (p) => JSON.parse(readFileSync(path.join(root, p), 'utf8'));
 
 const rings = mainIslandRings();
-const { decodeRoadGraph } = await import(pathToFileURL(path.join(root, 'app/src/matching/roadGraph.ts')).href);
-const graph = decodeRoadGraph(readJson('content/roads.json'));
-const routing = await import(pathToFileURL(path.join(root, 'app/src/matching/roadRouting.ts')).href);
-const levadas = readJson('content/levadas.json');
-const places = readJson('content/pois.json').places;
-
-const font = `font-family="Segoe UI, Roboto, Arial, sans-serif"`;
 const NIGHT = '#0F1A20';
 
-const fmt = (points) => `M${points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join('L')}`;
 
-/** The island's whole road network, a set of lit roads and the levadas, as paths in the 108 canvas. */
-function islandLayers(island, { litSeed = 7, litWalks = 9, walkM = 30000, kinds = ['m', 'p', 'r'], alwaysKinds = [] } = {}) {
-  const project = (e, i) => island.project(graph.lon[i], graph.lat[i]);
-  let network = '';
-  for (let e = 0; e < graph.edgeCount; e += 1) {
-    const from = graph.pointStart[e];
-    const to = graph.pointStart[e + 1];
-    if (graph.lat[from] < 32.6) continue; // the Desertas and Porto Santo
-    const pts = [];
-    for (let i = from; i < to; i += 1) pts.push(project(e, i));
-    network += fmt(pts);
-  }
-  // Lit roads: walks from real places, so they cluster where people go.
-  const random = rng(litSeed);
-  const starts = places.filter((p) => p.geofences[0].lat > 32.6);
-  const nearest = (lat, lon) => {
-    let best = -1;
-    let bestD = Infinity;
-    for (let e = 0; e < graph.edgeCount; e += 1) {
-      const kind = graph.edgeKindCodes[e].toLowerCase();
-      if (!'mpr'.includes(kind)) continue;
-      const i = graph.pointStart[e];
-      const d = (graph.lat[i] - lat) ** 2 + (graph.lon[i] - lon) ** 2;
-      if (d < bestD) {
-        bestD = d;
-        best = e;
-      }
-    }
-    return best;
-  };
-  let lit = '';
-  for (let w = 0; w < litWalks; w += 1) {
-    const place = starts[Math.floor(random() * starts.length)];
-    const steps = drivenRoute(graph, routing, nearest(place.geofences[0].lat, place.geofences[0].lon), walkM * (0.5 + random()), random, kinds);
-    for (const { edge } of steps) {
-      const pts = [];
-      for (let i = graph.pointStart[edge]; i < graph.pointStart[edge + 1]; i += 1) pts.push(project(edge, i));
-      lit += fmt(pts);
-    }
-  }
-  // Every road of these kinds, lit whole: the expressways, which nearly every visitor drives.
-  for (let e = 0; e < graph.edgeCount; e += 1) {
-    if (!alwaysKinds.includes(graph.edgeKindCodes[e].toLowerCase()) || graph.lat[graph.pointStart[e]] < 32.6) continue;
-    const pts = [];
-    for (let i = graph.pointStart[e]; i < graph.pointStart[e + 1]; i += 1) pts.push(project(e, i));
-    lit += fmt(pts);
-  }
-  let lev = '';
-  for (const f of levadas.features) {
-    const lines = f.geometry.type === 'LineString' ? [f.geometry.coordinates] : f.geometry.coordinates;
-    for (const line of lines) lev += fmt(line.map(([lon, lat]) => island.project(lon, lat)));
-  }
-  return { network, lit, lev };
-}
 
 /** The island at night: the network faint, the lit roads in the dark map's blue. */
 function nightIsland(island, { levadaGlow = true, ...litOptions } = {}) {
@@ -201,10 +137,16 @@ function optionE(c = DUSK) {
       : wordmark(512, 120, 84, c.ink, c.sub)}`;
 }
 
-/** The name and, under it, MADEIRA in spaced capitals: a word every language reads the same. */
-function wordmark(x, y, size, ink, sub, anchor = 'middle') {
-  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Segoe UI Semibold, Segoe UI, Roboto, Arial, sans-serif" font-size="${size}" font-weight="600" letter-spacing="${size * 0.06}" fill="${ink}">Bruma</text>
-    <text x="${anchor === 'middle' ? x : x + 4}" y="${y + size * 0.48}" text-anchor="${anchor}" ${font} font-size="${size * 0.22}" font-weight="600" letter-spacing="${size * 0.11}" fill="${sub}">MADEIRA</text>`;
+
+/** G: the island by day, centred, the name above it. */
+function optionG() {
+  const island = islandPaths(rings, 100, 54);
+  const s = 7.2;
+  return `<defs>${DAY_DEFS}</defs>
+    <rect width="${W}" height="${H}" fill="url(#sea)"/>
+    <rect width="${W}" height="${H}" fill="url(#seaLight)"/>
+    <g transform="translate(${512 - 54 * s} ${306 - 54 * s}) scale(${s})">${dayIsland(island)}</g>
+    ${wordmark(512, 92, 62, '#1B2A33', '#4C6677')}`;
 }
 
 /** H: E at first light. Pale sky, white mist, the road in a deep blue with a white halo. */
@@ -220,56 +162,6 @@ function optionH() {
   });
 }
 
-/** The island by day, map style: soft shadow, shelf rings in the sea, lit roads in deep blue with a white casing. */
-function dayIsland(island, { pins = true } = {}) {
-  const { network, lit, lev } = islandLayers(island, { litSeed: 4, litWalks: 4, walkM: 40000, kinds: ['m', 'p'], alwaysKinds: ['m'] });
-  const pinAt = (id) => {
-    const g = places.find((p) => p.id === id).geofences[0];
-    const [x, y] = island.project(g.lon, g.lat);
-    return `<circle cx="${x}" cy="${y}" r="1.25" fill="#FFFFFF" filter="url(#pinShadow)"/><circle cx="${x}" cy="${y}" r="0.7" fill="#E4572E"/>`;
-  };
-  const line = 'fill="none" stroke-linecap="round" stroke-linejoin="round"';
-  return `
-    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="9" stroke-linejoin="round"/>
-    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="${island.d}" fill="#000000" fill-opacity="0.18" stroke="#000000" stroke-opacity="0.18" stroke-width="2.4" stroke-linejoin="round" transform="translate(0.6 1.4)" filter="url(#islandShadow)"/>
-    <path d="${island.d}" fill="url(#land)" stroke="url(#land)" stroke-width="2.4" stroke-linejoin="round"/>
-    <path d="${island.d}" fill="none" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="0.35" stroke-linejoin="round"/>
-    <path d="${network}" fill="none" stroke="#7D8F86" stroke-opacity="0.28" stroke-width="0.09"/>
-    <path d="${lev}" ${line} stroke="#1E9E78" stroke-opacity="0.75" stroke-width="0.22" stroke-dasharray="0.6 0.45"/>
-    <path d="${lit}" ${line} stroke="#FFFFFF" stroke-width="1.05"/>
-    <path d="${lit}" ${line} stroke="#1F6FE0" stroke-width="0.55"/>
-    ${pins ? ['pico-do-areeiro', 'cabo-girao', 'porto-moniz', 'levada-das-25-fontes', 'santana', 'ponta-de-sao-lourenco'].map(pinAt).join('') : ''}`;
-}
-
-const DAY_DEFS = `
-    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF4F8"/><stop offset="1" stop-color="#CFE4EE"/></linearGradient>
-    <radialGradient id="seaLight" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.7"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
-    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9F0DC"/><stop offset="0.6" stop-color="#D6E5C6"/><stop offset="1" stop-color="#C7DBB6"/></linearGradient>
-    <filter id="islandShadow" x="-10%" y="-10%" width="120%" height="130%"><feGaussianBlur stdDeviation="1.6"/></filter>
-    <filter id="pinShadow" x="-100%" y="-100%" width="300%" height="300%"><feDropShadow dx="0" dy="0.25" stdDeviation="0.3" flood-color="#000000" flood-opacity="0.35"/></filter>`;
-
-/** G: the island by day, centred, the name above it. */
-function optionG() {
-  const island = islandPaths(rings, 100, 54);
-  const s = 7.2;
-  return `<defs>${DAY_DEFS}</defs>
-    <rect width="${W}" height="${H}" fill="url(#sea)"/>
-    <rect width="${W}" height="${H}" fill="url(#seaLight)"/>
-    <g transform="translate(${512 - 54 * s} ${306 - 54 * s}) scale(${s})">${dayIsland(island)}</g>
-    ${wordmark(512, 92, 62, '#1B2A33', '#4C6677')}`;
-}
-
-/** G2: the same island by day, to the right, the name on the left. */
-function optionG2() {
-  const island = islandPaths(rings, 100, 54);
-  const s = 6.0;
-  return `<defs>${DAY_DEFS}</defs>
-    <rect width="${W}" height="${H}" fill="url(#sea)"/>
-    <rect width="${W}" height="${H}" fill="url(#seaLight)"/>
-    <g transform="translate(${672 - 54 * s} ${262 - 54 * s}) scale(${s})">${dayIsland(island)}</g>
-    ${wordmark(64, 252, 72, '#1B2A33', '#4C6677', 'start')}`;
-}
 
 /** One of the app's own stamps, placed and turned. resvg ignores CSS transforms, so the tilt moves to a group. */
 function placedStamp(id, size, x, y, extraTilt = 0) {
@@ -299,7 +191,7 @@ function optionF() {
 
 const options = [
   ['g', 'G, the island by day', 'A light map: the island with a soft shadow and pale shelf rings in the sea, a few trips in deep blue with a white casing, levadas as green dashes, six places pinned. MADEIRA under the name reads the same in every language.', optionG()],
-  ['g2', 'G2, the same, name on the left', 'G as a layout with the name beside the island instead of above it: more room for both.', optionG2()],
+  ['g2', 'G2, the same, name on the left (chosen 2026-11-24, ships)', 'G as a layout with the name beside the island instead of above it: more room for both.', optionG2(rings)],
   ['h', 'H, bruma at first light', 'E redrawn in daylight: pale sky, white mist, a soft sun, the road in deep blue with a white halo.', optionH()],
   ['b', 'B, the banner now', 'What Play shows today: the icon at banner size. For comparison.', flagBanner(rings, ROUTE)],
   ['d', 'D, the island at night', 'The whole road network faint, a month of driving lit in the app’s blue, the levadas glowing green. What the app looks like after you have used it, which the icon does not show.', optionD()],

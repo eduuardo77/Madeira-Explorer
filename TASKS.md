@@ -4552,6 +4552,12 @@ Cheap answers to expensive questions. Nothing here requires the app to exist.
       quieter versions; the lead: "I'll keep B"). `store/feature-graphic.png` (1024 × 500, 24-bit
       RGB: Play refuses alpha there) and `store/icon-512.png`, both written by `build-icon.mjs` from
       the icon's art (`lib/feature-graphic.mjs`), so they cannot drift from the launcher.
+      ✅ **Feature graphic replaced 2026-11-24: G2**, the island as a light map with "Bruma" and
+      MADEIRA on its left. The lead found B "a bit too similar to the icon"; rounds three (D, E, F,
+      dark) and four (G, G2, H, lighter, "more professional finish") drawn, G2 picked. Lit roads are
+      every expressway plus a few `drivenRoute` trips, not a trace (D-016). The name is text, so
+      `build-icon.mjs` renders with system fonts (Segoe UI): build it on Windows. Awaits the lead's
+      upload to Play.
 - [ ] **T-134** Verify ≥10 real week-long trips recorded end to end with no tracking failure
       ⇠ T-129
 - [ ] **T-135** Verify no beta tester reports a missing levada or a false stamp ⇠ T-132

@@ -271,7 +271,35 @@ const paced = {
 };
 console.log(`paced by day: ${plan.days.length} days with new road, ${plan.strokes.filter((s) => !s.quiet).length} pen strokes`);
 
-const natural = { ...data, paced, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
+// --- The spike's job (T-329): node tools/preview-video-options.mjs --db … --spike <dir> ---
+// Everything the throwaway app in tools/video-spike/ needs to render this film
+// on a phone: the frames' cameras (MapLibre zoom, one less than Google's), the
+// pen's strokes, and the style resolved to files in that app's folder.
+const NATURAL_PALETTE = JSON.parse(readFileSync(path.join(root, 'tools/lib/video-natural-palette.json'), 'utf8')).paint;
+const spikeDir = arg('spike', null);
+if (spikeDir !== null) {
+  const PHONE = '/storage/emulated/0/Android/data/com.proa.videospike/files';
+  const style = JSON.parse(
+    readFileSync(path.join(root, 'app/assets/map/light.json'), 'utf8')
+      .replace('{{TILES_PMTILES}}', `pmtiles://file://${PHONE}/madeira.pmtiles`)
+      .replace('{{TERRAIN_PMTILES}}', `pmtiles://file://${PHONE}/madeira-terrain.pmtiles`)
+      .replace('{{GLYPHS}}', `file://${PHONE}/fonts`)
+  );
+  // The natural palette, the one file the sketch page uses too.
+  for (const [key, value] of Object.entries(NATURAL_PALETTE)) {
+    const [id, prop] = key.split('|');
+    const layer = style.layers.find((l) => l.id === id);
+    if (layer) layer.paint = { ...(layer.paint ?? {}), [prop]: value };
+  }
+  const lean = paced.cameras.lean.day;
+  const frames = lean.map(([lon, lat, zoom], i) => [Math.round(i * STEP_MS), lon / 1e5, lat / 1e5, Math.round((zoom - 1) * 1000) / 1000]);
+  mkdirSync(spikeDir, { recursive: true });
+  writeFileSync(path.join(spikeDir, 'style.json'), JSON.stringify(style));
+  writeFileSync(path.join(spikeDir, 'job.json'), JSON.stringify({ width: 360, height: 640, pixelRatio: 3, fps: 30, frames, strokes: paced.strokes }));
+  console.log(`spike job: ${frames.length} frames → ${spikeDir}`);
+}
+
+const natural = { ...data, paced, palette: NATURAL_PALETTE, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
 writeFileSync(
   path.join(root, 'tools/out/video-natural.html'),
   readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))

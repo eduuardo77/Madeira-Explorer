@@ -1,0 +1,5 @@
+# Gradle output and caches of the T-329 spike; only the sources are kept.
+.gradle/
+build/
+app/build/
+local.properties

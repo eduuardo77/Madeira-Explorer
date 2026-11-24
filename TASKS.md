@@ -560,6 +560,16 @@ permission, L3 privacy contact.
       trip in the gallery: saving the same trip again replaces the file the app made before (an
       app may change its own MediaStore files without permission on Android 10 and later), and
       says so; if the person deleted or moved it, a new one is saved.
+      **Started 24 Nov (the lead: "yes, start it").** The pen and the camera are app modules now
+      (`souvenir/pacedFilm.ts`, `souvenir/videoCamera.ts`, 14 tests), and the sketch runs on them.
+      **Spike on the P30** (`tools/video-spike/`, a separate throwaway app; README there): MapLibre
+      11.13.5 draws Bruma's map in a MapView frame by frame, the roads are drawn on with a Canvas,
+      frames go to the H.264 encoder as YUV with their own timestamps, the MP4 is saved to
+      Movies/BrumaSpike. **Trip 31's 18.2 s film was made in 157 s, all 547 frames, 20.3 MB**;
+      frames checked with ffmpeg. Next: cut the time (YUV conversion and road projection in plain
+      Kotlin are half of it), the overlays (title, info line, watermark, end card), then the native
+      module in the app with the preview screen. ⚠ MapLibre adds a native library to Bruma's
+      download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

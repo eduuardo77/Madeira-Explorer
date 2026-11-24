@@ -36,6 +36,7 @@ const { keepSimplified } = await load('map/simplifyLine.ts');
 const { distanceM } = await load('recording/distance.ts');
 const { composeSouvenir } = await load('souvenir/composition.ts');
 const { frameAt, frameTimes } = await load('souvenir/frame.ts');
+const { cameraPath } = await load('souvenir/replayMap.ts');
 const { detectAccommodation, maskTrace, MASK_RADIUS_M } = await load('souvenir/accommodation.ts');
 
 function arg(name, fallback) {
@@ -177,7 +178,15 @@ for (let e = 0; e < graph.edgeCount; e += 1) {
   (kind === 'm' || kind === 'p' ? roadLines.major : roadLines.minor).push(line);
 }
 
+// The app's own camera path (what `playCameraPath` plays on the phone), for a
+// 360 x 640 dp frame with the title above and the counters below. Google zoom.
+const path60 = cameraPath(film, { width: 360, height: 640, padding: { top: 100, bottom: 230, left: 20, right: 20 } });
+const cameraPathData = path60
+  .filter((_, i) => i % 2 === 0)
+  .map((p) => [Math.round(p.atMs), q(p.camera.coordinates.longitude), q(p.camera.coordinates.latitude), Math.round(p.camera.zoom * 1000) / 1000]);
+
 const data = {
+  cameraPath: cameraPathData,
   durationMs: film.durationMs,
   draw: film.scenes.find((s) => s.kind === 'draw'),
   finaleAt: film.scenes.find((s) => s.kind === 'finale').startMs,
@@ -200,6 +209,12 @@ const html = readFileSync(path.join(root, 'tools/lib/video-options-page.html'), 
   JSON.stringify(data)
 );
 mkdirSync(path.join(root, 'tools/out'), { recursive: true });
+// The natural map version (B on the project's own MapLibre map), lighter: no island geometry.
+const natural = { ...data, outlines: undefined, roadLines: undefined, camera: undefined };
+writeFileSync(
+  path.join(root, 'tools/out/video-natural.html'),
+  readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))
+);
 const out = path.join(root, 'tools/out/video-options.html');
 writeFileSync(out, html);
 console.log(

@@ -486,6 +486,16 @@ permission, L3 privacy contact.
       from a Canvas surface, save to `Movies/` through MediaStore, share), unmeasured on the P30.
       The sketch's km counter is approximate (345 against the app's 369). Supersedes the Google
       basemap assumption in T-105b-v2 and T-106 (*Google's attribution clear of both*).
+      **Later 24 Nov: the lead picked B, "natural, in terms of the map".** B is now drawn on the
+      project's own MapLibre map from August (`app/assets/map/`: OSM tiles, SRTM relief, the light
+      style) with a greener palette (blue sea, green forest, stronger relief; August's muted colours
+      one click away), the app's own film camera (`cameraPath`, Google zoom minus 1), the trace in
+      `traceStyle.light`, stamps landing, and the closing card under the island. Sketch:
+      `tools/out/video-natural.html`, written by the same command; it needs `tools/out/map/` (a copy
+      of `app/assets/map/`) and the `options` server. *Câmara mais perto* tries one level closer
+      while drawing; it crops the far end of a long day. ⚠ **For the phone:** MapLibre Native left
+      the app with D-057, so drawing this map on the device means bringing a renderer back (or
+      MapLibre's offscreen snapshotter), a native dependency and a store build. Unmeasured.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's
       and the passport's Partilhar are gone, and the trophy card's share (a stamp, no map) is hidden.

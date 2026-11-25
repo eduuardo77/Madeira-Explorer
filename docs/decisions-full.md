@@ -6094,3 +6094,8 @@ export (its terms).
 the export, a native dependency and a store build; the time to render on the P30 is unmeasured,
 so no screen promises a duration. Android 7 to 9 ask for storage permission to save.
 
+**Built 25 Nov 2026** (`modules/video-export`, `souvenir/videoJob.ts`, `VideoScreen.tsx`), on the
+P30: 20.4 s of video in 79 s, preview at 52 fps on a field build. Measured cost: the APK from
+43.8 to 76.9 MB (tiles 19 MB, MapLibre ~13 MB). Android 9 and earlier share rather than save (the
+app holds no storage permission). Saving a trip again replaces its video.
+

@@ -12,6 +12,12 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   within 10 m**, by car 97.4%, on foot 63.1%; every stop slept, false *in vehicle* labels indoors
   raised nothing, no departure dropped to walking; a quiet night. No new fault. Backup
   `p30-2026-11-25-after-trip`.
+- **25 Nov, 10:55: T-329, the video you keep, built into Bruma** (D-112), on the P30 as a field
+  build (e05d943, backup `p30-2026-11-25-before-t329-video`): the film's *Fazer o vídeo* opens a
+  preview with *Informação* and *Câmara*, *Guardar na Galeria* makes it (trip 31: 79 s, 21 MB),
+  a second save of the same trip replaces the first, *Partilhar* works. New native module
+  `modules/video-export` (MapLibre): **the APK grew 43.8 to 76.9 MB**. Not in the Play build;
+  T-328 (privacy policy) has to change with it. The spike app was removed from the P30.
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

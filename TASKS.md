@@ -562,7 +562,7 @@ permission, L3 privacy contact.
       says so; if the person deleted or moved it, a new one is saved.
       **Started 24 Nov (the lead: "yes, start it").** The pen and the camera are app modules now
       (`souvenir/pacedFilm.ts`, `souvenir/videoCamera.ts`, 14 tests), and the sketch runs on them.
-      **Spike on the P30** (`tools/video-spike/`, a separate throwaway app; README there): MapLibre
+      **Spike on the P30** (`tools/video-spike/`, a separate throwaway app, removed 25 Nov once its code moved into the app; README in git history): MapLibre
       11.13.5 draws Bruma's map in a MapView frame by frame, the roads are drawn on with a Canvas,
       frames go to the H.264 encoder as YUV with their own timestamps, the MP4 is saved to
       Movies/BrumaSpike. **Trip 31's 18.2 s film was made in 157 s, all 547 frames, 20.3 MB**;
@@ -581,6 +581,20 @@ permission, L3 privacy contact.
       (now each municipality's largest polygon), and the day's date ran into the trip dates (now
       on the figures' row). ⚠ The sketch page still has its own copy of the overlay timing; the
       module is the one that ships.
+      **25 Nov, built into Bruma** (the lead: "build it into Bruma"; commits 742549c, e05d943):
+      `modules/video-export` (MapLibre 11.13.5; `BrumaVideoView` previews and exports, `Gallery`
+      saves), `souvenir/videoJob.ts` (pure, 7 tests), `videoSource.ts` (the masked export, D-040),
+      `VideoScreen.tsx`, *Fazer o vídeo* on the film (whole trip, Android only). **Seen on the P30
+      (field build e05d943, backup `p30-2026-11-25-before-t329-video`):** preview at 52 fps (field
+      builds run slower); trip 31 saved in 79 s, 613 frames, 21 MB, checked with ffmpeg; saved
+      again with *Completa*: one file in Movies/Bruma, *Substituiu…* shown; *Partilhar* opens
+      Android's sheet with the video. Fixed on the phone: the close said 374 km against the
+      viewer's 375 (it glided short; now the figure exactly). ⚠ **The APK grew 43.8 to 76.9 MB**
+      (19 MB tiles, 0.6 MB fonts, ~13 MB MapLibre): smaller tiles for the video (it never zooms past
+      island level) is the obvious cut, not done. ⚠ Not in the Play build; needs a store build and
+      the privacy policy's sharing section (T-328) rewritten for the video. Android 9 and earlier
+      can only share it (no storage permission). Not seen: the unlock from *Tirar a marca* (Play
+      billing only works from a Play install), Android 7 to 9, any other phone.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

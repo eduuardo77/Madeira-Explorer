@@ -19,7 +19,7 @@
  * place, a sketch's stand-in for the award time.
  */
 
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -271,77 +271,10 @@ const paced = {
 };
 console.log(`paced by day: ${plan.days.length} days with new road, ${plan.strokes.filter((s) => !s.quiet).length} pen strokes`);
 
-// --- The spike's job (T-329): node tools/preview-video-options.mjs --db … --spike <dir> ---
-// Everything the throwaway app in tools/video-spike/ needs to render this film
-// on a phone: the frames' cameras (MapLibre zoom, one less than Google's), the
-// pen's strokes, and the style resolved to files in that app's folder.
-const NATURAL_PALETTE = JSON.parse(readFileSync(path.join(root, 'tools/lib/video-natural-palette.json'), 'utf8')).paint;
-const spikeDir = arg('spike', null);
-if (spikeDir !== null) {
-  const PHONE = '/storage/emulated/0/Android/data/com.proa.videospike/files';
-  const style = JSON.parse(
-    readFileSync(path.join(root, 'app/assets/map/light.json'), 'utf8')
-      .replace('{{TILES_PMTILES}}', `pmtiles://file://${PHONE}/madeira.pmtiles`)
-      .replace('{{TERRAIN_PMTILES}}', `pmtiles://file://${PHONE}/madeira-terrain.pmtiles`)
-      .replace('{{GLYPHS}}', `file://${PHONE}/fonts`)
-  );
-  // The natural palette, the one file the sketch page uses too.
-  for (const [key, value] of Object.entries(NATURAL_PALETTE)) {
-    const [id, prop] = key.split('|');
-    const layer = style.layers.find((l) => l.id === id);
-    if (layer) layer.paint = { ...(layer.paint ?? {}), [prop]: value };
-  }
-  // The frames: the camera (by-day path, settled on the whole trip at the close,
-  // held through the end card) and what is drawn over the map, both from the
-  // app's own modules. --info full|discreet|none, --tier free|paid.
-  const { planOverlay, overlayAt, videoDurationMs } = await load('souvenir/videoOverlay.ts');
-  const { settleCamera, videoCameraAt } = await load('souvenir/videoCamera.ts');
-  const { fitBounds } = await load('map/cameraFit.ts');
-  const { APP_NAME } = await load('brand.ts');
-  const info = arg('info', 'discreet');
-  const tier = arg('tier', 'free');
-  const finaleAt = film.scenes.find((s) => s.kind === 'finale').startMs;
-  const overlayPlan = planOverlay({
-    language: 'pt', title: pack.destination, firstTs: data.firstTs, lastTs: data.lastTs, tripDays: paced.tripDays,
-    paced: plan, placeNames: new Map([...places].map(([id, p]) => [id, p.name])),
-    collected: film.scenes.find((s) => s.kind === 'finale').collected, total: madeiraTotal,
-    drawStartMs: DRAW_FROM, finaleAtMs: finaleAt, durationMs: film.durationMs, info, tier,
-  });
-  const bottom = info === 'full' ? 230 : 130;
-  const viewport = { width: 360, height: 640, padding: { top: 120, bottom, left: 24, right: 24 } };
-  const dayPath = videoCameraPath({ whole: wholeBox, days: plan.days.map((d) => ({ startMs: d.startMs, bounds: d.bounds })), viewport, durationMs: film.durationMs, stepMs: STEP_MS, options: DAY_CAMERA });
-  const rest = fitBounds(wholeBox, { width: 360, height: 640, padding: { top: 120, bottom: bottom + 20, left: 24, right: 24 } });
-  const cameraPath = settleCamera(dayPath, { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom }, finaleAt - 600, 1500);
-  const total = videoDurationMs(overlayPlan);
-  const frames = [];
-  const overlays = [];
-  for (let i = 0; i * STEP_MS <= total; i += 1) {
-    const t = i * STEP_MS;
-    const cam = videoCameraAt(cameraPath, Math.min(t, film.durationMs));
-    frames.push([Math.round(t), cam.lon, cam.lat, Math.round((cam.zoom - 1) * 1000) / 1000]);
-    overlays.push(overlayAt(overlayPlan, t));
-  }
-  // The watermark's island, as rings of points in a 100-wide box (the page draws the same).
-  const k = Math.cos((32.75 * Math.PI) / 180);
-  // Each municipality's largest polygon, as islandMapArt.ts draws the island:
-  // Santa Cruz's outline also carries the Desertas, which read as specks.
-  const area = (ring) => Math.abs(ring.reduce((sum, [x, y], i) => { const [x2, y2] = ring[(i + 1) % ring.length]; return sum + x * y2 - x2 * y; }, 0)) / 2;
-  const mainland = regions.features
-    .filter((f) => f.properties.islandId === 'ilha-da-madeira')
-    .map((f) => (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates).map((poly) => poly[0]).sort((x, y) => area(y) - area(x))[0]);
-  const ringPts = mainland.map((r) => r.filter((_, i) => i % 6 === 0).map(([x, y]) => [x * k, -y]));
-  const flat = ringPts.flat();
-  const [x0, x1, y0, y1] = [Math.min(...flat.map((p) => p[0])), Math.max(...flat.map((p) => p[0])), Math.min(...flat.map((p) => p[1])), Math.max(...flat.map((p) => p[1]))];
-  const s100 = 100 / (x1 - x0);
-  const glyph = { width: 100, height: Math.round((y1 - y0) * s100 * 10) / 10, rings: ringPts.map((r) => r.map(([x, y]) => [Math.round((x - x0) * s100 * 10) / 10, Math.round((y - y0) * s100 * 10) / 10])) };
-  mkdirSync(spikeDir, { recursive: true });
-  writeFileSync(path.join(spikeDir, 'style.json'), JSON.stringify(style));
-  writeFileSync(path.join(spikeDir, 'job.json'), JSON.stringify({ width: 360, height: 640, pixelRatio: 3, fps: 30, appName: APP_NAME, frames, overlays, glyph, strokes: paced.strokes }));
-  copyFileSync(path.join(root, 'store/icon-512.png'), path.join(spikeDir, 'icon.png'));
-  console.log(`spike job: ${frames.length} frames (${info}, ${tier}) → ${spikeDir}`);
-}
+// The video's colours, the app's own (map/videoPalette.ts), for the page to apply.
+const { VIDEO_PALETTE } = await load('map/videoPalette.ts');
 
-const natural = { ...data, paced, palette: NATURAL_PALETTE, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
+const natural = { ...data, paced, palette: VIDEO_PALETTE, islandGlyph, outlines: undefined, roadLines: undefined, camera: undefined, finaleMs: film.durationMs - film.scenes.find((s) => s.kind === 'finale').startMs };
 writeFileSync(
   path.join(root, 'tools/out/video-natural.html'),
   readFileSync(path.join(root, 'tools/lib/video-natural-page.html'), 'utf8').replace('/*DATA*/null', JSON.stringify(natural))

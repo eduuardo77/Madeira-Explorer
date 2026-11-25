@@ -37,7 +37,7 @@ import java.util.concurrent.Executors
  *   - **Export.** The same map, frame by frame: move the camera, wait
  *     `SETTLE_FRAMES` screen refreshes, take its picture; a worker draws the
  *     roads and the overlay at full size and hands the frame to the encoder,
- *     while the map draws the next. Measured on the P30 in `tools/video-spike/`
+ *     while the map draws the next. Measured on the P30 in a throwaway spike app (in git before 25 Nov 2026, `tools/video-spike/`)
  *     (71 s for 20.4 s of video). Saved to the gallery, over the trip's last
  *     video when there is one (`Gallery`).
  *

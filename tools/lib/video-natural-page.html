@@ -219,7 +219,7 @@ document.getElementById('heroTotal').textContent = ` / ${D.total}`;
 document.getElementById('glyph').innerHTML =
   `<svg viewBox="0 0 100 ${D.islandGlyph.height}" aria-hidden="true"><path d="${D.islandGlyph.d}"/></svg>`;
 
-// A palette near the Google map the app shows (tools/lib/video-natural-palette.json).
+// A palette near the Google map the app shows (app/src/map/videoPalette.ts).
 // August's style was muted on purpose (D-026).
 const NATURAL = D.palette;
 function setPalette(map, palette) {

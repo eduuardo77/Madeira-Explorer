@@ -728,6 +728,16 @@ export const STRINGS = {
   'replay.a11y.pause': s('Pause', 'Pausa', 'Pause'),
   'replay.a11y.watchAgain': s('Watch again', 'Ver outra vez', 'Noch einmal ansehen'),
   'replay.a11y.close': s('Close and go back', 'Fechar e voltar', 'Schließen und zurück'),
+  // T-329, D-112: the words written into the video you keep. Drawn on the frames,
+  // so short: they sit over a moving map at phone size.
+  'video.line.drawing': s('{km} km · {stamps}', '{km} km · {stamps}', '{km} km · {stamps}'),
+  'video.line.close': s('{places} · {km} km of roads lit', '{places} · {km} km de estradas acesas', '{places} · {km} km Straßen beleuchtet'),
+  'video.card.km': s('km of roads lit', 'km de estradas acesas', 'km Straßen beleuchtet'),
+  'video.hero.km': s('{km} km of roads lit', '{km} km de estradas acesas', '{km} km Straßen beleuchtet'),
+  'video.day': s('Day {day} of {days}', 'Dia {day} de {days}', 'Tag {day} von {days}'),
+  'video.more': s('and {count} more', 'e mais {count}', 'und {count} weitere'),
+  'video.endCard': s('Made with {app}, on Google Play', 'Feito com {app}, no Google Play', 'Erstellt mit {app}, bei Google Play'),
+  'video.credit': s('© OpenStreetMap · relief NASA SRTM', '© OpenStreetMap · relevo NASA SRTM', '© OpenStreetMap · Relief NASA SRTM'),
 
   // ⚠ Added 2026-08-18, and they should have been here since T-160. The screens
   // spoke three languages; the **screen reader** spoke one, and three visible
@@ -1643,6 +1653,23 @@ export const PLURALS = {
   'passport.island.count': {
     one: s('{collected} of {count} place', '{collected} de {count} lugar', '{collected} von {count} Ort'),
     other: s('{collected} of {count} places', '{collected} de {count} lugares', '{collected} von {count} Orten'),
+  },
+  // T-329: the video's counts.
+  'video.stamps': {
+    one: s('{count} stamp', '{count} carimbo', '{count} Stempel'),
+    other: s('{count} stamps', '{count} carimbos', '{count} Stempel'),
+  },
+  'video.places': {
+    one: s('{collected} of {count} place', '{collected} de {count} lugar', '{collected} von {count} Ort'),
+    other: s('{collected} of {count} places', '{collected} de {count} lugares', '{collected} von {count} Orten'),
+  },
+  'video.card.stamps': {
+    one: s('stamp', 'carimbo', 'Stempel'),
+    other: s('stamps', 'carimbos', 'Stempel'),
+  },
+  'video.hero.places': {
+    one: s('place visited', 'lugar visitado', 'Ort besucht'),
+    other: s('places visited', 'lugares visitados', 'Orte besucht'),
   },
   'passport.collected': {
     one: s('place collected', 'lugar visitado', 'Ort gesammelt'),

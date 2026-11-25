@@ -3,6 +3,7 @@ package com.proa.videospike
 import android.app.Activity
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
@@ -82,7 +83,11 @@ class MainActivity : Activity() {
   }
 
   /** What to render, from job.json. Frames are [atMs, lon, lat, zoom (MapLibre)]. */
-  class Job(val width: Int, val height: Int, val ratio: Float, val fps: Int, val frames: List<DoubleArray>, val strokes: List<RoadPainter.Stroke>) {
+  class Job(
+    val width: Int, val height: Int, val ratio: Float, val fps: Int, val frames: List<DoubleArray>, val strokes: List<RoadPainter.Stroke>,
+    /** What `videoOverlay.ts` says is drawn over each frame, one per frame. */
+    val overlays: org.json.JSONArray, val glyph: JSONObject, val appName: String,
+  ) {
     val outW = Math.round(width * ratio)
     val outH = Math.round(height * ratio)
 
@@ -98,7 +103,8 @@ class MainActivity : Activity() {
           for (k in 0 until c.length()) { val p = c.getJSONArray(k); lonLat[2 * k] = p.getDouble(0) / 1e5; lonLat[2 * k + 1] = p.getDouble(1) / 1e5 }
           RoadPainter.Stroke(lonLat, DoubleArray(t.length()) { t.getDouble(it) })
         }
-        return Job(o.getInt("width"), o.getInt("height"), o.getDouble("pixelRatio").toFloat(), o.getInt("fps"), frames, strokes)
+        return Job(o.getInt("width"), o.getInt("height"), o.getDouble("pixelRatio").toFloat(), o.getInt("fps"), frames, strokes,
+          o.getJSONArray("overlays"), o.getJSONObject("glyph"), o.getString("appName"))
       }
     }
   }
@@ -108,6 +114,8 @@ class MainActivity : Activity() {
     private val worker = Executors.newSingleThreadExecutor()
     private val tmp = File(cacheDir, "spike.mp4")
     private val painter = RoadPainter(job.strokes, job.outW, job.outH, job.ratio)
+    private val icon: Bitmap? = File(dir, "icon.png").takeIf { it.exists() }?.let { BitmapFactory.decodeFile(it.absolutePath) }
+    private val overlay = OverlayPainter(job.outW, job.outH, job.ratio, job.appName, job.glyph, icon)
     private lateinit var encoder: FrameEncoder
 
     private var index = 0
@@ -162,12 +170,14 @@ class MainActivity : Activity() {
     private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int) {
       val t0 = SystemClock.elapsedRealtime()
       val canvasBitmap = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
-      val points = painter.paint(Canvas(canvasBitmap), f[0], f[1], f[2], f[3])
+      val canvas = Canvas(canvasBitmap)
+      val points = painter.paint(canvas, f[0], f[1], f[2], f[3])
+      overlay.paint(canvas, job.overlays.getJSONObject(frameIndex)) { lon, lat, out -> painter.project(lon, lat, f[1], f[2], f[3], out) }
       val t1 = SystemClock.elapsedRealtime()
       encoder.add(canvasBitmap)
       val t2 = SystemClock.elapsedRealtime()
       roadsMs.add(t1 - t0); encodeMs.add(t2 - t1)
-      if (frameIndex == 0 || frameIndex == 270 || frameIndex == 540) {
+      if (frameIndex in PROBE_FRAMES) {
         File(dir, "frame-$frameIndex.png").outputStream().use { canvasBitmap.compress(Bitmap.CompressFormat.PNG, 90, it) }
         say("probe $frameIndex: at ${f[0].toInt()} ms, $points road points")
       }
@@ -185,7 +195,7 @@ class MainActivity : Activity() {
       val uri = save()
       val result = JSONObject().apply {
         put("device", "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}")
-        put("method", "MapView settle then snapshot; roads by own Mercator; YUV on 4 threads; map and encoding overlapped")
+        put("method", "MapView settle then snapshot; roads by own Mercator; overlays from videoOverlay.ts; YUV on 4 threads; map and encoding overlapped")
         put("frames", index); put("framesWritten", encoder.written); put("totalMs", totalMs)
         put("videoSeconds", index.toDouble() / job.fps); put("chroma", encoder.chromaLayout)
         put("mapMs", stats(mapMs)); put("roadsMs", stats(roadsMs)); put("encodeMs", stats(encodeMs))
@@ -226,5 +236,7 @@ class MainActivity : Activity() {
     const val FIRST_SETTLE_FRAMES = 60
     /** Pictures waiting for the worker at most: each is 8 MB. */
     const val MAX_IN_FLIGHT = 2
+    /** Frames kept as PNGs: the start, mid-drawing with a stamp name, the close, the end card. */
+    val PROBE_FRAMES = setOf(0, 120, 270, 500, 545, 600)
   }
 }

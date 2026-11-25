@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { fitBounds } from '../map/cameraFit.ts';
-import { CLOSE_CAMERA, DAY_CAMERA, videoCameraAt, videoCameraPath, type CameraDay } from './videoCamera.ts';
+import { CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath, type CameraDay } from './videoCamera.ts';
 
 const viewport = { width: 360, height: 640, padding: { top: 100, bottom: 130, left: 20, right: 20 } };
 const whole: [number, number, number, number] = [-17.25, 32.63, -16.65, 32.87];
@@ -72,4 +72,15 @@ test('between samples the camera is interpolated, and out of range it holds', ()
   assert.ok(Math.abs(mid.zoom - (p[10].zoom + p[11].zoom) / 2) < 1e-9);
   assert.deepEqual(videoCameraAt(p, -100), { lon: p[0].lon, lat: p[0].lat, zoom: p[0].zoom });
   assert.equal(videoCameraAt([], 0), null);
+});
+
+test('the close eases onto its target and rests there, leaving what came before alone', () => {
+  const p = path();
+  const target = { lon: -16.95, lat: 32.75, zoom: 9 };
+  const settled = settleCamera(p, target, 12_000, 1500);
+  assert.deepEqual(settled[0], p[0]);
+  const before = settled.find((s) => s.atMs >= 11_900)!;
+  assert.deepEqual(before, p[p.indexOf(p.find((s) => s.atMs >= 11_900)!)]);
+  const last = settled[settled.length - 1];
+  assert.ok(Math.abs(last.lon - target.lon) < 1e-9 && Math.abs(last.zoom - target.zoom) < 1e-9);
 });

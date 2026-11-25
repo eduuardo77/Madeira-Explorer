@@ -140,6 +140,25 @@ export function videoCameraPath(input: {
   return out.map((camera, i) => ({ ...camera, atMs: i * stepMs }));
 }
 
+/**
+ * The close: from `fromMs`, ease the path over `overMs` to rest on `target`
+ * (the whole trip, centred), and hold it there to the end. The by-day path
+ * parks the island where a card would leave room; without the card it should
+ * sit in the middle (the lead saw it sink to the bottom edge, 24 Nov).
+ */
+export function settleCamera(path: readonly CameraSample[], target: VideoCamera, fromMs: number, overMs: number): CameraSample[] {
+  return path.map((sample) => {
+    const u = easeInOut((sample.atMs - fromMs) / overMs);
+    if (u <= 0) return sample;
+    return {
+      atMs: sample.atMs,
+      lon: sample.lon + (target.lon - sample.lon) * u,
+      lat: sample.lat + (target.lat - sample.lat) * u,
+      zoom: sample.zoom + (target.zoom - sample.zoom) * u,
+    };
+  });
+}
+
 /** The camera at `atMs`, between samples. */
 export function videoCameraAt(path: readonly CameraSample[], atMs: number): VideoCamera | null {
   if (path.length === 0) return null;
@@ -155,6 +174,11 @@ export function videoCameraAt(path: readonly CameraSample[], atMs: number): Vide
 function holdBothWays(path: VideoCamera[], hold: (prev: VideoCamera, cur: VideoCamera) => void): void {
   for (let i = 1; i < path.length; i += 1) hold(path[i - 1], path[i]);
   for (let i = path.length - 2; i >= 0; i -= 1) hold(path[i + 1], path[i]);
+}
+
+function easeInOut(u: number): number {
+  const x = clamp(u, 0, 1);
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
 function clamp(value: number, low: number, high: number): number {

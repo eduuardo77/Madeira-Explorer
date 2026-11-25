@@ -571,6 +571,16 @@ permission, L3 privacy contact.
       module in the app with the preview screen. **25 Nov: 157 s down to 61 s** (the lead: "make it
       faster"; own Mercator for the roads, YUV on four threads, map and encoding overlapped;
       frames checked with ffmpeg). The map's 94 ms a frame is now the whole of the time.
+      **25 Nov, the overlays** (the lead: "add the overlays"): what is drawn over the map is now an
+      app module, `souvenir/videoOverlay.ts` (9 tests), with its words in `i18n/strings.ts` in three
+      languages; the close's camera is `videoCamera.settleCamera`. The spike draws each frame's
+      overlay exactly as the module says (`OverlayPainter.kt`): title and dates, the figures line,
+      the day and its date, stamp names, the comet head, the closing figures, the white BRUMA
+      signature, the end card. On the P30: 20.4 s (film and end card) in 71 s, 613 frames, checked
+      with ffmpeg. Fixed after looking: the watermark's island carried the Desertas as specks
+      (now each municipality's largest polygon), and the day's date ran into the trip dates (now
+      on the figures' row). ⚠ The sketch page still has its own copy of the overlay timing; the
+      module is the one that ships.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

@@ -33,6 +33,10 @@ read-back), roads 55 ms, encoding 35 ms; the map is now the whole of the time. G
 further means waiting fewer refreshes (tiles might be missing) or taking the picture off the
 GPU without the read-back.
 
+**With the overlays (25 Nov): 71 s** for 20.4 s of video (the film and the free end card),
+613 frames. `OverlayPainter.kt` draws what `app/src/souvenir/videoOverlay.ts` says each frame
+holds; the job carries it frame by frame (`--info full|discreet|none`, `--tier free|paid`).
+
 Three traps on the way, each of which looked like a result:
 
 - **`MapSnapshotter`** answered the first request and then never again, and in one run returned

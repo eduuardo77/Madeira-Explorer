@@ -1,0 +1,22 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.proa.madeira'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.videoexport"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}
+
+dependencies {
+  // T-329, D-112: Bruma's own map (OSM tiles, SRTM relief) for the video you keep.
+  // Google's map may not leave the app (Maps SDK snapshot() terms), so the video
+  // is drawn with MapLibre. The version the spike measured on the P30.
+  implementation 'org.maplibre.gl:android-sdk:11.13.5'
+}

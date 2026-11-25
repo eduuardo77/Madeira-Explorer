@@ -12,6 +12,7 @@ test('T-211: Back goes one step towards the map, and the map lets the OS have it
   assert.equal(backTarget('debug'), 'map');
   assert.equal(backTarget('replay'), 'passport');
   assert.equal(backTarget('timelapse'), 'replay');
+  assert.equal(backTarget('video'), 'timelapse');
   assert.equal(backTarget('map'), null);
 });
 
@@ -21,12 +22,13 @@ test('the map stays alive under Settings and the passport, not under screens wit
   }
   assert.equal(keepsMapMounted('replay'), false);
   assert.equal(keepsMapMounted('timelapse'), false);
+  assert.equal(keepsMapMounted('video'), false);
 });
 
 test('the passport is mounted once prepared, or opened before that, then kept under every screen', () => {
   assert.equal(keepsPassportMounted('map', false), false, 'not before it is prepared');
   assert.equal(keepsPassportMounted('passport', false), true);
-  for (const screen of ['map', 'settings', 'replay', 'timelapse', 'debug'] as const) {
+  for (const screen of ['map', 'settings', 'replay', 'timelapse', 'video', 'debug'] as const) {
     assert.equal(keepsPassportMounted(screen, true), true, screen);
   }
 });

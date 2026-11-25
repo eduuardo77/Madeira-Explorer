@@ -21,6 +21,8 @@ import * as recordingEventDao from './src/storage/dao/recordingEventDao';
 import DebugScreen from './src/ui/DebugScreen';
 import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
+import { BrumaVideoView } from './src/souvenir/videoExport';
+import VideoScreen from './src/souvenir/VideoScreen';
 import TripViewerScreen from './src/souvenir/TripViewerScreen';
 import AnimatedSplash from './src/ui/AnimatedSplash';
 import SettingsScreen from './src/ui/SettingsScreen';
@@ -321,7 +323,11 @@ function AppScreens({ onShown }: { onShown: () => void }) {
           tripId={viewedTripId ?? undefined}
           range={replayRange ?? undefined}
           onClose={() => setScreen('replay')}
+          // T-329: the whole trip only, and only where the video can be made.
+          onMakeVideo={BrumaVideoView !== null && replayRange === null ? () => setScreen('video') : undefined}
         />
+      ) : screen === 'video' ? (
+        <VideoScreen tripId={viewedTripId ?? undefined} onClose={() => setScreen('timelapse')} />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

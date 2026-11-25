@@ -15,7 +15,7 @@
  * ⚠ `replay` is the trip viewer since T-253 (the id kept, so nothing else moves);
  * `timelapse` is the animated film, WalkNYC's *Replay*, opened from the viewer.
  */
-export type AppScreen = 'map' | 'passport' | 'replay' | 'timelapse' | 'settings' | 'debug';
+export type AppScreen = 'map' | 'passport' | 'replay' | 'timelapse' | 'video' | 'settings' | 'debug';
 
 /**
  * Whether the map stays mounted, hidden, under this screen (2026-10-18).
@@ -58,6 +58,9 @@ export function backTarget(screen: AppScreen): AppScreen | null {
     case 'timelapse':
       // And the timelapse from the trip viewer.
       return 'replay';
+    case 'video':
+      // The video you keep is made from the timelapse (T-329).
+      return 'timelapse';
     case 'passport':
     case 'settings':
     case 'debug':

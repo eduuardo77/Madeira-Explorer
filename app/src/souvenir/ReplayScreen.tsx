@@ -120,12 +120,15 @@ export default function ReplayScreen({
   tripId,
   range,
   onClose,
+  onMakeVideo,
 }: {
   /** The trip to play (T-275); the trip on show when absent. */
   tripId?: number;
   /** One day of it, from the trip viewer's "this day"; the whole trip when absent. */
   range?: { fromTs: number; toTs: number };
   onClose: () => void;
+  /** T-329: open the video you keep. Absent where it cannot be made (not Android, one day only). */
+  onMakeVideo?: () => void;
 }) {
   const [composition, setComposition] = useState<Composition | null>(null);
   const [caption, setCaption] = useState('');
@@ -465,6 +468,17 @@ export default function ReplayScreen({
       >
         <Text style={styles.closeText}>{t('replay.close')}</Text>
       </Pressable>
+
+      {/* T-329: the video you keep is made from here, seen before it is saved. */}
+      {onMakeVideo === undefined ? null : (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onMakeVideo}
+          style={({ pressed }) => [styles.makeVideo, pressed && styles.pressed]}
+        >
+          <Text style={styles.makeVideoText}>{t('video.make')}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -510,6 +524,22 @@ const styles = StyleSheet.create({
     minHeight: MIN_TAP_TARGET,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
+  },
+  makeVideo: {
+    position: 'absolute',
+    top: spacing.xl,
+    right: spacing.sm,
+    minHeight: MIN_TAP_TARGET,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  makeVideoText: {
+    color: colors.tint,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+    textShadowColor: 'rgba(255, 255, 255, 0.85)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
   },
   closeText: {
     color: colors.tint,

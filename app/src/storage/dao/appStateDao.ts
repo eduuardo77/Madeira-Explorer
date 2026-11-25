@@ -215,6 +215,16 @@ export const AppStateKey = {
    * Settings. What keeps the ask rare. Absent until the first ask.
    */
   ReviewAsks: 'review_asks',
+  /**
+   * The video you keep (T-329): the last choices, `{ info, camera }`, so the
+   * next video opens as the last was made.
+   */
+  VideoChoices: 'video_choices',
+  /**
+   * The video saved for each trip, `{ [tripId]: contentUri }`: saving the same
+   * trip again replaces that file, one video per trip in the gallery.
+   */
+  VideoUris: 'video_uris',
 } as const;
 
 export type AppStateKeyName =

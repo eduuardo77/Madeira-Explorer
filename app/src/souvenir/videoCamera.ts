@@ -204,6 +204,23 @@ export function cameraBreath(atMs: number, at: { openMs: number; driftFromMs: nu
 export const OPEN_ZOOM = 0.25;
 export const DRIFT_ZOOM = 0.12;
 
+/**
+ * The opening: held on `target` (the whole trip, centred) until `untilMs -
+ * overMs`, then eased onto the path by `untilMs`. The mirror of `settleCamera`.
+ */
+export function openCamera(path: readonly CameraSample[], target: VideoCamera, untilMs: number, overMs: number): CameraSample[] {
+  return path.map((sample) => {
+    const u = easeInOut((sample.atMs - (untilMs - overMs)) / overMs);
+    if (u >= 1) return sample;
+    return {
+      atMs: sample.atMs,
+      lon: target.lon + (sample.lon - target.lon) * u,
+      lat: target.lat + (sample.lat - target.lat) * u,
+      zoom: target.zoom + (sample.zoom - target.zoom) * u,
+    };
+  });
+}
+
 /** The camera at `atMs`, between samples. */
 export function videoCameraAt(path: readonly CameraSample[], atMs: number): VideoCamera | null {
   if (path.length === 0) return null;

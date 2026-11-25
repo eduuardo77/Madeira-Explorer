@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { fitBounds } from '../map/cameraFit.ts';
-import { CLOSE_CAMERA, DAY_CAMERA, DRIFT_ZOOM, OPEN_ZOOM, cameraBreath, settleCamera, videoCameraAt, videoCameraPath, zoomToHold, type CameraDay } from './videoCamera.ts';
+import { CLOSE_CAMERA, DAY_CAMERA, DRIFT_ZOOM, OPEN_ZOOM, cameraBreath, openCamera, settleCamera, videoCameraAt, videoCameraPath, zoomToHold, type CameraDay } from './videoCamera.ts';
 
 const viewport = { width: 360, height: 640, padding: { top: 100, bottom: 130, left: 20, right: 20 } };
 const whole: [number, number, number, number] = [-17.25, 32.63, -16.65, 32.87];
@@ -116,4 +116,13 @@ test('cameraBreath: opens wide, settles, and drifts in only after the close', ()
   assert.equal(cameraBreath(10_000, at), 0);
   assert.ok(Math.abs(cameraBreath(20_000, at) - DRIFT_ZOOM) < 1e-9);
   for (let t = 0; t < 20_000; t += 33) assert.ok(Math.abs(cameraBreath(t + 33, at) - cameraBreath(t, at)) / 0.033 < 0.3, `breath too quick at ${t}`);
+});
+
+test('openCamera: held on the target, then the path itself', () => {
+  const p = path();
+  const target = { lon: -16.95, lat: 32.75, zoom: 9 };
+  const opened = openCamera(p, target, 3000, 1200);
+  const at = (t: number) => opened[Math.round(t / STEP)];
+  assert.deepEqual([at(0).lon, at(0).lat, at(0).zoom], [target.lon, target.lat, target.zoom]);
+  assert.deepEqual(at(5000), p[Math.round(5000 / STEP)]);
 });

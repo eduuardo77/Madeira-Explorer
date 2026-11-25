@@ -20,7 +20,7 @@ import { fitBounds } from '../map/cameraFit.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { Film } from './frame.ts';
 import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type PacedFilm, type TimedRoad } from './pacedFilm.ts';
-import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
+import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, openCamera, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
 import { overlayAt, planOverlay, videoDurationMs, type InfoMode, type OverlayFrame, type Tier } from './videoOverlay.ts';
 
 /** The video's frame, in points: 9:16, as phones show stories and reels. */
@@ -159,7 +159,11 @@ export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = pr
     keep: choices.camera === 'close' ? undefined : { boundsAt: (t) => (t < finaleAtMs ? dayDrawnBoundsAt(paced, t) : null), padding: KEEP_PADDING[choices.info] },
   });
   const rest = fitBounds(whole, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom: bottom + 20, left: 24, right: 24 } });
-  const camera = rest === null ? path : settleCamera(path, { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom }, finaleAtMs - 600, 1500);
+  // Opens on the whole trip, centred, as it closes: the smoothed path was
+  // already leaning toward the first day under the title, the island's far
+  // end cut off (25 Nov). It joins the path as the pen starts.
+  const centred = rest === null ? null : { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom };
+  const camera = centred === null ? path : settleCamera(openCamera(path, centred, drawStartMs + 300, 1200), centred, finaleAtMs - 600, 1500);
 
   const durationMs = videoDurationMs(plan);
   const breath = { openMs: drawStartMs + 400, driftFromMs: finaleAtMs + 900, endMs: durationMs };

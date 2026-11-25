@@ -153,12 +153,16 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
   private inner class OverlayView(context: Context) : View(context) {
     private var roads: RoadPainter? = null
     private var overlay: OverlayPainter? = null
+    private var labelPainter: MapLabels.Painter? = null
+    private val labels = MapLabels()
 
     fun rebuild() {
       val j = job
       if (j == null || width == 0) { roads = null; overlay = null; return }
       val r = j.ratio * width / j.outW
       roads = RoadPainter(j.strokes, width, height, r, cachePx = PREVIEW_CACHE_PX)
+      labelPainter = MapLabels.Painter(r)
+      labels.reset()
       overlay = OverlayPainter(width, height, r, j.appName, j.glyph, icon)
     }
 
@@ -171,6 +175,7 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
       val roads = roads ?: return
       val o = j.overlays.getJSONObject(currentFrame)
       roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
+      map?.let { m -> labelPainter?.paint(canvas, labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) } }
       overlay?.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
     }
   }
@@ -231,8 +236,10 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
     private val main = Handler(Looper.getMainLooper())
     private val composers = List(COMPOSERS) { Executors.newSingleThreadExecutor() }
     private val painters = List(COMPOSERS) {
-      RoadPainter(j.strokes, j.outW, j.outH, j.ratio) to OverlayPainter(j.outW, j.outH, j.ratio, j.appName, j.glyph, icon)
+      Triple(RoadPainter(j.strokes, j.outW, j.outH, j.ratio), MapLabels.Painter(j.ratio), OverlayPainter(j.outW, j.outH, j.ratio, j.appName, j.glyph, icon))
     }
+    /** Main thread: the map's names, frame after frame, with their fades. */
+    private val labels = MapLabels()
     private val encoding = Executors.newSingleThreadExecutor()
     private val file = File(context.cacheDir, "bruma-video.mp4")
     private val displayName = options["displayName"] as? String ?: "${j.appName}.mp4"
@@ -297,22 +304,25 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
     private fun taken(picture: Bitmap, f: DoubleArray) {
       val frameIndex = index
       inFlight += 1
-      composers[frameIndex % COMPOSERS].execute { compose(picture, f, frameIndex) }
+      // The camera has not moved since the picture: the names the map placed in it.
+      val names = labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])
+      composers[frameIndex % COMPOSERS].execute { compose(picture, f, frameIndex, names) }
       index += 1
       if (index % PROGRESS_EVERY == 0) onProgress(mapOf("done" to index, "total" to j.frames.size))
       main.post { next() }
     }
 
     /** A composer: roads and overlay onto the picture, then to the encoder thread. */
-    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int) {
+    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int, names: List<MapLabels.Label>) {
       if (cancelled) return
-      val (roads, overlay) = painters[frameIndex % COMPOSERS]
+      val (roads, labelPainter, overlay) = painters[frameIndex % COMPOSERS]
       val frame = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
       val canvas = Canvas(frame)
       val o = j.overlays.getJSONObject(frameIndex)
       val t1 = SystemClock.elapsedRealtime()
       roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
       val t2 = SystemClock.elapsedRealtime()
+      labelPainter.paint(canvas, names) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
       overlay.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
       roadsMs.addAndGet(t2 - t1); overlayMs.addAndGet(SystemClock.elapsedRealtime() - t2)
       encoding.execute { encodeInOrder(frameIndex, frame) }

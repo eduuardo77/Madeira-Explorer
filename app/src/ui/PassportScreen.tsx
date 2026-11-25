@@ -11,7 +11,8 @@ import { deviceLanguage, n, t } from '../i18n';
 import { DATE_LOCALES, type Language } from '../i18n/languages';
 import type { StringKey } from '../i18n/strings';
 import type { WalkedEvidence } from '../progress/levadaCoverage';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import { readTripViewAhead } from '../souvenir/tripViewerData';
 import type { Category, Place } from '../content/contentPack';
 import { getContentPack } from '../content/poiCatalogue';
 import { getRegionName } from '../content/regionCatalogue';
@@ -282,6 +283,18 @@ export default function PassportScreen({
     }
     wasActive.current = active;
   }, [active]);
+  /**
+   * *Viagem* read ahead while the passport is in front and settled, so the
+   * trip viewer opens on it (`rememberedTripView`, T-329 follow-up, 25 Nov).
+   */
+  useEffect(() => {
+    if (!active) return;
+    const task = InteractionManager.runAfterInteractions(() => {
+      readTripViewAhead(undefined).catch(() => undefined);
+    });
+    return () => task.cancel();
+  }, [active]);
+
   /**
    * Prepared behind the map and not yet opened (`keepsPassportMounted`): the
    * load stops after the stored page, and the award pass, the film's offer and

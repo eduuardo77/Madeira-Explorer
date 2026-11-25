@@ -35,6 +35,7 @@ import { GoogleMapsColorScheme, GoogleMapsMapType } from 'expo-maps/build/google
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  InteractionManager,
   PixelRatio,
   Pressable,
   StyleSheet,
@@ -66,7 +67,7 @@ import {
 } from './tripDays';
 import ChevronMark from '../ui/ChevronMark';
 import Svg, { Path } from 'react-native-svg';
-import { loadTripView, type TripView } from './tripViewerData';
+import { loadTripView, rememberedTripView, type TripView } from './tripViewerData';
 
 /**
  * The pills' row, and the card at the foot: the camera frames the day between
@@ -118,17 +119,20 @@ export default function TripViewerScreen({
     let cancelled = false;
     (async () => {
       try {
-        const [loaded, preference] = await Promise.all([
-          loadTripView(tripId, 'stored'),
-          appStateDao.get(AppStateKey.MapStyle),
-        ]);
-        if (!cancelled) {
-          setStyleName(effectiveMapStyle(parseMapStyle(preference)));
-          setView(loaded);
-          setDayIndex(loaded === null ? -1 : openingDay(loaded.days));
-        }
-        // What was recorded since the map last matched, behind the page; the
-        // day shown stays the day shown.
+        const [remembered, preference] = await Promise.all([rememberedTripView(tripId), appStateDao.get(AppStateKey.MapStyle)]);
+        if (cancelled) return;
+        setStyleName(effectiveMapStyle(parseMapStyle(preference)));
+        // Made before (the passport reads it ahead) and nothing new since: at once.
+        let loaded = remembered?.view ?? null;
+        if (remembered === null) loaded = await loadTripView(tripId, 'stored');
+        if (cancelled) return;
+        setView(loaded);
+        setDayIndex(loaded === null ? -1 : openingDay(loaded.days));
+        if (remembered?.upToDate) return;
+        // What was recorded since the map last matched, behind the page once it
+        // is up; the day shown stays the day shown.
+        await new Promise<void>((resolve) => InteractionManager.runAfterInteractions(() => resolve()));
+        if (cancelled) return;
         const matched = await loadTripView(tripId, 'matched');
         if (!cancelled && matched !== null && (loaded === null || !sameDays(loaded.days, matched.days))) {
           setView(matched);

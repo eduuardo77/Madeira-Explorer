@@ -50,6 +50,10 @@ export async function loadTripView(
     return null;
   }
 
+  // Read before the roads: a fix arriving meanwhile then makes the next look stale, not this one fresh.
+  const key = freshnessKey(trip.id);
+  key.catch(() => undefined); // awaited at the end; a failure before then is not left unhandled
+
   // A trip with nothing stored under this matcher (the map has not shown it
   // since an update changed the matcher) is matched whichever was asked for.
   const stored = source === 'stored' ? await storedRoadsFor([trip.id]) : null;
@@ -79,7 +83,7 @@ export async function loadTripView(
   }
 
   const days = tripDays(runs, stamps, localStartOfDay);
-  return {
+  const view = {
     tripId: trip.id,
     startedTs: trip.started_ts,
     endTs: trip.ended_ts ?? nowMs,
@@ -87,4 +91,45 @@ export async function loadTripView(
     days,
     stampCount: stamps.length,
   };
+  remember(view, source, await key);
+  return view;
+}
+
+/**
+ * The view last made of this trip, while nothing it was made from has changed
+ * (no fix recorded, no stamp earned since): the viewer opens on it at once.
+ * `upToDate` when it was the matched one, so there is nothing to match again.
+ *
+ * Opening *Viagem* read the stored view (0.4 s on the P30, trip 31), showed
+ * it, then matched the trip again behind it (0.4 s, seconds when anything new
+ * had been recorded) and, on the lead's trip, found the same days every time.
+ */
+export async function rememberedTripView(tripId: number | undefined): Promise<{ view: TripView; upToDate: boolean } | null> {
+  const trip = tripId === undefined ? await tripDao.getTripOnShow() : await tripDao.getTrip(tripId);
+  if (trip === null) return null;
+  const entry = remembered.get(trip.id);
+  if (entry === undefined || entry.key !== (await freshnessKey(trip.id))) return null;
+  return { view: entry.view, upToDate: entry.source === 'matched' };
+}
+
+/** Reads the trip's view ahead (the passport, before *Viagem* is tapped); nothing if it is remembered. */
+export async function readTripViewAhead(tripId: number | undefined): Promise<void> {
+  if ((await rememberedTripView(tripId)) === null) await loadTripView(tripId, 'stored');
+}
+
+/** What a view was made from: the trip's fixes and stamps, and the day (an open trip's days end today). */
+async function freshnessKey(tripId: number): Promise<string> {
+  const [count, last, awards] = await Promise.all([rawFixDao.countFixes(tripId), rawFixDao.getLastFix(tripId), stampAwardDao.getAwards(tripId)]);
+  return [tripId, count, last?.ts ?? 0, awards.length, localStartOfDay(Date.now())].join(':');
+}
+
+const remembered = new Map<number, { key: string; source: 'stored' | 'matched'; view: TripView }>();
+
+function remember(view: TripView, source: 'stored' | 'matched', key: string): void {
+  const kept = remembered.get(view.tripId);
+  // A stored view never replaces a matched one made from the same.
+  if (kept !== undefined && kept.key === key && kept.source === 'matched' && source === 'stored') return;
+  remembered.set(view.tripId, { key, source, view });
+  // A few trips at most: the passport's list can open any of them.
+  if (remembered.size > 4) remembered.delete(remembered.keys().next().value as number);
 }

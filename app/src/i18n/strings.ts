@@ -732,6 +732,8 @@ export const STRINGS = {
   // so short: they sit over a moving map at phone size.
   'video.line.drawing': s('{km} km · {stamps}', '{km} km · {stamps}', '{km} km · {stamps}'),
   'video.line.close': s('{places} · {km} km of roads lit', '{places} · {km} km de estradas acesas', '{places} · {km} km Straßen beleuchtet'),
+  // T-329: the close of a video with no stamp in it (often a day's): the road alone, not "0 of 84 places".
+  'video.line.closeKm': s('{km} km of roads lit', '{km} km de estradas acesas', '{km} km Straßen beleuchtet'),
   'video.card.km': s('km of roads lit', 'km de estradas acesas', 'km Straßen beleuchtet'),
   'video.hero.km': s('{km} km of roads lit', '{km} km de estradas acesas', '{km} km Straßen beleuchtet'),
   'video.day': s('Day {day} of {days}', 'Dia {day} de {days}', 'Tag {day} von {days}'),

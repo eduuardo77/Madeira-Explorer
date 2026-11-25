@@ -150,10 +150,12 @@ export function overlayAt(plan: OverlayPlan, atMs: number): OverlayFrame {
       ? {
           opacity: fadeIn(t, drawStartMs, 500),
           text: finale
-            ? translate(STRINGS['video.line.close'], language, {
-                places: plural(PLURALS['video.places'], plan.total, language, { collected: countUp }),
-                km,
-              })
+            ? plan.collected === 0
+              ? translate(STRINGS['video.line.closeKm'], language, { km })
+              : translate(STRINGS['video.line.close'], language, {
+                  places: plural(PLURALS['video.places'], plan.total, language, { collected: countUp }),
+                  km,
+                })
             : translate(STRINGS['video.line.drawing'], language, {
                 km,
                 stamps: plural(PLURALS['video.stamps'], stampsNow, language),

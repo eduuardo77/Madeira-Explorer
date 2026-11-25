@@ -149,3 +149,9 @@ test('a one-day video has no day chip; its date is under the title', () => {
   assert.equal(overlayAt(p, (DRAW_START + FINALE) / 2).day, null);
   assert.notEqual(overlayAt(plan('discreet'), (DRAW_START + FINALE) / 2).day, null);
 });
+
+test('a close with no stamp says the road alone, not "0 of 10 places"', () => {
+  const p = planOverlay({ ...plan('discreet'), collected: 0 });
+  const text = overlayAt(p, FINALE + 2000).line!.text;
+  assert.ok(!/places/.test(text) && /km of roads lit/.test(text), text);
+});

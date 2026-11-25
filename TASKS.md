@@ -625,6 +625,10 @@ permission, L3 privacy contact.
       opens on the whole island centred (`openCamera`). Saving 45 s. Not done: the pen's head can
       sit on a name; the sea under the watermark stays empty (a portrait frame of a wide island).
       The browser sketch shows no names since.
+      **25 Nov, tilt** ("Try the tilt"; 2434cec, on the P30): a third camera, *Inclinada*: bearing
+      262 to 278, pitch 50, the whole trip in view, ~0.85 levels closer than flat; roads, names and
+      pen drawn through a perspective fixed by four projected points a frame. Awaits the lead's
+      eye. The free watermark now sits over the island.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

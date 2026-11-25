@@ -568,7 +568,10 @@ permission, L3 privacy contact.
       Movies/BrumaSpike. **Trip 31's 18.2 s film was made in 157 s, all 547 frames, 20.3 MB**;
       frames checked with ffmpeg. Next: cut the time (YUV conversion and road projection in plain
       Kotlin are half of it), the overlays (title, info line, watermark, end card), then the native
-      module in the app with the preview screen. ⚠ MapLibre adds a native library to Bruma's
+      module in the app with the preview screen. **25 Nov: 157 s down to 61 s** (the lead: "make it
+      faster"; own Mercator for the roads, YUV on four threads, map and encoding overlapped;
+      frames checked with ffmpeg). The map's 94 ms a frame is now the whole of the time.
+      ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:
       "leave it for now").** Since T-327 no picture of the map leaves the phone: the trip viewer's

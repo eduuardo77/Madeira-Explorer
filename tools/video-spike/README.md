@@ -18,6 +18,21 @@ length), all 547 frames written, 20.3 MB at 10 Mbit/s. Map per frame: median 112
 percentile 150 ms. Roads, YUV conversion and encoding: median 158 ms, 90th 233 ms (all in
 plain Kotlin, the obvious place to save time). Checked by extracting frames with ffmpeg.
 
+**Made faster the next day (25 Nov): 61 s**, 2.6 times quicker, the same 547 frames, checked
+with ffmpeg. Three changes, in `RoadPainter.kt` and `FrameEncoder.kt`:
+
+- Road positions by Web Mercator from the frame's camera instead of one `toScreenLocation`
+  call per point (checked against MapLibre on frame 0: under 0.01 px apart).
+- RGB to YUV into plain arrays on four threads, then into the encoder's buffers in bulk,
+  instead of a byte at a time.
+- A worker thread draws the roads and encodes while the map draws the next frame (at most
+  two pictures waiting, 8 MB each).
+
+Per frame now: map median 94 ms (three screen refreshes of waiting, then the picture's
+read-back), roads 55 ms, encoding 35 ms; the map is now the whole of the time. Going
+further means waiting fewer refreshes (tiles might be missing) or taking the picture off the
+GPU without the read-back.
+
 Three traps on the way, each of which looked like a result:
 
 - **`MapSnapshotter`** answered the first request and then never again, and in one run returned

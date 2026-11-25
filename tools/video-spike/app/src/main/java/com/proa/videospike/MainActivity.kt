@@ -4,13 +4,6 @@ import android.app.Activity
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
-import android.media.MediaCodec
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
-import android.media.MediaMuxer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -18,6 +11,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Choreographer
 import android.widget.FrameLayout
 import android.widget.TextView
 import org.json.JSONObject
@@ -30,26 +24,25 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import java.io.File
+import java.util.concurrent.Executors
 
 /**
- * T-329 spike. Reads job.json and style.json from this app's external files
- * folder (pushed by hand, see tools/video-spike/README.md), and for every frame
- * of the film: moves a MapLibre MapView's camera, waits a few screen
- * refreshes, takes its picture, draws the lit roads on top with a
- * Canvas, and encodes H.264 into an MP4, saved to Movies/BrumaSpike.
- * result.json records the time each step took; three frames are kept as PNGs.
+ * T-329 spike: can the phone make the film as a video, and how fast? See README.md.
  *
- * ⚠ A first version used MapSnapshotter: it answered the first request and
- * then never again (or, once, returned the same picture 546 times). A MapView
- * is also what the app's preview screen would show anyway.
+ * Reads job.json and style.json from this app's external files folder. For every
+ * frame of the film, on the main thread: move a MapLibre MapView's camera, wait a
+ * few screen refreshes, take the map's picture. A worker thread then draws the
+ * lit roads on it (`RoadPainter`) and hands it to the encoder (`FrameEncoder`),
+ * while the map is already drawing the next frame. The MP4 is saved to
+ * Movies/BrumaSpike; result.json records the time each step took, and frames 0,
+ * 270 and 540 are kept as PNGs to look at.
+ *
+ * Traps met on the way, each of which looked like a result: MapSnapshotter
+ * answered once and then never; MapLibre's idle and rendered-fully signals
+ * never arrived after moveCamera; the browser's player showed one picture for a
+ * correct MP4 (check frames with ffmpeg).
  */
-/** Screen refreshes to wait after moving the camera before the picture. */
-private const val SETTLE_FRAMES = 3
-/** The first frame waits for the map's tiles to load. */
-private const val FIRST_SETTLE_FRAMES = 60
-
 class MainActivity : Activity() {
-  private val tag = "VideoSpike"
   private lateinit var log: TextView
   private lateinit var mapView: MapView
 
@@ -57,15 +50,12 @@ class MainActivity : Activity() {
     super.onCreate(savedInstanceState)
     MapLibre.getInstance(this)
     val dir = getExternalFilesDir(null)!!
-    val job = JSONObject(File(dir, "job.json").readText())
-    val ratio = job.getDouble("pixelRatio").toFloat()
-    val outW = Math.round(job.getInt("width") * ratio)
-    val outH = Math.round(job.getInt("height") * ratio)
+    val job = Job.read(File(dir, "job.json"))
 
     val root = FrameLayout(this)
-    val options = MapLibreMapOptions.createFromAttributes(this, null).pixelRatio(ratio).textureMode(true)
+    val options = MapLibreMapOptions.createFromAttributes(this, null).pixelRatio(job.ratio).textureMode(true)
     mapView = MapView(this, options)
-    root.addView(mapView, FrameLayout.LayoutParams(outW, outH))
+    root.addView(mapView, FrameLayout.LayoutParams(job.outW, job.outH))
     log = TextView(this).apply { textSize = 11f; setPadding(24, 24, 24, 24); setBackgroundColor(0xCCFFFFFF.toInt()) }
     root.addView(log, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT))
     setContentView(root)
@@ -75,7 +65,7 @@ class MainActivity : Activity() {
       map.uiSettings.isAttributionEnabled = false
       map.uiSettings.isCompassEnabled = false
       map.setStyle(Style.Builder().fromJson(File(dir, "style.json").readText())) {
-        try { Spike(dir, job, map, outW, outH, ratio).start() } catch (e: Exception) { say("failed: $e") }
+        try { Render(dir, job, map).start() } catch (e: Exception) { say("failed: $e") }
       }
     }
   }
@@ -87,227 +77,129 @@ class MainActivity : Activity() {
   override fun onDestroy() { mapView.onDestroy(); super.onDestroy() }
 
   private fun say(line: String) {
-    Log.i(tag, line)
+    Log.i(TAG, line)
     runOnUiThread { log.append(line + "\n") }
   }
 
-  inner class Spike(
-    private val dir: File, job: JSONObject, private val map: MapLibreMap,
-    private val outW: Int, private val outH: Int, private val ratio: Float,
-  ) {
-    private val fps = job.getInt("fps")
-    private val frames: List<DoubleArray>
-    private val strokes: List<Pair<DoubleArray, DoubleArray>> // (lon,lat interleaved, times)
-    private val handler = Handler(Looper.getMainLooper())
+  /** What to render, from job.json. Frames are [atMs, lon, lat, zoom (MapLibre)]. */
+  class Job(val width: Int, val height: Int, val ratio: Float, val fps: Int, val frames: List<DoubleArray>, val strokes: List<RoadPainter.Stroke>) {
+    val outW = Math.round(width * ratio)
+    val outH = Math.round(height * ratio)
 
-    init {
-      val f = job.getJSONArray("frames")
-      frames = (0 until f.length()).map { i -> f.getJSONArray(i).let { a -> DoubleArray(4) { a.getDouble(it) } } }
-      val s = job.getJSONArray("strokes")
-      strokes = (0 until s.length()).map { i ->
-        val o = s.getJSONObject(i); val c = o.getJSONArray("c"); val t = o.getJSONArray("t")
-        val xy = DoubleArray(c.length() * 2)
-        for (k in 0 until c.length()) { val p = c.getJSONArray(k); xy[2 * k] = p.getDouble(0) / 1e5; xy[2 * k + 1] = p.getDouble(1) / 1e5 }
-        Pair(xy, DoubleArray(t.length()) { t.getDouble(it) })
+    companion object {
+      fun read(file: File): Job {
+        val o = JSONObject(file.readText())
+        val f = o.getJSONArray("frames")
+        val frames = (0 until f.length()).map { i -> f.getJSONArray(i).let { a -> DoubleArray(4) { a.getDouble(it) } } }
+        val s = o.getJSONArray("strokes")
+        val strokes = (0 until s.length()).map { i ->
+          val st = s.getJSONObject(i); val c = st.getJSONArray("c"); val t = st.getJSONArray("t")
+          val lonLat = DoubleArray(c.length() * 2)
+          for (k in 0 until c.length()) { val p = c.getJSONArray(k); lonLat[2 * k] = p.getDouble(0) / 1e5; lonLat[2 * k + 1] = p.getDouble(1) / 1e5 }
+          RoadPainter.Stroke(lonLat, DoubleArray(t.length()) { t.getDouble(it) })
+        }
+        return Job(o.getInt("width"), o.getInt("height"), o.getDouble("pixelRatio").toFloat(), o.getInt("fps"), frames, strokes)
       }
     }
+  }
 
-    private lateinit var codec: MediaCodec
-    private lateinit var frame: Bitmap      // the composed frame, map and roads, reused
-    private lateinit var argb: IntArray
-    private var queued = 0                   // frames handed to the encoder
-    private lateinit var muxer: MediaMuxer
-    private var track = -1
-    private var muxing = false
-    private var written = 0
+  inner class Render(private val dir: File, private val job: Job, private val map: MapLibreMap) {
+    private val main = Handler(Looper.getMainLooper())
+    private val worker = Executors.newSingleThreadExecutor()
     private val tmp = File(cacheDir, "spike.mp4")
-    private var index = 0
-    private val renderMs = ArrayList<Long>()
-    private val drawMs = ArrayList<Long>()
-    private var startedAt = 0L
-    private var askedAt = 0L
+    private val painter = RoadPainter(job.strokes, job.outW, job.outH, job.ratio)
+    private lateinit var encoder: FrameEncoder
 
-    private val casing = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-      style = Paint.Style.STROKE; color = Color.WHITE; alpha = 235; strokeWidth = 8f * ratio
-      strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-    }
-    private val core = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-      style = Paint.Style.STROKE; color = Color.rgb(0xB3, 0x3A, 0x0A); strokeWidth = 4f * ratio
-      strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-    }
+    private var index = 0
+    private var inFlight = 0              // pictures handed to the worker, not yet encoded (main thread only)
+    private var waitingForWorker = false
+    private var askedAt = 0L
+    private var startedAt = 0L
+    private val mapMs = ArrayList<Long>()  // main thread
+    private val roadsMs = ArrayList<Long>() // worker
+    private val encodeMs = ArrayList<Long>() // worker
 
     fun start() {
-      say("job: ${frames.size} frames, ${outW}x$outH at $fps fps, ${strokes.size} strokes")
-      val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, outW, outH).apply {
-        // Frames are handed over as YUV with their own timestamps. Drawing into the
-        // encoder's input Surface instead gave an MP4 that repeated one picture on the P30.
-        setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
-        setInteger(MediaFormat.KEY_BIT_RATE, 10_000_000)
-        setInteger(MediaFormat.KEY_FRAME_RATE, fps)
-        setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
-      }
-      codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-      codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-      codec.start()
-      frame = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
-      argb = IntArray(outW * outH)
-      muxer = MediaMuxer(tmp.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+      say("job: ${job.frames.size} frames, ${job.outW}x${job.outH} at ${job.fps} fps, ${job.strokes.size} strokes")
+      worker.execute { encoder = FrameEncoder(job.outW, job.outH, job.fps, tmp) }
       startedAt = SystemClock.elapsedRealtime()
-      handler.post { next() }
+      next()
     }
 
+    /** Main thread: point the map at the next frame and, once it has settled, take its picture. */
     private fun next() {
-      if (index >= frames.size) { finish(); return }
-      val f = frames[index]
+      if (index >= job.frames.size) { worker.execute { finish() }; return }
+      if (inFlight >= MAX_IN_FLIGHT) { waitingForWorker = true; return }
+      val f = job.frames[index]
       askedAt = SystemClock.elapsedRealtime()
-      map.moveCamera(CameraUpdateFactory.newCameraPosition(
-        CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).build()))
+      map.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).build()))
       map.triggerRepaint()
-      // Wait SETTLE_FRAMES screen refreshes, then take the picture. MapLibre's own
-      // signals (idle, frame rendered fully) never arrived after moveCamera in this
-      // setup, so every frame waited a 3 s fallback. Frames 270 and 540 are kept as
-      // PNGs to check that no tile is missing.
-      // The first frame waits longer: the map's tiles are still loading.
+      // MapLibre's idle and rendered-fully signals never arrived here, so wait a few
+      // screen refreshes; the first frame longer, while the tiles load.
       var left = if (index == 0) FIRST_SETTLE_FRAMES else SETTLE_FRAMES
-      val choreographer = android.view.Choreographer.getInstance()
-      val tick = object : android.view.Choreographer.FrameCallback {
+      Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
         override fun doFrame(frameTimeNanos: Long) {
-          left -= 1
-          if (left > 0) choreographer.postFrameCallback(this) else { trace("settled"); take(f) }
+          if (--left > 0) Choreographer.getInstance().postFrameCallback(this)
+          else map.snapshot { picture -> taken(picture, f) }
         }
-      }
-      choreographer.postFrameCallback(tick)
+      })
     }
 
-    private fun take(f: DoubleArray) {
-      map.snapshot { bitmap -> trace("snapshot ${bitmap.width}x${bitmap.height}"); compose(bitmap, f[0]) }
-    }
-
-    private fun compose(bitmap: Bitmap, atMs: Double) {
-      val t0 = SystemClock.elapsedRealtime()
-      renderMs.add(t0 - askedAt)
-      val path = Path()
-      var points = 0
-      val projection = map.projection
-      for ((xy, t) in strokes) {
-        if (t[0] > atMs) continue
-        var k = 0
-        while (k < t.size) {
-          var lon = xy[2 * k]; var lat = xy[2 * k + 1]
-          val beyond = t[k] > atMs
-          if (beyond) {
-            if (k == 0) break
-            val u = (atMs - t[k - 1]) / Math.max(1.0, t[k] - t[k - 1])
-            lon = xy[2 * k - 2] + (lon - xy[2 * k - 2]) * u
-            lat = xy[2 * k - 1] + (lat - xy[2 * k - 1]) * u
-          }
-          val p = projection.toScreenLocation(LatLng(lat, lon))
-          if (k == 0) path.moveTo(p.x, p.y) else path.lineTo(p.x, p.y)
-          points += 1
-          if (beyond) break
-          k += 1
-        }
+    private fun taken(picture: Bitmap, f: DoubleArray) {
+      mapMs.add(SystemClock.elapsedRealtime() - askedAt)
+      val frameIndex = index
+      if (frameIndex == 0) {
+        val worst = painter.checkAgainst({ lon, lat -> map.projection.toScreenLocation(LatLng(lat, lon)).let { Pair(it.x, it.y) } }, f[1], f[2], f[3])
+        say("own projection against MapLibre's: at most ${"%.2f".format(worst)} px apart")
       }
-      val canvas = Canvas(frame)
-      canvas.drawBitmap(bitmap, null, android.graphics.Rect(0, 0, outW, outH), null)
-      canvas.drawPath(path, casing)
-      canvas.drawPath(path, core)
-      encode(frame)
-      if (index == 0 || index == 270 || index == 540) {
-        // Exactly the picture handed to the encoder.
-        File(dir, "frame-$index.png").outputStream().use { frame.compress(Bitmap.CompressFormat.PNG, 90, it) }
-        say("probe $index: at ${atMs.toInt()} ms, bitmap ${bitmap.width}x${bitmap.height}, zoom now ${"%.2f".format(map.cameraPosition.zoom)}, $points road points")
-      }
-      drain(false)
-      drawMs.add(SystemClock.elapsedRealtime() - t0)
-      if (index % 10 == 0) say("frame $index: map ${renderMs.last()} ms, draw+encode ${drawMs.last()} ms")
+      inFlight += 1
+      worker.execute { compose(picture, f, frameIndex) }
       index += 1
-      handler.post { next() }
+      main.post { next() }
     }
 
-    /** Step markers for the first frames, on screen: where a stall happens (logcat drops our info lines on EMUI). */
-    private fun trace(step: String) {
-      if (index < 3) say("  $index $step")
-    }
-
-    /** Hand one frame to the encoder as YUV 4:2:0, stamped `queued / fps`. */
-    private fun encode(picture: Bitmap) {
-      picture.getPixels(argb, 0, outW, 0, 0, outW, outH)
-      var input: Int
-      while (true) {
-        input = codec.dequeueInputBuffer(10_000)
-        if (input >= 0) break
-        drain(false)
+    /** Worker: roads onto the picture, then the encoder. */
+    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int) {
+      val t0 = SystemClock.elapsedRealtime()
+      val canvasBitmap = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
+      val points = painter.paint(Canvas(canvasBitmap), f[0], f[1], f[2], f[3])
+      val t1 = SystemClock.elapsedRealtime()
+      encoder.add(canvasBitmap)
+      val t2 = SystemClock.elapsedRealtime()
+      roadsMs.add(t1 - t0); encodeMs.add(t2 - t1)
+      if (frameIndex == 0 || frameIndex == 270 || frameIndex == 540) {
+        File(dir, "frame-$frameIndex.png").outputStream().use { canvasBitmap.compress(Bitmap.CompressFormat.PNG, 90, it) }
+        say("probe $frameIndex: at ${f[0].toInt()} ms, $points road points")
       }
-      val image = codec.getInputImage(input)!!
-      val y = image.planes[0]; val u = image.planes[1]; val v = image.planes[2]
-      val yBuf = y.buffer; val uBuf = u.buffer; val vBuf = v.buffer
-      for (row in 0 until outH) {
-        var at = row * y.rowStride
-        val base = row * outW
-        for (col in 0 until outW) {
-          val c = argb[base + col]
-          val r = (c shr 16) and 0xFF; val g = (c shr 8) and 0xFF; val b = c and 0xFF
-          yBuf.put(at, (((66 * r + 129 * g + 25 * b + 128) shr 8) + 16).toByte())
-          at += y.pixelStride
-        }
-      }
-      for (row in 0 until outH / 2) {
-        for (col in 0 until outW / 2) {
-          val c = argb[(2 * row) * outW + 2 * col]
-          val r = (c shr 16) and 0xFF; val g = (c shr 8) and 0xFF; val b = c and 0xFF
-          uBuf.put(row * u.rowStride + col * u.pixelStride, (((-38 * r - 74 * g + 112 * b + 128) shr 8) + 128).toByte())
-          vBuf.put(row * v.rowStride + col * v.pixelStride, (((112 * r - 94 * g - 18 * b + 128) shr 8) + 128).toByte())
-        }
-      }
-      codec.queueInputBuffer(input, 0, outW * outH * 3 / 2, queued * 1_000_000L / fps, 0)
-      queued += 1
-    }
-
-    private fun drain(end: Boolean) {
-      val info = MediaCodec.BufferInfo()
-      while (true) {
-        val out = codec.dequeueOutputBuffer(info, if (end) 10_000 else 0)
-        when {
-          out == MediaCodec.INFO_TRY_AGAIN_LATER -> if (!end) return
-          out == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> { track = muxer.addTrack(codec.outputFormat); muxer.start(); muxing = true }
-          out >= 0 -> {
-            val buffer = codec.getOutputBuffer(out)!!
-            if (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) info.size = 0
-            if (info.size > 0 && muxing) {
-              buffer.position(info.offset); buffer.limit(info.offset + info.size)
-              muxer.writeSampleData(track, buffer, info)
-              written += 1
-            }
-            codec.releaseOutputBuffer(out, false)
-            if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) return
-          }
-        }
+      if (frameIndex % 60 == 0) say("frame $frameIndex: map ${mapMs.getOrNull(frameIndex)} ms, roads ${t1 - t0} ms, encode ${t2 - t1} ms")
+      main.post {
+        inFlight -= 1
+        if (waitingForWorker) { waitingForWorker = false; next() }
       }
     }
 
+    /** Worker: close the file, save it, write the record. */
     private fun finish() {
-      var input: Int
-      while (true) { input = codec.dequeueInputBuffer(10_000); if (input >= 0) break; drain(false) }
-      codec.queueInputBuffer(input, 0, 0, queued * 1_000_000L / fps, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-      drain(true)
-      codec.stop(); codec.release()
-      if (muxing) muxer.stop()
-      muxer.release()
+      encoder.finish()
       val totalMs = SystemClock.elapsedRealtime() - startedAt
       val uri = save()
-      val pct = { l: List<Long>, p: Double -> val s = l.sorted(); if (s.isEmpty()) -1L else s[Math.min(s.size - 1, (s.size * p).toInt())] }
       val result = JSONObject().apply {
         put("device", "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}")
-        put("method", "MapView, settle frames, snapshot, YUV to the encoder")
-        put("frames", index); put("framesWritten", written); put("totalMs", totalMs)
-        put("videoSeconds", index.toDouble() / fps); put("settleFrames", SETTLE_FRAMES)
-        put("mapMs", JSONObject().put("p50", pct(renderMs, .5)).put("p90", pct(renderMs, .9)).put("max", pct(renderMs, 1.0)))
-        put("drawEncodeMs", JSONObject().put("p50", pct(drawMs, .5)).put("p90", pct(drawMs, .9)).put("max", pct(drawMs, 1.0)))
+        put("method", "MapView settle then snapshot; roads by own Mercator; YUV on 4 threads; map and encoding overlapped")
+        put("frames", index); put("framesWritten", encoder.written); put("totalMs", totalMs)
+        put("videoSeconds", index.toDouble() / job.fps); put("chroma", encoder.chromaLayout)
+        put("mapMs", stats(mapMs)); put("roadsMs", stats(roadsMs)); put("encodeMs", stats(encodeMs))
         put("bytes", tmp.length()); put("savedTo", uri)
       }
       File(dir, "result.json").writeText(result.toString(2))
+      worker.shutdown()
       say("DONE $result")
+    }
+
+    private fun stats(values: List<Long>): JSONObject {
+      val s = values.sorted()
+      val at = { p: Double -> if (s.isEmpty()) -1L else s[minOf(s.size - 1, (s.size * p).toInt())] }
+      return JSONObject().put("p50", at(.5)).put("p90", at(.9)).put("max", at(1.0))
     }
 
     private fun save(): String {
@@ -324,5 +216,15 @@ class MainActivity : Activity() {
       contentResolver.update(uri, values, null, null)
       return uri.toString()
     }
+  }
+
+  private companion object {
+    const val TAG = "VideoSpike"
+    /** Screen refreshes to wait after moving the camera, before the picture. */
+    const val SETTLE_FRAMES = 3
+    /** The first frame waits for the map's tiles to load. */
+    const val FIRST_SETTLE_FRAMES = 60
+    /** Pictures waiting for the worker at most: each is 8 MB. */
+    const val MAX_IN_FLIGHT = 2
   }
 }

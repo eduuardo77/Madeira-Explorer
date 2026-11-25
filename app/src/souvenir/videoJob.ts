@@ -19,7 +19,7 @@ import { APP_NAME } from '../brand.ts';
 import { fitBounds } from '../map/cameraFit.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { Film } from './frame.ts';
-import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type TimedRoad } from './pacedFilm.ts';
+import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type PacedFilm, type TimedRoad } from './pacedFilm.ts';
 import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
 import { overlayAt, planOverlay, videoDurationMs, type InfoMode, type OverlayFrame, type Tier } from './videoOverlay.ts';
 
@@ -80,13 +80,24 @@ const KEEP_PADDING: Record<InfoMode, { top: number; bottom: number; left: number
   none: { top: 40, bottom: 28, left: 12, right: 12 },
 };
 
-export function buildVideoJob(input: VideoJobInput): VideoJob {
-  const { film, choices } = input;
-  const draw = film.scenes.find((scene) => scene.kind === 'draw');
-  const finale = film.scenes.find((scene) => scene.kind === 'finale');
-  const drawStartMs = draw?.startMs ?? 0;
-  const finaleAtMs = finale?.startMs ?? film.durationMs;
+/**
+ * The part of a job that the choices do not change: the pen's pacing (most of
+ * the work, 0.8 s on the P30 for the lead's trip), its strokes as sent, the
+ * watermark. Made once per trip, so a change of *Informação* or *Câmara*
+ * only redoes the camera and the overlay.
+ */
+export type PreparedVideo = {
+  paced: PacedFilm;
+  drawStartMs: number;
+  finaleAtMs: number;
+  strokes: VideoJob['strokes'];
+  glyph: VideoJob['glyph'];
+};
 
+export function prepareVideo(input: Omit<VideoJobInput, 'choices' | 'tier'>): PreparedVideo {
+  const { film } = input;
+  const drawStartMs = film.scenes.find((scene) => scene.kind === 'draw')?.startMs ?? 0;
+  const finaleAtMs = film.scenes.find((scene) => scene.kind === 'finale')?.startMs ?? film.durationMs;
   const paced = planPacedFilm({
     roads: input.roads,
     awards: input.awards,
@@ -96,6 +107,23 @@ export function buildVideoJob(input: VideoJobInput): VideoJob {
     tripStartKey: input.dayKey(input.firstTs),
     totalKm: input.totalKm,
   });
+  return {
+    paced,
+    drawStartMs,
+    finaleAtMs,
+    strokes: paced.strokes.map((stroke) => ({
+      c: stroke.coordinates.map(([lon, lat]) => [Math.round(lon * 1e5), Math.round(lat * 1e5)]),
+      t: stroke.timesMs.map(Math.round),
+    })),
+    glyph: islandGlyph(input.islandOutlines),
+  };
+}
+
+/** The job for these choices; pass `prepared` (`prepareVideo`) to skip redoing the pacing. */
+export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = prepareVideo(input)): VideoJob {
+  const { film, choices } = input;
+  const { paced, drawStartMs, finaleAtMs } = prepared;
+  const finale = film.scenes.find((scene) => scene.kind === 'finale');
 
   const plan = planOverlay({
     language: input.language,
@@ -154,11 +182,8 @@ export function buildVideoJob(input: VideoJobInput): VideoJob {
     durationMs,
     frames,
     overlays,
-    strokes: paced.strokes.map((stroke) => ({
-      c: stroke.coordinates.map(([lon, lat]) => [Math.round(lon * 1e5), Math.round(lat * 1e5)]),
-      t: stroke.timesMs.map(Math.round),
-    })),
-    glyph: islandGlyph(input.islandOutlines),
+    strokes: prepared.strokes,
+    glyph: prepared.glyph,
   };
 }
 

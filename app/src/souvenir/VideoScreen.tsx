@@ -27,7 +27,7 @@ import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from '../ui/theme';
 import { formatDateRange } from './shareCard';
 import { REFUSAL_KEYS } from './shareTrip';
 import { BrumaVideoView, openVideo, shareVideo, type BrumaVideoHandle, type ExportResult } from './videoExport';
-import { buildVideoJob, type CameraChoice, type VideoChoices } from './videoJob';
+import { buildVideoJob, prepareVideo, type CameraChoice, type VideoChoices } from './videoJob';
 import type { InfoMode, Tier } from './videoOverlay';
 import {
   loadChoices,
@@ -80,9 +80,11 @@ export default function VideoScreen({ tripId, onClose }: { tripId?: number; onCl
     };
   }, [tripId, language]);
 
+  // The pacing once per trip; a change of choice redoes only the camera and the overlay.
+  const prepared = useMemo(() => (source?.ok ? prepareVideo(source.input) : null), [source]);
   const job = useMemo(
-    () => (source?.ok && choices !== null ? JSON.stringify(buildVideoJob({ ...source.input, tier, choices })) : null),
-    [source, choices, tier],
+    () => (source?.ok && prepared !== null && choices !== null ? JSON.stringify(buildVideoJob({ ...source.input, tier, choices }, prepared)) : null),
+    [source, prepared, choices, tier],
   );
 
   const choose = useCallback((next: Partial<VideoChoices>) => {

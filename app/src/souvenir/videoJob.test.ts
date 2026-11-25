@@ -12,7 +12,7 @@ import type { Film } from './frame.ts';
 import type { TimedRoad } from './pacedFilm.ts';
 import { DRIFT_ZOOM } from './videoCamera.ts';
 import { END_CARD_MS } from './videoOverlay.ts';
-import { VIDEO_FPS, buildVideoJob, islandGlyph, type VideoJobInput } from './videoJob.ts';
+import { VIDEO_FPS, buildVideoJob, islandGlyph, prepareVideo, type VideoJobInput } from './videoJob.ts';
 
 const T0 = Date.parse('2026-10-01T09:00:00Z');
 const dayKey = (ts: number) => new Date(ts).toISOString().slice(0, 10);
@@ -106,4 +106,12 @@ test('the island glyph fits a 100-wide box', () => {
   const all = glyph.rings.flat();
   assert.ok(all.every(([x, y]) => x >= 0 && x <= 100 && y >= 0 && y <= glyph.height));
   assert.deepEqual(islandGlyph([]), { width: 100, height: 0, rings: [] });
+});
+
+test('a job built from a prepared video is the job built from scratch', () => {
+  const base = input();
+  const prepared = prepareVideo(base);
+  for (const choices of [{ info: 'full', camera: 'close' }, { info: 'none', camera: 'normal' }] as const) {
+    assert.deepEqual(buildVideoJob({ ...base, choices }, prepared), buildVideoJob({ ...base, choices }));
+  }
 });

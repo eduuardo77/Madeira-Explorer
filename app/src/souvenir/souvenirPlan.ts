@@ -37,6 +37,9 @@ import { exportedTrip, getExportableTrace } from './exportTrace';
  * `quiet`: plan without writing to the diary, for the passport's question
  * "is there a film to offer" (T-217), asked on every visit.
  */
+/** The last film composed, and what it was composed from. */
+let lastComposition: { key: string; value: Composition } | null = null;
+
 export async function getSouvenirComposition({
   quiet = false,
   tripId,
@@ -68,6 +71,14 @@ export async function getSouvenirComposition({
     // The masked export of the whole trip, then cut to the range: the guard in
     // `traceDrawn.test.ts` holds this call to the masked trace. Drawn only, as
     // on the map: fewer points per frame (`simplifyLine`), times unchanged.
+    // The same trip, fixes and stamps as last time (the timelapse just made it,
+    // and the video screen opened from it asks again): the same film. Composing
+    // is 2.7 s of the lead's 63-day trip on the P30 (T-329, 25 Nov 2026).
+    const lastFix = trace.fixes[trace.fixes.length - 1];
+    const key = [trip.id, range?.fromTs ?? '', range?.toTs ?? '', trace.fixes.length, lastFix?.ts ?? '', awards.length,
+      awards.reduce((latest, award) => Math.max(latest, award.awarded_ts), 0), progress.total].join(':');
+    if (lastComposition !== null && lastComposition.key === key) return lastComposition.value;
+
     const roads = (await exportRoadSegments(trace.fixes, trace.accommodation, MASK_RADIUS_M))
       .map((segment) => ({ ...segment, fixes: keepSimplified(segment.fixes.filter((fix) => inRange(fix.ts))) }))
       .filter((segment) => segment.fixes.length >= 2);
@@ -88,6 +99,7 @@ export async function getSouvenirComposition({
       roads,
     });
 
+    lastComposition = { key, value: composition };
     if (quiet) {
       return composition;
     }

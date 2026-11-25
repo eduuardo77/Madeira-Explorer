@@ -629,6 +629,12 @@ permission, L3 privacy contact.
       262 to 278, pitch 50, the whole trip in view, ~0.85 levels closer than flat; roads, names and
       pen drawn through a perspective fixed by four projected points a frame. Awaits the lead's
       eye. The free watermark now sits over the island.
+      **25 Nov, 3D terrain asked for:** MapLibre Android 11.13.5 has no 3D terrain (no `terrain` in
+      its library, hillshade only). MapLibre GL JS has it, and our terrarium relief works with it
+      (`tools/out/terrain-try.html`, the lead's trip draped, relief x2). Doing it in the app means
+      rendering the video with GL JS in a WebView (frames out of WebGL to the encoder, roads as
+      map layers): a rebuild of the renderer, speed unmeasured; it would also drop the 13 MB
+      native library. Not started; the lead's call.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

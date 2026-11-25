@@ -26,6 +26,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   **19:50: a day's video too** (c8ba394, on the P30), and the video ready 0.5 s after the tap once the film has stopped.
   **20:10: names over the roads, opening on the whole island** (d779d29, on the P30).
   **20:55: *Inclinada*, a tilted camera** (2434cec, on the P30), a third choice to compare.
+  **21:20: *Viagem* opens in ~0.7 s** (970724a, on the P30; was 1.0 to 1.4 s): last view remembered, read ahead
+  from the passport, matched again only when needed. 3D terrain: not in MapLibre Android; needs a GL JS renderer.
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

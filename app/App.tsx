@@ -23,6 +23,8 @@ import PassportScreen from './src/ui/PassportScreen';
 import ReplayScreen from './src/souvenir/ReplayScreen';
 import { BrumaVideoView } from './src/souvenir/videoExport';
 import VideoScreen from './src/souvenir/VideoScreen';
+import { readyVideo } from './src/souvenir/videoSource';
+import { deviceLanguage } from './src/i18n';
 import TripViewerScreen from './src/souvenir/TripViewerScreen';
 import AnimatedSplash from './src/ui/AnimatedSplash';
 import SettingsScreen from './src/ui/SettingsScreen';
@@ -134,6 +136,10 @@ function AppScreens({ onShown }: { onShown: () => void }) {
     setScreen('replay');
   }, []);
   const closePassport = useCallback(() => setScreen('map'), []);
+  // T-329: the video for the trip (or day) on show, made while the person looks at the stopped film.
+  const prepareVideoAhead = useCallback(() => {
+    void readyVideo(viewedTripId ?? undefined, deviceLanguage(), replayRange ?? undefined).catch(() => undefined);
+  }, [viewedTripId, replayRange]);
   const showOnMap = useCallback((place: Place, collected: boolean, locked?: boolean) => {
     setFocusPlace({ place, collected, locked });
     setScreen('map');
@@ -323,11 +329,13 @@ function AppScreens({ onShown }: { onShown: () => void }) {
           tripId={viewedTripId ?? undefined}
           range={replayRange ?? undefined}
           onClose={() => setScreen('replay')}
-          // T-329: the whole trip only, and only where the video can be made.
-          onMakeVideo={BrumaVideoView !== null && replayRange === null ? () => setScreen('video') : undefined}
+          // T-329: the whole trip or the day on show, where the video can be made;
+          // made ready once the film stops, so the screen opens on it.
+          onMakeVideo={BrumaVideoView !== null ? () => setScreen('video') : undefined}
+          onIdle={BrumaVideoView !== null ? prepareVideoAhead : undefined}
         />
       ) : screen === 'video' ? (
-        <VideoScreen tripId={viewedTripId ?? undefined} onClose={() => setScreen('timelapse')} />
+        <VideoScreen tripId={viewedTripId ?? undefined} range={replayRange ?? undefined} onClose={() => setScreen('timelapse')} />
       ) : screen === 'settings' ? (
         <SettingsScreen
           onClose={() => setScreen('map')}

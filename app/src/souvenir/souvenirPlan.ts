@@ -25,7 +25,7 @@ import { composeSouvenir } from './composition';
 import { exportRoadSegments } from '../matching/roadNetwork';
 import { keepSimplified } from '../map/simplifyLine';
 import { MASK_RADIUS_M } from './accommodation';
-import { exportedTrip, getExportableTrace } from './exportTrace';
+import { exportedTrip, getExportableTrace, type ExportableTrace } from './exportTrace';
 
 /**
  * Plan the souvenir for `tripId`, or for the trip that just ended.
@@ -44,8 +44,11 @@ export async function getSouvenirComposition({
   quiet = false,
   tripId,
   range,
+  trace: given,
 }: {
   quiet?: boolean;
+  /** The trip's exportable trace when the caller has just read it (the video, T-329): not read again. */
+  trace?: ExportableTrace;
   tripId?: number;
   /** One day of the trip (the viewer's "this day", 17 Oct 2026); the whole trip when absent. */
   range?: { fromTs: number; toTs: number };
@@ -57,7 +60,7 @@ export async function getSouvenirComposition({
       return { renderable: false, reason: 'no trip to show' };
     }
 
-    const trace = await getExportableTrace({ quiet, tripId: trip.id });
+    const trace = given ?? (await getExportableTrace({ quiet, tripId: trip.id }));
     if (!trace.safeToShare) {
       // Already the right answer, and `composeSouvenir` would reach it too.
       // Returning early keeps the reason exactly as the export phrased it.

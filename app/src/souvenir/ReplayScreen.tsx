@@ -121,14 +121,21 @@ export default function ReplayScreen({
   range,
   onClose,
   onMakeVideo,
+  onIdle,
 }: {
   /** The trip to play (T-275); the trip on show when absent. */
   tripId?: number;
   /** One day of it, from the trip viewer's "this day"; the whole trip when absent. */
   range?: { fromTs: number; toTs: number };
   onClose: () => void;
-  /** T-329: open the video you keep. Absent where it cannot be made (not Android, one day only). */
+  /** T-329: open the video you keep. Absent where it cannot be made (not Android). */
   onMakeVideo?: () => void;
+  /**
+   * T-329: the film has played and stopped (finished or paused). The video is
+   * made ready then, not while the film plays: its frame loop runs here, in
+   * JavaScript, and would stutter.
+   */
+  onIdle?: () => void;
 }) {
   const [composition, setComposition] = useState<Composition | null>(null);
   const [caption, setCaption] = useState('');
@@ -219,6 +226,12 @@ export default function ReplayScreen({
   }, [renderable, mapReady]);
 
   const playing = isPlaying(clock);
+
+  const hasPlayed = useRef(false);
+  useEffect(() => {
+    if (playing) hasPlayed.current = true;
+    else if (hasPlayed.current) onIdle?.();
+  }, [playing, onIdle]);
 
   // A frame loop while playing, and nothing at all while paused or finished — a
   // replay left on screen must not hold the CPU awake over a still picture.

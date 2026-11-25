@@ -143,3 +143,9 @@ test('the roads light up together at the close, peak, and stay lit', () => {
   assert.equal(overlayAt(p, FINALE - 100).roadGlow, 0);
   assert.ok(overlayAt(p, FINALE + 600).roadGlow > GLOW_REST);
 });
+
+test('a one-day video has no day chip; its date is under the title', () => {
+  const p = planOverlay({ ...plan('discreet'), lastTs: T0, tripDays: 1 });
+  assert.equal(overlayAt(p, (DRAW_START + FINALE) / 2).day, null);
+  assert.notEqual(overlayAt(plan('discreet'), (DRAW_START + FINALE) / 2).day, null);
+});

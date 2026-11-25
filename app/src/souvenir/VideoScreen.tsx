@@ -27,16 +27,17 @@ import { colors, fontSize, MIN_TAP_TARGET, radius, spacing } from '../ui/theme';
 import { formatDateRange } from './shareCard';
 import { REFUSAL_KEYS } from './shareTrip';
 import { BrumaVideoView, openVideo, shareVideo, type BrumaVideoHandle, type ExportResult } from './videoExport';
-import { buildVideoJob, prepareVideo, type CameraChoice, type VideoChoices } from './videoJob';
+import { buildVideoJob, type CameraChoice, type VideoChoices } from './videoJob';
 import type { InfoMode, Tier } from './videoOverlay';
 import {
-  loadChoices,
-  loadVideoSource,
+  readyVideo,
   rememberSavedVideo,
   saveChoices,
   savedVideoUri,
   tier as currentTier,
   videoFileName,
+  type ReadyVideo,
+  type VideoRange,
   type VideoSource,
 } from './videoSource';
 
@@ -46,15 +47,20 @@ const SEGMENT_SLOP = { top: (MIN_TAP_TARGET - SEGMENT_HEIGHT) / 2, bottom: (MIN_
 /** *Tirar a marca* is one line of small text: grown to a tap target. */
 const LINK_SLOP = { top: 20, bottom: 20, left: spacing.sm, right: spacing.sm };
 
+function sameChoices(a: VideoChoices, b: VideoChoices): boolean {
+  return a.info === b.info && a.camera === b.camera;
+}
+
 type Phase =
   | { kind: 'edit' }
   | { kind: 'saving'; done: number; total: number }
   | { kind: 'done'; result: ExportResult }
   | { kind: 'failed' };
 
-export default function VideoScreen({ tripId, onClose }: { tripId?: number; onClose: () => void }) {
+export default function VideoScreen({ tripId, range, onClose }: { tripId?: number; range?: VideoRange; onClose: () => void }) {
   const language = deviceLanguage();
   const [source, setSource] = useState<VideoSource | null>(null);
+  const [made, setMade] = useState<ReadyVideo | null>(null);
   const [choices, setChoices] = useState<VideoChoices | null>(null);
   const [tier, setTier] = useState<Tier>('free');
   const [ready, setReady] = useState(false);
@@ -66,11 +72,13 @@ export default function VideoScreen({ tripId, onClose }: { tripId?: number; onCl
   useEffect(() => {
     let live = true;
     (async () => {
-      const [loaded, chosen] = await Promise.all([loadVideoSource(tripId, language), loadChoices()]);
+      // Usually made already: the film starts on it once it stops playing.
+      const got = await readyVideo(tripId, language, range);
       if (!live) return;
-      setSource(loaded);
-      setChoices(chosen);
-      if (loaded.ok) setTier(loaded.input.tier);
+      setMade(got);
+      setSource(got.source);
+      setChoices(got.choices);
+      if (got.source.ok) setTier(got.source.input.tier);
     })().catch(async (error) => {
       await recordingEventDao.logError('video source', error);
       if (live) setSource({ ok: false, refusal: 'failed' });
@@ -78,14 +86,16 @@ export default function VideoScreen({ tripId, onClose }: { tripId?: number; onCl
     return () => {
       live = false;
     };
-  }, [tripId, language]);
+  }, [tripId, language, range?.fromTs, range?.toTs]);
 
   // The pacing once per trip; a change of choice redoes only the camera and the overlay.
-  const prepared = useMemo(() => (source?.ok ? prepareVideo(source.input) : null), [source]);
-  const job = useMemo(
-    () => (source?.ok && prepared !== null && choices !== null ? JSON.stringify(buildVideoJob({ ...source.input, tier, choices }, prepared)) : null),
-    [source, prepared, choices, tier],
-  );
+  // The job made ahead is used while the choices and tier are the ones it was made for.
+  const prepared = made?.prepared ?? null;
+  const job = useMemo(() => {
+    if (!source?.ok || prepared === null || choices === null) return null;
+    if (made !== null && made.job !== null && sameChoices(made.choices, choices) && tier === source.input.tier) return made.job;
+    return JSON.stringify(buildVideoJob({ ...source.input, tier, choices }, prepared));
+  }, [made, source, prepared, choices, tier]);
 
   const choose = useCallback((next: Partial<VideoChoices>) => {
     setChoices((current) => (current === null ? current : { ...current, ...next }));
@@ -100,9 +110,9 @@ export default function VideoScreen({ tripId, onClose }: { tripId?: number; onCl
       const result = await view.current.exportVideo({
         displayName: videoFileName(source.input.title, dates),
         folder: APP_NAME,
-        replaceUri: await savedVideoUri(source.tripId),
+        replaceUri: await savedVideoUri(source.tripId, range),
       });
-      if (result.saved) await rememberSavedVideo(source.tripId, result.uri);
+      if (result.saved) await rememberSavedVideo(source.tripId, result.uri, range);
       await recordingEventDao.log('export', `video: ${result.frames} frames in ${result.ms} ms, saved ${result.saved}, replaced ${result.replaced}`);
       setPhase({ kind: 'done', result });
     } catch (error) {
@@ -113,7 +123,7 @@ export default function VideoScreen({ tripId, onClose }: { tripId?: number; onCl
       await recordingEventDao.logError('video export', error);
       setPhase({ kind: 'failed' });
     }
-  }, [source, choices, language]);
+  }, [source, choices, language, range]);
 
   // --- not available ---
   if (BrumaVideoView === null || (source !== null && !source.ok)) {

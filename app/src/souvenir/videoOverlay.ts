@@ -12,7 +12,8 @@
  *     at the close "32 de 84 lugares · 345 km de estradas acesas"); *Completa*,
  *     a card at the foot and at the close a card with the count rising; *Nenhuma*,
  *     nothing, and the title leaves after `TITLE_HOLD_MS`;
- *   - the day and its date, top right, while the pen draws (not with *Nenhuma*);
+ *   - the day and its date, top right, while the pen draws (not with *Nenhuma*,
+ *     nor in a one-day video);
  *   - each stamp's name for `PILL_MS`, one at a time, "e mais 2" when several
  *     land together (not with *Nenhuma*);
  *   - the pen's head: a comet that grows in, fades in after a long move, and
@@ -189,7 +190,8 @@ export function overlayAt(plan: OverlayPlan, atMs: number): OverlayFrame {
 
   const dayNow = [...plan.paced.days].reverse().find((day) => day.startMs <= drawTo) ?? null;
   const day =
-    dayNow !== null && info !== 'none' && !finale
+    // A one-day video has no "Dia 1 de 1": its date is under the title already.
+    dayNow !== null && info !== 'none' && !finale && plan.tripDays > 1
       ? {
           text: translate(STRINGS['video.day'], language, { day: dayNow.dayNumber, days: plan.tripDays }),
           date: new Date(`${dayNow.key}T12:00:00Z`).toLocaleDateString(DATE_LOCALES[language], { day: 'numeric', month: 'long', timeZone: 'UTC' }),

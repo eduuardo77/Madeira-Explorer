@@ -595,6 +595,12 @@ permission, L3 privacy contact.
       the privacy policy's sharing section (T-328) rewritten for the video. Android 9 and earlier
       can only share it (no storage permission). Not seen: the unlock from *Tirar a marca* (Play
       billing only works from a Play install), Android 7 to 9, any other phone.
+      **25 Nov, tiles cut** (the lead: "shrink the tiles"; a671071): map and relief cut to zoom 11
+      (`tools/cut-video-tiles.mjs`, own PMTiles reader/writer in `tools/lib/pmtiles.mjs`), 19.1 to
+      5.6 MB; **APK 76.9 to 63.4 MB** (43.8 before the video). A video made with the cut tiles on
+      the P30 matches the full-tiles one at 52.5 dB average PSNR over 613 frames (worst 43.8), side
+      by side the same; MAP_CONTENT_REVISION 2 dropped the old 19 MB cache copy on the phone. What
+      is left of the video's cost: MapLibre's library (~13 MB) and the relief (4.8 MB).
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

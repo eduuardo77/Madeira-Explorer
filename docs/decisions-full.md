@@ -6097,5 +6097,6 @@ so no screen promises a duration. Android 7 to 9 ask for storage permission to s
 **Built 25 Nov 2026** (`modules/video-export`, `souvenir/videoJob.ts`, `VideoScreen.tsx`), on the
 P30: 20.4 s of video in 79 s, preview at 52 fps on a field build. Measured cost: the APK from
 43.8 to 76.9 MB (tiles 19 MB, MapLibre ~13 MB). Android 9 and earlier share rather than save (the
-app holds no storage permission). Saving a trip again replaces its video.
+app holds no storage permission). Saving a trip again replaces its video. **Tiles cut to zoom 11
+the same day** (the video never asks for more): APK 63.4 MB, the frames unchanged (52.5 dB PSNR).
 

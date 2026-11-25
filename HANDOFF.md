@@ -18,6 +18,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   a second save of the same trip replaces the first, *Partilhar* works. New native module
   `modules/video-export` (MapLibre): **the APK grew 43.8 to 76.9 MB**. Not in the Play build;
   T-328 (privacy policy) has to change with it. The spike app was removed from the P30.
+  **17:10: tiles cut to zoom 11** (a671071, on the P30): APK 76.9 to 63.4 MB, the video unchanged
+  (52.5 dB PSNR against the full-tiles one).
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

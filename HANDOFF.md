@@ -8,6 +8,10 @@ genuinely blocked. Grep the reference docs; do not read them whole.
 
 ## ⚠⚠⚠ 2026-10-18: START HERE, after the second carried day
 
+- **24 Nov, evening out, the first trip of T-315 and T-321** (field log): **94.1% of the route
+  within 10 m**, by car 97.4%, on foot 63.1%; every stop slept, false *in vehicle* labels indoors
+  raised nothing, no departure dropped to walking; a quiet night. No new fault. Backup
+  `p30-2026-11-25-after-trip`.
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

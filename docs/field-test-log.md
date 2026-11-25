@@ -14,6 +14,7 @@ never where the lead lives.
 
 | Date | Test | Device | Tier | Result |
 |---|---|---|---|---|
+| 2026-11-24 | **Evening out, automatic recording, first trip with T-315 and T-321**: three drives and two walks with stops, 16:24 to 20:14 (end of the trip set aside: phone left in the car, iPhone closed), 38 km measured | P30 | one mode (D-108), automatic | ✅ **94.1% of the route within 10 m**, 98.4% within 30 m, by car 97.4%, on foot 63.1%; ✅ every stop slept (four), false *in vehicle* labels indoors never raised one; ✅ no departure dropped to walking; ✅ a quiet night, no fix from 20:52 to 09:17; battery not measured (held 100% for 3 h from full) |
 | 2026-11-22 | **Day west, automatic recording, first trip of T-312, T-313 and T-314**: Câmara de Lobos, Ponta do Sol, Caminho Velho dos Reis Magos on foot, 8 h, 106 km measured, iPhone 11:08 to 19:14 | P30 | one mode (D-108), automatic | ✅ **89.5% of the route within 10 m**, 96.0% within 30 m, by car 91.5%, on foot 69.3% (51.5% the day before); ✅ T-312: no stop woken by its own fixes, both single-label raises real departures; battery 94 to 77% in 8 h 12 (about 2.1 an hour); ❌ **T-315: a still check slept the phone as the car left** (14:19, about 1.2 km dark); ❌ 1.2 km of expressway lit beside the old road at Ponta do Sol (T-313's second half); the road join did not fire |
 | 2026-11-21 to 22 | **Cinema at Forum Madeira and the night after, automatic recording**, car each way (19 km), 4 h in the shopping centre, iPhone alongside | P30 | one mode (D-108), automatic | ✅ **90.4% there and 91.6% back within 10 m**, 97.5 and 99.1% within 30 m; ✅ **the film slept** (20:50 to 00:09, motion wakes never raised it); ✅ **a quiet night**: 2 fixes from 01:07 to 09:57; battery 97 to 85% in 14 h 31, trip included; ❌ T-312 twice more: a false *in vehicle* in the centre (20 min), home raised to walking (30 min) |
 | 2026-11-21 | **Sightseeing day, automatic recording, version 14's first trip**: east end, Santana, Ribeiro Frio, Monte, Funchal on foot, Reis Magos, 6 h 45, 96 km measured, app opened 5 times, iPhone 11:00 to 16:40 | P30 | one mode (D-108), automatic | ✅ **87.9% of the route within 10 m**, 94.8% within 30 m, by car 90.4%; on foot 51.5%; ✅ recording survived this morning's revoke and regrant; ✅ 6 stamps, app closed; battery 100 to 86% in 6 h 48 (about 2.1 an hour); ❌ **stops woken back to driving**: three times by the stop's own fixes (home included: fine GPS at home after), and a 53 min stop held on driving by *in vehicle* labels |
@@ -51,6 +52,30 @@ never where the lead lives.
 | 2026-08-16 | PR18 Levada do Rei, on foot | none | n/a | observations only, no app |
 
 ## Entries
+
+### 2026-11-24: an evening out, three drives and two walks, the first trip of T-315 and T-321
+
+- **Setup:** field build of 10:14 (539c969, T-315 and T-321 in it), versionCode 15, automatic,
+  unplugged 16:21 at 100%. iPhone SensorLogger 16:31 to 20:14
+  (`Madeira-fieldwork/iphone-2026-11-24`, compare page beside it). After 20:14 the lead left the
+  P30 in the car and the iPhone stopped by accident: set aside. Database pulled 25 Nov 09:17,
+  `backups/p30-2026-11-25-after-trip`.
+- **Route, 16:29 to 20:14 (37.9 km measured): 94.1% within 10 m, 98.4% within 30 m**; by car
+  97.4% (99.8% within 30 m), on foot 3.7 km, 63.1%. Lit line 96.4% within 10 m. Unlit: two runs
+  of about 200 m, one on the first walk.
+- ✅ **Departures:** walking at the first motion wake (16:25:39), driving at 16:31:41, the car
+  moving from about 16:29 and lit from its first fix. 17:28:06 and 20:04:52 raised driving out of
+  a *still* label; neither dropped to walking (T-321's case did not come back).
+- ✅ **Every stop slept:** 17:20:56 (*within 118 m for 12 min*), 17:56:33 and 20:20:29
+  (*still for 6 min, no position*), 19:07:14 (*within 125 m*). Indoors 17:51 to 18:30 the phone
+  logged *driving* labels three times and a motion wake on *driving* (18:23:53); none raised it.
+- ⚠ Raises still lag: driving came 3 to 5 min after the car left (16:31, 20:04), on walking's
+  fixes meanwhile, which lit the road. The 17:40 walk ran on *driving* until the 17:56 sleep.
+- **Set aside, 20:30 to 20:51:** the car moved about 1.3 km with the P30 alone in it; raised by
+  one *in vehicle* label, fixes at 20 to 40 km/h, the recheck had no position, slept at 20:51:30.
+- ✅ **A quiet night** in the car: no fix and no event from 20:52 to 09:17.
+- **Battery: not measured.** 100% for 3 h 08 from a full charge (the P30's plateau), 99% at 19:30,
+  97% at 05:00; plugged 09:15 at 97%. No stamps (no new place).
 
 ### 2026-11-23: the botanical garden and a stop west, the day Play went live
 

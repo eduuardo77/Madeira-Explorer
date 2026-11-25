@@ -671,6 +671,9 @@ permission, L3 privacy contact.
       does not separate them). Cost: those walks stay on the denser rate until a walking label;
       no road lost. Replay fixture `departure-stale-still-2026-11-23` (fails before, passes
       after). 1,318 tests. Not in the Play build.
+      — **24 Nov trip: 17:28 and 20:04 left a stop out of a *still* label and raised driving;
+      nothing dropped to walking.** Not the exact case (those were raises, not a drive held), so
+      still to see the narrow rule fire.
 - [ ] **T-320** **A first-run tutorial with a selling point (idea, 23 Nov).** The lead's idea:
       three or four picture steps before the permission cards, the last one the founder stamp and
       the launch price. Written up with its constraints (Play's disclosure order, no gate, D-110)
@@ -789,6 +792,8 @@ permission, L3 privacy contact.
       through the motion wake. Fixture `still-departure-2026-11-22` (2° west). The two replays
       fail on the old recorder. 1,291 tests. On the P30 since 19:30 (field build, backup
       `p30-2026-11-22-before-t315`). To see on a trip: a departure from a stop that does not sleep.
+      — **24 Nov trip: no departure slept.** Four stops slept, none as the car left; the case
+      itself (a check due as a drive starts) did not recur, so seen not regressing, not seen firing.
 - [ ] **T-313** **A driven road left dark by a GPS bad patch (21 Nov, Poiso to above Parque
       Ecológico, 1.8 km).** The lead: treat it seriously. Research in
       `docs/research-broken-line-2026-11-21.md`: a join along the road when every fix between two

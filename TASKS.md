@@ -614,6 +614,11 @@ permission, L3 privacy contact.
       once per trip), a choice ~1 s to ~0.6 s; saving 90 s to 41 s (two composers, encoder in
       order, snapshot straight after the move). Against the earlier video: 50.2 dB avg, worst 35.8,
       place names fading a frame or two apart.
+      **25 Nov, one day and a faster open** (7a943f9, c8ba394, on the P30): a day's timelapse now
+      makes its own video (the day cut from the masked trip as its film is; the day's lit km; no
+      day chip; kept apart from the trip's video); a close with no stamp reads the km alone. The
+      video is made ready (`readyVideo`) once the film has played and stopped: tap to preview 0.5 s
+      (2.4 s while the film still plays). A day's save: 401 frames in 29 s.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

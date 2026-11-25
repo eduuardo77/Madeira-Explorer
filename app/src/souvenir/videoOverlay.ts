@@ -197,7 +197,7 @@ export function overlayAt(plan: OverlayPlan, atMs: number): OverlayFrame {
             name: current.name,
             more: current.more > 0 ? translate(STRINGS['video.more'], language, { count: current.more }) : '',
             opacity: Math.min(easeOut(u / 0.2), 1 - easeOut((u - 0.8) / 0.2)),
-            offsetX: (1 - easeOut(u / 0.25)) * -14,
+            offsetX: (easeOut(u / 0.25) - 1) * 14,
           };
         })();
 

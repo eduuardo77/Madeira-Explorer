@@ -25,7 +25,9 @@
  * Pure: numbers in, a path out.
  */
 
-import { fitBounds, type Viewport } from '../map/cameraFit.ts';
+import { fitBounds, type Bounds, type Viewport } from '../map/cameraFit.ts';
+
+type Padding = NonNullable<Viewport['padding']>;
 
 export type VideoCamera = { lon: number; lat: number; zoom: number };
 export type CameraSample = VideoCamera & { atMs: number };
@@ -36,14 +38,21 @@ export type VideoCameraOptions = {
   zoomInMax: number;
   smoothMs: number;
   zoomRateMax: number;
+  /** Closing in is slower than pulling out: a push, not a pump. Levels a second. */
+  zoomInRateMax: number;
   /** km/s; 0 leaves the pan free. */
   panMaxKmPerS: number;
 };
 
-/** The calm by-day camera, as the lead approved it in the sketch on 24 Nov 2026. */
-export const DAY_CAMERA: VideoCameraOptions = { zoomInMax: 0.7, smoothMs: 700, zoomRateMax: 0.45, panMaxKmPerS: 0 };
+/**
+ * The calm by-day camera, as the lead approved it in the sketch on 24 Nov 2026,
+ * then made to keep the day's road in view (`keep`): days framed 0.5 levels in
+ * rather than 0.7 and closed in on slowly, which held the extra zoom travel
+ * that keeping costs to 1.9 levels over the lead's trip, from 1.8 (3.6 without them).
+ */
+export const DAY_CAMERA: VideoCameraOptions = { zoomInMax: 0.5, smoothMs: 700, zoomRateMax: 0.45, zoomInRateMax: 0.12, panMaxKmPerS: 0 };
 /** *Câmara mais perto*: it follows the pen, so it smooths less and holds its pan. */
-export const CLOSE_CAMERA: VideoCameraOptions = { zoomInMax: 1.3, smoothMs: 350, zoomRateMax: 0.45, panMaxKmPerS: 26 };
+export const CLOSE_CAMERA: VideoCameraOptions = { zoomInMax: 1.3, smoothMs: 350, zoomRateMax: 0.45, zoomInRateMax: 0.45, panMaxKmPerS: 26 };
 
 const KM_PER_DEG = 111.32;
 
@@ -62,6 +71,12 @@ export function videoCameraPath(input: {
   stepMs: number;
   options: VideoCameraOptions;
   follow?: (atMs: number) => { lon: number; lat: number } | null;
+  /**
+   * What has to be on screen at each moment (the day's road drawn so far),
+   * inside `padding`. Without it a smoothed camera cropped the day's own road
+   * in 8% of frames on the lead's trip, a third of it at worst (T-329, 25 Nov 2026).
+   */
+  keep?: { boundsAt: (atMs: number) => Bounds | null; padding: Padding };
 }): CameraSample[] {
   const { viewport, stepMs, options } = input;
   const wholeFit = fitBounds(input.whole, viewport);
@@ -122,6 +137,20 @@ export function videoCameraPath(input: {
   holdBothWays(out, (prev, cur) => {
     cur.zoom = clamp(cur.zoom, prev.zoom - zoomStep, prev.zoom + zoomStep);
   });
+  // What must stay in view: zoom out enough, never past the speed limit, so
+  // the limit is met by starting earlier rather than by cropping.
+  if (input.keep) {
+    const { boundsAt, padding } = input.keep;
+    const ceiling = out.map((camera, i) => zoomToHold(camera, boundsAt(i * stepMs), input.viewport, padding));
+    for (let i = 1; i < count; i += 1) ceiling[i] = Math.min(ceiling[i], ceiling[i - 1] + zoomStep);
+    for (let i = count - 2; i >= 0; i -= 1) ceiling[i] = Math.min(ceiling[i], ceiling[i + 1] + zoomStep);
+    out.forEach((camera, i) => {
+      camera.zoom = Math.min(camera.zoom, ceiling[i]);
+    });
+  }
+  // Closing in held slower still; this only ever zooms out, so nothing kept leaves the frame.
+  const inStep = (Math.min(options.zoomInRateMax, options.zoomRateMax) * stepMs) / 1000;
+  for (let i = 1; i < count; i += 1) out[i].zoom = Math.min(out[i].zoom, out[i - 1].zoom + inStep);
   // Pan speed held, when asked.
   if (options.panMaxKmPerS > 0) {
     const panStepDeg = (options.panMaxKmPerS * stepMs) / 1000 / KM_PER_DEG;
@@ -159,6 +188,22 @@ export function settleCamera(path: readonly CameraSample[], target: VideoCamera,
   });
 }
 
+/**
+ * Zoom added to the camera at `atMs` so it is never still at either end: the
+ * film opens a little wide and settles in while the title rises, and after the
+ * close it keeps drifting in, slowly, to the last frame (the close sat frozen
+ * for three seconds, 25 Nov). Levels, Google's; negative is wider.
+ */
+export function cameraBreath(atMs: number, at: { openMs: number; driftFromMs: number; endMs: number }): number {
+  const opening = -OPEN_ZOOM * (1 - Math.sin((Math.PI / 2) * clamp(atMs / Math.max(1, at.openMs), 0, 1)));
+  const u = clamp((atMs - at.driftFromMs) / Math.max(1, at.endMs - at.driftFromMs), 0, 1);
+  return opening + DRIFT_ZOOM * u * u * (3 - 2 * u);
+}
+
+/** How wide the film opens, and how far the close drifts in, levels. */
+export const OPEN_ZOOM = 0.25;
+export const DRIFT_ZOOM = 0.12;
+
 /** The camera at `atMs`, between samples. */
 export function videoCameraAt(path: readonly CameraSample[], atMs: number): VideoCamera | null {
   if (path.length === 0) return null;
@@ -169,6 +214,34 @@ export function videoCameraAt(path: readonly CameraSample[], atMs: number): Vide
   const a = path[i];
   const b = path[Math.min(path.length - 1, i + 1)];
   return { lon: a.lon + (b.lon - a.lon) * u, lat: a.lat + (b.lat - a.lat) * u, zoom: a.zoom + (b.zoom - a.zoom) * u };
+}
+
+/** The closest zoom (Google's) at which `bounds` sits inside the padded frame, the camera's centre unmoved. */
+export function zoomToHold(camera: VideoCamera, bounds: Bounds | null, viewport: Viewport, padding: Padding): number {
+  if (bounds === null) return Infinity;
+  const [west, south, east, north] = bounds;
+  const halfW = viewport.width / 2;
+  const halfH = viewport.height / 2;
+  const cx = mercX(camera.lon);
+  const cy = mercY(camera.lat);
+  // World width in points that each edge allows; the smallest wins.
+  let world = Infinity;
+  const allow = (offset: number, room: number) => {
+    if (offset > 1e-12) world = Math.min(world, Math.max(1, room) / offset);
+  };
+  allow(mercX(east) - cx, halfW - (padding.right ?? 0));
+  allow(cx - mercX(west), halfW - (padding.left ?? 0));
+  allow(mercY(south) - cy, halfH - (padding.bottom ?? 0));
+  allow(cy - mercY(north), halfH - (padding.top ?? 0));
+  return world === Infinity ? Infinity : Math.log2(world / 256);
+}
+
+function mercX(lon: number): number {
+  return (lon + 180) / 360;
+}
+
+function mercY(lat: number): number {
+  return (1 - Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) / Math.PI) / 2;
 }
 
 function holdBothWays(path: VideoCamera[], hold: (prev: VideoCamera, cur: VideoCamera) => void): void {

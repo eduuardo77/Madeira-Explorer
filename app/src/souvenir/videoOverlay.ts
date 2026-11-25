@@ -17,6 +17,7 @@
  *     land together (not with *Nenhuma*);
  *   - the pen's head: a comet that grows in, fades in after a long move, and
  *     shrinks away as the camera pulls back;
+ *   - how lit the roads are: at the close they all light up together;
  *   - the watermark (free: large; paid: small) and, free only, the end card.
  *
  * Pure: the plan, the strings and a language in; numbers and words out. Every
@@ -83,6 +84,12 @@ export type OverlayFrame = {
   pill: { name: string; more: string; opacity: number; offsetX: number } | null;
   finale: { opacity: number; offsetY: number; count: string; total: string; placesLabel: string; km: string } | null;
   head: { lon: number; lat: number; opacity: number; scale: number; tail: [number, number][] } | null;
+  /**
+   * How lit the whole road network is, 0 to 1: nothing while drawing (the
+   * fresh road glows on its own, in the painter), then at the close every
+   * road lights up at once, peaks, and stays lit to the end.
+   */
+  roadGlow: number;
   watermark: { tier: Tier; opacity: number };
   endCard: { text: string; opacity: number; scale: number } | null;
   credit: string;
@@ -212,6 +219,7 @@ export function overlayAt(plan: OverlayPlan, atMs: number): OverlayFrame {
     pill,
     finale: finaleCard,
     head: finale ? null : headFrame(plan, t),
+    roadGlow: roadGlowAt(t - finaleAtMs),
     watermark: { tier, opacity: ending ? 0 : 1 },
     endCard: ending
       ? { text: translate(STRINGS['video.endCard'], language, { app: APP_NAME }), opacity: fadeIn(t, durationMs, 450), scale: 0.96 + 0.04 * fadeIn(t, durationMs, 450) }
@@ -235,6 +243,17 @@ function headFrame(plan: OverlayPlan, t: number): OverlayFrame['head'] {
   tail.push([head.lon, head.lat]);
   return { lon: head.lon, lat: head.lat, opacity, scale, tail };
 }
+
+/** The close's light: up in `GLOW_RISE_MS`, then down to `GLOW_REST` over `GLOW_SETTLE_MS`. */
+export function roadGlowAt(sinceFinaleMs: number): number {
+  if (sinceFinaleMs <= 0) return 0;
+  if (sinceFinaleMs < GLOW_RISE_MS) return easeOut(sinceFinaleMs / GLOW_RISE_MS);
+  return 1 - (1 - GLOW_REST) * easeOut((sinceFinaleMs - GLOW_RISE_MS) / GLOW_SETTLE_MS);
+}
+
+const GLOW_RISE_MS = 450;
+const GLOW_SETTLE_MS = 1200;
+export const GLOW_REST = 0.55;
 
 /** Km drawn, averaged over the last 175 ms so the figure glides rather than ticks. */
 function smoothKmAt(paced: PacedFilm, atMs: number): number {

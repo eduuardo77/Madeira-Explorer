@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 
 import { APP_NAME } from '../brand.ts';
 import { planPacedFilm, type TimedRoad } from './pacedFilm.ts';
-import { END_CARD_MS, PILL_MS, TITLE_HOLD_MS, overlayAt, planOverlay, videoDurationMs, type InfoMode, type Tier } from './videoOverlay.ts';
+import { END_CARD_MS, GLOW_REST, PILL_MS, TITLE_HOLD_MS, overlayAt, roadGlowAt, planOverlay, videoDurationMs, type InfoMode, type Tier } from './videoOverlay.ts';
 
 const T0 = Date.parse('2026-10-01T09:00:00Z');
 const dayKey = (ts: number) => new Date(ts).toISOString().slice(0, 10);
@@ -131,4 +131,15 @@ test('the close states the trip figure exactly, not the glide short of it', () =
   // totalKm is 9 in the plan above.
   assert.match(overlayAt(plan('discreet'), FINALE + 50).line!.text, / 9 km of roads lit$/);
   assert.equal(overlayAt(plan('full'), FINALE + 2000).finale!.km, '9 km of roads lit');
+});
+
+test('the roads light up together at the close, peak, and stay lit', () => {
+  assert.equal(roadGlowAt(-1), 0);
+  assert.equal(roadGlowAt(0), 0);
+  const peak = Math.max(...Array.from({ length: 100 }, (_, i) => roadGlowAt(i * 20)));
+  assert.ok(peak > 0.99);
+  assert.ok(Math.abs(roadGlowAt(10_000) - GLOW_REST) < 1e-9);
+  const p = plan('discreet');
+  assert.equal(overlayAt(p, FINALE - 100).roadGlow, 0);
+  assert.ok(overlayAt(p, FINALE + 600).roadGlow > GLOW_REST);
 });

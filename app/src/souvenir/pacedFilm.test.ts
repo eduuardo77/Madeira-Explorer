@@ -7,7 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MIN_PIECE_M, headAt, planPacedFilm, type TimedRoad } from './pacedFilm.ts';
+import { MIN_PIECE_M, dayDrawnBoundsAt, headAt, planPacedFilm, type TimedRoad } from './pacedFilm.ts';
 
 const DAY = 86_400_000;
 const T0 = Date.parse('2026-10-01T09:00:00Z');
@@ -104,4 +104,16 @@ test('the running count ends on the trip figure when given', () => {
 test('nothing to draw is an empty plan, not a crash', () => {
   const film = plan([]);
   assert.deepEqual(film, { strokes: [], days: [], awards: [], drawnKm: [] });
+});
+
+test('dayDrawnBoundsAt: only the day under way, only what the pen has reached', () => {
+  const film = plan([eastward(40, 10, 4000, T0), eastward(41, 10, 4000, T0 + DAY)]);
+  assert.equal(dayDrawnBoundsAt(film, 0), null);
+  const second = film.days[1];
+  const mid = (second.startMs + second.endMs) / 2;
+  const box = dayDrawnBoundsAt(film, mid)!;
+  assert.ok(box[1] > 40.5, 'the first day is not in the second day\'s box');
+  const head = headAt(film, mid)!;
+  assert.ok(Math.abs(box[2] - head.lon) < 1e-9, 'the box ends at the pen');
+  assert.ok(box[2] < second.bounds[2], 'the road ahead is not in it');
 });

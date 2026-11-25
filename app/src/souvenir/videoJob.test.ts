@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { composeSouvenir } from './composition.ts';
 import type { Film } from './frame.ts';
 import type { TimedRoad } from './pacedFilm.ts';
+import { DRIFT_ZOOM } from './videoCamera.ts';
 import { END_CARD_MS } from './videoOverlay.ts';
 import { VIDEO_FPS, buildVideoJob, islandGlyph, type VideoJobInput } from './videoJob.ts';
 
@@ -67,11 +68,12 @@ test('paid: no end card, so the video is the film', () => {
   assert.ok(job.overlays.every((o) => o.endCard === null));
 });
 
-test('the camera is MapLibre zoom (one less than the film planner\'s) and holds through the end card', () => {
+test('the camera is MapLibre zoom (one less than the film planner\'s) holds its place through the end card and only drifts in', () => {
   const job = buildVideoJob(input());
   const last = job.frames[job.frames.length - 1];
   const atFilmEnd = job.frames.find(([t]) => t >= film.durationMs)!;
-  assert.deepEqual(last.slice(1), atFilmEnd.slice(1));
+  assert.deepEqual(last.slice(1, 3), atFilmEnd.slice(1, 3));
+  assert.ok(last[3] >= atFilmEnd[3] && last[3] - atFilmEnd[3] <= DRIFT_ZOOM);
   assert.ok(job.frames.every(([, , , zoom]) => zoom > 0 && zoom < 16));
 });
 

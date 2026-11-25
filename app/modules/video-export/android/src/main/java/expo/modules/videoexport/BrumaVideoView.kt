@@ -164,8 +164,9 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
       if (!styleLoaded || j.frames.isEmpty()) return
       val f = j.frames[currentFrame]
       val roads = roads ?: return
-      roads.paint(canvas, f[0], f[1], f[2], f[3])
-      overlay?.paint(canvas, j.overlays.getJSONObject(currentFrame)) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
+      val o = j.overlays.getJSONObject(currentFrame)
+      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
+      overlay?.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
     }
   }
 
@@ -266,8 +267,9 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
     private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int) {
       val frame = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
       val canvas = Canvas(frame)
-      roads.paint(canvas, f[0], f[1], f[2], f[3])
-      overlay.paint(canvas, j.overlays.getJSONObject(frameIndex)) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
+      val o = j.overlays.getJSONObject(frameIndex)
+      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
+      overlay.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
       encoder.add(frame)
       main.post {
         inFlight -= 1

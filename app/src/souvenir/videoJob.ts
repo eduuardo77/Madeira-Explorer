@@ -19,8 +19,8 @@ import { APP_NAME } from '../brand.ts';
 import { fitBounds } from '../map/cameraFit.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { Film } from './frame.ts';
-import { headAt, planPacedFilm, type PacedAward, type TimedRoad } from './pacedFilm.ts';
-import { CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
+import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type TimedRoad } from './pacedFilm.ts';
+import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
 import { overlayAt, planOverlay, videoDurationMs, type InfoMode, type OverlayFrame, type Tier } from './videoOverlay.ts';
 
 /** The video's frame, in points: 9:16, as phones show stories and reels. */
@@ -73,6 +73,13 @@ export type VideoJob = {
 
 const MS_PER_DAY = 86_400_000;
 
+/** Where the day's road must stay, points: under the title and the day, above the card (*Completa*). */
+const KEEP_PADDING: Record<InfoMode, { top: number; bottom: number; left: number; right: number }> = {
+  full: { top: 112, bottom: 214, left: 12, right: 12 },
+  discreet: { top: 112, bottom: 28, left: 12, right: 12 },
+  none: { top: 40, bottom: 28, left: 12, right: 12 },
+};
+
 export function buildVideoJob(input: VideoJobInput): VideoJob {
   const { film, choices } = input;
   const draw = film.scenes.find((scene) => scene.kind === 'draw');
@@ -120,18 +127,21 @@ export function buildVideoJob(input: VideoJobInput): VideoJob {
     stepMs,
     options: choices.camera === 'close' ? CLOSE_CAMERA : DAY_CAMERA,
     follow: choices.camera === 'close' ? (t) => (t < finaleAtMs ? headAt(paced, t) : null) : undefined,
+    // The day's road stays on screen: below the title, above the card, clear of the sides.
+    keep: choices.camera === 'close' ? undefined : { boundsAt: (t) => (t < finaleAtMs ? dayDrawnBoundsAt(paced, t) : null), padding: KEEP_PADDING[choices.info] },
   });
   const rest = fitBounds(whole, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom: bottom + 20, left: 24, right: 24 } });
   const camera = rest === null ? path : settleCamera(path, { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom }, finaleAtMs - 600, 1500);
 
   const durationMs = videoDurationMs(plan);
+  const breath = { openMs: drawStartMs + 400, driftFromMs: finaleAtMs + 900, endMs: durationMs };
   const frames: VideoJob['frames'] = [];
   const overlays: OverlayFrame[] = [];
   for (let i = 0; i * stepMs <= durationMs; i += 1) {
     const t = i * stepMs;
     const cam = videoCameraAt(camera, Math.min(t, film.durationMs));
     if (cam === null) break;
-    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom - 1]);
+    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom + cameraBreath(t, breath) - 1]);
     overlays.push(overlayAt(plan, t));
   }
 

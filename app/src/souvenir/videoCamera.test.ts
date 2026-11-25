@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { fitBounds } from '../map/cameraFit.ts';
-import { CLOSE_CAMERA, DAY_CAMERA, settleCamera, videoCameraAt, videoCameraPath, type CameraDay } from './videoCamera.ts';
+import { CLOSE_CAMERA, DAY_CAMERA, DRIFT_ZOOM, OPEN_ZOOM, cameraBreath, settleCamera, videoCameraAt, videoCameraPath, zoomToHold, type CameraDay } from './videoCamera.ts';
 
 const viewport = { width: 360, height: 640, padding: { top: 100, bottom: 130, left: 20, right: 20 } };
 const whole: [number, number, number, number] = [-17.25, 32.63, -16.65, 32.87];
@@ -83,4 +83,37 @@ test('the close eases onto its target and rests there, leaving what came before 
   assert.deepEqual(before, p[p.indexOf(p.find((s) => s.atMs >= 11_900)!)]);
   const last = settled[settled.length - 1];
   assert.ok(Math.abs(last.lon - target.lon) < 1e-9 && Math.abs(last.zoom - target.zoom) < 1e-9);
+});
+
+test('with keep, what must stay in view never leaves the frame, and closing in is slow', () => {
+  // The pen's road so far: a box that grows west to east across the island.
+  const boundsAt = (t: number): [number, number, number, number] | null =>
+    t < 1200 ? null : [-17.2, 32.65, -17.2 + Math.min(0.5, (t - 1200) / 20_000), 32.8];
+  const padding = { top: 112, bottom: 28, left: 12, right: 12 };
+  const p = videoCameraPath({ whole, days, viewport, durationMs: 15_000, stepMs: STEP, options: DAY_CAMERA, keep: { boundsAt, padding } });
+  for (const sample of p) {
+    assert.ok(sample.zoom <= zoomToHold(sample, boundsAt(sample.atMs), viewport, padding) + 1e-9, `cropped at ${sample.atMs}`);
+  }
+  for (let i = 1; i < p.length; i += 1) {
+    assert.ok((p[i].zoom - p[i - 1].zoom) / (STEP / 1000) <= DAY_CAMERA.zoomInRateMax + 1e-9, `closing in too fast at ${p[i].atMs}`);
+  }
+});
+
+test('zoomToHold: a box fits at the zoom it gives, and not much closer', () => {
+  const camera = { lon: -16.95, lat: 32.75, zoom: 0 };
+  const box: [number, number, number, number] = [-17.1, 32.7, -16.9, 32.8];
+  const z = zoomToHold(camera, box, viewport, { top: 0, bottom: 0, left: 0, right: 0 });
+  // West edge is 0.15 deg from the centre, half the frame is 180 points.
+  const world = 256 * 2 ** z;
+  assert.ok(Math.abs((0.15 / 360) * world - 180) < 0.5);
+  assert.equal(zoomToHold(camera, null, viewport, {}), Infinity);
+});
+
+test('cameraBreath: opens wide, settles, and drifts in only after the close', () => {
+  const at = { openMs: 1600, driftFromMs: 16_000, endMs: 20_000 };
+  assert.equal(cameraBreath(0, at), -OPEN_ZOOM);
+  assert.equal(cameraBreath(1600, at), 0);
+  assert.equal(cameraBreath(10_000, at), 0);
+  assert.ok(Math.abs(cameraBreath(20_000, at) - DRIFT_ZOOM) < 1e-9);
+  for (let t = 0; t < 20_000; t += 33) assert.ok(Math.abs(cameraBreath(t + 33, at) - cameraBreath(t, at)) / 0.033 < 0.3, `breath too quick at ${t}`);
 });

@@ -307,3 +307,35 @@ export function headAt(film: PacedFilm, atMs: number): { lon: number; lat: numbe
   const last = coordinates[coordinates.length - 1];
   return { lon: last[0], lat: last[1], strokeIndex: index };
 }
+
+/**
+ * The box around the road the pen has drawn so far on the day under way, its
+ * head included; null before the first day. What the video's camera keeps in
+ * view (`videoCamera`, `keep`).
+ */
+export function dayDrawnBoundsAt(film: PacedFilm, atMs: number): [number, number, number, number] | null {
+  let day: PacedDay | null = null;
+  for (const d of film.days) if (d.startMs <= atMs) day = d;
+  if (day === null) return null;
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  const take = (lon: number, lat: number) => {
+    west = Math.min(west, lon);
+    east = Math.max(east, lon);
+    south = Math.min(south, lat);
+    north = Math.max(north, lat);
+  };
+  for (const stroke of film.strokes) {
+    const { timesMs, coordinates } = stroke;
+    // A stroke is the day's if the pen began it that day: the day before ends
+    // on the very millisecond this one starts. Quiet pieces are left out: under
+    // 250 m, they land as their day closes.
+    if (stroke.quiet || timesMs[0] < day.startMs || timesMs[0] > atMs) continue;
+    for (let i = 0; i < timesMs.length && timesMs[i] <= atMs; i += 1) take(coordinates[i][0], coordinates[i][1]);
+  }
+  const head = headAt(film, atMs);
+  if (head !== null && film.strokes[head.strokeIndex].timesMs[0] >= day.startMs) take(head.lon, head.lat);
+  return west === Infinity ? null : [west, south, east, north];
+}

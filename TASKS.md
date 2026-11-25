@@ -619,6 +619,12 @@ permission, L3 privacy contact.
       day chip; kept apart from the trip's video); a close with no stamp reads the km alone. The
       video is made ready (`readyVideo`) once the film has played and stopped: tap to preview 0.5 s
       (2.4 s while the film still plays). A day's save: 401 frames in 29 s.
+      **25 Nov, clean look** (d779d29, on the P30): the roads covered the map's town names; the
+      names are now drawn over the roads (`MapLabels.kt`: the map places them at text-opacity
+      0.01, is asked where after each frame, and they are drawn with a halo, fading). The video
+      opens on the whole island centred (`openCamera`). Saving 45 s. Not done: the pen's head can
+      sit on a name; the sea under the watermark stays empty (a portrait frame of a wide island).
+      The browser sketch shows no names since.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

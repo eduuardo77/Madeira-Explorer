@@ -49,7 +49,9 @@ import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
 
 /** Bump when any bundled map asset changes. Keep in step with an app release. */
-export const MAP_CONTENT_REVISION = 1;
+// 2 (T-329, 25 Nov 2026): the tiles cut to zoom 11 for the video, 19.1 MB to 5.6 MB
+// (`tools/cut-video-tiles.mjs`); a phone holding revision 1's copies drops them.
+export const MAP_CONTENT_REVISION = 2;
 
 /**
  * Every bundled map file, spelled out one `require` at a time.

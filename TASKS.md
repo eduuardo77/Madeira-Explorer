@@ -601,6 +601,13 @@ permission, L3 privacy contact.
       the P30 matches the full-tiles one at 52.5 dB average PSNR over 613 frames (worst 43.8), side
       by side the same; MAP_CONTENT_REVISION 2 dropped the old 19 MB cache copy on the phone. What
       is left of the video's cost: MapLibre's library (~13 MB) and the relief (4.8 MB).
+      **25 Nov, polish** (the lead: "it can be way better"; 0270d4d, on the P30, 17:26): the by-day
+      camera cropped the day's own road in 8% of frames (a third of it at worst); it now keeps the
+      day's drawn road in view (`dayDrawnBoundsAt`, `keep`), days framed 0.5 levels in, closing in
+      at 0.12 levels/s: 0% cropped, zoom travel 1.9 levels against 1.8. Opens 0.25 levels wide and
+      settles in, drifts in 0.12 after the close (it sat frozen 3 s). Roads thinner when wide, the
+      new road bright orange settling to red over 0.9 s, all roads light up at the close
+      (`roadGlow`). Older days' roads can still leave the frame on a day camera, by design.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

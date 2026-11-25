@@ -20,6 +20,8 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   T-328 (privacy policy) has to change with it. The spike app was removed from the P30.
   **17:10: tiles cut to zoom 11** (a671071, on the P30): APK 76.9 to 63.4 MB, the video unchanged
   (52.5 dB PSNR against the full-tiles one).
+  **17:26: polish** (0270d4d, on the P30): the day's road no longer cropped, opening and close move,
+  fresh road glows, all roads light up at the close. Awaits the lead's eye.
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

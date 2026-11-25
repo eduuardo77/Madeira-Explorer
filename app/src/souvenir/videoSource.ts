@@ -109,7 +109,7 @@ export async function loadChoices(): Promise<VideoChoices> {
   const stored = await appStateDao.getJson<Partial<VideoChoices>>(AppStateKey.VideoChoices);
   return {
     info: stored?.info === 'full' || stored?.info === 'none' || stored?.info === 'discreet' ? stored.info : DEFAULT_CHOICES.info,
-    camera: stored?.camera === 'close' || stored?.camera === 'normal' ? stored.camera : DEFAULT_CHOICES.camera,
+    camera: stored?.camera === 'close' || stored?.camera === 'normal' || stored?.camera === 'tilted' ? stored.camera : DEFAULT_CHOICES.camera,
   };
 }
 

@@ -145,7 +145,7 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
     if (j.frames.isEmpty()) return
     currentFrame = index.coerceIn(0, j.frames.size - 1)
     val f = j.frames[currentFrame]
-    m.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).build()))
+    m.moveCamera(cameraAt(f))
     overlayView.invalidate()
   }
 
@@ -174,9 +174,10 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
       val f = j.frames[currentFrame]
       val roads = roads ?: return
       val o = j.overlays.getJSONObject(currentFrame)
-      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
-      map?.let { m -> labelPainter?.paint(canvas, labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) } }
-      overlay?.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
+      val screen = map?.let { m -> screenAnchors(m, f, roads, width.toFloat() / FULL_W) }
+      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat(), screen)
+      map?.let { m -> labelPainter?.paint(canvas, labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])) { lon, lat, out -> roads.projectFrame(lon, lat, out) } }
+      overlay?.paint(canvas, o) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
     }
   }
 
@@ -202,6 +203,25 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
   // React Native does not lay out views it did not create; do it ourselves.
   private val relayout = Runnable { measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)); layout(left, top, right, bottom) }
   override fun requestLayout() { super.requestLayout(); post(relayout) }
+
+  /** A frame's camera: place, zoom, and for *Inclinada* its turn and tilt. */
+  private fun cameraAt(f: DoubleArray) =
+    CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).bearing(f[4]).tilt(f[5]).build())
+
+  /**
+   * For a tilted frame, where `roads.anchors` land on the map's screen, times
+   * `scale` (the overlay's size against the map's); null when the map is flat.
+   * The camera must already be at the frame.
+   */
+  private fun screenAnchors(m: MapLibreMap, f: DoubleArray, roads: RoadPainter, scale: Float): FloatArray? {
+    if (f[5] == 0.0) return null
+    val out = FloatArray(8)
+    roads.anchors.forEachIndexed { i, a ->
+      val p = m.projection.toScreenLocation(LatLng(a[1], a[0]))
+      out[2 * i] = p.x * scale; out[2 * i + 1] = p.y * scale
+    }
+    return out
+  }
 
   // --- export ---
 
@@ -290,7 +310,7 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
       // waited three screen refreshes first (44 ms a frame, then the snapshot
       // drew again); measured against a video made that way, the same
       // (T-329, 25 Nov 2026). The first frame waits while the tiles load.
-      m.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).build()))
+      m.moveCamera(cameraAt(f))
       if (index > 0) { take(); return }
       m.triggerRepaint()
       var left = FIRST_SETTLE_FRAMES
@@ -306,24 +326,25 @@ class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(contex
       inFlight += 1
       // The camera has not moved since the picture: the names the map placed in it.
       val names = labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])
-      composers[frameIndex % COMPOSERS].execute { compose(picture, f, frameIndex, names) }
+      val screen = screenAnchors(m, f, painters[0].first, j.outW.toFloat() / FULL_W)
+      composers[frameIndex % COMPOSERS].execute { compose(picture, f, frameIndex, names, screen) }
       index += 1
       if (index % PROGRESS_EVERY == 0) onProgress(mapOf("done" to index, "total" to j.frames.size))
       main.post { next() }
     }
 
     /** A composer: roads and overlay onto the picture, then to the encoder thread. */
-    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int, names: List<MapLabels.Label>) {
+    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int, names: List<MapLabels.Label>, screen: FloatArray?) {
       if (cancelled) return
       val (roads, labelPainter, overlay) = painters[frameIndex % COMPOSERS]
       val frame = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
       val canvas = Canvas(frame)
       val o = j.overlays.getJSONObject(frameIndex)
       val t1 = SystemClock.elapsedRealtime()
-      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat())
+      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat(), screen)
       val t2 = SystemClock.elapsedRealtime()
-      labelPainter.paint(canvas, names) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
-      overlay.paint(canvas, o) { lon, lat, out -> roads.project(lon, lat, f[1], f[2], f[3], out) }
+      labelPainter.paint(canvas, names) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
+      overlay.paint(canvas, o) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
       roadsMs.addAndGet(t2 - t1); overlayMs.addAndGet(SystemClock.elapsedRealtime() - t2)
       encoding.execute { encodeInOrder(frameIndex, frame) }
     }

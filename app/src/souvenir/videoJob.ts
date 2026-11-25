@@ -20,7 +20,7 @@ import { fitBounds } from '../map/cameraFit.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { Film } from './frame.ts';
 import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type PacedFilm, type TimedRoad } from './pacedFilm.ts';
-import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, openCamera, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
+import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, openCamera, settleCamera, tiltedCameraPath, videoCameraAt, videoCameraPath } from './videoCamera.ts';
 import { overlayAt, planOverlay, videoDurationMs, type InfoMode, type OverlayFrame, type Tier } from './videoOverlay.ts';
 
 /** The video's frame, in points: 9:16, as phones show stories and reels. */
@@ -30,7 +30,7 @@ export const VIDEO_HEIGHT = 640;
 export const VIDEO_PIXEL_RATIO = 3;
 export const VIDEO_FPS = 30;
 
-export type CameraChoice = 'normal' | 'close';
+export type CameraChoice = 'normal' | 'close' | 'tilted';
 
 export type VideoChoices = { info: InfoMode; camera: CameraChoice };
 
@@ -62,8 +62,8 @@ export type VideoJob = {
   fps: number;
   appName: string;
   durationMs: number;
-  /** [atMs, lon, lat, zoom (MapLibre, one less than Google's)] per frame. */
-  frames: [number, number, number, number][];
+  /** [atMs, lon, lat, zoom (MapLibre, one less than Google's), bearing, pitch (degrees)] per frame. */
+  frames: [number, number, number, number, number, number][];
   overlays: OverlayFrame[];
   /** The pen's strokes: points in 1e-5 degrees, [lon, lat], and when the pen reaches each. */
   strokes: { c: [number, number][]; t: number[] }[];
@@ -147,23 +147,30 @@ export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = pr
   const viewport = { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom, left: 24, right: 24 } };
   const whole = boundsOf(paced.strokes.flatMap((stroke) => stroke.coordinates));
   const stepMs = 1000 / VIDEO_FPS;
-  const path = videoCameraPath({
-    whole,
-    days: paced.days.map((day) => ({ startMs: day.startMs, bounds: day.bounds })),
-    viewport,
-    durationMs: film.durationMs,
-    stepMs,
-    options: choices.camera === 'close' ? CLOSE_CAMERA : DAY_CAMERA,
-    follow: choices.camera === 'close' ? (t) => (t < finaleAtMs ? headAt(paced, t) : null) : undefined,
-    // The day's road stays on screen: below the title, above the card, clear of the sides.
-    keep: choices.camera === 'close' ? undefined : { boundsAt: (t) => (t < finaleAtMs ? dayDrawnBoundsAt(paced, t) : null), padding: KEEP_PADDING[choices.info] },
-  });
-  const rest = fitBounds(whole, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom: bottom + 20, left: 24, right: 24 } });
-  // Opens on the whole trip, centred, as it closes: the smoothed path was
-  // already leaning toward the first day under the title, the island's far
-  // end cut off (25 Nov). It joins the path as the pen starts.
-  const centred = rest === null ? null : { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom };
-  const camera = centred === null ? path : settleCamera(openCamera(path, centred, drawStartMs + 300, 1200), centred, finaleAtMs - 600, 1500);
+  // *Inclinada*: the whole trip, tilted and turning slowly; no day framing to follow.
+  const tilted = choices.camera === 'tilted' ? tiltedCameraPath({ whole, viewport, durationMs: film.durationMs, stepMs }) : null;
+  const camera = tilted ?? flatCamera();
+
+  function flatCamera() {
+    const path = videoCameraPath({
+      whole,
+      days: paced.days.map((day) => ({ startMs: day.startMs, bounds: day.bounds })),
+      viewport,
+      durationMs: film.durationMs,
+      stepMs,
+      options: choices.camera === 'close' ? CLOSE_CAMERA : DAY_CAMERA,
+      follow: choices.camera === 'close' ? (t) => (t < finaleAtMs ? headAt(paced, t) : null) : undefined,
+      // The day's road stays on screen: below the title, above the card, clear of the sides.
+      keep: choices.camera === 'close' ? undefined : { boundsAt: (t) => (t < finaleAtMs ? dayDrawnBoundsAt(paced, t) : null), padding: KEEP_PADDING[choices.info] },
+    });
+    const rest = fitBounds(whole, { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom: bottom + 20, left: 24, right: 24 } });
+    if (rest === null) return path;
+    // Opens on the whole trip, centred, as it closes: the smoothed path was
+    // already leaning toward the first day under the title, the island's far
+    // end cut off (25 Nov). It joins the path as the pen starts.
+    const centred = { lon: rest.coordinates.longitude, lat: rest.coordinates.latitude, zoom: rest.zoom };
+    return settleCamera(openCamera(path, centred, drawStartMs + 300, 1200), centred, finaleAtMs - 600, 1500);
+  }
 
   const durationMs = videoDurationMs(plan);
   const breath = { openMs: drawStartMs + 400, driftFromMs: finaleAtMs + 900, endMs: durationMs };
@@ -173,7 +180,8 @@ export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = pr
     const t = i * stepMs;
     const cam = videoCameraAt(camera, Math.min(t, film.durationMs));
     if (cam === null) break;
-    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom + cameraBreath(t, breath) - 1]);
+    const turn = tilted === null ? null : tilted[Math.min(tilted.length - 1, Math.round(Math.min(t, film.durationMs) / stepMs))];
+    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom + cameraBreath(t, breath) - 1, turn?.bearing ?? 0, turn?.pitch ?? 0]);
     overlays.push(overlayAt(plan, t));
   }
 

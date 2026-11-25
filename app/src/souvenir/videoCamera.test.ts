@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { fitBounds } from '../map/cameraFit.ts';
-import { CLOSE_CAMERA, DAY_CAMERA, DRIFT_ZOOM, OPEN_ZOOM, cameraBreath, openCamera, settleCamera, videoCameraAt, videoCameraPath, zoomToHold, type CameraDay } from './videoCamera.ts';
+import { CLOSE_CAMERA, DAY_CAMERA, DRIFT_ZOOM, OPEN_ZOOM, TILT, cameraBreath, openCamera, tiltedCameraPath, settleCamera, videoCameraAt, videoCameraPath, zoomToHold, type CameraDay } from './videoCamera.ts';
 
 const viewport = { width: 360, height: 640, padding: { top: 100, bottom: 130, left: 20, right: 20 } };
 const whole: [number, number, number, number] = [-17.25, 32.63, -16.65, 32.87];
@@ -125,4 +125,13 @@ test('openCamera: held on the target, then the path itself', () => {
   const at = (t: number) => opened[Math.round(t / STEP)];
   assert.deepEqual([at(0).lon, at(0).lat, at(0).zoom], [target.lon, target.lat, target.zoom]);
   assert.deepEqual(at(5000), p[Math.round(5000 / STEP)]);
+});
+
+test('the tilted camera: whole trip, turning slowly, closer than the flat one', () => {
+  const p = tiltedCameraPath({ whole, viewport, durationMs: 15_000, stepMs: STEP });
+  assert.equal(p[0].bearing, TILT.bearingFrom);
+  assert.ok(Math.abs(p[p.length - 1].bearing - TILT.bearingTo) < 1e-9);
+  assert.ok(p.every((s) => s.pitch === TILT.pitch && s.zoom === p[0].zoom));
+  for (let i = 1; i < p.length; i += 1) assert.ok(Math.abs(p[i].bearing - p[i - 1].bearing) / (STEP / 1000) < 4, 'turning gently: at most 4 degrees a second');
+  assert.ok(p[0].zoom > fitBounds(whole, viewport)!.zoom, 'the island long way up the frame sits closer');
 });

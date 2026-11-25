@@ -217,6 +217,7 @@ export default function VideoScreen({ tripId, range, onClose }: { tripId?: numbe
             options={[
               ['normal', t('video.choice.camera.normal')],
               ['close', t('video.choice.camera.close')],
+              ['tilted', t('video.choice.camera.tilted')],
             ]}
             onChange={(camera) => choose({ camera })}
           />

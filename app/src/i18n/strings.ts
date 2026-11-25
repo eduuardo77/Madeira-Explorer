@@ -751,6 +751,7 @@ export const STRINGS = {
   'video.choice.camera': s('Camera', 'Câmara', 'Kamera'),
   'video.choice.camera.normal': s('Normal', 'Normal', 'Normal'),
   'video.choice.camera.close': s('Closer', 'Mais perto', 'Näher'),
+  'video.choice.camera.tilted': s('Tilted', 'Inclinada', 'Geneigt'),
   'video.free.note': s('Free: with the {app} mark.', 'Grátis: com a marca {app}.', 'Kostenlos: mit dem {app}-Zeichen.'),
   'video.free.remove': s('Remove the mark', 'Tirar a marca', 'Zeichen entfernen'),
   'video.save': s('Save to Gallery', 'Guardar na Galeria', 'In der Galerie speichern'),

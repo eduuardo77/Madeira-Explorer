@@ -59,6 +59,27 @@ class RoadPainter(
     }
   }
 
+  /**
+   * Four points round the roads (lon, lat), for a tilted camera: the map is
+   * asked where they land on screen and the four answers fix the perspective
+   * from the roads' plane to the frame (`paint`'s `screen`). A tilted map of a
+   * flat ground is exactly such a perspective, so four points are enough.
+   */
+  val anchors: List<DoubleArray>
+  private val anchorsLocal = FloatArray(8)
+
+  init {
+    var x0 = Float.MAX_VALUE; var y0 = Float.MAX_VALUE; var x1 = -Float.MAX_VALUE; var y1 = -Float.MAX_VALUE
+    for (xy in local) for (i in xy.indices step 2) {
+      x0 = minOf(x0, xy[i]); x1 = maxOf(x1, xy[i]); y0 = minOf(y0, xy[i + 1]); y1 = maxOf(y1, xy[i + 1])
+    }
+    if (x0 > x1) { x0 = 0f; x1 = 0f; y0 = 0f; y1 = 0f }
+    val pad = maxOf((x1 - x0), (y1 - y0), 200f) * 0.25f
+    val corners = arrayOf(floatArrayOf(x0 - pad, y0 - pad), floatArrayOf(x1 + pad, y0 - pad), floatArrayOf(x1 + pad, y1 + pad), floatArrayOf(x0 - pad, y1 + pad))
+    corners.forEachIndexed { i, c -> anchorsLocal[2 * i] = c[0]; anchorsLocal[2 * i + 1] = c[1] }
+    anchors = corners.map { c -> doubleArrayOf(lonOf(c[0] / LOCAL + originX), latOf(c[1] / LOCAL + originY)) }
+  }
+
   /** Road the pen laid more than `FRESH_MS` ago: appended to, never rebuilt while time goes forward. */
   private val settled = Path()
   /** Points of each stroke already in `settled`. */
@@ -81,6 +102,15 @@ class RoadPainter(
   private val fresh = stroke(FRESH)
   private val freshGlow = stroke(FRESH)
 
+  /** Screen position of (lon, lat), pixels, under the camera of the last `paint`. */
+  fun projectFrame(lon: Double, lat: Double, out: FloatArray) {
+    out[0] = ((mercX(lon) - originX) * LOCAL).toFloat()
+    out[1] = ((mercY(lat) - originY) * LOCAL).toFloat()
+    matrix.mapPoints(out)
+  }
+
+  private val probe = FloatArray(4)
+
   /** Screen position of (lon, lat), pixels, for a camera at (cLon, cLat, zoom). */
   fun project(lon: Double, lat: Double, cLon: Double, cLat: Double, zoom: Double, out: FloatArray) {
     val world = 512.0 * 2.0.pow(zoom) * ratio
@@ -98,19 +128,29 @@ class RoadPainter(
    * are thinner when the camera is wide: at the whole island the old width
    * ran Funchal's streets into one red patch.
    */
-  fun paint(canvas: Canvas, atMs: Double, cLon: Double, cLat: Double, zoom: Double, roadGlow: Float = 0f): Int {
+  fun paint(canvas: Canvas, atMs: Double, cLon: Double, cLat: Double, zoom: Double, roadGlow: Float = 0f, screen: FloatArray? = null): Int {
     val cutoff = atMs - FRESH_MS
     var points = settle(cutoff)
     points += freshRoad(atMs, cutoff)
 
-    // The camera as one matrix: local units to pixels.
+    // The camera as one matrix: local units to pixels; a perspective one when
+    // the map is tilted (`screen`: where the `anchors` landed, pixels).
     val world = 512.0 * 2.0.pow(zoom) * ratio
-    val scale = (world / LOCAL).toFloat()
-    matrix.setScale(scale, scale)
-    matrix.postTranslate(
-      ((originX - mercX(cLon)) * world + width / 2.0).toFloat(),
-      ((originY - mercY(cLat)) * world + height / 2.0).toFloat(),
-    )
+    var scale = (world / LOCAL).toFloat()
+    if (screen != null) {
+      matrix.setPolyToPoly(anchorsLocal, 0, screen, 0, 4)
+      // Line widths by the scale at the middle of the roads.
+      probe[0] = (anchorsLocal[0] + anchorsLocal[4]) / 2; probe[1] = (anchorsLocal[1] + anchorsLocal[5]) / 2
+      probe[2] = probe[0] + 1f; probe[3] = probe[1]
+      matrix.mapPoints(probe)
+      scale = kotlin.math.hypot(probe[2] - probe[0], probe[3] - probe[1])
+    } else {
+      matrix.setScale(scale, scale)
+      matrix.postTranslate(
+        ((originX - mercX(cLon)) * world + width / 2.0).toFloat(),
+        ((originY - mercY(cLat)) * world + height / 2.0).toFloat(),
+      )
+    }
     val w = cache?.widthLocal ?: ((BASE_WIDTH + (zoom - WIDE_ZOOM) * WIDTH_PER_LEVEL).coerceIn(MIN_WIDTH, MAX_WIDTH).toFloat() * ratio / scale)
     val g = roadGlow.coerceIn(0f, 1f)
     if (cache != null) {
@@ -313,6 +353,8 @@ class RoadPainter(
     (Color.blue(a) + (Color.blue(b) - Color.blue(a)) * u).toInt(),
   )
 
+  private fun lonOf(x: Double) = x * 360.0 - 180.0
+  private fun latOf(y: Double) = Math.toDegrees(kotlin.math.atan(kotlin.math.sinh(PI * (1 - 2 * y))))
   private fun mercX(lon: Double) = (lon + 180.0) / 360.0
   private fun mercY(lat: Double) = (1.0 - ln(tan(PI / 4 + lat * PI / 360.0)) / PI) / 2.0
 

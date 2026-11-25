@@ -14,7 +14,7 @@ class VideoJob(
   val ratio: Float,
   val fps: Int,
   val appName: String,
-  /** [atMs, lon, lat, zoom (MapLibre)] per frame. */
+  /** [atMs, lon, lat, zoom (MapLibre), bearing, pitch] per frame. */
   val frames: List<DoubleArray>,
   /** One per frame: what is drawn over the map. */
   val overlays: JSONArray,
@@ -28,7 +28,8 @@ class VideoJob(
     fun parse(json: String): VideoJob {
       val o = JSONObject(json)
       val f = o.getJSONArray("frames")
-      val frames = (0 until f.length()).map { i -> f.getJSONArray(i).let { a -> DoubleArray(4) { a.getDouble(it) } } }
+      // Bearing and pitch (*Inclinada*) after the zoom; 0 when absent.
+      val frames = (0 until f.length()).map { i -> f.getJSONArray(i).let { a -> DoubleArray(6) { k -> if (k < a.length()) a.getDouble(k) else 0.0 } } }
       val s = o.getJSONArray("strokes")
       val strokes = (0 until s.length()).map { i ->
         val stroke = s.getJSONObject(i)

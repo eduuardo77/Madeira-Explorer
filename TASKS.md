@@ -608,6 +608,12 @@ permission, L3 privacy contact.
       settles in, drifts in 0.12 after the close (it sat frozen 3 s). Roads thinner when wide, the
       new road bright orange settling to red over 0.9 s, all roads light up at the close
       (`roadGlow`). Older days' roads can still leave the frame on a day camera, by design.
+      **25 Nov, faster** ("feels a bit laggy and takes time"; 7f728f7, on the P30): preview 58 to 12
+      fps by the film's end, now 50 to 60 throughout (settled road painted once into masks, the
+      camera one matrix); opening the screen ~4.8 s to ~2.4 s (last film composition kept, pacing
+      once per trip), a choice ~1 s to ~0.6 s; saving 90 s to 41 s (two composers, encoder in
+      order, snapshot straight after the move). Against the earlier video: 50.2 dB avg, worst 35.8,
+      place names fading a frame or two apart.
       ⚠ MapLibre adds a native library to Bruma's
       download, and the tiles (19 MB) have to ship again; neither weighed yet.
 - [ ] **T-328** **The privacy policy's sharing section is out of date (held by the lead, 24 Nov:

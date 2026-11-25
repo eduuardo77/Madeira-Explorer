@@ -22,6 +22,7 @@ genuinely blocked. Grep the reference docs; do not read them whole.
   (52.5 dB PSNR against the full-tiles one).
   **17:26: polish** (0270d4d, on the P30): the day's road no longer cropped, opening and close move,
   fresh road glows, all roads light up at the close. Awaits the lead's eye.
+  **19:36: faster** (7f728f7, on the P30): preview 50 to 60 fps, screen opens in ~2.4 s, saving 41 s (was 90).
 - **24 Nov, 11:30: T-329, the film as a video, sketched.** Google's terms forbid map images
   leaving the app (`snapshot()` docs, Maps Platform 3.2.3 a), so an exported video is drawn on
   Bruma's own OSM island. Three looks on the real trip in `tools/out/video-options.html`

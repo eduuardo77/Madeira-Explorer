@@ -126,3 +126,9 @@ test('no dash in anything the video writes, in any language', () => {
     }
   }
 });
+
+test('the close states the trip figure exactly, not the glide short of it', () => {
+  // totalKm is 9 in the plan above.
+  assert.match(overlayAt(plan('discreet'), FINALE + 50).line!.text, / 9 km of roads lit$/);
+  assert.equal(overlayAt(plan('full'), FINALE + 2000).finale!.km, '9 km of roads lit');
+});

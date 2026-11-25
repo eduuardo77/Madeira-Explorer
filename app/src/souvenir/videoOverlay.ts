@@ -125,7 +125,10 @@ export function overlayAt(plan: OverlayPlan, atMs: number): OverlayFrame {
   const finale = t >= finaleAtMs;
   const ending = tier === 'free' && t > durationMs;
   const drawTo = Math.min(t, finaleAtMs);
-  const km = Math.round(smoothKmAt(plan.paced, drawTo));
+  // Gliding while drawn; at the close, the trip's own figure exactly (the
+  // glide stopped a kilometre short on the P30: 374 against the viewer's 375).
+  const finalKm = plan.paced.drawnKm.length > 0 ? plan.paced.drawnKm[plan.paced.drawnKm.length - 1][1] : 0;
+  const km = Math.round(finale ? finalKm : smoothKmAt(plan.paced, drawTo));
   const stampsNow = plan.paced.awards.filter((award) => award.atMs <= drawTo).length;
   const countUp = Math.round(plan.collected * easeOut((t - finaleAtMs - 300) / COUNT_UP_MS));
 

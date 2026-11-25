@@ -221,62 +221,6 @@ export function openCamera(path: readonly CameraSample[], target: VideoCamera, u
   });
 }
 
-/**
- * *Inclinada* (T-329, 25 Nov 2026): the map tilted `pitch` degrees and turned
- * so the island's length runs up the frame, the whole trip in view the whole
- * time, the camera turning slowly round it from `bearingFrom` to `bearingTo`.
- * A wide island in a tall frame left a third of the flat video empty sea; tilted
- * and turned it sits about 0.85 levels closer (the sketch, `tools/out/tilt-try.html`).
- */
-export const TILT = { bearingFrom: 262, bearingTo: 278, pitch: 50 };
-
-export type TiltedSample = CameraSample & { bearing: number; pitch: number };
-
-export function tiltedCameraPath(input: {
-  whole: Bounds;
-  viewport: Viewport;
-  durationMs: number;
-  stepMs: number;
-}): TiltedSample[] {
-  const { whole, viewport, stepMs } = input;
-  const [west, south, east, north] = whole;
-  const cx = (mercX(west) + mercX(east)) / 2;
-  const cy = (mercY(north) + mercY(south)) / 2;
-  const zoom = Math.min(...[TILT.bearingFrom, (TILT.bearingFrom + TILT.bearingTo) / 2, TILT.bearingTo].map((b) => tiltedFitZoom(whole, viewport, b, TILT.pitch)));
-  const lon = cx * 360 - 180;
-  const lat = (Math.atan(Math.sinh(Math.PI * (1 - 2 * cy))) * 180) / Math.PI;
-  const count = Math.max(1, Math.ceil(input.durationMs / stepMs) + 1);
-  return Array.from({ length: count }, (_, i) => {
-    const u = easeInOut((i * stepMs) / Math.max(1, input.durationMs));
-    return { atMs: i * stepMs, lon, lat, zoom, bearing: TILT.bearingFrom + (TILT.bearingTo - TILT.bearingFrom) * u, pitch: TILT.pitch };
-  });
-}
-
-/**
- * The closest zoom (Google's) at which `bounds`, turned to `bearing` and
- * tilted to `pitch`, fits the padded frame: its depth foreshortened by the
- * tilt's cosine, with a margin for the near side, which perspective enlarges.
- */
-export function tiltedFitZoom(bounds: Bounds, viewport: Viewport, bearing: number, pitch: number): number {
-  const [west, south, east, north] = bounds;
-  const b = (bearing * Math.PI) / 180;
-  const corners = [[west, south], [west, north], [east, south], [east, north]].map(([lon, lat]) => {
-    const dx = mercX(lon);
-    const dy = -mercY(lat); // north up
-    return { right: dx * Math.cos(b) - dy * Math.sin(b), up: dx * Math.sin(b) + dy * Math.cos(b) };
-  });
-  const span = (values: number[]) => Math.max(...values) - Math.min(...values);
-  const width = span(corners.map((c) => c.right));
-  const depth = span(corners.map((c) => c.up)) * Math.cos((pitch * Math.PI) / 180) * NEAR_MARGIN;
-  const padding = viewport.padding ?? {};
-  const usableW = viewport.width - (padding.left ?? 0) - (padding.right ?? 0);
-  const usableH = viewport.height - (padding.top ?? 0) - (padding.bottom ?? 0);
-  return Math.log2(Math.min(usableW / width, usableH / depth) / 256);
-}
-
-/** The near half of a tilted map is larger than the cosine says, the far half smaller; on the P30 they balanced (1.2 left the island a quarter level too far). */
-const NEAR_MARGIN = 1.0;
-
 /** The camera at `atMs`, between samples. */
 export function videoCameraAt(path: readonly CameraSample[], atMs: number): VideoCamera | null {
   if (path.length === 0) return null;

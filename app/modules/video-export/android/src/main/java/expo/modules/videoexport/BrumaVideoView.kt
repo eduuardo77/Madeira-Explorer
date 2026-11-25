@@ -1,427 +1,262 @@
 package expo.modules.videoexport
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.Base64
 import android.util.Log
-import android.view.Choreographer
-import android.view.View
-import android.widget.FrameLayout
+import android.webkit.ConsoleMessage
+import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
-import org.maplibre.android.MapLibre
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicLong
+import java.io.FileOutputStream
 
 /**
- * The video you keep, seen and made (T-329, D-112).
+ * The video you keep, seen and made (T-329, D-112), on a 3D map.
  *
- * One view does both, so what is seen is what is saved:
+ * MapLibre Android has no 3D terrain, and the lead asked for the relief (25 Nov
+ * 2026). So the video is drawn and encoded by a page, `assets/video3d/`, with
+ * MapLibre GL JS in this WebView: the preview is the page playing, saving is
+ * the page encoding with the phone's video encoder (WebCodecs) and handing the
+ * MP4 back in pieces, which this view puts in the gallery (`Gallery`).
  *
- *   - **Preview.** A MapLibre map at the video's full size (1080 x 1920), shown
- *     scaled down, its camera moved to the frame of the moment; the roads and
- *     the overlay drawn above it at screen size, by the same painters (the
- *     settled road from masks, `RoadPainter.cachePx`).
- *   - **Export.** The same map, frame by frame: move the camera and take its
- *     picture; two composers draw the roads and the overlay at full size, an
- *     encoder thread takes the frames in order, while the map draws the next.
- *     On the P30, 41 s for 20.4 s of the lead's trip (T-329, 25 Nov 2026; 90 s
- *     before). Saved to the gallery, over the trip's last video when there is
- *     one (`Gallery`).
+ * The page and the app's map files (`mapAssets.ts`, under the cache) are served
+ * from `https://bruma.local/`, a name only this WebView answers: nothing leaves
+ * the phone, and the page reads the files as same-origin fetches.
  *
  * What shows and when is all in the job (`app/src/souvenir/videoJob.ts`).
  */
+@SuppressLint("SetJavaScriptEnabled", "ViewConstructor")
 class BrumaVideoView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
   private val onReady by EventDispatcher<Map<String, Any>>()
   private val onProgress by EventDispatcher<Map<String, Any>>()
 
-  private var job: VideoJob? = null
-  private var mapStyle: String? = null
-  private var map: MapLibreMap? = null
-  private var styleLoaded = false
+  private val main = Handler(Looper.getMainLooper())
+  private val web = WebView(context)
+  @Volatile private var job: String? = null
+  @Volatile private var mapStyle: String? = null
   private var playing = false
-  private var exporting: Export? = null
-
-  private val stage = FrameLayout(context)
-  private val mapView: MapView
-  private val overlayView = OverlayView(context)
-  private val icon: Bitmap? = appIcon(context)
+  private var pageLoaded = false
+  @Volatile private var exporting: Export? = null
 
   init {
-    MapLibre.getInstance(context)
-    val options = MapLibreMapOptions.createFromAttributes(context, null).pixelRatio(PIXEL_RATIO).textureMode(true)
-    mapView = MapView(context, options)
-    stage.addView(mapView, FrameLayout.LayoutParams(FULL_W, FULL_H))
-    addView(stage)
-    addView(overlayView)
-    clipChildren = true
-    mapView.onCreate(null)
-    mapView.onStart()
-    mapView.onResume()
-    mapView.getMapAsync { m ->
-      map = m
-      m.uiSettings.setAllGesturesEnabled(false)
-      m.uiSettings.isLogoEnabled = false
-      m.uiSettings.isAttributionEnabled = false
-      m.uiSettings.isCompassEnabled = false
-      applyStyle()
+    web.setBackgroundColor(Color.rgb(0x91, 0xD8, 0xEE))
+    web.settings.apply {
+      javaScriptEnabled = true
+      allowFileAccess = false
+      allowContentAccess = false
+      setSupportZoom(false)
+      builtInZoomControls = false
     }
+    web.isVerticalScrollBarEnabled = false
+    web.isHorizontalScrollBarEnabled = false
+    web.webViewClient = object : WebViewClient() {
+      override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? = serve(request.url)
+      override fun onPageFinished(view: WebView, url: String) {
+        pageLoaded = true
+        loadJob()
+      }
+    }
+    web.webChromeClient = object : WebChromeClient() {
+      override fun onConsoleMessage(message: ConsoleMessage): Boolean {
+        Log.i(TAG, "page: ${message.message()}")
+        return true
+      }
+    }
+    web.addJavascriptInterface(Bridge(), "BrumaNative")
+    addView(web)
+    web.loadUrl("$ORIGIN/assets/video3d/index.html")
   }
 
   // --- props ---
 
   fun setJob(json: String?) {
-    val t0 = SystemClock.elapsedRealtime()
-    job = json?.let { VideoJob.parse(it) }
-    Log.i(TAG, "job: ${json?.length ?: 0} chars parsed in ${SystemClock.elapsedRealtime() - t0} ms")
-    overlayView.rebuild()
-    startedAt = SystemClock.elapsedRealtime()
-    showFrame(0)
+    if (json == job) return
+    job = json
+    loadJob()
   }
 
   fun setMapStyle(json: String?) {
     if (json == mapStyle) return
     mapStyle = json
-    styleLoaded = false
-    applyStyle()
+    loadJob()
   }
 
   fun setPlaying(value: Boolean) {
     playing = value
-    if (value) { startedAt = SystemClock.elapsedRealtime() - pausedAtMs; tick() } else pausedAtMs = SystemClock.elapsedRealtime() - startedAt
+    if (pageLoaded) web.evaluateJavascript("bruma.play($value)", null)
   }
 
-  private fun applyStyle() {
-    val m = map ?: return
-    val style = mapStyle ?: return
-    m.setStyle(Style.Builder().fromJson(style)) {
-      styleLoaded = true
-      showFrame(currentFrame)
-      onReady(mapOf("ready" to true))
-      if (playing) tick()
-    }
-  }
-
-  // --- preview ---
-
-  private var startedAt = 0L
-  private var pausedAtMs = 0L
-  private var currentFrame = 0
-  private var ticking = false
-
-  private fun tick() {
-    if (ticking) return
-    ticking = true
-    Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-      override fun doFrame(frameTimeNanos: Long) {
-        val j = job
-        if (!playing || exporting != null || j == null || !styleLoaded || !isAttachedToWindow) { ticking = false; return }
-        val elapsed = SystemClock.elapsedRealtime() - startedAt
-        // The preview loops; a slow frame drops frames, it never slows the clock.
-        showFrame(((elapsed * j.fps / 1000) % j.frames.size).toInt())
-        Choreographer.getInstance().postFrameCallback(this)
-      }
-    })
-  }
-
-  private fun showFrame(index: Int) {
-    val j = job ?: return
-    val m = map ?: return
-    if (j.frames.isEmpty()) return
-    currentFrame = index.coerceIn(0, j.frames.size - 1)
-    val f = j.frames[currentFrame]
-    m.moveCamera(cameraAt(f))
-    overlayView.invalidate()
-  }
-
-  /** The roads and the overlay at screen size, over the scaled-down map. */
-  private inner class OverlayView(context: Context) : View(context) {
-    private var roads: RoadPainter? = null
-    private var overlay: OverlayPainter? = null
-    private var labelPainter: MapLabels.Painter? = null
-    private val labels = MapLabels()
-
-    fun rebuild() {
-      val j = job
-      if (j == null || width == 0) { roads = null; overlay = null; return }
-      val r = j.ratio * width / j.outW
-      roads = RoadPainter(j.strokes, width, height, r, cachePx = PREVIEW_CACHE_PX)
-      labelPainter = MapLabels.Painter(r)
-      labels.reset()
-      overlay = OverlayPainter(width, height, r, j.appName, j.glyph, icon)
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) = rebuild()
-
-    override fun onDraw(canvas: Canvas) {
-      val j = job ?: return
-      if (!styleLoaded || j.frames.isEmpty()) return
-      val f = j.frames[currentFrame]
-      val roads = roads ?: return
-      val o = j.overlays.getJSONObject(currentFrame)
-      val screen = map?.let { m -> screenAnchors(m, f, roads, width.toFloat() / FULL_W) }
-      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat(), screen)
-      map?.let { m -> labelPainter?.paint(canvas, labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])) { lon, lat, out -> roads.projectFrame(lon, lat, out) } }
-      overlay?.paint(canvas, o) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
-    }
-  }
-
-  // --- layout: the map at full size, shown scaled; the overlay at screen size ---
-
-  override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-    setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec))
-  }
-
-  override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-    val w = r - l
-    val h = b - t
-    stage.measure(MeasureSpec.makeMeasureSpec(FULL_W, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(FULL_H, MeasureSpec.EXACTLY))
-    stage.layout(0, 0, FULL_W, FULL_H)
-    stage.pivotX = 0f
-    stage.pivotY = 0f
-    stage.scaleX = w.toFloat() / FULL_W
-    stage.scaleY = h.toFloat() / FULL_H
-    overlayView.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY))
-    overlayView.layout(0, 0, w, h)
-  }
-
-  // React Native does not lay out views it did not create; do it ourselves.
-  private val relayout = Runnable { measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)); layout(left, top, right, bottom) }
-  override fun requestLayout() { super.requestLayout(); post(relayout) }
-
-  /** A frame's camera: place, zoom, and for *Inclinada* its turn and tilt. */
-  private fun cameraAt(f: DoubleArray) =
-    CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(LatLng(f[2], f[1])).zoom(f[3]).bearing(f[4]).tilt(f[5]).build())
-
-  /**
-   * For a tilted frame, where `roads.anchors` land on the map's screen, times
-   * `scale` (the overlay's size against the map's); null when the map is flat.
-   * The camera must already be at the frame.
-   */
-  private fun screenAnchors(m: MapLibreMap, f: DoubleArray, roads: RoadPainter, scale: Float): FloatArray? {
-    if (f[5] == 0.0) return null
-    val out = FloatArray(8)
-    roads.anchors.forEachIndexed { i, a ->
-      val p = m.projection.toScreenLocation(LatLng(a[1], a[0]))
-      out[2 * i] = p.x * scale; out[2 * i + 1] = p.y * scale
-    }
-    return out
+  /** The page asks for the job, the style and the icon itself (`Bridge`): megabytes do not belong in a script. */
+  private fun loadJob() {
+    if (!pageLoaded || job == null || mapStyle == null || exporting != null) return
+    web.evaluateJavascript("bruma.play($playing); bruma.load(JSON.parse(BrumaNative.job()), JSON.parse(BrumaNative.style()), BrumaNative.icon())", null)
   }
 
   // --- export ---
 
   fun export(options: Map<String, Any?>, promise: Promise) {
-    val j = job
-    val m = map
-    if (j == null || m == null || !styleLoaded) { promise.reject("ERR_NOT_READY", "the video is not ready", null); return }
+    if (!pageLoaded || job == null) { promise.reject("ERR_NOT_READY", "the video is not ready", null); return }
     if (exporting != null) { promise.reject("ERR_BUSY", "a video is already being made", null); return }
-    val export = Export(j, m, options, promise)
-    exporting = export
-    export.start()
+    exporting = Export(options, promise)
+    web.evaluateJavascript("bruma.exportVideo()", null)
   }
 
-  fun cancelExport() { exporting?.cancelled = true }
+  fun cancelExport() {
+    if (exporting != null) web.evaluateJavascript("bruma.cancel()", null)
+  }
 
   fun destroy() {
-    exporting?.cancelled = true
-    playing = false
-    mapView.onPause(); mapView.onStop(); mapView.onDestroy()
+    exporting?.close()
+    exporting = null
+    web.stopLoading()
+    web.destroy()
   }
 
-  /**
-   * Making the video. The main thread moves the map and takes its picture;
-   * two composers draw the roads and the overlay, even frames on one and odd
-   * on the other, each with its own painters (a painter keeps the road it has
-   * drawn and only goes forward); one encoder thread takes the frames back in
-   * order. With one worker the roads were 89 ms of a frame on the P30 and
-   * held the map back a quarter of the time (T-329, 25 Nov 2026).
-   */
-  private inner class Export(private val j: VideoJob, private val m: MapLibreMap, options: Map<String, Any?>, private val promise: Promise) {
-    @Volatile var cancelled = false
-    private val main = Handler(Looper.getMainLooper())
-    private val composers = List(COMPOSERS) { Executors.newSingleThreadExecutor() }
-    private val painters = List(COMPOSERS) {
-      Triple(RoadPainter(j.strokes, j.outW, j.outH, j.ratio), MapLabels.Painter(j.ratio), OverlayPainter(j.outW, j.outH, j.ratio, j.appName, j.glyph, icon))
-    }
-    /** Main thread: the map's names, frame after frame, with their fades. */
-    private val labels = MapLabels()
-    private val encoding = Executors.newSingleThreadExecutor()
-    private val file = File(context.cacheDir, "bruma-video.mp4")
-    private val displayName = options["displayName"] as? String ?: "${j.appName}.mp4"
-    private val folder = options["folder"] as? String ?: j.appName
-    private val replace = (options["replaceUri"] as? String)?.let { Uri.parse(it) }
-    private lateinit var encoder: FrameEncoder
-    /** Encoder thread only: composed frames waiting their turn, and the next one due. */
-    private val ready = HashMap<Int, Bitmap>()
-    private var nextToEncode = 0
-    private var index = 0
-    private var inFlight = 0
-    private var waiting = false
-    private val startedAt = SystemClock.elapsedRealtime()
-    // Where the time goes, ms in all.
-    private var settleMs = 0L
-    private var snapshotMs = 0L
-    private var heldMs = 0L
-    private var heldSince = 0L
-    private val roadsMs = AtomicLong()
-    private val overlayMs = AtomicLong()
-    private var encodeMs = 0L
+  /** One video being made: the pieces the page hands over, written to a file, then the gallery. */
+  private inner class Export(options: Map<String, Any?>, private val promise: Promise) {
+    val file = File(context.cacheDir, "bruma-video.mp4")
+    private val out = FileOutputStream(file)
+    val displayName = options["displayName"] as? String ?: "video.mp4"
+    val folder = options["folder"] as? String ?: "Movies"
+    val replace = (options["replaceUri"] as? String)?.let { Uri.parse(it) }
+    val startedAt = SystemClock.elapsedRealtime()
 
-    fun start() {
-      overlayView.visibility = INVISIBLE
-      encoding.execute { encoder = FrameEncoder(j.outW, j.outH, j.fps, file) }
-      next()
-    }
+    fun write(piece: String) = out.write(Base64.decode(piece, Base64.DEFAULT))
 
-    /** Main thread: point the map at the next frame and take its picture once it has drawn it. */
-    private fun next() {
-      if (cancelled) {
-        stop()
-        encoding.execute { runCatching { encoder.finish() }; file.delete(); main.post { promise.reject("ERR_CANCELLED", "cancelled", null) } }
-        return
-      }
-      if (index >= j.frames.size) return // the encoder thread finishes after the last frame
-      if (inFlight >= MAX_IN_FLIGHT) { waiting = true; heldSince = SystemClock.elapsedRealtime(); return }
-      val f = j.frames[index]
-      currentFrame = index
-      val moved = SystemClock.elapsedRealtime()
-      val take = {
-        val asked = SystemClock.elapsedRealtime()
-        settleMs += asked - moved
-        m.snapshot { picture -> snapshotMs += SystemClock.elapsedRealtime() - asked; taken(picture, f) }
-      }
-      // MapLibre draws a fresh frame for every snapshot, at the camera of the
-      // moment, so the picture is asked for straight after the move. The spike
-      // waited three screen refreshes first (44 ms a frame, then the snapshot
-      // drew again); measured against a video made that way, the same
-      // (T-329, 25 Nov 2026). The first frame waits while the tiles load.
-      m.moveCamera(cameraAt(f))
-      if (index > 0) { take(); return }
-      m.triggerRepaint()
-      var left = FIRST_SETTLE_FRAMES
-      Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-        override fun doFrame(frameTimeNanos: Long) {
-          if (--left > 0) Choreographer.getInstance().postFrameCallback(this) else take()
-        }
-      })
-    }
+    fun close() = runCatching { out.close() }
 
-    private fun taken(picture: Bitmap, f: DoubleArray) {
-      val frameIndex = index
-      inFlight += 1
-      // The camera has not moved since the picture: the names the map placed in it.
-      val names = labels.update(m, mapView.width.toFloat(), mapView.height.toFloat(), f[3])
-      val screen = screenAnchors(m, f, painters[0].first, j.outW.toFloat() / FULL_W)
-      composers[frameIndex % COMPOSERS].execute { compose(picture, f, frameIndex, names, screen) }
-      index += 1
-      if (index % PROGRESS_EVERY == 0) onProgress(mapOf("done" to index, "total" to j.frames.size))
-      main.post { next() }
-    }
-
-    /** A composer: roads and overlay onto the picture, then to the encoder thread. */
-    private fun compose(picture: Bitmap, f: DoubleArray, frameIndex: Int, names: List<MapLabels.Label>, screen: FloatArray?) {
-      if (cancelled) return
-      val (roads, labelPainter, overlay) = painters[frameIndex % COMPOSERS]
-      val frame = if (picture.isMutable) picture else picture.copy(Bitmap.Config.ARGB_8888, true)
-      val canvas = Canvas(frame)
-      val o = j.overlays.getJSONObject(frameIndex)
-      val t1 = SystemClock.elapsedRealtime()
-      roads.paint(canvas, f[0], f[1], f[2], f[3], o.optDouble("roadGlow", 0.0).toFloat(), screen)
-      val t2 = SystemClock.elapsedRealtime()
-      labelPainter.paint(canvas, names) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
-      overlay.paint(canvas, o) { lon, lat, out -> roads.projectFrame(lon, lat, out) }
-      roadsMs.addAndGet(t2 - t1); overlayMs.addAndGet(SystemClock.elapsedRealtime() - t2)
-      encoding.execute { encodeInOrder(frameIndex, frame) }
-    }
-
-    /** The encoder thread: frames in the order they play, whichever composer finished first. */
-    private fun encodeInOrder(frameIndex: Int, frame: Bitmap) {
-      if (cancelled) return
-      ready[frameIndex] = frame
-      while (true) {
-        val due = ready.remove(nextToEncode) ?: break
-        val t0 = SystemClock.elapsedRealtime()
-        encoder.add(due)
-        encodeMs += SystemClock.elapsedRealtime() - t0
-        nextToEncode += 1
-        main.post {
-          inFlight -= 1
-          if (waiting) { waiting = false; heldMs += SystemClock.elapsedRealtime() - heldSince; next() }
-        }
-      }
-      if (nextToEncode == j.frames.size) finish()
-    }
-
-    /** Encoder thread: close the file, put it in the gallery, answer. */
-    private fun finish() {
+    /** Bridge thread: the file into the gallery, then the answer on the main thread. */
+    fun finish(meta: JSONObject) {
+      close()
       try {
-        encoder.finish()
-        Log.i(TAG, "export: ${j.frames.size} frames in ${SystemClock.elapsedRealtime() - startedAt} ms; settle $settleMs, snapshot $snapshotMs, roads $roadsMs, overlay $overlayMs, encode $encodeMs, main held $heldMs")
         val saved = Gallery.save(context, file, displayName, folder, replace)
+        val ms = SystemClock.elapsedRealtime() - startedAt
         val result = mapOf(
           "uri" to (saved?.first?.toString() ?: Uri.fromFile(file).toString()),
           "saved" to (saved != null),
           "replaced" to (saved?.second ?: false),
-          "frames" to j.frames.size,
-          "ms" to (SystemClock.elapsedRealtime() - startedAt),
+          "frames" to meta.optInt("frames"),
+          "ms" to ms,
         )
-        main.post { stop(); promise.resolve(result) }
+        Log.i(TAG, "export: ${meta.optInt("frames")} frames in $ms ms, ${file.length()} bytes")
+        main.post { exporting = null; promise.resolve(result) }
       } catch (e: Exception) {
-        main.post { stop(); promise.reject("ERR_EXPORT", e.message ?: "the video could not be made", e) }
+        main.post { exporting = null; promise.reject("ERR_EXPORT", e.message ?: "the video could not be made", e) }
       }
     }
 
-    private fun stop() {
-      composers.forEach { it.shutdown() }
-      encoding.shutdown()
-      exporting = null
-      overlayView.visibility = VISIBLE
-      this@BrumaVideoView.startedAt = SystemClock.elapsedRealtime()
-      showFrame(0)
-      if (playing) tick()
+    fun fail(message: String) {
+      close()
+      file.delete()
+      main.post {
+        exporting = null
+        if (message == "cancelled") promise.reject("ERR_CANCELLED", "cancelled", null)
+        else promise.reject("ERR_EXPORT", message, null)
+      }
     }
   }
 
-  private companion object {
-    const val TAG = "BrumaVideo"
-    /** The preview's road masks, pixels on their long side (`RoadPainter.cachePx`). */
-    const val PREVIEW_CACHE_PX = 1600
-    /** The video's size, pixels, and points to pixels: 360 x 640 points, as `videoJob.ts`. */
-    const val FULL_W = 1080
-    const val FULL_H = 1920
-    const val PIXEL_RATIO = 3f
-    /** The first frame waits this many screen refreshes, while the tiles load. */
-    const val FIRST_SETTLE_FRAMES = 60
-    /** Threads drawing roads and overlay onto the map's pictures. */
-    const val COMPOSERS = 2
-    /** Pictures between the map and the encoder at most: each is 8 MB. */
-    const val MAX_IN_FLIGHT = 4
-    const val PROGRESS_EVERY = 6
+  /** What the page calls; on a WebView thread, not the main one. */
+  private inner class Bridge {
+    @JavascriptInterface fun job(): String = job ?: "null"
+    @JavascriptInterface fun style(): String = mapStyle ?: "null"
+    @JavascriptInterface fun icon(): String = iconUrl
 
-    fun appIcon(context: Context): Bitmap? = runCatching {
+    @JavascriptInterface fun ready() { main.post { onReady(mapOf("ready" to true)) } }
+    @JavascriptInterface fun progress(done: Int, total: Int) { main.post { onProgress(mapOf("done" to done, "total" to total)) } }
+    @JavascriptInterface fun chunk(piece: String) { exporting?.write(piece) }
+    @JavascriptInterface fun done(meta: String) { exporting?.finish(JSONObject(meta)) }
+    @JavascriptInterface fun failed(message: String) {
+      Log.w(TAG, "page failed: $message")
+      exporting?.fail(message)
+    }
+    @JavascriptInterface fun log(message: String) { Log.i(TAG, "page: $message") }
+  }
+
+  // --- the page's files ---
+
+  /** `https://bruma.local/assets/…` from the app's assets, `/cache/…` from its cache (the map files). */
+  private fun serve(url: Uri): WebResourceResponse? {
+    if (url.host != HOST) return null
+    val path = url.path ?: return notFound()
+    return try {
+      when {
+        path.startsWith("/assets/") -> response(path, context.assets.open(path.removePrefix("/assets/")))
+        path.startsWith("/cache/") -> {
+          val root = context.cacheDir.canonicalFile
+          val file = File(root, path.removePrefix("/cache/")).canonicalFile
+          if (!file.path.startsWith(root.path + File.separator) || !file.isFile) notFound() else response(path, file.inputStream())
+        }
+        else -> notFound()
+      }
+    } catch (e: java.io.IOException) {
+      notFound()
+    }
+  }
+
+  private fun response(path: String, stream: java.io.InputStream): WebResourceResponse {
+    val mime = when (path.substringAfterLast('.', "")) {
+      "html" -> "text/html"
+      "js" -> "application/javascript"
+      "json" -> "application/json"
+      "pbf" -> "application/x-protobuf"
+      else -> "application/octet-stream"
+    }
+    val text = mime.startsWith("text") || mime.endsWith("javascript")
+    return WebResourceResponse(mime, if (text) "utf-8" else null, 200, "OK", mapOf("Cache-Control" to "no-store"), stream)
+  }
+
+  private fun notFound() = WebResourceResponse("text/plain", "utf-8", 404, "Not Found", emptyMap(), "".byteInputStream())
+
+  /** The app's icon for the end card, as a data URL. */
+  private val iconUrl: String by lazy {
+    runCatching {
       val drawable = context.packageManager.getApplicationIcon(context.applicationInfo)
-      if (drawable is BitmapDrawable) drawable.bitmap else {
-        val bitmap = Bitmap.createBitmap(192, 192, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
+      val bitmap = if (drawable is BitmapDrawable) drawable.bitmap else Bitmap.createBitmap(192, 192, Bitmap.Config.ARGB_8888).also {
+        val canvas = Canvas(it)
         drawable.setBounds(0, 0, 192, 192)
         drawable.draw(canvas)
-        bitmap
       }
-    }.getOrNull()
+      val bytes = ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+      "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+    }.getOrDefault("")
+  }
+
+  // --- layout: React Native does not lay out a native view's children ---
+
+  override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+    web.measure(MeasureSpec.makeMeasureSpec(r - l, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(b - t, MeasureSpec.EXACTLY))
+    web.layout(0, 0, r - l, b - t)
+  }
+
+  private val relayout = Runnable {
+    measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
+    layout(left, top, right, bottom)
+  }
+
+  override fun requestLayout() { super.requestLayout(); post(relayout) }
+
+  private companion object {
+    const val TAG = "BrumaVideo"
+    const val HOST = "bruma.local"
+    const val ORIGIN = "https://$HOST"
   }
 }

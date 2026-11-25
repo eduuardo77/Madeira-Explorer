@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Fixed scale: else Chrome widens the page to the 360-point frame and the view shows part of it. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #91D8EE; }
+  /* The video's frame, 360 x 640 points, scaled to fill the view. */
+  #stage { position: fixed; left: 0; top: 0; width: 360px; height: 640px; transform-origin: 0 0; }
+  #map, #overlay { position: absolute; left: 0; top: 0; width: 360px; height: 640px; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="map"></div><canvas id="overlay"></canvas></div>
+<script src="lib/maplibre-gl.js"></script>
+<script src="lib/pmtiles.js"></script>
+<script src="lib/mp4-muxer.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ import { fitBounds } from '../map/cameraFit.ts';
 import type { Language } from '../i18n/languages.ts';
 import type { Film } from './frame.ts';
 import { dayDrawnBoundsAt, headAt, planPacedFilm, type PacedAward, type PacedFilm, type TimedRoad } from './pacedFilm.ts';
-import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, openCamera, settleCamera, tiltedCameraPath, videoCameraAt, videoCameraPath } from './videoCamera.ts';
+import { cameraBreath, CLOSE_CAMERA, DAY_CAMERA, openCamera, settleCamera, videoCameraAt, videoCameraPath } from './videoCamera.ts';
 import { overlayAt, planOverlay, videoDurationMs, type InfoMode, type OverlayFrame, type Tier } from './videoOverlay.ts';
 
 /** The video's frame, in points: 9:16, as phones show stories and reels. */
@@ -30,7 +30,7 @@ export const VIDEO_HEIGHT = 640;
 export const VIDEO_PIXEL_RATIO = 3;
 export const VIDEO_FPS = 30;
 
-export type CameraChoice = 'normal' | 'close' | 'tilted';
+export type CameraChoice = 'normal' | 'close';
 
 export type VideoChoices = { info: InfoMode; camera: CameraChoice };
 
@@ -62,8 +62,12 @@ export type VideoJob = {
   fps: number;
   appName: string;
   durationMs: number;
-  /** [atMs, lon, lat, zoom (MapLibre, one less than Google's), bearing, pitch (degrees)] per frame. */
-  frames: [number, number, number, number, number, number][];
+  /**
+   * [atMs, lon, lat, zoom (MapLibre, one less than Google's), bearing (always
+   * 0, north up), pitch (degrees), top padding (points: the centre that far
+   * below the middle, doubled)] per frame.
+   */
+  frames: [number, number, number, number, number, number, number][];
   overlays: OverlayFrame[];
   /** The pen's strokes: points in 1e-5 degrees, [lon, lat], and when the pen reaches each. */
   strokes: { c: [number, number][]; t: number[] }[];
@@ -72,6 +76,20 @@ export type VideoJob = {
 };
 
 const MS_PER_DAY = 86_400_000;
+
+/**
+ * The map's tilt, degrees, by camera: the video is a 3D map, relief raised
+ * (the lead, 25 Nov 2026), always north up (bearing 0, the lead's word). The
+ * close camera, nearer the ground, tilts further.
+ */
+export const PITCH: Record<CameraChoice, number> = { normal: 50, close: 60 };
+
+/**
+ * Points the camera's centre sits below the frame's middle, by camera. The close
+ * camera's centre is the pen, mostly on the south coast: in the middle of a
+ * tilted frame, it left the lower half to the sea in front (25 Nov).
+ */
+export const LOWER: Record<CameraChoice, number> = { normal: 0, close: 150 };
 
 /** Where the day's road must stay, points: under the title and the day, above the card (*Completa*). */
 const KEEP_PADDING: Record<InfoMode, { top: number; bottom: number; left: number; right: number }> = {
@@ -147,11 +165,9 @@ export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = pr
   const viewport = { width: VIDEO_WIDTH, height: VIDEO_HEIGHT, padding: { top: 120, bottom, left: 24, right: 24 } };
   const whole = boundsOf(paced.strokes.flatMap((stroke) => stroke.coordinates));
   const stepMs = 1000 / VIDEO_FPS;
-  // *Inclinada*: the whole trip, tilted and turning slowly; no day framing to follow.
-  const tilted = choices.camera === 'tilted' ? tiltedCameraPath({ whole, viewport, durationMs: film.durationMs, stepMs }) : null;
-  const camera = tilted ?? flatCamera();
+  const camera = cameraPath();
 
-  function flatCamera() {
+  function cameraPath() {
     const path = videoCameraPath({
       whole,
       days: paced.days.map((day) => ({ startMs: day.startMs, bounds: day.bounds })),
@@ -180,8 +196,7 @@ export function buildVideoJob(input: VideoJobInput, prepared: PreparedVideo = pr
     const t = i * stepMs;
     const cam = videoCameraAt(camera, Math.min(t, film.durationMs));
     if (cam === null) break;
-    const turn = tilted === null ? null : tilted[Math.min(tilted.length - 1, Math.round(Math.min(t, film.durationMs) / stepMs))];
-    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom + cameraBreath(t, breath) - 1, turn?.bearing ?? 0, turn?.pitch ?? 0]);
+    frames.push([Math.round(t), cam.lon, cam.lat, cam.zoom + cameraBreath(t, breath) - 1, 0, PITCH[choices.camera], LOWER[choices.camera]]);
     overlays.push(overlayAt(plan, t));
   }
 

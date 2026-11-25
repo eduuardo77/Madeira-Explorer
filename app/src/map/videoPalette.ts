@@ -28,11 +28,8 @@ export const VIDEO_PALETTE: Readonly<Record<string, unknown>> = {
   'terrain_hillshade|hillshade-accent-color': '#6B7B67',
   'places_locality|text-color': '#404040',
   'places_locality|text-halo-color': '#FFFFFF',
-  // The names are drawn by the video, over its roads (`MapLabels.kt`); the map
-  // only places them. Not 0: a layer at 0 is not placed, and cannot be asked
-  // where its names went. (The sketch in `tools/` shows no names since.)
-  'places_locality|text-opacity': 0.01,
-  'earth_label_islands|text-opacity': 0.01,
+  // The names stand over the trip's roads, which the 3D map drapes under them.
+  'places_locality|text-halo-width': 1.6,
 };
 
 type Layer = { id: string; paint?: Record<string, unknown> };
